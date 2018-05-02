@@ -334,6 +334,7 @@ begin
 	create operator Count(const AList : list) : Integer class "System.ListCountNode";
 	create operator Clear(var AList : list) class "System.ListClearNode" static tags { DAE.IsLocallyFunctional = "False" };
 	create operator Add(var AList : list, AValue : generic) : Integer class "System.ListAddNode" static tags { DAE.IsLocallyFunctional = "False" };
+	create operator Distinct(const AList : list) : list class "System.DistinctListNode";
 	create operator Insert(var AList : list, AValue : generic, const AIndex : Integer) class "System.ListInsertNode" static tags { DAE.IsLocallyFunctional = "False" };
 	create operator Remove(var AList : list, const AValue : generic) class "System.ListRemoveNode" static tags { DAE.IsLocallyFunctional = "False" };
 	create operator RemoveAt(var AList : list, const AInteger : Integer) class "System.ListRemoveAtNode" static tags { DAE.IsLocallyFunctional = "False" };
@@ -2101,6 +2102,7 @@ begin
 	grant usage on DependentObjects(Name, Boolean) to role CatalogUser;                                                                  
 	grant usage on DerivationTimeStamp() to role User;                                                                                          
 	grant usage on DeviceUserExists(UserID, Name) to role CatalogUser;                                                                   
+	grant usage on Distinct(list) to role User;
 	grant usage on DropServerLinkUser(String, Name) to role CatalogUser;
 	grant usage on Duration(TimeSpan) to role User;                                                                                      
 	grant usage on EncryptString(String) to role User;

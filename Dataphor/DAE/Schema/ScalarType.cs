@@ -556,6 +556,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return _isUnique; }
 			set { _isUnique = value; }
 		}
+
+		private bool _isEquality;
+		public bool IsEquality
+		{
+			get { return _isEquality; }
+			set { _isEquality = value; }
+		}
 		
 		private PlanNode _compareNode;
 		public PlanNode CompareNode
@@ -1764,6 +1771,42 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
+		private int _equalitySortID = -1;
+		public int EqualitySortID
+		{
+			get { return _equalitySortID; }
+			set { _equalitySortID = value; }
+		}
+		
+		public void LoadEqualitySortID()
+		{
+			Tag tag = RemoveMetaDataTag("DAE.EqualitySortID");
+			if (tag != Tag.None)
+				_equalitySortID = Int32.Parse(tag.Value);
+		}
+
+		public void SaveEqualitySortID()
+		{
+			AddMetaDataTag("DAE.EqualitySortID", _equalitySortID.ToString(), true);
+		}
+
+		public void RemoveEqualitySortID()
+		{
+			RemoveMetaDataTag("DAE.EqualitySortID");
+		}
+		
+		[Reference]
+		private Sort _equalitySort;
+		public Sort EqualitySort
+		{
+			get { return _equalitySort; }
+			set 
+			{ 
+				_equalitySort = value; 
+				_equalitySortID = value == null ? -1 : value.ID;
+			}
+		}
+
 		// HasHandlers
 		public bool HasHandlers()
 		{
@@ -1874,6 +1917,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				SaveComparisonOperatorID();
 				SaveSortID();
 				SaveUniqueSortID();
+				SaveEqualitySortID();
 			}
 			else
 			{
@@ -1883,6 +1927,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveComparisonOperatorID();
 				RemoveSortID();
 				RemoveUniqueSortID();
+				RemoveEqualitySortID();
 			}
 			try
 			{
@@ -1918,6 +1963,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					RemoveComparisonOperatorID();
 					RemoveSortID();
 					RemoveUniqueSortID();
+					RemoveEqualitySortID();
 				}
 
 			}

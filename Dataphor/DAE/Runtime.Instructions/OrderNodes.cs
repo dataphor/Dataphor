@@ -18,14 +18,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Server;	
+	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using System.Collections.Generic;
 
-    public abstract class BaseOrderNode : UnaryTableNode
+	public abstract class BaseOrderNode : UnaryTableNode
     {
 		protected Schema.Order _requestedOrder;
 		public Schema.Order RequestedOrder
@@ -1057,6 +1058,121 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int index = 0; index < RequestedOrder.Columns.Count; index++)
 					browseExpression.Columns.Add(RequestedOrder.Columns[index].EmitStatement(mode));
 				return browseExpression;
+			}
+		}
+	}
+
+	// operator iDistinct(const AValue : table) : table
+	public class DistinctNode : UnaryTableNode
+	{
+		protected Schema.Key _key;
+		public Schema.Key Key
+		{
+			get { return _key; }
+			set { _key = value; }
+		}
+
+		protected CursorCapability _requestedCapabilities;
+		public CursorCapability RequestedCapabilities
+		{
+			get { return _requestedCapabilities; }
+			set { _requestedCapabilities = value; }
+		}
+		
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			return Nodes[0].EmitStatement(mode);
+		}
+		
+		public override void InferPopulateNode(Plan plan)
+		{
+			if (SourceNode.PopulateNode != null)
+				_populateNode = SourceNode.PopulateNode;
+		}
+		
+		protected bool _isAccelerator;
+		public bool IsAccelerator
+		{
+			get { return _isAccelerator; }
+			set { _isAccelerator = value; }
+		}
+		
+		private Dictionary<String, Schema.Sort> _equalitySorts;
+		private Schema.Sort GetEqualitySort(String columnName)
+		{
+			return _equalitySorts[columnName];
+		}
+
+		private void EnsureEqualitySorts(Plan plan)
+		{
+			_equalitySorts = new Dictionary<String, Schema.Sort>();
+			foreach (var column in _key.Columns)
+			{
+				var equalitySort = Compiler.GetEqualitySort(plan, column.DataType);
+				_equalitySorts.Add(column.Name, equalitySort);
+			}
+		}
+
+		public Dictionary<String, Schema.Sort> EqualitySorts
+		{
+			get { return _equalitySorts; }
+		}
+
+		public override void DetermineDataType(Plan plan)
+		{
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
+
+			CopyTableVarColumns(SourceTableVar.Columns);
+			
+			DetermineRemotable(plan);
+
+			CopyKeys(SourceTableVar.Keys);
+			CopyOrders(SourceTableVar.Orders);
+
+			#if UseReferenceDerivation
+			#if UseElaborable
+			if (plan.CursorContext.CursorCapabilities.HasFlag(CursorCapability.Elaborable))
+			#endif
+				CopyReferences(plan, SourceTableVar);
+			#endif
+
+			EnsureEqualitySorts(plan);
+		}
+		
+		public override void DetermineCursorBehavior(Plan plan)
+		{
+			_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
+				CursorCapability.Navigable | 
+				CursorCapability.Bookmarkable |
+				CursorCapability.Countable |
+				(
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
+				) |
+				(
+					plan.CursorContext.CursorCapabilities & SourceNode.CursorCapabilities & CursorCapability.Elaborable
+				);
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
+		}
+		
+		public override object InternalExecute(Program program)
+		{
+			DistinctTable table = new DistinctTable(this, program);
+			try
+			{
+				table.Open();
+				return table;
+			}
+			catch
+			{
+				table.Dispose();
+				throw;
 			}
 		}
 	}

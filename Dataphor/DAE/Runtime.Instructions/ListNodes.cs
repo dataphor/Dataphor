@@ -698,6 +698,74 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
+	// operator Distinct(const AList : list) : list
+	public class DistinctListNode : UnaryInstructionNode
+	{
+		private Schema.Sort _equalitySort;
+		public Schema.Sort EqualitySort
+		{
+			get { return _equalitySort; }
+			set { _equalitySort = value; }
+		}
+		
+		public override void DetermineDataType(Plan plan)
+		{
+			DetermineModifiers(plan);
+			_dataType = new Schema.ListType(((Schema.ListType)Nodes[0].DataType).ElementType);
+			_equalitySort = Compiler.GetEqualitySort(plan, ((Schema.ListType)_dataType).ElementType);
+		}
+		
+		public override object InternalExecute(Program program, object argument1)
+		{
+			IList sourceList = (IList)argument1;
+			#if NILPROPOGATION
+			if (sourceList == null)
+				return null;
+			#endif
+
+			// TODO: This would be better as a SetValue, but for now, managing a set to perform the distinct will have to do
+			ListValue result = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+			try
+			{
+				NativeSet set = new NativeSet((Schema.IListType)_dataType, _equalitySort);
+				try
+				{
+					for (int index = 0; index < sourceList.Count; index++)
+					{
+						if (!set.Contains(program.ValueManager, sourceList[index]))
+						{
+							set.Insert(program.ValueManager, sourceList[index]);
+							result.Add(sourceList[index]);
+						}
+					}
+				}
+				finally
+				{
+					set.Drop(program.ValueManager);
+				}
+			}
+			catch
+			{
+				if (result is IDisposable)
+					((IDisposable)result).Dispose();
+				throw;
+			}
+
+			return result;
+		}
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			if (_equalitySort != null)
+			{
+				var newDistinctListNode = (DistinctListNode)newNode;
+				newDistinctListNode._equalitySort = _equalitySort;
+			}
+		}
+	}
+
 	// operator ToList(const ATable : cursor) : list
 	public class TableToListNode : InstructionNodeBase
 	{
@@ -780,6 +848,536 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						((TableValue)source).Dispose();
 				}
 			}
+		}
+	}
+
+	// ListForEachNode
+	//	Nodes[0] - Iteration Expression
+	//	Nodes[1] - Return Expression
+	public class ListForEachNode : PlanNode
+	{
+		public ListForEachNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
+		private ForEachExpression _expression;
+		public ForEachExpression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		private Schema.IDataType _variableType;
+		public Schema.IDataType VariableType
+		{
+			get { return _variableType; }
+			set { _variableType = value; }
+		}
+		
+		private int _location;
+		public int Location
+		{
+			get { return _location; }
+			set { _location = value; }
+		}
+
+		private bool _isMany;
+		public bool IsMany
+		{
+			get { return _isMany; }
+			set { _isMany = value; }
+		}
+		
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
+		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
+			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
+			if (_expression.VariableName == String.Empty)
+				plan.EnterRowContext();
+			try
+			{
+				if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+					plan.Symbols.Push(new Symbol(_expression.VariableName, _variableType));
+				try
+				{
+					if ((_expression.VariableName != String.Empty) && !_expression.IsAllocation)
+					{
+						int columnIndex;
+						Location = Compiler.ResolveVariableIdentifier(plan, _expression.VariableName, out columnIndex);
+						if (Location < 0)
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _expression.VariableName);
+							
+						if (columnIndex >= 0)
+							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _expression.VariableName);
+					}
+
+					#if USEVISIT
+					Nodes[1] = visitor.Visit(plan, Nodes[1]);
+					#else
+					Nodes[1].BindingTraversal(plan, visitor);
+					#endif
+				}
+				finally
+				{
+					if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+						plan.Symbols.Pop();
+				}
+			}
+			finally
+			{
+				if (_expression.VariableName == String.Empty)
+					plan.ExitRowContext();
+			}
+		}
+		
+		public override void DetermineDataType(Plan plan)
+		{
+			// A ForEach List Node always returns a list
+			if (Nodes[1].DataType is Schema.ListType)
+			{
+				_isMany = true;
+				_dataType = new Schema.ListType(((Schema.ListType)Nodes[1].DataType).ElementType);
+			}
+			else
+			{
+				_dataType = new Schema.ListType(Nodes[1].DataType);
+			}
+		}
+		
+		private bool CursorNext(Program program, Cursor cursor)
+		{
+			cursor.SwitchContext(program);
+			try
+			{
+				return cursor.Table.Next();
+			}
+			finally
+			{
+				cursor.SwitchContext(program);
+			}
+		}
+		
+		private void CursorSelect(Program program, Cursor cursor, Row row)
+		{
+			cursor.SwitchContext(program);
+			try
+			{
+				cursor.Table.Select(row);
+			}
+			finally
+			{
+				cursor.SwitchContext(program);
+			}
+		}
+		
+		public override object InternalExecute(Program program)
+		{
+			ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+			if (Nodes[0].DataType is Schema.ICursorType)
+			{
+				CursorValue cursorValue = (CursorValue)Nodes[0].Execute(program);
+				Cursor cursor = program.CursorManager.GetCursor(cursorValue.ID);
+				try
+				{
+					int stackIndex = 0;
+					if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+						program.Stack.Push(null);
+					else
+						stackIndex = Location;
+					try
+					{
+						using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
+						{
+							program.Stack.Poke(stackIndex, row);
+							try
+							{
+								while (CursorNext(program, cursor))
+								{
+									try
+									{
+										// Select row...
+										CursorSelect(program, cursor, row);
+										var returnResult = Nodes[1].Execute(program);
+										if (returnResult != null)
+										{
+											if (returnResult is IList)
+											{
+												try
+												{
+													for (int resultIndex = 0; resultIndex < ((IList)returnResult).Count; resultIndex++)
+													{
+														listValue.Add(DataValue.CopyValue(program.ValueManager, ((IList)returnResult)[resultIndex]));
+													}
+												}
+												finally
+												{
+													DataValue.DisposeValue(program.ValueManager, returnResult);
+												}
+											}
+											else
+											{
+												listValue.Add(returnResult);
+											}
+										}
+									}
+									catch (ContinueError) {}
+								}
+							}
+							finally
+							{
+								program.Stack.Poke(stackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
+							}
+						}
+					}
+					finally
+					{
+						if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+							program.Stack.Pop();
+					}
+				}
+				catch (BreakError) {}
+				finally
+				{
+					program.CursorManager.CloseCursor(cursorValue.ID);
+				}
+			}
+			else
+			{
+				IList tempValue = (IList)Nodes[0].Execute(program);
+				if (tempValue != null)
+				{
+					try
+					{
+						int stackIndex = 0;
+						if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+							program.Stack.Push(null);
+						else
+							stackIndex = Location;
+						
+						try
+						{
+							for (int index = 0; index < tempValue.Count; index++)
+							{
+								try
+								{
+									// Select iteration value
+									program.Stack.Poke(stackIndex, tempValue[index]);
+									var returnResult = Nodes[1].Execute(program);
+									if (returnResult != null)
+									{
+										if (returnResult is IList)
+										{
+											try
+											{
+												for (int resultIndex = 0; resultIndex < ((IList)returnResult).Count; resultIndex++)
+												{
+													listValue.Add(DataValue.CopyValue(program.ValueManager, ((IList)returnResult)[resultIndex]));
+												}
+											}
+											finally
+											{
+												DataValue.DisposeValue(program.ValueManager, returnResult);
+											}
+										}
+										else
+										{
+											listValue.Add(returnResult);
+										}
+									}
+								}
+								catch (ContinueError) {}
+							}
+						}
+						finally
+						{
+							if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+								program.Stack.Pop();
+						}
+					}
+					catch (BreakError) {}
+				}
+			}
+
+			return listValue;
+		}
+		
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			ForEachExpression expression = new ForEachExpression();
+			expression.IsAllocation = _expression.IsAllocation;
+			expression.VariableName = _expression.VariableName;
+			if (Nodes[0] is CursorNode)
+			{
+				CursorSelectorExpression cursorSelectorExpression = (CursorSelectorExpression)Nodes[0].EmitStatement(mode);
+				expression.Expression = cursorSelectorExpression.CursorDefinition;
+			}
+			else
+				expression.Expression = new CursorDefinition((Expression)Nodes[0].EmitStatement(mode));
+			
+			expression.Return = (Expression)Nodes[1].EmitStatement(mode);	
+			
+			return expression;
+		}
+	}
+
+	// TableForEachNode -- Used when the source is a table and the return is a row
+	//	Nodes[0] - Iteration Expression
+	//	Nodes[1] - Return Expression
+	public class TableForEachNode : TableNode
+	{
+		public TableForEachNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
+		private ForEachExpression _expression;
+		public ForEachExpression Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+		
+		private Schema.IDataType _variableType;
+		public Schema.IDataType VariableType
+		{
+			get { return _variableType; }
+			set { _variableType = value; }
+		}
+		
+		private int _location;
+		public int Location
+		{
+			get { return _location; }
+			set { _location = value; }
+		}
+		
+		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
+		{
+			#if USEVISIT
+			Nodes[0] = visitor.Visit(plan, Nodes[0]);
+			#else
+			Nodes[0].BindingTraversal(plan, visitor);
+			#endif
+			if (_expression.VariableName == String.Empty)
+				plan.EnterRowContext();
+			try
+			{
+				if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+					plan.Symbols.Push(new Symbol(_expression.VariableName, _variableType));
+				try
+				{
+					if ((_expression.VariableName != String.Empty) && !_expression.IsAllocation)
+					{
+						int columnIndex;
+						Location = Compiler.ResolveVariableIdentifier(plan, _expression.VariableName, out columnIndex);
+						if (Location < 0)
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _expression.VariableName);
+							
+						if (columnIndex >= 0)
+							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _expression.VariableName);
+					}
+
+					#if USEVISIT
+					Nodes[1] = visitor.Visit(plan, Nodes[1]);
+					#else
+					Nodes[1].BindingTraversal(plan, visitor);
+					#endif
+				}
+				finally
+				{
+					if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+						plan.Symbols.Pop();
+				}
+			}
+			finally
+			{
+				if (_expression.VariableName == String.Empty)
+					plan.ExitRowContext();
+			}
+		}
+		
+		public override void DetermineDataType(Plan plan)
+		{
+			DetermineModifiers(plan);
+			// A ForEach TableNode returns a table of the same type as the row type of the return
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+
+			Schema.RowType rowType = (Schema.RowType)Nodes[1].DataType;
+			foreach (Schema.Column column in rowType.Columns)
+				DataType.Columns.Add(column.Copy());
+
+			_tableVar.EnsureTableVarColumns();
+
+			Schema.Key key = new Schema.Key();
+			key.IsInherited = true;
+			foreach (Schema.TableVarColumn column in TableVar.Columns)
+				key.Columns.Add(column);
+			TableVar.Keys.Add(key);
+
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
+			
+			// Ensure the order exists in the orders list
+			if (!TableVar.Orders.Contains(Order))
+				TableVar.Orders.Add(Order);
+		}
+		
+		private bool CursorNext(Program program, Cursor cursor)
+		{
+			cursor.SwitchContext(program);
+			try
+			{
+				return cursor.Table.Next();
+			}
+			finally
+			{
+				cursor.SwitchContext(program);
+			}
+		}
+		
+		private void CursorSelect(Program program, Cursor cursor, Row row)
+		{
+			cursor.SwitchContext(program);
+			try
+			{
+				cursor.Table.Select(row);
+			}
+			finally
+			{
+				cursor.SwitchContext(program);
+			}
+		}
+
+		// TODO: Convert this to pipelined execution when possible...
+		public override object InternalExecute(Program program)
+		{
+			LocalTable result = new LocalTable(this, program);
+			try
+			{
+				result.Open();
+				
+				if (Nodes[0].DataType is Schema.ICursorType)
+				{
+					CursorValue cursorValue = (CursorValue)Nodes[0].Execute(program);
+					Cursor cursor = program.CursorManager.GetCursor(cursorValue.ID);
+					try
+					{
+						int stackIndex = 0;
+						if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+							program.Stack.Push(null);
+						else
+							stackIndex = Location;
+						try
+						{
+							using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
+							{
+								program.Stack.Poke(stackIndex, row);
+								try
+								{
+									while (CursorNext(program, cursor))
+									{
+										try
+										{
+											// Select row...
+											CursorSelect(program, cursor, row);
+											var resultRow = Nodes[1].Execute(program) as IRow;
+											if (resultRow != null)
+												result.Insert(resultRow);
+											
+										}
+										catch (ContinueError) {}
+									}
+								}
+								finally
+								{
+									program.Stack.Poke(stackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
+								}
+							}
+						}
+						finally
+						{
+							if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+								program.Stack.Pop();
+						}
+					}
+					catch (BreakError) {}
+					finally
+					{
+						program.CursorManager.CloseCursor(cursorValue.ID);
+					}
+				}
+				else
+				{
+					IList tempValue = (IList)Nodes[0].Execute(program);
+					if (tempValue != null)
+					{
+						try
+						{
+							int stackIndex = 0;
+							if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+								program.Stack.Push(null);
+							else
+								stackIndex = Location;
+						
+							try
+							{
+								for (int index = 0; index < tempValue.Count; index++)
+								{
+									try
+									{
+										// Select iteration value
+										program.Stack.Poke(stackIndex, tempValue[index]);
+										var resultRow = Nodes[1].Execute(program) as IRow;
+										if (resultRow != null)
+											result.Insert(resultRow);
+									}
+									catch (ContinueError) {}
+								}
+							}
+							finally
+							{
+								if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
+									program.Stack.Pop();
+							}
+						}
+						catch (BreakError) {}
+					}
+				}
+
+				
+				result.First();
+				
+				return result;
+			}
+			catch
+			{
+				result.Dispose();
+				throw;
+			}
+		}
+		
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			ForEachExpression expression = new ForEachExpression();
+			expression.IsAllocation = _expression.IsAllocation;
+			expression.VariableName = _expression.VariableName;
+			if (Nodes[0] is CursorNode)
+			{
+				CursorSelectorExpression cursorSelectorExpression = (CursorSelectorExpression)Nodes[0].EmitStatement(mode);
+				expression.Expression = cursorSelectorExpression.CursorDefinition;
+			}
+			else
+				expression.Expression = new CursorDefinition((Expression)Nodes[0].EmitStatement(mode));
+			
+			expression.Return = (Expression)Nodes[1].EmitStatement(mode);	
+			
+			return expression;
 		}
 	}
 }

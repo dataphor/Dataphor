@@ -286,9 +286,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime.Data\NativeAccessor.cs" />
+    <Compile Include="Runtime.Data\NativeMap.cs" />
     <Compile Include="Runtime.Data\NativeRowIndex.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\NativeRowMap.cs" />
+    <Compile Include="Runtime.Data\NativeRowTree.cs" />
+    <Compile Include="Runtime.Data\NativeSet.cs" />
     <Compile Include="Runtime.Data\NativeTable.cs">
       <SubType>Code</SubType>
     </Compile>

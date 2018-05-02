@@ -54,6 +54,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<while statement> |
 		<do while statement> |
 		<for statement> |
+		<foreach statement> |
 		<repeat statement> |
 		<break statement> |
 		<continue statement> |
@@ -173,7 +174,8 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		("("<expression>")") |
 		(parent <qualified identifier>) |
 		<if expression> |
-		<case expression>
+		<case expression> |
+		<foreach expression>
 
 	<selector expression> ::=
 		<table selector> |
@@ -223,6 +225,11 @@ The same conventions found in the The Third Manifesto are used here, namely:
 
 	<case expression item> ::=
 		when <expression> then <expression>
+
+	<foreach expression> ::=
+		foreach row | ([var] <qualified identifier>)
+			in <cursor definition> 
+			do <expression>
 
 	<qualified identifier> ::=
 		[.]{<identifier>.}<identifier>
@@ -426,6 +433,11 @@ The same conventions found in the The Third Manifesto are used here, namely:
 			:= <expression> (to | downto)
 			<expression> 
 			[step <expression>] 
+			do <statement>
+
+	<foreach statement> ::=
+		foreach row | ([var] <qualified identifier>)
+			in <cursor definition> 
 			do <statement>
 
 	<repeat statement> ::=

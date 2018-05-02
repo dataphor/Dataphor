@@ -345,13 +345,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _isUnique; }
 			set { _isUnique = value; }
 		}
+
+		private bool _isEquality;
+		public bool IsEquality
+		{
+			get { return _isEquality; }
+			set { _isEquality = value; }
+		}
 		
 		public override object InternalExecute(Program program)
 		{
 			lock (program.Catalog)
 			{
 				program.CatalogDeviceSession.CreateSort(_sort);
-				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, _isUnique);
+				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, _isUnique, _isEquality);
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);
 				return null;
 			}
@@ -381,11 +388,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (_scalarType.Sort != null)
 				{
 					Schema.Sort sort = _scalarType.Sort;
-					program.CatalogDeviceSession.DetachSort(_scalarType, sort, false);
+					program.CatalogDeviceSession.DetachSort(_scalarType, sort, false, false);
 					program.CatalogDeviceSession.DropSort(sort);
 				}
 				program.CatalogDeviceSession.CreateSort(_sort);
-				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, false);
+				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, false, false);
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);
 				return null;
 			}
@@ -418,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					CheckNotSystem(program, sort);
 					CheckNoDependents(program, sort);
 					
-					program.CatalogDeviceSession.DetachSort(_scalarType, sort, _isUnique);
+					program.CatalogDeviceSession.DetachSort(_scalarType, sort, _isUnique, false);
 					program.CatalogDeviceSession.DropSort(sort);
 				}
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);

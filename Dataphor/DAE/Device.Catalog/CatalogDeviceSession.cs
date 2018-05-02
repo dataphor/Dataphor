@@ -422,20 +422,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected class SetScalarTypeSortInstruction : DDLInstruction
 		{
-			public SetScalarTypeSortInstruction(Schema.ScalarType scalarType, Schema.Sort originalSort, bool isUnique)
+			public SetScalarTypeSortInstruction(Schema.ScalarType scalarType, Schema.Sort originalSort, bool isUnique, bool isEquality)
 			{
 				_scalarType = scalarType;
 				_originalSort = originalSort;
 				_isUnique = isUnique;
+				_isEquality = isEquality;
 			}
 			
 			private Schema.ScalarType _scalarType;
 			private Schema.Sort _originalSort;
 			private bool _isUnique;
+			private bool _isEquality;
 
 			public override void Undo(CatalogDeviceSession session)
 			{
-				session.SetScalarTypeSort(_scalarType, _originalSort, _isUnique);
+				session.SetScalarTypeSort(_scalarType, _originalSort, _isUnique, _isEquality);
 			}
 		}
 		
@@ -2145,9 +2147,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Sort
 		
-		private void SetScalarTypeSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
+		private void SetScalarTypeSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique, bool isEquality)
 		{
-			if (isUnique)
+			if (isEquality)
+				scalarType.EqualitySort = sort;
+			else if (isUnique)
 				scalarType.UniqueSort = sort;
 			else
 				scalarType.Sort = sort;
@@ -2163,24 +2167,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			DeleteCatalogObject(sort);
 		}
 
-		public void AttachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
+		public void AttachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique, bool isEquality)
 		{
 			#if LOGDDLINSTRUCTIONS
-			Schema.Sort originalSort = isUnique ? scalarType.UniqueSort : scalarType.Sort;
+			Schema.Sort originalSort = isEquality ? scalarType.EqualitySort : (isUnique ? scalarType.UniqueSort : scalarType.Sort);
 			#endif
-			SetScalarTypeSort(scalarType, sort, isUnique);
+			SetScalarTypeSort(scalarType, sort, isUnique, isEquality);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, originalSort, isUnique));
+				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, originalSort, isUnique, isEquality));
 			#endif
 		}
 		
-		public void DetachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
+		public void DetachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique, bool isEquality)
 		{
-			SetScalarTypeSort(scalarType, null, isUnique);
+			SetScalarTypeSort(scalarType, null, isUnique, isEquality);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, sort, isUnique));
+				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, sort, isUnique, isEquality));
 			#endif
 		}
 		

@@ -25,6 +25,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string Aggregate = "iAggregate";
         public const string Order = "iOrder";
         public const string Copy = "iCopy";
+		public const string Distinct = "iDistinct";
         public const string Browse = "iBrowse";
         public const string Quota = "iQuota";
         public const string Explode = "iExplode";
