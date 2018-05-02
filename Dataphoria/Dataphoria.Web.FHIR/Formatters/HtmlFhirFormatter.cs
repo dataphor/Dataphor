@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 					writer.WriteLine("<hr/>");
 
 					bool summary = requestMessage.RequestSummary();
-					string xml = FhirSerializer.SerializeResourceToXml(resource, summary);
+					string xml = FhirSerializer.SerializeResourceToXml(resource, summary ? Hl7.Fhir.Rest.SummaryType.True : Hl7.Fhir.Rest.SummaryType.False);
 					System.Xml.XPath.XPathDocument xmlDoc = new System.Xml.XPath.XPathDocument(new StringReader(xml));
 
 					// And we also need an output writer

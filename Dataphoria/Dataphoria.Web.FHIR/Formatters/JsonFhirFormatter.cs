@@ -84,8 +84,8 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 						FhirResponse response = (value as FhirResponse);
 						if (response.HasBody)
 						{
-							FhirSerializer.SerializeResource(response.Resource, writer, summary);
-						}
+							FhirSerializer.SerializeResource(response.Resource, writer, summary ? Hl7.Fhir.Rest.SummaryType.True : Hl7.Fhir.Rest.SummaryType.False);
+                        }
 					}
 
 				}

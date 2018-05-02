@@ -6,9 +6,15 @@
     <Deterministic>false</Deterministic>
     <AssemblyName>Alphora.Dataphor.DAE.Connection.PGSQL</AssemblyName>
     <RootNamespace>Alphora.Dataphor.DAE.Connection.PGSQL</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>SIGNASSEMBLIES</DefineConstants>
+    <OutputPath>..\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="3.2.7" />

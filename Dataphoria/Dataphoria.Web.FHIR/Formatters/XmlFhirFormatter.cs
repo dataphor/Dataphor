@@ -77,25 +77,26 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 			{
 				XmlWriter writer = new XmlTextWriter(writeStream, new UTF8Encoding(false));
 				bool summary = requestMessage.RequestSummary();
+                Hl7.Fhir.Rest.SummaryType summaryType = summary ? Hl7.Fhir.Rest.SummaryType.True : Hl7.Fhir.Rest.SummaryType.False;
 
-				if (type == typeof(OperationOutcome))
+                if (type == typeof(OperationOutcome))
 				{
 					Resource resource = (Resource)value;
-					FhirSerializer.SerializeResource(resource, writer, summary);
-				}
+					FhirSerializer.SerializeResource(resource, writer, summaryType);
+                }
 				else if (type.IsAssignableFrom(typeof(Resource)))
 				{
 					Resource resource = (Resource)value;
-					FhirSerializer.SerializeResource(resource, writer, summary);
+					FhirSerializer.SerializeResource(resource, writer, summaryType);
 
-					content.Headers.ContentLocation = resource.ExtractKey().ToUri();
+                    content.Headers.ContentLocation = resource.ExtractKey().ToUri();
 				}
 				else if (type == typeof(FhirResponse))
 				{
 					FhirResponse response = (value as FhirResponse);
 					if (response.HasBody)
-						FhirSerializer.SerializeResource(response.Resource, writer, summary);
-				}
+						FhirSerializer.SerializeResource(response.Resource, writer, summaryType);
+                }
 
 				writer.Flush();
 			});
