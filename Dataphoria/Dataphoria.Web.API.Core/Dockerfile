@@ -1,5 +1,5 @@
 FROM microsoft/aspnetcore:2.0 AS base
-COPY ServerConfigurations.config /usr/share/Alphora/Dataphor/Instances/ServerConfigurations.config
+COPY Dataphoria/Dataphoria.Web.API.Core/ServerConfigurations.config /usr/share/Alphora/Dataphor/Instances/ServerConfigurations.config
 WORKDIR /app
 EXPOSE 80
 

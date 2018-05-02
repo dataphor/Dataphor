@@ -5,14 +5,13 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>e2cf004c-a47e-4203-b55d-9fcaef2396ea</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>http://localhost:{ServicePort}/api/values</DockerServiceUrl>
-    <DockerServiceName>dataphoria.web.api</DockerServiceName>
+    <DockerServiceUrl>http://localhost:{ServicePort}/api/query?e=select%201</DockerServiceUrl>
+    <DockerServiceName>dataphoria.web.api.core</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
   </ItemGroup>
 </Project>

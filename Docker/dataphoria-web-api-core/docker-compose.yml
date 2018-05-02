@@ -4,10 +4,5 @@ services:
   dataphoria.web.api.core:
     image: dataphoriawebapicore
     build:
-      context: ../../Dataphoria/Dataphoria.Web.API.Core/
-    depends_on:
-      - db
-  
-  db:
-    image: postgres:alpine
-    restart: always
+      context: ../../
+      dockerfile: Dataphoria/Dataphoria.Web.API.Core/Dockerfile

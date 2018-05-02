@@ -4,6 +4,7 @@ VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
+		..\.dockerignore = ..\.dockerignore
 		CompilerDefines.txt = CompilerDefines.txt
 		Error Message Prefix Codes.txt = Error Message Prefix Codes.txt
 	EndProjectSection
@@ -38,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria", "Dataphoria\Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.SQLCE", "DAE.SQLCE\DAE.SQLCE.csproj", "{788980F0-5A85-4F9A-9E6A-56746E7D37C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.SQLite", "DAE.SQLite\DAE.SQLite.csproj", "{6D005BA9-2F0B-4EAA-B82F-039AFA11C425}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.SQLite", "DAE.SQLite\DAE.SQLite.csproj", "{6D005BA9-2F0B-4EAA-B82F-039AFA11C425}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Service", "DAE.Service\DAE.Service.csproj", "{B7466206-120E-45BD-9FB0-F30A0C7971A4}"
 EndProject
@@ -66,17 +67,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.Oracle.Oracl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.Oracle", "..\Libraries\MSOracleConnection\Source\DAE.Connection.Oracle.csproj", "{C49E387B-6B62-4D5F-8E75-EF75D562B7DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.Simple", "..\Libraries\SimpleDevice\Source\DAE.Device.Simple.csproj", "{C6F705E1-DEDA-4106-A8E3-B3BFC8A91A3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Device.Simple", "..\Libraries\SimpleDevice\Source\DAE.Device.Simple.csproj", "{C6F705E1-DEDA-4106-A8E3-B3BFC8A91A3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.SQL", "..\Libraries\SQLDevice\Source\DAE.Device.SQL.csproj", "{13A5D21C-63C4-4C56-97F4-6D921C4BA373}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Device.SQL", "..\Libraries\SQLDevice\Source\DAE.Device.SQL.csproj", "{13A5D21C-63C4-4C56-97F4-6D921C4BA373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Diagnostics", "..\Libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj", "{9D8EF75D-1434-412F-825F-3889877321F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Diagnostics", "..\Libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj", "{9D8EF75D-1434-412F-825F-3889877321F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceDB2", "..\Libraries\DB2Device\Source\DAEDeviceDB2.csproj", "{9969EADB-3E5D-4D60-8268-A7D860CE69E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceLinter", "..\Libraries\LinterDevice\Source\DAEDeviceLinter.csproj", "{2E8AA030-8081-44D5-A25C-D1A7726AC640}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceMSSQL", "..\Libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj", "{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAEDeviceMSSQL", "..\Libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj", "{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceMySQL", "..\Libraries\MySQLDevice\Source\DAEDeviceMySQL.csproj", "{3F4A39C3-7317-4E96-91E9-C30EADE8D142}"
 EndProject
@@ -90,17 +91,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Server", "..\Libra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping", "..\Libraries\Sample.Shipping\Source\Shipping.csproj", "{4F32414B-6689-4AEE-8D53-DA9C5A18AF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Integration", "..\Libraries\System.Integration\Source\System.Integration.csproj", "{575B3F5A-1A24-46C4-B3C0-504BD492CEB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Integration", "..\Libraries\System.Integration\Source\System.Integration.csproj", "{575B3F5A-1A24-46C4-B3C0-504BD492CEB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Internet", "..\Libraries\System.Internet\Source\System.Internet.csproj", "{5E6A5ACD-9148-4403-BA1A-6FCEC3F88C4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Internet", "..\Libraries\System.Internet\Source\System.Internet.csproj", "{5E6A5ACD-9148-4403-BA1A-6FCEC3F88C4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Platform", "..\Libraries\System.Platform\Source\System.Platform.csproj", "{6554AF3D-E9B6-4CF3-A60D-DCEFE10CDD56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Platform", "..\Libraries\System.Platform\Source\System.Platform.csproj", "{6554AF3D-E9B6-4CF3-A60D-DCEFE10CDD56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.NativeCLI", "DAE.NativeCLI\DAE.NativeCLI.csproj", "{7CCBA92D-BB78-49E3-8C11-4CC29B173296}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.MSSQL", "DAE.MSSQL\DAE.MSSQL.csproj", "{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAE.Connection.PGSQL", "..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
 EndProject
@@ -159,11 +160,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.Client", "..\Dataphoria\Dataphoria.Web.Client\Dataphoria.Web.Client.csproj", "{23565EEF-87F4-4FAA-AEEC-C507FA51FC57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR.Core", "..\Libraries\FHIR.Core\Source\FHIR.Core.csproj", "{737DEDCB-669D-4962-8DB9-894009FD1DC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR.Core", "..\Libraries\FHIR.Core\Source\FHIR.Core.csproj", "{737DEDCB-669D-4962-8DB9-894009FD1DC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR.Device", "..\Libraries\FHIR.Device\Source\FHIR.Device.csproj", "{57149AF0-5A0E-4E13-A40C-1355DE9693AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR.Device", "..\Libraries\FHIR.Device\Source\FHIR.Device.csproj", "{57149AF0-5A0E-4E13-A40C-1355DE9693AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR.Server", "..\Libraries\FHIR.Server\Source\FHIR.Server.csproj", "{FACC01D9-F135-40BB-ADAE-2965785DB967}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR.Server", "..\Libraries\FHIR.Server\Source\FHIR.Server.csproj", "{FACC01D9-F135-40BB-ADAE-2965785DB967}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8FA5FA37-DC03-4E24-900B-AA863CA9650F} = {8FA5FA37-DC03-4E24-900B-AA863CA9650F}
 		{6EC1F378-510B-48D0-8D00-E36BEF214766} = {6EC1F378-510B-48D0-8D00-E36BEF214766}
@@ -181,9 +182,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.API", "..\Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.Core", "..\Dataphoria\Dataphoria.Web.Core\Dataphoria.Web.Core.csproj", "{6009F17A-D960-449B-A96E-2D915AD743FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR2.Core", "..\Libraries\FHIR2.Core\Source\FHIR2.Core.csproj", "{0529069C-4980-4F4E-9495-2ACA2D067E41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR2.Core", "..\Libraries\FHIR2.Core\Source\FHIR2.Core.csproj", "{0529069C-4980-4F4E-9495-2ACA2D067E41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR3.Core", "..\Libraries\FHIR3.Core\Source\FHIR3.Core.csproj", "{A36433E8-3829-4F43-BAB4-CB994EF01D09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR3.Core", "..\Libraries\FHIR3.Core\Source\FHIR3.Core.csproj", "{A36433E8-3829-4F43-BAB4-CB994EF01D09}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{BB27679F-B327-4A1D-A58C-03EF07025810}"
 EndProject
