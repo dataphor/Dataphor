@@ -1,4 +1,6 @@
 .dockerignore
+docker-compose.yml
+docker-compose.*.yml
 .env
 .git
 .gitignore
@@ -9,10 +11,11 @@
 *.snk
 *.csproj
 *.dcproj
+
+
 /Dataphor
 /Dataphoria
 /Design
-/Docker
 /Documentation
 /External
 /Images
@@ -22,6 +25,21 @@
 /Tests
 /Utilities
 
-
 !Dataphoria/Dataphoria.Web.API.Core
+
+!Libraries/Connection
+!Libraries/PGSQLConnection
+!Libraries/SimpleDevice
+!Libraries/SQLDevice
+!Libraries/TestFramework.Coverage.Base
+!Libraries/MSSQLDevice
+!Libraries/PGSQLDevice
+!Libraries/FHIR.Core
+!Libraries/FHIR.Device
+!Libraries/FHIR.Server
+!Libraries/FHIR2.Core
+!Libraries/FHIR3.Core
+!Libraries/System.Integration
+!Libraries/System.Internet
+!Libraries/System.Platform
 

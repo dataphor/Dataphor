@@ -5,7 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>e2cf004c-a47e-4203-b55d-9fcaef2396ea</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>http://localhost:{ServicePort}/api/query?e=select%201</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:{ServicePort}/api/query?e=select%20LoadedLibraries</DockerServiceUrl>
     <DockerServiceName>dataphoria.web.api.core</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
