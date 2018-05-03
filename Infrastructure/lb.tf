@@ -16,6 +16,10 @@ resource "aws_lb_target_group" "target_group" {
   stickiness {
     type = "lb_cookie"
   }
+
+  health_check {
+    matcher = "200-499"
+  }
 }
 
 resource "aws_lb_listener" "lb_listener" {
