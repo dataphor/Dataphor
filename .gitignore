@@ -3,6 +3,7 @@
 *.pdb
 *.suo
 *.user
+.terraform
 
 *.DS_Store
 
