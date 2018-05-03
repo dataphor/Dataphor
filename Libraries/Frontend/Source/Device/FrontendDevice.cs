@@ -1183,8 +1183,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 	}
 	
-	public class FrontendDeviceSession : MemoryDeviceSession, IStreamProvider
-	{		
+	public class FrontendDeviceSession : MemoryDeviceSession, DAE.Streams.IStreamProvider
+    {		
 		protected internal FrontendDeviceSession(DAE.Schema.Device device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
 		protected override void Dispose(bool disposing)

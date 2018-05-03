@@ -10,9 +10,6 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-
-[assembly: InternalsVisibleTo("AlphoraDataphorServerDTC")]
-
 [assembly: AssemblyTitle("Alphora Dataphor - Server")]
 [assembly: AssemblyDescription("Dataphor Server")]
 [assembly: AssemblyConfiguration("")]
@@ -70,8 +67,12 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyDelaySign(false)]
 #if SIGNASSEMBLIES
-[assembly: AssemblyKeyFile("..\\..\\..\\..\\Dataphor.snk")]
+[assembly: AssemblyKeyFile("..\\..\\Dataphor.snk")]
+[assembly: InternalsVisibleTo("AlphoraDataphorServerDTC, PublicKey=00240000048000009400000006020000002400005253413100040000010001001b46c5a7449e1e8cfd9e083129885926ccb4c70fd3a0bd2dca8ed5a96747ddd707950f3afbf8ad16df57e7fcc8d3cd922a51aa9ab605d1389d2cbbc77c36360c17121e838e64fb6dca76e8af2f4915090af0632c6346a6ce5242c594e78372da2fedf7087fb5783945c681e74155fb3ed995716de6c30df05384d70cf77472ae")]
+
 #else
 [assembly: AssemblyKeyFile("")]
+[assembly: InternalsVisibleTo("AlphoraDataphorServerDTC")]
+
 #endif
 [assembly: AssemblyKeyName("")]

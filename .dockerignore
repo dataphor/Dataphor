@@ -6,16 +6,14 @@ docker-compose.*.yml
 .gitignore
 .vs
 .vscode
-*.cs
-*.sln
-*.snk
-*.csproj
-*.dcproj
+/obj
+/bin
 
 
 /Dataphor
 /Dataphoria
 /Design
+/Docker
 /Documentation
 /External
 /Images
@@ -39,7 +37,11 @@ docker-compose.*.yml
 !Libraries/FHIR.Server
 !Libraries/FHIR2.Core
 !Libraries/FHIR3.Core
+!Libraries/Frontend
 !Libraries/System.Integration
 !Libraries/System.Internet
 !Libraries/System.Platform
+
+/*/*/Source
+
 
