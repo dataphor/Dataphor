@@ -44,7 +44,10 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			int result = 7;
+			for (int i = 0; i < type.Count; i++)
+				result += 31 * type[i].GetHashCode();
+			return result;
 		}
 	}
 
@@ -69,7 +72,10 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			int result = 7;
+			for (int i = 0; i < choice.Count; i++)
+				result += 31 * choice[i].GetHashCode();
+			return result;
 		}
 	}
 
@@ -96,7 +102,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 
@@ -116,7 +122,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 
@@ -133,7 +139,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return (fromType == null ? 0 : fromType.GetHashCode()) + 31 * (toType == null ? 0 : toType.GetHashCode());
 		}
 	}
 
@@ -160,7 +166,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return pointType == null ? 0 : pointType.GetHashCode();
 		}
 	}
 
@@ -179,7 +185,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return pointType == null ? 0 : pointType.GetHashCode();
 		}
 	}
 
@@ -207,7 +213,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return elementType == null ? 0 : elementType.GetHashCode();
 		}
 	}
 	
@@ -226,7 +232,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return elementType == null ? 0 : elementType.GetHashCode();
 		}
 	}
 
@@ -241,7 +247,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 
@@ -255,7 +261,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 
@@ -272,7 +278,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return (modelName == null ? 0 : modelName.GetHashCode()) + 37 * (name == null ? 0 : name.GetHashCode());
 		}
 	}
 
@@ -306,7 +312,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 
@@ -334,7 +340,10 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			int result = 7;
+			for (int i = 0; i < element.Count; i++)
+				result += 31 * element[i].GetHashCode();
+			return result;
 		}
 	}
 
@@ -355,7 +364,7 @@ namespace CQF.Model
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return name == null ? 0 : name.GetHashCode();
 		}
 	}
 

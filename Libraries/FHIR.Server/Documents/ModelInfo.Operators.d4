@@ -1,3 +1,5 @@
+//* Generators: Set up a generators table in the temp space
+// This is only used for messages
 begin
   var defaultDeviceName := GetDefaultDeviceName();
   SetDefaultDeviceName("Temp");

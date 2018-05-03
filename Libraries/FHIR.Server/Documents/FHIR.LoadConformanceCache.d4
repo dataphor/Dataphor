@@ -4,12 +4,12 @@
 //* Table: StructureDefinitions
 SafeDrop("StructureDefinitions");
 create table StructureDefinitions in Temp from
-	Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+	Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition };
 
 //* Table: ImplementationGuides
 SafeDrop("ImplementationGuides");
 create table ImplementationGuides in Temp from
-	Resource where Type = "ImplementationGuide" { Id, (Content as ImplementationGuide) ImplementationGuide }
+	Resource where Type = "ImplementationGuide" { Id, (Content as ImplementationGuide) ImplementationGuide };
 
 //* Table: Models
 SafeDrop("Models");

@@ -8,16 +8,7 @@
     <element name="status" type="FHIR.AccountStatus" />
     <element name="type" type="FHIR.CodeableConcept" />
     <element name="name" type="FHIR.string" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
     <element name="active" type="FHIR.Period" />
     <element name="balance" type="FHIR.Money" />
@@ -35,13 +26,7 @@
     <element name="priority" type="FHIR.positiveInt" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Account.GuarantorComponent">
-    <element name="party">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="party" type="FHIR.Reference" />
     <element name="onHold" type="FHIR.boolean" />
     <element name="period" type="FHIR.Period" />
   </typeInfo>
@@ -132,7 +117,6 @@
     <element name="product">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
       </typeSpecifier>
     </element>
@@ -191,14 +175,7 @@
     <element name="identifier" type="FHIR.Identifier" />
     <element name="category" type="FHIR.AdverseEventCategory" />
     <element name="type" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="date" type="FHIR.dateTime" />
     <element name="reaction">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -206,34 +183,14 @@
     <element name="location" type="FHIR.Reference" />
     <element name="seriousness" type="FHIR.CodeableConcept" />
     <element name="outcome" type="FHIR.CodeableConcept" />
-    <element name="recorder">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="eventParticipant">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="recorder" type="FHIR.Reference" />
+    <element name="eventParticipant" type="FHIR.Reference" />
     <element name="description" type="FHIR.string" />
     <element name="suspectEntity">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.AdverseEvent.SuspectEntityComponent" />
     </element>
     <element name="subjectMedicalHistory">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="referenceDocument">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -243,15 +200,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="AdverseEvent.SuspectEntityComponent">
-    <element name="instance">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="instance" type="FHIR.Reference" />
     <element name="causality" type="FHIR.AdverseEventCausality" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="AdverseEventCategory">
@@ -287,19 +236,8 @@
       </typeSpecifier>
     </element>
     <element name="assertedDate" type="FHIR.dateTime" />
-    <element name="recorder">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="asserter">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="recorder" type="FHIR.Reference" />
+    <element name="asserter" type="FHIR.Reference" />
     <element name="lastOccurrence" type="FHIR.dateTime" />
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -343,8 +281,6 @@
     <element name="author">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="string" />
       </typeSpecifier>
     </element>
@@ -368,12 +304,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="indication">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="priority" type="FHIR.unsignedInt" />
     <element name="description" type="FHIR.string" />
@@ -402,16 +333,7 @@
     <element name="type">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="required" type="FHIR.ParticipantRequired" />
     <element name="status" type="FHIR.ParticipationStatus" />
   </typeInfo>
@@ -425,16 +347,7 @@
     <element name="participantType">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="participantStatus" type="FHIR.ParticipantStatus" />
     <element name="comment" type="FHIR.string" />
   </typeInfo>
@@ -487,15 +400,7 @@
     <element name="role">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="reference">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="reference" type="FHIR.Reference" />
     <element name="userId" type="FHIR.Identifier" />
     <element name="altId" type="FHIR.string" />
     <element name="name" type="FHIR.string" />
@@ -558,13 +463,7 @@
     <element name="code" type="FHIR.CodeableConcept" />
     <element name="subject" type="FHIR.Reference" />
     <element name="created" type="FHIR.date" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Resource" name="Binary" label="Binary" retrievable="true">
     <element name="contentType" type="FHIR.MimeType" />
@@ -819,12 +718,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -842,29 +736,11 @@
     </element>
     <element name="title" type="FHIR.string" />
     <element name="description" type="FHIR.string" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
     <element name="author">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="careTeam">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -887,13 +763,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="CarePlan.Activity.DetailComponent">
     <element name="category" type="FHIR.CodeableConcept" />
-    <element name="definition">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="definition" type="FHIR.Reference" />
     <element name="code" type="FHIR.CodeableConcept" />
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
@@ -915,20 +785,11 @@
     </element>
     <element name="location" type="FHIR.Reference" />
     <element name="performer">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="product">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -946,20 +807,7 @@
     <element name="progress">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
     </element>
-    <element name="reference">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="reference" type="FHIR.Reference" />
     <element name="detail" type="FHIR.CarePlan.Activity.DetailComponent" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="CarePlanActivityStatus">
@@ -980,18 +828,8 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="name" type="FHIR.string" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
     <element name="participant">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CareTeam.ParticipantComponent" />
@@ -1011,15 +849,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="CareTeam.ParticipantComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="member">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="member" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
   </typeInfo>
@@ -1036,18 +866,8 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -1067,32 +887,13 @@
     <element name="factorOverride" type="FHIR.decimal" />
     <element name="priceOverride" type="FHIR.Money" />
     <element name="overrideReason" type="FHIR.string" />
-    <element name="enterer">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="enterer" type="FHIR.Reference" />
     <element name="enteredDate" type="FHIR.dateTime" />
     <element name="reason">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="service">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="account">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -1106,15 +907,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ChargeItem.ParticipantComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ChargeItemStatus">
     <element name="Value" type="System.String" />
@@ -1141,12 +934,7 @@
     <element name="related">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Claim.RelatedComponent" />
     </element>
-    <element name="prescription">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="prescription" type="FHIR.Reference" />
     <element name="originalPrescription" type="FHIR.Reference" />
     <element name="payee" type="FHIR.Claim.PayeeComponent" />
     <element name="referral" type="FHIR.Reference" />
@@ -1186,12 +974,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Claim.CareTeamComponent">
     <element name="sequence" type="FHIR.positiveInt" />
-    <element name="provider">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="provider" type="FHIR.Reference" />
     <element name="responsible" type="FHIR.boolean" />
     <element name="role" type="FHIR.CodeableConcept" />
     <element name="qualification" type="FHIR.CodeableConcept" />
@@ -1337,14 +1120,7 @@
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Claim.PayeeComponent">
     <element name="type" type="FHIR.CodeableConcept" />
     <element name="resourceType" type="FHIR.Coding" />
-    <element name="party">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="party" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Claim.ProcedureComponent">
     <element name="sequence" type="FHIR.positiveInt" />
@@ -1517,18 +1293,8 @@
     <element name="status" type="FHIR.ClinicalImpressionStatus" />
     <element name="code" type="FHIR.CodeableConcept" />
     <element name="description" type="FHIR.string" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="effective">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -1539,12 +1305,7 @@
     <element name="assessor" type="FHIR.Reference" />
     <element name="previous" type="FHIR.Reference" />
     <element name="problem">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="investigation">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.ClinicalImpression.InvestigationComponent" />
@@ -1563,15 +1324,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="action">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -1582,7 +1335,6 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
     <element name="basis" type="FHIR.string" />
@@ -1590,16 +1342,7 @@
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ClinicalImpression.InvestigationComponent">
     <element name="code" type="FHIR.CodeableConcept" />
     <element name="item">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ClinicalImpressionStatus">
@@ -1714,12 +1457,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -1735,54 +1473,22 @@
     <element name="medium">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="recipient">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="topic">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="sent" type="FHIR.dateTime" />
     <element name="received" type="FHIR.dateTime" />
-    <element name="sender">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="sender" type="FHIR.Reference" />
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="payload">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Communication.PayloadComponent" />
@@ -1822,34 +1528,14 @@
     <element name="medium">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="recipient">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="topic">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="payload">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CommunicationRequest.PayloadComponent" />
     </element>
@@ -1860,26 +1546,13 @@
       </typeSpecifier>
     </element>
     <element name="authoredOn" type="FHIR.dateTime" />
-    <element name="sender">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="sender" type="FHIR.Reference" />
     <element name="requester" type="FHIR.CommunicationRequest.RequesterComponent" />
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -1895,15 +1568,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="CommunicationRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="CommunicationRequestStatus">
@@ -1959,14 +1624,7 @@
     <element name="encounter" type="FHIR.Reference" />
     <element name="date" type="FHIR.dateTime" />
     <element name="author">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="title" type="FHIR.string" />
     <element name="confidentiality" type="FHIR.DocumentConfidentiality" />
@@ -1989,13 +1647,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CompositionAttestationMode" />
     </element>
     <element name="time" type="FHIR.dateTime" />
-    <element name="party">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="party" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Composition.EventComponent">
     <element name="code">
@@ -2132,18 +1784,8 @@
     <element name="bodySite">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="onset">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -2164,13 +1806,7 @@
       </typeSpecifier>
     </element>
     <element name="assertedDate" type="FHIR.dateTime" />
-    <element name="asserter">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="asserter" type="FHIR.Reference" />
     <element name="stage" type="FHIR.Condition.StageComponent" />
     <element name="evidence">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Condition.EvidenceComponent" />
@@ -2190,13 +1826,7 @@
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Condition.StageComponent">
     <element name="summary" type="FHIR.CodeableConcept" />
     <element name="assessment">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ConditionClinicalStatus">
@@ -2221,14 +1851,7 @@
     <element name="period" type="FHIR.Period" />
     <element name="dateTime" type="FHIR.dateTime" />
     <element name="consentingParty">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="actor">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Consent.ActorComponent" />
@@ -2243,9 +1866,6 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Attachment" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Identifier" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -2268,17 +1888,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Consent.ActorComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="reference">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="reference" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Consent.DataComponent">
     <element name="meaning" type="FHIR.ConsentDataMeaning" />
@@ -2286,17 +1896,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Consent.Except.ActorComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="reference">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="reference" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Consent.Except.DataComponent">
     <element name="meaning" type="FHIR.ConsentDataMeaning" />
@@ -2412,8 +2012,6 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Attachment" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
     <element name="friendly">
@@ -2427,19 +2025,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Contract.AgentComponent">
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="role">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
@@ -2449,8 +2035,6 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Attachment" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
   </typeInfo>
@@ -2458,8 +2042,6 @@
     <element name="content">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Attachment" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -2474,32 +2056,13 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Contract.SignerComponent">
     <element name="type" type="FHIR.Coding" />
-    <element name="party">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="party" type="FHIR.Reference" />
     <element name="signature">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Signature" />
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Contract.Term.AgentComponent">
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="role">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
@@ -2580,30 +2143,13 @@
     </element>
     <element name="status" type="FHIR.CoverageStatus" />
     <element name="type" type="FHIR.CodeableConcept" />
-    <element name="policyHolder">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="subscriber">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="policyHolder" type="FHIR.Reference" />
+    <element name="subscriber" type="FHIR.Reference" />
     <element name="beneficiary" type="FHIR.Reference" />
     <element name="relationship" type="FHIR.CodeableConcept" />
     <element name="period" type="FHIR.Period" />
     <element name="payor">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="grouping" type="FHIR.Coverage.GroupingComponent" />
     <element name="dependent" type="FHIR.string" />
@@ -2692,12 +2238,7 @@
     <element name="severity" type="FHIR.DetectedIssueSeverity" />
     <element name="patient" type="FHIR.Reference" />
     <element name="date" type="FHIR.dateTime" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
     <element name="implicated">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -2814,12 +2355,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -2837,20 +2373,8 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
       </typeSpecifier>
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -2861,16 +2385,7 @@
     <element name="authoredOn" type="FHIR.dateTime" />
     <element name="requester" type="FHIR.DeviceRequest.RequesterComponent" />
     <element name="performerType" type="FHIR.CodeableConcept" />
-    <element name="performer">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="performer" type="FHIR.Reference" />
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
@@ -2888,13 +2403,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="DeviceRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="DeviceRequestStatus">
@@ -2905,12 +2414,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="status" type="FHIR.DeviceUseStatementStatus" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="whenUsed" type="FHIR.Period" />
     <element name="timing">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
@@ -2920,13 +2424,7 @@
       </typeSpecifier>
     </element>
     <element name="recordedOn" type="FHIR.dateTime" />
-    <element name="source">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="source" type="FHIR.Reference" />
     <element name="device" type="FHIR.Reference" />
     <element name="indication">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
@@ -2944,34 +2442,13 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.DiagnosticReportStatus" />
     <element name="category" type="FHIR.CodeableConcept" />
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="effective">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -2989,12 +2466,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="imagingStudy">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="image">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.DiagnosticReport.ImageComponent" />
@@ -3013,12 +2485,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="DiagnosticReport.PerformerComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="DiagnosticReportStatus">
     <element name="Value" type="System.String" />
@@ -3040,35 +2507,13 @@
     </element>
     <element name="status" type="FHIR.DocumentReferenceStatus" />
     <element name="type" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="created" type="FHIR.dateTime" />
     <element name="author">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="recipient">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="source" type="FHIR.uri" />
     <element name="description" type="FHIR.string" />
@@ -3103,33 +2548,13 @@
     <element name="docStatus" type="FHIR.ReferredDocumentStatus" />
     <element name="type" type="FHIR.CodeableConcept" />
     <element name="class" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="created" type="FHIR.dateTime" />
     <element name="indexed" type="FHIR.instant" />
     <element name="author">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
-    <element name="authenticator">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="authenticator" type="FHIR.Reference" />
     <element name="custodian" type="FHIR.Reference" />
     <element name="relatesTo">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.DocumentReference.RelatesToComponent" />
@@ -3524,12 +2949,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="priority" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="episodeOfCare">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -3563,12 +2983,7 @@
     <element name="period" type="FHIR.Period" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Encounter.DiagnosisComponent">
-    <element name="condition">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="condition" type="FHIR.Reference" />
     <element name="role" type="FHIR.CodeableConcept" />
     <element name="rank" type="FHIR.positiveInt" />
   </typeInfo>
@@ -3599,12 +3014,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="period" type="FHIR.Period" />
-    <element name="individual">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="individual" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Encounter.StatusHistoryComponent">
     <element name="status" type="FHIR.EncounterStatus" />
@@ -3804,12 +3214,7 @@
     <element name="related">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.ExplanationOfBenefit.RelatedComponent" />
     </element>
-    <element name="prescription">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="prescription" type="FHIR.Reference" />
     <element name="originalPrescription" type="FHIR.Reference" />
     <element name="payee" type="FHIR.ExplanationOfBenefit.PayeeComponent" />
     <element name="information">
@@ -3924,12 +3329,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ExplanationOfBenefit.CareTeamComponent">
     <element name="sequence" type="FHIR.positiveInt" />
-    <element name="provider">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="provider" type="FHIR.Reference" />
     <element name="responsible" type="FHIR.boolean" />
     <element name="role" type="FHIR.CodeableConcept" />
     <element name="qualification" type="FHIR.CodeableConcept" />
@@ -4097,14 +3497,7 @@
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ExplanationOfBenefit.PayeeComponent">
     <element name="type" type="FHIR.CodeableConcept" />
     <element name="resourceType" type="FHIR.CodeableConcept" />
-    <element name="party">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="party" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ExplanationOfBenefit.PaymentComponent">
     <element name="type" type="FHIR.CodeableConcept" />
@@ -4205,12 +3598,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.FamilyHistoryStatus" />
     <element name="notDone" type="FHIR.boolean" />
@@ -4247,14 +3635,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -4288,28 +3669,10 @@
     <element name="status" type="FHIR.FlagStatus" />
     <element name="category" type="FHIR.CodeableConcept" />
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
     <element name="encounter" type="FHIR.Reference" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="FlagStatus">
     <element name="Value" type="System.String" />
@@ -4324,13 +3687,7 @@
     </element>
     <element name="priority" type="FHIR.CodeableConcept" />
     <element name="description" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="start">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="date" />
@@ -4340,24 +3697,9 @@
     <element name="target" type="FHIR.Goal.TargetComponent" />
     <element name="statusDate" type="FHIR.date" />
     <element name="statusReason" type="FHIR.string" />
-    <element name="expressedBy">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="expressedBy" type="FHIR.Reference" />
     <element name="addresses">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -4473,15 +3815,7 @@
     <element name="period" type="FHIR.Period" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Group.MemberComponent">
-    <element name="entity">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="entity" type="FHIR.Reference" />
     <element name="period" type="FHIR.Period" />
     <element name="inactive" type="FHIR.boolean" />
   </typeInfo>
@@ -4493,18 +3827,8 @@
     <element name="identifier" type="FHIR.Identifier" />
     <element name="module" type="FHIR.Reference" />
     <element name="status" type="FHIR.GuidanceResponseStatus" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrenceDateTime" type="FHIR.dateTime" />
     <element name="performer" type="FHIR.Reference" />
     <element name="reason">
@@ -4520,12 +3844,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="outputParameters" type="FHIR.Reference" />
-    <element name="result">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="result" type="FHIR.Reference" />
     <element name="dataRequirement">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.DataRequirement" />
     </element>
@@ -4638,15 +3957,7 @@
     <element name="identifier" type="FHIR.Identifier" />
     <element name="patient" type="FHIR.Reference" />
     <element name="authoringTime" type="FHIR.dateTime" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
     <element name="description" type="FHIR.string" />
     <element name="study">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.ImagingManifest.StudyComponent" />
@@ -4686,21 +3997,10 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Coding" />
     </element>
     <element name="patient" type="FHIR.Reference" />
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="started" type="FHIR.dateTime" />
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="referrer" type="FHIR.Reference" />
     <element name="interpreter">
@@ -4839,12 +4139,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="supportingPatientInformation">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ImmunizationStatus">
@@ -4989,12 +4284,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.DomainResource" name="Linkage" label="Linkage" retrievable="true">
     <element name="active" type="FHIR.boolean" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
     <element name="item">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Linkage.ItemComponent" />
     </element>
@@ -5014,23 +4304,10 @@
     <element name="mode" type="FHIR.ListMode" />
     <element name="title" type="FHIR.string" />
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="encounter" type="FHIR.Reference" />
     <element name="date" type="FHIR.dateTime" />
-    <element name="source">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="source" type="FHIR.Reference" />
     <element name="orderedBy" type="FHIR.CodeableConcept" />
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -5250,21 +4527,8 @@
     <element name="type" type="FHIR.DigitalMediaType" />
     <element name="subtype" type="FHIR.CodeableConcept" />
     <element name="view" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -5276,12 +4540,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="bodySite" type="FHIR.CodeableConcept" />
-    <element name="device">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="device" type="FHIR.Reference" />
     <element name="height" type="FHIR.positiveInt" />
     <element name="width" type="FHIR.positiveInt" />
     <element name="frames" type="FHIR.positiveInt" />
@@ -5310,7 +4569,6 @@
     <element name="item">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -5344,20 +4602,10 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="partOf">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.MedicationAdministrationStatus" />
     <element name="category" type="FHIR.CodeableConcept" />
@@ -5367,18 +4615,8 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="supportingInformation">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -5399,12 +4637,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="prescription" type="FHIR.Reference" />
     <element name="device">
@@ -5432,14 +4665,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="MedicationAdministration.PerformerComponent">
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="MedicationAdministrationStatus">
@@ -5460,18 +4686,8 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="supportingInformation">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -5488,12 +4704,7 @@
     <element name="whenHandedOver" type="FHIR.dateTime" />
     <element name="destination" type="FHIR.Reference" />
     <element name="receiver">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -5511,15 +4722,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="MedicationDispense.PerformerComponent">
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="MedicationDispense.SubstitutionComponent">
@@ -5540,22 +4743,10 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="groupIdentifier" type="FHIR.Identifier" />
     <element name="status" type="FHIR.MedicationRequestStatus" />
@@ -5568,18 +4759,8 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="supportingInformation">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -5590,12 +4771,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -5621,15 +4797,7 @@
     <element name="performer" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="MedicationRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="MedicationRequest.SubstitutionComponent">
@@ -5650,32 +4818,12 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="partOf">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="status" type="FHIR.MedicationStatementStatus" />
     <element name="category" type="FHIR.CodeableConcept" />
     <element name="medication">
@@ -5691,20 +4839,8 @@
       </typeSpecifier>
     </element>
     <element name="dateAsserted" type="FHIR.dateTime" />
-    <element name="informationSource">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="informationSource" type="FHIR.Reference" />
+    <element name="subject" type="FHIR.Reference" />
     <element name="derivedFrom">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
@@ -5716,12 +4852,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -5763,12 +4894,7 @@
     <element name="copyright" type="FHIR.markdown" />
     <element name="base" type="FHIR.Reference" />
     <element name="parent">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="replaces">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -5798,28 +4924,13 @@
     <element name="destination">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.MessageHeader.DestinationComponent" />
     </element>
-    <element name="receiver">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="sender">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="receiver" type="FHIR.Reference" />
+    <element name="sender" type="FHIR.Reference" />
     <element name="timestamp" type="FHIR.instant" />
     <element name="enterer" type="FHIR.Reference" />
     <element name="author" type="FHIR.Reference" />
     <element name="source" type="FHIR.MessageHeader.SourceComponent" />
-    <element name="responsible">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="responsible" type="FHIR.Reference" />
     <element name="reason" type="FHIR.CodeableConcept" />
     <element name="response" type="FHIR.MessageHeader.ResponseComponent" />
     <element name="focus">
@@ -6000,37 +5111,15 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.ObservationStatus" />
     <element name="category">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="effective">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -6039,14 +5128,7 @@
     </element>
     <element name="issued" type="FHIR.instant" />
     <element name="performer">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="value">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
@@ -6069,12 +5151,7 @@
     <element name="bodySite" type="FHIR.CodeableConcept" />
     <element name="method" type="FHIR.CodeableConcept" />
     <element name="specimen" type="FHIR.Reference" />
-    <element name="device">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="device" type="FHIR.Reference" />
     <element name="referenceRange">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Observation.ReferenceRangeComponent" />
     </element>
@@ -6119,13 +5196,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Observation.RelatedComponent">
     <element name="type" type="FHIR.ObservationRelationshipType" />
-    <element name="target">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="target" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ObservationRelationshipType">
     <element name="Value" type="System.String" />
@@ -6371,12 +5442,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Patient.CommunicationComponent" />
     </element>
     <element name="generalPractitioner">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="managingOrganization" type="FHIR.Reference" />
     <element name="link">
@@ -6406,12 +5472,7 @@
     <element name="period" type="FHIR.Period" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Patient.LinkComponent">
-    <element name="other">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="other" type="FHIR.Reference" />
     <element name="type" type="FHIR.LinkType" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.DomainResource" name="PaymentNotice" label="PaymentNotice" retrievable="true">
@@ -6496,14 +5557,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Person.LinkComponent">
-    <element name="target">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="target" type="FHIR.Reference" />
     <element name="assurance" type="FHIR.IdentityAssuranceLevel" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.DomainResource" name="PlanDefinition" label="PlanDefinition" retrievable="true">
@@ -6630,12 +5684,7 @@
     <element name="requiredBehavior" type="FHIR.ActionRequiredBehavior" />
     <element name="precheckBehavior" type="FHIR.ActionPrecheckBehavior" />
     <element name="cardinalityBehavior" type="FHIR.ActionCardinalityBehavior" />
-    <element name="definition">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="definition" type="FHIR.Reference" />
     <element name="transform" type="FHIR.Reference" />
     <element name="dynamicValue">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.PlanDefinition.Action.DynamicValueComponent" />
@@ -6755,48 +5804,20 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="partOf">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.ProcedureStatus" />
     <element name="notDone" type="FHIR.boolean" />
     <element name="category" type="FHIR.CodeableConcept" />
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="performed">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -6811,12 +5832,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="bodySite">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
@@ -6838,13 +5854,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Procedure.FocalDeviceComponent" />
     </element>
     <element name="usedReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="usedCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
@@ -6856,15 +5866,7 @@
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Procedure.PerformerComponent">
     <element name="role" type="FHIR.CodeableConcept" />
-    <element name="actor">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="actor" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.DomainResource" name="ProcedureRequest" label="ProcedureRequest" retrievable="true" primaryCodePath="code">
@@ -6872,12 +5874,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -6894,20 +5891,8 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -6924,26 +5909,12 @@
     <element name="authoredOn" type="FHIR.dateTime" />
     <element name="requester" type="FHIR.ProcedureRequest.RequesterComponent" />
     <element name="performerType" type="FHIR.CodeableConcept" />
-    <element name="performer">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="performer" type="FHIR.Reference" />
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="supportingInfo">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -6962,13 +5933,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ProcedureRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ProcedureRequestIntent">
@@ -7082,19 +6047,11 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="uri" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
     <element name="onBehalfOf">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="uri" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -7243,47 +6200,18 @@
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.DomainResource" name="QuestionnaireResponse" label="QuestionnaireResponse" retrievable="true">
     <element name="identifier" type="FHIR.Identifier" />
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="parent">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="questionnaire" type="FHIR.Reference" />
     <element name="status" type="FHIR.QuestionnaireResponseStatus" />
     <element name="subject" type="FHIR.Reference" />
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="authored" type="FHIR.dateTime" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="source">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
+    <element name="source" type="FHIR.Reference" />
     <element name="item">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.QuestionnaireResponse.ItemComponent" />
     </element>
@@ -7354,21 +6282,10 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Identifier" />
     </element>
     <element name="definition">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="basedOn">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="replaces">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -7381,18 +6298,8 @@
     <element name="serviceRequested">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -7403,24 +6310,13 @@
     <element name="requester" type="FHIR.ReferralRequest.RequesterComponent" />
     <element name="specialty" type="FHIR.CodeableConcept" />
     <element name="recipient">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="reasonCode">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="reasonReference">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="description" type="FHIR.string" />
     <element name="supportingInfo">
@@ -7434,15 +6330,7 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="ReferralRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="ReferralRequestStatus">
@@ -7502,25 +6390,10 @@
     <element name="status" type="FHIR.RequestStatus" />
     <element name="intent" type="FHIR.RequestIntent" />
     <element name="priority" type="FHIR.RequestPriority" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="authoredOn" type="FHIR.dateTime" />
-    <element name="author">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="author" type="FHIR.Reference" />
     <element name="reason">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
@@ -7577,14 +6450,7 @@
       </typeSpecifier>
     </element>
     <element name="participant">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="type" type="FHIR.Coding" />
     <element name="groupingBehavior" type="FHIR.ActionGroupingBehavior" />
@@ -7700,18 +6566,8 @@
     <element name="status" type="FHIR.RiskAssessmentStatus" />
     <element name="method" type="FHIR.CodeableConcept" />
     <element name="code" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
+    <element name="context" type="FHIR.Reference" />
     <element name="occurrence">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="dateTime" />
@@ -7719,12 +6575,7 @@
       </typeSpecifier>
     </element>
     <element name="condition" type="FHIR.Reference" />
-    <element name="performer">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="performer" type="FHIR.Reference" />
     <element name="reason">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
@@ -7783,17 +6634,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
     <element name="actor">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="planningHorizon" type="FHIR.Period" />
     <element name="comment" type="FHIR.string" />
@@ -7983,19 +6824,11 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="uri" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
     <element name="onBehalfOf">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="uri" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -8035,14 +6868,7 @@
     <element name="accessionIdentifier" type="FHIR.Identifier" />
     <element name="status" type="FHIR.SpecimenStatus" />
     <element name="type" type="FHIR.CodeableConcept" />
-    <element name="subject">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="subject" type="FHIR.Reference" />
     <element name="receivedTime" type="FHIR.dateTime" />
     <element name="parent">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -8409,12 +7235,7 @@
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="partOf">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
     <element name="status" type="FHIR.SupplyDeliveryStatus" />
     <element name="patient" type="FHIR.Reference" />
@@ -8427,12 +7248,7 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Timing" />
       </typeSpecifier>
     </element>
-    <element name="supplier">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="supplier" type="FHIR.Reference" />
     <element name="destination" type="FHIR.Reference" />
     <element name="receiver">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
@@ -8443,8 +7259,6 @@
     <element name="item">
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
@@ -8476,19 +7290,8 @@
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
-    <element name="deliverFrom">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
-    <element name="deliverTo">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="deliverFrom" type="FHIR.Reference" />
+    <element name="deliverTo" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="SupplyRequest.OrderedItemComponent">
     <element name="quantity" type="FHIR.Quantity" />
@@ -8496,21 +7299,11 @@
       <typeSpecifier xsi:type="ChoiceTypeSpecifier">
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="CodeableConcept" />
         <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
       </typeSpecifier>
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="SupplyRequest.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="SupplyRequestStatus">
@@ -8547,12 +7340,7 @@
     <element name="description" type="FHIR.string" />
     <element name="focus" type="FHIR.Reference" />
     <element name="for" type="FHIR.Reference" />
-    <element name="context">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="context" type="FHIR.Reference" />
     <element name="executionPeriod" type="FHIR.Period" />
     <element name="authoredOn" type="FHIR.dateTime" />
     <element name="lastModified" type="FHIR.dateTime" />
@@ -8560,15 +7348,7 @@
     <element name="performerType">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.CodeableConcept" />
     </element>
-    <element name="owner">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="owner" type="FHIR.Reference" />
     <element name="reason" type="FHIR.CodeableConcept" />
     <element name="note">
       <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Annotation" />
@@ -8675,30 +7455,14 @@
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Task.RequesterComponent">
-    <element name="agent">
-      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-      </typeSpecifier>
-    </element>
+    <element name="agent" type="FHIR.Reference" />
     <element name="onBehalfOf" type="FHIR.Reference" />
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.BackboneElement" name="Task.RestrictionComponent">
     <element name="repetitions" type="FHIR.positiveInt" />
     <element name="period" type="FHIR.Period" />
     <element name="recipient">
-      <typeSpecifier xsi:type="ListTypeSpecifier">
-        <elementTypeSpecifier xsi:type="ChoiceTypeSpecifier">
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-          <choice xsi:type="NamedTypeSpecifier" modelName="FHIR" name="Reference" />
-        </elementTypeSpecifier>
-      </typeSpecifier>
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="FHIR.Reference" />
     </element>
   </typeInfo>
   <typeInfo xsi:type="ClassInfo" baseType="FHIR.Element" name="TaskIntent">
