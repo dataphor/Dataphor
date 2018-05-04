@@ -54,13 +54,27 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 		public object Evaluate(string statement, IEnumerable<KeyValuePair<string, object>> args)
 		{
 			CheckActive();
-			var session = _server.Connect(new SessionInfo());
-			var process = session.StartProcess(new ProcessInfo());
+            RESTResult result = null;
+            var session = _server.Connect(new SessionInfo());
+            try
+            {
+                var process = session.StartProcess(new ProcessInfo());
+                try
+                {
+                    DataParam[] paramsValue = RESTMarshal.ArgsToDataParams(process, args);
+                    result = Execute(process, statement, paramsValue);
+                }
+                finally
+                {
+                    session.StopProcess(process);
+                }
+            }
+            finally
+            {
+                _server.Disconnect(session);
+            }
 
-			DataParam[] paramsValue = RESTMarshal.ArgsToDataParams(process, args);
-			var result = Execute(process, statement, paramsValue);
-
-			return result;
+            return result;
 		}
 
 		public object HostEvaluate(string statement)
