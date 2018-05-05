@@ -24,6 +24,7 @@ docker-compose.*.yml
 /Utilities
 
 !Dataphoria/Dataphoria.Web.API.Core
+!Docker/dataphoria-web-api-core/Config
 
 !Libraries/Connection
 !Libraries/PGSQLConnection

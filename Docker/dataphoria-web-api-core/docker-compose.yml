@@ -6,3 +6,11 @@ services:
     build:
       context: ../../
       dockerfile: Dataphoria/Dataphoria.Web.API.Core/Dockerfile
+    volumes:
+      - ./Instances:/usr/share/Alphora/Dataphor/Instances
+      - ../../Libraries:/usr/share/Alphora/Dataphor/Libraries
+      - ../../../medig/Application:/usr/share/Alphora/Application/Libraries
+
+  db:
+    image: postgres:alpine
+    restart: always

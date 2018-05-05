@@ -6,3 +6,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "80"
+
+  db:
+    environment:
+      - POSTGRES_PASSWORD=example
+    ports:
+      - "5432"

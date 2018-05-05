@@ -1,6 +1,4 @@
 FROM microsoft/aspnetcore:2.0 AS base
-COPY Libraries /usr/share/Alphora/Dataphor/Libraries
-COPY Dataphoria/Dataphoria.Web.API.Core/ServerConfigurations.config /usr/share/Alphora/Dataphor/Instances/ServerConfigurations.config
 WORKDIR /app
 EXPOSE 80
 
@@ -20,5 +18,7 @@ EXPOSE 80
 
 FROM base AS final
 WORKDIR /app
+COPY Libraries /usr/share/Alphora/Dataphor/Libraries
+COPY Docker/dataphoria-web-api-core/Instances /usr/share/Alphora/Dataphor/Instances/ServerConfigurations.config
 COPY Dataphoria/Dataphoria.Web.API.Core/bin/Release/PublishOutput .
 ENTRYPOINT ["dotnet", "Dataphoria.Web.API.Core.dll"]
