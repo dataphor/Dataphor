@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Schema
 {
 	public static class LibraryUtility
 	{
-		public const string RegisterFileName = @"Documents\Register.d4";
+        public static readonly string RegisterFileName = Path.Combine("Documents", "Register.d4");
 		public const string RegisterDocumentLocator = @"doc:{0}:Register";
 
 		public static string GetInstanceLibraryDirectory(string instanceDirectory, string libraryName)

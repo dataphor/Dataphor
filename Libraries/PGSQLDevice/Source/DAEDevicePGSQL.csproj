@@ -5,7 +5,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
     <AssemblyName>AlphoraPGSQLDevice</AssemblyName>
-    <RootNamespace>Alphora.Dataphor.DAE.Device.PGSQL</RootNamespace>
+    <RootNamespace></RootNamespace>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
