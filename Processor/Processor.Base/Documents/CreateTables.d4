@@ -1,0 +1,16 @@
+
+EnsureGenerators();
+
+create table ToDoList
+{
+	Id : Integer { default GetNextGenerator('ToDoList') },
+	Description : String tags { Storage.Length = "200" },
+	key { Id }
+};
+
+create table DoneList
+{
+	Id : Integer,
+	Description : String tags { Storage.Length = "200" },
+	key { Id }
+};

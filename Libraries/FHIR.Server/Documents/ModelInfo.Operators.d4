@@ -1,0 +1,581 @@
+//* Generators: Set up a generators table in the temp space
+// This is only used for messages
+begin
+  var defaultDeviceName := GetDefaultDeviceName();
+  SetDefaultDeviceName("Temp");
+  try
+    EnsureGenerators();
+  finally
+    SetDefaultDeviceName(defaultDeviceName);
+  end;
+end;
+
+//* Table: Messages
+// Create a logging table
+SafeDrop("Messages");
+create table Messages in Temp 
+{ 
+	Id : Integer not nil { default GetNextGenerator("Messages") }, 
+	Timestamp : DateTime not nil { default DateTime() }, 
+	Message : String not nil, key { Id } 
+};
+
+//* Operator: Message(String)
+// Log a debug message
+SafeDrop("Message(String)");
+create operator Message(message: String)
+begin
+  //insert row { message Message } into Messages;
+end;
+
+//* Operator: GetHead
+// Returns the Head of the given URL
+SafeDrop("GetHead(String)");
+create operator GetHead(const url: String): String
+begin
+  var index := url.LastIndexOf("/");
+  result :=
+    case
+      when index.IsNil() then nil
+      when index > 0 then url.SubString(0, index)
+      else ""
+    end;
+end;
+
+//select GetHead(nil);
+//select GetHead("");
+//select GetHead("http:");
+//select GetHead("http://hl7.org/fhir/StructureDefinition/");
+//select GetHead("http://hl7.org/fhir/StructureDefinition/test");
+
+//* Operator: GetTail
+// Returns the Tail of the given URL
+SafeDrop("GetTail(String)");
+create operator GetTail(const url: String): String
+begin
+  var index := url.LastIndexOf("/");
+  result := 
+    case
+      when index.IsNil() then nil
+      when index > 0 then url.SubString(index + 1)
+      else ""
+    end;
+end;
+
+//select GetTail(nil);
+//select GetTail("");
+//select GetTail("http:");
+//select GetTail("http://hl7.org/fhir/StructureDefinition/");
+//select GetTail("http://hl7.org/fhir/StructureDefinition/test");
+
+//* Operator: GetTypeName
+// Returns the string representation of the given named type specifier
+SafeDrop("GetTypeName(NamedTypeSpecifier)");
+create operator GetTypeName(const namedTypeSpecifier: NamedTypeSpecifier): String
+begin
+  result := IfNil(namedTypeSpecifier.modelName + ".", "") + namedTypeSpecifier.name;
+end;
+
+//* Operator: ResolveModelName(String)
+// Resolves the name of the model from a structuredefinition URL
+SafeDrop("ResolveModelName(String)");
+create operator ResolveModelName(const url: String) : String
+begin
+  result := Models[GetHead(GetHead(url)) by { Url }].Name;
+  if result.IsNil() then
+    raise Error("Could not resolve model name for url: " + url);
+end;
+
+//* Operator: ResolveTypeName(String)
+// Resolves the name of the type from a structuredefinition URL
+SafeDrop("ResolveTypeName(String)");
+create operator ResolveTypeName(const url: String) : String
+begin
+  if url.IsNotNil() then
+  begin
+    var modelName := ResolveModelName(url);
+    result := GetTypeName(modelName, GetTail(url));
+  end;
+end;
+
+//* Operator: BuildTypeSpecifier(String, String)
+// Builds a NamedTypeSpecifier from the given type name  	  
+SafeDrop("BuildTypeSpecifier(String, String)");
+create operator BuildTypeSpecifier(const modelName: String, const typeName: String): TypeSpecifier
+begin
+  result := NamedTypeSpecifier(row { modelName modelName, typeName name });
+end;
+
+//* Operator: BuildTypeSpecifier(String)
+// Builds a NamedTypeSpecifier from the given qualified type name
+SafeDrop("BuildTypeSpecifier(String)");
+create operator BuildTypeSpecifier(const typeName: String): TypeSpecifier
+begin
+  result := NamedTypeSpecifier(row { Qualifier(typeName) modelName, Unqualify(typeName) name });
+end;
+
+//* Operator: BuildTypeSpecifier(TypeRefComponent)
+// Builds a TypeSpecifier from the given TypeRefComponent
+SafeDrop("BuildTypeSpecifier(TypeRefComponent)");
+create operator BuildTypeSpecifier(const typeRef: TypeRefComponent): TypeSpecifier
+begin
+  if typeRef.Profile.IsNotNil() then
+  begin
+    result := BuildTypeSpecifier(ResolveTypeName(typeRef.Profile));
+  end
+  else
+  begin
+    // TODO: typeRef may have a regex extension (http://hl7.org/fhir/StructureDefinition/structuredefinition-regex)
+    // TODO: typeRef.code may have a json-type extension (http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type)
+    // TODO: typeRef.code may have an xml-type extension (http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type)
+    // TODO: typeRef.code may have an ref-type extension (http://hl7.org/fhir/StructureDefinition/structuredefinition-rdf-type)
+    result := NamedTypeSpecifier(row { "FHIR" modelName, typeRef.Code name });
+  end;
+end;
+
+//* Operator: BuildTypeSpecifier(list(TypeRefComponent))
+// Builds a TypeSpecifier from the given list of TypeRefComponents
+SafeDrop("BuildTypeSpecifier(list(TypeRefComponent))");
+create operator BuildTypeSpecifier(const typeRefs: list(TypeRefComponent)): TypeSpecifier
+begin
+  var specifiers :=
+    foreach var typeRef in typeRefs do
+      BuildTypeSpecifier(typeRef);
+      
+  // Remove any duplicates
+  specifiers := specifiers.Distinct();
+
+  if specifiers.Count() = 1 then
+    result := specifiers[0]
+  else if specifiers.Count() > 1 then
+    result := ChoiceTypeSpecifier(row { specifiers choice })
+  else
+    result := nil;
+end;
+
+//* Operator: Capitalize(String)
+// Returns the given string with the first letter capitalized
+SafeDrop("Capitalize(String)");
+create operator Capitalize(const name: String): String
+begin
+  if name.Length() >= 1 then
+    result := name.SubString(0, 1).Upper() + name.SubString(1)
+  else
+    result := name;
+end;
+
+//select Capitalize("path");
+
+//* Operator: CapitalizePath(String)
+// Returns the given path with the first letter of every path capitalized
+SafeDrop("CapitalizePath(String)");
+create operator CapitalizePath(const path: String): String
+begin
+  result := Concat(foreach var name in path.Split(".") do name.Capitalize(), ".");
+end;
+
+//* Operator: GetComponentTypeName(String)
+// Returns the name of the component type used to represent anonymous nested structures
+SafeDrop("GetComponentTypeName(String)");
+create operator GetComponentTypeName(const path: String): String
+begin
+  result := path.CapitalizePath() + "Component";
+end;
+
+//* Operator: StripRoot(String, String)
+// Strips the given root from the given path.
+// Throws an error if the path does not start with the root.
+SafeDrop("StripRoot(String, String)");
+create operator StripRoot(const path: String, const root: String): String
+begin
+  var index := path.IndexOf(root);
+  if index <> 0 then
+    raise Error("Path '" + path + "' does not start with the root '" + root + "'.");
+    
+  result := path.SubString(root.Length());
+  if result.StartsWith(".") then
+    result := result.SubString(1);
+end;
+
+//select StripRoot("Patient", "Patient"); // Empty string
+//select StripRoot("Patient.name", "Patient");
+//select StripRoot("Patient.name.value", "Patient.name");
+
+//* Operator: StripChoice(String)
+// Strips the [x] suffix of an element name which indicates a choice in FHIR
+SafeDrop("StripChoice(String)");
+create operator StripChoice(const name: String): String
+begin
+  var index := name.IndexOf("[x]");
+  if index > 0 then
+    result := name.SubString(0, index)
+  else
+    result := name;
+end;
+
+//select StripChoice("name");
+//select StripChoice("deceased[x]");
+
+//* Operator: AsInteger(String)
+// Returns the value of the given string as an integer if it is integer-valued, nil otherwise.
+SafeDrop("AsInteger(String)");
+create operator AsInteger(const AValue: String): Integer
+begin
+  result := if AValue.IsDigit() then AValue.ToInteger() else nil;
+end;
+
+//* Operator: IsConstraintElement(ElementDefinition)
+// Returns true if the ElementDefinition describes a constraint only
+// For now, since constraints cannot be represented in ModelInfo, no element will be created for these
+// For now, we are assuming that if the element specifies a type, it should be declared
+// This may be a type constraint, which can be expressed in ModelInfo, so that's okay, but if all
+// the element is changing is the binding or cardinality, no element will be produced.
+SafeDrop("IsConstraintElement(ElementDefinition)");
+create operator IsConstraintElement(const ed: ElementDefinition): Boolean
+begin
+  if ed.Type.IsNotNil() then
+    if ed.Type.Count() > 0 then
+      result := true;
+  result := false;
+end;      
+
+//* Operator: IsBackboneElement(ElementDefinition)
+// Returns true if the ElementDefinition describes a Backbone Element
+SafeDrop("IsBackboneElement(ElementDefinition)");
+create operator IsBackboneElement(const ed: ElementDefinition): Boolean
+begin
+  result := false;
+  if ed.Type.IsNotNil() then
+    if ed.Type.Count() = 1 then
+      if ed.Type[0].Code = "BackboneElement" then
+        result := true;
+end;
+
+//* Operator: IsExtension(ElementDefinition)
+// Returns true if the ElementDefinition describes an Extension
+SafeDrop("IsExtension(ElementDefinition)");
+create operator IsExtension(const ed: ElementDefinition): Boolean
+begin
+  result := false;
+  if ed.Type.IsNotNil() then
+    if ed.Type.Count() = 1 then
+      if ed.Type[0].Code = "Extension" then
+        result := true;
+end;
+
+//* Operator: TypeCode(ElementDefinition)
+// Returns the type code for the element if there is only one type ref
+SafeDrop("TypeCode(ElementDefinition)");
+create operator TypeCode(const ed: ElementDefinition): String
+begin
+  if ed.Type.IsNotNil() then
+    if ed.Type.Count() = 1 then
+      result := ed.Type[0].Code;
+end;
+
+//* Operator: IsBackboneElement(TypeSpecifier)
+// Returns true if the type specifier is a NamedTypeSpecifier referencing FHIR.BackboneElement
+SafeDrop("IsBackboneElement(TypeSpecifier)");
+create operator IsBackboneElement(const typeSpecifier: TypeSpecifier): Boolean
+begin
+  result := false;
+  if typeSpecifier is NamedTypeSpecifier then
+    result := ((typeSpecifier as NamedTypeSpecifier).GetTypeName() = "FHIR.BackboneElement").IfNil(false);
+end;
+
+//* Operator: GetElementDefinitions(String typeId)
+// Returns the set of element definitions for the given type id
+SafeDrop("GetElementDefinitions(String)");
+create operator GetElementDefinitions(const typeId: String): list(ElementDefinition)
+begin
+  var structureDefinition := StructureDefinitions[typeId].StructureDefinition;
+  if structureDefinition.IsNil() then
+    raise Error("Could not retrieve element definitions for " + typeId);
+  result := structureDefinition.Differential.Element;
+end;
+
+//* Operator: GetElementDefinitions(TypeSpecifier)
+// Returns the set of element definitions for the given type
+SafeDrop("GetElementDefinitions(TypeSpecifier)");
+create operator GetElementDefinitions(const typeSpecifier: TypeSpecifier): list(ElementDefinition)
+begin
+  if typeSpecifier is NamedTypeSpecifier then
+  begin
+    var namedTypeSpecifier := typeSpecifier as NamedTypeSpecifier;
+    var typeName := namedTypeSpecifier.name;
+    if typeName.IsNotNil() then
+      result := GetElementDefinitions(typeName);
+  end;
+end;
+
+//* Operator: ForPath(list(ElementDefinition), String)
+// Returns the element definition for the given path
+SafeDrop("ForPath(list(ElementDefinition), String)");
+create operator ForPath(const eds: list(ElementDefinition), const path: String): ElementDefinition
+begin
+  result := nil;
+  if eds.IsNotNil() then
+    foreach var e in eds do
+      if e.Path = path then
+      begin
+        result := e;
+        break;
+      end;
+end;
+
+/*
+If the element is of type code and has a required binding, use the binding name element definition extension to construct a type
+ModelInfo doesn't support enumerated types...
+*/
+
+//* Operator: BuildClassInfoElement
+// Builds a ClassInfoElement for the given ElementDefinition
+// This method assumes the given element is not a structure
+SafeDrop("BuildClassInfoElement(ElementDefinition, String)");
+create operator BuildClassInfoElement(const ed: ElementDefinition, const structureEd: ElementDefinition, const root: String, typeSpecifier: TypeSpecifier): ClassInfoElement
+begin
+  Message("BuildClassInfoElement: ed.Path: " + ed.Path + ", structureEd.Path: " + IfNil(structureEd.Path, "<No Value>") + ", root: " + root);
+  if structureEd.IsNil() then
+  begin
+    if ed.Max = "*" or ed.Max.AsInteger() > 1 then
+      typeSpecifier := ListTypeSpecifier(row { 
+        if typeSpecifier is NamedTypeSpecifier then (typeSpecifier as NamedTypeSpecifier).GetTypeName() else nil elementType,
+        if not(typeSpecifier is NamedTypeSpecifier) then typeSpecifier else nil elementTypeSpecifier
+      });
+    
+    var name := if ed.SliceName.IsNotNil() then ed.SliceName else ed.Path.StripRoot(root).StripChoice();
+    
+    result :=
+      ClassInfoElement(row {
+        name name,
+        if typeSpecifier is NamedTypeSpecifier then (typeSpecifier as NamedTypeSpecifier).GetTypeName() else nil type,
+        if not(typeSpecifier is NamedTypeSpecifier) then typeSpecifier else nil typeSpecifier
+      });
+  end;
+end;
+
+//select (BuildTypeSpecifier(StructureDefinitions["Patient"].StructureDefinition.Differential.Element[1].Type) as NamedTypeSpecifier).name;
+
+//* Operator: Element(list(ElementDefinition), String)
+// Returns the given element definition if it exists
+SafeDrop("Element(list(ElementDefinition), String)");
+create operator Element(const elements: list(ElementDefinition), const path: String): ElementDefinition
+begin
+  if elements.IsNotNil() then
+    foreach var ed in elements do
+      if ed.Path = path then
+      begin
+        result := ed;
+        break;
+      end;
+end;
+
+//select (StructureDefinitions["Patient"].StructureDefinition.Differential.Element.Element("Patient.gender").Binding.Extension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").Value as FHIRString).Value
+
+//select StructureDefinitions["Patient"].StructureDefinition.Differential.Element.Element("Patient.gender").Binding.Strength
+
+//* Operator: Extension(Element, String)
+// Returns the given extension if it exists
+SafeDrop("Extension(Element, String)");
+create operator Extension(const element: Element, const url: String): Extension
+begin
+  if element.IsNotNil() then
+    foreach var ex in element.Extension do
+      if ex.Url = url then
+      begin
+        result := ex;
+        break;
+      end;
+end;
+
+//* Operator: BuildElementTypeSpecifier(list(TypeRefComponent))
+// Builds the type specifier for the given element
+SafeDrop("BuildElementTypeSpecifier(String, ElementDefinition)");
+create operator BuildElementTypeSpecifier(const root: String, const ed: ElementDefinition): TypeSpecifier
+begin
+  var typeCode := ed.TypeCode();
+  if typeCode = "code" and ed.Binding.IsNotNil() and ed.Binding.Strength = "Required" then
+  begin
+    var typeName := (ed.Binding.Extension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").Value as FHIRString).Value;
+    if not exists (TypeInfos where Name = "FHIR." + typeName) then
+    begin
+      var typeInfo :=
+        ClassInfo(row {
+          typeName name,
+          "FHIR.Element" baseType,
+          false retrievable,
+          { ClassInfoElement(row { "Value" name, "System.String" type }) } element // Map directly to System.String here, this is a "Primitive" type
+        });
+      insert row { "FHIR." + typeName Name, "FHIR" ModelName, typeInfo Value } into TypeInfos;
+    end;
+    result := NamedTypeSpecifier(row { "FHIR" modelName, typeName name });
+  end
+  else
+  begin
+    result := BuildTypeSpecifier(ed.Type);
+    if result is NamedTypeSpecifier then
+    begin
+      if (result as NamedTypeSpecifier).name.IsNil() then
+      begin
+        // This creates the value element for primitive types when generating a "Complex" model info
+        result := BuildTypeSpecifier(PrimitiveTypeMappings[GetTypeName("FHIR", root)].TargetTypeName);
+      end;
+    end;
+  end;
+end;
+
+//select BuildElementTypeSpecifier("Patient", StructureDefinitions["Patient"].StructureDefinition.Differential.Element[1])
+
+//* Operator: Translate(String, String, String)
+// Translates a path from the source root to the target root
+SafeDrop("Translate(String, String, String)");
+create operator Translate(const path: String, const sourceRoot: String, const targetRoot: String): String
+begin
+  result := path;
+  var sourceRootIndex := path.IndexOf(sourceRoot);
+  if sourceRootIndex = 0 then
+    result := targetRoot + path.SubString(sourceRoot.Length());
+end;
+
+//select Translate("Extension.extension", "Extension", "Extension");
+//select Translate("Extension.extension.extension", "Extension.extension", "Extension");
+//select Translate("Extension.extension.url", "Extension.extension", "Extension");
+
+//* Operator: VisitElementDefinition
+// Visits the given element definition and returns a ClassInfoElement. If the element is a BackboneElement
+// the visit will create an appropriate ClassInfo and record it in the TypeInfos table
+// On return, index will be updated to the index of the next element to be processed
+// This visit should not be used on the root element of a structure definition
+SafeDrop("VisitElementDefinition(String, list(ElementDefinition), String, var Integer)");
+create operator VisitElementDefinition(const modelName: String, const root: String, const eds: list(ElementDefinition), const structureRoot: String, const structureEds: list(ElementDefinition), var index: Integer): ClassInfoElement
+begin
+  var ed := eds[index];
+  var path := ed.Path;
+  Message("VisitElementDefinition: root: " + root + ", path: " + path + ", index: " + index.ToString());
+  
+  // Construct the type specifier for the element
+  var typeSpecifier := BuildElementTypeSpecifier(root, ed);
+  
+  // If this is not a backbone or an extension element, pull the element definitions from the type
+  var typeCode := ed.TypeCode();
+  var typeDefinition := StructureDefinitions[typeCode].StructureDefinition;
+  var typeEds := 
+    if typeCode = "ComplexType" and typeDefinition.Id <> "BackboneElement" then 
+      typeDefinition.Differential.Element 
+    else 
+      structureEds;
+      
+  var typeRoot :=
+    if typeCode = "ComplexType" and typeDefinition.Id <> "BackboneElement" then
+      typeDefinition.Id
+    else
+      structureRoot;
+      
+  Message("typeCode: " + typeCode.IfNil("<No Value>") + ", typeRoot: " + typeRoot.IfNil("<No Value>"));
+  
+  // Visit the child elements, if any
+  index := index + 1;
+  var elements := list(ClassInfoElement) { };
+  while index < eds.Count() do
+  begin
+    if eds[index].Path.StartsWith(path) and eds[index].Path <> path then
+    begin
+      var element := VisitElementDefinition(modelName, path, eds, typeRoot, typeEds, var index);
+      if element.IsNotNil() then
+        elements.Add(element);
+    end
+    else
+      break;
+  end;
+  
+  // If there are any elements, and this is a BackboneElement, create a component type
+  if elements.Count() > 0 then
+  begin
+    if typeDefinition.Id = "BackboneElement" then
+    begin
+      var typeName := GetComponentTypeName(path);
+      var componentClassInfo := 
+        ClassInfo(row {
+          typeName name,
+          "FHIR.BackboneElement" baseType,
+          false retrievable,
+          elements element
+        });
+
+      // Record the generated class info      
+      insert row { modelName + "." + typeName Name, modelName ModelName, componentClassInfo Value } into TypeInfos;
+      
+      // Set the type specifier to the component type
+      typeSpecifier := BuildTypeSpecifier(modelName, typeName);
+    end;
+  end;
+  
+  // Build an element for the item and return it
+  var typeEd := typeEds.ForPath(ed.Path.Translate(root, typeRoot));
+  Message("typeEd: " + if typeEd.IsNil() then "<No Value>" else typeEd.Path);
+  result := BuildClassInfoElement(ed, typeEd, root, typeSpecifier);
+end;
+
+//* Operator: IsCodeable(String)
+// Returns true if the type is a "codeable" type (i.e. String, Code, Concept, string, code, Coding, CodeableConcept)
+SafeDrop("IsCodeable(String)");
+create operator IsCodeable(const typeName: String): Boolean
+begin
+  result := typeName in { "System.String", "System.Code", "System.Concept", "FHIR.string", "FHIR.code", "FHIR.Coding", "FHIR.CodeableConcept" };
+end;
+
+//* Operator: PrimaryCodePath(list(ClassInfoElement), String): String
+// Returns the primary code path for the given type, based on the following:
+// If the type has an entry in the PrimaryCodePaths table, the value there is used
+// If the type has an element named "code" with a type of "String", "Code", "Coding", or "CodeableConcept", that element is used
+SafeDrop("PrimaryCodePath(list(ClassInfoElement), String)");
+create operator PrimaryCodePath(const elements: list(ClassInfoElement), const typeName: String): String
+begin
+  result := PrimaryCodePaths[typeName].PrimaryCodePath;
+  if result.IsNil() and elements.IsNotNil() then
+    foreach var e in elements do
+      if e.name.Lower() = "code" and e.type.IsCodeable() then
+      begin
+        result := e.name;
+        break;
+      end;
+end;
+
+//* Operator: BuildClassInfo(StructureDefinition)
+// Given a StructureDefinition, creates a ClassInfo to represent it
+SafeDrop("BuildClassInfo(StructureDefinition)");
+create operator BuildClassInfo(const sd: StructureDefinition): ClassInfo
+begin
+    var modelName := ResolveModelName(sd.Url);
+    var typeName := sd.Id;
+    var index := 1;
+    var elements := list(ClassInfoElement) { };
+    var eds := sd.Differential.Element;
+    var path := sd.Type; // Type is used to navigate the elements, regardless of the baseDefinition
+    var structure := if typeName <> path then StructureDefinitions[sd.Type].StructureDefinition else nil;
+    var structureEds := if structure.IsNotNil() then structure.Differential.Element else nil;
+    while index < eds.Count() do
+    begin
+      if eds[index].Path.StartsWith(path) and eds[index].Path <> path then
+      begin
+        var element := VisitElementDefinition(modelName, path, eds, structure.Id, structureEds, var index);
+        if element.IsNotNil() then
+	        elements.Add(element);
+      end
+      else
+        break;
+    end;
+    
+    result :=
+      ClassInfo(row {
+        typeName name,
+        typeName label,
+        ResolveTypeName(sd.BaseDefinition) baseType,
+        sd.Kind = "Resource" retrievable,
+        elements element,
+        elements.PrimaryCodePath(typeName) primaryCodePath
+      });
+
+    // Record the generated class info      
+    insert row { modelName + "." + typeName Name, modelName ModelName, result Value } into TypeInfos;
+end;  	  

@@ -17,8 +17,7 @@
     <OutputPath>..\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Hl7.Fhir.DSTU2" Version="0.95.0" />
-    <PackageReference Include="Hl7.Fhir.Support" Version="0.95.0" />
+    <PackageReference Include="Hl7.Fhir.DSTU2" Version="0.94.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>

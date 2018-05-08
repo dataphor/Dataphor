@@ -64,7 +64,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 
-			var result = instance.GetType().GetProperty(PropertyName).GetValue(instance, null);
+			var property = instance.GetType().GetProperty(PropertyName);
+
+			var result = ObjectMarshal.GetHostProperty(instance, property);
 
 			return ObjectMarshal.ToNativeOf(program.ValueManager, DataType, result);
 		}

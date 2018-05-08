@@ -2208,7 +2208,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 				else
-					return ((scalarType.NativeType != null) && (scalarType.NativeType.Equals(tempValue.GetType())));
+					return ((scalarType.NativeType != null) && (scalarType.NativeType.IsAssignableFrom(tempValue.GetType())));
 			}
 			
 			return false;

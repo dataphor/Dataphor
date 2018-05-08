@@ -1528,7 +1528,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				([.]<identifier>[("("<actual parameter commalist>")") | (from <expression>)]) |
 				("("<expression>")") |
 				<if expression> |
-				<case expression>
+				<case expression> |
+				<foreach expression>
 				
 			<selector expression> ::=
 				<table selector> |
@@ -1616,6 +1617,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					case Keywords.Cursor: return CursorSelector();
 					case Keywords.If: return IfExpression();
 					case Keywords.Case: return CaseExpression();
+					case Keywords.ForEach: return ForEachExpression();
 					#if VirtualSupport
 					case Keywords.Inherited: return InheritedExpression();
 					#endif
@@ -1962,6 +1964,38 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			expression.TrueExpression = ExpressionTerm();
 			_lexer.NextToken().CheckSymbol(Keywords.Else);
 			expression.FalseExpression = ExpressionTerm();
+			expression.SetEndPosition(_lexer);
+			return expression;
+		}
+
+		/*
+			BNF:
+			<foreach expression> ::=
+				foreach row | ([var] <qualified identifier>)
+					in <cursor definition> 
+					do <expression>
+		*/
+		protected ForEachExpression ForEachExpression()
+		{
+			ForEachExpression expression = new ForEachExpression();
+			_lexer.NextToken();
+			expression.SetPosition(_lexer);
+			switch (_lexer.PeekTokenSymbol(1))
+			{
+				case Keywords.Row : _lexer.NextToken(); break;
+				case Keywords.Var :
+					_lexer.NextToken();
+					expression.VariableName = UnrootedIdentifier();
+					expression.IsAllocation = true;
+				break;
+				
+				default: expression.VariableName = UnrootedIdentifier(); break;
+			}
+			
+			_lexer.NextToken().CheckSymbol(Keywords.In);
+			expression.Expression = CursorDefinition();
+			_lexer.NextToken().CheckSymbol(Keywords.Do);
+			expression.Return = Expression();
 			expression.SetEndPosition(_lexer);
 			return expression;
 		}

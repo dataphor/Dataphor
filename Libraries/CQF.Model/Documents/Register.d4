@@ -1,0 +1,21 @@
+
+
+create operator GenerateTypes() : String class "CQF.Model.GenerateTypesNode";
+
+ExecuteScript("CQF.Model", "Types.Core");
+
+//select GenerateTypes()
+
+ExecuteScript("CQF.Model", "Types.Generated");
+
+ExecuteScript("CQF.Model", "Types.Operators");
+
+//select ModelInfo(row { "TestModelInfo" name, "1.0" version, "http://opencds.org/cqf/testmodel" url }); 
+//select ClassInfoElement(row { NamedTypeSpecifier(row { "System" modelName, "String" name }) typeSpecifier, "Id" name, true prohibited })
+
+//select LoadDocument("CQF.Model", "SystemModelInfo")
+
+//select LoadTextFile("C:\Users\Bryn\Documents\Src\Alphora\Dataphor\Dataphor\Libraries\CQF.Model\Documents\SystemModelInfo.xml")
+
+//select AsXML(LoadDocument("CQF.Model", "SystemModelInfo"))
+//select AsXML(LoadTextFile("C:\Users\Bryn\Documents\Src\Alphora\Dataphor\Dataphor\Libraries\CQF.Model\Documents\SystemModelInfo.xml"))

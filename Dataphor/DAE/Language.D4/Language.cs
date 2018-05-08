@@ -175,6 +175,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				|- AsExpression
 				|- AsExpression
 				|- IsExpression
+				|- ForEachExpression
 				|- TableSelectorExpressionBase
 				|	|- TableSelectorExpression
 				|	|- PresentationSelectorExpression
@@ -849,6 +850,41 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			get { return _statement; }
 			set { _statement = value; }
+		}
+	}
+	
+	public class ForEachExpression : Expression
+	{
+		protected bool _isAllocation;
+		/// <summary>Indicates whether the variable exists in the current stack window, or should be allocated by the statement</summary>
+		public bool IsAllocation
+		{
+			get { return _isAllocation; }
+			set { _isAllocation = value; }
+		}
+		
+		protected string _variableName = String.Empty;
+		/// <summary>The name of the variable that will receive the value for each successive iteration. If variable name is empty, this is a row foreach expression.</summary>
+		public string VariableName
+		{
+			get { return _variableName; }
+			set { _variableName = value == null ? String.Empty : value; }
+		}
+		
+		protected CursorDefinition _expression;
+		/// <summary>The list or cursor to be iterated over.</summary>
+		public CursorDefinition Expression
+		{
+			get { return _expression; }
+			set { _expression = value; }
+		}
+
+		protected Expression _return;
+		/// <summary>The iterative expression to be evaluated.</summary>
+		public Expression Return
+		{
+			get { return _return; }
+			set { _return = value; }
 		}
 	}
 	

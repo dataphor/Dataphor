@@ -170,4 +170,103 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             return _sourceTable.EOF();
         }
     }
+
+    /// <remarks> 
+	///		ProjectTableMap uses a HashTable to track keys that have been seen.
+    /// </remarks>    
+    public class ProjectTableMap : Table
+    {
+        public ProjectTableMap(ProjectNodeBase node, Program program) : base(node, program){}
+        
+        public new ProjectNodeBase Node
+        {
+            get
+            {
+                return (ProjectNodeBase)_node;
+            }
+        }
+        
+        // SourceTable
+        protected Table _sourceTable;
+        protected Row _sourceRow;
+
+		protected NativeMap _map;
+        
+        // Table Support
+        protected override void InternalOpen()
+        {
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceRow = new Row(Manager, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
+
+			_map = new NativeMap(Manager, Node.TableVar, Node.Key, Node.EqualitySorts);
+        }
+        
+        protected override void InternalClose()
+        {
+            if (_sourceTable != null)
+            {
+				_sourceTable.Dispose();
+                _sourceTable = null;
+            }
+            
+            if (_sourceRow != null)
+			{
+				_sourceRow.Dispose();
+                _sourceRow = null;
+			}
+        }
+        
+        protected override void InternalReset()
+        {
+            _sourceTable.Reset();
+			_map.Truncate(Manager);
+        }
+        
+        protected override void InternalSelect(IRow row)
+        {
+			_sourceTable.Select(_sourceRow);
+			_sourceRow.CopyTo(row);
+        }
+    
+        protected override bool InternalNext()
+        {
+			bool found = false;
+			while (_sourceTable.Next())
+			{
+				var currentRow = new Row(Manager, Node.DataType.RowType);
+				try
+				{
+					_sourceTable.Select(currentRow);
+
+					if (!_map.HasRow(Manager, currentRow))
+					{
+						_map.Insert(Manager, currentRow);
+						currentRow.ValuesOwned = false;
+						found = true;
+						break;
+					}
+				}
+				finally
+				{
+					currentRow.Dispose();
+				}
+			}
+			return found;
+        }
+        
+        protected override void InternalLast()
+        {
+            _sourceTable.Last();
+        }
+        
+        protected override bool InternalBOF()
+        {
+            return _sourceTable.BOF();
+        }
+        
+        protected override bool InternalEOF()
+        {
+            return _sourceTable.EOF();
+        }
+    }
 }

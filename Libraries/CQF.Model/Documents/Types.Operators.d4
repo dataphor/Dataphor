@@ -1,0 +1,58 @@
+//* Operator: GetTypeName
+// Returns the name of the type info if it is a named type.
+// drop operator GetTypeName(TypeInfo)
+create operator GetTypeName(const modelName : String, const typeInfo : TypeInfo) : String
+begin
+  result := 
+    case 
+    	when typeInfo is SimpleTypeInfo then (modelName + "." + (typeInfo as SimpleTypeInfo).name)
+    	when typeInfo is ClassInfo then (modelName + "." + (typeInfo as ClassInfo).name)
+    	else "<unnamed type>"
+    end;
+end;
+
+//* Operator: GetTypeName
+create operator GetTypeName(const modelName : String, const name : String) : String
+begin
+  result := modelName + "." + name;
+end;
+
+//* Operator: Qualifier
+//SafeDrop("Qualifier(String)");
+create operator Qualifier(const name: String): String
+begin
+  var index := name.IndexOf(".");
+  result :=
+    case
+      when index.IsNil() then nil
+      when index > 0 then name.SubString(0, index)
+      else ""
+    end;
+end;
+
+//select Qualifier("FHIR.Blah");
+//select Qualifier(nil);
+//select Qualifier("");
+//select Qualifier("Blah");
+
+//* Operator: Unqualify
+//SafeDrop("Unqualify(String)");
+create operator Unqualify(const name: String): String
+begin
+  var index := name.IndexOf(".");
+  result :=
+    case
+      when index.IsNil() then nil
+      when index > 0 then name.SubString(index + 1)
+      else name
+    end;
+end;
+
+//select Unqualify("FHIR.Blah");
+//select Unqualify(nil);
+//select Unqualify("");
+//select Unqualify("Blah");
+
+//* Operator: iEqual
+create operator iEqual(const base1 : Base, const base2 : Base) : Boolean
+  class "CQF.Model.ModelEqualNode";
