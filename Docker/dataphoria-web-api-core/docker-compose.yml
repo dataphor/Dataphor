@@ -6,11 +6,8 @@ services:
     build:
       context: ../../
       dockerfile: Dataphoria/Dataphoria.Web.API.Core/Dockerfile
-    volumes:
-      - ./Instances:/usr/share/Alphora/Dataphor/Instances
-      - ../../Libraries:/usr/share/Alphora/Dataphor/Libraries
-      - ../../../medig/Application:/usr/share/Alphora/Application/Libraries
 
-  db:
-    image: postgres:alpine
-    restart: always
+    volumes:
+      - ../../Dataphor/D4Runner/bin/Release/netcoreapp2.0/publish:/usr/share/Alphora/D4Runner
+      - ./Dataphor:/usr/share/Alphora/Dataphor
+      - ../../Libraries:/usr/share/Alphora/Libraries

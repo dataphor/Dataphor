@@ -114,7 +114,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
-      <Name>Client %28Client\Client%29</Name>
+      <Name>Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.Client\DAE.Client.csproj">
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
@@ -134,7 +134,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

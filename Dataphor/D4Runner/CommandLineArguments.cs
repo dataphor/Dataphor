@@ -489,10 +489,7 @@ namespace CommandLine
         /// <returns> Printable string containing a user friendly description of command line arguments. </returns>
         public static string ArgumentsUsage(Type argumentType)
         {
-            int screenWidth = Parser.GetConsoleWindowWidth();
-            if (screenWidth == 0)
-                screenWidth = 80;
-            return ArgumentsUsage(argumentType, screenWidth);
+            return ArgumentsUsage(argumentType, 80);
         }
 
         /// <summary>
@@ -507,52 +504,6 @@ namespace CommandLine
             return (new Parser(argumentType, null)).GetUsageString(columns);
         }
 
-        private const int STD_OUTPUT_HANDLE  = -11;
-
-        private struct COORD
-        {
-            internal Int16 x;
-            internal Int16 y;
-        }
-
-        private struct SMALL_RECT
-        {
-            internal Int16 Left;
-            internal Int16 Top;
-            internal Int16 Right;
-            internal Int16 Bottom;
-        }
-
-        private struct CONSOLE_SCREEN_BUFFER_INFO
-        {
-            internal COORD dwSize;
-            internal COORD dwCursorPosition;
-            internal Int16 wAttributes;
-            internal SMALL_RECT srWindow;
-            internal COORD dwMaximumWindowSize;
-        }
-
-        [DllImport("kernel32.dll", EntryPoint="GetStdHandle", SetLastError=true, CharSet=CharSet.Auto, CallingConvention=CallingConvention.StdCall)]
-        private static extern int GetStdHandle(int nStdHandle);
-
-        [DllImport("kernel32.dll", EntryPoint="GetConsoleScreenBufferInfo", SetLastError=true, CharSet=CharSet.Auto, CallingConvention=CallingConvention.StdCall)]
-        private static extern int GetConsoleScreenBufferInfo(int hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
-
-        /// <summary>
-        /// Returns the number of columns in the current console window
-        /// </summary>
-        /// <returns>Returns the number of columns in the current console window</returns>
-        public static int GetConsoleWindowWidth()
-        {
-            int screenWidth;
-            CONSOLE_SCREEN_BUFFER_INFO csbi = new CONSOLE_SCREEN_BUFFER_INFO();
-
-            int rc;
-            rc = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), ref csbi);
-            screenWidth = csbi.dwSize.x;
-            return screenWidth;
-        }
-        
         /// <summary>
         /// Searches a StringBuilder for a character
         /// </summary>

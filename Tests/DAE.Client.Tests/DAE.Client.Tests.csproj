@@ -119,7 +119,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Server.Tests\DAE.Server.Tests.csproj">
       <Project>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</Project>

@@ -18,7 +18,8 @@ EXPOSE 80
 
 FROM base AS final
 WORKDIR /app
-COPY Libraries /usr/share/Alphora/Dataphor/Libraries
-COPY Docker/dataphoria-web-api-core/Instances /usr/share/Alphora/Dataphor/Instances/ServerConfigurations.config
-COPY Dataphoria/Dataphoria.Web.API.Core/bin/Release/PublishOutput .
+COPY Dataphor/D4Runner/bin/Release/netcoreapp2.0/publish /usr/share/Alphora/D4Runner
+COPY Docker/dataphoria-web-api-core/Dataphor /usr/share/Alphora/Dataphor
+COPY Libraries /usr/share/Alphora/Libraries
+COPY Dataphoria/Dataphoria.Web.API.Core/bin/Release/netcoreapp2.0/publish .
 ENTRYPOINT ["dotnet", "Dataphoria.Web.API.Core.dll"]

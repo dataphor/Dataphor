@@ -18,30 +18,13 @@ docker-compose.*.yml
 /External
 /Images
 /Legacy
-/Libraries
 /Setup
 /Tests
 /Utilities
 
+!Dataphor/D4Runner
 !Dataphoria/Dataphoria.Web.API.Core
-!Docker/dataphoria-web-api-core/Config
-
-!Libraries/Connection
-!Libraries/PGSQLConnection
-!Libraries/SimpleDevice
-!Libraries/SQLDevice
-!Libraries/TestFramework.Coverage.Base
-!Libraries/MSSQLDevice
-!Libraries/PGSQLDevice
-!Libraries/FHIR.Core
-!Libraries/FHIR.Device
-!Libraries/FHIR.Server
-!Libraries/FHIR2.Core
-!Libraries/FHIR3.Core
-!Libraries/Frontend
-!Libraries/System.Integration
-!Libraries/System.Internet
-!Libraries/System.Platform
+!Docker/dataphoria-web-api-core/Dataphor
 
 /*/*/Source
 

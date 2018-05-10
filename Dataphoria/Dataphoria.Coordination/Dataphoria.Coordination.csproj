@@ -62,7 +62,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
       <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
-      <Name>Common %28Common\Common%29</Name>
+      <Name>Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Coordination.Common\Dataphoria.Coordination.Common.csproj">
       <Project>{1ac3a290-09f5-4eb6-805c-8ed597645271}</Project>
