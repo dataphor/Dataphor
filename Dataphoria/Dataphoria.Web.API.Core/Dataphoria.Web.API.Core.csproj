@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>false</Deterministic>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DockerComposeProjectPath>..\..\Docker\dataphoria-web-api-core\dataphoria-web-api-core.dcproj</DockerComposeProjectPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -16,7 +18,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Dataphoria\Dataphoria.Processing\Dataphoria.Processing.csproj" />
-    <ProjectReference Include="..\..\Dataphor\DAE.SQLite\DAE.SQLite.csproj" />
+    <ProjectReference Include="..\..\Dataphor\DAE.SQLite\DAE.SQLite.csproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
