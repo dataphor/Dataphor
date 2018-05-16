@@ -419,7 +419,7 @@ namespace Alphora.Dataphor
 			var assemblies = GetRegisteredAssemblies();
 			foreach (Assembly assembly in assemblies)
 			{
-				var result = assembly.GetType(qualifiedClassName, false);
+				var result = assembly.GetType(qualifiedClassName, false, true);
 				if (result != null)
 					return result;
 			}
