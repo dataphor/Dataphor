@@ -30,3 +30,11 @@ If Dataphoria fails after startup with an error message citing a missing DLL or 
 Dataphor have been compiled and are not missing.
 
 Additional troubleshooting help can be found in our <<Documentation>>.
+
+
+== Bootstrap Docker Repo
+
+* Install terraform, awscli, Docker
+* Infrastucture/terraform apply -target aws_ecr_repository.dataphor_repo
+* Scripts/BuildContainer.ps1, Scripts/PublishContainer.ps1
+* Infrastucture/terraform apply

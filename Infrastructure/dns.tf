@@ -1,15 +1,15 @@
-data "aws_route53_zone" "harmoniqhealth" {
-  name = "harmoniqhealth.com"
+data "aws_route53_zone" "cluster_zone" {
+  zone_id = "${data.terraform_remote_state.shared_state.zone_id}"
 }
 
 resource "aws_route53_record" "dataphor_url" {
-  zone_id = "${data.aws_route53_zone.harmoniqhealth.zone_id}"
-  name    = "dataphor.harmoniqhealth.com"
+  zone_id = "${data.aws_route53_zone.cluster_zone.zone_id}"
+  name    = "dataphor.${data.aws_route53_zone.cluster_zone.name}"
   type    = "A"
 
   alias {
-    name                   = "${aws_lb.lb.dns_name}"
-    zone_id                = "${aws_lb.lb.zone_id}"
+    name                   = "${data.terraform_remote_state.shared_state.lb_dns_name}"
+    zone_id                = "${data.terraform_remote_state.shared_state.lb_zone_id}"
     evaluate_target_health = false
   }
 }

@@ -10,4 +10,3 @@ msbuild ./Dataphor/Dataphor.sln /t:"Dataphoria\Dataphoria_Web_API_Core:Publish" 
 
 docker build --target final -t dataphoriawebapicore:latest -f .\Dataphoria\Dataphoria.Web.API.Core\Dockerfile .
 Set-Location $dir
-

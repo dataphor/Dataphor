@@ -6,8 +6,18 @@ terraform {
   }
 }
 
+data "terraform_remote_state" "shared_state" {
+  backend = "s3"
+
+  config {
+    bucket = "dbcg-infrastructure-state"
+    key    = "shared.tfstate"
+    region = "us-west-2"
+  }
+}
+
 provider "aws" {
-  region  = "us-east-1"
+  region  = "${data.terraform_remote_state.shared_state.aws_region}"
   profile = "${var.aws_profile}"
   version = "~> 1.5"
 }
