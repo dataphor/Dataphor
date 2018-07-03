@@ -1,7 +1,7 @@
 /*
 	System Supported Operators
 	
-	© Copyright 2007 Alphora
+	ï¿½ Copyright 2007 Alphora
 */
 
 -- DAE_Trunc
@@ -400,6 +400,7 @@ go
 
 create function DAE_DTWriteMillisecond(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(ms,@APart - DatePart(ms,@ADate),@ADate);
 end
@@ -415,6 +416,7 @@ go
 
 create function DAE_DTWriteSecond(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(ss,@APart - DatePart(ss,@ADate),@ADate);
 end
@@ -430,6 +432,7 @@ go
 
 create function DAE_DTWriteMinute(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(mi,@APart - DatePart(mi,@ADate),@ADate);
 end
@@ -445,6 +448,7 @@ go
 
 create function DAE_DTWriteHour(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(hh,@APart - DatePart(hh,@ADate),@ADate);
 end
@@ -460,6 +464,7 @@ go
 
 create function DAE_DTWriteDay(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(dd,@APart - DatePart(dd,@ADate),@ADate);
 end
@@ -475,6 +480,7 @@ go
 
 create function DAE_DTWriteMonth(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(mm,@APart - DatePart(mm,@ADate),@ADate);
 end
@@ -490,6 +496,7 @@ go
 
 create function DAE_DTWriteYear(@ADate datetime, @APart int)
 returns datetime
+with schemabinding
 begin
 	return DateAdd(yyyy,@APart - DatePart(yyyy,@ADate),@ADate);
 end
@@ -505,8 +512,9 @@ go
 
 create function DAE_DateTimeSelector(@Year int, @Month int = 0, @Day int = 0, @Hour int = 0, @Minute int = 0, @Second int = 0, @Millisecond int = 0)
 returns datetime
+with schemabinding
 begin
-	return DateAdd(ms, @Millisecond, DateAdd(ss, @Second, DateAdd(mi, @Minute, DateAdd(hh, @Hour, dbo.DAE_DTWriteDay(dbo.DAE_DTWriteMonth(dbo.DAE_DTWriteYear('1/1/1900', @Year), @Month), @Day)))))
+	return DateAdd(ms, @Millisecond, DateAdd(ss, @Second, DateAdd(mi, @Minute, DateAdd(hh, @Hour, dbo.DAE_DTWriteDay(dbo.DAE_DTWriteMonth(dbo.DAE_DTWriteYear(CONVERT(datetime, '19000101', 112), @Year), @Month), @Day)))))
 end
 go
 
