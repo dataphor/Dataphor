@@ -1,4 +1,4 @@
-/*
+﻿/*
 	System Supported Operators
 	
 	� Copyright 2007 Alphora
@@ -71,6 +71,11 @@ end
 go
 
 grant execute on DAE_Factorial to public
+go
+
+-- DAE_DateTimeSelector drop
+if exists (select * from sysobjects where id = Object_ID('DAE_DateTimeSelector'))
+	drop function DAE_DateTimeSelector
 go
 
 -- DAE_TSReadMillisecond 
@@ -505,11 +510,7 @@ go
 grant execute on DAE_DTWriteYear to public
 go
 
--- DAE_DateTimeSelector
-if exists (select * from sysobjects where id = Object_ID('DAE_DateTimeSelector'))
-	drop function DAE_DateTimeSelector
-go
-
+-- DAE_DateTimeSelector create
 create function DAE_DateTimeSelector(@Year int, @Month int = 0, @Day int = 0, @Hour int = 0, @Minute int = 0, @Second int = 0, @Millisecond int = 0)
 returns datetime
 with schemabinding
