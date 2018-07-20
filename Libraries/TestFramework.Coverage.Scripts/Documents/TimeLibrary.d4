@@ -4,6 +4,7 @@
 // System Library
 
 // Time tests
+SafeDrop('TimeTest');
 create table TimeTest
 {
 	ID: Integer,

@@ -9,11 +9,12 @@
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	using System;
-	
+
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
-	
+	using Sigil;
+
 	// operator Floor(AValue : decimal) : decimal;
 	// operator Floor(AValue : Money) : Money;
 	public class DecimalFloorNode : UnaryInstructionNode
@@ -27,8 +28,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return Decimal.Floor((decimal)argument1);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("Floor", new[] { typeof(decimal) }));
+		}
 	}
-	
+
 	// operator Truncate(AValue : decimal) : decimal;
 	// operator Truncate(AValue : Money) : Money;
 	public class DecimalTruncateNode : UnaryInstructionNode
@@ -42,6 +50,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return Decimal.Truncate((decimal)argument1);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("Truncate", new[] { typeof(decimal) }));
+		}
 	}
 
 	// operator Ceiling(AValue : decimal) : decimal;
@@ -54,8 +69,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (argument1 == null)
 				return null;
 			#endif
-			
-			decimal argument = (decimal)argument1;
+			return StaticExecute((decimal)argument1);
+		}
+
+		public static decimal StaticExecute(decimal argument)
+		{
 			decimal result = Decimal.Floor(argument);
 			if (result != argument)
 				result += 1m;
@@ -70,16 +88,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//TODO: I'm changing this from NewFangledIEEEBankersRound to YeOldElementarySchoolKidsRound (Sadly, mostly to provide continuity with other DBMSs).  We eventually need to have both.
 	public class DecimalRoundNode : InstructionNode
 	{
+		public const int DefaultDigits = 2;
+
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
 			if (arguments[0] == null || ((arguments.Length > 1) && arguments[1] == null))
 				return null;
 			#endif
-			
-			int digits = arguments.Length > 1 ? (int)arguments[1] : 2;
-			decimal tempValue = (decimal)arguments[0];
+
+			int digits = arguments.Length > 1 ? (int)arguments[1] : DefaultDigits;
+			return StaticExecute((decimal)arguments[0], digits);
+		}
+
+		public static decimal StaticExecute(decimal tempValue, int digits)
+		{
 			return (decimal)(Math.Floor((double)tempValue * Math.Pow(10.0, (double)digits) + 0.5) / Math.Pow(10.0, (double)digits));
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			if (Nodes.Count == 1)
+				m.IL.LoadConstant(DefaultDigits);
+			EmitCallStaticExecute(m);
 		}
 	}
 
@@ -97,6 +130,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			decimal argument = (decimal)argument1;
 			return argument - Decimal.Truncate(argument);
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.Call(typeof(Decimal).GetMethod("Truncate", new[] { typeof(decimal) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Subtraction", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
 
 	// operator Abs(AValue : decimal) : decimal;	
@@ -112,8 +157,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return Math.Abs((decimal)argument1);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Abs", new[] { typeof(decimal) }));
+		}
 	}
-	
+
 	// operator Abs(AValue : integer) : integer;
 	public class IntegerAbsNode : UnaryInstructionNode
 	{
@@ -125,6 +177,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			return Math.Abs((int)argument1);
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Abs", new[] { typeof(int) }));
 		}
 	}
 
@@ -142,6 +201,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return (decimal)Math.Log((double)(decimal)argument1, (double)(decimal)argument2);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Log", new[] { typeof(double), typeof(double) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
 
 	// operator Ln(AValue : decimal) : decimal;
@@ -155,6 +228,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			return (decimal)Math.Log((double)(decimal)argument1);
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Log", new[] { typeof(double) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
 		}
 	}
 
@@ -170,6 +257,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return (decimal)Math.Log10((double)(decimal)argument1);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Log10", new[] { typeof(double) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
 
 	// operator Exp(AValue : decimal) : decimal;
@@ -184,6 +285,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return (decimal)Math.Exp((double)(decimal)argument1);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(MethodInfoStatics.DecimalToDoubleConversion);
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Exp", new[] { typeof(double) }));
+			m.IL.Call(typeof(Decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
 	}
 
 	// operator Factorial(AValue : integer) : integer;
@@ -195,9 +310,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (argument1 == null)
 				return null;
 			#endif
-			
+
+			return StaticExecute((int)argument1);
+		}
+
+		public static int StaticExecute(int tempValue)
+		{
 			int returnVal = 1;
-			int tempValue = (int)argument1;
 
 			for (int i = 2; i <= tempValue; i++)
 			{
@@ -235,14 +354,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			if (arguments.Length == 0)
+				StaticExecute();
+			else
+				StaticExecute((int)arguments[0]);
+			return null;
+		}
+
+		public static void StaticExecute()
+		{
 			lock (typeof(SeedNode))
 			{
-				if (arguments.Length == 0)
-					_random = new Random();
-				else
-					_random = new Random((int)arguments[0]);
+				_random = new Random();
 			}
-			return null;
+		}
+
+		public static void StaticExecute(int seed)
+		{
+			lock (typeof(SeedNode))
+			{
+				_random = new Random(seed);
+			}
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			if (Nodes.Count == 0)
+				m.IL.Call(GetType().GetMethod("StaticExecute", new Type[0]));
+			else
+				m.IL.Call(GetType().GetMethod("StaticExecute", new[] { typeof(int) }));
+			m.IL.LoadNull();
 		}
 	}
 
@@ -253,8 +396,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return SeedNode.NextDecimal();
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(SeedNode).GetMethod("NextDecimal", new Type[0]));
+		}
 	}
-												
+
 	// operator Random(const ACount : Integer) : Integer
 	public class IntegerRandomNode : UnaryInstructionNode
 	{
@@ -266,6 +416,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			return SeedNode.Next(0, (int)argument1);
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.Call(typeof(SeedNode).GetMethod("Next", new[] { typeof(int), typeof(int) }));
 		}
 	}
 
@@ -280,6 +441,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			return SeedNode.Next((int)argument1, (int)argument2 + 1);
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(1);
+			m.IL.Add();
+			m.IL.Call(typeof(SeedNode).GetMethod("Next", new[] { typeof(int), typeof(int) }));
 		}
 	}
 }

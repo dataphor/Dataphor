@@ -109,7 +109,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDisposable = value; }
 		}
 
-        public TypeSpecifier EmitSpecifier(EmitMode mode)
+		public Type NativeType => typeof(object);
+
+		public TypeSpecifier EmitSpecifier(EmitMode mode)
         {
 			return new GenericTypeSpecifier();
         }

@@ -74,7 +74,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDisposable = value; }
 		}
 
-		#if NATIVEROW
+		public Type NativeType => typeof(object);
+
+#if NATIVEROW
 		// ByteSize
 		public int GetByteSize(object tempValue)
 		{

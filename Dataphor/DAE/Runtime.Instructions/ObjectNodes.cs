@@ -14,6 +14,7 @@ using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Sigil;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -113,5 +114,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return arguments[0].ToString();
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			if (Nodes[0].NativeType.IsValueType)
+				m.IL.LoadLocalAddress(arguments[0]);
+			else
+				m.IL.LoadLocal(arguments[0]);
+			m.IL.CallVirtual(typeof(object).GetMethod("ToString", new Type[0]));
+		}
+	}
 }

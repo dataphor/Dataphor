@@ -21,6 +21,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
+	using Sigil;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	/*
@@ -500,16 +501,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program, object argument1)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (argument1 == null)
 				return null;
-			#endif
-			
-			using 
+#endif
+
+			return NewMethod(program, argument1);
+		}
+
+		private static object NewMethod(Program program, object argument1)
+		{
+			using
 			(
-				Scalar scalar = 
-					(argument1 is StreamID) 
-						? new Scalar(program.ValueManager, program.DataTypes.SystemBinary, (StreamID)argument1) 
+				Scalar scalar =
+					(argument1 is StreamID)
+						? new Scalar(program.ValueManager, program.DataTypes.SystemBinary, (StreamID)argument1)
 						: new Scalar(program.ValueManager, program.DataTypes.SystemBinary, argument1)
 			)
 			{
@@ -555,10 +561,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return new Guid((string)argument1);
 		}
-    }
 
-    // SystemGuidReadAccessorNode
-    public class SystemGuidReadAccessorNode : UnaryInstructionNode
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(Guid).GetConstructor(new[] { typeof(string) }));
+		}
+	}
+
+	// SystemGuidReadAccessorNode
+	public class SystemGuidReadAccessorNode : UnaryInstructionNode
     {
 		public SystemGuidReadAccessorNode() : base()
 		{
@@ -580,10 +593,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return ((Guid)argument1).ToString();
 		}
-    }
-    
-    // SystemGuidWriteAccessorNode
-    public class SystemGuidWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadLocalAddress(arguments[0]);
+			m.IL.CallVirtual(typeof(object).GetMethod("ToString", new Type[0]));
+		}
+	}
+
+	// SystemGuidWriteAccessorNode
+	public class SystemGuidWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -594,10 +617,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return new Guid((string)argument2);
 		}
-    }
-    
-    // ScalarSelectorNode
-    public class ScalarSelectorNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.NewObject(typeof(Guid).GetConstructor(new[] { typeof(string) }));
+		}
+	}
+
+	// ScalarSelectorNode
+	public class ScalarSelectorNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1)
 		{
@@ -608,7 +638,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return DataValue.CopyValue(program.ValueManager, argument1);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.CopyValue(() => EmitSubNodeN(0, m, true));
+			m.ObjectToPhysical(this);
+		}
+	}
 
 	// ValidatingScalarSelectorNode
 	public class ValidatingScalarSelectorNode : UnaryInstructionNode
@@ -622,10 +660,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument1));
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			EmitValidatedCopy(m);
+			m.ObjectToPhysical(this);
+		}
 	}
-    
-    // ScalarReadAccessorNode
-    public class ScalarReadAccessorNode : UnaryInstructionNode
+
+	// ScalarReadAccessorNode
+	public class ScalarReadAccessorNode : UnaryInstructionNode
     {
 		public ScalarReadAccessorNode() : base()
 		{
@@ -647,10 +693,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return DataValue.CopyValue(program.ValueManager, argument1);
 		}
-    }
-    
-    // ScalarWriteAccessorNode
-    public class ScalarWriteAccessorNode : BinaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.CopyValue(() => EmitSubNodeN(0, m, true));
+			m.ObjectToPhysical(this);
+		}
+	}
+
+	// ScalarWriteAccessorNode
+	public class ScalarWriteAccessorNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -661,7 +715,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return DataValue.CopyValue(program.ValueManager, argument2);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.CopyValue(() => EmitSubNodeN(0, m, true));
+			m.ObjectToPhysical(this);
+		}
+	}
 
 	// ValidatingScalarWriteAccessorNode
 	public class ValidatingScalarWriteAccessorNode : BinaryInstructionNode
@@ -675,10 +737,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType, DataValue.CopyValue(program.ValueManager, argument2));
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			EmitValidatedCopy(m);
+			m.ObjectToPhysical(this);
+		}
 	}
-    
-    // CompoundScalarSelectorNode
-    public class CompoundScalarSelectorNode : InstructionNode
+
+	// CompoundScalarSelectorNode
+	public class CompoundScalarSelectorNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
@@ -788,10 +858,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return false;
 		}
-    }
-    
-    // operator IsNil(AValue : generic) : Boolean;
-    public class IsNilNode : UnaryInstructionNode
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.LoadConstant(0);
+		}
+	}
+
+	// operator IsNil(AValue : generic) : Boolean;
+	public class IsNilNode : UnaryInstructionNode
     {
 		public override void DetermineCharacteristics(Plan plan)
 		{
@@ -803,7 +880,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return argument1 == null;
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle
+		{
+			get { return ArgumentEmissionStyle.PhysicalInLocals; }
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			if (Nodes[0].IsNilable)
+			{
+				m.IL.LoadLocal(arguments[0]);
+				m.IL.LoadConstant(0);
+				m.IL.CompareEqual();
+			}
+			else
+				m.IL.LoadConstant(0);
+		}
+	}
 
 	// operator IsNil(AValue : row, AColumnName : System.String) : Boolean;
 	public class IsNilRowNode : BinaryInstructionNode
@@ -823,10 +919,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return !(((IRow)argument1).HasValue((string)argument2));
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.PhysicalInLocals;	// Because this node returns nil, the instruction node base won't handle nulls for us so we must
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			EmitHasValue(this, m, arguments, () => m.Not(), true);
+		}
+
+		public static void EmitHasValue(InstructionNodeBase node, NativeMethod m, Local[] arguments, Action emitPost, bool valueIfNil)
+		{
+			var nilLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			m.EmitCheckArguments(node, arguments, nilLabel);
+
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.CastClass<IRow>();
+			m.IL.LoadLocal(arguments[1]);
+			m.PhysicalToNative(node.Nodes[1], nilLabel);
+			m.IL.CallVirtual(typeof(IRow).GetMethod("HasValue", new[] { typeof(string) }));
+			emitPost?.Invoke();
+			m.IL.Branch(endLabel);
+
+			m.IL.MarkLabel(nilLabel);
+			m.IL.LoadConstant(valueIfNil ? 1 : 0);
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+		}
 	}
 
-    // operator IsNotNil(AValue : generic) : Boolean;
-    public class IsNotNilNode : UnaryInstructionNode
+	// operator IsNotNil(AValue : generic) : Boolean;
+	public class IsNotNilNode : UnaryInstructionNode
     {
 		public override void DetermineCharacteristics(Plan plan)
 		{
@@ -838,7 +965,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return !(argument1 == null);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.PhysicalInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			if (Nodes[0].IsNilable)
+			{
+				m.IL.LoadLocal(arguments[0]);
+				m.IL.LoadConstant(0);
+				m.IL.CompareEqual();
+				m.Not();
+			}
+			else
+				m.IL.LoadConstant(1);
+		}
+	}
 
 	// operator IsNotNil(AValue : row, AColumnName : System.String) : Boolean;
 	public class IsNotNilRowNode : BinaryInstructionNode
@@ -858,15 +1002,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return (((IRow)argument1).HasValue((string)argument2));
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.PhysicalInLocals;   // Because this node returns nil, the instruction node base won't handle nulls for us so we must
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			IsNilRowNode.EmitHasValue(this, m, arguments, null, false);
+		}
 	}
 
 	// operator IfNil(AValue : generic, AValue : generic) : generic;
-    public class IfNilNode : InstructionNodeBase
+	public class IfNilNode : InstructionNodeBase
     {
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
-			IsNilable = Nodes[1].IsNilable;
+			IsNilable = Nodes[0].IsNilable && Nodes[1].IsNilable;
 		}
 
 		public override void DetermineDataType(Plan plan)
@@ -914,19 +1067,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				result = Nodes[1].Execute(program);
 			return DataValue.CopyValue(program.ValueManager, result);
 		}
-    }
-    
-    /// <remarks>operator System.Diagnostics.IsSupported(AStatement : String, ADeviceName : Name) : Boolean;</remarks>
-    public class SystemIsSupportedNode : InstructionNode
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var falseLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			EmitSubNodeN(0, m);
+			if (Nodes[0].IsNilable)
+			{
+				var conditionValue = m.StoreLocal(Nodes[0].PhysicalType);
+				m.IL.LoadLocal(conditionValue);
+				m.IL.BranchIfFalse(falseLabel);
+				m.IL.LoadLocal(conditionValue);
+				if (!IsNilable)
+					m.PhysicalToNative(Nodes[0]);
+				m.IL.Branch(endLabel);
+				m.IL.MarkLabel(falseLabel);
+				EmitSubNodeN(1, m);
+				m.IL.MarkLabel(endLabel);
+				m.IL.Nop();
+			}
+		}
+	}
+
+	/// <remarks>operator System.Diagnostics.IsSupported(AStatement : String, ADeviceName : Name) : Boolean;</remarks>
+	public class SystemIsSupportedNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			string deviceName = (string)arguments[0];
 			string statementString = (string)arguments[1];
+			return StaticExecute(program, deviceName, statementString);
+		}
+
+		public static bool StaticExecute(Program program, string deviceName, string statementString)
+		{
 			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, deviceName, true) as Schema.Device;
 			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-				
+
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
@@ -948,7 +1130,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Dispose();
 			}
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.LoadLocal(arguments[0]);
+			m.IL.LoadLocal(arguments[1]);
+			EmitCallStaticExecute(m);
+		}
+	}
 
 	//	operator Reconcile() : table { Sequence : Integer, Error : Error };
 	//	operator Reconcile(ADeviceName : System.Name) : table { Sequence : Integer, Error : Error };
@@ -1044,20 +1238,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string deviceName = (string)arguments[0];
+			StaticExecute(program, (string)arguments[0]);
+			return null;
+		}
+
+		public static void StaticExecute(Program program, string deviceName)
+		{
 			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, deviceName, true) as Schema.Device;
 			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			program.ServerProcess.EnsureDeviceStarted(device);
-			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.LoadLocal(arguments[0]);
+			EmitCallStaticExecute(m);
+			m.IL.LoadNull();
 		}
 	}
-	
+
 	public class SystemShowPlanNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string statementString = (string)arguments[0];
+			return StaticExecute(program, (string)arguments[0]);
+		}
+
+		public static string StaticExecute(Program program, string statementString)
+		{
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
@@ -1083,6 +1297,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Dispose();
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.LoadLocal(arguments[0]);
+			EmitCallStaticExecute(m);
+		}
 	}
 
 	/// <remarks>operator System.Diagnostics.GetRestrictionAlgorithm(AExpression : String) : String;</remarks>
@@ -1090,13 +1315,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			return StaticExecute(program, (string)arguments[0]);
+		}
+
+		public static string StaticExecute(Program program, string expression)
+		{
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				PlanNode node = Compiler.Compile(plan, (string)arguments[0]);
+				PlanNode node = Compiler.Compile(plan, expression);
 
 				node = node.ExtractNode<RestrictNode>();
-			
+
 				return ((RestrictNode)node).RestrictionAlgorithm.Name;
 			}
 			finally
@@ -1104,20 +1334,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Dispose();
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.LoadLocal(arguments[0]);
+			EmitCallStaticExecute(m);
+		}
 	}
-    
+
 	/// <remarks>operator System.Diagnostics.GetJoinAlgorithm(AExpression : String) : String;</remarks>
 	public class SystemGetJoinAlgorithmNode : InstructionNode    
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			return StaticExecute(program, (string)arguments[0]);
+		}
+
+		public static string StaticExecute(Program program, string expression)
+		{
 			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				PlanNode node = Compiler.Compile(plan, (string)arguments[0]);
+				PlanNode node = Compiler.Compile(plan, expression);
 
 				node = node.ExtractNode<JoinNode>();
-			
+
 				return ((JoinNode)node).JoinAlgorithm.Name;
 			}
 			finally
@@ -1125,17 +1371,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				plan.Dispose();
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.LoadLocal(arguments[0]);
+			EmitCallStaticExecute(m);
+		}
 	}
-    
+
 	/// <remarks>operator StartProcess() : Integer;</remarks>
 	public class SystemStartProcessNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			return StaticExecute(program);
+		}
+
+		public static int StaticExecute(Program program)
+		{
 			return ((IServerSession)program.ServerProcess.ServerSession).StartProcess(new ProcessInfo(program.ServerProcess.ServerSession.SessionInfo)).ProcessID;
 		}
 	}
-	
+
 	// create operator Execute(const AScript : String) 
 	// create operator Execute(const AScript : String, const AInParams : row) 
 	// create operator Execute(const AScript : String, const AInParams : row, var AOutParams : row) 
@@ -1627,20 +1889,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(System.Threading.Thread).GetMethod("Sleep", new[] { typeof(int) }));
+			m.IL.LoadNull();
+		}
 	}
-	
-    /// <remarks> operator NewGuid() : Guid </remarks>
-    public class NewGuidNode : InstructionNode
+
+	/// <remarks> operator NewGuid() : Guid </remarks>
+	public class NewGuidNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			return Guid.NewGuid();
 		}
-    }
-    
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Guid).GetMethod("NewGuid", new Type[0]));
+		}
+	}
+
 	/// <remarks>operator GetDefaultDeviceName();</remarks>    
 	/// <remarks>operator GetDefaultDeviceName(ALibraryName : Name);</remarks>
-    public class SystemGetDefaultDeviceNameNode : InstructionNode
+	public class SystemGetDefaultDeviceNameNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
@@ -1649,30 +1926,79 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 				return program.Plan.GetDefaultDeviceName((string)arguments[0], false);
 		}
-    }
 
-    /// <remarks>operator EnableErrorLogging();</remarks>
-    public class SystemEnableErrorLoggingNode : InstructionNode
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.LoadProgram();
+			m.IL.CallVirtual(typeof(Program).GetMethod("get_Plan", new Type[0]));
+			if (Nodes.Count == 0)
+			{
+				m.IL.CallVirtual(typeof(Plan).GetMethod("get_DefaultDeviceName", new Type[0]));
+			}
+			else
+			{
+				m.IL.LoadLocal(arguments[0]);
+				m.IL.LoadConstant(0);
+				m.IL.CallVirtual(typeof(Plan).GetMethod("GetDefaultDeviceName", new[] { typeof(string), typeof(bool) }));
+			}
+		}
+	}
+
+	/// <remarks>operator EnableErrorLogging();</remarks>
+	public class SystemEnableErrorLoggingNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			program.ServerProcess.ServerSession.Server.LogErrors = true;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			EmitSetLogErrors(m, true);
+		}
+
+		public static void EmitSetLogErrors(NativeMethod m, bool enable)
+		{
+			m.LoadProgram();
+			m.IL.CallVirtual(typeof(Program).GetMethod("get_ServerProcess", new Type[0]));
+			m.IL.CallVirtual(typeof(ServerProcess).GetMethod("get_ServerSession", new Type[0]));
+			m.IL.CallVirtual(typeof(ServerSession).GetMethod("get_Server", new Type[0]));
+			m.IL.LoadConstant(enable ? 1 : 0);
+			m.IL.CallVirtual(typeof(Engine).GetMethod("set_LogErrors", new[] { typeof(bool) }));
+			m.IL.LoadNull();
+		}
 	}
 
-    /// <remarks>operator EnableErrorLogging();</remarks>
-    public class SystemDisableErrorLoggingNode : InstructionNode
+	/// <remarks>operator EnableErrorLogging();</remarks>
+	public class SystemDisableErrorLoggingNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			program.ServerProcess.ServerSession.Server.LogErrors = false;
 			return null;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle => ArgumentEmissionStyle.NativeInLocals;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			SystemEnableErrorLoggingNode.EmitSetLogErrors(m, false);
+		}
 	}
 
-    /// <remarks>operator System.EncryptPassword(const AString : System.String) : System.String;</remarks>
-    public class SystemEncryptPasswordNode : InstructionNode
+	/// <remarks>operator System.EncryptPassword(const AString : System.String) : System.String;</remarks>
+	public class SystemEncryptPasswordNode : InstructionNode
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{

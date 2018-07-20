@@ -145,6 +145,7 @@ namespace D4Runner
 		[STAThread]
 		static int Main(string[] args)
 		{
+            Console.WriteLine("Args: " + String.Join(" ", args));
 			D4Runner app = new D4Runner();
 			if (CommandLine.Parser.ParseArgumentsWithUsage(args, app))
                 return app.Run();

@@ -81,7 +81,7 @@ namespace Alphora.Common.WCF
 						SetChannel(default(T));
 					}
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					// TODO: Log exception
 				}
@@ -94,7 +94,7 @@ namespace Alphora.Common.WCF
 						_channelFactoryWrapper = null;
 					}
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					// TODO: Log exception
 				}

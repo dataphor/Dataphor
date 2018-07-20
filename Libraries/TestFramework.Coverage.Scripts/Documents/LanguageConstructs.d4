@@ -212,6 +212,7 @@ begin
 		raise Error("foreach with list and external variable failed");
 end;
 
+SafeDrop('TestForEach(table { ID : Integer })');
 create operator TestForEach(const ATable : table { ID : Integer }) : Integer
 begin
 	result := 0;
@@ -281,6 +282,7 @@ TestExit();
 drop operator TestExit();
 
 // Recursive Operator
+SafeDrop('TestRecursion(Integer)');
 create operator TestRecursion(AInteger : Integer) : Integer
 begin
   if (AInteger > 0) then
@@ -290,9 +292,9 @@ begin
 end;
 
 if (TestRecursion(5) <> 0) then
-  raise Error("TestRecursion failed");
+  raise Error('TestRecursion failed');
 
-drop operator TestRecursion(Integer);
+SafeDrop('TestRecursion(Integer)');
 
 // Name Resolution
 begin

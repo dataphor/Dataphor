@@ -105,35 +105,36 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public int EvaluateSort(Schema.OrderColumn orderColumn, object indexValue, object compareValue)
 		{
-			#if USEICOMPARABLE
+#if USEICOMPARABLE
 			IComparable indexComparable = AIndexValue as IComparable;
 			if (indexComparable != null)
 				return indexComparable.CompareTo(ACompareValue) * (AOrderColumn.Ascending ? 1 : -1);
 			else
 			{
-			#endif
-				// NOTE: Use currently executing program because the whole point is that this is inner loop sort code.
-				// We don't want to have to use a new program, or
-				Program program = _serverProcess.ExecutingProgram;
-				//LProgram.Stack.PushWindow(0);
-				//try
-				//{
-					program.Stack.Push(indexValue);
-					program.Stack.Push(compareValue);
-					try
-					{
-						return ((int)orderColumn.Sort.CompareNode.Execute(program)) * (orderColumn.Ascending ? 1 : -1);
-					}
-					finally
-					{
-						program.Stack.Pop();
-						program.Stack.Pop();
-					}
-				//}
-				//finally
-				//{
-				//	LProgram.Stack.PopWindow();
-				//}
+#endif
+            // NOTE: Use currently executing program because the whole point is that this is inner loop sort code.
+            // We don't want to have to use a new program, or
+
+            Program program = _serverProcess.ExecutingProgram;
+            //program.Stack.PushWindow(0);
+            //try
+            //{
+                program.Stack.Push(indexValue);
+                program.Stack.Push(compareValue);
+                try
+				{
+					return ((int)orderColumn.Sort.CompareNode.Execute(program)) * (orderColumn.Ascending ? 1 : -1);
+				}
+				finally
+				{
+					program.Stack.Pop();
+					program.Stack.Pop();
+				}
+			//}
+			//finally
+			//{
+			//	program.Stack.PopWindow();
+			//}
 			#if USEICOMPARABLE
 			} 
 			#endif

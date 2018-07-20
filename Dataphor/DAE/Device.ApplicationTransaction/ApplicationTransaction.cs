@@ -1321,13 +1321,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						plan.Dispose();
 					}
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					try
 					{
 						ReportTableChange(process, sourceTableVar, false);
 					}
-					catch (Exception ne)
+					catch (Exception)
 					{
 						// Ignore errors here, this is cleanup code
 					}
@@ -1893,7 +1893,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					plan.Dispose();
 				}
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				RemoveOperatorMap(process, operatorMap);
 				throw;

@@ -3777,11 +3777,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			whileStatement.Condition = new BinaryExpression(new IdentifierExpression(variableName), isPositive ? Instructions.InclusiveLess : Instructions.InclusiveGreater, finalExpression);
 			Statement iterationStatement = Statement();
 			Statement incrementStatement = new AssignmentStatement(new IdentifierExpression(variableName), new BinaryExpression(new IdentifierExpression(variableName), isPositive ? Instructions.Addition : Instructions.Subtraction, stepExpression));
-			TryFinallyStatement iterationBlock = new TryFinallyStatement();
-			iterationBlock.TryStatement = iterationStatement;
-			iterationBlock.FinallyStatement = incrementStatement;
-			iterationStatement = iterationBlock;
-			whileStatement.Statement = iterationStatement;
+			var iterationBlock = new DelimitedBlock();
+			iterationBlock.Statements.Add(iterationStatement);
+			iterationBlock.Statements.Add(incrementStatement);
+			whileStatement.Statement = iterationBlock;
 			block.Statements.Add(whileStatement);
 			block.SetEndPosition(_lexer);
 			return block;

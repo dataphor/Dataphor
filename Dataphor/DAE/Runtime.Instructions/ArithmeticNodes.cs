@@ -7,7 +7,7 @@
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System; 
+	using System;
 	using System.Reflection;
 	using System.Reflection.Emit;
 
@@ -21,85 +21,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Sigil;
 
-	#if UseUnsignedIntegers	
+#if UseUnsignedIntegers
 	/// <remarks> operator iNegate(sbyte) : sbyte </remarks>
     public class SByteNegateNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument == null)
 				return null;
 			else
-			#endif
+#endif
 				return (sbyte)-(sbyte)AArgument;
 			
 		}
     }
-    #endif
-    
+#endif
+
 	/// <remarks> operator iNegate(short) : short </remarks>
-    public class ShortNegateNode : UnaryInstructionNode
+	public class ShortNegateNode : UnaryInstructionNode
     {
 		public ShortNegateNode() : base()
 		{
 		}
 
-/*
-		protected override void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
-		{
-			Label LNil = AGenerator.DefineLabel();
-			Label LNotNil = AGenerator.DefineLabel();
-			Label LCreateResult = AGenerator.DefineLabel();
-			
-			LocalBuilder LThis = EmitThis(APlan, AGenerator, AExecutePath);
-			LocalBuilder LValue = AGenerator.DeclareLocal(typeof(DataValue));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-			
-			AGenerator.Emit(OpCodes.Ldloc, AArguments);
-			AGenerator.Emit(OpCodes.Ldc_I4_0);
-			AGenerator.Emit(OpCodes.Ldelem_Ref, typeof(DataVar));
-			AGenerator.Emit(OpCodes.Ldfld, typeof(DataVar).GetField("Value"));
-			AGenerator.Emit(OpCodes.Stloc, LValue);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Brfalse, LNil);
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("IsNil").GetGetMethod());
-			AGenerator.Emit(OpCodes.Brfalse, LNil);
-			
-			AGenerator.Emit(OpCodes.Br, LNotNil);
-			
-			AGenerator.MarkLabel(LNil);
-			
-			AGenerator.Emit(OpCodes.Ldnull);
-			AGenerator.Emit(OpCodes.Br, LCreateResult);
-			
-			AGenerator.MarkLabel(LNotNil);
-			
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Ldloc, LThis);
-			AGenerator.Emit(OpCodes.Ldfld, typeof(PlanNode).GetField("FDataType", BindingFlags.Instance | BindingFlags.NonPublic));
-			AGenerator.Emit(OpCodes.Castclass, typeof(Schema.ScalarType));
-			
-			AGenerator.Emit(OpCodes.Ldloc, LValue);
-			AGenerator.Emit(OpCodes.Callvirt, typeof(DataValue).GetProperty("AsInt16").GetGetMethod());
-			
-			AGenerator.Emit(OpCodes.Neg);
-			AGenerator.Emit(OpCodes.Conv_I2); // According to the docs this isnt necessary?
-			AGenerator.Emit(OpCodes.Box, typeof(Int16));
-			AGenerator.Emit(OpCodes.Newobj, typeof(IScalar).GetConstructor(new Type[] { typeof(ServerProcess), typeof(Schema.ScalarType), typeof(object) }));
-			
-			AGenerator.MarkLabel(LCreateResult);
-			
-			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
-		}
-*/
-		
 		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
@@ -109,6 +56,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (short)-(short)argument; // Another cast is required because the result of negating a short is an int.
 		}
+
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+        {
+            m.IL.Negate();
+            m.IL.Convert<short>();
+        }
     }
     
 	/// <remarks> operator iNegate(int) : int </remarks>
@@ -123,10 +79,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return -(int)argument;
 		}
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+        {
+            m.IL.Negate();
+        }
     }
-    
+
 	/// <remarks> operator iNegate(long) : long </remarks>
-    public class LongNegateNode : UnaryInstructionNode
+	public class LongNegateNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument)
 		{
@@ -137,25 +100,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return -(long)argument;
 		}
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+        {
+            m.IL.Negate();
+        }
     }
 
-	#if USEDOUBLE    
+#if USEDOUBLE
 	/// <remarks> operator iNegate(double) : double </remarks>    
     public class DoubleNegateNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument == null)
 				return null;
 			else
-			#endif
+#endif
 				return -(double)AArgument;
 		}
     }
-    #endif
-	
-	/// <remarks> operator iNegate(decimal) : decimal </remarks>    
+#endif
+
+    /// <remarks> operator iNegate(decimal) : decimal </remarks>    
     public class DecimalNegateNode : UnaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument)
@@ -167,6 +137,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return -(decimal)argument;
 		}
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+        {
+            m.IL.Call(typeof(Decimal).GetMethod("op_UnaryNegation", new[] { typeof(decimal) }));
+        }
     }
 
     /// <remarks> operator iPower(byte, byte) : byte </remarks>
@@ -186,19 +163,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(byte)argument2
 					);
 		}
+
+        public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+        {
+            m.IL.Call(typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) }));
+			m.IL.Convert<byte>();
+        }
     }
-    
-	#if UseUnsignedIntegers	
+
+#if UseUnsignedIntegers
     /// <remarks> operator iPower(sbyte, sbyte) : sbyte </remarks>
     public class SBytePowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)Math.Pow
 					(
@@ -207,8 +197,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
+#endif
+
     /// <remarks> operator iPower(short, short) : short </remarks>
     public class ShortPowerNode : BinaryInstructionNode
     {
@@ -226,19 +216,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(short)argument2
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) }));
+			m.IL.Convert<short>();
+		}
+	}
+
+#if UseUnsignedIntegers
     /// <remarks> operator iPower(ushort, ushort) : ushort </remarks>
     public class UShortPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)Math.Pow
 					(
@@ -247,10 +250,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
-    /// <remarks> operator iPower(integer, integer) : integer </remarks>
-    public class IntegerPowerNode : BinaryInstructionNode
+#endif
+
+	/// <remarks> operator iPower(integer, integer) : integer </remarks>
+	public class IntegerPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -266,19 +269,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)argument2
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+        public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Convert<double>();
+		}
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) }));
+			m.IL.Convert<int>();
+		}
+	}
+
+#if UseUnsignedIntegers
     /// <remarks> operator iPower(uinteger, uinteger) : uinteger </remarks>
     public class UIntegerPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(uint)Math.Pow
 					(
@@ -287,10 +303,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
-    /// <remarks> operator iPower(long, long) : long </remarks>
-    public class LongPowerNode : BinaryInstructionNode
+#endif
+
+	/// <remarks> operator iPower(long, long) : long </remarks>
+	public class LongPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -306,19 +322,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(long)argument2
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) }));
+			m.IL.Convert<long>();
+		}
+	}
+
+#if UseUnsignedIntegers
     /// <remarks> operator iPower(ulong, ulong) : ulong </remarks>
     public class ULongPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ulong)Math.Pow
 					(
@@ -327,19 +356,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
-	#if USEDOUBLE    
+#if USEDOUBLE
     /// <remarks> operator iPower(double, double) : double </remarks> 
     public class DoublePowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					Math.Pow
 					(
@@ -348,10 +377,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
-    /// <remarks> operator iPower(decimal, decimal) : decimal </remarks>
-    public class DecimalPowerNode : BinaryInstructionNode
+#endif
+
+	/// <remarks> operator iPower(decimal, decimal) : decimal </remarks>
+	public class DecimalPowerNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -367,10 +396,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(double)(decimal)argument2
 					);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("ToDouble", new[] { typeof(decimal) }));
+			m.IL.Convert<double>();
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Math).GetMethod("Pow", new[] { typeof(double), typeof(double) }));
+			m.IL.Call(typeof(decimal).GetMethod("op_Explicit", new[] { typeof(double) }));
+		}
+	}
 
 	/// <remarks> operator iMultiplication(byte, byte) : byte </remarks>    
-    public class ByteMultiplicationNode : BinaryInstructionNode
+	public class ByteMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -389,19 +432,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.MultiplyOverflow();
+			m.IL.Convert<byte>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMultiplication(sbyte, sbyte) : sbyte </remarks>    
     public class SByteMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)
 					(
@@ -410,10 +461,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMultiplication(short, short) : short </remarks>    
-    public class ShortMultiplicationNode : BinaryInstructionNode
+	public class ShortMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -432,19 +483,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.MultiplyOverflow();
+			m.IL.Convert<short>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMultiplication(ushort, ushort) : ushort </remarks>    
     public class UShortMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)
 					(
@@ -453,10 +512,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMultiplication(integer, integer) : integer </remarks>    
-    public class IntegerMultiplicationNode : BinaryInstructionNode
+	public class IntegerMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -472,19 +531,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)argument2
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.MultiplyOverflow();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMultiplication(uinteger, uinteger) : uinteger </remarks>    
     public class UIntegerMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return
 					(uint)
 					(
@@ -493,10 +559,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					)
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMultiplication(long, long) : long </remarks>    
-    public class LongMultiplicationNode : BinaryInstructionNode
+	public class LongMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -512,19 +578,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(long)argument2
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.MultiplyOverflow();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMultiplication(ulong, ulong) : ulong </remarks>    
     public class ULongMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					checked
 					(
@@ -533,19 +606,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
-	#if USEDOUBLE    
+#if USEDOUBLE
 	/// <remarks> operator iMultiplication(double, double) : double </remarks>    
     public class DoubleMultiplicationNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(double)AArgument1 *
@@ -553,7 +626,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMultiplication(decimal, decimal) : decimal </remarks>    
 	public class DecimalMultiplicationNode : BinaryInstructionNode
@@ -566,6 +639,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 * (decimal)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 
@@ -581,6 +661,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 * (decimal)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
 
 	/// <remarks> operator iMultiplication(decimal, money) : money </remarks>    
@@ -594,6 +681,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 * (decimal)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 
@@ -609,6 +703,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 * (int)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			if (index == 1)
+				m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(int) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
 
 	/// <remarks> operator iMultiplication(integer, money) : money </remarks>    
@@ -623,10 +730,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (int)argument1 * (decimal)argument2;
 		}
+
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			if (index == 0)
+				m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(int) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Multiply", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
 
 	/// <remarks> operator iDivision(byte, byte) : decimal</remarks>    
-    public class ByteDivisionNode : BinaryInstructionNode
+	public class ByteDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -641,10 +762,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(decimal)(byte)argument2
 					);
 		}
-    }
-    
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(byte) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
+
 	/// <remarks> operator iDiv(byte, byte) : byte</remarks>    
-    public class ByteDivNode : BinaryInstructionNode
+	public class ByteDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -663,19 +796,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Divide();
+			m.IL.ConvertOverflow<byte>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iDivision(sbyte, sbyte) : decimal</remarks>    
     public class SByteDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(decimal)(sbyte)AArgument1() /
@@ -689,11 +830,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)
 					(
@@ -702,10 +843,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iDivision(short, short) : decimal</remarks>    
-    public class ShortDivisionNode : BinaryInstructionNode
+	public class ShortDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -720,10 +861,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(decimal)(short)argument2
 					);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(short) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDiv(short, short) : short </remarks>    
-    public class ShortDivNode : BinaryInstructionNode
+	public class ShortDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -742,19 +895,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Divide();
+			m.IL.ConvertOverflow<short>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iDivision(ushort, ushort) : decimal</remarks>    
     public class UShortDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(decimal)(ushort)AArgument1() /
@@ -762,19 +923,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
-	#if UseUnsignedIntegers	
+#if UseUnsignedIntegers
 	/// <remarks> operator iDiv(ushort, ushort) : ushort </remarks>    
     public class UShortDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)
 					(
@@ -783,10 +944,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iDivision(integer, integer) : decimal</remarks>    
-    public class IntegerDivisionNode : BinaryInstructionNode
+	public class IntegerDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -797,10 +958,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)(int)argument1 / (int)argument2;
 		}
-    }
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+            m.IL.Call(typeof(decimal).GetMethod("op_Implicit", new[] { typeof(int) }));
+        }
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDiv(integer, integer) : integer </remarks>    
-    public class IntegerDivNode : BinaryInstructionNode
+	public class IntegerDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -809,26 +982,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return 
-					checked
-					(
-						(int)argument1 /
-						(int)argument2
-					);
+				return (int)argument1 / (int)argument2;
 		}
-    }
 
-	#if UseUnsignedIntegers	
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Divide();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iDivision(uinteger, uinteger) : decimal</remarks>    
     public class UIntegerDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(decimal)(uint)AArgument1() /
@@ -842,11 +1017,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(uint)AArgument1() /
@@ -854,10 +1029,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iDivision(long, long) : decimal</remarks>    
-    public class LongDivisionNode : BinaryInstructionNode
+	public class LongDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -868,10 +1043,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)(long)argument1 / (decimal)(long)argument2;
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(long) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDiv(long, long) : long </remarks>    
-    public class LongDivNode : BinaryInstructionNode
+	public class LongDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -887,19 +1074,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(long)argument2
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Divide();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iDivision(ulong, ulong) : decimal</remarks>    
     public class ULongDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(decimal)(ulong)AArgument1() /
@@ -913,11 +1107,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(ulong)AArgument1() /
@@ -925,19 +1119,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
-	#if USEDOUBLE
+#if USEDOUBLE
 	/// <remarks> operator iDivision(double, double) : double </remarks>    
     public class DoubleDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(double)AArgument1() /
@@ -945,10 +1139,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iDivision(decimal, decimal) : decimal </remarks>    
-    public class DecimalDivisionNode : BinaryInstructionNode
+	public class DecimalDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -959,10 +1153,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 / (decimal)argument2;
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDiv(decimal, decimal) : decimal </remarks>    
-    public class DecimalDivNode : BinaryInstructionNode
+	public class DecimalDivNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -972,22 +1173,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return 
-					(decimal)Math.Floor
+					Math.Floor
 					(
-						checked
-						(
-							(double)
-							(
-								(decimal)argument1 /
-								(decimal)argument2
-							)
-						)
+						(decimal)argument1 /
+						(decimal)argument2
 					);
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+			m.IL.Call(typeof(Math).GetMethod("Floor", new[] { typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDivision(Money, Money) : Decimal </remarks>    
-    public class MoneyDivisionNode : BinaryInstructionNode
+	public class MoneyDivisionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -998,7 +1201,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 / (decimal)argument2;
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iDivision(money, decimal) : money </remarks>    
 	public class MoneyDecimalDivisionNode : BinaryInstructionNode
@@ -1011,6 +1221,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 / (decimal)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 
@@ -1026,6 +1243,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 / (decimal)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
 
 	/// <remarks> operator iDivision(money, integer) : money </remarks>    
@@ -1039,6 +1263,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 / (int)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			if (index == 1)
+				m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(int) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 
@@ -1054,10 +1291,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (int)argument1 / (decimal)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitPostArgument(NativeMethod m, int index)
+		{
+			if (index == 0)
+				m.IL.Call(typeof(Decimal).GetMethod("op_Implicit", new[] { typeof(int) }));
+		}
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Division", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
-	
+
 	/// <remarks> operator iMod(byte, byte) : byte </remarks>    
-    public class ByteModNode : BinaryInstructionNode
+	public class ByteModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1073,19 +1323,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(byte)argument2
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Remainder();
+			m.IL.Convert<byte>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMod(sbyte, sbyte) : sbyte </remarks>    
     public class SByteModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)
 					(
@@ -1094,10 +1352,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMod(short, short) : short </remarks>    
-    public class ShortModNode : BinaryInstructionNode
+	public class ShortModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1113,19 +1371,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(short)argument2
 					);
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Remainder();
+			m.IL.Convert<short>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMod(ushort, ushort) : ushort </remarks>    
     public class UShortModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)
 					(
@@ -1134,10 +1400,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMod(integer, integer) : integer </remarks>    
-    public class IntegerModNode : BinaryInstructionNode
+	public class IntegerModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1148,26 +1414,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (int)argument1 % (int)argument2;
 		}
-    }
 
-	#if UseUnsignedIntegers	
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Remainder();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMod(uinteger, uinteger) : uinteger </remarks>    
     public class UIntegerModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return (uint)AArgument1 % (uint)AArgument2;
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMod(long, long) : long </remarks>    
-    public class LongModNode : BinaryInstructionNode
+	public class LongModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1178,42 +1451,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (long)argument1 % (long)argument2;
 		}
-    }
 
-	#if UseUnsignedIntegers	
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Remainder();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iMod(ulong, ulong) : ulong </remarks>    
     public class ULongModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return (ulong)AArgument1() % (ulong)AArgument2;
 		}
     }
-    #endif
+#endif
 
-	#if USEDOUBLE
+#if USEDOUBLE
 	/// <remarks> operator iMod(double, double) : double </remarks>    
     public class DoubleModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return (double)AArgument1() % (double)AArgument2;
 		}
     }
-    #endif
+#endif
 
 	/// <remarks> operator iMod(decimal, decimal) : decimal </remarks>    
-    public class DecimalModNode : BinaryInstructionNode
+	public class DecimalModNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1224,7 +1504,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 % (decimal)argument2;
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(decimal).GetMethod("op_Modulus", new[] { typeof(decimal), typeof(decimal) }));
+		}
+	}
 
 	/// <remarks> operator iAddition(string, string) : string </remarks>    
 	public class StringAdditionNode : BinaryInstructionNode
@@ -1238,8 +1525,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (string)argument1 + (string)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+		}
 	}
-    
+
 	/// <remarks> operator iAddition(byte, byte) : byte </remarks>    
 	public class ByteAdditionNode : BinaryInstructionNode
 	{
@@ -1260,19 +1554,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.AddOverflow();
+			m.IL.ConvertOverflow<byte>();
+		}
 	}
-    
-	#if UseUnsignedIntegers	
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iAddition(sbyte, sbyte) : sbyte </remarks>    
 	public class SByteAdditionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)
 					(
@@ -1281,8 +1583,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
-    
+#endif
+
 	/// <remarks> operator iAddition(short, short) : short </remarks>    
 	public class ShortAdditionNode : BinaryInstructionNode
 	{
@@ -1303,19 +1605,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.AddOverflow();
+			m.IL.ConvertOverflow<short>();
+		}
 	}
-    
-	#if UseUnsignedIntegers	
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iAddition(ushort, ushort) : ushort </remarks>    
 	public class UShortAdditionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)
 					(
@@ -1324,8 +1634,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
-    
+#endif
+
 	/// <remarks> operator iAddition(integer, integer) : integer </remarks>    
 	public class IntegerAdditionNode : BinaryInstructionNode
 	{
@@ -1338,19 +1648,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return checked((int)argument1 + (int)argument2);
 		}
+
+        public override bool CanEmitIL => true;
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.AddOverflow();
+		}
 	}
-    
-	#if UseUnsignedIntegers	
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iAddition(uinteger, uinteger) : uinteger </remarks>    
 	public class UIntegerAdditionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(uint)AArgument1() +
@@ -1358,8 +1675,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
-    
+#endif
+
 	/// <remarks> operator iAddition(long, long) : long </remarks>    
 	public class LongAdditionNode : BinaryInstructionNode
 	{
@@ -1377,19 +1694,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(long)argument2
 					);
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.AddOverflow();
+		}
 	}
-    
-	#if UseUnsignedIntegers	
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iAddition(ulong, ulong) : ulong </remarks>    
 	public class ULongAdditionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(ulong)AArgument1() +
@@ -1397,19 +1721,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
+#endif
 
-	#if USEDOUBLE
+#if USEDOUBLE
 	/// <remarks> operator iAddition(double, double) : double </remarks>    
 	public class DoubleAdditionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(double)AArgument1() +
@@ -1417,8 +1741,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
-    
+#endif
+
 	/// <remarks> operator iAddition(decimal, decimal) : decimal </remarks>    
 	public class DecimalAdditionNode : BinaryInstructionNode
 	{
@@ -1431,8 +1755,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 + (decimal)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Addition", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
-    
+
 	/// <remarks> operator iAddition(money, money) : money </remarks>    
 	public class MoneyAdditionNode : BinaryInstructionNode
 	{
@@ -1445,10 +1776,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 				return (decimal)argument1 + (decimal)argument2;
 		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(decimal).GetMethod("op_Addition", new[] { typeof(decimal), typeof(decimal) }));
+		}
 	}
-    
+
 	/// <remarks> operator iSubtraction(byte, byte) : byte </remarks>
-    public class ByteSubtractionNode : BinaryInstructionNode
+	public class ByteSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1467,19 +1805,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.SubtractOverflow();
+			m.IL.ConvertOverflow<byte>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iSubtraction(sbyte, sbyte) : sbyte </remarks>
     public class SByteSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(sbyte)
 					(
@@ -1488,10 +1834,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
+#endif
+
 	/// <remarks> operator iSubtraction(short, short) : short </remarks>
-    public class ShortSubtractionNode : BinaryInstructionNode
+	public class ShortSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1510,19 +1856,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						)
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.SubtractOverflow();
+			m.IL.ConvertOverflow<short>();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iSubtraction(ushort, ushort) : ushort </remarks>
     public class UShortSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(ushort)
 					(
@@ -1531,10 +1885,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
+#endif
+
 	/// <remarks> operator iSubtraction(integer, integer) : integer </remarks>
-    public class IntegerSubtractionNode : BinaryInstructionNode
+	public class IntegerSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1550,19 +1904,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(int)argument2
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers	
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.SubtractOverflow();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iSubtraction(uinteger, uinteger) : uinteger </remarks>
     public class UIntegerSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(uint)AArgument1() -
@@ -1570,10 +1931,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
+#endif
+
 	/// <remarks> operator iSubtraction(long, long) : long </remarks>
-    public class LongSubtractionNode : BinaryInstructionNode
+	public class LongSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
@@ -1589,19 +1950,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(long)argument2
 					);
 		}
-    }
-    
-	#if UseUnsignedIntegers
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.SubtractOverflow();
+		}
+	}
+
+#if UseUnsignedIntegers
 	/// <remarks> operator iSubtraction(ulong, ulong) : ulong </remarks>
     public class ULongSubtractionNode : BinaryInstructionNode
     {
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(ulong)AArgument1() -
@@ -1609,19 +1977,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
     }
-    #endif
-    
-	#if USEDOUBLE
+#endif
+
+#if USEDOUBLE
 	/// <remarks> operator iSubtraction(double, double) : double </remarks>
 	public class DoubleSubtractionNode : BinaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			#if NILPROPOGATION
+#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
 				return null;
 			else
-			#endif
+#endif
 				return 
 					(
 						(double)AArgument1() -
@@ -1629,8 +1997,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					);
 		}
 	}
-	#endif
-    
+#endif
+
 	/// <remarks> operator iSubtraction(decimal, decimal) : decimal </remarks>
 	public class DecimalSubtractionNode : BinaryInstructionNode
 	{
@@ -1642,6 +2010,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 - (decimal)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Subtraction", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 
@@ -1656,6 +2031,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				return (decimal)argument1 - (decimal)argument2;
+		}
+
+		public override bool CanEmitIL => true;
+
+		protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+			m.IL.Call(typeof(Decimal).GetMethod("op_Subtraction", new[] { typeof(decimal), typeof(decimal) }));
 		}
 	}
 }

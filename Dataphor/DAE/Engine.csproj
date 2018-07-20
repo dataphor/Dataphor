@@ -93,6 +93,10 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Sigil, Version=4.7.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\External\Sigil.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -117,6 +121,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiling\NativeMethod.cs" />
     <Compile Include="Compiling\Normalizer.cs" />
     <Compile Include="Compiling\Visitors\DetermineAccessPathVisitor.cs" />
     <Compile Include="Compiling\Visitors\DetermineDeviceVisitor.cs" />
@@ -354,6 +359,7 @@
     <Compile Include="Runtime.Instructions\AggregateNodes.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Instructions\ArgumentEmissionStyle.cs" />
     <Compile Include="Runtime.Instructions\ArithmeticNodes.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -417,6 +423,7 @@
     <Compile Include="Runtime.Instructions\MathNodes.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Instructions\MethodInfoStatics.cs" />
     <Compile Include="Runtime.Instructions\NativeAccessorNodes.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -471,6 +478,7 @@
     </Compile>
     <Compile Include="Runtime\DataParam.cs" />
     <Compile Include="Frame.cs" />
+    <Compile Include="Compiling\NativeModule.cs" />
     <Compile Include="Runtime\Program.cs" />
     <Compile Include="Runtime\RuntimeException.cs">
       <SubType>Code</SubType>

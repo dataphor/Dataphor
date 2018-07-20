@@ -11,9 +11,6 @@
 // TODO: optimize application transaction calls in the CallNode
 
 using System;
-using System.Text;
-using System.Threading;
-using System.Reflection;
 using System.Reflection.Emit;
 
 using Alphora.Dataphor.DAE.Language;
@@ -21,15 +18,10 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Compiling.Visitors;
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Schema = Alphora.Dataphor.DAE.Schema;
 using System.Collections.Generic;
 using System.Collections;
+using Sigil;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -45,6 +37,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < NodeCount; index++)
 				Nodes[index].Execute(program);
 			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			for (int index = 0; index < NodeCount; index++)
+			{
+				EmitSubNodeN(index, m);
+				if (m.IL.IsReachable)
+					m.IL.Pop();
+				else
+					return;
+			}
+			m.IL.LoadNull();
 		}
 
 		public override Statement EmitStatement(EmitMode mode)
@@ -78,6 +85,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int index = 0; index < NodeCount; index++)
 				Nodes[index].Execute(program);
 			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			for (int index = 0; index < NodeCount; index++)
+			{
+				EmitSubNodeN(index, m);
+				if (m.IL.IsReachable)
+					m.IL.Pop();
+				else
+					return;
+			}
+			m.IL.LoadNull();
 		}
 
 		public override Statement EmitStatement(EmitMode mode)
@@ -127,7 +149,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Stack.PopFrame();
 			}
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override bool RequiresEmptyStack { get { return true; } }
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.FrameAround(() =>
+				{
+					EmitSubNodeN(0, m);
+					if (m.IL.IsReachable)
+                        m.IL.Pop();
+				}
+			);
+
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return Nodes[0].EmitStatement(mode);
@@ -152,7 +191,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DataValue.DisposeValue(program.ValueManager, objectValue);
 			return null;
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+            var disposeNeeded = DataValue.ShouldDispose(Nodes[0].DataType);
+			if (disposeNeeded)
+			{
+				EmitSubNodeN(0, m);
+				var valueLocal = m.StoreLocal(PhysicalType);
+				m.DisposeValue(() => m.IL.LoadLocal(valueLocal));
+				m.IL.LoadNull();
+				valueLocal.Dispose();
+			}
+			else
+			{
+				EmitSubNodeN(0, m);
+				// must replace the returned value with null in case there is a value type on the stack
+				m.IL.Pop();
+				m.IL.LoadNull();
+			}
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new ExpressionStatement((Expression)Nodes[0].EmitStatement(mode));
@@ -180,7 +241,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			throw new ExitError();
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			// TODO: better story for break, continue, and exit
+			m.IL.NewObject(typeof(ExitError).GetConstructor(new Type[0]));
+			m.IL.Throw();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new ExitStatement();
@@ -200,12 +270,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				while (true)
 				{
+					object objectValue = Nodes[0].Execute(program);
+					if ((objectValue == null) || !(bool)objectValue)
+						break;
+							
 					try
 					{
-						object objectValue = Nodes[0].Execute(program);
-						if ((objectValue == null) || !(bool)objectValue)
-							break;
-							
 						Nodes[1].Execute(program);
 					}
 					catch (ContinueError) { }
@@ -214,7 +284,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			catch (BreakError) { }
 			return null;
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+        public override bool RequiresEmptyStack { get { return true; } }
+
+        public override void InternalEmitIL(NativeMethod m)
+		{
+			var loopEnd = m.IL.DefineLabel();
+			var loopStart = m.IL.DefineLabel();
+			var loopBreak = m.IL.DefineLabel();
+			var breakBlock = m.IL.BeginExceptionBlock();
+
+			m.IL.MarkLabel(loopStart);
+			m.AbortCheck();
+
+			EmitSubNodeN(0, m);
+            m.BranchOnNilOrFalse(Nodes[0], loopBreak);
+
+			var continueBlock = m.IL.BeginExceptionBlock();
+
+			EmitSubNodeN(1, m);
+			m.IL.Pop();
+
+			var continueCatch = m.IL.BeginCatchBlock(continueBlock, typeof(ContinueError));
+            m.IL.Pop(); // Eat exception
+            m.IL.EndCatchBlock(continueCatch);
+			m.IL.EndExceptionBlock(continueBlock);
+
+			m.IL.Branch(loopStart);
+
+			m.IL.MarkLabel(loopBreak);
+			m.IL.Leave(loopEnd);
+
+			var breakCatch = m.IL.BeginCatchBlock(breakBlock, typeof(BreakError));
+            m.IL.Pop(); // Eat exception
+            m.IL.EndCatchBlock(breakCatch);
+			m.IL.EndExceptionBlock(breakBlock);
+
+			m.IL.MarkLabel(loopEnd);
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			WhileStatement statement = new WhileStatement();
@@ -250,8 +361,47 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			catch (BreakError){}
 			return null;
 		}
-		
-		public override Statement EmitStatement(EmitMode mode)
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+        {
+            var loopEnd = m.IL.DefineLabel();
+            var loopStart = m.IL.DefineLabel();
+            var loopBreak = m.IL.DefineLabel();
+			var breakBlock = m.IL.BeginExceptionBlock();
+
+			m.IL.MarkLabel(loopStart);
+            m.AbortCheck();
+
+			var continueBlock = m.IL.BeginExceptionBlock();
+
+			EmitSubNodeN(0, m);
+            m.IL.Pop();
+
+			var continueCatch = m.IL.BeginCatchBlock(continueBlock, typeof(ContinueError));
+            m.IL.Pop(); // Eat exception
+            m.IL.EndCatchBlock(continueCatch);
+			m.IL.EndExceptionBlock(continueBlock);
+
+			EmitSubNodeN(1, m);
+            m.BranchOnNilOrFalse(Nodes[1], loopBreak);
+
+            m.IL.Branch(loopStart);
+
+            m.IL.MarkLabel(loopBreak);
+            m.IL.Leave(loopEnd);
+
+			var breakCatch = m.IL.BeginCatchBlock(breakBlock, typeof(BreakError));
+            m.IL.Pop(); // Eat exception
+            m.IL.EndCatchBlock(breakCatch);
+			m.IL.EndExceptionBlock(breakBlock);
+
+			m.IL.MarkLabel(loopEnd);
+            m.IL.LoadNull();
+        }
+
+        public override Statement EmitStatement(EmitMode mode)
 		{
 			DoWhileStatement statement = new DoWhileStatement();
 			statement.Statement = Nodes[0].EmitStatement(mode);
@@ -484,7 +634,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			throw new BreakError();
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			// TODO: better story for break, continue, and exit
+			m.IL.NewObject(typeof(BreakError).GetConstructor(new Type[0]));
+			m.IL.Throw();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new BreakStatement();
@@ -507,7 +666,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			throw new ContinueError();
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			// TODO: better story for break, continue, and exit
+			m.IL.NewObject(typeof(ContinueError).GetConstructor(new Type[0]));
+			m.IL.Throw();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new ContinueStatement();
@@ -530,7 +698,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.ReportThrow();
 			throw (Exception)program.Stack.ErrorVar;
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var noErrorLabel = m.IL.DefineLabel();
+
+			if (NodeCount > 0)
+			{
+				m.GetStack();
+				EmitSubNodeN(0, m, true);
+				m.IL.CallVirtual(typeof(Stack).GetMethod("set_ErrorVar", new[] { typeof(object) }));
+			}
+
+			m.GetStack();
+			m.IL.CallVirtual(typeof(Stack).GetMethod("get_ErrorVar", new Type[0]));
+			m.IL.LoadNull();
+			m.IL.CompareEqual();
+			m.IL.BranchIfFalse(noErrorLabel);
+
+			m.IL.LoadConstant((int)RuntimeException.Codes.NilEncountered);
+			m.IL.NewObject(typeof(RuntimeException).GetConstructor(new[] { typeof(RuntimeException.Codes) }));
+			m.IL.Throw();
+
+			m.IL.MarkLabel(noErrorLabel);
+			m.LoadProgram();
+			m.IL.CallVirtual(typeof(Program).GetMethod("ReportThrow", new Type[0]));
+
+			m.GetStack();
+			m.IL.CallVirtual(typeof(Stack).GetMethod("get_ErrorVar", new Type[0]));
+			m.IL.CastClass(typeof(Exception));
+			m.IL.Throw();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			RaiseStatement statement = new RaiseStatement();
@@ -559,7 +760,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Nodes[1].Execute(program);
 			}
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override bool RequiresEmptyStack { get { return true; } }
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var handleBlock = m.IL.BeginExceptionBlock();
+			
+			EmitSubNodeN(0, m);
+			m.IL.Pop();
+			
+			var handleFinally = m.IL.BeginFinallyBlock(handleBlock);
+			EmitSubNodeN(1, m);
+			m.IL.Pop();
+			m.IL.EndFinallyBlock(handleFinally);
+			m.IL.EndExceptionBlock(handleBlock);
+
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			TryFinallyStatement statement = new TryFinallyStatement();
@@ -568,7 +789,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return statement;
 		}
 	}
-	
+
 	public class ErrorHandlerNode : PlanNode
 	{
 		public ErrorHandlerNode() : base()
@@ -677,26 +898,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			catch (Exception exception)
 			{
-				// if this is a host exception, set the error variable
-				if (program.Stack.ErrorVar == null)
-					program.Stack.ErrorVar = exception;
-					
-				ErrorHandlerNode node;
-				object errorVar = program.Stack.ErrorVar;
-				for (int index = 1; index < NodeCount; index++)
-				{
-					node = GetErrorHandlerNode(Nodes[index]);
-					if (program.DataTypes.SystemError.Is(node.ErrorType)) // TODO: No RTTI on the error
-					{
-						node.Execute(program);
-						break;
-					}
-				}
-				program.Stack.ErrorVar = null;
+				InternalHandleException(exception, program);
 			}
 			return null;
 		}
-		
+
+		public void InternalHandleException(Exception exception, Program program)
+		{
+			// TODO: IL emission of this - flatten nodes
+
+			// if this is a host exception, set the error variable
+			if (program.Stack.ErrorVar == null)
+				program.Stack.ErrorVar = exception;
+
+			ErrorHandlerNode node;
+			object errorVar = program.Stack.ErrorVar;
+			for (int index = 1; index < NodeCount; index++)
+			{
+				node = GetErrorHandlerNode(Nodes[index]);
+				if (program.DataTypes.SystemError.Is(node.ErrorType)) // TODO: No RTTI on the error
+				{
+					node.Execute(program);
+					break;
+				}
+			}
+
+			program.Stack.ErrorVar = null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override bool RequiresEmptyStack { get { return true; } }
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var handleBlock = m.IL.BeginExceptionBlock();
+			
+			EmitSubNodeN(0, m);
+			m.IL.Pop();
+
+			var handleCatch = m.IL.BeginCatchBlock(handleBlock, typeof(Exception));
+			var errorVar = m.StoreLocal(typeof(Exception));
+            m.LoadStatic(this);
+			m.IL.CastClass(typeof(TryExceptNode));
+			m.IL.LoadLocal(errorVar);
+			errorVar.Dispose();
+			m.LoadProgram();
+			m.IL.Call(typeof(TryExceptNode).GetMethod("InternalHandleException", new[] { typeof(Exception), typeof(Program) }));
+			m.IL.EndCatchBlock(handleCatch);
+			m.IL.EndExceptionBlock(handleBlock);
+			
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			TryExceptStatement statement = new TryExceptStatement();
@@ -732,7 +986,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			return null;
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var elseLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			EmitSubNodeN(0, m);
+			m.BranchOnNilOrFalse(Nodes[0], elseLabel);
+
+            EmitSubNodeN(1, m);
+			m.IL.Pop();
+
+			if (Nodes.Count > 2)
+				m.IL.Branch(endLabel);
+
+			m.IL.MarkLabel(elseLabel);
+			if (Nodes.Count > 2)
+			{
+				EmitSubNodeN(2, m);
+				m.IL.Pop();
+			}
+			else
+				m.IL.Nop();	// Something for the label to associate with
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			IfStatement statement = new IfStatement();
@@ -781,7 +1064,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			return null;
 		}
-		
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var endLabel = m.IL.DefineLabel();
+			for (var i = 0; i < Nodes.Count; ++i)
+			{
+				var nextLabel = m.IL.DefineLabel();
+				var caseNode = Nodes[i];
+				if (caseNode.Nodes.Count == 2)
+				{
+					caseNode.EmitSubNodeN(0, m);
+                    m.BranchOnNilOrFalse(caseNode.Nodes[0], nextLabel);
+
+					caseNode.EmitSubNodeN(1, m);
+					m.IL.Pop();
+
+                    m.IL.Branch(endLabel);
+
+                    m.IL.MarkLabel(nextLabel);
+                    m.IL.Nop();
+                }
+                else
+				{
+					caseNode.EmitSubNodeN(0, m);
+                    m.IL.Pop();
+                }
+			}
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.LoadNull();
+		}
+
 		public override Statement EmitStatement(EmitMode mode)
 		{
 			CaseStatement caseStatement = new CaseStatement();
@@ -843,7 +1159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					for (int index = 2; index < Nodes.Count; index++)
 					{
-						CaseItemNode node = (CaseItemNode)Nodes[index];
+						var node = (CaseItemNode)Nodes[index];
 						if (node.Nodes.Count == 2)
 						{
 							bool tempValue = false;
@@ -853,13 +1169,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								program.Stack.Push(whenVar);
 								try
 								{
-									object objectValue = Nodes[1].Execute(program);
+									var isMatch = Nodes[1].Execute(program);
 									#if NILPROPOGATION
-									if (objectValue == null)
+									if (isMatch == null)
 										tempValue = false;
 									else
 									#endif
-										tempValue = (bool)objectValue;
+										tempValue = (bool)isMatch;
 								}
 								finally
 								{
@@ -897,7 +1213,93 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode mode)
+		public override bool CanEmitIL => true;
+
+        public override bool RequiresEmptyStack { get { return true; } }
+
+        public override void InternalEmitIL(NativeMethod m)
+		{
+			// selector
+		 	EmitSubNodeN(0, m, true);
+            var selectorLocal = m.StoreLocal(typeof(object));
+
+            m.PushStack(() => m.IL.LoadLocal(selectorLocal));
+			var stackSelectorBlock = m.IL.BeginExceptionBlock();
+
+			var shouldDisposeSelector = DataValue.ShouldDispose(Nodes[0].DataType);
+			ExceptionBlock disposeSelectorBlock = null;
+			if (shouldDisposeSelector)
+				disposeSelectorBlock = m.IL.BeginExceptionBlock();
+
+			var endLabel = m.IL.DefineLabel();
+			var whenLocal = m.IL.DeclareLocal(typeof(object), initializeReused: false);
+			for (int index = 2; index < Nodes.Count; index++)
+			{
+				var nextLabel = m.IL.DefineLabel();
+
+				CaseItemNode caseNode = (CaseItemNode)Nodes[index];
+				if (caseNode.Nodes.Count == 2)
+                {
+                    caseNode.EmitSubNodeN(0, m, true);   // whenVar
+                    m.IL.StoreLocal(whenLocal);
+                    var shouldDisposeWhen = DataValue.ShouldDispose(caseNode.Nodes[0].DataType);
+					ExceptionBlock disposeBlock = null;
+					if (shouldDisposeWhen)
+                        disposeBlock = m.IL.BeginExceptionBlock();
+
+                    m.PushStack(() => m.IL.LoadLocal(whenLocal));
+                    var stackBlock = m.IL.BeginExceptionBlock();
+
+                    EmitSubNodeN(1, m);    // isMatch
+					m.BranchOnNilOrFalse(Nodes[1], nextLabel, true);
+
+                    var stackFinally = m.IL.BeginFinallyBlock(stackBlock);
+                    m.PopStack();
+					m.IL.EndFinallyBlock(stackFinally);
+                    m.IL.EndExceptionBlock(stackBlock);
+
+                    if (shouldDisposeWhen)
+                    {
+                        var disposeFinally = m.IL.BeginFinallyBlock(disposeBlock);
+                        m.DisposeValue(() => m.IL.LoadLocal(whenLocal));
+						m.IL.EndFinallyBlock(disposeFinally);
+                        m.IL.EndExceptionBlock(disposeBlock);
+                    }
+
+                    caseNode.EmitSubNodeN(1, m);
+                    m.IL.Pop();
+                    m.IL.Leave(endLabel);
+
+                    m.IL.MarkLabel(nextLabel);
+                    m.IL.Nop();
+                }
+                else
+				{
+					caseNode.EmitSubNodeN(0, m);
+					m.IL.Pop();
+					m.IL.Leave(endLabel);
+				}
+			}
+
+			var stackSelectorFinally = m.IL.BeginFinallyBlock(stackSelectorBlock);
+			m.PopStack();
+			m.IL.EndFinallyBlock(stackSelectorFinally);
+			m.IL.EndExceptionBlock(stackSelectorBlock);
+
+			if (shouldDisposeSelector)
+			{
+				var disposeSelectorFinally = m.IL.BeginFinallyBlock(disposeSelectorBlock);
+				m.DisposeValue(() => m.IL.LoadLocal(selectorLocal));
+				m.IL.EndFinallyBlock(disposeSelectorFinally);
+				m.IL.EndExceptionBlock(disposeSelectorBlock);
+			}
+			selectorLocal.Dispose();
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.LoadNull();
+		}
+
+        public override Statement EmitStatement(EmitMode mode)
 		{
 			CaseStatement caseStatement = new CaseStatement();
 			caseStatement.Expression = (Expression)Nodes[0].EmitStatement(mode);
@@ -965,7 +1367,65 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return _value;		 
 		}
-		
+
+		public override bool CanEmitIL
+		{
+			get
+			{
+				return 
+                    (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemBooleanName)
+						|| Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemByteName)
+						|| Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemShortName)
+						|| Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemIntegerName)
+					    || Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemLongName)
+					    || Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemDecimalName)
+					    || Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemMoneyName)
+					    || Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemStringName)
+				    );
+			}
+		}
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			if (_value == null)
+				m.IL.LoadNull();
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemBooleanName))
+				m.IL.LoadConstant((bool)_value ? 1 : 0);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemIntegerName))
+				m.IL.LoadConstant((int)_value);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemByteName))
+			{
+				m.IL.LoadConstant((int)_value);
+				m.IL.Convert<byte>();
+			}
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemShortName))
+			{
+				m.IL.LoadConstant((int)_value);
+				m.IL.Convert<short>();
+			}
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemLongName))
+			{
+				m.IL.LoadConstant((long)_value);
+				m.IL.Convert<long>();   // According to ILGen in Linq.Expressions, this is needed
+			}
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemDecimalName)
+			|| Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemMoneyName))
+			{
+				var bits = Decimal.GetBits((decimal)_value);
+				m.IL.LoadConstant(bits[0]);
+				m.IL.LoadConstant(bits[1]);
+				m.IL.LoadConstant(bits[2]);
+				m.IL.LoadConstant(((bits[3] & 0x80000000) != 0) ? 1 : 0);
+				m.IL.LoadConstant(((bits[3] >> 16) & 0x7f));
+				m.IL.NewObject(typeof(decimal).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte) }));
+			}
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemStringName))
+				m.IL.LoadConstant((string)_value);
+			else
+				throw new RuntimeException(RuntimeException.Codes.UnsupportedValueType, _dataType.Name);
+			m.NativeToPhysical(this);
+		}
+
 		// EmitStatement
 		public override Statement EmitStatement(EmitMode mode)
 		{
@@ -1065,7 +1525,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return Nodes[0].Execute(program);
 		}
 
-		protected override void InternalClone(PlanNode newNode)
+        public override bool CanEmitIL => true;
+
+        public override void InternalEmitIL(NativeMethod m)
+        {
+			EmitSubNodeN(0, m);
+        }
+
+        protected override void InternalClone(PlanNode newNode)
 		{
 			base.InternalClone(newNode);
 
@@ -1084,6 +1551,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		private PlanNode _allocateResultNode;
+		public PlanNode AllocateResultNode { get { return _allocateResultNode; } }
 
 		protected override void InternalClone(PlanNode newNode)
 		{
@@ -1206,8 +1674,151 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.Plan.PopSecurityContext();
 			}
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override ArgumentEmissionStyle ArgumentEmissionStyle
+		{
+			get { return ArgumentEmissionStyle.PhysicalInLocals; }
+		}
+
+		public override bool RequiresEmptyStack { get { return true; } }
+
+        protected override void EmitInstructionOperation(NativeMethod m, Local[] arguments)
+		{
+            // Push arguments onto Dataphor stack
+			for (var i = 0; i < Nodes.Count; ++i)
+                m.PushStack(() =>
+					{
+						m.IL.LoadLocal(arguments[i]);
+						m.PhysicalToObject(Nodes[i]);
+					}
+				);
+
+			// NOTE: Removed this per the comment in InternalExecute
+			//program.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
+
+			m.LoadProgram();
+			m.IL.CallVirtual(typeof(Program).GetMethod("get_ServerProcess", new Type[0]));
+			var serverProcessLocal = m.StoreLocal(typeof(ServerProcess));
+
+			m.IL.LoadLocal(serverProcessLocal);
+			m.IL.CallVirtual(typeof(ServerProcess).GetMethod("get_IsInsert", new Type[0]));
+			var isInsertLocal = m.StoreLocal(typeof(bool));
+
+			m.IL.LoadLocal(serverProcessLocal);
+			m.IL.LoadConstant(0);
+			m.IL.CallVirtual(typeof(ServerProcess).GetMethod("set_IsInsert", new[] { typeof(bool) }));
+
+			var isInsertBlock = m.IL.BeginExceptionBlock();
+
+			ExceptionBlock globalContextBlock = null;
+			if (!Operator.ShouldTranslate)
+			{
+				m.IL.LoadLocal(serverProcessLocal);
+				m.IL.CallVirtual(typeof(ServerProcess).GetMethod("PushGlobalContext", new Type[0]));
+				globalContextBlock = m.IL.BeginExceptionBlock();
+			}
+
+			// Prepare the result
+			if (_allocateResultNode != null)
+            {
+                m.Node(_allocateResultNode);
+                m.IL.Pop(); // statement, ignore result
+            }
+
+            // Record the stack depth
+			m.StackCount();
+            var stackDepthLocal = m.StoreLocal(typeof(int));
+
+			m.IL.LoadConstant("Before stack depth: ");
+			m.IL.Call(typeof(System.Diagnostics.Debug).GetMethod("Write", new[] { typeof(object) }));
+			m.IL.LoadLocal(stackDepthLocal);
+			m.IL.Box(typeof(int));
+			m.IL.Call(typeof(System.Diagnostics.Debug).GetMethod("WriteLine", new[] { typeof(object) }));
+
+			var exitBlock = m.IL.BeginExceptionBlock();
+
+            // TODO: inline optimization for simple cases
+            m.LoadStatic(this);
+            m.IL.CastClass(typeof(CallNode));
+			m.IL.CallVirtual(typeof(CallNode).GetMethod("get_Operator", new Type[0]));
+			m.IL.CallVirtual(typeof(Schema.Operator).GetMethod("get_Block", new Type[0]));
+			m.IL.CallVirtual(typeof(Schema.OperatorBlock).GetMethod("get_BlockNode", new Type[0]));
+			m.NodeExecute();
+			// Disregard results of block, actual result will be on the Dataphor stack
+			m.IL.Pop();
+
+			var exitCatch = m.IL.BeginCatchBlock(exitBlock, typeof(ExitError));
+			m.IL.Pop();
+			m.IL.EndCatchBlock(exitCatch);
+			m.IL.EndExceptionBlock(exitBlock);
+
+			// Pass any var arguments back out to the instruction
+			for (int index = 0; index < Operator.Operands.Count; index++)
+				if (Operator.Operands[index].Modifier == Modifier.Var)
+				{
+					m.GetStackItem(() =>
+					{
+						// TODO: Surely we can resolve the stack depth at compile time and replace all of this with a const
+						m.IL.LoadConstant(Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index);
+						m.StackCount();
+						m.IL.LoadLocal(stackDepthLocal);
+						m.IL.Subtract();
+						m.IL.Add();
+					}
+					);
+					m.IL.StoreLocal(arguments[index]);
+				}
+
+			// Return the result
+			if (_allocateResultNode != null)
+			{
+				m.GetStackItem(() =>
+				{
+					m.GetStack();
+					// TODO: Surely we can resolve the stack depth at compile time and replace all of this with a const
+					m.IL.CallVirtual(typeof(Stack).GetMethod("get_Count", new Type[0]));
+					m.IL.LoadLocal(stackDepthLocal);
+					m.IL.Subtract();
+				});
+				stackDepthLocal.Dispose();
+				m.ObjectToPhysical(this);
+			}
+			else
+				m.IL.LoadNull();
+
+			// Store the result in a local for after the finallies
+			var resultLocal = m.StoreLocal(PhysicalType);
+
+			if (!Operator.ShouldTranslate)
+			{
+				var globalContextFinally = m.IL.BeginFinallyBlock(globalContextBlock);
+				m.IL.LoadLocal(serverProcessLocal);
+				m.IL.CallVirtual(typeof(ServerProcess).GetMethod("PopGlobalContext", new Type[0]));
+				m.IL.EndFinallyBlock(globalContextFinally);
+				m.IL.EndExceptionBlock(globalContextBlock);
+			}
+
+			var isInsertFinally = m.IL.BeginFinallyBlock(isInsertBlock);
+			m.IL.LoadLocal(serverProcessLocal);
+			serverProcessLocal.Dispose();
+			m.IL.LoadLocal(isInsertLocal);
+			isInsertLocal.Dispose();
+			m.IL.CallVirtual(typeof(ServerProcess).GetMethod("set_IsInsert", new[] { typeof(bool) }));
+			m.IL.EndFinallyBlock(isInsertFinally);
+			m.IL.EndExceptionBlock(isInsertBlock);
+
+			m.IL.LoadLocal(resultLocal);
+			resultLocal.Dispose();
+		}
+
+		protected override void EmitPostInstruction(NativeMethod m)
+		{
+			// No need to convert to physical
+		}
 	}
-	
+
 	public class VariableNode : PlanNode
 	{
 		public VariableNode() : base()
@@ -1268,10 +1879,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			program.Stack.Push(null);
-			int stackDepth = program.Stack.Count;
 
 			if (NodeCount > 0)
 			{
+				int stackDepth = program.Stack.Count;
 				object tempValue = Nodes[0].Execute(program);
 				if (Nodes[0].DataType is Schema.ScalarType)
 					tempValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)Nodes[0].DataType, tempValue);
@@ -1296,6 +1907,47 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				statement.Expression = (Expression)Nodes[0].EmitStatement(mode);
 			return statement;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.PushStack(() => m.IL.LoadNull());
+
+			if (NodeCount > 0)
+			{
+				m.StackCount();
+				var stackCountLocal = m.StoreLocal(typeof(int));
+
+				EmitValidatedAssignment(m, () => EmitSubNodeN(0, m, true), 0);
+				var valueLocal = m.StoreLocal(typeof(object));
+
+				m.GetStack();
+				m.StackCount();
+				m.IL.LoadLocal(stackCountLocal);
+				stackCountLocal.Dispose();
+				m.IL.Subtract();
+				m.IL.LoadLocal(valueLocal);
+				valueLocal.Dispose();
+				m.IL.CallVirtual(typeof(Stack).GetMethod("Poke", new[] { typeof(int), typeof(object) }));
+			}
+			else
+			{
+				if (_hasDefault && (VariableType is Schema.ScalarType))
+				{
+					m.GetStack();
+					m.IL.LoadConstant(0);
+					m.LoadProgram();
+                    m.LoadStatic(this);
+					m.IL.CallVirtual(typeof(VariableNode).GetMethod("get_VariableType", new Type[0]));
+					m.IL.CastClass(typeof(Schema.ScalarType));
+					m.IL.Call(typeof(ValueUtility).GetMethod("DefaultValue", new[] { typeof(Program), typeof(Schema.ScalarType) }));
+					m.IL.CallVirtual(typeof(Stack).GetMethod("Poke", new[] { typeof(int), typeof(object) }));
+				}
+			}
+
+			m.IL.LoadNull();
+		}
 	}
 	
 	public class DropVariableNode : PlanNode
@@ -1313,6 +1965,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			program.Stack.Pop();
 			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.PopStack();
+			m.IL.LoadNull();
 		}
 	}
 	
@@ -1339,8 +1999,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return new EmptyStatement();
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.DisposeValue(() => m.GetStackItem(() => m.IL.LoadConstant(Location)));
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class NoOpNode : PlanNode
 	{
 		public NoOpNode() : base()
@@ -1356,8 +2024,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return new EmptyStatement();
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.IL.LoadNull();
+		}
 	}
-	
+
 	public class AssignmentNode : PlanNode
 	{
 		public AssignmentNode() : base()
@@ -1398,12 +2073,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			statement.Expression = (Expression)Nodes[1].EmitStatement(mode);
 			return statement;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.GetStack();
+
+			m.IL.LoadConstant(((StackReferenceNode)Nodes[0]).Location);
+
+			EmitValidatedAssignment(m, () => EmitSubNodeN(1, m, true), 1);
+
+			m.IL.CallVirtual(typeof(Stack).GetMethod("Poke", new[] { typeof(int), typeof(object) }));
+
+			m.IL.LoadNull();
+		}
 	}
-	
-    // Nodes[0] = If condition (must be boolean)
-    // Nodes[1] = True expression
-    // Nodes[2] = False expression (must be the same type as the true expression)
-    public class ConditionNode : PlanNode
+
+	// Nodes[0] = If condition (must be boolean)
+	// Nodes[1] = True expression
+	// Nodes[2] = False expression (must be the same type as the true expression)
+	public class ConditionNode : PlanNode
     {
 		// DetermineDataType
 		public override void DetermineDataType(Plan plan)
@@ -1443,9 +2133,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 		}
-		
-		// Execute
-		public override object InternalExecute(Program program)
+
+        public override void DetermineCharacteristics(Plan plan)
+        {
+            IsLiteral = true;
+            IsFunctional = true;
+            IsDeterministic = true;
+            IsRepeatable = true;
+            for (int index = 0; index < Nodes.Count; index++)
+            {
+                IsLiteral = IsLiteral && Nodes[index].IsLiteral;
+                IsFunctional = IsFunctional && Nodes[index].IsFunctional;
+                IsDeterministic = IsDeterministic && Nodes[index].IsDeterministic;
+                IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
+            }
+            IsNilable = false;
+            for (int index = 1; index < Nodes.Count; index++)
+                IsNilable = IsNilable || Nodes[index].IsNilable;
+        }
+
+        // Execute
+        public override object InternalExecute(Program program)
 		{
 			bool tempValue = false;
 			object objectValue = Nodes[0].Execute(program);
@@ -1467,7 +2175,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			return new IfExpression((Expression)Nodes[0].EmitStatement(mode), (Expression)Nodes[1].EmitStatement(mode), (Expression)Nodes[2].EmitStatement(mode));
 		}
-    }
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var falseLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			EmitSubNodeN(0, m);
+			m.BranchOnNilOrFalse(Nodes[0], falseLabel);
+			EmitSubNodeN(1, m);
+            m.PhysicalToPhysical(Nodes[1], this);
+			m.IL.Branch(endLabel);
+			m.IL.MarkLabel(falseLabel);
+			EmitSubNodeN(2, m);
+            m.PhysicalToPhysical(Nodes[2], this);
+            m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+		}
+	}
 
 	public class ConditionedCaseNode : PlanNode
 	{
@@ -1492,8 +2219,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 		}
-		
-		public override object InternalExecute(Program program)
+
+        public override void DetermineCharacteristics(Plan plan)
+        {
+            IsLiteral = true;
+            IsFunctional = true;
+            IsDeterministic = true;
+            IsRepeatable = true;
+            IsNilable = false;
+            foreach (var node in Nodes)
+            {
+                IsLiteral = IsLiteral && node.IsLiteral;
+                IsFunctional = IsFunctional && node.IsFunctional;
+                IsDeterministic = IsDeterministic && node.IsDeterministic;
+                IsRepeatable = IsRepeatable && node.IsRepeatable;
+                IsNilable = IsNilable || node.IsNilable;
+            }
+        }
+
+        public override object InternalExecute(Program program)
 		{
 			foreach (ConditionedCaseItemNode node in Nodes)
 			{
@@ -1530,13 +2274,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			return caseExpression;
 		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var endLabel = m.IL.DefineLabel();
+
+			for (int i = 0; i < Nodes.Count; ++i)
+			{
+				var nextLabel = m.IL.DefineLabel();
+				var sub = (ConditionedCaseItemNode)Nodes[i];
+				if (sub.Nodes.Count == 2)
+				{
+					sub.EmitSubNodeN(0, m);
+					m.BranchOnNilOrFalse(sub.Nodes[0], nextLabel);
+					sub.EmitSubNodeN(1, m);
+                    m.PhysicalToPhysical(sub, this);
+					m.IL.Branch(endLabel);
+
+					m.IL.MarkLabel(nextLabel);
+					m.IL.Nop();
+				}
+				else
+				{
+					sub.EmitSubNodeN(0, m);
+                    m.PhysicalToPhysical(sub, this);
+					m.IL.Branch(endLabel);
+				}
+			}
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+		}
 	}
-	
+
 	// Nodes[0] -> Selector expression
 	// Nodes[1] -> Selector equality node
 	// Nodes[2..N] -> case item nodes
-		// Nodes[0] -> case item when expression
-		// Nodes[1] -> case item then expression
+	//	Nodes[0] -> case item when expression
+	//	Nodes[1] -> case item then expression
 	public class SelectedConditionedCaseNode : PlanNode
 	{
 		// DetermineDataType
@@ -1577,14 +2354,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 		}
 
-		public override object InternalExecute(Program program)
+        public override void DetermineCharacteristics(Plan plan)
+        {
+            IsLiteral = true;
+            IsFunctional = true;
+            IsDeterministic = true;
+            IsRepeatable = true;
+            foreach (var node in Nodes)
+            {
+                IsLiteral = IsLiteral && node.IsLiteral;
+                IsFunctional = IsFunctional && node.IsFunctional;
+                IsDeterministic = IsDeterministic && node.IsDeterministic;
+                IsRepeatable = IsRepeatable && node.IsRepeatable;
+            }
+            IsNilable = false;
+            for (int index = 2; index < Nodes.Count; index++)
+                IsNilable = IsNilable || Nodes[index].IsNilable;
+        }
+
+        public override object InternalExecute(Program program)
 		{
 			object selector = Nodes[0].Execute(program);
 			try
 			{
 				for (int index = 2; index < Nodes.Count; index++)
 				{
-					ConditionedCaseItemNode node = (ConditionedCaseItemNode)Nodes[index];
+					var node = (ConditionedCaseItemNode)Nodes[index];
 					if (node.Nodes.Count == 2)
 					{
 						bool tempValue = false;
@@ -1635,7 +2430,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode mode)
+        public override Statement EmitStatement(EmitMode mode)
 		{
 			CaseExpression caseExpression = new CaseExpression();
 			caseExpression.Expression = (Expression)Nodes[0].EmitStatement(mode);
@@ -1649,13 +2444,124 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			return caseExpression;
 		}
+
+		public override bool CanEmitIL => true;
+
+        public override bool RequiresEmptyStack { get { return true; } }
+
+        public override void InternalEmitIL(NativeMethod m)
+		{
+			var endLabel = m.IL.DefineLabel();
+			var whenLocal = m.IL.DeclareLocal(typeof(object), initializeReused: false);
+			var shouldDisposeSelector = DataValue.ShouldDispose(Nodes[0].DataType);
+
+			// selector
+			EmitSubNodeN(0, m, true);
+			var selectorLocal = m.StoreLocal(typeof(object));
+
+			ExceptionBlock disposeSelectorBlock = null;
+			if (shouldDisposeSelector)
+				disposeSelectorBlock = m.IL.BeginExceptionBlock();
+
+			for (int index = 2; index < Nodes.Count; index++)
+			{
+				var nextLabel = m.IL.DefineLabel();
+
+				var caseNode = (ConditionedCaseItemNode)Nodes[index];
+				if (caseNode.Nodes.Count == 2)
+				{
+					caseNode.EmitSubNodeN(0, m, true);   // whenVar
+					m.IL.StoreLocal(whenLocal);
+			
+					var shouldDisposeWhen = DataValue.ShouldDispose(caseNode.Nodes[0].DataType);
+					ExceptionBlock disposeBlock = null;
+					if (shouldDisposeWhen)
+						disposeBlock = m.IL.BeginExceptionBlock();
+
+					m.PushStack(() => m.IL.LoadLocal(selectorLocal));
+					var pushSelectorBlock = m.IL.BeginExceptionBlock();
+
+					m.PushStack(() => m.IL.LoadLocal(whenLocal));
+					var pushWhenBlock = m.IL.BeginExceptionBlock();
+
+					EmitSubNodeN(1, m);    // isMatch
+					m.BranchOnNilOrFalse(Nodes[1], nextLabel, true);
+
+					var pushWhenFinally = m.IL.BeginFinallyBlock(pushWhenBlock);
+					m.PopStack();
+					m.IL.EndFinallyBlock(pushWhenFinally);
+					m.IL.EndExceptionBlock(pushWhenBlock);
+
+					var pushSelectorFinally = m.IL.BeginFinallyBlock(pushSelectorBlock);
+					m.PopStack();
+					m.IL.EndFinallyBlock(pushSelectorFinally);
+					m.IL.EndExceptionBlock(pushSelectorBlock);
+
+					if (shouldDisposeWhen)
+					{
+						var disposeFinally = m.IL.BeginFinallyBlock(disposeBlock);
+						m.DisposeValue(() => m.IL.LoadLocal(whenLocal));
+						m.IL.EndFinallyBlock(disposeFinally);
+						m.IL.EndExceptionBlock(disposeBlock);
+					}
+
+					caseNode.EmitSubNodeN(1, m);
+                    m.PhysicalToPhysical(caseNode, this);
+					m.BranchOrLeave(endLabel, shouldDisposeSelector);
+
+					m.IL.MarkLabel(nextLabel);
+					m.IL.Nop();
+				}
+				else
+				{
+					caseNode.EmitSubNodeN(0, m);
+					m.BranchOrLeave(endLabel, shouldDisposeSelector);
+				}
+			}
+
+			if (shouldDisposeSelector)
+			{
+				var disposeSelectorFinally = m.IL.BeginFinallyBlock(disposeSelectorBlock);
+				m.DisposeValue(() => m.IL.LoadLocal(selectorLocal));
+				m.IL.EndFinallyBlock(disposeSelectorFinally);
+				m.IL.EndExceptionBlock(disposeSelectorBlock);
+			}
+
+			whenLocal.Dispose();
+			selectorLocal.Dispose();
+
+			m.IL.MarkLabel(endLabel);
+		}
 	}
-	
+
 	public class ConditionedCaseItemNode : PlanNode
 	{
-		public override object InternalExecute(Program program)
+        public override void DetermineCharacteristics(Plan plan)
+        {
+            IsLiteral = true;
+            IsFunctional = true;
+            IsDeterministic = true;
+            IsRepeatable = true;
+            foreach (var node in Nodes)
+            {
+                IsLiteral = IsLiteral && node.IsLiteral;
+                IsFunctional = IsFunctional && node.IsFunctional;
+                IsDeterministic = IsDeterministic && node.IsDeterministic;
+                IsRepeatable = IsRepeatable && node.IsRepeatable;
+            }
+            IsNilable = Nodes.Count == 1 ? Nodes[0].IsNilable : Nodes[1].IsNilable;
+        }
+
+        public override object InternalExecute(Program program)
 		{
 			return null;
+		}
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.IL.LoadNull();
 		}
 	}
 
@@ -1687,28 +2593,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public StackReferenceNode() : base()
 		{
 		}
-		
-		public StackReferenceNode(Schema.IDataType dataType, int location) : base(dataType)
+
+		protected StackReferenceNode(Schema.IDataType dataType) : base(dataType)
+		{
+		}
+
+		public StackReferenceNode(Schema.IDataType dataType, int location) : this(dataType)
 		{
 			Location = location;
 		}
 		
-		public StackReferenceNode(Schema.IDataType dataType, int location, bool byReference) : base(dataType)
+		public StackReferenceNode(Schema.IDataType dataType, int location, bool byReference) : this(dataType, location)
 		{
-			Location = location;
 			ByReference = byReference;
 		}
 		
-		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location) : base(dataType)
+		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location) : this(dataType, location)
 		{
 			Identifier = identifier;
-			Location = location;
 		}
 		
-		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location, bool byReference) : base(dataType)
+		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location, bool byReference) : this(identifier, dataType, location)
 		{
-			Identifier = identifier;
-			Location = location;
 			ByReference = byReference;
 		}
 		
@@ -1753,6 +2659,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _identifier);
 		}
 
+		public override void DetermineCharacteristics(Plan plan)
+		{
+			// TODO: imperative nilability detection
+			IsNilable = true;
+		}
+
 		// Execute
 		public override object InternalExecute(Program program)
 		{
@@ -1776,9 +2688,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return false;
 			return true;
 		}
-    }
-    
-    public class StackColumnReferenceNode : VarReferenceNode
+
+		public override bool CanEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			m.GetStackItem(Location);
+			if (!ByReference)
+			{
+				var valueLocal = m.StoreLocal(typeof(object));
+				m.CopyValue(() => m.IL.LoadLocal(valueLocal));
+				valueLocal.Dispose();
+			}
+			m.ObjectToPhysical(this);
+        }
+	}
+
+	public class StackColumnReferenceNode : VarReferenceNode
     {
 		// constructor
 		#if USECOLUMNLOCATIONBINDING
@@ -1823,6 +2749,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		#if !USECOLUMNLOCATIONBINDING		
 		private string _resolvingIdentifier;
+		public string ResolvingIdentifier { get { return _resolvingIdentifier;  } }
 		private void SetResolvingIdentifier()
 		{
 			switch (Schema.Object.Qualifier(Schema.Object.EnsureUnrooted(Identifier)))
@@ -1908,6 +2835,87 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 
+		//public override bool ShouldEmitIL => true;
+
+		public override void InternalEmitIL(NativeMethod m)
+		{
+			var errorLabel = m.IL.DefineLabel();
+			var nullLabel = m.IL.DefineLabel();
+			var endLabel = m.IL.DefineLabel();
+
+			m.GetStackItem(Location);
+			m.IL.CastClass(typeof(IRow));
+			var rowLocal = m.StoreLocal(typeof(IRow));
+			m.IL.StoreLocal(rowLocal);
+			// TODO: once nilability inference is in place, avoid checking
+			//if (IsNilable)
+			{
+				m.IL.LoadLocal(rowLocal);
+				m.IL.BranchIfFalse(nullLabel);
+				m.IL.LoadLocal(rowLocal);
+				m.IL.CallVirtual(typeof(IDataValue).GetMethod("get_IsNil", new Type[0]));
+				m.IL.BranchIfFalse(nullLabel);
+			}
+
+			// TODO: Avoid referencing columns by name at runtime
+			m.IL.LoadLocal(rowLocal);
+			m.IL.CallVirtual(typeof(IRow).GetMethod("get_DataType", new Type[0]));
+			m.IL.CallVirtual(typeof(Schema.IRowType).GetMethod("get_Columns", new Type[0]));
+			m.IL.CallVirtual(typeof(Schema.Columns).GetMethod("IndexOf", new[] { typeof(string) }));
+			var columnIndexLocal = m.StoreLocal(typeof(int));
+
+			m.IL.LoadLocal(columnIndexLocal);
+			m.IL.LoadConstant(0);
+			m.IL.CompareLessThan();
+			m.IL.BranchIfTrue(errorLabel);
+
+			m.IL.LoadLocal(rowLocal);
+			m.IL.LoadLocal(columnIndexLocal);
+			m.IL.CallVirtual(typeof(IRow).GetMethod("HasValue", new[] { typeof(int) }));
+			m.IL.BranchIfFalse(nullLabel);
+
+			#if USECOLUMNLOCATIONBINDING
+			TODO: Write logic
+			#endif
+
+			if (ByReference)
+				EmitGetRowItem(m, rowLocal, columnIndexLocal);
+			else
+				m.CopyValue(() => EmitGetRowItem(m, rowLocal, columnIndexLocal));
+			m.IL.Branch(endLabel);
+
+			m.IL.MarkLabel(errorLabel);
+			m.IL.LoadConstant((int)CompilerException.Codes.UnknownIdentifier);
+			m.IL.LoadConstant(1);
+			m.IL.NewArray(typeof(object));
+			m.IL.Duplicate();
+			m.IL.LoadConstant(0);
+            m.LoadStatic(this);
+            m.IL.LoadField(typeof(StackColumnReferenceNode).GetField("_resolvingIdentifier"));
+			m.IL.StoreElement<object>();
+			m.IL.NewObject(typeof(CompilerException).GetConstructor(new[] { typeof(CompilerException.Codes), typeof(object[]) }));
+			m.IL.Throw();
+			
+			m.IL.MarkLabel(nullLabel);
+			m.IL.LoadNull();
+			m.IL.Branch(endLabel);
+
+			m.IL.MarkLabel(endLabel);
+			m.IL.Nop();
+
+			m.ObjectToPhysical(this);
+
+			rowLocal.Dispose();
+			columnIndexLocal.Dispose();
+		}
+
+		private static void EmitGetRowItem(NativeMethod m, Local rowLocal, Local columnIndexLocal)
+		{
+			m.IL.LoadLocal(rowLocal);
+			m.IL.LoadLocal(columnIndexLocal);
+			m.IL.CallVirtual(typeof(IRow).GetMethod("get_Item", new[] { typeof(int) }));
+		}
+
 		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
 			base.WritePlanAttributes(writer);
@@ -1935,7 +2943,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsDeterministic = true;
 			IsRepeatable = true;
 			// TODO: introduce infrastructure (possible by merging tablevar with tabletype) to infer nilability through columns
-			IsNilable = false;  //((Schema.RowType)APlan.Symbols[Location].DataType).Columns[FResolvingIdentifier].IsNilable;
+			IsNilable = true;  //((Schema.RowType)APlan.Symbols[Location].DataType).Columns[FResolvingIdentifier].IsNilable;
 			base.DetermineCharacteristics(plan);
 		}
     }
