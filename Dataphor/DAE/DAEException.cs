@@ -32,6 +32,11 @@ namespace Alphora.Dataphor.DAE
 		string Locator { get; set; }
 	}
 
+	public interface ICodeContextException
+	{
+		string Context { get; set; }
+	}
+
 	public static class LocatedExceptionExtensions
 	{
 		public static void SetLocator(this Exception exception, Alphora.Dataphor.DAE.Debug.DebugLocator locator)

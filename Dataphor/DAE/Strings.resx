@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="SystemDisplayTextNode.Representation" xml:space="preserve">
     <value>Representation '{0}'</value>
@@ -219,10 +219,10 @@
   <data name="SchemaObjectDescription.Property" xml:space="preserve">
     <value>Property "{0}" of representation "{1}" of type "{2}"</value>
   </data>
-	<data name="SchemaObjectDescription.ClassType" xml:space="preserve">
+  <data name="SchemaObjectDescription.ClassType" xml:space="preserve">
     <value>Class Type "{0}"</value>
   </data>
-	<data name="SchemaObjectDescription.ScalarType" xml:space="preserve">
+  <data name="SchemaObjectDescription.ScalarType" xml:space="preserve">
     <value>Type "{0}"</value>
   </data>
   <data name="SchemaObjectDescription.ScalarTypeDefault" xml:space="preserve">
@@ -347,5 +347,10 @@
   </data>
   <data name="SchemaObjectDescription.ServerLink" xml:space="preserve">
     <value>Server link "{0}" ({1} on {2}{3})</value>
+  </data>
+  <data name="ExceptionInContext" xml:space="preserve">
+    <value>{0}
+in:
+{1}</value>
   </data>
 </root>

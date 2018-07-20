@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	///	processing the abstract syntax tree for a given program.  The line number and position of the
 	/// invalid constructs will be given if possible.  Only the compiler should throw exceptions of this type.
 	/// </remarks>
-	public class CompilerException : DAEException, ILocatorException
+	public class CompilerException : DAEException, ILocatorException, ICodeContextException
 	{
 		public enum Codes : int
 		{
@@ -815,6 +815,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 			_linePos = linePos;
 		}
 
+		// TODO: duplication here suggests need for common base with runtime exception
+		public override string GetDetails()
+		{
+			if (Context != null)
+				return String.Format("Exception occurred while executing the following code: {0}", Context);
+
+			return base.GetDetails();
+		}
+
 		private CompilerErrorLevel _errorLevel = CompilerErrorLevel.NonFatal;
 		public CompilerErrorLevel ErrorLevel { get { return _errorLevel; } }
 
@@ -838,6 +847,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get { return _locator; }
 			set { _locator = value; }
 		}
+
+		public string Context { get; set; }
 	}
 	
 	#if USETYPEDLIST
