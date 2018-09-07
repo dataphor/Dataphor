@@ -102,40 +102,40 @@ insert
 //* Table: CQLTypeMappings
 // Define CQL type mappings	
 SafeDrop("CQLTypeMappings");
-create table CQLTypeMappings in Temp { SourceTypeName : String, TargetTypeName : String, key { SourceTypeName } };
+create table CQLTypeMappings in Temp { SourceTypeName : String, TargetTypeSpecifier : TypeSpecifier, key { SourceTypeName } };
 
 insert
-	table
+	table of typeof(CQLTypeMappings)
 	{
-		row { "FHIR.base64Binary" SourceTypeName, "System.String" TargetTypeName },
-		row { "FHIR.boolean", "System.Boolean" },
-		row { "FHIR.code", "System.String" },
-		row { "FHIR.date", "System.DateTime" },
-		row { "FHIR.dateTime", "System.DateTime" },
-		row { "FHIR.decimal", "System.Decimal" },
-		row { "FHIR.id", "System.String" },
-		row { "FHIR.instant", "System.DateTime" },
-		row { "FHIR.integer", "System.Integer" },
-		row { "FHIR.markdown", "System.String" },
-		row { "FHIR.oid", "System.String" },
-		row { "FHIR.positiveInt", "System.Integer" },
-		row { "FHIR.string", "System.String" },
-		row { "FHIR.time", "System.Time" },
-		row { "FHIR.unsignedInt", "System.Integer" },
-		row { "FHIR.uri", "System.String" },
-		row { "FHIR.uuid", "System.String" },
-		row { "FHIR.xhtml", "System.String" },
-		row { "FHIR.Coding", "System.Code" },
-		row { "FHIR.CodeableConcept", "System.Concept" },
-		row { "FHIR.Period", "Interval<System.DateTime>" },
-		row { "FHIR.Range", "Interval<System.Quantity>" },
-		row { "FHIR.Quantity", "System.Quantity" },
-		row { "FHIR.Age", "System.Quantity" },
-		row { "FHIR.Distance", "System.Quantity" },
-		row { "FHIR.SimpleQuantity", "System.Quantity" },
-		row { "FHIR.Duration", "System.Quantity" },
-		row { "FHIR.Count", "System.Quantity" },
-		row { "FHIR.Money", "System.Quantity" }
+		row { "FHIR.base64Binary" SourceTypeName, NamedTypeSpecifier(row { "System" modelName, "String" name }) TargetTypeSpecifier },
+		row { "FHIR.boolean", NamedTypeSpecifier(row { "System" modelName, "Boolean" name }) },
+		row { "FHIR.code", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.date", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "FHIR.dateTime", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "FHIR.decimal", NamedTypeSpecifier(row { "System" modelName, "Decimal" name }) },
+		row { "FHIR.id", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.instant", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "FHIR.integer", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "FHIR.markdown", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.oid", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.positiveInt", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "FHIR.string", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.time", NamedTypeSpecifier(row { "System" modelName, "Time" name }) },
+		row { "FHIR.unsignedInt", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "FHIR.uri", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.uuid", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.xhtml", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "FHIR.Coding", NamedTypeSpecifier(row { "System" modelName, "Code" name }) },
+		row { "FHIR.CodeableConcept", NamedTypeSpecifier(row { "System" modelName, "Concept" name }) },
+		row { "FHIR.Period", IntervalTypeSpecifier(row { "System.DateTime" pointType }) },
+		row { "FHIR.Range", IntervalTypeSpecifier(row { "System.Quantity" pointType }) },
+		row { "FHIR.Quantity", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "FHIR.Age", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "FHIR.Distance", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "FHIR.SimpleQuantity", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "FHIR.Duration", NamedTypeSpecifier(row { "System" modelName, "Duration" name }) },
+		row { "FHIR.Count", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "FHIR.Money", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) }
 	}
 	into CQLTypeMappings;
 

@@ -6,21 +6,25 @@
 // Needs FHIR.LoadConformanceCache to load the structure definitions into in-memory tables for processing
 // Needs ModelInfo.Operators to create the required operators
 
-delete TypeInfos;
+delete Models where Url = "http://hl7.org/fhir";
+insert row { "FHIR" Name, "http://hl7.org/fhir" Url } into Models;
 
 // Generate Primitive Types
 foreach row in 
 	StructureDefinitions where StructureDefinition.Kind = "PrimitiveType" 
 do
-  BuildClassInfo(StructureDefinition);
-
+  BuildClassInfo("FHIR", StructureDefinition);
+  
 // Generate Complex Types
 foreach row in 
   StructureDefinitions
     where StructureDefinition.Kind = "ComplexType" 
 		and (StructureDefinition.BaseDefinition.IsNil() or StructureDefinition.BaseDefinition <> "http://hl7.org/fhir/StructureDefinition/Extension")
 do
-  BuildClassInfo(StructureDefinition);
+begin
+  delete Messages;
+  BuildClassInfo("FHIR", StructureDefinition);
+end;  
 
 // Generate Resources
 foreach row in
@@ -30,7 +34,7 @@ foreach row in
 do
 begin
   delete Messages;
-  BuildClassInfo(StructureDefinition);
+  BuildClassInfo("FHIR", StructureDefinition);
 end;
 
 //delete Documents where Library_Name = "CQF.Model.FHIR" and Name <> "Register"
@@ -55,8 +59,8 @@ CreateAndSave("CQF.Model.FHIR", "FHIRModelInfo", "xml",
     foreach row in 
       (TypeInfos 
         where Value is ClassInfo 
-          and Value.baseType = "FHIR.Element" 
-          and (Value as ClassInfo).element.Count() = 1 
+          and Value.baseType = "FHIR.Element"
+        where (Value as ClassInfo).element.Count() = 1
         { Name, Value as ClassInfo Value } 
         { Name, Value, Value.name sourceTypeName, Value.element[0].type targetTypeName }
         { Name, sourceTypeName, targetTypeName, "To" + Unqualify(targetTypeName) functionName }
@@ -86,7 +90,7 @@ foreach row in
   TypeInfos 
     where Value is ClassInfo 
       and Value.baseType = "FHIR.Element" 
-      and (Value as ClassInfo).element.Count() = 1 
+    where (Value as ClassInfo).element.Count() = 1
     { Name, Value as ClassInfo Value } 
     { Name, Value, Value.name sourceTypeName, Value.element[0].type targetTypeName }
     { Name, Value, sourceTypeName, targetTypeName, "To" + Unqualify(targetTypeName) functionName }

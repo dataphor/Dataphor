@@ -1,4 +1,3 @@
-  
 // CreateModelInfo
 // Iterate through a set of profiles to create a CQL model info that:
 // 1. Optionally uses CQL primitives, rather than FHIR primitives
@@ -13,8 +12,128 @@ select Resource where Id = "us-core-allergyintolerance" { (Content as StructureD
 
 select Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
    where StructureDefinition.Kind = "Resource"
-	{ Id, StructureDefinition.Url Url, StructureDefinition.Kind Kind, StructureDefinition.Type Type, StructureDefinition.BaseDefinition BaseDefinition, StructureDefinition.Derivation Derivation }
-	
+	{ 
+		Id, 
+		StructureDefinition.Url Url, 
+		StructureDefinition.Kind Kind, 
+		StructureDefinition.Type Type, 
+		StructureDefinition.BaseDefinition BaseDefinition, 
+		StructureDefinition.Derivation Derivation 
+	}
+
+create table Results in Temp from
+Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+   where StructureDefinition.Kind = "Resource"
+     and Id in list(String){ 'ActivityDefinition', 'EventDefinition', 'Measure', 'OperationDefinition', 'PlanDefinition', 'Questionnaire' }
+	{ 
+		Id,
+		Id Display,
+		StructureDefinition.Differential.Element[0].Short Description
+	}
+
+select Results { Id, Description }
+
+drop table Results;
+create table Results in Temp from
+Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+   where StructureDefinition.Kind = "Resource"
+     and Id in list(String){ 'Appointment',
+'AppointmentResponse',
+'CarePlan',
+'Claim',
+'CommunicationRequest',
+'Contract',
+'CoverageEligibilityRequest',
+'DeviceRequest',
+'EnrollmentRequest',
+'ImmunizationRecommendation',
+'MedicationRequest',
+'NutritionOrder',
+'ServiceRequest',
+'Task',
+'SupplyRequest',
+'VisionPrescription'}
+	{ 
+		Id,
+		Id Display,
+		StructureDefinition.Differential.Element[0].Short Description
+	}
+
+select Results { '"' + Id + '","' + Display + '","' + Description + '"' Result }
+
+drop table Results;
+create table Results in Temp from
+Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+   where StructureDefinition.Kind = "Resource"
+     and Id in list(String){ 
+'ChargeItem',
+'ClaimResponse',
+'ClinicalImpression',
+'Communication',
+'Composition',
+'Condition',
+'Consent',
+'Coverage',
+'CoverageEligibilityResponse',
+'DeviceUseStatement',
+'DiagnosticReport',
+'DocumentManifest',
+'DocumentReference',
+'Encounter',
+'EnrollmentResponse',
+'EpisodeOfCare',
+'ExplanationOfBenefit',
+'FamilyMemberHistory',
+'GuidanceResponse',
+'ImagingStudy',
+'Immunization',
+'MeasureReport',
+'Media',
+'MedicationAdministration',
+'MedicationDispense',
+'MedicationStatement',
+'Observation',
+'PaymentNotice',
+'PaymentReconciliation',
+'Procedure',
+'ProcessResponse',
+'QuestionnaireResponse',
+'RiskAssessment',
+'SupplyDelivery',
+'Task'
+}
+	{ 
+		Id,
+		Id Display,
+		StructureDefinition.Differential.Element[0].Short Description
+	}
+
+select Results { '"' + Id + '","' + Display + '","' + Description + '"' Result }
+
+drop table Results;
+create table Results in Temp from
+Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
+   where StructureDefinition.Kind = "Resource"
+     and Id in list(String){ 
+'ActivityDefinition',
+'CodeSystem',
+'ConceptMap',
+'EventDefinition',
+'Library',
+'Measure',
+'PlanDefinition',
+'StructureDefinition',
+'StructureMap',
+'ValueSet'
+}
+	{ 
+		Id,
+		Id Display,
+		StructureDefinition.Differential.Element[0].Short Description
+	}
+
+select Results { '"' + Id + '","' + Display + '","' + Description + '"' Result }
+
 select Resource where Type = "StructureDefinition" { Id, (Content as StructureDefinition) StructureDefinition }
    explode by (parent StructureDefinition).Url = StructureDefinition.BaseDefinition 
    	where StructureDefinition.Kind = "Resource" and StructureDefinition.BaseDefinition.IsNil()
@@ -49,6 +168,7 @@ select
 	//where StructureDefinition.Kind = "ComplexType" 
 	//	and StructureDefinition.BaseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension"
 	
+select foreach var LPackage in ImplementationGuides['qicore'].ImplementationGuide.Package do LPackage.Name
 foreach row in
 select
   StructureDefinitions
@@ -70,6 +190,8 @@ select
   (ImplementationGuides rename I)
     times (StructureDefinitions rename S)
     where S.StructureDefinition.Url.StartsWith(I.ImplementationGuide.Url.GetHead().GetHead())
+      and S.StructureDefinition.Kind = 'Resource'
+    
 
 select Models  
  		  
@@ -290,6 +412,27 @@ delete TypeInfos where ModelName = "FHIR"
 
 select TypeInfos
 
+// Note that we _could_ have the ModelInfo do the transformation to FHIR, instead of having it be a runtime consideration....
+
+// For primitives, this would mean:
+
+// Patient.gender would translate as
+// Patient.gender.value
+
+// For extensions, this would mean:
+
+// Patient.race would translate as
+// Patient.extension["http://hl7.org/fhir/us/core/us-core-race"]
+// Patient.race.category would translate as
+// Patient.extension["http://hl7.org/fhir/us/core/us-core-race"].extension["category"].valueCoding
+
+// For references, this would mean:
+
+// Patient.organization would translate as
+// Resolve(Patient, Patient.organization.reference)
+// Where resolve is a run-time operation that resolves to either a contained reference or a retrieve
+// Note that this would not support references in a bundle
+
 // Extensions
 // Structures marked as ComplexType, descending from Extension
 select StructureDefinitions
@@ -298,10 +441,17 @@ select StructureDefinitions
    //explode by (parent StructureDefinition).Url = StructureDefinition.BaseDefinition 
    //	where StructureDefinition.BaseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension"
    	{ Id, StructureDefinition.BaseDefinition BaseDefinition }
-   	
+
+delete TypeInfos where ModelName = 'USCore'
+select BuildClassInfo(StructureDefinitions["us-core-direct"].StructureDefinition);   	
 select BuildClassInfo(StructureDefinitions["us-core-race"].StructureDefinition);
+delete Messages
 select Messages
+select TypeInfos["USCore.us-core-direct"].Value.AsXML
+select TypeInfos["USCore.us-core-race"].Value.AsXML
 select TypeInfos
+
+select foreach var e in StructureDefinitions["Extension"].StructureDefinition.Differential.Element do e.Path
 
 // Resources	
 select StructureDefinitions
