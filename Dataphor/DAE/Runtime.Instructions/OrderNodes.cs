@@ -1110,6 +1110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				var equalitySort = Compiler.GetEqualitySort(plan, column.DataType);
 				_equalitySorts.Add(column.Name, equalitySort);
+				plan.AttachDependency(equalitySort);
 			}
 		}
 

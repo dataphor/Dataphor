@@ -176,7 +176,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					_equalitySorts = new Dictionary<String, Schema.Sort>();
 					foreach (var column in Key.Columns)
 					{
-						_equalitySorts.Add(column.Name, Compiler.GetEqualitySort(plan, column.DataType));
+						var equalitySort = Compiler.GetEqualitySort(plan, column.DataType);
+						_equalitySorts.Add(column.Name, equalitySort);
+						plan.AttachDependency(equalitySort);
+
 					}
 				}
 			}

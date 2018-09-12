@@ -713,6 +713,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(plan);
 			_dataType = new Schema.ListType(((Schema.ListType)Nodes[0].DataType).ElementType);
 			_equalitySort = Compiler.GetEqualitySort(plan, ((Schema.ListType)_dataType).ElementType);
+			plan.AttachDependency(_equalitySort);
 		}
 		
 		public override object InternalExecute(Program program, object argument1)
