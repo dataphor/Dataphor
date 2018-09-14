@@ -82,6 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemNameReadAccessorNode() : base()
 		{
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
@@ -98,6 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
     }

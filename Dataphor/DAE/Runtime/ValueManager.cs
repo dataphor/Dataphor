@@ -34,6 +34,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		bool OrderIncludesOrder(Schema.Order AIncludingOrder, Schema.Order AIncludedOrder);
 		Schema.Sort GetUniqueSort(Schema.IDataType ADataType);
 		int EvaluateSort(Schema.OrderColumn AOrderColumn, object AIndexValue, object ACompareValue);
+		Schema.Sort GetEqualitySort(Schema.IDataType ADataType);
+		bool EvaluateEqualitySort(Schema.Sort ASort, object AIndexValue, object ACompareValue);
 		IDataValue GetAsDataValue(Schema.Representation ARepresentation, object AValue);
 		object GetAsNative(Schema.Representation ARepresentation, object AValue);
 		object SetAsNative(Schema.Representation ARepresentation, object AValue, object ANewValue);
@@ -102,6 +104,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			return Compiler.GetUniqueSort(_plan, type);
 		}
+
+		public Schema.Sort GetEqualitySort(Schema.IDataType type)
+		{
+			return Compiler.GetEqualitySort(_plan, type);
+		}
 		
 		public int EvaluateSort(Schema.OrderColumn orderColumn, object indexValue, object compareValue)
 		{
@@ -137,6 +144,32 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#if USEICOMPARABLE
 			} 
 			#endif
+		}
+
+		public bool EvaluateEqualitySort(Schema.Sort sort, object indexValue, object compareValue)
+		{
+			// NOTE: Use currently executing program because the whole point is that this is inner loop sort code.
+			// We don't want to have to use a new program, or
+			Program program = _serverProcess.ExecutingProgram;
+			//LProgram.Stack.PushWindow(0);
+			//try
+			//{
+				program.Stack.Push(indexValue);
+				program.Stack.Push(compareValue);
+				try
+				{
+					return (bool)sort.CompareNode.Execute(program);
+				}
+				finally
+				{
+					program.Stack.Pop();
+					program.Stack.Pop();
+				}
+			//}
+			//finally
+			//{
+			//	LProgram.Stack.PopWindow();
+			//}
 		}
 		
         private void EnsureReadNode(Plan plan, Schema.Representation representation)

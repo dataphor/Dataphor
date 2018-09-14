@@ -1,0 +1,3 @@
+//ExecuteScript('Processor.Base', 'CreateDevice');
+//ExecuteScript('Processor.Base', 'CreateTables');
+

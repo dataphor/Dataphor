@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="Main" assembliesasstring="" librariesasstring="" settings="" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" name="Processor.Base" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<libraries.libraryreference name="PGSQLDevice" version="*" />
+	<libraries.libraryreference name="PGSQLConnection" version="*" />
+	<libraries.libraryreference name="System.Internet" version="*" />
+</library>

@@ -1,16 +1,23 @@
 ﻿using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.REST;
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Processing
 {
 	public class Processor : IDisposable
 	{
 		public const string DefaultProcessorInstanceName = "Processor";
+		private ServerConfiguration _configuration;
+		private Server _server;
 
+		private string _instanceName;
+		public string InstanceName { get { return _instanceName; } }
+		
 		public Processor() : this(DefaultProcessorInstanceName)
 		{
 		}
@@ -27,16 +34,7 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 			_server = new Server();
 			_configuration.ApplyTo(_server);
 			_server.Start();
-
-			_nativeServer = new NativeServer(_server);
 		}
-
-		private string _instanceName;
-		public string InstanceName { get { return _instanceName; } }
-
-		private ServerConfiguration _configuration;
-		private Server _server;
-		private NativeServer _nativeServer;
 
 		#region IDisposable Members
 
@@ -47,25 +45,22 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 				_server.Stop();
 				_server = null;
 			}
-
-			_nativeServer = null;
+			
 			_configuration = null;
 		}
 
 		#endregion
-
+		
 		public object Evaluate(string statement, IEnumerable<KeyValuePair<string, object>> args)
 		{
 			CheckActive();
+			var session = _server.Connect(new SessionInfo());
+			var process = session.StartProcess(new ProcessInfo());
 
-			var paramsValue = 
-				args != null 
-					? (from e in args select new NativeParam { Name = e.Key, Value = NativeCLIHelper.ValueToNativeValue(e.Value), Modifier = NativeModifier.In }).ToArray()
-					: null;
+			DataParam[] paramsValue = RESTMarshal.ArgsToDataParams(process, args);
+			var result = Execute(process, statement, paramsValue);
 
-			// Use the NativeCLI here to wrap the result in a NativeResult
-			// The Web service layer will then convert that to pure Json.
-			return _nativeServer.Execute(new NativeSessionInfo(), statement, paramsValue, NativeExecutionOptions.Default);
+			return result;
 		}
 
 		public object HostEvaluate(string statement)
@@ -108,6 +103,73 @@ namespace Alphora.Dataphor.Dataphoria.Processing
 			if ((_server == null) || (_server.State != ServerState.Started))
 			{
 				throw new InvalidOperationException("Instance is not active.");
+			}
+		}
+
+		private RESTResult Execute(IServerProcess process, string statement, DataParam[] paramsValue)
+		{
+			IServerScript script = process.PrepareScript(statement);
+			try
+			{
+				if (script.Batches.Count != 1)
+				{
+					throw new ArgumentException("Execution statement must contain one, and only one, batch.");
+				}
+
+				IServerBatch batch = script.Batches[0];
+				DataParams dataParams = RESTMarshal.ParamsArrayToDataParams(process, paramsValue);
+				RESTResult result = new RESTResult();
+				result.Params = paramsValue;
+
+				if (batch.IsExpression())
+				{
+					IServerExpressionPlan expressionPlan = batch.PrepareExpression(dataParams);
+					try
+					{
+						if (expressionPlan.DataType is TableType)
+						{
+							IServerCursor cursor = expressionPlan.Open(dataParams);
+							try
+							{
+								result.Value = RESTMarshal.ServerCursorToValue(process, cursor);
+							}
+							finally
+							{
+								expressionPlan.Close(cursor);
+							}
+						}
+						else
+						{
+							using (IDataValue tempValue = expressionPlan.Evaluate(dataParams))
+							{
+								result.Value = RESTMarshal.DataValueToValue(process, tempValue);
+							}
+						}
+					}
+					finally
+					{
+						batch.UnprepareExpression(expressionPlan);
+					}
+				}
+				else
+				{
+					IServerStatementPlan statementPlan = batch.PrepareStatement(dataParams);
+					try
+					{
+						statementPlan.Execute(dataParams);
+					}
+					finally
+					{
+						batch.UnprepareStatement(statementPlan);
+					}
+				}
+
+				//NativeMarshal.SetNativeOutputParams(process, result.Params, dataParams);
+				return result;
+			}
+			finally
+			{
+				process.UnprepareScript(script);
 			}
 		}
 	}

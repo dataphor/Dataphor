@@ -1412,12 +1412,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!Nodes[0].DataType.Is(plan.DataTypes.SystemBoolean))
 				throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, plan.CurrentStatement());
 				
-			if (Nodes[2].DataType.Is(Nodes[1].DataType))
+			if (Nodes[2].DataType.Is(Nodes[1].DataType) || Nodes[2].DataType.IsNil)
 			{
 				_dataType = Nodes[1].DataType;
 				Nodes[2] = Compiler.Upcast(plan, Nodes[2], _dataType);
 			}
-			else if (Nodes[1].DataType.Is(Nodes[2].DataType))
+			else if (Nodes[1].DataType.Is(Nodes[2].DataType) || Nodes[1].DataType.IsNil)
 			{
 				_dataType = Nodes[2].DataType;
 				Nodes[1] = Compiler.Upcast(plan, Nodes[1], _dataType);
@@ -1667,6 +1667,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsFunctional = true;
 			IsDeterministic = true;
 			IsRepeatable = true;
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
@@ -1677,6 +1678,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsFunctional = true;
 			IsDeterministic = true;
 			IsRepeatable = true;
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 	}

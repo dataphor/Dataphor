@@ -1,0 +1,89 @@
+// USCore.CreateModelInfo
+// Creates the UScore Model Info
+// This creates a USCore model where only the profiles defined in USCore result in types in the model
+
+// Needs FHIR.LoadConformance to load the structure definitions for FHIR
+// Needs FHIR.LoadConformanceCache to load the structure definitions into in-memory tables for processing
+// Needs ModelInfo.Operators to create the required operators
+
+select
+  (ImplementationGuides where Id = 'ig' rename I)
+    times (StructureDefinitions rename S)
+    where S.StructureDefinition.Url.StartsWith(I.ImplementationGuide.Url.GetHead().GetHead())
+      and S.StructureDefinition.Kind = 'Resource'
+
+select ImplementationGuides['ig'].ImplementationGuide.Url
+select TypeInfos
+delete TypeInfos where ModelName <> 'System';
+
+select Models
+update ModelInfoSettings set { UseCQLPrimitives := true };
+
+// Generate Resources
+foreach row in
+select
+  StructureDefinitions
+    where StructureDefinition.Url.StartsWith("http://hl7.org/fhir/us/core")
+      and StructureDefinition.Kind = "Resource"
+      and (StructureDefinition.Derivation.IsNil() or StructureDefinition.Derivation = "Constraint")
+do
+begin
+  delete Messages;
+  BuildClassInfo(StructureDefinitions['us-core-allergyintolerance'].StructureDefinition);
+end;
+select Messages;
+select StructureDefinitions['us-core-allergyintolerance'].StructureDefinition.AsXML
+
+
+// Generate Complex Types other than those covered by the CQL types
+foreach row in 
+  StructureDefinitions
+    where StructureDefinition.Kind = "ComplexType" 
+		and (StructureDefinition.BaseDefinition.IsNil() or StructureDefinition.BaseDefinition <> "http://hl7.org/fhir/StructureDefinition/Extension")
+		and not (Id in (CQLTypeMappings { Unqualify(SourceTypeName) Name }))
+do
+  BuildClassInfo(StructureDefinition);
+  
+select TypeInfos
+
+// Generate Resources
+foreach row in
+  StructureDefinitions
+    where StructureDefinition.Kind = "Resource"
+      and (StructureDefinition.Derivation.IsNil() or StructureDefinition.Derivation = "Specialization")
+do
+begin
+  delete Messages;
+  BuildClassInfo(StructureDefinition);
+end;
+
+delete Documents where Library_Name = "CQF.Model.QUICK" and Name <> "Register";
+foreach row in TypeInfos do
+begin
+  var name := Name.Replace("-", "_");
+  CreateAndSave("CQF.Model.QUICK", name, "xml", Value.AsXML);
+end
+
+//    <ns4:conversionInfo fromType="FHIR.Coding" toType="System.Code" functionName="FHIRHelpers.ToCode"/>
+//    <ns4:conversionInfo fromType="FHIR.CodeableConcept" toType="System.Concept" functionName="FHIRHelpers.ToConcept"/>
+//    <ns4:conversionInfo fromType="FHIR.Quantity" toType="System.Quantity" functionName="FHIRHelpers.ToQuantity"/>
+//    <ns4:conversionInfo fromType="FHIR.Period" toType="Interval&lt;System.DateTime&gt;" functionName="FHIRHelpers.ToInterval"/>
+//    <ns4:conversionInfo fromType="FHIR.Range" toType="Interval&lt;System.Quantity&gt;" functionName="FHIRHelpers.ToInterval"/>
+
+select TypeInfos
+
+DeleteDocument("CQF.Model.QUICK", "QUICKModelInfo");
+CreateAndSave("CQF.Model.QUICK", "QUICKModelInfo", "xml",
+  ModelInfo(row { 
+    { ModelSpecifier(row { "System" name, "1.0.0" version }) } requiredModelInfo, 
+    foreach row in TypeInfos where ModelName = "QUICK" do Value typeInfo,
+	"QUICK" name, 
+	"3.0.0" version, 
+	Models["QUICK"].Url url, 
+	//"fhir" targetQualifier, 
+	"QUICK.Patient" patientClassName, 
+	"birthDate" patientBirthDatePropertyName
+}).AsXML);
+
+
+

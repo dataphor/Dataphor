@@ -1267,6 +1267,95 @@ namespace Alphora.Dataphor.DAE.Compiling
 			node.DetermineCharacteristics(plan);
 			return node;
 		}
+
+		protected static PlanNode CompileForEachExpression(Plan plan, ForEachExpression expression)
+		{
+			// TODO: Determine whether to use the TableForEachNode...
+			ListForEachNode node = new ListForEachNode();
+			node.SetLineInfo(plan, expression.LineInfo);
+			node.Expression = expression;
+			PlanNode iterationSource = CompileCursorDefinition(plan, node.Expression.Expression);
+			plan.EnterLoop();
+			try
+			{
+				node.Nodes.Add(iterationSource);
+				
+				if (iterationSource.DataType is Schema.ICursorType)
+				{
+					node.VariableType = ((Schema.ICursorType)iterationSource.DataType).TableType.RowType;
+				}
+				else if (iterationSource.DataType is Schema.IListType)
+				{
+					if (node.Expression.VariableName == String.Empty)
+						throw new CompilerException(CompilerException.Codes.ForEachVariableNameRequired, node.Expression);
+					node.VariableType = ((Schema.IListType)iterationSource.DataType).ElementType;
+				}
+				else
+					throw new CompilerException(CompilerException.Codes.InvalidForEachStatement, node.Expression);
+					
+				if (node.Expression.VariableName == String.Empty)
+					plan.EnterRowContext();
+				try
+				{
+					if ((node.Expression.VariableName == String.Empty) || node.Expression.IsAllocation)
+					{
+						if (node.Expression.VariableName != String.Empty)
+						{
+							List<string> names = new List<string>();
+							if (!plan.Symbols.IsValidVariableIdentifier(node.Expression.VariableName, names))
+							{
+								#if DISALLOWAMBIGUOUSNAMES
+								if (Schema.Object.NamesEqual(names[0], LStatement.VariableName.Identifier))
+									if (String.Compare(names[0], LStatement.VariableName.Identifier) == 0)
+										throw new CompilerException(CompilerException.Codes.CreatingDuplicateIdentifier, LStatement.VariableName, LStatement.VariableName.Identifier);
+									else
+										throw new CompilerException(CompilerException.Codes.CreatingHiddenIdentifier, LStatement.VariableName, LStatement.VariableName.Identifier, names[0]);
+								else
+									throw new CompilerException(CompilerException.Codes.CreatingHidingIdentifier, LStatement.VariableName, LStatement.VariableName.Identifier, names[0]);
+								#else
+								throw new CompilerException(CompilerException.Codes.CreatingDuplicateIdentifier, node.Expression, node.Expression.VariableName);
+								#endif
+							}
+						}
+						plan.Symbols.Push(new Symbol(node.Expression.VariableName, node.VariableType));
+					}
+					else
+					{
+						int columnIndex;
+						node.Location = ResolveVariableIdentifier(plan, node.Expression.VariableName, out columnIndex);
+						if (node.Location < 0)
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, node.Expression, node.Expression.VariableName);
+							
+						if (columnIndex >= 0)
+							throw new CompilerException(CompilerException.Codes.InvalidColumnReference, node.Expression);
+							
+						if (!node.VariableType.Is(plan.Symbols.Peek(node.Location).DataType))
+							throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, node.Expression, node.VariableType.Name, plan.Symbols.Peek(node.Location).DataType.Name);
+					}
+					try
+					{
+						node.Nodes.Add(CompileExpression(plan, node.Expression.Return));
+					}
+					finally
+					{
+						if ((node.Expression.VariableName == String.Empty) || node.Expression.IsAllocation)
+							plan.Symbols.Pop();
+					}
+				}
+				finally
+				{
+					if (node.Expression.VariableName == String.Empty)
+						plan.ExitRowContext();
+				}
+			}
+			finally
+			{
+				plan.ExitLoop();
+			}
+			node.DetermineDataType(plan);
+			node.DetermineCharacteristics(plan);
+			return node;
+		}
 		
 		protected static PlanNode CompileForEachStatement(Plan plan, Statement statement)
 		{
@@ -3167,6 +3256,42 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else
 			{
 				Schema.Sort sort = CompileSortDefinition(plan, dataType);
+				return sort;
+			}
+		}
+
+		public static Schema.Sort GetEqualitySort(Plan plan, Schema.IDataType dataType)
+		{
+			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			if (scalarType != null)
+			{
+				if (scalarType.EqualitySort == null)
+				{
+					if (scalarType.EqualitySortID >= 0)
+						plan.CatalogDeviceSession.ResolveCatalogObject(scalarType.EqualitySortID);
+					else
+					{
+						plan.PushLoadingContext(new LoadingContext(scalarType.Owner, scalarType.Library.Name, false));
+						try
+						{
+							CreateSortNode createSortNode = new CreateSortNode();
+							createSortNode.ScalarType = scalarType;
+							createSortNode.Sort = CompileEqualitySortDefinition(plan, scalarType);
+							createSortNode.IsEquality = true;
+							plan.ExecuteNode(createSortNode);
+						}
+						finally
+						{
+							plan.PopLoadingContext();
+						}
+					}
+				}
+
+				return scalarType.EqualitySort;
+			}
+			else
+			{
+				Schema.Sort sort = CompileEqualitySortDefinition(plan, dataType);
 				return sort;
 			}
 		}
@@ -5623,6 +5748,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							node.ScalarType.LoadComparisonOperatorID();
 							node.ScalarType.LoadSortID();
 							node.ScalarType.LoadUniqueSortID();
+							node.ScalarType.LoadEqualitySortID();
 						}
 
 						#if !NATIVEROW
@@ -5773,7 +5899,21 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.Sort CompileSortDefinition(Plan plan, Schema.IDataType dataType, SortDefinition sortDefinition, bool isScalarSort)
 		{
 			int objectID = Schema.Object.GetObjectID(sortDefinition.MetaData);
-			Schema.Sort sort = new Schema.Sort(objectID, String.Format("{0}Sort{1}", dataType.Name, isScalarSort ? String.Empty : objectID.ToString()), dataType);
+			var isEquality = false;
+			string sortQualifier = String.Empty;
+			if (isScalarSort)
+			{
+				var scalarType = (Schema.ScalarType)dataType;
+				if (objectID == scalarType.UniqueSortID)
+					sortQualifier = "Unique";
+				else if (objectID == scalarType.EqualitySortID)
+				{
+					isEquality = true;
+					sortQualifier = "Equality";
+				}
+			}
+
+			Schema.Sort sort = new Schema.Sort(objectID, String.Format("{0}{1}Sort{2}", dataType.Name, sortQualifier, isScalarSort ? String.Empty : objectID.ToString()), dataType);
 			sort.IsGenerated = true;
 			sort.Owner = plan.User;
 			sort.Library = plan.CurrentLibrary;
@@ -5792,8 +5932,16 @@ namespace Alphora.Dataphor.DAE.Compiling
 						try
 						{
 							PlanNode node = CompileExpression(plan, sortDefinition.Expression);
-							if (!(node.DataType.Is(plan.DataTypes.SystemInteger)))
-								throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, sortDefinition.Expression);
+							if (isEquality)
+							{
+								if (!(node.DataType.Is(plan.DataTypes.SystemBoolean)))
+									throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, sortDefinition.Expression);
+							}
+							else
+							{
+								if (!(node.DataType.Is(plan.DataTypes.SystemInteger)))
+									throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, sortDefinition.Expression);
+							}
 							if (!(node.IsFunctional && node.IsDeterministic))
 								throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, sortDefinition.Expression);
 							node = OptimizeNode(plan, node);
@@ -5820,6 +5968,72 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			sort.DetermineRemotable(plan.CatalogDeviceSession);
 			return sort;
+		}
+		
+		public static Schema.Sort CompileEqualitySortDefinition(Plan plan, Schema.IDataType dataType)
+		{
+			int messageIndex = plan.Messages.Count;
+			try
+			{
+				Schema.Sort sort = new Schema.Sort(Schema.Object.GetNextObjectID(), String.Format("{0}EqualitySort", dataType.Name), dataType);
+				sort.Library = plan.CurrentLibrary;
+				sort.Owner = plan.User;
+				sort.IsGenerated = true;
+				sort.IsEquality = true;
+				plan.PlanCatalog.Add(sort);
+				try
+				{
+					plan.PushCreationObject(sort);
+					try
+					{
+						string leftIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Left);
+						string rightIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Right);
+						plan.Symbols.Push(new Symbol(leftIdentifier, dataType));
+						try
+						{
+							plan.Symbols.Push(new Symbol(rightIdentifier, dataType));
+							try
+							{
+								PlanNode node = CompileExpression(plan, new BinaryExpression(new IdentifierExpression(leftIdentifier), Instructions.Equal, new IdentifierExpression(rightIdentifier)));
+								if (!(node.DataType.Is(plan.DataTypes.SystemBoolean)))
+									throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, plan.CurrentStatement());
+								if (!(node.IsFunctional && node.IsDeterministic))
+									throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, plan.CurrentStatement());
+								node = OptimizeNode(plan, node);
+								sort.CompareNode = node;
+							}
+							finally
+							{
+								plan.Symbols.Pop();
+							}
+						}
+						finally
+						{
+							plan.Symbols.Pop();
+						}
+					}
+					finally
+					{
+						plan.PopCreationObject();
+					}
+				}
+				finally
+				{
+					plan.PlanCatalog.SafeRemove(sort);
+				}
+				sort.DetermineRemotable(plan.CatalogDeviceSession);
+				return sort;
+			}
+			catch (Exception exception)
+			{
+				if ((exception is CompilerException) && (((CompilerException)exception).Code == (int)CompilerException.Codes.NonFatalErrors))
+				{
+					plan.Messages.Insert(messageIndex, new CompilerException(CompilerException.Codes.UnableToConstructSort, plan.CurrentStatement(), dataType.Name));
+					throw exception;
+				}
+				else
+					throw new CompilerException(CompilerException.Codes.UnableToConstructSort, plan.CurrentStatement(), exception, dataType.Name);
+			}
 		}
 		
 		public static Schema.Sort CompileSortDefinition(Plan plan, Schema.IDataType dataType)
@@ -9620,6 +9834,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				node.IsUnique = true;
 				node.Sort.IsUnique = true;
 			}
+			else if (node.ScalarType.EqualitySortID == node.Sort.ID)
+			{
+				node.IsEquality = true;
+				node.Sort.IsEquality = true;
+			}
 			else
 				node.Sort.IsGenerated = false;
 			return node;
@@ -10974,6 +11193,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						case "D4IndexerExpression": result = CompileIndexerExpression(plan, (D4IndexerExpression)expression); break;
 						case "IfExpression": result = CompileIfExpression(plan, (IfExpression)expression); break;
 						case "CaseExpression": result = CompileCaseExpression(plan, (CaseExpression)expression); break;
+						case "ForEachExpression": result = CompileForEachExpression(plan, (ForEachExpression)expression); break;
 						case "OnExpression": result = CompileOnExpression(plan, (OnExpression)expression); break;
 						case "RenameAllExpression": result = CompileRenameAllExpression(plan, (RenameAllExpression)expression); break;
 						case "IsExpression": result = CompileIsExpression(plan, (IsExpression)expression); break;
@@ -13974,6 +14194,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 			CopyNode node = (CopyNode)FindCallNode(plan, new EmptyStatement(), Instructions.Copy, new PlanNode[]{sourceNode});
 			node.RequestedOrder = order;
 			node.RequestedCapabilities = plan.CursorContext.CursorCapabilities;
+			node.DetermineDataType(plan);
+			node.DetermineCharacteristics(plan);
+			return node;
+		}
+
+		public static PlanNode EmitDistinctNode(Plan plan, TableNode sourceNode, Schema.Key key)
+		{
+			var statement = new EmptyStatement();
+			DistinctNode node = (DistinctNode)FindCallNode(plan, statement, Instructions.Distinct, new PlanNode[]{sourceNode});
+			node.IsAccelerator = true;
+			node.Key = key;
 			node.DetermineDataType(plan);
 			node.DetermineCharacteristics(plan);
 			return node;

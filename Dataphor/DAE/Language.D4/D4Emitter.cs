@@ -226,6 +226,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitIndexerExpression((D4IndexerExpression)expression);
 			else if (expression is IfExpression)
 				EmitIfExpression((IfExpression)expression);
+			else if (expression is ForEachExpression)
+				EmitForEachExpression((ForEachExpression)expression);
 			else if (expression is RowSelectorExpressionBase)
 				EmitRowSelectorExpressionBase((RowSelectorExpressionBase)expression);
 			else if (expression is RowExtractorExpressionBase)
@@ -1779,6 +1781,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			AppendFormat(" {0}", Keywords.Do);
 			IncreaseIndent();
 			EmitTerminatedStatement(statement.Statement);
+			DecreaseIndent();
+		}
+		
+		protected virtual void EmitForEachExpression(ForEachExpression expression)
+		{
+			AppendFormat("{0} ", Keywords.ForEach);
+			if (expression.VariableName == String.Empty)
+				AppendFormat("{0} ", Keywords.Row);
+			else
+			{
+				if (expression.IsAllocation)
+					AppendFormat("{0} ", Keywords.Var);
+				AppendFormat("{0} ", expression.VariableName);
+			}
+			AppendFormat("{0} ", Keywords.In);
+			EmitCursorDefinition(expression.Expression);
+			AppendFormat(" {0}", Keywords.Do);
+			IncreaseIndent();
+			EmitExpression(expression.Return);
 			DecreaseIndent();
 		}
 		

@@ -1,0 +1,18 @@
+
+create device Main
+	reconciliation { mode = { command }, master = server }
+	class "PostgreSQLDevice"
+		attributes
+		{
+			"ConnectionClass" = "PostgreSQLConnection.PostgreSQLConnection"
+			, "Server" = "localhost"
+//			, "Port" = "5432"
+			, "OnBrowseConnectStatement" = "'SET bytea_output = ''escape'';'"
+			, "OnExecuteConnectStatement" = "'SET bytea_output = ''escape'';'"
+			, "Database" = "Processor"
+			, "ShouldEnsureDatabase" = "False"
+//			, "ShouldEnsureOperators" = "False"
+		};
+
+CreateDeviceUser("System", "Main", "postgres", "postgresql");
+CreateDeviceUser("Admin", "Main", "postgres", "postgresql");

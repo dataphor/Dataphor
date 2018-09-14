@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-16"?>
+<TypeInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="AllergyIntolerance.ReactionComponent" xmlns="urn:hl7-org:elm-modelinfo:r1">
+  <element name="id" type="System.String" />
+  <element name="extension">
+    <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+  </element>
+  <element name="reaction-duration" type="QUICK.allergyintolerance-duration" />
+  <element name="modifierExtension">
+    <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+  </element>
+  <element name="substance" type="System.Concept" />
+  <element name="manifestation">
+    <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+  </element>
+  <element name="description" type="System.String" />
+  <element name="onset" type="System.DateTime" />
+  <element name="severity" type="System.String" />
+  <element name="exposureRoute" type="System.Concept" />
+  <element name="note">
+    <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+  </element>
+</TypeInfo>

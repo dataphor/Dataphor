@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<documenttypescontainer xmlns:bop="www.alphora.com/schemas/bop" xmlns="Alphora.Dataphor.Frontend.Server.Device,Alphora.Dataphor.Frontend.Server">
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="D4 Script" designersasstring="D4;Text" id="d4" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="D4 Catalog" designersasstring="D4;Text" id="d4c" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="SQL Script" designersasstring="SQL;Text" id="sql" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Dataphor Form Document" designersasstring="DFD;XML;Text" id="dfd" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Customized Dataphor Form Document" designersasstring="DFDX;XML;Text" id="dfdx" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Text" designersasstring="Text" id="txt" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="XML" designersasstring="XML;Text" id="xml" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Dataphor Node Types" designersasstring="XML;Text" id="dnt" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Dataphor Frontend Theme" designersasstring="XML;Text" id="dft" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="Bitmap" designersasstring="" id="bmp" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="GIF" designersasstring="" id="gif" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="JPEG" designersasstring="" id="jpg" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="EXIF" designersasstring="" id="exif" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="Portable Network Graphic" designersasstring="" id="png" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="TIFF" designersasstring="" id="tiff" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="Windows Metafile" designersasstring="" id="wmf" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="Icon" designersasstring="" id="ico" />
+	<documenttypes.documenttype _datatype="System.Graphic" datatype="System.Graphic" description="Enhanced Metafile" designersasstring="" id="emf" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="C# Script" designersasstring="CS;Text" id="cs" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="VB.NET Script" designersasstring="VB;Text" id="vb" />
+	<documenttypes.documenttype _datatype="System.Binary" datatype="System.Binary" description="Compiled Help" designersasstring="" id="chm" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="HTML" designersasstring="Text" id="htm" />
+	<documenttypes.documenttype _datatype="System.String" datatype="System.String" description="Dataphor Execution Plan" designersasstring="ANY;XML" id="pla" />
+</documenttypescontainer>

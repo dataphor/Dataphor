@@ -1,0 +1,14 @@
+
+
+create operator GenerateTypes() : String class "FHIR3.Core.GenerateTypesNode";
+
+ExecuteScript("FHIR3.Core", "Types.Core");
+
+//select GenerateTypes()
+
+ExecuteScript("FHIR3.Core", "Types.Generated");
+
+ExecuteScript("FHIR3.Core", "Types.Operators");
+
+//ExecuteScript("FHIR3.Core", "Search");
+

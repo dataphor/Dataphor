@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Alphora.Dataphor.DAE.REST;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using Alphora.Dataphor.DAE.NativeCLI;
-using Newtonsoft.Json.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 {
@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 	public class DataController : ApiController
 	{
 		[HttpGet, Route("{table}")]
-		public JToken Get(string table)
+		public HttpResponseMessage Get(string table)
 		{
 			// Libraries/Qualifiers?
 			// Filter?
@@ -25,15 +25,20 @@ namespace Alphora.Dataphor.Dataphoria.Web.Controllers
 			// Includes?
 			// Paging?
 			// Functions?
-			var result = ProcessorInstance.Instance.Evaluate(String.Format("select Get('{0}')", table), null);
-			return JsonInterop.NativeResultToJson((NativeResult)result);
+			var result = ProcessorInstance.Instance.Evaluate(string.Format("select Get('{0}')", table), null);
+			var temp = JsonConvert.SerializeObject(((RESTResult)result).Value);
+
+			var res = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+			res.Content = new StringContent(temp, Encoding.UTF8, "application/json");
+			return res;
 		}
 
 		[HttpGet, Route("{table}/{key}")]
 		public JToken Get(string table, string key)
 		{
-			var result = ProcessorInstance.Instance.Evaluate(String.Format("select GetByKey('{0}', '{1}')", table, key), null);
-			return JsonInterop.NativeResultToJson((NativeResult)result);
+			//select GetByKey('Patients', '1')
+			var result = ProcessorInstance.Instance.Evaluate(string.Format("select GetByKey('{0}', '{1}')", table, key), null);
+			return JsonConvert.SerializeObject(((RESTResult)result).Value);
 		}
 
 		[HttpPost, Route("{table}")]

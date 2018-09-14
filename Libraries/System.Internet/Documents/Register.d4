@@ -268,3 +268,6 @@ create operator Patch(ATableName : Name, AKey : String, ARow : row) class "Inter
 
 //* Operator: Delete
 create operator Delete(ATableName : Name, AKey : String) class "Internet.DeleteNode" static tags { DAE.IsRemotable = "False" };
+
+// Register Dynamic type
+ExecuteScript("System.Internet", "Dynamic");

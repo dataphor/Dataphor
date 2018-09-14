@@ -1,0 +1,129 @@
+// QUICK.CreateModelInfo
+// Creates the QUICK Model Info
+// This creates the "QUICK" version of a set of profiles
+
+// Needs FHIR.LoadConformance to load the structure definitions for FHIR
+// Needs FHIR.LoadConformanceCache to load the structure definitions into in-memory tables for processing
+// Needs ModelInfo.Operators to create the required operators
+
+
+delete TypeInfos where ModelName <> 'System'
+delete PrimitiveTypeMappings where SourceTypeName.StartsWith("QUICK.");
+delete CQLTypeMappings where SourceTypeName.StartsWith("QUICK.");
+
+insert
+	table
+	{
+		row { "QUICK.base64Binary" SourceTypeName, "System.String" TargetTypeName },
+		row { "QUICK.boolean", "System.Boolean" },
+		row { "QUICK.code", "System.String" },
+		row { "QUICK.date", "System.DateTime" },
+		row { "QUICK.dateTime", "System.DateTime" },
+		row { "QUICK.decimal", "System.Decimal" },
+		row { "QUICK.id", "System.String" },
+		row { "QUICK.instant", "System.DateTime" },
+		row { "QUICK.integer", "System.Integer" },
+		row { "QUICK.markdown", "System.String" },
+		row { "QUICK.oid", "System.String" },
+		row { "QUICK.positiveInt", "System.Integer" },
+		row { "QUICK.string", "System.String" },
+		row { "QUICK.time", "System.Time" },
+		row { "QUICK.unsignedInt", "System.Integer" },
+		row { "QUICK.uri", "System.String" },
+		row { "QUICK.uuid", "System.String" },
+		row { "QUICK.xhtml", "System.String" }
+	}
+	into PrimitiveTypeMappings;
+
+insert
+	table of typeof(CQLTypeMappings)
+	{
+		row { "QUICK.base64Binary" SourceTypeName, NamedTypeSpecifier(row { "System" modelName, "String" name }) TargetTypeSpecifier },
+		row { "QUICK.boolean", NamedTypeSpecifier(row { "System" modelName, "Boolean" name }) },
+		row { "QUICK.code", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.date", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "QUICK.dateTime", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "QUICK.decimal", NamedTypeSpecifier(row { "System" modelName, "Decimal" name }) },
+		row { "QUICK.id", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.instant", NamedTypeSpecifier(row { "System" modelName, "DateTime" name }) },
+		row { "QUICK.integer", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "QUICK.markdown", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.oid", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.positiveInt", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "QUICK.string", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.time", NamedTypeSpecifier(row { "System" modelName, "Time" name }) },
+		row { "QUICK.unsignedInt", NamedTypeSpecifier(row { "System" modelName, "Integer" name }) },
+		row { "QUICK.uri", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.uuid", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.xhtml", NamedTypeSpecifier(row { "System" modelName, "String" name }) },
+		row { "QUICK.Coding", NamedTypeSpecifier(row { "System" modelName, "Code" name }) },
+		row { "QUICK.CodeableConcept", NamedTypeSpecifier(row { "System" modelName, "Concept" name }) },
+		row { "QUICK.Period", IntervalTypeSpecifier(row { "System.DateTime" pointType }) },
+		row { "QUICK.Range", IntervalTypeSpecifier(row { "System.Quantity" pointType }) },
+		row { "QUICK.Quantity", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "QUICK.Age", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "QUICK.Distance", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "QUICK.SimpleQuantity", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "QUICK.Duration", NamedTypeSpecifier(row { "System" modelName, "Duration" name }) },
+		row { "QUICK.Count", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
+		row { "QUICK.Money", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) }
+	}
+	into CQLTypeMappings;
+
+delete Models where Url = "http://hl7.org/fhir";
+insert row { "QUICK" Name, "http://hl7.org/fhir" Url } into Models;
+update ModelInfoSettings set { UseCQLPrimitives := true };
+
+// Generate Complex Types other than those covered by the CQL types
+// TODO: Limit to only those ComplexTypes actually referenced by resources in QUICK
+foreach row in 
+  StructureDefinitions
+    where StructureDefinition.Kind = "ComplexType" 
+		and (StructureDefinition.BaseDefinition.IsNil() or StructureDefinition.BaseDefinition <> "http://hl7.org/fhir/StructureDefinition/Extension")
+		and not (Id in (CQLTypeMappings { Unqualify(SourceTypeName) Name }))
+do
+begin
+  delete Messages;
+  BuildClassInfo("QUICK", StructureDefinition);
+end;
+  
+// Generate Resources
+foreach row in
+  StructureDefinitions
+    where StructureDefinition.Url.StartsWith("http://hl7.org/fhir/us/qicore")
+      and StructureDefinition.Kind = "Resource"
+      and (StructureDefinition.Derivation.IsNil() or StructureDefinition.Derivation = "Constraint")
+do
+begin
+  delete Messages;
+  BuildClassInfo("QUICK", StructureDefinition);
+end;
+
+delete Documents where Library_Name = "CQF.Model.QUICK" and Name <> "Register";
+foreach row in TypeInfos do
+begin
+  var name := Name.Replace("-", "_");
+  CreateAndSave("CQF.Model.QUICK", name, "xml", Value.AsXML);
+end
+
+//    <ns4:conversionInfo fromType="FHIR.Coding" toType="System.Code" functionName="FHIRHelpers.ToCode"/>
+//    <ns4:conversionInfo fromType="FHIR.CodeableConcept" toType="System.Concept" functionName="FHIRHelpers.ToConcept"/>
+//    <ns4:conversionInfo fromType="FHIR.Quantity" toType="System.Quantity" functionName="FHIRHelpers.ToQuantity"/>
+//    <ns4:conversionInfo fromType="FHIR.Period" toType="Interval&lt;System.DateTime&gt;" functionName="FHIRHelpers.ToInterval"/>
+//    <ns4:conversionInfo fromType="FHIR.Range" toType="Interval&lt;System.Quantity&gt;" functionName="FHIRHelpers.ToInterval"/>
+
+select TypeInfos
+
+DeleteDocument("CQF.Model.QUICK", "QUICKModelInfo");
+CreateAndSave("CQF.Model.QUICK", "QUICKModelInfo", "xml",
+  ModelInfo(row { 
+    { ModelSpecifier(row { "System" name, "1.0.0" version }) } requiredModelInfo, 
+    foreach row in TypeInfos where ModelName = "QUICK" do Value typeInfo,
+	"QUICK" name, 
+	"3.0.0" version, 
+	Models["QUICK"].Url url, 
+	//"fhir" targetQualifier, 
+	"QUICK.Patient" patientClassName, 
+	"birthDate" patientBirthDatePropertyName
+}).AsXML);
+

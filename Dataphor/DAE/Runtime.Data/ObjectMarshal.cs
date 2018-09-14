@@ -111,6 +111,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return type;
 		}
 
+		public static PropertyInfo GetSpecifiedProperty(Type type, PropertyInfo property)
+		{
+			if (property.PropertyType.IsValueType)
+			{
+				var specifiedProperty = type.GetProperty(property.Name + "Specified");
+				if (specifiedProperty != null && specifiedProperty.CanRead && specifiedProperty.PropertyType.Equals(typeof(bool)))
+				{
+					return specifiedProperty;
+				}
+			}
+
+			return null;
+		}
+
+		public static object GetHostProperty(object instance, PropertyInfo property)
+		{
+			// TODO: Optimize this, it's runtime code now, should cache as much as possible, but no other way to set/get specified properties
+			var specifiedProperty = GetSpecifiedProperty(instance.GetType(), property);
+			if (specifiedProperty != null)
+			{
+				if ((bool)specifiedProperty.GetValue(instance, null))
+				{
+					return property.GetValue(instance, null);
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			return property.GetValue(instance, null);
+		}
+
 		public static void SetHostProperty(object instance, PropertyInfo property, object value)
 		{
 			if (value != null && !property.PropertyType.IsAssignableFrom(value.GetType()))
@@ -203,6 +236,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (property.CanWrite)
 					property.SetValue(instance, value, null);
+
+				var specifiedProperty = GetSpecifiedProperty(instance.GetType(), property);
+				if (specifiedProperty != null)
+				{
+					specifiedProperty.SetValue(instance, value != null, null);
+				}
 			}
 		}
 	}

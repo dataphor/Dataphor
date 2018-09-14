@@ -1,0 +1,554 @@
+/*
+Types.Generated - Generated using the following statement:
+select GenerateTypes()
+*/
+
+
+create type ServiceInfoResultDto from class "VadsClient.ServiceInfoResultDto" class "System.BOPObjectConveyor";
+alter type ServiceInfoResultDto
+{
+	create representation ServiceInfoResultDto
+	{
+		dateStarted : DateTime, 
+		description : String, 
+		dbVersion : String, 
+		dbVersionDate : DateTime, 
+		contentVersion : String, 
+		contentVersionDate : DateTime, 
+		serviceVersion : String, 
+		deprecated : Boolean, 
+		errorText : String
+	}
+};
+create type AuthorityResultDto from class "VadsClient.AuthorityResultDto" class "System.BOPObjectConveyor";
+create type Authority from class "VadsClient.Authority" class "System.BOPObjectConveyor";
+alter type Authority
+{
+	create representation Authority
+	{
+		id : String, 
+		name : String, 
+		description : String, 
+		url : String, 
+		contactInformation : String
+	}
+};
+alter type AuthorityResultDto
+{
+	create representation AuthorityResultDto
+	{
+		authorities : list(Authority), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CodeSystemResultDto from class "VadsClient.CodeSystemResultDto" class "System.BOPObjectConveyor";
+create type CodeSystem from class "VadsClient.CodeSystem" class "System.BOPObjectConveyor";
+alter type CodeSystem
+{
+	create representation CodeSystem
+	{
+		oid : String, 
+		id : String, 
+		name : String, 
+		definitionText : String, 
+		status : String, 
+		statusDate : DateTime, 
+		version : String, 
+		versionDescription : String, 
+		acquiredDate : DateTime, 
+		effectiveDate : DateTime, 
+		expiryDate : DateTime, 
+		assigningAuthorityVersionName : String, 
+		assigningAuthorityReleaseDate : DateTime, 
+		distributionSourceVersionName : String, 
+		distributionSourceReleaseDate : DateTime, 
+		distributionSourceId : String, 
+		sdoCreateDate : DateTime, 
+		lastRevisionDate : DateTime, 
+		sdoReleaseDate : DateTime, 
+		assigningAuthorityId : String, 
+		codeSystemCode : String, 
+		sourceUrl : String, 
+		hl70396Identifier : String
+	}
+};
+alter type CodeSystemResultDto
+{
+	create representation CodeSystemResultDto
+	{
+		codeSystems : list(CodeSystem), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ValueSetConceptResultDto from class "VadsClient.ValueSetConceptResultDto" class "System.BOPObjectConveyor";
+create type ValueSetConcept from class "VadsClient.ValueSetConcept" class "System.BOPObjectConveyor";
+alter type ValueSetConcept
+{
+	create representation ValueSetConcept
+	{
+		id : String, 
+		codeSystemOid : String, 
+		valueSetVersionId : String, 
+		conceptCode : String, 
+		scopeNoteText : String, 
+		status : String, 
+		statusDate : DateTime, 
+		cdcPreferredDesignation : String, 
+		preferredAlternateCode : String, 
+		definitionText : String, 
+		codeSystemConceptName : String, 
+		sequence : Integer
+	}
+};
+alter type ValueSetConceptResultDto
+{
+	create representation ValueSetConceptResultDto
+	{
+		valueSetConcepts : list(ValueSetConcept), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CodeSystemConceptAltDesignationResultDto from class "VadsClient.CodeSystemConceptAltDesignationResultDto" class "System.BOPObjectConveyor";
+create type CodeSystemConceptAltDesignation from class "VadsClient.CodeSystemConceptAltDesignation" class "System.BOPObjectConveyor";
+alter type CodeSystemConceptAltDesignation
+{
+	create representation CodeSystemConceptAltDesignation
+	{
+		id : String, 
+		codeSystemOid : String, 
+		conceptCode : String, 
+		sdoDesignationId : String, 
+		conceptDesignationText : String, 
+		phinPreferredTerm : Boolean, 
+		code : Boolean, 
+		sdoDesignationStatus : String, 
+		designationType : String
+	}
+};
+alter type CodeSystemConceptAltDesignationResultDto
+{
+	create representation CodeSystemConceptAltDesignationResultDto
+	{
+		codeSystemConceptAltDesignations : list(CodeSystemConceptAltDesignation), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CodeSystemConceptPropertyValueResultDto from class "VadsClient.CodeSystemConceptPropertyValueResultDto" class "System.BOPObjectConveyor";
+create type CodeSystemConceptPropertyValue from class "VadsClient.CodeSystemConceptPropertyValue" class "System.BOPObjectConveyor";
+alter type CodeSystemConceptPropertyValue
+{
+	create representation CodeSystemConceptPropertyValue
+	{
+		id : String, 
+		codeSystemOid : String, 
+		sequenceNumber : Integer, 
+		codeSystemConceptCode : String, 
+		propertyName : String, 
+		definitionText : String, 
+		stringValue : String, 
+		numericValue : Decimal, 
+		booleanValue : Boolean, 
+		dateValue : DateTime, 
+		valueType : String
+	}
+};
+alter type CodeSystemConceptPropertyValueResultDto
+{
+	create representation CodeSystemConceptPropertyValueResultDto
+	{
+		codeSystemConceptPropertyValues : list(CodeSystemConceptPropertyValue), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CodeSystemConceptResultDto from class "VadsClient.CodeSystemConceptResultDto" class "System.BOPObjectConveyor";
+create type CodeSystemConcept from class "VadsClient.CodeSystemConcept" class "System.BOPObjectConveyor";
+alter type CodeSystemConcept
+{
+	create representation CodeSystemConcept
+	{
+		id : String, 
+		name : String, 
+		codeSystemOid : String, 
+		conceptCode : String, 
+		sdoPreferredDesignation : String, 
+		definitionText : String, 
+		preCoordinatedFlag : String, 
+		preCoordinatedConceptNote : String, 
+		sdoConceptCreatedDate : DateTime, 
+		sdoConceptRevisionDate : DateTime, 
+		status : String, 
+		statusDate : DateTime, 
+		sdoConceptStatus : String, 
+		sdoConceptStatusDate : DateTime, 
+		supersededByCodeSystemConceptId : String, 
+		umlsCui : String, 
+		umlsAui : String, 
+		isRootFlag : Boolean, 
+		isConceptFlag : Boolean, 
+		sequence : Integer
+	}
+};
+alter type CodeSystemConceptResultDto
+{
+	create representation CodeSystemConceptResultDto
+	{
+		codeSystemConcepts : list(CodeSystemConcept), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CodeSystemPropertyDefinitionResultDto from class "VadsClient.CodeSystemPropertyDefinitionResultDto" class "System.BOPObjectConveyor";
+create type CodeSystemPropertyDefinition from class "VadsClient.CodeSystemPropertyDefinition" class "System.BOPObjectConveyor";
+alter type CodeSystemPropertyDefinition
+{
+	create representation CodeSystemPropertyDefinition
+	{
+		id : String, 
+		codeSystemOid : String, 
+		sequenceNumber : Integer, 
+		name : String, 
+		definitionText : String, 
+		dataType : String, 
+		maxLength : Integer, 
+		required : Boolean
+	}
+};
+alter type CodeSystemPropertyDefinitionResultDto
+{
+	create representation CodeSystemPropertyDefinitionResultDto
+	{
+		codeSystemPropertyDefinitions : list(CodeSystemPropertyDefinition), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type CustomResultDto from class "VadsClient.CustomResultDto" class "System.BOPObjectConveyor";
+alter type CustomResultDto
+{
+	create representation CustomResultDto
+	{
+		results : list(generic), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type FileImageResultDto from class "VadsClient.FileImageResultDto" class "System.BOPObjectConveyor";
+alter type FileImageResultDto
+{
+	create representation FileImageResultDto
+	{
+		fileImages : list(Binary), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type GroupResultDto from class "VadsClient.GroupResultDto" class "System.BOPObjectConveyor";
+create type Group from class "VadsClient.Group" class "System.BOPObjectConveyor";
+alter type Group
+{
+	create representation Group
+	{
+		id : String, 
+		name : String, 
+		descriptionText : String, 
+		status : String, 
+		statusDate : DateTime, 
+		groupNotes : String
+	}
+};
+alter type GroupResultDto
+{
+	create representation GroupResultDto
+	{
+		groups : list(Group), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type IdResultDto from class "VadsClient.IdResultDto" class "System.BOPObjectConveyor";
+alter type IdResultDto
+{
+	create representation IdResultDto
+	{
+		ids : list(String), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type SourceResultDto from class "VadsClient.SourceResultDto" class "System.BOPObjectConveyor";
+create type Source from class "VadsClient.Source" class "System.BOPObjectConveyor";
+alter type Source
+{
+	create representation Source
+	{
+		id : String, 
+		name : String, 
+		description : String, 
+		url : String, 
+		contactInformation : String
+	}
+};
+alter type SourceResultDto
+{
+	create representation SourceResultDto
+	{
+		sources : list(Source), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ValidateResultDto from class "VadsClient.ValidateResultDto" class "System.BOPObjectConveyor";
+alter type ValidateResultDto
+{
+	create representation ValidateResultDto
+	{
+		valid : Boolean, 
+		errorText : String
+	}
+};
+create type ValueSetResultDto from class "VadsClient.ValueSetResultDto" class "System.BOPObjectConveyor";
+create type ValueSet from class "VadsClient.ValueSet" class "System.BOPObjectConveyor";
+alter type ValueSet
+{
+	create representation ValueSet
+	{
+		oid : String, 
+		id : String, 
+		name : String, 
+		code : String, 
+		status : String, 
+		statusDate : DateTime, 
+		definitionText : String, 
+		scopeNoteText : String, 
+		assigningAuthorityId : String, 
+		valueSetCreatedDate : DateTime, 
+		valueSetLastRevisionDate : DateTime
+	}
+};
+alter type ValueSetResultDto
+{
+	create representation ValueSetResultDto
+	{
+		valueSet : list(ValueSet), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ValueSetVersionResultDto from class "VadsClient.ValueSetVersionResultDto" class "System.BOPObjectConveyor";
+create type ValueSetVersion from class "VadsClient.ValueSetVersion" class "System.BOPObjectConveyor";
+alter type ValueSetVersion
+{
+	create representation ValueSetVersion
+	{
+		id : String, 
+		valueSetOid : String, 
+		versionNumber : Integer, 
+		description : String, 
+		status : String, 
+		statusDate : DateTime, 
+		assigningAuthorityText : String, 
+		assigningAuthorityReleaseDate : DateTime, 
+		noteText : String, 
+		effectiveDate : DateTime, 
+		expiryDate : DateTime
+	}
+};
+alter type ValueSetVersionResultDto
+{
+	create representation ValueSetVersionResultDto
+	{
+		valueSetVersions : list(ValueSetVersion), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ViewResultDto from class "VadsClient.ViewResultDto" class "System.BOPObjectConveyor";
+create type View from class "VadsClient.View" class "System.BOPObjectConveyor";
+alter type View
+{
+	create representation View
+	{
+		name : String, 
+		id : String, 
+		descriptionText : String, 
+		status : String, 
+		statusDate : DateTime, 
+		viewNotes : String
+	}
+};
+alter type ViewResultDto
+{
+	create representation ViewResultDto
+	{
+		views : list(View), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ViewVersionResultDto from class "VadsClient.ViewVersionResultDto" class "System.BOPObjectConveyor";
+create type ViewVersion from class "VadsClient.ViewVersion" class "System.BOPObjectConveyor";
+alter type ViewVersion
+{
+	create representation ViewVersion
+	{
+		id : String, 
+		viewId : String, 
+		versionNumber : Integer, 
+		reason : String, 
+		statusDate : DateTime, 
+		status : String
+	}
+};
+alter type ViewVersionResultDto
+{
+	create representation ViewVersionResultDto
+	{
+		viewVersions : list(ViewVersion), 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type VocabObjectCountResultDto from class "VadsClient.VocabObjectCountResultDto" class "System.BOPObjectConveyor";
+alter type VocabObjectCountResultDto
+{
+	create representation VocabObjectCountResultDto
+	{
+		valueSetCount : Integer, 
+		valueSetConceptCount : Integer, 
+		codeSystemCount : Integer, 
+		codeSystemConceptCount : Integer, 
+		viewCount : Integer, 
+		groupCount : Integer, 
+		totalResults : Integer, 
+		errorText : String
+	}
+};
+create type ValueSetConceptSearchCriteriaDto from class "VadsClient.ValueSetConceptSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type ValueSetConceptSearchCriteriaDto
+{
+	create representation ValueSetConceptSearchCriteriaDto
+	{
+		filterByViews : Boolean, 
+		filterByGroups : Boolean, 
+		filterByValueSets : Boolean, 
+		filterByCodeSystems : Boolean, 
+		groupIds : list(String), 
+		viewIds : list(String), 
+		valueSetOids : list(String), 
+		codeSystemOids : list(String), 
+		conceptCodeSearch : Boolean, 
+		conceptNameSearch : Boolean, 
+		preferredNameSearch : Boolean, 
+		alternateNameSearch : Boolean, 
+		searchText : String, 
+		searchType : Integer, 
+		versionOption : Integer, 
+		versionDate : DateTime
+	}
+};
+create type CodeSystemConceptSearchCriteriaDto from class "VadsClient.CodeSystemConceptSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type CodeSystemConceptSearchCriteriaDto
+{
+	create representation CodeSystemConceptSearchCriteriaDto
+	{
+		filterByCodeSystems : Boolean, 
+		codeSystemOids : list(String), 
+		codeSearch : Boolean, 
+		nameSearch : Boolean, 
+		preferredNameSearch : Boolean, 
+		alternateNameSearch : Boolean, 
+		definitionSearch : Boolean, 
+		searchText : String, 
+		searchType : Integer
+	}
+};
+create type CodeSystemSearchCriteriaDto from class "VadsClient.CodeSystemSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type CodeSystemSearchCriteriaDto
+{
+	create representation CodeSystemSearchCriteriaDto
+	{
+		codeSearch : Boolean, 
+		nameSearch : Boolean, 
+		oidSearch : Boolean, 
+		definitionSearch : Boolean, 
+		assigningAuthoritySearch : Boolean, 
+		table396Search : Boolean, 
+		searchText : String, 
+		searchType : Integer
+	}
+};
+create type GroupSearchCriteriaDto from class "VadsClient.GroupSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type GroupSearchCriteriaDto
+{
+	create representation GroupSearchCriteriaDto
+	{
+		nameSearch : Boolean, 
+		definitionSearch : Boolean, 
+		searchText : String, 
+		searchType : Integer
+	}
+};
+create type ValueSetSearchCriteriaDto from class "VadsClient.ValueSetSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type ValueSetSearchCriteriaDto
+{
+	create representation ValueSetSearchCriteriaDto
+	{
+		filterByViews : Boolean, 
+		filterByGroups : Boolean, 
+		groupIds : list(String), 
+		viewIds : list(String), 
+		codeSearch : Boolean, 
+		nameSearch : Boolean, 
+		oidSearch : Boolean, 
+		definitionSearch : Boolean, 
+		searchText : String, 
+		searchType : Integer
+	}
+};
+create type ValueSetVersionSearchCriteriaDto from class "VadsClient.ValueSetVersionSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type ValueSetVersionSearchCriteriaDto
+{
+	create representation ValueSetVersionSearchCriteriaDto
+	{
+		filterByViews : Boolean, 
+		filterByGroups : Boolean, 
+		groupIds : list(String), 
+		viewIds : list(String), 
+		codeSearch : Boolean, 
+		nameSearch : Boolean, 
+		oidSearch : Boolean, 
+		definitionSearch : Boolean, 
+		searchText : String, 
+		searchType : Integer, 
+		versionOption : Integer, 
+		versionDate : DateTime
+	}
+};
+create type ViewSearchCriteriaDto from class "VadsClient.ViewSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type ViewSearchCriteriaDto
+{
+	create representation ViewSearchCriteriaDto
+	{
+		searchText : String, 
+		searchType : Integer
+	}
+};
+create type ViewVersionSearchCriteriaDto from class "VadsClient.ViewVersionSearchCriteriaDto" class "System.BOPObjectConveyor";
+alter type ViewVersionSearchCriteriaDto
+{
+	create representation ViewVersionSearchCriteriaDto
+	{
+		searchText : String, 
+		searchType : Integer, 
+		versionOption : Integer, 
+		versionDate : DateTime
+	}
+};
+create type SearchTypes from class "VadsClient.SearchTypes" class "System.BOPObjectConveyor";
+create type VersionOptions from class "VadsClient.VersionOptions" class "System.BOPObjectConveyor";
+create type CustomMethods from class "VadsClient.CustomMethods" class "System.BOPObjectConveyor";

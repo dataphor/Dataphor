@@ -1,0 +1,2 @@
+This library supports the STU3 version of FHIR (3.0.1).
+

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="FHIR2.Core" settings="" version="*" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<files.filereference filename="Hl7.Fhir.DSTU2.Core.dll" isassembly="False" />
+	<files.filereference filename="Alphora.Dataphor.FHIR2.Core.dll" isassembly="True" />
+	<libraries.libraryreference name="System.Internet" version="*" />
+</library>

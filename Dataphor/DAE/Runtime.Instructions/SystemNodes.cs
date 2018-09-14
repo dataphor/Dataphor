@@ -495,6 +495,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemBinaryReadAccessorNode() : base()
 		{
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
@@ -521,6 +522,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
     }
@@ -562,12 +564,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemGuidReadAccessorNode() : base()
 		{
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 
@@ -629,12 +633,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public ScalarReadAccessorNode() : base()
 		{
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
 		{
 			base.DetermineCharacteristics(plan);
+			IsUniquePreserving = true;
 			IsOrderPreserving = true;
 		}
 		
@@ -2202,7 +2208,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 				else
-					return ((scalarType.NativeType != null) && (scalarType.NativeType.Equals(tempValue.GetType())));
+					return ((scalarType.NativeType != null) && (scalarType.NativeType.IsAssignableFrom(tempValue.GetType())));
 			}
 			
 			return false;

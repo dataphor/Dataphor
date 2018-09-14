@@ -139,8 +139,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				IsRepeatable = IsRepeatable && Nodes[index].IsRepeatable;
 				IsNilable = IsNilable || Nodes[index].IsNilable;
 			} 
-			
+
+			IsUniquePreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsUniquePreserving", IsUniquePreserving.ToString()));
 			IsOrderPreserving = Convert.ToBoolean(MetaData.GetTag(Operator.MetaData, "DAE.IsOrderPreserving", IsOrderPreserving.ToString()));
+			// Order preserving is strictly stronger than unique preserving, so set it explicitly here
+			if (IsOrderPreserving)
+			{
+				IsUniquePreserving = true;
+			}
 		}
 		
 		public override void DetermineDataType(Plan plan)

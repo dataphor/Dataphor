@@ -1,0 +1,2894 @@
+<?xml version="1.0" encoding="utf-16"?>
+<modelInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="QUICK" version="3.0.0" url="http://hl7.org/fhir" patientClassName="QUICK.Patient" patientBirthDatePropertyName="birthDate" xmlns="urn:hl7-org:elm-modelinfo:r1">
+  <requiredModelInfo name="System" version="1.0.0" />
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="AdverseEvent.SuspectEntityComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="instance" type="QUICK.Reference" />
+    <element name="causality" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="AllergyIntolerance.ReactionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="reaction-duration" type="QUICK.allergyintolerance-duration" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="substance" type="System.Concept" />
+    <element name="manifestation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="onset" type="System.DateTime" />
+    <element name="severity" type="System.String" />
+    <element name="exposureRoute" type="System.Concept" />
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.AccidentComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="date" type="System.DateTime" />
+    <element name="type" type="System.Concept" />
+    <element name="location">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Address" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.CareTeamComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="provider" type="QUICK.Reference" />
+    <element name="responsible" type="System.Boolean" />
+    <element name="role" type="System.Concept" />
+    <element name="qualification" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.DiagnosisComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="diagnosis">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="type">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="packageCode" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.InformationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="category" type="System.Concept" />
+    <element name="code" type="System.Concept" />
+    <element name="timing">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="value">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Attachment" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="reason" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.InsuranceComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="focal" type="System.Boolean" />
+    <element name="coverage" type="QUICK.Reference" />
+    <element name="businessArrangement" type="System.String" />
+    <element name="preAuthRef">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.String" />
+    </element>
+    <element name="claimResponse" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.Item.Detail.SubDetailComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="revenue" type="System.Concept" />
+    <element name="category" type="System.Concept" />
+    <element name="service" type="System.Concept" />
+    <element name="modifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="programCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="unitPrice" type="System.Quantity" />
+    <element name="factor" type="System.Decimal" />
+    <element name="net" type="System.Quantity" />
+    <element name="udi" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.Item.DetailComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="revenue" type="System.Concept" />
+    <element name="category" type="System.Concept" />
+    <element name="service" type="System.Concept" />
+    <element name="modifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="programCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="unitPrice" type="System.Quantity" />
+    <element name="factor" type="System.Decimal" />
+    <element name="net" type="System.Quantity" />
+    <element name="udi">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="subDetail">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.Item.Detail.SubDetailComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.ItemComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="careTeamLinkId">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Integer" />
+    </element>
+    <element name="diagnosisLinkId">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Integer" />
+    </element>
+    <element name="procedureLinkId">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Integer" />
+    </element>
+    <element name="informationLinkId">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Integer" />
+    </element>
+    <element name="revenue" type="System.Concept" />
+    <element name="category" type="System.Concept" />
+    <element name="service" type="System.Concept" />
+    <element name="modifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="programCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="serviced">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="locationReference" type="QUICK.Reference" />
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="unitPrice" type="System.Quantity" />
+    <element name="factor" type="System.Decimal" />
+    <element name="net" type="System.Quantity" />
+    <element name="udi">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="bodySite" type="System.Concept" />
+    <element name="subSite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="encounter">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="detail">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.Item.DetailComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.PayeeComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="type" type="System.Concept" />
+    <element name="resourceType" type="System.Code" />
+    <element name="party" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.ProcedureComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="sequence" type="System.Integer" />
+    <element name="date" type="System.DateTime" />
+    <element name="procedure">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Claim.RelatedComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="claim" type="QUICK.Reference" />
+    <element name="relationship" type="System.Concept" />
+    <element name="reference" type="QUICK.Identifier" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Communication.PayloadComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="content">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Attachment" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="CommunicationRequest.PayloadComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="content">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Attachment" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="CommunicationRequest.RequesterComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="agent" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Condition.EvidenceComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="code">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="detail">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Condition.StageComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="summary" type="System.Concept" />
+    <element name="assessment">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Coverage.GroupingComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="group" type="System.String" />
+    <element name="subGroup" type="System.String" />
+    <element name="plan" type="System.String" />
+    <element name="subPlan" type="System.String" />
+    <element name="class" type="System.String" />
+    <element name="subClass" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Device.UdiComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="deviceIdentifier" type="System.String" />
+    <element name="name" type="System.String" />
+    <element name="jurisdiction" type="System.String" />
+    <element name="carrierHRF" type="System.String" />
+    <element name="carrierAIDC" type="System.String" />
+    <element name="issuer" type="System.String" />
+    <element name="entryType" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="DiagnosticReport.ImageComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="comment" type="System.String" />
+    <element name="link" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="DiagnosticReport.PerformerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="role" type="System.Concept" />
+    <element name="actor" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.ClassHistoryComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="class" type="System.Code" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.DiagnosisComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="condition" type="QUICK.Reference" />
+    <element name="role" type="System.Concept" />
+    <element name="rank" type="System.Integer" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.HospitalizationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="preAdmissionIdentifier" type="QUICK.Identifier" />
+    <element name="origin" type="QUICK.Reference" />
+    <element name="admitSource" type="System.Concept" />
+    <element name="reAdmission" type="System.Concept" />
+    <element name="dietPreference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="specialCourtesy">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="specialArrangement">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="destination" type="QUICK.Reference" />
+    <element name="dischargeDisposition" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.LocationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="location" type="QUICK.Reference" />
+    <element name="status" type="System.String" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.ParticipantComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="type">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="individual" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Encounter.StatusHistoryComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="FamilyMemberHistory.ConditionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="condition-abatement" type="QUICK.familymemberhistory-abatement" />
+    <element name="condition-severity" type="QUICK.familymemberhistory-severity" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="outcome" type="System.Concept" />
+    <element name="onset">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Goal.TargetComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="measure" type="System.Concept" />
+    <element name="detail">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+      </typeSpecifier>
+    </element>
+    <element name="due">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Duration" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ImagingStudy.Series.InstanceComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="uid" type="System.String" />
+    <element name="number" type="System.Integer" />
+    <element name="sopClass" type="System.String" />
+    <element name="title" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ImagingStudy.SeriesComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="uid" type="System.String" />
+    <element name="number" type="System.Integer" />
+    <element name="modality" type="System.Code" />
+    <element name="description" type="System.String" />
+    <element name="numberOfInstances" type="System.Integer" />
+    <element name="availability" type="System.String" />
+    <element name="endpoint">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="bodySite" type="System.Code" />
+    <element name="laterality" type="System.Code" />
+    <element name="started" type="System.DateTime" />
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="instance">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ImagingStudy.Series.InstanceComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Immunization.ExplanationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="reason">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Immunization.PractitionerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="role" type="System.Concept" />
+    <element name="actor" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Immunization.ReactionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="date" type="System.DateTime" />
+    <element name="detail" type="QUICK.Reference" />
+    <element name="reported" type="System.Boolean" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Immunization.VaccinationProtocolComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="doseSequence" type="System.Integer" />
+    <element name="description" type="System.String" />
+    <element name="authority" type="QUICK.Reference" />
+    <element name="series" type="System.String" />
+    <element name="targetDisease">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="doseStatus" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ImmunizationRecommendation.Recommendation.DateCriterionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="value" type="System.DateTime" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ImmunizationRecommendation.Recommendation.ProtocolComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="doseSequence" type="System.Integer" />
+    <element name="description" type="System.String" />
+    <element name="authority" type="QUICK.Reference" />
+    <element name="series" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ImmunizationRecommendation.RecommendationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="date" type="System.DateTime" />
+    <element name="vaccineCode" type="System.Concept" />
+    <element name="targetDisease" type="System.Concept" />
+    <element name="doseNumber" type="System.Integer" />
+    <element name="forecastStatus" type="System.Concept" />
+    <element name="dateCriterion">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ImmunizationRecommendation.Recommendation.DateCriterionComponent" />
+    </element>
+    <element name="protocol" type="QUICK.ImmunizationRecommendation.Recommendation.ProtocolComponent" />
+    <element name="supportingImmunization">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="supportingPatientInformation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Location.PositionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="longitude" type="System.Decimal" />
+    <element name="latitude" type="System.Decimal" />
+    <element name="altitude" type="System.Decimal" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Medication.IngredientComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="item" type="QUICK.Reference" />
+    <element name="isActive" type="System.Boolean" />
+    <element name="amount" type="QUICK.Ratio" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Medication.Package.BatchComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="lotNumber" type="System.String" />
+    <element name="expirationDate" type="System.DateTime" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Medication.Package.ContentComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="itemReference" type="QUICK.Reference" />
+    <element name="amount" type="QUICK.SimpleQuantity" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Medication.PackageComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="container" type="System.Concept" />
+    <element name="content">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Medication.Package.ContentComponent" />
+    </element>
+    <element name="batch">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Medication.Package.BatchComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationAdministration.DosageComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="text" type="System.String" />
+    <element name="site" type="System.Concept" />
+    <element name="route" type="System.Concept" />
+    <element name="method" type="System.Concept" />
+    <element name="dose" type="QUICK.SimpleQuantity" />
+    <element name="rate">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Ratio" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="SimpleQuantity" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationAdministration.PerformerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="actor" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationDispense.PerformerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="actor" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationDispense.SubstitutionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="wasSubstituted" type="System.Boolean" />
+    <element name="type" type="System.Concept" />
+    <element name="reason">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="responsibleParty">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationRequest.DispenseRequestComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="validityPeriod">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="numberOfRepeatsAllowed" type="System.Integer" />
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="expectedSupplyDuration" type="System.Duration" />
+    <element name="performer" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationRequest.RequesterComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="agent" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="MedicationRequest.SubstitutionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="allowed" type="System.Boolean" />
+    <element name="reason" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Observation.ComponentComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="value">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Ratio" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="SampledData" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Attachment" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Time" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="dataAbsentReason" type="System.Concept" />
+    <element name="interpretation" type="System.Concept" />
+    <element name="referenceRange">
+      <typeSpecifier xsi:type="ListTypeSpecifier" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Observation.ReferenceRangeComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="low" type="QUICK.SimpleQuantity" />
+    <element name="high" type="QUICK.SimpleQuantity" />
+    <element name="type" type="System.Concept" />
+    <element name="appliesTo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="age">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+    </element>
+    <element name="text" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Observation.RelatedComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="type" type="System.String" />
+    <element name="target" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Organization.ContactComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="purpose" type="System.Concept" />
+    <element name="name" type="QUICK.HumanName" />
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="address" type="QUICK.Address" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Patient.AnimalComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="species" type="System.Concept" />
+    <element name="breed" type="System.Concept" />
+    <element name="genderStatus" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Patient.CommunicationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="language" type="System.Concept" />
+    <element name="preferred" type="System.Boolean" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Patient.ContactComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="relationship">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="name" type="QUICK.HumanName" />
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="address" type="QUICK.Address" />
+    <element name="gender" type="System.String" />
+    <element name="organization" type="QUICK.Reference" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Patient.LinkComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="other" type="QUICK.Reference" />
+    <element name="type" type="System.String" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Practitioner.QualificationComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="issuer" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Procedure.FocalDeviceComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="action" type="System.Concept" />
+    <element name="manipulated" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Procedure.PerformerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="role" type="System.Concept" />
+    <element name="actor" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ProcedureRequest.RequesterComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="agent" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="ReferralRequest.RequesterComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="agent" type="QUICK.Reference" />
+    <element name="onBehalfOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Specimen.CollectionComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="collector" type="QUICK.Reference" />
+    <element name="collected">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="method" type="System.Concept" />
+    <element name="bodySite" type="System.Concept" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Specimen.ContainerComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="container-sequenceNumber" type="QUICK.specimen-sequenceNumber" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="capacity" type="QUICK.SimpleQuantity" />
+    <element name="specimenQuantity" type="QUICK.SimpleQuantity" />
+    <element name="additive">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Specimen.ProcessingComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="procedure" type="System.Concept" />
+    <element name="additive">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="time">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Substance.IngredientComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="quantity" type="QUICK.Ratio" />
+    <element name="substanceReference" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BackboneElement" name="Substance.InstanceComponent">
+    <element name="id" type="System.String" />
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier" type="QUICK.Identifier" />
+    <element name="expiry" type="System.DateTime" />
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.AdverseEvent" name="qicore-adverseevent" label="qicore-adverseevent" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier" type="QUICK.Identifier" />
+    <element name="category" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="date" type="System.DateTime" />
+    <element name="reaction">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="location" type="QUICK.Reference" />
+    <element name="seriousness" type="System.Concept" />
+    <element name="outcome" type="System.Concept" />
+    <element name="recorder" type="QUICK.Reference" />
+    <element name="eventParticipant" type="QUICK.Reference" />
+    <element name="description" type="System.String" />
+    <element name="suspectEntity">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.AdverseEvent.SuspectEntityComponent" />
+    </element>
+    <element name="subjectMedicalHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="referenceDocument">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="study">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-allergyintolerance" name="qicore-allergyintolerance" label="qicore-allergyintolerance" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="resolutionAge" type="QUICK.allergyintolerance-resolutionAge" />
+    <element name="reasonRefuted" type="QUICK.allergyintolerance-reasonRefuted" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="clinicalStatus" type="System.String" />
+    <element name="verificationStatus" type="System.String" />
+    <element name="type" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.String" />
+    </element>
+    <element name="criticality" type="System.String" />
+    <element name="code" type="System.Concept" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="onset">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="assertedDate" type="System.DateTime" />
+    <element name="recorder" type="QUICK.Reference" />
+    <element name="asserter" type="QUICK.Reference" />
+    <element name="lastOccurrence" type="System.DateTime" />
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="reaction">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.AllergyIntolerance.ReactionComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.BodySite" name="qicore-bodysite" label="qicore-bodysite" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="active" type="System.Boolean" />
+    <element name="code" type="System.Concept" />
+    <element name="qualifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="image">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+    <element name="patient" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Claim" name="qicore-claim" label="qicore-claim" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="subType">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="use" type="System.String" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="billablePeriod">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="created" type="System.DateTime" />
+    <element name="enterer" type="QUICK.Reference" />
+    <element name="insurer" type="QUICK.Reference" />
+    <element name="provider" type="QUICK.Reference" />
+    <element name="organization" type="QUICK.Reference" />
+    <element name="priority" type="System.Concept" />
+    <element name="fundsReserve" type="System.Concept" />
+    <element name="related">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.RelatedComponent" />
+    </element>
+    <element name="prescription" type="QUICK.Reference" />
+    <element name="originalPrescription" type="QUICK.Reference" />
+    <element name="payee" type="QUICK.Claim.PayeeComponent" />
+    <element name="referral" type="QUICK.Reference" />
+    <element name="facility" type="QUICK.Reference" />
+    <element name="careTeam">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.CareTeamComponent" />
+    </element>
+    <element name="information">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.InformationComponent" />
+    </element>
+    <element name="diagnosis">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.DiagnosisComponent" />
+    </element>
+    <element name="procedure">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.ProcedureComponent" />
+    </element>
+    <element name="insurance">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.InsuranceComponent" />
+    </element>
+    <element name="accident" type="QUICK.Claim.AccidentComponent" />
+    <element name="employmentImpacted">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="hospitalization">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="item">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Claim.ItemComponent" />
+    </element>
+    <element name="total" type="System.Quantity" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Communication" name="qicore-communication" label="qicore-communication" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="partOf">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="notDone" type="System.Boolean" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="medium">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="recipient">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="topic">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="context" type="QUICK.Reference" />
+    <element name="sent" type="System.DateTime" />
+    <element name="received" type="System.DateTime" />
+    <element name="sender" type="QUICK.Reference" />
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="payload">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Communication.PayloadComponent" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.CommunicationRequest" name="qicore-communicationrequest" label="qicore-communicationrequest" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="orderedBy" type="QUICK.communicationrequest-orderedBy" />
+    <element name="authorizedBy" type="QUICK.procedurerequest-authorizedBy" />
+    <element name="reasonRejected" type="QUICK.communicationrequest-reasonRejected" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="replaces">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="groupIdentifier" type="QUICK.Identifier" />
+    <element name="status" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="priority" type="System.String" />
+    <element name="medium">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="recipient">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="topic">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="context" type="QUICK.Reference" />
+    <element name="payload">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.CommunicationRequest.PayloadComponent" />
+    </element>
+    <element name="occurrence">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="authoredOn" type="System.DateTime" />
+    <element name="sender" type="QUICK.Reference" />
+    <element name="requester" type="QUICK.CommunicationRequest.RequesterComponent" />
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-condition" name="qicore-condition" label="qicore-condition" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="criticality" type="QUICK.condition-criticality" />
+    <element name="dueTo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.condition-dueTo" />
+    </element>
+    <element name="occurredFollowing">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.condition-occurredFollowing" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="clinicalStatus" type="System.String" />
+    <element name="verificationStatus" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="severity" type="System.Concept" />
+    <element name="code" type="System.Concept" />
+    <element name="bodySite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="onset">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="abatement">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="assertedDate" type="System.DateTime" />
+    <element name="asserter" type="QUICK.Reference" />
+    <element name="stage" type="QUICK.Condition.StageComponent" />
+    <element name="evidence">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Condition.EvidenceComponent" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Coverage" name="qicore-coverage" label="qicore-coverage" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="policyHolder" type="QUICK.Reference" />
+    <element name="subscriber" type="QUICK.Reference" />
+    <element name="beneficiary" type="QUICK.Reference" />
+    <element name="relationship" type="System.Concept" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="payor">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="grouping" type="QUICK.Coverage.GroupingComponent" />
+    <element name="dependent" type="System.String" />
+    <element name="sequence" type="System.String" />
+    <element name="order" type="System.Integer" />
+    <element name="network" type="System.String" />
+    <element name="contract">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-device" name="qicore-device" label="qicore-device" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="udi" type="QUICK.Device.UdiComponent" />
+    <element name="status" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="lotNumber" type="System.String" />
+    <element name="manufacturer" type="System.String" />
+    <element name="manufactureDate" type="System.DateTime" />
+    <element name="expirationDate" type="System.DateTime" />
+    <element name="model" type="System.String" />
+    <element name="version" type="System.String" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="owner" type="QUICK.Reference" />
+    <element name="contact">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="location" type="QUICK.Reference" />
+    <element name="url" type="System.String" />
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="safety">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.DeviceUseStatement" name="qicore-deviceusestatement" label="qicore-deviceusestatement" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="whenUsed">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="timing">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Timing" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="recordedOn" type="System.DateTime" />
+    <element name="source" type="QUICK.Reference" />
+    <element name="device" type="QUICK.Reference" />
+    <element name="indication">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="bodySite" type="System.Concept" />
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-diagnosticreport" name="qicore-diagnosticreport" label="qicore-diagnosticreport" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="locationPerformed" type="QUICK.diagnosticReport-locationPerformed" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="code" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="effective">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="issued" type="System.DateTime" />
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.DiagnosticReport.PerformerComponent" />
+    </element>
+    <element name="specimen">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="result">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="imagingStudy">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="image">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.DiagnosticReport.ImageComponent" />
+    </element>
+    <element name="conclusion" type="System.String" />
+    <element name="codedDiagnosis">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="presentedForm">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Encounter" name="qicore-encounter" label="qicore-encounter" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="reasonCancelled" type="QUICK.encounter-reasonCancelled" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="class" type="System.Code" />
+    <element name="type">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="priority" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="episodeOfCare">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="incomingReferral">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="participant">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Encounter.ParticipantComponent" />
+    </element>
+    <element name="appointment" type="QUICK.Reference" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="length" type="System.Duration" />
+    <element name="reason">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="diagnosis">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Encounter.DiagnosisComponent" />
+    </element>
+    <element name="account">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="hospitalization" type="QUICK.Encounter.HospitalizationComponent" />
+    <element name="location">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Encounter.LocationComponent" />
+    </element>
+    <element name="serviceProvider" type="QUICK.Reference" />
+    <element name="partOf" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.FamilyMemberHistory" name="qicore-familymemberhistory" label="qicore-familymemberhistory" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="notDone" type="System.Boolean" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="date" type="System.DateTime" />
+    <element name="name" type="System.String" />
+    <element name="relationship" type="System.Concept" />
+    <element name="gender" type="System.String" />
+    <element name="born">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="age">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="estimatedAge" type="System.Boolean" />
+    <element name="deceased">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+      </typeSpecifier>
+    </element>
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="condition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.FamilyMemberHistory.ConditionComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Flag" name="qicore-flag" label="qicore-flag" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="code" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+    <element name="encounter" type="QUICK.Reference" />
+    <element name="author" type="QUICK.Reference" />
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-goal" name="qicore-goal" label="qicore-goal" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="reasonRejected" type="QUICK.goal-reasonRejected" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="priority" type="System.Concept" />
+    <element name="description" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="start">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+      </typeSpecifier>
+    </element>
+    <element name="target" type="QUICK.Goal.TargetComponent" />
+    <element name="statusDate" type="System.DateTime" />
+    <element name="statusReason" type="System.String" />
+    <element name="expressedBy" type="QUICK.Reference" />
+    <element name="addresses">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="outcomeCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="outcomeReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.ImagingStudy" name="qicore-imagingstudy" label="qicore-imagingstudy" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="uid" type="System.String" />
+    <element name="accession" type="QUICK.Identifier" />
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="availability" type="System.String" />
+    <element name="modalityList">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Code" />
+    </element>
+    <element name="patient" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="started" type="System.DateTime" />
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="referrer" type="QUICK.Reference" />
+    <element name="interpreter">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="endpoint">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="numberOfSeries" type="System.Integer" />
+    <element name="numberOfInstances" type="System.Integer" />
+    <element name="procedureReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="procedureCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reason" type="System.Concept" />
+    <element name="description" type="System.String" />
+    <element name="series">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ImagingStudy.SeriesComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-immunization" name="qicore-immunization" label="qicore-immunization" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="notGiven" type="System.Boolean" />
+    <element name="vaccineCode" type="System.Concept" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="encounter" type="QUICK.Reference" />
+    <element name="date" type="System.DateTime" />
+    <element name="primarySource" type="System.Boolean" />
+    <element name="reportOrigin" type="System.Concept" />
+    <element name="location" type="QUICK.Reference" />
+    <element name="manufacturer" type="QUICK.Reference" />
+    <element name="lotNumber" type="System.String" />
+    <element name="expirationDate" type="System.DateTime" />
+    <element name="site" type="System.Concept" />
+    <element name="route" type="System.Concept" />
+    <element name="doseQuantity" type="QUICK.SimpleQuantity" />
+    <element name="practitioner">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Immunization.PractitionerComponent" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="explanation" type="QUICK.Immunization.ExplanationComponent" />
+    <element name="reaction">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Immunization.ReactionComponent" />
+    </element>
+    <element name="vaccinationProtocol">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Immunization.VaccinationProtocolComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.ImmunizationRecommendation" name="qicore-immunizationrec" label="qicore-immunizationrec" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="patient" type="QUICK.Reference" />
+    <element name="recommendation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ImmunizationRecommendation.RecommendationComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-location" name="qicore-location" label="qicore-location" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="operationalStatus" type="System.Code" />
+    <element name="name" type="System.String" />
+    <element name="alias">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.String" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="mode" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="address" type="QUICK.Address" />
+    <element name="physicalType" type="System.Concept" />
+    <element name="position" type="QUICK.Location.PositionComponent" />
+    <element name="managingOrganization" type="QUICK.Reference" />
+    <element name="partOf" type="QUICK.Reference" />
+    <element name="endpoint">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-medication" name="qicore-medication" label="qicore-medication" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="status" type="System.String" />
+    <element name="isBrand" type="System.Boolean" />
+    <element name="isOverTheCounter" type="System.Boolean" />
+    <element name="manufacturer" type="QUICK.Reference" />
+    <element name="form" type="System.Concept" />
+    <element name="ingredient">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Medication.IngredientComponent" />
+    </element>
+    <element name="package" type="QUICK.Medication.PackageComponent" />
+    <element name="image">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.MedicationAdministration" name="qicore-medicationadministration" label="qicore-medicationadministration" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="partOf">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="medication">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="supportingInformation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="effective">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.MedicationAdministration.PerformerComponent" />
+    </element>
+    <element name="notGiven" type="System.Boolean" />
+    <element name="reasonNotGiven">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="prescription" type="QUICK.Reference" />
+    <element name="device">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="dosage" type="QUICK.MedicationAdministration.DosageComponent" />
+    <element name="eventHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.MedicationDispense" name="qicore-medicationdispense" label="qicore-medicationdispense" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="validityPeriod" type="QUICK.medicationdispense-validityPeriod" />
+    <element name="refillsRemaining" type="QUICK.pharmacy-core-refillsRemaining" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="partOf">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="medication">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="supportingInformation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.MedicationDispense.PerformerComponent" />
+    </element>
+    <element name="authorizingPrescription">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="type" type="System.Concept" />
+    <element name="quantity" type="QUICK.SimpleQuantity" />
+    <element name="daysSupply" type="QUICK.SimpleQuantity" />
+    <element name="whenPrepared" type="System.DateTime" />
+    <element name="whenHandedOver" type="System.DateTime" />
+    <element name="destination" type="QUICK.Reference" />
+    <element name="receiver">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="dosageInstruction">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Dosage" />
+    </element>
+    <element name="substitution" type="QUICK.MedicationDispense.SubstitutionComponent" />
+    <element name="detectedIssue">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="notDone" type="System.Boolean" />
+    <element name="eventHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-medicationrequest" name="qicore-medicationrequest" label="qicore-medicationrequest" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="groupIdentifier" type="QUICK.Identifier" />
+    <element name="status" type="System.String" />
+    <element name="intent" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="priority" type="System.String" />
+    <element name="medication">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="supportingInformation">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="authoredOn" type="System.DateTime" />
+    <element name="requester" type="QUICK.MedicationRequest.RequesterComponent" />
+    <element name="recorder" type="QUICK.Reference" />
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="dosageInstruction">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Dosage" />
+    </element>
+    <element name="dispenseRequest" type="QUICK.MedicationRequest.DispenseRequestComponent" />
+    <element name="substitution" type="QUICK.MedicationRequest.SubstitutionComponent" />
+    <element name="priorPrescription" type="QUICK.Reference" />
+    <element name="detectedIssue">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="eventHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-medicationstatement" name="qicore-medicationstatement" label="qicore-medicationstatement" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="partOf">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="context" type="QUICK.Reference" />
+    <element name="status" type="System.String" />
+    <element name="category" type="System.Concept" />
+    <element name="medication">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Reference" />
+      </typeSpecifier>
+    </element>
+    <element name="effective">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="dateAsserted" type="System.DateTime" />
+    <element name="informationSource" type="QUICK.Reference" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="derivedFrom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="taken" type="System.String" />
+    <element name="reasonNotTaken">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="dosage">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Dosage" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Observation" name="qicore-observation" label="qicore-observation" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="bodyPosition" type="QUICK.observation-bodyPosition" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="effective">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="issued" type="System.DateTime" />
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="value">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="String" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.Quantity" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Ratio" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="SampledData" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Attachment" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Time" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="dataAbsentReason" type="System.Concept" />
+    <element name="interpretation" type="System.Concept" />
+    <element name="comment" type="System.String" />
+    <element name="bodySite" type="System.Concept" />
+    <element name="method" type="System.Concept" />
+    <element name="specimen" type="QUICK.Reference" />
+    <element name="device" type="QUICK.Reference" />
+    <element name="referenceRange">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Observation.ReferenceRangeComponent" />
+    </element>
+    <element name="related">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Observation.RelatedComponent" />
+    </element>
+    <element name="component">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Observation.ComponentComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-organization" name="qicore-organization" label="qicore-organization" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="active" type="System.Boolean" />
+    <element name="type">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="name" type="System.String" />
+    <element name="alias">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.String" />
+    </element>
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="address">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Address" />
+    </element>
+    <element name="partOf" type="QUICK.Reference" />
+    <element name="contact">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Organization.ContactComponent" />
+    </element>
+    <element name="endpoint">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-patient" name="qicore-patient" label="qicore-patient" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="race" type="USCore.us-core-race" />
+    <element name="ethnicity" type="USCore.us-core-ethnicity" />
+    <element name="religion" type="QUICK.patient-religion" />
+    <element name="birthPlace" type="QUICK.birthPlace" />
+    <element name="disability">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.patient-disability" />
+    </element>
+    <element name="nationality">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.patient-nationality" />
+    </element>
+    <element name="cadavericDonor" type="QUICK.patient-cadavericDonor" />
+    <element name="militaryService" type="QICore.qicore-military-service" />
+    <element name="clinicalTrial">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.patient-clinicalTrial" />
+    </element>
+    <element name="birthTime" type="QUICK.patient-birthTime" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="active" type="System.Boolean" />
+    <element name="name">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.HumanName" />
+    </element>
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="gender" type="System.String" />
+    <element name="birthDate" type="System.DateTime" />
+    <element name="deceased">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="address">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Address" />
+    </element>
+    <element name="maritalStatus" type="System.Concept" />
+    <element name="multipleBirth">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Integer" />
+      </typeSpecifier>
+    </element>
+    <element name="photo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+    <element name="contact">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Patient.ContactComponent" />
+    </element>
+    <element name="animal" type="QUICK.Patient.AnimalComponent" />
+    <element name="communication">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Patient.CommunicationComponent" />
+    </element>
+    <element name="generalPractitioner">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="managingOrganization" type="QUICK.Reference" />
+    <element name="link">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Patient.LinkComponent" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-practitioner" name="qicore-practitioner" label="qicore-practitioner" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="classification" type="QUICK.practitioner-classification" />
+    <element name="role">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QICore.qicore-practitioner-role" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="active" type="System.Boolean" />
+    <element name="name" type="QUICK.HumanName" />
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="address">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Address" />
+    </element>
+    <element name="gender" type="System.String" />
+    <element name="birthDate" type="System.DateTime" />
+    <element name="photo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+    <element name="qualification">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Practitioner.QualificationComponent" />
+    </element>
+    <element name="communication">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="USCore.us-core-procedure" name="qicore-procedure" label="qicore-procedure" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="approachBodySite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QICore.qicore-procedurerequest-approachBodySite" />
+    </element>
+    <element name="incisionDateTime" type="QUICK.procedure-incisionDateTime" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="partOf">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="notDone" type="System.Boolean" />
+    <element name="category" type="System.Concept" />
+    <element name="code" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="performed">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="performer">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Procedure.PerformerComponent" />
+    </element>
+    <element name="location" type="QUICK.Reference" />
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="bodySite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="outcome" type="System.Concept" />
+    <element name="report">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="complication">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="followUp">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="focalDevice">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Procedure.FocalDeviceComponent" />
+    </element>
+    <element name="usedReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="usedCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.ProcedureRequest" name="qicore-procedurerequest" label="qicore-procedurerequest" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="reasonRefused" type="QUICK.procedurerequest-reasonRefused" />
+    <element name="approachBodySite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QICore.qicore-procedurerequest-approachBodySite" />
+    </element>
+    <element name="appropriatenessScore" type="QICore.qicore-procedurerequest-appropriatenessScore" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="replaces">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="requisition" type="QUICK.Identifier" />
+    <element name="status" type="System.String" />
+    <element name="intent" type="System.String" />
+    <element name="priority" type="System.String" />
+    <element name="doNotPerform" type="System.Boolean" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="occurrence">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="QUICK" name="Timing" />
+      </typeSpecifier>
+    </element>
+    <element name="asNeeded">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Boolean" />
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="Concept" />
+      </typeSpecifier>
+    </element>
+    <element name="authoredOn" type="System.DateTime" />
+    <element name="requester" type="QUICK.ProcedureRequest.RequesterComponent" />
+    <element name="performerType" type="System.Concept" />
+    <element name="performer" type="QUICK.Reference" />
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="supportingInfo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="specimen">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="bodySite">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="relevantHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.ReferralRequest" name="qicore-referralrequest" label="qicore-referralrequest" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="refusalReason" type="QUICK.referralrequest-reasonRefused" />
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="definition">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="basedOn">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="replaces">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="groupIdentifier" type="QUICK.Identifier" />
+    <element name="status" type="System.String" />
+    <element name="intent" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="priority" type="System.String" />
+    <element name="serviceRequested">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="subject" type="QUICK.Reference" />
+    <element name="context" type="QUICK.Reference" />
+    <element name="occurrence">
+      <typeSpecifier xsi:type="ChoiceTypeSpecifier">
+        <choice xsi:type="NamedTypeSpecifier" modelName="System" name="DateTime" />
+        <choice xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+      </typeSpecifier>
+    </element>
+    <element name="authoredOn" type="System.DateTime" />
+    <element name="requester" type="QUICK.ReferralRequest.RequesterComponent" />
+    <element name="specialty" type="System.Concept" />
+    <element name="recipient">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="reasonCode">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="reasonReference">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="description" type="System.String" />
+    <element name="supportingInfo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+    <element name="relevantHistory">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.RelatedPerson" name="qicore-relatedperson" label="qicore-relatedperson" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="active" type="System.Boolean" />
+    <element name="patient" type="QUICK.Reference" />
+    <element name="relationship" type="System.Concept" />
+    <element name="name">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.HumanName" />
+    </element>
+    <element name="telecom">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.ContactPoint" />
+    </element>
+    <element name="gender" type="System.String" />
+    <element name="birthDate" type="System.DateTime" />
+    <element name="address">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Address" />
+    </element>
+    <element name="photo">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Attachment" />
+    </element>
+    <element name="period">
+      <typeSpecifier xsi:type="IntervalTypeSpecifier" pointType="System.DateTime" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Specimen" name="qicore-specimen" label="qicore-specimen" retrievable="true">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="accessionIdentifier" type="QUICK.Identifier" />
+    <element name="status" type="System.String" />
+    <element name="type" type="System.Concept" />
+    <element name="subject" type="QUICK.Reference" />
+    <element name="receivedTime" type="System.DateTime" />
+    <element name="parent">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="request">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Reference" />
+    </element>
+    <element name="collection" type="QUICK.Specimen.CollectionComponent" />
+    <element name="processing">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Specimen.ProcessingComponent" />
+    </element>
+    <element name="container">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Specimen.ContainerComponent" />
+    </element>
+    <element name="note">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Annotation" />
+    </element>
+  </typeInfo>
+  <typeInfo xsi:type="ClassInfo" baseType="QUICK.Substance" name="qicore-substance" label="qicore-substance" retrievable="true" primaryCodePath="code">
+    <element name="id" type="System.String" />
+    <element name="meta" type="QUICK.Meta" />
+    <element name="implicitRules" type="System.String" />
+    <element name="language" type="System.String" />
+    <element name="text" type="QUICK.Narrative" />
+    <element name="contained">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Resource" />
+    </element>
+    <element name="extension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="modifierExtension">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Extension" />
+    </element>
+    <element name="identifier">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Identifier" />
+    </element>
+    <element name="status" type="System.String" />
+    <element name="category">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="System.Concept" />
+    </element>
+    <element name="code" type="System.Concept" />
+    <element name="description" type="System.String" />
+    <element name="instance">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Substance.InstanceComponent" />
+    </element>
+    <element name="ingredient">
+      <typeSpecifier xsi:type="ListTypeSpecifier" elementType="QUICK.Substance.IngredientComponent" />
+    </element>
+  </typeInfo>
+</modelInfo>

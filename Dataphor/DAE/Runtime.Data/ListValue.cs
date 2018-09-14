@@ -49,6 +49,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 	}
 	
+	// TODO: This isn't right because it won't use the engine's Equals to perform comparisons
+	// It also doesn't dispose or copy properly (needs to use a ValueManager)
 	public class NativeList : System.Object, IList
 	{
 		public NativeList() : base() {}

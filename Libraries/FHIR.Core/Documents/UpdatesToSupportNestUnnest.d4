@@ -214,3 +214,25 @@ create table Action
 select Action { id, title, number, resource, Action where parent_id = id actions }
 
 // Hmmm......
+
+
+
+// Nest and Wrap are just shorthands for equivalent specify operations
+// Same with Unwrap, because you could always just specify the expressions
+// But unnest is different because it changes the cardinality....
+
+
+select EmployeePhone nest { Phone } Phones // Returns a result with one row per EmployeeId, and a column with a relation for each Phone
+select EmployeePhones unnest { Phones } // Returns a result with one row per Phone per Employee
+
+// A foreach expression could do it, but only if the foreach was allowed to change cardinality
+
+select 
+	foreach var LEmployeePhone in EmployeePhones do
+	  foreach var LPhone in LEmployeePhone.Phones do
+	    row { LEmployeePhone.EmployeeID EmployeeID, LPhone.Phone Phone }
+
+// Without the cardinality change, this would still be a nested result
+// So the foreach would need to be able to say, if the result is list-valued or table-valued, expand it
+// But that leads to the question of if you would ever want to still be able to do that
+// I suppose not, because you could always nest with a specify or extend	    

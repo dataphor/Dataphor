@@ -740,10 +740,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	
 		// ShouldSupportModify, true if the DAE should try to support the modification at this level
+		private bool _shouldSupportModify;
 		public bool ShouldSupportModify
 		{
-			get { return (_characteristics & ShouldSupportModifyFlag) == ShouldSupportModifyFlag; }
-			set { if (value) _characteristics |= ShouldSupportModifyFlag; else _characteristics &= NotShouldSupportModifyFlag; }
+			// Moved back to a boolean here to make room for the IsUniquePreserving characteristic in PlanNode.
+			get { return _shouldSupportModify; }
+			set { _shouldSupportModify = value; }
+			//get { return (_characteristics & ShouldSupportModifyFlag) == ShouldSupportModifyFlag; }
+			//set { if (value) _characteristics |= ShouldSupportModifyFlag; else _characteristics &= NotShouldSupportModifyFlag; }
 		}
 		
 		public virtual void DetermineModifySupported(Plan plan)

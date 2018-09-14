@@ -21,6 +21,131 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using Alphora.Dataphor.DAE.Device.Memory;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using System.Collections.Generic;
+
+	public class DistinctTable : Table
+	{
+		public DistinctTable(DistinctNode node, Program program) : base(node, program) {}
+
+		public new DistinctNode Node { get { return (DistinctNode)_node; } }
+
+		protected NativeMap _map;
+		protected Dictionary<NativeRow, NativeRow>.Enumerator _enumerator;
+		protected bool _BOF;
+		protected bool _EOF;
+
+		protected override void InternalOpen()
+		{
+			_map = new NativeMap(Manager, Node.TableVar, Node.Key, Node.EqualitySorts);
+			PopulateTable();
+			GetEnumerator();
+		}
+
+		protected void PopulateTable()
+		{
+			using (ITable table = (ITable)Node.Nodes[0].Execute(Program))
+			{
+				Row row = new Row(Manager, DataType.RowType);
+				try
+				{
+					while (table.Next())
+					{
+						table.Select(row);
+						if (!_map.HasRow(Manager, row))
+						{
+							_map.Insert(Manager, row); // no validation is required because FTable will never be changed
+						}
+						row.ClearValues();
+						Program.CheckAborted(); // Yield
+					}
+				}
+				finally
+				{
+					row.Dispose();
+				}
+			}
+		}
+
+		protected void GetEnumerator()
+		{
+			_enumerator = _map.Index.GetEnumerator();
+			_BOF = true;
+			_EOF = false;
+		}
+
+		protected override void InternalClose()
+		{
+			_enumerator.Dispose();
+			if (_map != null)
+			{
+				_map.Drop(Manager);
+				_map = null;
+			}
+		}
+		
+		protected override void InternalReset()
+		{
+			_enumerator.Dispose();
+
+			_map.Truncate(Manager);
+			PopulateTable();
+			GetEnumerator();
+		}
+		
+		protected override void InternalSelect(IRow row)
+		{
+			var localRow = new Row(Manager, _map.Index.DataRowType, _enumerator.Current.Value);
+			try
+			{
+				localRow.CopyTo(row);
+			}
+			finally
+			{
+				localRow.Dispose();
+			}
+		}
+		
+		protected override bool InternalNext()
+		{
+			var result = _enumerator.MoveNext();
+			if (result)
+			{
+				_BOF = false;
+			}
+			else
+			{
+				_EOF = true;
+			}
+			return result;
+		}
+		
+		protected override void InternalLast()
+		{
+			while (_enumerator.MoveNext()) { }
+			_EOF = true;
+		}
+
+		protected override bool InternalBOF()
+		{
+			return _BOF;
+		}
+		
+		protected override bool InternalEOF()
+		{
+			return _EOF;
+		}
+		
+		protected override void InternalFirst()
+		{
+			GetEnumerator();
+		}
+		
+        // ICountable
+        protected override int InternalRowCount()
+        {
+			return _map.Index.Count();
+        }
+	}
 
     public abstract class SortTableBase : Table
     {

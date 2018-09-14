@@ -36,13 +36,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _distinctRequired; }
 			set { _distinctRequired = value; }
 		}
-		
+
 		// EqualNode
 		protected PlanNode _equalNode;
 		public PlanNode EqualNode
 		{
 			get { return _equalNode; }
 			set { _equalNode = value; }
+		}
+
+		// Key
+		protected Schema.Key _key;
+		public Schema.Key Key
+		{
+			get { return _key; }
+			set { _key = value; }
+		}
+
+		// EqualitySorts
+		protected Dictionary<String, Schema.Sort> _equalitySorts;
+		public Dictionary<String, Schema.Sort> EqualitySorts
+		{
+			get { return _equalitySorts; }
+			set { _equalitySorts = value; }
 		}
 		
 		// ColumnNames
@@ -82,51 +98,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				Schema.Key newKey = new Schema.Key();
 				newKey.IsInherited = true;
+				var isComparable = true;
 				foreach (Schema.TableVarColumn column in TableVar.Columns)
-				    newKey.Columns.Add(column);
+				{
+					newKey.Columns.Add(column);
+					if (!Compiler.SupportsComparison(plan, column.DataType))
+						isComparable = false;
+				}
+
 				TableVar.Keys.Add(newKey);
-				if (newKey.Columns.Count > 0)
-					Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, newKey, true);
+				_key = newKey;
+
+				if (isComparable)
+				{
+					if (newKey.Columns.Count > 0)
+						Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, newKey, true);
 			
-				plan.EnterRowContext();
-				try
-				{	
-					#if USENAMEDROWVARIABLES
-					plan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
-					#else
-					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
-					#endif
+					plan.EnterRowContext();
 					try
-					{
+					{	
 						#if USENAMEDROWVARIABLES
-						plan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+						plan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
 						#else
-						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
 						#endif
 						try
 						{
-							_equalNode = 
-								Compiler.CompileExpression
-								(
-									plan, 
-									#if USENAMEDROWVARIABLES
-									Compiler.BuildRowEqualExpression
+							#if USENAMEDROWVARIABLES
+							plan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+							#else
+							APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+							#endif
+							try
+							{
+								_equalNode = 
+									Compiler.CompileExpression
 									(
 										plan, 
-										Keywords.Left,
-										Keywords.Right,
-										newKey.Columns,
-										newKey.Columns
-									)
-									#else
-									Compiler.BuildRowEqualExpression
-									(
-										APlan, 
-										new Schema.RowType(LNewKey.Columns, Keywords.Left).Columns, 
-										new Schema.RowType(LNewKey.Columns, Keywords.Right).Columns
-									)
-									#endif
-								);
+										#if USENAMEDROWVARIABLES
+										Compiler.BuildRowEqualExpression
+										(
+											plan, 
+											Keywords.Left,
+											Keywords.Right,
+											newKey.Columns,
+											newKey.Columns
+										)
+										#else
+										Compiler.BuildRowEqualExpression
+										(
+											APlan, 
+											new Schema.RowType(LNewKey.Columns, Keywords.Left).Columns, 
+											new Schema.RowType(LNewKey.Columns, Keywords.Right).Columns
+										)
+										#endif
+									);
+							}
+							finally
+							{
+								plan.Symbols.Pop();
+							}
 						}
 						finally
 						{
@@ -135,15 +166,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						plan.Symbols.Pop();
+						plan.ExitRowContext();
+					}
+				
+					Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
+				}
+				else
+				{
+					_equalitySorts = new Dictionary<String, Schema.Sort>();
+					foreach (var column in Key.Columns)
+					{
+						var equalitySort = Compiler.GetEqualitySort(plan, column.DataType);
+						_equalitySorts.Add(column.Name, equalitySort);
+						plan.AttachDependency(equalitySort);
+
 					}
 				}
-				finally
-				{
-					plan.ExitRowContext();
-				}
-				
-				Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, TableVar));
 			}
 			else
 			{
@@ -223,7 +261,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_cursorIsolation = plan.CursorContext.CursorIsolation;
 
 			// If this node has no determined order, it is because the projection did not affect cardinality, and we may therefore assume the order of the source, as long as it's columns have been preserved by the projection
-			if ((SourceNode.Order != null) && SourceNode.Order.Columns.IsSubsetOf(TableVar.Columns))
+			if (!DistinctRequired && (SourceNode.Order != null) && SourceNode.Order.Columns.IsSubsetOf(TableVar.Columns))
 				Order = CopyOrder(SourceNode.Order);
 			else
 				Order = null;
@@ -232,16 +270,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Execute
 		public override object InternalExecute(Program program)
 		{
-			ProjectTable table = new ProjectTable(this, program);
-			try
+			if (EqualitySorts != null)
 			{
-				table.Open();
-				return table;
+				ProjectTableMap table = new ProjectTableMap(this, program);
+				try
+				{
+					table.Open();
+					return table;
+				}
+				catch
+				{
+					table.Dispose();
+					throw;
+				}
 			}
-			catch
+			else
 			{
-				table.Dispose();
-				throw;
+				ProjectTable table = new ProjectTable(this, program);
+				try
+				{
+					table.Open();
+					return table;
+				}
+				catch
+				{
+					table.Dispose();
+					throw;
+				}
 			}
 		}
 		

@@ -1,0 +1,9 @@
+/*
+
+FHIR Search Functionality
+
+*/
+
+create operator SatisfiesSearchParam(const AResource : generic, const AParamName : String, const AValue : String) : Boolean class "FHIR.Core.SatisfiesSearchParamNode";
+create operator Current() : generic class "FHIR.Core.CurrentNode";
+

@@ -1,23 +1,174 @@
 //* Table: Resource
-// drop table FHIR.Server.Resources
+// drop table FHIR.Server.Resource
 create table
-	Resources
+	Resource
 	{
-		Id : String,
-		Type : String,
-		Content : FHIR.Core.Base,
-		Number : String, //* searchable field
-		Date : String, //* searchable field
-		String : String, //* searchable field
-		Token : String, //* searchable field
-		Reference : String, //* searchable field
-		Composite : String, //* searchable field
-		Quantity	: String, //* searchable field
-		Uri : String, //* searchable field
+		Id : String tags { Storage.Length = "64" },
+		Type : String tags { Storage.Length = "200" },
+		VersionId : String tags { Storage.Length = "128" },
+		LastUpdated : DateTime,
+		Content : FHIR3.Core.Resource,
+//		Number : String, //* searchable field
+//		Date : String, //* searchable field
+//		String : String, //* searchable field
+//		Token : String, //* searchable field
+//		Reference : String, //* searchable field
+//		Composite : String, //* searchable field
+//		Quantity	: String, //* searchable field
+//		Uri : String, //* searchable field
 		key { Id }
 	};
-grant usage on Resources to role User;
+//grant Usage on Resource to role User;
 
+//* Table: ResourceHistory
+// drop table FHIR.Server.ResourceHistory
+create table
+	ResourceHistory
+	{
+		Id : String tags { Storage.Length = "64" },
+		Type : String tags { Storage.Length = "200" },
+		VersionId : String tags { Storage.Length = "128" },
+		LastUpdated : DateTime,
+		Content : FHIR3.Core.Resource,
+		key { Id, VersionId },
+		key { VersionId }
+	};
+//grant Select on ResourceHistory to role User;
+
+//* Operator: GetVersionNumber
+// Returns the version number from a VersionId string, encoded as XXX.YYY
+// Where XXX is the Id and YYY is the 5 digit 0-padded version number
+create operator GetVersionNumber(const AVersionId : String) : Integer
+begin
+  result := IfNil(SubString(AVersionId, LastPos('.', AVersionId) + 1).ToInteger(), 0);
+end;
+
+//* Operator: GetNextResourceId
+// Returns the next resource id for the server
+// TODO: Use a sequential guid generator: https://gist.github.com/yemrekeskin/16cb2eb71fb337dd98f3
+create operator GetNextResourceId() : String
+begin
+  result := NewGuid().ToString(); 
+end;
+
+//* Operator: GetNextVersionId
+// Returns the next version id for the given id, encoded as XXX.YYY
+// Where XXX is the Id and YYY is the 5 digit 0-padded version number
+create operator GetNextVersionId(const AId : String) : String
+begin
+  var LNextVersionNumber := GetVersionNumber(Max(VersionId from ResourceHistory where Id = AId)) + 1;
+  result := AId + '.' + PadLeft(LNextVersionNumber.ToString(), 5, '0');
+end;
+
+//* Operator: GetResourceTypeFromPath
+// Returns the resource type from the given resource path
+// TODO: Expand to support full URL resolution, only works for relative paths right now
+//drop operator GetResourceTypeFromPath(String);
+create operator GetResourceTypeFromPath(const APath : String) : String
+begin
+	var index := APath.IndexOf("/");
+	if (index > 0) then
+		result := APath.SubString(0, index)
+	else
+		result := APath;
+end;
+
+//select GetResourceTypeFromPath("StructureDefinition");
+//select GetResourceTypeFromPath("StructureDefinition/");
+//select GetResourceTypeFromPath("StructureDefinition/StructureDefinition");
+//select GetResourceTypeFromPath("StructureDefinition/ValueSet");
+
+//* Operator: GetResourceIdFromPath
+// Returns the resource id from the given resource path
+// TODO: Expand to support full URL resolution, only works for simple paths right now
+//drop operator GetResourceIdFromPath(String);
+create operator GetResourceIdFromPath(const APath : String) : String
+begin
+	var index := APath.LastIndexOf("/");
+	if (index > 0 and index + 1 < APath.Length()) then
+		result := APath.SubString(index + 1)
+	else
+		result := nil;
+end;
+
+//select GetResourceIdFromPath("StructureDefinition");
+//select GetResourceIdFromPath("StructureDefinition/");
+//select GetResourceIdFromPath("StructureDefinition/StructureDefinition");
+//select GetResourceIdFromPath("StructureDefinition/ValueSet");
+
+//* Operator: Resource_Insert
+// On any insert into Resource
+	// ensure the resource has an Id, generate one if it is not present
+	// set the Type
+	// set the VersionId of the resource based on the Id (use ResourceHistory to determine next VersionId)
+	// set LastUpdated based on Now
+	// ensure the Resource.Meta content is consistent
+create operator Resource_Insert(var ANewRow : typeof(Resource[]), var APerformUpdate : Boolean)
+begin
+  APerformUpdate := true;
+  
+  // If the resource is asserting an Id, record it, and try to use it
+  if ANewRow.Content.Id.IsNotNil() then
+  begin
+    ANewRow.Id := ANewRow.Content.Id;
+  end;
+  
+  // Assign a new resource Id
+  if ANewRow.Id.IsNil() then
+  begin
+    ANewRow.Id := GetNextResourceId();
+  end;
+
+  // Delete the current resource, if one exists
+  delete Resource where Id = ANewRow.Id;
+
+  // Record version information and ensure meta is consistent
+  ANewRow.VersionId := GetNextVersionId(ANewRow.Id);
+  ANewRow.LastUpdated := DateTime();
+  ANewRow.Type := ANewRow.Content.TypeName;
+  var LContent := ANewRow.Content;
+  if LContent.Id.IsNil() or LContent.Id <> ANewRow.Id then
+    LContent.Id := ANewRow.Id;
+  LContent.Meta.VersionId := ANewRow.VersionId;
+  LContent.Meta.LastUpdated := ANewRow.LastUpdated;
+  ANewRow.Content := LContent;
+end;
+attach Resource_Insert to Resource on before insert;
+
+//* Operator: Resource_Update
+// On any update of Resource
+	// update the VersionId of the resource based on the Id (use ResourceHistory to determine next VersionId)
+	// set LastUpdated based on Now
+	// ensure the Resource.Meta content is consistent
+	// insert a record into ResourceHistory based on the old record
+create operator Resource_Update(const AOldRow : typeof(Resource[]), var ANewRow : typeof(Resource[]), var APerformUpdate : Boolean)
+begin
+  APerformUpdate := true;
+  
+  ANewRow.VersionId := GetNextVersionId(ANewRow.Id);
+  ANewRow.LastUpdated := DateTime();
+  ANewRow.Type := ANewRow.Content.TypeName;
+  var LContent := ANewRow.Content;
+  LContent.Meta.VersionId := ANewRow.VersionId;
+  LContent.Meta.LastUpdated := ANewRow.LastUpdated;
+  ANewRow.Content := LContent;
+  
+  insert AOldRow into ResourceHistory;
+end;
+attach Resource_Update to Resource on before update;
+
+//* Operator: Resource_Delete
+// On any delete of Resource
+	// insert the deleted record into ResourceHistory
+create operator Resource_Delete(const ARow : typeof(Resource[]), var APerformUpdate : Boolean)
+begin
+  APerformUpdate := true;
+
+  insert ARow into ResourceHistory;
+end;
+attach Resource_Delete to Resource on before delete;
+	
+/*
 //* Table: Patients
 create table
 	Patients
@@ -99,3 +250,4 @@ create view FHIRServerPatientView
 grant usage on FHIRServerPatientView to role User;	
 
 select FHIRServerPatientView
+*/

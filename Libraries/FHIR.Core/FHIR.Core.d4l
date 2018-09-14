@@ -3,4 +3,5 @@
 	<files.filereference filename="Alphora.Dataphor.FHIR.Core.dll" isassembly="True" />
 	<files.filereference filename="Newtonsoft.Json.dll" isassembly="False" />
 	<files.filereference filename="Hl7.Fhir.DSTU2.Core.dll" isassembly="False" />
+	<libraries.libraryreference name="System.Internet" version="*" />
 </library>

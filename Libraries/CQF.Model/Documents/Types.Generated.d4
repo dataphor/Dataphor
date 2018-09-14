@@ -1,0 +1,166 @@
+create type ModelInfo from class "CQF.Model.ModelInfo" is { Base };
+create type ModelSpecifier from class "CQF.Model.ModelSpecifier" is { Base };
+alter type ModelSpecifier
+{
+	create representation ModelSpecifier
+	{
+		name : String, 
+		version : String
+	}
+};
+create type TypeInfo from class "CQF.Model.TypeInfo" is { Base };
+create type TypeSpecifier from class "CQF.Model.TypeSpecifier" is { Base };
+alter type TypeInfo
+{
+	create representation TypeInfo
+	{
+		baseTypeSpecifier : TypeSpecifier, 
+		baseType : String
+	}
+};
+create type ConversionInfo from class "CQF.Model.ConversionInfo" is { Base };
+alter type ConversionInfo
+{
+	create representation ConversionInfo
+	{
+		fromTypeSpecifier : TypeSpecifier, 
+		toTypeSpecifier : TypeSpecifier, 
+		functionName : String, 
+		fromType : String, 
+		toType : String
+	}
+};
+alter type ModelInfo
+{
+	create representation ModelInfo
+	{
+		requiredModelInfo : list(ModelSpecifier), 
+		typeInfo : list(TypeInfo), 
+		conversionInfo : list(ConversionInfo), 
+		name : String, 
+		version : String, 
+		url : String, 
+		schemaLocation : String, 
+		targetQualifier : String, 
+		patientClassName : String, 
+		patientClassIdentifier : String, 
+		patientBirthDatePropertyName : String, 
+		caseSensitive : Boolean, 
+		strictRetrieveTyping : Boolean
+	}
+};
+create type ChoiceTypeSpecifier from class "CQF.Model.ChoiceTypeSpecifier" is { TypeSpecifier };
+alter type ChoiceTypeSpecifier
+{
+	create representation ChoiceTypeSpecifier
+	{
+		choice : list(TypeSpecifier)
+	}
+};
+create type IntervalTypeSpecifier from class "CQF.Model.IntervalTypeSpecifier" is { TypeSpecifier };
+alter type IntervalTypeSpecifier
+{
+	create representation IntervalTypeSpecifier
+	{
+		pointTypeSpecifier : TypeSpecifier, 
+		pointType : String
+	}
+};
+create type ListTypeSpecifier from class "CQF.Model.ListTypeSpecifier" is { TypeSpecifier };
+alter type ListTypeSpecifier
+{
+	create representation ListTypeSpecifier
+	{
+		elementTypeSpecifier : TypeSpecifier, 
+		elementType : String
+	}
+};
+create type NamedTypeSpecifier from class "CQF.Model.NamedTypeSpecifier" is { TypeSpecifier };
+alter type NamedTypeSpecifier
+{
+	create representation NamedTypeSpecifier
+	{
+		modelName : String, 
+		name : String
+	}
+};
+create type TupleTypeInfoElement from class "CQF.Model.TupleTypeInfoElement" is { Base };
+alter type TupleTypeInfoElement
+{
+	create representation TupleTypeInfoElement
+	{
+		typeSpecifier : TypeSpecifier, 
+		name : String, 
+		type : String, 
+		prohibited : Boolean, 
+		oneBased : Boolean
+	}
+};
+create type ClassInfoElement from class "CQF.Model.ClassInfoElement" is { Base };
+alter type ClassInfoElement
+{
+	create representation ClassInfoElement
+	{
+		typeSpecifier : TypeSpecifier, 
+		name : String, 
+		type : String, 
+		prohibited : Boolean, 
+		oneBased : Boolean
+	}
+};
+create type ChoiceTypeInfo from class "CQF.Model.ChoiceTypeInfo" is { TypeInfo };
+alter type ChoiceTypeInfo
+{
+	create representation ChoiceTypeInfo
+	{
+		type : list(TypeSpecifier)
+	}
+};
+create type TupleTypeInfo from class "CQF.Model.TupleTypeInfo" is { TypeInfo };
+alter type TupleTypeInfo
+{
+	create representation TupleTypeInfo
+	{
+		element : list(TupleTypeInfoElement)
+	}
+};
+create type ListTypeInfo from class "CQF.Model.ListTypeInfo" is { TypeInfo };
+alter type ListTypeInfo
+{
+	create representation ListTypeInfo
+	{
+		elementTypeSpecifier : TypeSpecifier, 
+		elementType : String
+	}
+};
+create type IntervalTypeInfo from class "CQF.Model.IntervalTypeInfo" is { TypeInfo };
+alter type IntervalTypeInfo
+{
+	create representation IntervalTypeInfo
+	{
+		pointTypeSpecifier : TypeSpecifier, 
+		pointType : String
+	}
+};
+create type SimpleTypeInfo from class "CQF.Model.SimpleTypeInfo" is { TypeInfo };
+alter type SimpleTypeInfo
+{
+	create representation SimpleTypeInfo
+	{
+		name : String
+	}
+};
+create type ClassInfo from class "CQF.Model.ClassInfo" is { TypeInfo };
+alter type ClassInfo
+{
+	create representation ClassInfo
+	{
+		element : list(ClassInfoElement), 
+		name : String, 
+		identifier : String, 
+		label : String, 
+		retrievable : Boolean, 
+		primaryCodePath : String
+	}
+};
+create type ProfileInfo from class "CQF.Model.ProfileInfo" is { ClassInfo };

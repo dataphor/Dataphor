@@ -1,0 +1,8 @@
+// This logic results in a sort being performed on every iteration?
+
+// foreach statement
+begin
+ var LTable := table of { X : Integer, Y : Integer } { };
+ for var LIndex := 1 to 100 do
+  insert table { row { LIndex X, 101 - LIndex Y } } into LTable;
+end;

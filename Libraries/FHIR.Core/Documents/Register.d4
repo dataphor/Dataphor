@@ -7,15 +7,4 @@
 	TODO: It would be awesome if we could just use .NET types everywhere, instead of having DataValue wrappers....
 */
 
-create operator GenerateTypes() : String class "FHIR.Core.GenerateTypesNode";
-
-ExecuteScript("FHIR.Core", "Types.Core");
-
-//select GenerateTypes()
-
-ExecuteScript("FHIR.Core", "Types.Generated");
-
-ExecuteScript("FHIR.Core", "Dynamic");
-ExecuteScript("FHIR.Core", "Search");
-
 ExecuteScript("FHIR.Core", "Structure.Definition");

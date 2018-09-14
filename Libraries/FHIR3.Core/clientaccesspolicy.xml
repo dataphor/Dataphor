@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<access-policy>
+	<cross-domain-access>
+		<!--Enables Silverlight 3 all methods functionality-->
+		<policy>
+			<allow-from http-methods="*">”
+				<domain uri="*"/>
+			</allow-from>
+			<grant-to>
+				<resource path="/listener" include-subpaths="true"/>
+				<dynamicresources>
+					<!-- This portion is dynamically generated based on the instances. -->
+				</dynamicresources>
+			</grant-to>
+		</policy>
+	</cross-domain-access>
+</access-policy>
