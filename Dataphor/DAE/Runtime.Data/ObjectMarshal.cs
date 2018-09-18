@@ -150,11 +150,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (property.PropertyType.TypeOrUnderlyingNullableType().IsEnum && value is string && property.CanWrite)
 				{
-					property.SetValue(instance, Enum.Parse(property.PropertyType.TypeOrUnderlyingNullableType(), (string)value, true), null);
+					property.SetValue(instance, Enum.Parse(property.PropertyType.TypeOrUnderlyingNullableType(), value.ToString(), true), null);
 				}
 				else if (property.PropertyType.TypeOrUnderlyingNullableType() == typeof(DateTimeOffset) && value is DateTime && property.CanWrite)
 				{
 					property.SetValue(instance, new DateTimeOffset((DateTime)value), null);
+				}
+				// NOTE: This is relying on D4 type checking to ensure this is correct
+				else if (property.PropertyType == typeof(string) && property.CanWrite) 
+				{
+					property.SetValue(instance, value.ToString(), null);
 				}
 				else if (value is TableValue)
 				{
@@ -222,7 +227,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 
 					for (int index = 0; index < sourceListValue.Count; index++)
-						targetListValue.Add(sourceListValue[index]);
+					{
+						var sourceValue = sourceListValue[index];
+						if (sourceValue is DataValue)
+						{
+							// TODO: This is effectively a reference, it should be a copy....
+							var sourceDataValue = (DataValue)sourceValue;
+							targetListValue.Add(sourceDataValue.IsNil ? null : sourceDataValue.AsNative);
+						}
+						else
+						{
+							targetListValue.Add(sourceValue);
+						}
+					}
 
 					if (property.CanWrite)
 						property.SetValue(instance, targetListValue, null);

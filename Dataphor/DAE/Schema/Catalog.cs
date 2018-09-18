@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public Catalog() : base() 
 		{
 			_dataTypes = new DataTypes(this);
+			_nativeTypes = new Dictionary<Type, ScalarType>();
 		}
 		
 		// Used by serializer
@@ -71,6 +72,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		// DataTypes
         private DataTypes _dataTypes;
         public DataTypes DataTypes { get { return _dataTypes; } }
+
+		private Dictionary<Type, ScalarType> _nativeTypes;
+
+		public Schema.ScalarType GetRuntimeType(Type runtimeType) 
+		{
+			Schema.ScalarType result;
+			_nativeTypes.TryGetValue(runtimeType, out result);
+			return result;
+		}
 
 		// TimeStamp
 		protected long _timeStamp = 0;
@@ -192,12 +202,27 @@ namespace Alphora.Dataphor.DAE.Schema
 					throw;
 				}
 			}
+
+			if (item is ScalarType)
+			{
+				var scalarType = (ScalarType)item;
+				if (scalarType.IsClassType && scalarType.NativeType != null)
+					_nativeTypes.Add(scalarType.NativeType, scalarType);
+			}
         }
         
         protected override void Removing(Object item, int index)
         {
 			if ((item is Operator) && (_operatorMaps.ContainsOperator((Operator)item)))
 				_operatorMaps.RemoveOperator((Operator)item);
+
+			if (item is ScalarType)
+			{
+				var scalarType = (ScalarType)item;
+				if (scalarType.IsClassType && scalarType.NativeType != null)
+					_nativeTypes.Remove(scalarType.NativeType);
+			}
+
 			base.Removing(item, index);
         }
         

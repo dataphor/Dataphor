@@ -39,6 +39,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		IDataValue GetAsDataValue(Schema.Representation ARepresentation, object AValue);
 		object GetAsNative(Schema.Representation ARepresentation, object AValue);
 		object SetAsNative(Schema.Representation ARepresentation, object AValue, object ANewValue);
+		Schema.IDataType GetRuntimeType(object AValue);
 	}
 	
 	/// <summary>
@@ -270,5 +271,39 @@ namespace Alphora.Dataphor.DAE.Runtime
 				program.Stack.Pop();
 			}
         }
+
+		public Schema.IDataType GetRuntimeType(object tempValue)
+		{
+			if (tempValue == null)
+				return _plan.Catalog.DataTypes.SystemScalar;
+
+			if (tempValue is DataValue)
+				return ((DataValue)tempValue).DataType;
+
+			var type = _plan.Catalog.GetRuntimeType(tempValue.GetType());
+			if (type == null) 
+			{
+				type = (Schema.ScalarType)NativeTypeToScalarType(tempValue.GetType());
+			}
+
+			return type;
+		}
+
+		private Schema.IScalarType NativeTypeToScalarType(Type type)
+		{
+			if (type == NativeAccessors.AsBoolean.NativeType) return DataTypes.SystemBoolean;
+			if (type == NativeAccessors.AsByte.NativeType) return DataTypes.SystemByte;
+			if (type == NativeAccessors.AsByteArray.NativeType) return DataTypes.SystemBinary;
+			if (type == NativeAccessors.AsDateTime.NativeType) return DataTypes.SystemDateTime;
+			if (type == NativeAccessors.AsDecimal.NativeType) return DataTypes.SystemDecimal;
+			if (type == NativeAccessors.AsException.NativeType) return DataTypes.SystemError;
+			if (type == NativeAccessors.AsGuid.NativeType) return DataTypes.SystemGuid;
+			if (type == NativeAccessors.AsInt16.NativeType) return DataTypes.SystemShort;
+			if (type == NativeAccessors.AsInt32.NativeType) return DataTypes.SystemInteger;
+			if (type == NativeAccessors.AsInt64.NativeType) return DataTypes.SystemLong;
+			if (type == NativeAccessors.AsString.NativeType) return DataTypes.SystemString;
+			if (type == NativeAccessors.AsTimeSpan.NativeType) return DataTypes.SystemTimeSpan;
+			return DataTypes.SystemScalar;
+		}
 	}
 }

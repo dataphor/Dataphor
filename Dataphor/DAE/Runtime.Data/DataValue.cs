@@ -358,23 +358,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return CopyNativeAs(DataType);
 		}
 		
-		public static Schema.IScalarType NativeTypeToScalarType(IValueManager manager, Type type)
-		{
-			if (type == NativeAccessors.AsBoolean.NativeType) return manager.DataTypes.SystemBoolean;
-			if (type == NativeAccessors.AsByte.NativeType) return manager.DataTypes.SystemByte;
-			if (type == NativeAccessors.AsByteArray.NativeType) return manager.DataTypes.SystemBinary;
-			if (type == NativeAccessors.AsDateTime.NativeType) return manager.DataTypes.SystemDateTime;
-			if (type == NativeAccessors.AsDecimal.NativeType) return manager.DataTypes.SystemDecimal;
-			if (type == NativeAccessors.AsException.NativeType) return manager.DataTypes.SystemError;
-			if (type == NativeAccessors.AsGuid.NativeType) return manager.DataTypes.SystemGuid;
-			if (type == NativeAccessors.AsInt16.NativeType) return manager.DataTypes.SystemShort;
-			if (type == NativeAccessors.AsInt32.NativeType) return manager.DataTypes.SystemInteger;
-			if (type == NativeAccessors.AsInt64.NativeType) return manager.DataTypes.SystemLong;
-			if (type == NativeAccessors.AsString.NativeType) return manager.DataTypes.SystemString;
-			if (type == NativeAccessors.AsTimeSpan.NativeType) return manager.DataTypes.SystemTimeSpan;
-			return manager.DataTypes.SystemScalar;
-		}
-		
 		public static IDataValue FromNative(IValueManager manager, object tempValue)
 		{
 			if (tempValue == null)
@@ -383,7 +366,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (tempValue is StreamID)
 				return new Scalar(manager, manager.DataTypes.SystemScalar, (StreamID)tempValue);
 				
-			return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
+			return new Scalar(manager, (Schema.ScalarType)manager.GetRuntimeType(tempValue.GetType()), tempValue);
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
@@ -396,7 +379,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (tempValue is StreamID)
 					return new Scalar(manager, scalarType, (StreamID)tempValue);
 				if (scalarType.IsGeneric)
-					return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
+					return new Scalar(manager, (Schema.ScalarType)manager.GetRuntimeType(tempValue.GetType()), tempValue);
 				return new Scalar(manager, scalarType, tempValue);
 			}
 				
@@ -418,7 +401,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
 				return new CursorValue(manager, cursorType, (int)tempValue);
-				
+
+			var runtimeType = manager.GetRuntimeType(tempValue);
+			if (runtimeType != null)
+				return FromNative(manager, runtimeType, tempValue);
+
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
@@ -453,7 +440,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
 				return new CursorValue(manager, cursorType, (int)nativeRow.Values[nativeRowIndex]);
-				
+
+			var runtimeType = manager.GetRuntimeType(nativeRow.Values[nativeRowIndex]);
+			if (runtimeType != null)
+				return new RowInternedScalar(manager, (Schema.IScalarType)runtimeType, nativeRow, nativeRowIndex);
+
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
@@ -484,7 +475,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
 				return new CursorValue(manager, cursorType, (int)nativeList.Values[nativeListIndex]);
-				
+
+			var runtimeType = manager.GetRuntimeType(nativeList.Values[nativeListIndex]);
+			if (runtimeType != null)
+				return new ListInternedScalar(manager, (Schema.IScalarType)runtimeType, nativeList, nativeListIndex);
+
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, nativeList.DataTypes[nativeListIndex] == null ? "<null>" : nativeList.DataTypes[nativeListIndex].GetType().Name);
 		}
 		
@@ -539,7 +534,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			// This code is duplicated in the descendent CopyNative methods for performance
 			if (tempValue == null)
 				return tempValue;
-				
+
 			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
 			if (scalarType != null)
 			{
@@ -608,7 +603,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
 			if (cursorType != null)
 				return tempValue;
-			
+
+			var runtimeType = manager.GetRuntimeType(tempValue);
+			if (runtimeType != null)
+				return CopyNative(manager, runtimeType, tempValue);
+
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 

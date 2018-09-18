@@ -679,7 +679,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					#if USEDATATYPESINNATIVEROW
 					if ((DataType.Columns[index].DataType.Equals(Manager.DataTypes.SystemGeneric)) || (DataType.Columns[index].DataType.Equals(Manager.DataTypes.SystemScalar)))
-						_row.DataTypes[index] = DataValue.NativeTypeToScalarType(Manager, value.GetType());
+						_row.DataTypes[index] = Manager.GetRuntimeType(value.GetType());
 					else
 						_row.DataTypes[index] = DataType.Columns[index].DataType;
 					_row.Values[index] = DataValue.CopyNative(Manager, _row.DataTypes[index], value);

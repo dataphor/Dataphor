@@ -223,9 +223,19 @@ begin
 	result := Coding(row { Code CodeElement, System SystemElement });
 end;
 
+create operator Coding(Code: Code, System: String): Coding
+begin
+  result := Coding(row { Code CodeElement, System System });
+end;
+
 create operator Coding(Code: Code, System: FHIRUri, Display: FHIRString): Coding
 begin
   result := Coding(row { Code CodeElement, System SystemElement, Display DisplayElement });
+end;
+
+create operator Coding(Code: Code, System: String, Display: String): Coding
+begin
+  result := Coding(row { Code CodeElement, System System, Display Display });
 end;
 
 create operator CodeableConcept(Coding: Coding): CodeableConcept
@@ -236,4 +246,9 @@ end;
 create operator CodeableConcept(Coding: Coding, Text: FHIRString): CodeableConcept
 begin
   result := CodeableConcept(row { list { Coding } Coding, Text TextElement });
+end;
+
+create operator CodeableConcept(Coding: Coding, Text: String): CodeableConcept
+begin
+  result := CodeableConcept(row { list { Coding } Coding, Text Text });
 end;
