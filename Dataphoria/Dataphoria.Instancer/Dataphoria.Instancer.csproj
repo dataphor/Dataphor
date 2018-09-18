@@ -64,18 +64,22 @@
     <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
       <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
       <Name>Server %28Server\Server%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Instancing.Common\Dataphoria.Instancing.Common.csproj">
       <Project>{117a4731-bff8-4012-a84c-9dea96ac19d8}</Project>
       <Name>Dataphoria.Instancing.Common</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Instancing\Dataphoria.Instancing.csproj">
       <Project>{3976f907-e6ed-43e5-ab31-821ca6acf03a}</Project>
       <Name>Dataphoria.Instancing</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

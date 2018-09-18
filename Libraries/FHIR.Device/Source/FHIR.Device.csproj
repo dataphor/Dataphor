@@ -59,18 +59,22 @@
     <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8cbb779f-64d4-455f-9e4f-70719408a7ca}</Project>
       <Name>DAE.Connection</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\FHIR.Core\Source\FHIR.Core.csproj">
       <Project>{737dedcb-669d-4962-8db9-894009fd1dc9}</Project>
       <Name>FHIR.Core</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

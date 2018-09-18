@@ -53,6 +53,7 @@
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

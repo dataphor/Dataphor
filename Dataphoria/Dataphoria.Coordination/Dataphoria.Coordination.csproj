@@ -55,22 +55,27 @@
     <ProjectReference Include="..\..\Dataphor\Base.Windows\Base.Windows.csproj">
       <Project>{24d70a7f-f43a-45a3-8c54-ea31764841c7}</Project>
       <Name>Base.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
       <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Coordination.Common\Dataphoria.Coordination.Common.csproj">
       <Project>{1ac3a290-09f5-4eb6-805c-8ed597645271}</Project>
       <Name>Dataphoria.Coordination.Common</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Instancing.Common\Dataphoria.Instancing.Common.csproj">
       <Project>{117a4731-bff8-4012-a84c-9dea96ac19d8}</Project>
       <Name>Dataphoria.Instancing.Common</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

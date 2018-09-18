@@ -50,34 +50,42 @@
     <ProjectReference Include="..\..\Dataphor\Base.Windows\Base.Windows.csproj">
       <Project>{24d70a7f-f43a-45a3-8c54-ea31764841c7}</Project>
       <Name>Base.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
       <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Client\Client.csproj">
       <Project>{f342f781-894f-4a6f-a59a-86080e1ac737}</Project>
       <Name>Client %28Client\Client%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
       <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.Client\DAE.Client.csproj">
       <Project>{146abd06-fa98-4b90-9e85-1b4ce7be598d}</Project>
       <Name>DAE.Client</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
       <Name>Server %28Server\Server%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Instancing.Common\Dataphoria.Instancing.Common.csproj">
       <Project>{117a4731-bff8-4012-a84c-9dea96ac19d8}</Project>
       <Name>Dataphoria.Instancing.Common</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

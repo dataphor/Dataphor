@@ -154,6 +154,7 @@
     <ProjectReference Include="..\Dataphoria.Processing\Dataphoria.Processing.csproj">
       <Project>{0abade9d-8700-4c29-acef-3ba3e6f3d757}</Project>
       <Name>Dataphoria.Processing</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

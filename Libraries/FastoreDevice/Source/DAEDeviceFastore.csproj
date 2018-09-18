@@ -107,6 +107,7 @@
     <ProjectReference Include="..\..\..\Dataphor\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
       <Name>Client %28Client\Client%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>

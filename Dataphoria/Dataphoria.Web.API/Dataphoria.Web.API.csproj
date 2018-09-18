@@ -26,6 +26,7 @@
     </NuGetPackageImportStamp>
     <WebGreaseLibPath>..\..\Dataphor\packages\WebGrease.1.5.2\lib</WebGreaseLibPath>
     <TargetFrameworkProfile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -259,18 +260,22 @@
     <ProjectReference Include="..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
       <Project>{788980f0-5a85-4f9a-9e6a-56746e7d37c7}</Project>
       <Name>DAE.SQLCE</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Processing\Dataphoria.Processing.csproj">
       <Project>{0abade9d-8700-4c29-acef-3ba3e6f3d757}</Project>
       <Name>Dataphoria.Processing</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Web.Core\Dataphoria.Web.Core.csproj">
       <Project>{6009f17a-d960-449b-a96e-2d915ad743fd}</Project>
       <Name>Dataphoria.Web.Core</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
