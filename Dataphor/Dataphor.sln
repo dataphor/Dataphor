@@ -1,9 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		CompilerDefines.txt = CompilerDefines.txt
 		Error Message Prefix Codes.txt = Error Message Prefix Codes.txt
 	EndProjectSection
@@ -189,6 +190,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR3.Core", "..\Libraries\FHIR3.Core\Source\FHIR3.Core.csproj", "{A36433E8-3829-4F43-BAB4-CB994EF01D09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CQF.Model", "..\Libraries\CQF.Model\Source\CQF.Model.csproj", "{8DD69DCF-95E3-4209-A09F-8668022DDE0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHIR.API", "..\Libraries\FHIR.API\Source\FHIR.API.csproj", "{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1095,6 +1098,18 @@ Global
 		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8DD69DCF-95E3-4209-A09F-8668022DDE0A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1179,5 +1194,9 @@ Global
 		{0529069C-4980-4F4E-9495-2ACA2D067E41} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{A36433E8-3829-4F43-BAB4-CB994EF01D09} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{8DD69DCF-95E3-4209-A09F-8668022DDE0A} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
+		{EA0AAFBF-AD88-444C-BC7F-8A009A4FC02F} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8C9C8D3D-F73F-459B-BCA9-33CBC8CA8071}
 	EndGlobalSection
 EndGlobal

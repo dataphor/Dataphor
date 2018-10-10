@@ -1,0 +1,33 @@
+
+select Resource where Type = "StructureDefinition" where Id like "%us-core%"
+
+foreach row in
+  //(ImplementationGuides where Id = 'ig' rename I)
+  //  times (StructureDefinitions rename S)
+  //  where S.StructureDefinition.Url.StartsWith(I.ImplementationGuide.Url.GetHead().GetHead())
+  //    and S.StructureDefinition.Kind = 'Resource'
+  select StructureDefinitions where StructureDefinition.Url like '%birthsex%' rename S
+do
+begin
+  HTTP("PUT", "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/StructureDefinition/" + S.StructureDefinition.Id, nil, S.StructureDefinition.AsXML);
+end;      
+
+foreach row in
+  (ImplementationGuides where Id = 'qicore' rename I)
+    times (StructureDefinitions rename S)
+    where S.StructureDefinition.Url.StartsWith(I.ImplementationGuide.Url.GetHead().GetHead())
+      and S.StructureDefinition.Kind = 'Resource'
+do
+begin
+  HTTP("PUT", "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/StructureDefinition/" + S.StructureDefinition.Id, nil, S.StructureDefinition.AsXML);
+end;      
+
+
+
+select
+  (ImplementationGuides where Id = 'ig' rename I)
+    times (StructureDefinitions rename S)
+    where S.StructureDefinition.Url.StartsWith(I.ImplementationGuide.Url.GetHead().GetHead())
+      and S.StructureDefinition.Kind = 'Resource'
+
+select StructureDefinitions where Id.StartsWith("us-core-")

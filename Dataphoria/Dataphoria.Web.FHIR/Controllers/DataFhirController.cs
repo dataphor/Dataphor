@@ -1,10 +1,18 @@
-﻿using Alphora.Dataphor.DAE.REST;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2018 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using Alphora.Dataphor.DAE.REST;
 using Alphora.Dataphor.Dataphoria.Web.Core;
 using Alphora.Dataphor.Dataphoria.Web.Core.Extensions;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
+using Alphora.Dataphor.Dataphoria.Web.FHIR.Server;
 using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -14,203 +22,76 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Controllers
 	[EnableCors("*", "*", "*")]
 	public class DataFhirController : ApiController
 	{
+		private DataFhirCursorManager _cursorManager;
+		private int _defaultPageSize = 20;
+
+		public DataFhirController() : base()
+		{
+			// TODO: Inject
+			_cursorManager = DataFhirServerManager.CursorManager;
+		}
+
 		#region public API
-
-		[HttpPost, Route("")]
-		public FhirResponse Add([FromBody]Resource resource)
-		{
-			switch (resource.GetType().FullName)
-			{
-				case "Hl7.Fhir.Model.Patient":
-					Patient patient = (Patient)resource;
-
-					//insert Resource
-					var id = Guid.NewGuid().ToString();
-					var insertClause = BuildResourceInsertClause(resource);
-					var parameters = BuildResourceInsertParams(id, resource, "Patient");
-					var d4Result = ProcessorInstance.Instance.Evaluate(insertClause, parameters);
-
-					//insert Patient
-					insertClause = BuildPatientInsertClause(patient);
-					parameters = BuildPatientInsertParams(id, patient);
-					d4Result = ProcessorInstance.Instance.Evaluate(insertClause, parameters);
-					return null;
-			}
-			return null;
-		}
-
-		[HttpDelete, Route("{type}/{id}")]
-		public FhirResponse Delete([FromUri]string type, [FromUri]string id)
-		{
-			IEnumerable<KeyValuePair<string, object>> parameters;
-			object d4Result;
-
-			switch (type)
-			{
-				case "patient":
-					parameters = BuildPatientDeleteParams(id);
-					d4Result = ProcessorInstance.Instance.Evaluate("delete Patients where ResourceId = AResourceId", parameters);
-
-					break;
-			}
-
-			parameters = BuildResourceDeleteParams(id);
-			d4Result = ProcessorInstance.Instance.Evaluate("delete Resources where Id = AId", parameters);
-			return null;
-		}
 
 		[HttpGet, Route("{type}")]
 		public FhirResponse Search([FromUri]string type)
 		{
-			var searchParameters = Request.NativeListedParameters();
-			var whereClause = ProcessorInstance.Instance.BuildWhereClause(searchParameters);
-			var bundle = new Bundle();
-
-			switch (type)
+			var cursor = _cursorManager.AcquireCursor(type, Request.GetQueryNameValuePairs());
+			try
 			{
-				case "condition":
-
-
-					break;
-				case "patient":
-					var d4Result = ProcessorInstance.Instance.Evaluate(string.Format("select FHIR.Server.FHIRServerPatientView {0}", whereClause), searchParameters);
-					var rows = (IEnumerable<object>)((RESTResult)d4Result).Value;
-					
-					foreach (var row in rows)
-					{
-						// TODO: ["ResourceContent"] is the column that returns the JSON manifestation of the content.  But is that a hack??
-						var patient = ((Dictionary<string, object>)row)["ResourceContent"];
-
-						// this cast only works because we are functioning "in process"
-						// the NativeCLI doesn't *really* know how to serialize this object
-						var convertedPatient = (Patient)patient;
-						bundle.AddResourceEntry(convertedPatient, new Uri("patient/" + convertedPatient.Id, UriKind.Relative).ToString());
-					}
-
-					break;
+				var pageSize = Request.GetParameterAsIntWithDefault("_count", _defaultPageSize);
+				var bundle = cursor.GetNextPage(pageSize);
+				return Respond.WithBundle(bundle);
 			}
-			return Respond.WithBundle(bundle);
-		}
-
-		#endregion
-
-		#region private methods
-
-		private string BuildResourceInsertClause(Resource resource)
-		{
-			var clause = @"insert table
+			finally
 			{
-				row
-				{
-					AId Id,
-					AType Type,
-					AContent Content,
-					ANumber Number,
-					ADate Date,
-					AString String,
-					AToken Token,
-					AReference Reference,
-					AComposite Composite,
-					AQuantity Quantity,
-					AUri Uri
-				}
+				_cursorManager.ReleaseCursor(cursor);
 			}
-			into Resources;";
-
-			return clause;
 		}
 
-		private IEnumerable<KeyValuePair<string, object>> BuildResourceInsertParams(string id, Resource resource, string type)
+		[HttpGet, Route("{type}/{id}")]
+		public FhirResponse Get([FromUri]string type, [FromUri]string id)
 		{
-			var parameters = new Dictionary<string, object>
+			var searchParameters = new Dictionary<String, String>();
+			searchParameters.Add("_id", id);
+			var cursor = _cursorManager.AcquireCursor(type, searchParameters);
+			try
 			{
-				{ "AId", id },
-				{ "AType", type },
-				{ "AContent", resource },
-				{ "ANumber", "" },
-				{ "ADate", DateTime.Now.ToString() },
-				{ "AString", "" },
-				{ "AToken", "" },
-				{ "AReference", "" },
-				{ "AComposite", "" },
-				{ "AQuantity", "" },
-				{ "AUri", "" }
-			};
-			
-			return parameters;
+				return Respond.WithResource(cursor.GetResource());
+			}
+			finally
+			{
+				_cursorManager.ReleaseCursor(cursor);
+			}
 		}
 
-		private IEnumerable<KeyValuePair<string, object>> BuildResourceDeleteParams(string id)
+		[HttpPost, Route("{table}")]
+		public void Post(string table, [FromBody]object value)
 		{
-			var parameters = new Dictionary<string, object>
-			{
-				{ "AId", id }
-			};
-
-			return parameters;
+			// TODO: Upsert conditions...
+			//ProcessorInstance.Instance.Evaluate(String.Format("Post('{0}', ARow)", table), new Dictionary<string, object> { { "ARow", value } });
 		}
 
-		private string BuildPatientInsertClause(Patient patient)
+		[HttpPut, Route("{table}/{key}")]
+		public void Put(string table, string key, [FromBody]object value)
 		{
-			var clause = @"insert table
-			{
-				row
-				{
-					AResourceId ResourceId,
-					AActive Active,
-					AAddressLine Address,
-					AAddressCity AddressCity,
-					AAddressCountry AddressCountry,
-					AAddressPostalCode AddressPostalCode,
-					AAddressState AddressState,
-					ABirthdate Birthdate,
-					ADeceased Deceased,
-					AEmail Email,
-					ANameFamily Family,
-					AGender Gender,
-					ANameGiven Given,
-					ALanguage Language,
-					AName Name,
-					APhone Phone
-				}
-			} into Patients;";
-
-			return clause;
+			// TODO: Concurrency using ETags...
+			// TODO: if-match conditions?
+			//ProcessorInstance.Instance.Evaluate(String.Format("Put('{0}', '{1}', ARow)", table, key), new Dictionary<string, object> { { "ARow", value } });
 		}
 
-		private IEnumerable<KeyValuePair<string, object>> BuildPatientInsertParams(string id, Patient patient)
+		[HttpPatch, Route("{table}/{key}")]
+		public void Patch(string table, string key, [FromBody]object updatedValues)
 		{
-			var parameters = new Dictionary<string, object>
-			{
-				{ "AResourceId", id },
-				{ "AActive", true },
-				{ "AAddressLine", "" },
-				{ "AAddressCity", "" },
-				{ "AAddressCountry", "" },
-				{ "AAddressPostalCode", "" },
-				{ "AAddressState", "" },
-				{ "ABirthdate", "" },
-				{ "ADeceased", false },
-				{ "AEmail", "" },
-				{ "ANameFamily", "" },
-				{ "AGender", "" },
-				{ "ANameGiven", "" },
-				{ "ALanguage", "" },
-				{ "AName", "" },
-				{ "APhone", "" }
-			};
-
-			return parameters;
+			// TODO: Concurrency using ETags...
+			// TODO: if-match conditions?
+			//ProcessorInstance.Instance.Evaluate(String.Format("Patch('{0}', '{1}', ARow)", table, key), new Dictionary<string, object> { { "ARow", updatedValues } });
 		}
 
-		private IEnumerable<KeyValuePair<string, object>> BuildPatientDeleteParams(string id)
+		[HttpDelete, Route("{table}/{key}")]
+		public void Delete(string table, string key)
 		{
-			var parameters = new Dictionary<string, object>
-			{
-				{ "AResourceId", id }
-			};
-
-			return parameters;
+			//ProcessorInstance.Instance.Evaluate(String.Format("Delete('{0}', '{1}')", table, key), null);
 		}
 
 		#endregion

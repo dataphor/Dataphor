@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 			var encoding = Encoding.GetEncoding(charset);
 
 			if (encoding != Encoding.UTF8)
-				throw Error.BadRequest("FHIR supports UTF-8 encoding exclusively, not " + encoding.WebName);
+				throw ExceptionHandling.Error.BadRequest("FHIR supports UTF-8 encoding exclusively, not " + encoding.WebName);
 
 			StreamReader reader = new StreamReader(readStream, Encoding.UTF8, true);
 			return reader.ReadToEnd();

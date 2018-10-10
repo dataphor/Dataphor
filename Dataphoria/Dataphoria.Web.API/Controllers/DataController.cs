@@ -1,4 +1,10 @@
-﻿using Alphora.Dataphor.DAE.REST;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2018 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using Alphora.Dataphor.DAE.REST;
 using Alphora.Dataphor.Dataphoria.Web.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

@@ -62,6 +62,21 @@ namespace Alphora.Dataphor.Dataphoria.Web.Core.Extensions
 			return null;
 		}
 
+		public static int GetParameterAsIntWithDefault(this HttpRequestMessage request, string key, int defaultValue) 
+		{
+			var param = request.GetParameter(key);
+			if (param != null)
+			{
+				int result;
+				if (Int32.TryParse(param, out result)) 
+				{
+					return result;
+				}
+			}
+
+			return defaultValue;
+		}
+
 		public static List<Tuple<string, string>> TupledParameters(this HttpRequestMessage request)
 		{
 			var list = new List<Tuple<string, string>>();

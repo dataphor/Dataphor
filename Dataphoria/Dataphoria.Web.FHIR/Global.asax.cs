@@ -1,5 +1,6 @@
 ﻿using Alphora.Dataphor.Dataphoria.Web.Core;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions;
+using Alphora.Dataphor.Dataphoria.Web.FHIR.Server;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -16,7 +17,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			GlobalConfiguration.Configure(this.Configure);
 
-			ProcessorInstance.Initialize();
+			DataFhirServerManager.Initialize();
 		}
 
 		public void Configure(HttpConfiguration config)
@@ -26,7 +27,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR
 
 		protected void Application_End()
 		{
-			ProcessorInstance.Uninitialize();
+			DataFhirServerManager.Uninitialize();
 		}
 	}
 }

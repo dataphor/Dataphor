@@ -1,0 +1,17 @@
+//* Operator: GetById
+create operator GetById(ATableName : Name, AId : String) : row class "API.GetByIdNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Get
+create operator Get(ATableName : Name) : table class "API.GetNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Post
+create operator Post(ATableName : Name, ARow : row) class "API.PostNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Put
+create operator Put(ATableName : Name, AKey : String, ARow : row) class "API.PutNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Patch
+create operator Patch(ATableName : Name, AKey : String, ARow : row) class "API.PutNode" static tags { DAE.IsRemotable = "False" };
+
+//* Operator: Delete
+create operator Delete(ATableName : Name, AKey : String) class "API.DeleteNode" static tags { DAE.IsRemotable = "False" };

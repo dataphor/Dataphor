@@ -16,7 +16,7 @@ end;
 
 //* Operator: ImportResource
 // Imports the given resource, if it's a bundle, imports all the entries, otherwise just imports the resource
-create operator ImportResource(const ABase : Base)
+create operator ImportResource(const ABase : FHIR3.Core.Base)
 begin
   if ABase is Bundle then
     ImportBundle(ABase as Bundle)
@@ -50,4 +50,6 @@ ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\US-Core\
 // Load the QI-Core definitions, version 2.0.0, Execution Time 1.4 seconds, 67 resources
 ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\QI-Core\2.0.0");
 
-//select Resource group by { Type } add { Count() Number }
+// Load the QI-Core definitions, version 3.1.0, Execution Time 3.3 seconds, 67 resources
+ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\QI-Core\3.1.0");
+

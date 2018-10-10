@@ -14,6 +14,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Task = System.Threading.Tasks.Task;
 
 namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 {
@@ -51,7 +52,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 						if (XmlSignatureHelper.IsSigned(body))
 						{
 							if (!XmlSignatureHelper.VerifySignature(body))
-								throw Error.BadRequest("Digital signature in body failed verification");
+								throw ExceptionHandling.Error.BadRequest("Digital signature in body failed verification");
 						}
 					}
 
@@ -61,11 +62,11 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 						return resource;
 					}
 					else
-						throw Error.Internal("The type {0} expected by the controller can not be deserialized", type.Name);
+						throw ExceptionHandling.Error.Internal("The type {0} expected by the controller can not be deserialized", type.Name);
 				}
 				catch (FormatException exc)
 				{
-					throw Error.BadRequest("Body parsing failed: " + exc.Message);
+					throw ExceptionHandling.Error.BadRequest("Body parsing failed: " + exc.Message);
 				}
 			});
 		}
@@ -76,7 +77,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 			return Task.Factory.StartNew(() =>
 			{
 				XmlWriter writer = new XmlTextWriter(writeStream, new UTF8Encoding(false));
-				bool summary = requestMessage.RequestSummary();
+				var summary = requestMessage.RequestSummary();
 
 				if (type == typeof(OperationOutcome))
 				{

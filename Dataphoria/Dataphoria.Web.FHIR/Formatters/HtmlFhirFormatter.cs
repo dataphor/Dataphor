@@ -14,6 +14,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using static Alphora.Dataphor.Dataphoria.Web.FHIR.Models.Const;
+using Task = System.Threading.Tasks.Task;
 
 namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 {
@@ -41,7 +42,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 				}
 				catch (FormatException exc)
 				{
-					throw Error.BadRequest("Body parsing failed: " + exc.Message);
+					throw ExceptionHandling.Error.BadRequest("Body parsing failed: " + exc.Message);
 				}
 			});
 		}
@@ -181,7 +182,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 					writer.Write(text);
 					writer.WriteLine("<hr/>");
 
-					bool summary = requestMessage.RequestSummary();
+					var summary = requestMessage.RequestSummary();
 					string xml = FhirSerializer.SerializeResourceToXml(resource, summary);
 					System.Xml.XPath.XPathDocument xmlDoc = new System.Xml.XPath.XPathDocument(new StringReader(xml));
 

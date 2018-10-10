@@ -8,6 +8,7 @@ namespace Alphora.Dataphor.FHIR.Server
 	using DAE.Connection;
 	using DAE.Device.SQL;
 	using DAE.Runtime;
+	using Hl7.Fhir.Model;
 	using Hl7.Fhir.Serialization;
 	using Newtonsoft.Json;
 	using System.IO;
@@ -54,7 +55,8 @@ namespace Alphora.Dataphor.FHIR.Server
 			{
 				using (var jsonReader = new JsonTextReader(reader))
 				{
-					return FhirParser.Parse(jsonReader);
+					return new FhirJsonParser().Parse(jsonReader, typeof(Resource));
+					//return FhirParser.Parse(jsonReader, null);
 				}
 			}
 		}

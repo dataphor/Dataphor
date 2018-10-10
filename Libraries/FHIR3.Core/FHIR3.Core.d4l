@@ -2,5 +2,7 @@
 <library xmlns:bop="www.alphora.com/schemas/bop" assembliesasstring="" defaultdevicename="" generatorid="-1" isgenerated="False" isremotable="True" issystem="False" librariesasstring="" name="FHIR3.Core" settings="" version="*" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
 	<files.filereference filename="Alphora.Dataphor.FHIR3.Core.dll" isassembly="True" />
 	<files.filereference filename="Hl7.Fhir.STU3.Core.dll" isassembly="False" />
+	<files.filereference filename="HL7.Fhir.Support.dll" isassembly="False" />
+	<files.filereference filename="HL7.FhirPath.dll" isassembly="False" />
 	<libraries.libraryreference name="System.Internet" version="*" />
 </library>

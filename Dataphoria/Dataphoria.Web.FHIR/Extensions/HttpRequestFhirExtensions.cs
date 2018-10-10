@@ -1,4 +1,5 @@
 ﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Serialization;
 using System;
 using System.Collections.Generic;
@@ -256,9 +257,14 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions
 
 		}
 
-		public static bool RequestSummary(this HttpRequestMessage request)
+		public static SummaryType RequestSummary(this HttpRequestMessage request)
 		{
-			return (request.GetParameter("_summary") == "true");
+			SummaryType result;
+			if (Enum.TryParse<SummaryType>(request.GetParameter("_summary"), out result))
+			{
+				return result;
+			}
+			return SummaryType.False;
 		}
 
 	}

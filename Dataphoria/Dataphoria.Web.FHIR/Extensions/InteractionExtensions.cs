@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions
 		{
 			if (state != correct)
 			{
-				throw Error.Internal("Interaction was in an invalid state");
+				throw ExceptionHandling.Error.Internal("Interaction was in an invalid state");
 			}
 		}
 	}

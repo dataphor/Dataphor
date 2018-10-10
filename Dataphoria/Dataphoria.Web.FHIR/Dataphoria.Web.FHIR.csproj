@@ -58,9 +58,14 @@
       <HintPath>..\..\Dataphor\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Hl7.Fhir.DSTU2.Core, Version=0.90.4.20849, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
-      <HintPath>..\..\Dataphor\packages\Hl7.Fhir.DSTU2.0.90.4\lib\net45\Hl7.Fhir.DSTU2.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Hl7.Fhir.STU3.Core, Version=0.93.4.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\Hl7.Fhir.STU3.0.93.4\lib\net45\Hl7.Fhir.STU3.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Hl7.Fhir.Support, Version=0.4.2.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\Hl7.Fhir.Support.0.4.2\lib\net45\Hl7.Fhir.Support.dll</HintPath>
+    </Reference>
+    <Reference Include="Hl7.FhirPath, Version=0.4.2.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\Hl7.FhirPath.0.4.2\lib\net45\Hl7.FhirPath.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\Dataphor\packages\Microsoft.AspNet.Identity.Core.2.1.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
@@ -107,9 +112,8 @@
       <HintPath>..\..\Dataphor\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\Dataphor\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\..\Dataphor\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -122,6 +126,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\Dataphor\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
       <Private>True</Private>
@@ -299,27 +306,44 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\LocalhostExtensions.cs" />
     <Compile Include="Resources.Designer.cs" />
+    <Compile Include="Server\DataFhirCursor.cs" />
+    <Compile Include="Server\DataFhirCursorCache.cs" />
+    <Compile Include="Server\DataFhirCursorKey.cs" />
+    <Compile Include="Server\DataFhirCursorManager.cs" />
+    <Compile Include="Server\DataFhirQueryBuilder.cs" />
+    <Compile Include="Server\DataFhirMarshal.cs" />
+    <Compile Include="Server\DataFhirServer.cs" />
+    <Compile Include="Server\DataFhirServerManager.cs" />
+    <Compile Include="Server\DataFhirServerResult.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
+      <Project>{6ec1f378-510b-48d0-8d00-e36bef214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
       <Project>{788980f0-5a85-4f9a-9e6a-56746e7d37c7}</Project>
       <Name>DAE.SQLCE</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8fa5fa37-dc03-4e24-900b-aa863ca9650f}</Project>
       <Name>Engine</Name>
-      <Private>False</Private>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
+      <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
+      <Name>Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Processing\Dataphoria.Processing.csproj">
       <Project>{0abade9d-8700-4c29-acef-3ba3e6f3d757}</Project>
       <Name>Dataphoria.Processing</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Web.Core\Dataphoria.Web.Core.csproj">
       <Project>{6009f17a-d960-449b-a96e-2d915ad743fd}</Project>
       <Name>Dataphoria.Web.Core</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

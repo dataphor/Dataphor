@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 
 namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 {
@@ -49,12 +50,12 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 					}
 					else
 					{
-						throw Error.Internal("Cannot read unsupported type {0} from body", type.Name);
+						throw ExceptionHandling.Error.Internal("Cannot read unsupported type {0} from body", type.Name);
 					}
 				}
 				catch (FormatException exception)
 				{
-					throw Error.BadRequest("Body parsing failed: " + exception.Message);
+					throw ExceptionHandling.Error.BadRequest("Body parsing failed: " + exception.Message);
 				}
 			});
 		}
@@ -67,7 +68,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 				using (StreamWriter streamwriter = new StreamWriter(writeStream))
 				using (JsonWriter writer = new JsonTextWriter(streamwriter))
 				{
-					bool summary = requestMessage.RequestSummary();
+					var summary = requestMessage.RequestSummary();
 
 					if (type == typeof(OperationOutcome))
 					{

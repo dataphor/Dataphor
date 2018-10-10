@@ -27,11 +27,11 @@ create table
 	{
 		Id : String tags { Storage.Length = "64" },
 		Type : String tags { Storage.Length = "200" },
-		VersionId : String tags { Storage.Length = "128" },
+		VersionId : String tags { Storage.Length = "128" }, // TODO: This should be 64, not 128
 		LastUpdated : DateTime,
 		Content : FHIR3.Core.Resource,
 		key { Id, VersionId },
-		key { VersionId }
+		key { VersionId } // TODO: This shouldn't be a key
 	};
 //grant Select on ResourceHistory to role User;
 

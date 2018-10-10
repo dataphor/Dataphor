@@ -1,5 +1,4 @@
-﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.ExceptionHandling;
-using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
+﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
 using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 
 namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 {
@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 
 				if (!success)
 				{
-					throw Error.BadRequest("POST to binary must provide a Content-Type header");
+					throw ExceptionHandling.Error.BadRequest("POST to binary must provide a Content-Type header");
 				}
 
 				string contentType = xContentHeader.FirstOrDefault();
