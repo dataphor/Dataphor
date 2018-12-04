@@ -796,7 +796,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.ApplicationTransactionObjectDependency, localObjectValue.Name, ((Schema.Operator)objectValue).SourceOperatorName);
 					}
 							
-					Error.AssertFail(objectValue.ID > 0, "Object {0} does not have an object id and cannot be tracked as a dependency.", objectValue.Name);
+					if (objectValue.ID <= 0)
+					{
+						Error.Fail("Object {0} does not have an object id and cannot be tracked as a dependency.", objectValue.Name);
+					}
 					localObjectValue.AddDependency(objectValue);
 				}
 			}

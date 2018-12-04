@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -169,8 +169,17 @@ namespace Alphora.Dataphor.DAE.Schema
             if ((item.Name == null) || (item.Name == String.Empty))
 				throw new SchemaException(SchemaException.Codes.ObjectNameRequired);
 				
-			Error.AssertFail(item.ID > 0, "Object '{0}' ({1}) does not have an ID and cannot be tracked in a catalog.", item.Name, item.Description);
-			
+			if (item.ID <= 0)
+			{
+				Error.Fail
+				(
+					"Object '{0}' ({1}) does not have an ID and cannot be tracked in a catalog. Create statement:\r\n{2}",
+					item.Name,
+					item.Description,
+					new D4TextEmitter().Emit(item.EmitStatement(EmitMode.ForCopy))
+				);
+			}
+
 			if ((item is Operator) && (_operatorMaps.ContainsOperator((Operator)item)))
 				throw new SchemaException(SchemaException.Codes.DuplicateOperator, item.ToString());
             base.Validate(item);
