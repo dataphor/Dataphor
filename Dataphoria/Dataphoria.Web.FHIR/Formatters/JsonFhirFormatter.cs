@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Formatters
 						if (response.HasBody)
 						{
 							FhirSerializer.SerializeResource(response.Resource, writer, summary);
-						}
+                        }
 					}
 
 				}

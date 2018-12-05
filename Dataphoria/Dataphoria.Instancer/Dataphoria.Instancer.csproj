@@ -2,6 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{98A0BF21-48C2-4C35-989B-CCD9AE39C271}</ProjectGuid>
@@ -9,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alphora.Dataphor.Dataphoria.Instancer</RootNamespace>
     <AssemblyName>Dataphoria.Instancer</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -37,7 +38,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Primitives, Version=4.2.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\Dataphor\packages\System.ServiceModel.Primitives.4.4.2\lib\net461\System.ServiceModel.Primitives.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -63,13 +68,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Dataphor\Common\Common.csproj">
       <Project>{b488eca3-95ad-4814-bc9b-69d062b7b333}</Project>
-      <Name>Common %28Common\Common%29</Name>
-      <Private>False</Private>
+      <Name>Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
       <Project>{1db01c91-3f92-4094-a8ae-1f7ff01f2e1b}</Project>
-      <Name>Server %28Server\Server%29</Name>
-      <Private>False</Private>
+      <Name>Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\Dataphoria.Instancing.Common\Dataphoria.Instancing.Common.csproj">
       <Project>{117a4731-bff8-4012-a84c-9dea96ac19d8}</Project>
@@ -89,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="ServiceSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>ServiceSettings.Designer.cs</LastGenOutput>

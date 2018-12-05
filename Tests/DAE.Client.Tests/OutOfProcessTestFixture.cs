@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 		private DataSession FDataSession;
 		protected DataSession DataSession { get { return FDataSession; } }
 
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void FixtureSetup()
 		{
 			InstanceManager.Load();
@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 			}
 		}
 		
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void FixtureTearDown()
 		{
 			if (FDataSession != null)

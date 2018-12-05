@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -11,7 +11,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.ServiceModel;
 using System.ServiceProcess;
 using System.Configuration.Install;
 using System.Reflection;

@@ -4,8 +4,5 @@
 	<files.filereference filename="Npgsql.dll" isassembly="False">
 		<environments.string value="WindowsServer" xmlns="System,mscorlib" />
 	</files.filereference>
-	<files.filereference filename="Mono.Security.dll" isassembly="False">
-		<environments.string value="WindowsServer" xmlns="System,mscorlib" />
-	</files.filereference>
 	<libraries.libraryreference name="Connection" version="*" />
 </library>

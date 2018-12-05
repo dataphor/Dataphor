@@ -41,10 +41,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public static void SetProperty(object objectValue, string propertyName, string propertyValue)
 		{
 			PropertyInfo propertyInfo = objectValue.GetType().GetProperty(propertyName);
-			if (propertyInfo == null)
-				throw new Alphora.Dataphor.DAE.Server.ServerException(Alphora.Dataphor.DAE.Server.ServerException.Codes.PropertyNotFound, objectValue.GetType().Name, propertyName);
-			propertyInfo.SetValue(objectValue, Convert.ChangeType(propertyValue, propertyInfo.PropertyType, System.Threading.Thread.CurrentThread.CurrentCulture), null);
-		}
+            if (propertyInfo == null)
+                throw new Alphora.Dataphor.DAE.Server.ServerException(Alphora.Dataphor.DAE.Server.ServerException.Codes.PropertyNotFound, objectValue.GetType().Name, propertyName);
+
+            propertyInfo.SetValue(objectValue, 
+                propertyInfo.PropertyType.IsEnum ?
+                Enum.Parse(propertyInfo.PropertyType, propertyValue):
+                Convert.ChangeType(propertyValue, propertyInfo.PropertyType), 
+                null);
+        }
 		
 		public object CreateObject(CatalogDeviceSession session, ClassDefinition classDefinition, object[] actualParameters)
 		{

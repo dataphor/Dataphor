@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			SQLiteException localException = exception as SQLiteException;
 			if (localException != null)
-				return IsTransactionFailure(localException.ErrorCode);
+				return IsTransactionFailure(localException);
 
 			return false;
 		}
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			SQLiteException localException = exception as SQLiteException;
 			if (localException != null)
 			{
-				if (!IsUserCorrectableError(localException.ErrorCode))
+				if (!IsUserCorrectableError(localException.ResultCode))
 					return ErrorSeverity.Application;
 				return ErrorSeverity.User;
 			}

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
     <AssemblyName>AlphoraFastoreDevice</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -106,8 +106,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
-      <Name>Client %28Client\Client%29</Name>
-      <Private>False</Private>
+      <Name>Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
@@ -116,7 +115,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">

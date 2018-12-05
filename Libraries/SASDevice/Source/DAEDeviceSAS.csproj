@@ -30,7 +30,7 @@
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -140,7 +140,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">

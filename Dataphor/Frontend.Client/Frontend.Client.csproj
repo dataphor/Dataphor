@@ -27,7 +27,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -125,7 +125,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
-      <Name>Client %28Client\Client%29</Name>
+      <Name>Client</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">

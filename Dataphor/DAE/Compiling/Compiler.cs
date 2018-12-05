@@ -5715,7 +5715,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						#endif
 						
 						#if !NATIVEROW
-						node.ScalarType.StaticByteSize = CellValueStream.MinimumStaticByteSize;
+					    node.ScalarType.StaticByteSize = CellValueStream.MinimumStaticByteSize;
 						#endif
 						
 						if (node.ScalarType.IsDefaultConveyor)

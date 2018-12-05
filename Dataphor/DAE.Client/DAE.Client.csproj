@@ -28,7 +28,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -131,12 +131,12 @@
     </ProjectReference>
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
-      <Name>Client %28Client\Client%29</Name>
+      <Name>Client</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
-      <Name>Common %28Common\Common%29</Name>
+      <Name>Common</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
@@ -150,9 +150,13 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Server.WCF\Server.WCF.csproj">
+      <Project>{bac2c54e-2369-41aa-ad91-dff6e14c3e0b}</Project>
+      <Name>Server.WCF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
+      <Name>Server</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

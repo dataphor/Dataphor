@@ -25,9 +25,9 @@ namespace Alphora.Dataphor
 		[System.Diagnostics.Conditional("DEBUG")]
 		public static void SetThreadName(Thread thread, string name)
 		{
-			#if !SILVERLIGHT
+#if !SILVERLIGHT && !NETSTANDARD2_0
 			GetThreadNameFieldInfo().SetValue(thread, name);
-			#endif
-		}
-	}
+#endif
+        }
+    }
 }

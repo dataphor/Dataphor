@@ -381,7 +381,7 @@ namespace Alphora.Dataphor.DAE.Client
 						{
 							CursorSetChanged(row, true);
 						}
-						catch (Exception e)
+						catch (Exception)
 						{
 							_filter = oldFilter;
 							Open();
