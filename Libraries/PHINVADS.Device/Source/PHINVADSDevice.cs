@@ -482,7 +482,7 @@ namespace Aphora.Dataphor.PHINVADS.Device
 		private Dictionary<string, object> _directParams;
 		private enum APIType { GetAll, Find, Direct };
 		private APIType _apiType;
-		private string _idValue;
+		// private string _idValue;
 
 		private void InitializeResourceType()
 		{

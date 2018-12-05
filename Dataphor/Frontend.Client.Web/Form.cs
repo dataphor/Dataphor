@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -24,10 +24,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	public class FormInterface : Interface, IWebFormInterface, IWebMenu, IWebToolbar
 	{
 		// TODO: Move these constants into Frontend.Client
-		public const int MarginLeft = 4;
-		public const int MarginRight = 4;
-		public const int MarginTop = 6;
-		public const int MarginBottom = 6;
+		new public const int MarginLeft = 4;
+		new public const int MarginRight = 4;
+		new public const int MarginTop = 6;
+		new public const int MarginBottom = 6;
 
 		public FormInterface() : base()
 		{

@@ -65,12 +65,6 @@
     <Reference Include="Hl7.FhirPath, Version=0.95.0.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
       <HintPath>..\..\Dataphor\packages\Hl7.FhirPath.0.95.0\lib\net45\Hl7.FhirPath.dll</HintPath>
     </Reference>
-    <Reference Include="Hl7.Fhir.Support, Version=0.4.2.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
-      <HintPath>..\..\Dataphor\packages\Hl7.Fhir.Support.0.4.2\lib\net45\Hl7.Fhir.Support.dll</HintPath>
-    </Reference>
-    <Reference Include="Hl7.FhirPath, Version=0.4.2.0, Culture=neutral, PublicKeyToken=d706911480550fc3, processorArchitecture=MSIL">
-      <HintPath>..\..\Dataphor\packages\Hl7.FhirPath.0.4.2\lib\net45\Hl7.FhirPath.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\Dataphor\packages\Microsoft.AspNet.Identity.Core.2.1.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
       <Private>True</Private>

@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -963,7 +963,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		private byte _precision = 0;
 		[DefaultValue(0)]
 		[Category("Data")]
-		public byte Precision
+		new public byte Precision
 		{
 			get { return _precision; }
 			set { _precision = value; }
@@ -972,7 +972,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		private byte _scale = 0;
 		[DefaultValue(0)]
 		[Category("Data")]
-		public byte Scale
+		new public byte Scale
 		{
 			get { return _scale; }
 			set { _scale = value; }

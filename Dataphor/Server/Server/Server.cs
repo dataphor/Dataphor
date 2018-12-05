@@ -570,37 +570,37 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public override void LogMessage(LogEntryType entryType, string description)
 		{
-			//if (LoggingEnabled)
-			//{
-			//	if (IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
-			//		try
-			//		{
-			//			EventLog.WriteEntry(ServerSourceName, String.Format("Server: {0}\r\n{1}", Name, description), LogEntryTypeToEventLogEntryType(entryType));
-			//		}
-			//		catch
-			//		{
-			//			// ignore an error writing to the event log (it's probably complaining that it's full)
-			//		}
+			if (LoggingEnabled)
+			{
+				if (IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
+					try
+					{
+						// EventLog.WriteEntry(ServerSourceName, String.Format("Server: {0}\r\n{1}", Name, description), LogEntryTypeToEventLogEntryType(entryType));
+					}
+					catch
+					{
+						// ignore an error writing to the event log (it's probably complaining that it's full)
+					}
 
-			//	if (_log != null)
-			//	{
-			//		lock (_log)
-			//		{
-			//			_log.Write
-			//			(
-			//				String.Format
-			//				(
-			//					"{0} {1}{2}\r\n",
-			//					DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffff"),
-			//					(entryType == LogEntryType.Information) ?
-			//						String.Empty :
-			//						String.Format("{0}: ", entryType.ToString()),
-			//					description
-			//				)
-			//			);
-			//		}
-			//	}
-			//}
+				if (_log != null)
+				{
+					lock (_log)
+					{
+						_log.Write
+						(
+							String.Format
+							(
+								"{0} {1}{2}\r\n",
+								DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffff"),
+								(entryType == LogEntryType.Information) ?
+									String.Empty :
+									String.Format("{0}: ", entryType.ToString()),
+								description
+							)
+						);
+					}
+				}
+			}
 		}
 
 		protected override void StartLog()

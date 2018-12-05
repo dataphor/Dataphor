@@ -1,4 +1,4 @@
-/* From: http://www.vbaccelerator.com/home/net/code/libraries/Windows_Messages/Responding_to_Clipboard_Change_Notifications/article.asp */
+﻿/* From: http://www.vbaccelerator.com/home/net/code/libraries/Windows_Messages/Responding_to_Clipboard_Change_Notifications/article.asp */
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -8,9 +8,9 @@ using System.Windows.Forms;
 //using vbAccelerator.Components.Win32;
 
 // Requires unmanaged code
-[assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, UnmanagedCode=true)]
+// [assembly:SecurityPermissionAttribute(SecurityAction.RequestMinimum, UnmanagedCode=true)]
 // Requires all clipboard access
-[assembly:UIPermissionAttribute(SecurityAction.RequestMinimum, Clipboard=UIPermissionClipboard.AllClipboard)]
+// [assembly:UIPermissionAttribute(SecurityAction.RequestMinimum, Clipboard=UIPermissionClipboard.AllClipboard)]
 
 namespace vbAccelerator.Components.Clipboard
 {

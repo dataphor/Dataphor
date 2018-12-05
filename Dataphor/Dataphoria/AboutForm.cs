@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.Dataphoria
                     AssemblyName assemblyName = AssemblyName.GetAssemblyName(file.FullName);
                     FLvModules.Items.Add(new ListViewItem(new string[] { assemblyName.Name, assemblyName.Version.ToString() }));
                 }
-                catch (BadImageFormatException badImageFormatException)
+                catch (BadImageFormatException)
                 {
                     //HACK: How do I know if a .dll file is (or not) a .NET assembly?                   
                 }                                                

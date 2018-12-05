@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////////
 //    Command Line Argument Parser
 //    ----------------------------
 //
@@ -489,7 +489,7 @@ namespace CommandLine
         /// <returns> Printable string containing a user friendly description of command line arguments. </returns>
         public static string ArgumentsUsage(Type argumentType)
         {
-            return ArgumentsUsage(argumentType, 80);
+            return ArgumentsUsage(argumentType, Console.WindowWidth);
         }
 
         /// <summary>

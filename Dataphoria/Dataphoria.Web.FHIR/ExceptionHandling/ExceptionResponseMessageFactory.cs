@@ -9,7 +9,7 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.ExceptionHandling
 {
 	public class ExceptionResponseMessageFactory : IExceptionResponseMessageFactory
 	{
-		private DataFhirException ex;
+		// private DataFhirException ex;
 
 		public HttpResponseMessage GetResponseMessage(Exception exception, HttpRequestMessage request)
 		{
