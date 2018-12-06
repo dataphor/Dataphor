@@ -1,4 +1,4 @@
-﻿using Alphora.Dataphor.Dataphoria.Web.Core.Utilities;
+﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.Utilities;
 using System;
 
 namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Models

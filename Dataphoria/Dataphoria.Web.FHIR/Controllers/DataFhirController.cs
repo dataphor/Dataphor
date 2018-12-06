@@ -4,9 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-using Alphora.Dataphor.DAE.REST;
-using Alphora.Dataphor.Dataphoria.Web.Core;
-using Alphora.Dataphor.Dataphoria.Web.Core.Extensions;
+using Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Server;
 using Hl7.Fhir.Model;

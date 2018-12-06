@@ -1,7 +1,7 @@
 ﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.ExceptionHandling;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
-using Alphora.Dataphor.Dataphoria.Web.Core.Utilities;
+using Alphora.Dataphor.Dataphoria.Web.FHIR.Utilities;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Serialization;

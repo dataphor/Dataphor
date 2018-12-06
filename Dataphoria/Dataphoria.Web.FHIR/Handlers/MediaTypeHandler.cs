@@ -1,4 +1,4 @@
-﻿using Alphora.Dataphor.Dataphoria.Web.Core.Extensions;
+﻿using Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions;
 using Alphora.Dataphor.Dataphoria.Web.FHIR.Models;
 using Hl7.Fhir.Rest;
 using System;

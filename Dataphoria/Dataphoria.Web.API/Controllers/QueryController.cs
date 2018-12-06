@@ -1,14 +1,17 @@
 ﻿using Alphora.Dataphor.DAE.REST;
 using Alphora.Dataphor.Dataphoria.Web.Core;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Web.Mvc;
 
 namespace Alphora.Dataphor.Dataphoria.Web.API.Controllers
 {
-	public class QueryController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class QueryController : ControllerBase
     {
-        public object Index(string e, string a = null)
+        [HttpGet]
+        public object Get([FromQuery] string e, [FromQuery] string a = null)
         {
             var result = ProcessorInstance.Instance.Evaluate(e, a == null ? null : JsonInterop.JsonArgsToNative(JObject.Parse(a)));
             

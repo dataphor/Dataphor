@@ -53,16 +53,31 @@ namespace Alphora.Dataphor.Dataphoria.Web.FHIR.Extensions
 			else return null;
 		}
 
-		public static string GetParameter(this HttpRequestMessage request, string key)
-		{
-			foreach (var param in request.GetQueryNameValuePairs())
-			{
-				if (param.Key == key) return param.Value;
-			}
-			return null;
-		}
+        public static string GetParameter(this HttpRequestMessage request, string key)
+        {
+            foreach (var param in request.GetQueryNameValuePairs())
+            {
+                if (param.Key == key) return param.Value;
+            }
+            return null;
+        }
 
-		public static List<Tuple<string, string>> TupledParameters(this HttpRequestMessage request)
+        public static int GetParameterAsIntWithDefault(this HttpRequestMessage request, string key, int defaultValue)
+        {
+            var param = request.GetParameter(key);
+            if (param != null)
+            {
+                int result;
+                if (Int32.TryParse(param, out result))
+                {
+                    return result;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        public static List<Tuple<string, string>> TupledParameters(this HttpRequestMessage request)
 		{
 			var list = new List<Tuple<string, string>>();
 
