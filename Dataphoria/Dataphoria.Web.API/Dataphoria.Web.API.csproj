@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.2105168" />
+    <PackageReference Include="Npgsql" Version="3.2.7" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.109.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +23,9 @@
     <ProjectReference Include="..\..\Dataphor\DAE.PGSQL\DAE.PGSQL.csproj" />
     <ProjectReference Include="..\..\Dataphor\DAE.SQLite\DAE.SQLite.csproj" />
     <ProjectReference Include="..\..\Dataphor\Server\Server.csproj" />
+    <ProjectReference Include="..\..\Libraries\Connection\Source\DAE.Connection.csproj" />
     <ProjectReference Include="..\..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj" />
+    <ProjectReference Include="..\..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj" />
+    <ProjectReference Include="..\..\Libraries\SQLDevice\Source\DAE.Device.SQL.csproj" />
   </ItemGroup>
 </Project>

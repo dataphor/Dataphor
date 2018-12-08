@@ -180,7 +180,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PHINVADS.Device", "..\Libra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.FHIR", "..\Dataphoria\Dataphoria.Web.FHIR\Dataphoria.Web.FHIR.csproj", "{BCC3D8D1-622C-4C80-8126-2B911026C7D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria.Web.API", "..\Dataphoria\Dataphoria.Web.API\Dataphoria.Web.API.csproj", "{F2797B76-5D78-4810-83A9-01949B96BAB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dataphoria.Web.API", "..\Dataphoria\Dataphoria.Web.API\Dataphoria.Web.API.csproj", "{F2797B76-5D78-4810-83A9-01949B96BAB9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FHIR2.Core", "..\Libraries\FHIR2.Core\Source\FHIR2.Core.csproj", "{0529069C-4980-4F4E-9495-2ACA2D067E41}"
 EndProject
@@ -192,7 +192,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.WCF", "Server.WCF\Se
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{1F7BB243-1A1B-4206-A212-90E2FD60359A}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "dataphoria-web-api", "..\Docker\dataphoria-web-api-core\dataphoria-web-api.dcproj", "{E2CF004C-A47E-4203-B55D-9FCAEF2396EA}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "dataphoria-web-api", "..\Docker\dataphoria-web-api\dataphoria-web-api.dcproj", "{E2CF004C-A47E-4203-B55D-9FCAEF2396EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1186,7 +1186,7 @@ Global
 		{E2CF004C-A47E-4203-B55D-9FCAEF2396EA} = {1F7BB243-1A1B-4206-A212-90E2FD60359A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {49F3069A-A1D6-411F-AC8A-2880B72DD1A6}
 		{8DD69DCF-95E3-4209-A09F-8668022DDE0A} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
+		SolutionGuid = {49F3069A-A1D6-411F-AC8A-2880B72DD1A6}
 	EndGlobalSection
 EndGlobal

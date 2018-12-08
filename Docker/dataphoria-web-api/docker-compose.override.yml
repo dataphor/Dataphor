@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   dataphoria.web.api:
+    image: dataphoriawebapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:

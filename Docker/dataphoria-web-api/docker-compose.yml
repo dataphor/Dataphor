@@ -3,9 +3,6 @@ version: '3.4'
 services:
   dataphoria.web.api:
     image: dataphoriawebapi
-    build:
-      context: ../../
-      dockerfile: Dataphoria/Dataphoria.Web.API/Dockerfile
 
     volumes:
       - ../../Dataphor/D4Runner/bin/Release/netcoreapp2.0/publish:/usr/share/Alphora/D4Runner
