@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 			{
 				case SQLIsolationLevel.ReadUncommitted : // all three will map to committed in this Optimisitc system
 				case SQLIsolationLevel.RepeatableRead :
-                case SQLIsolationLevel.ReadCommitted: _isolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
+                case SQLIsolationLevel.ReadCommitted: // _isolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
                 case SQLIsolationLevel.Serializable: _isolationLevel = System.Data.IsolationLevel.Serializable; break;
 			}
 			_transaction = _connection.BeginTransaction(_isolationLevel);

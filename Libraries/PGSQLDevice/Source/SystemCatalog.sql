@@ -616,3 +616,12 @@ create or replace function DAE_Reverse(AString text)
 		RETURN LReturnVal;
 	end;
 	$$ LANGUAGE plpgsql;
+\
+create or replace function DAE_TooManyRows(ADummy in int)
+      RETURNS int
+      AS $$
+      begin
+            raise 'Row extractor expression must reference a table expression with at most one row.  Use a restriction or quota query to limit the number of rows in the source table expression.';
+      end;
+      $$ LANGUAGE plpgsql;
+

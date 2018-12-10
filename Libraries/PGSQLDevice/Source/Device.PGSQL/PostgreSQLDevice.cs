@@ -49,6 +49,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             // T-SQL allows items in the order by list to reference the column aliases used in the query
             UseParametersForCursors = true;
             ShouldNormalizeWhitespace = false;
+            Schema = "public";
         }
 
         public int MajorVersion

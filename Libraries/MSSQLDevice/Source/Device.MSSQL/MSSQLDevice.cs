@@ -78,6 +78,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             // T-SQL allows items in the order by list to reference the column aliases used in the query
             UseParametersForCursors = true;
             ShouldNormalizeWhitespace = false;
+            Schema = "dbo";
         }
 
 		// SQL Server Versions:

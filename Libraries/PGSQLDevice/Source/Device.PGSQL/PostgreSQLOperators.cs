@@ -63,16 +63,16 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					rangeVar.Columns.Add(rangeVarColumn);
 					selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
 				}
-				if
-				(
-					tableVarNode.Supports(CursorCapability.Updateable)
-						&&
-						(
-							SQLTable.CursorIsolationToIsolationLevel(tableVarNode.CursorIsolation, devicePlan.Plan.ServerProcess.CurrentIsolationLevel())
-								== IsolationLevel.Isolated
-						)
-				)
-					selectExpression.ForSpecifier = ForSpecifier.Update;
+				//if
+				//(
+				//	tableVarNode.Supports(CursorCapability.Updateable)
+				//		&&
+				//		(
+				//			SQLTable.CursorIsolationToIsolationLevel(tableVarNode.CursorIsolation, devicePlan.Plan.ServerProcess.CurrentIsolationLevel())
+				//				== IsolationLevel.Isolated
+				//		)
+				//)
+				//	selectExpression.ForSpecifier = ForSpecifier.Update;
 
 				selectExpression.SelectClause.Distinct =
 					(tableVar.Keys.Count == 1) &&
