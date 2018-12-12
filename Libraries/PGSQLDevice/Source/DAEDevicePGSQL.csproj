@@ -93,6 +93,10 @@
       <Name>DAE.Connection</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj">
+      <Project>{7887c79a-4a65-4f31-95c0-67c3558adb6b}</Project>
+      <Name>DAE.Connection.PGSQL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\SQLDevice\Source\DAE.Device.SQL.csproj">
       <Project>{13A5D21C-63C4-4C56-97F4-6D921C4BA373}</Project>
       <Name>DAE.Device.SQL</Name>
