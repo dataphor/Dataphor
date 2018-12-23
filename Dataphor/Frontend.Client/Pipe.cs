@@ -216,37 +216,47 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		private IScalar LoadWithCache(string document, IServerProcess process)
 		{
-			IScalar result;
+			IScalar result = null;
 			lock (Cache)
 			{
 				uint cRC32 = Cache.GetCRC32(document);
+                if (cRC32 > 0)
+                {
+                    try
+                    {
+                        result = LoadFromCache(document, process);
+                    }
+                    catch
+                    {
+                        result = null;
+                        cRC32 = 0;
+                    }
+                }
 
-				using
-					(
-						DAE.Runtime.Data.Row row = (DAE.Runtime.Data.Row)process.Evaluate
-						(
-							String.Format
-							(
-								"LoadIfNecessary('{0}', {1})",
-								document.Replace("'", "''"),
-								((int)cRC32).ToString()
-							),
-							null
-						)
-					)
-				{
-					if ((bool)row["CRCMatches"])
-						result = LoadFromCache(document, process);
-					else
-					{
-						using (DAE.Runtime.Data.Scalar value = row.GetValue("Value") as DAE.Runtime.Data.Scalar)
-						{
-							SaveToCache(document, process, value, (uint)(int)row["ActualCRC32"]);
-							result = (DAE.Runtime.Data.Scalar)value.Copy();
-						}
-					}
-				}
+                using
+                (
+                    DAE.Runtime.Data.Row row = (DAE.Runtime.Data.Row)process.Evaluate
+                    (
+                        String.Format
+                        (
+                            "LoadIfNecessary('{0}', {1})",
+                            document.Replace("'", "''"),
+                            ((int)cRC32).ToString()
+                        ),
+                        null
+                    )
+                )
+
+                if (!(bool)row["CRCMatches"])
+                {
+                    using (DAE.Runtime.Data.Scalar value = row.GetValue("Value") as DAE.Runtime.Data.Scalar)
+                    {
+                        SaveToCache(document, process, value, (uint)(int)row["ActualCRC32"]);
+                        result = (DAE.Runtime.Data.Scalar)value.Copy();
+                    }
+                }
 			}
+
 			return result;
 		}
 
