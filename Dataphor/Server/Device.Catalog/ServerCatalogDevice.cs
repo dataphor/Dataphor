@@ -75,7 +75,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected override DevicePlanNode InternalPrepare(DevicePlan devicePlan, PlanNode planNode)
+        protected override void InternalStop(ServerProcess process)
+        {
+            base.InternalStop(process);
+            if (!process.ServerSession.Server.IsEngine)
+            {
+                _store?.Dispose();
+            }
+        }
+
+        protected override DevicePlanNode InternalPrepare(DevicePlan devicePlan, PlanNode planNode)
 		{
 			CatalogDevicePlan localDevicePlan = (CatalogDevicePlan)devicePlan;
 			CatalogDevicePlanNode devicePlanNode = new CatalogDevicePlanNode(planNode);

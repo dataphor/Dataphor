@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	internal class StoreIndexHeaders : Dictionary<string, StoreIndexHeader> {}
 
-	public class CatalogStore : System.Object
+	public class CatalogStore : Disposable
 	{
 		public CatalogStore() { }
 		
@@ -120,9 +120,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			_store.ConnectionString = _storeConnectionString;
 			_store.MaxConnections = _maxConnections;
 		}
-		
-		/// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
-		public void Initialize(Server.Engine server)
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _store?.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
+        public void Initialize(Server.Engine server)
 		{
 			CreateStore();
 			_store.Initialize();

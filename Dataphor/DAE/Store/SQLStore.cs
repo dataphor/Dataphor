@@ -24,7 +24,7 @@ using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Store
 {
-	public abstract class SQLStore : System.Object
+	public abstract class SQLStore : Disposable
 	{
 		private string _connectionString;
 		public string ConnectionString
