@@ -117,7 +117,7 @@ go
 
 create table DAEObjects
 (
-	ID int not null,
+	ID bigint not null,
 	Name nvarchar(200) not null,
 	Library_Name nvarchar(200) not null,
 	DisplayName nvarchar(200) not null,
@@ -129,9 +129,9 @@ create table DAEObjects
 	IsATObject tinyint not null default 0, -- check (IsATObject in (0, 1)),
 	IsSessionObject tinyint not null default 0, -- check (IsSessionObject in (0, 1)),
 	IsPersistent tinyint not null default 0, -- check (IsPersistent in (0, 1)),
-	Catalog_Object_ID int null,
-	Parent_Object_ID int null,
-	Generator_Object_ID int null,
+	Catalog_Object_ID bigint null,
+	Parent_Object_ID bigint null,
+	Generator_Object_ID bigint null,
 	ServerData ntext,
 	constraint PK_DAEObjects primary key (ID)
 	--reference Objects_Objects { Parent_Object_ID } references Objects { ID },
@@ -156,8 +156,8 @@ go
 
 create table DAEObjectDependencies
 (
-	Object_ID int not null,
-	Dependency_Object_ID int not null,
+	Object_ID bigint not null,
+	Dependency_Object_ID bigint not null,
 	constraint PK_DAEObjectDependencies primary key (Object_ID, Dependency_Object_ID)
 	--reference ObjectDependencies_Objects { Object_ID } references Objects { ID },
 	--reference ObjectDependencies_Dependency_Objects { Dependency_Object_ID } references Objects { ID }
@@ -175,7 +175,7 @@ go
 
 create table DAECatalogObjects
 (
-	ID int not null,
+	ID bigint not null,
 	Name nvarchar(200) not null,
 	Library_Name nvarchar(200) not null,
 	Owner_User_ID nvarchar(200) not null,
@@ -205,7 +205,7 @@ create table DAECatalogObjectNames
 (
 	Depth int not null,
 	Name nvarchar(200) not null, --This is the name of the object specified by ID with name dequalified Depth times
-	ID int not null,
+	ID bigint not null,
 	constraint PK_DAECatalogObjectNames primary key (Depth, Name, ID)
 	--reference CatalogObjectNames_CatalogObjects { ID } references CatalogObjects { ID }
 )
@@ -222,7 +222,7 @@ go
 
 create table DAEBaseCatalogObjects
 (
-	ID int not null,
+	ID bigint not null,
 	constraint PK_DAEBaseCatalogObjects primary key (ID)
 	--reference BaseCatalogObjects_CatalogObjects { ID } references CatalogObjects { ID }
 )
@@ -236,9 +236,9 @@ go
 
 create table DAEScalarTypes
 (
-	ID int not null,
-	Unique_Sort_ID int not null,
-	Sort_ID int not null,
+	ID bigint not null,
+	Unique_Sort_ID bigint not null,
+	Sort_ID bigint not null,
 	constraint PK_DAEScalarTypes primary key (ID)
 	--reference ScalarTypes_CatalogObjects { ID } references CatalogObjects { ID }
 	--reference ScalarTypes_Sorts { Sort_ID } references Sorts { ID }
@@ -290,7 +290,7 @@ go
 
 create table DAEOperators
 (
-	ID int not null,
+	ID bigint not null,
 	OperatorName nvarchar(200) not null,
 	Signature ntext not null,
 	Locator ntext not null,
@@ -313,9 +313,9 @@ go
 
 create table DAEEventHandlers
 (
-	ID int not null, -- Object ID of the event handler
-	Operator_ID int not null, -- Object ID of the operator handling the event
-	Source_Object_ID int not null, -- Object ID of the object raising the event
+	ID bigint not null, -- Object ID of the event handler
+	Operator_ID bigint not null, -- Object ID of the operator handling the event
+	Source_Object_ID bigint not null, -- Object ID of the object raising the event
 	constraint PK_DAEEventHandlers primary key (ID)
 	--reference EventHandlers_CatalogObjects { ID } references CatalogObjects { ID },
 	--reference EventHandlers_Operators { Operator_ID } references Operators {ID },
@@ -337,9 +337,9 @@ go
 
 create table DAEApplicationTransactionTableMaps
 (
-	Source_TableVar_ID int not null,
-	Translated_TableVar_ID int not null,
-	Deleted_TableVar_ID int not null,
+	Source_TableVar_ID bigint not null,
+	Translated_TableVar_ID bigint not null,
+	Deleted_TableVar_ID bigint not null,
 	constraint PK_DAEApplicationTransactionTableMaps primary key (Source_TableVar_ID)
 )
 go
@@ -366,8 +366,8 @@ go
 
 create table DAEApplicationTransactionOperatorMaps
 (
-	Source_Operator_ID int not null,
-	Translated_Operator_ID int not null,
+	Source_Operator_ID bigint not null,
+	Translated_Operator_ID bigint not null,
 	constraint PK_DAEApplicationTransactionOperatorMaps primary key (Source_Operator_ID)
 )
 go
@@ -384,7 +384,7 @@ go
 create table DAEUserRoles
 (
 	User_ID nvarchar(200) not null,
-	Role_ID int not null,
+	Role_ID bigint not null,
 	constraint PK_DAEUserRoles primary key (User_ID, Role_ID)
 	--reference UserRoles_Users { User_ID } references Users { ID },
 	--reference UserRoles_Roles { Role_ID } references Roles { ID }	
@@ -406,7 +406,7 @@ create table DAERights
 (
 	Name nvarchar(200) not null,
 	Owner_User_ID nvarchar(200) not null,
-	Catalog_Object_ID int not null,
+	Catalog_Object_ID bigint not null,
 	constraint PK_DAERights primary key (Name)
 	--reference Rights_Users { Owner_User_ID } references Users { ID }
 	--reference Rights_CatalogObjects { Catalog_Object_ID } references CatalogObjects { ID }
@@ -427,7 +427,7 @@ go
 
 create table DAERoleRightAssignments
 (
-	Role_ID int not null,
+	Role_ID bigint not null,
 	Right_Name nvarchar(200) not null,
 	IsGranted tinyint not null default 0, -- check (IsGranted in (0, 1)),
 	constraint PK_DAERoleRightAssignments primary key (Role_ID, Right_Name)
@@ -467,7 +467,7 @@ go
 
 create table DAEDevices
 (
-	ID int not null,
+	ID bigint not null,
 	ReconciliationMaster nvarchar(20) not null,
 	ReconciliationMode nvarchar(80) not null,
 	constraint PK_DAEDevices primary key (ID)
@@ -484,7 +484,7 @@ go
 create table DAEDeviceUsers
 (
 	User_ID nvarchar(200) not null,
-	Device_ID int not null,
+	Device_ID bigint not null,
 	UserID nvarchar(200) not null,
 	Data nvarchar(200) not null,
 	ConnectionParameters nvarchar(500) not null,
@@ -505,9 +505,9 @@ go
 
 create table DAEDeviceObjects
 (
-	ID int not null,
-	Device_ID int not null,
-	Mapped_Object_ID int not null,
+	ID bigint not null,
+	Device_ID bigint not null,
+	Mapped_Object_ID bigint not null,
 	constraint PK_DAEDeviceObjects primary key (ID, Device_ID, Mapped_Object_ID)
 	--reference DeviceObjects_CatalogObjects { ID } references CatalogObjects { ID },
 	--reference DeviceObjects_Devices { Device_ID } references Devices { ID },
