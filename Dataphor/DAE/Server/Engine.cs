@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		protected virtual Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
+		protected virtual Schema.User ValidateLogin(long sessionID, SessionInfo sessionInfo)
 		{
 			return _systemUser;
 		}
@@ -534,8 +534,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerSessions _sessions;
 		public ServerSessions Sessions { get { return _sessions; } }
 
-		private int _nextSessionID = 1;
-		private int GetNextSessionID()
+		private long _nextSessionID = 1;
+		private long GetNextSessionID()
 		{
 			return Interlocked.Increment(ref _nextSessionID);
 		}
@@ -906,7 +906,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return ((IServer)this).Connect(sessionInfo);
 		}
 		
-		private ServerSession InternalConnect(int sessionID, SessionInfo sessionInfo)
+		private ServerSession InternalConnect(long sessionID, SessionInfo sessionInfo)
 		{
 			Schema.User user = ValidateLogin(sessionID, sessionInfo);
 			ServerSession session = new ServerSession(this, sessionID, sessionInfo, user);
@@ -966,7 +966,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public Debug.Debugger GetDebugger(int debuggerID)
+		public Debug.Debugger GetDebugger(long debuggerID)
 		{
 			BeginCall();
 			try

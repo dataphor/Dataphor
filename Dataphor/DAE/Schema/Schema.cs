@@ -29,11 +29,11 @@ namespace Alphora.Dataphor.DAE.Schema
     
     /// <summary>Maintains a set of objects by ID, with the ability to resolve a reference if necessary, caching that reference.</summary>
     /// <remarks>This class is used to track dependencies for catalog objects while they are in the cache.</remarks>
-    public class ObjectList : System.Object, ICollection<int>
+    public class ObjectList : System.Object, ICollection<long>
     {
-		private List<int> _iDs = new List<int>(0);
+		private List<long> _iDs = new List<long>(0);
 		/// <summary>Provides access to the IDs of the objects in the list, by index.</summary>
-		public List<int> IDs { get { return _iDs; } }
+		public List<long> IDs { get { return _iDs; } }
 		
 		private List<Schema.Object> _objects = new List<Schema.Object>(0);
 		/// <summary>Provides access to the references to the objects in the list, by index.</summary>
@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public List<Schema.Object> Objects { get { return _objects; } }
 
 		/// <summary>Ensures that the given object ID and object reference is in the list. AObject may be a null reference.</summary>		
-		public void Ensure(int iD, Schema.Object objectValue)
+		public void Ensure(long iD, Schema.Object objectValue)
 		{
 			if (!_iDs.Contains(iD))
 			{
@@ -51,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		/// <summary>Ensures that the given ID is in the list, adding it with a null reference if necessary.</summary>
-		public void Ensure(int iD)
+		public void Ensure(long iD)
 		{
 			Ensure(iD, null);
 		}
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		/// <summary>Adds the given ID and object reference to the list. If the list already has an entry for AID, an exception is raised. AObject may be a null reference.</summary>
-		public void Add(int iD, Schema.Object objectValue)
+		public void Add(long iD, Schema.Object objectValue)
 		{
 			if (_iDs.Contains(iD))
 				throw new SchemaException(SchemaException.Codes.DuplicateObject, ErrorSeverity.System, iD);
@@ -102,10 +102,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				objectList.Add(_iDs[index], _objects[index]);
 		}
 		
-		#region ICollection<int> Members
+		#region ICollection<long> Members
 
 		/// <summary>Adds the given ID to the list with a null reference for the object. If the ID is already in the list, an exception is raised.</summary>
-		public void Add(int iD)
+		public void Add(long iD)
 		{
 			Add(iD, null);
 		}
@@ -118,13 +118,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		/// <summary>Returns true if the list contains the given ID, false otherwise.</summary>
-		public bool Contains(int iD)
+		public bool Contains(long iD)
 		{
 			return _iDs.Contains(iD);
 		}
 
 		/// <summary>This method is not implemented, calling it will throw an exception.</summary>
-		public void CopyTo(int[] array, int arrayIndex)
+		public void CopyTo(long[] array, int arrayIndex)
 		{
 			throw new Exception("The method or operation is not implemented.");
 		}
@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		/// <summary>Removes the given ID and its associated object reference, if any, from the list. Returns true if the object was in the list, false otherwise.</summary>
-		public bool Remove(int item)
+		public bool Remove(long item)
 		{
 			int index = _iDs.IndexOf(item);
 			if (index >= 0)
@@ -156,9 +156,9 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		#endregion
 
-		#region IEnumerable<int> Members
+		#region IEnumerable<long> Members
 
-		public IEnumerator<int> GetEnumerator()
+		public IEnumerator <long> GetEnumerator()
 		{
 			return _iDs.GetEnumerator();
 		}
@@ -219,10 +219,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		public const int MaxObjectNameLength = 200; // Maximum length of an object name
 		public const int MaxDescriptionLength = 200; // Maximum length of the persisted description of an object
 		public const string Ellipsis = "..."; // Appended to a description that was truncated for persistence
-		public const int MaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
-		public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
+		public const int MaxObjectIDLength = 19; // Int64.MaxValue.ToString().Length;
+        public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
 		
-		public Object(int iD, string name) : base(name)
+		public Object(long iD, string name) : base(name)
 		{
 			if (iD <= 0)
 			{
@@ -237,9 +237,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// ID
-		protected int _iD;
+		protected long _iD;
 		/// <summary>Auto generated surrogate key for the object.</summary>
-		public int ID { get { return _iD; } }
+		public long ID { get { return _iD; } }
 		
 		// Library
 		[Reference]
@@ -259,7 +259,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// will also have the ID of the table as the CatalogObjectID, but would have the ID of the containing column
 		/// as the value of the ParentObjectID property.
 		/// </remarks>
-		public virtual int CatalogObjectID { get { return -1; } }
+		public virtual long CatalogObjectID { get { return -1; } }
 
 		// ParentObjectID		
 		/// <summary>The ID of the schema object that immediately contains this object, if this is not a catalog object.</summary>
@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// however, will have the ID of the column as the ParentObjectID, but would have the ID of the table
 		/// as the value of the CatalogObjectID property.
 		/// </remarks>
-		public virtual int ParentObjectID { get { return -1; } }
+		public virtual long ParentObjectID { get { return -1; } }
 		
 		// DisplayName
 		/// <summary>Returns a user-friendly name for the object.</summary>
@@ -318,12 +318,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// GeneratorID
-		private int _generatorID = -1;
+		private long _generatorID = -1;
 		/// <summary>The ID of the object responsible for generating this object, if this is a generated object.</summary>
 		/// <remarks>
 		/// If this is a generated object, this will be the ID of the object that generated it. Otherwise, this property will be -1.
 		/// </remarks>
-		public int GeneratorID
+		public long GeneratorID
 		{
 			get { return _generatorID; }
 			set { _generatorID = value; }
@@ -333,7 +333,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.GeneratorID");
 			if (tag != Tag.None)
-				_generatorID = Int32.Parse(tag.Value);
+				_generatorID = Int64.Parse(tag.Value);
 		}
 		
 		public void SaveGeneratorID()
@@ -754,7 +754,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return name;
 		}
 		
-		public static string GetGeneratedName(string seed, int objectID)
+		public static string GetGeneratedName(string seed, long objectID)
 		{
 			return String.Format("{0}{1}", seed.Length > MaxGeneratedNameLength ? seed.Substring(0, MaxGeneratedNameLength) : seed, objectID.ToString().PadLeft(MaxObjectIDLength, '0'));
 		}
@@ -764,13 +764,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			return String.Format("Object_{0}", iD.ToString().Replace("-", "_"));
 		}
 
-		private static int _nextID = 0;		
-		public static int GetNextObjectID()
+		private static long _nextID = 0;		
+		public static long GetNextObjectID()
 		{
 			return Interlocked.Increment(ref _nextID);
 		}
 		
-		public static void SetNextObjectID(int nextID)
+		public static void SetNextObjectID(long nextID)
 		{
 			lock (typeof(Schema.Object))
 			{
@@ -779,11 +779,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		/// <summary>Gets the object id from the given meta data and removes the DAE.ObjectID tag, if it exists. Otherwise, returns the value of GetNextObjectID().</summary>
-		public static int GetObjectID(MetaData metaData)
+		public static long GetObjectID(MetaData metaData)
 		{
 			Tag tag = MetaData.RemoveTag(metaData, "DAE.ObjectID");
 			if (tag != Tag.None)
-				return Int32.Parse(tag.Value);
+				return Int64.Parse(tag.Value);
 			return GetNextObjectID();
 		}
 
@@ -844,7 +844,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public ObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string displayName,
@@ -855,9 +855,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			bool isATObject,
 			bool isSessionObject,
 			bool isPersistent,
-			int catalogObjectID,
-			int parentObjectID,
-			int generatorObjectID
+			long catalogObjectID,
+			long parentObjectID,
+			long generatorObjectID
 		) : base()
 		{
 			_iD = iD;
@@ -876,8 +876,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			_generatorObjectID = generatorObjectID;
 		}
 		
-		private int _iD;
-		public int ID { get { return _iD; } }
+		private long _iD;
+		public long ID { get { return _iD; } }
 		
 		private string _name;
 		public string Name { get { return _name; } }
@@ -909,14 +909,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		private bool _isPersistent;
 		public bool IsPersistent { get { return _isPersistent; } }
 		
-		private int _catalogObjectID;
-		public int CatalogObjectID { get { return _catalogObjectID; } }
+		private long _catalogObjectID;
+		public long CatalogObjectID { get { return _catalogObjectID; } }
 		
-		private int _parentObjectID;
-		public int ParentObjectID { get { return _parentObjectID; } }
+		private long _parentObjectID;
+		public long ParentObjectID { get { return _parentObjectID; } }
 		
-		private int _generatorObjectID;
-		public int GeneratorObjectID { get { return _generatorObjectID; } }
+		private long _generatorObjectID;
+		public long GeneratorObjectID { get { return _generatorObjectID; } }
 		
 		public override int GetHashCode()
 		{
@@ -943,7 +943,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class DependentObjectHeaders : List<DependentObjectHeader>
 	{
 		/// <summary>Returns true if this list contains a header with the given ID.</summary>
-		public bool Contains(int objectID)
+		public bool Contains(long objectID)
 		{
 			for (int index = 0; index < Count; index++)
 				if (this[index].ID == objectID)
@@ -957,7 +957,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public DependentObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string displayName,
@@ -969,9 +969,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			bool isATObject,
 			bool isSessionObject,
 			bool isPersistent,
-			int catalogObjectID,
-			int parentObjectID,
-			int generatorObjectID,
+			long catalogObjectID,
+			long parentObjectID,
+			long generatorObjectID,
 			int level,
 			int sequence
 		) 
@@ -1014,7 +1014,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public PersistentObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string script,
@@ -1040,8 +1040,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			_isSessionObject = isSessionObject;
 		}
 		
-		private int _iD;
-		public int ID { get { return _iD; } }
+		private long _iD;
+		public long ID { get { return _iD; } }
 		
 		private string _name;
 		public string Name { get { return _name; } }
@@ -1080,7 +1080,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public CatalogObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string ownerID
@@ -1092,8 +1092,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			_ownerID = ownerID;
 		}
 		
-		private int _iD;
-		public int ID { get { return _iD; } }
+		private long _iD;
+		public long ID { get { return _iD; } }
 		
 		private string _name;
 		public string Name { get { return _name; } }
@@ -1107,21 +1107,21 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class ScalarTypeHeader : System.Object
 	{
-		public ScalarTypeHeader(int iD, int uniqueSortID, int sortID) : base()
+		public ScalarTypeHeader(long iD, long uniqueSortID, long sortID) : base()
 		{
 			_iD = iD;
 			_uniqueSortID = uniqueSortID;
 			_sortID = sortID;
 		}
 		
-		private int _iD;
-		public int ID { get { return _iD; } }
+		private long _iD;
+		public long ID { get { return _iD; } }
 		
-		private int _uniqueSortID;
-		public int UniqueSortID { get { return _uniqueSortID; } }
+		private long _uniqueSortID;
+		public long UniqueSortID { get { return _uniqueSortID; } }
 		
-		private int _sortID;
-		public int SortID { get { return _sortID; } }
+		private long _sortID;
+		public long SortID { get { return _sortID; } }
 	}
 	
 	public class FullObjectHeaders : System.Object
@@ -1129,7 +1129,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		private List<FullObjectHeader> _headers = new List<FullObjectHeader>();
 		
 		/// <summary>Stores the index of the header with a given ID.</summary>
-		private Dictionary<int, int> _headerHash = new Dictionary<int, int>();
+		private Dictionary<long, int> _headerHash = new Dictionary<long, int>();
 		
 		public void Add(FullObjectHeader header)
 		{
@@ -1142,7 +1142,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public FullObjectHeader this[int index] { get { return _headers[index]; } }
 		
 		/// <summary>Returns true if this list contains a header with the given ID.</summary>
-		public bool Contains(int objectID)
+		public bool Contains(long objectID)
 		{
 			return _headerHash.ContainsKey(objectID);
 		}
@@ -1153,7 +1153,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public FullObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string script,
@@ -1165,9 +1165,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			bool isATObject,
 			bool isSessionObject,
 			bool isPersistent,
-			int catalogObjectID,
-			int parentObjectID,
-			int generatorObjectID
+			long catalogObjectID,
+			long parentObjectID,
+			long generatorObjectID
 		) : base()
 		{
 			_iD = iD;
@@ -1187,8 +1187,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			_generatorObjectID = generatorObjectID;
 		}
 		
-		private int _iD;
-		public int ID { get { return _iD; } }
+		private long _iD;
+		public long ID { get { return _iD; } }
 		
 		private string _name;
 		public string Name { get { return _name; } }
@@ -1223,14 +1223,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		private bool _isPersistent;
 		public bool IsPersistent { get { return _isPersistent; } }
 		
-		private int _catalogObjectID;
-		public int CatalogObjectID { get { return _catalogObjectID; } }
+		private long _catalogObjectID;
+		public long CatalogObjectID { get { return _catalogObjectID; } }
 		
-		private int _parentObjectID;
-		public int ParentObjectID { get { return _parentObjectID; } }
+		private long _parentObjectID;
+		public long ParentObjectID { get { return _parentObjectID; } }
 		
-		private int _generatorObjectID;
-		public int GeneratorObjectID { get { return _generatorObjectID; } }
+		private long _generatorObjectID;
+		public long GeneratorObjectID { get { return _generatorObjectID; } }
 		
 		public override int GetHashCode()
 		{
@@ -1253,7 +1253,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public FullCatalogObjectHeader
 		(
-			int iD,
+			long iD,
 			string name,
 			string libraryName,
 			string ownerID,
@@ -1265,7 +1265,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			bool isGenerated,
 			bool isATObject,
 			bool isSessionObject,
-			int generatorObjectID
+			long generatorObjectID
 		) : base(iD, name, libraryName, script, displayName, objectType, isSystem, isRemotable, isGenerated, isATObject, isSessionObject, true, -1, -1, generatorObjectID)
 		{
 			_ownerID = ownerID;
@@ -2031,7 +2031,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class CatalogObject : Object
 	{
 		public CatalogObject(string name) : base(name) {}
-		public CatalogObject(int iD, string name) : base(iD, name) {}
+		public CatalogObject(long iD, string name) : base(iD, name) {}
 		
 		// Name
 		public override string Name
@@ -2055,10 +2055,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// CatalogObjectID
-		public override int CatalogObjectID	{ get { return -1; } }
+		public override long CatalogObjectID	{ get { return -1; } }
 
 		// ParentObjectID
-		public override int ParentObjectID { get { return -1; } }
+		public override long ParentObjectID { get { return -1; } }
 		
 		// IsSystem
 		public override bool IsSystem 
@@ -2095,8 +2095,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// SessionID
-		private int _sessionID;
-		public int SessionID
+		private long _sessionID;
+		public long SessionID
 		{
 			get { return _sessionID; }
 			set { _sessionID = value; }

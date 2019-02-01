@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public abstract class SQLScalarType : DeviceScalarType
     {
-		public SQLScalarType(int AID, string AName) : base(AID, AName) {}
+		public SQLScalarType(long AID, string AName) : base(AID, AName) {}
 		
 		public virtual string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -797,7 +797,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLString : SQLScalarType
     {
-		public SQLString(int AID, string AName) : base(AID, AName) {}
+		public SQLString(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -827,7 +827,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLText : SQLScalarType
     {
-		public SQLText(int AID, string AName) : base(AID, AName) {}
+		public SQLText(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -871,7 +871,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public const int CStreamAllocationThreshold = 32767;
 		
-		public SQLBinary(int AID, string AName) : base(AID, AName) {}
+		public SQLBinary(long AID, string AName) : base(AID, AName) {}
 		
 		private byte[] GetNativeValue(IValueManager AManager, object AValue)
 		{

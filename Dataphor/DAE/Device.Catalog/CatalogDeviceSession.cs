@@ -1480,22 +1480,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Object Selection
 
-		public virtual List<int> SelectOperatorHandlers(int operatorID)
+		public virtual List<long> SelectOperatorHandlers(long operatorID)
 		{
-			return new List<int>();
+			return new List<long>();
 		}
 
-		public virtual List<int> SelectObjectHandlers(int sourceObjectID)
+		public virtual List<long> SelectObjectHandlers(long sourceObjectID)
 		{
-			return new List<int>();
+			return new List<long>();
 		}
 
-		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int objectID, bool recursive)
+		public virtual Schema.DependentObjectHeaders SelectObjectDependents(long objectID, bool recursive)
 		{
 			return new Schema.DependentObjectHeaders();
 		}
 
-		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int objectID, bool recursive)
+		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(long objectID, bool recursive)
 		{
 			throw new NotSupportedException();
 		}
@@ -1505,7 +1505,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			throw new NotSupportedException();
 		}
 		
-		public virtual Schema.CatalogObjectHeaders SelectGeneratedObjects(int objectID)
+		public virtual Schema.CatalogObjectHeaders SelectGeneratedObjects(long objectID)
 		{
 			throw new NotSupportedException();
 		}
@@ -1570,7 +1570,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Resolves the catalog object with the given id. If the object is not found, an error is raised.</summary>
-		public virtual Schema.CatalogObject ResolveCatalogObject(int objectID)
+		public virtual Schema.CatalogObject ResolveCatalogObject(long objectID)
 		{
 			// TODO: Catalog deserialization concurrency
 			// Right now, use the same lock as the user's cache to ensure no deadlocks can occur during deserialization.
@@ -1587,12 +1587,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public virtual Schema.ObjectHeader GetObjectHeader(int objectID)
+		public virtual Schema.ObjectHeader GetObjectHeader(long objectID)
 		{
 			throw new NotSupportedException();
 		}
 
-		public Schema.Object ResolveObject(int objectID)
+		public Schema.Object ResolveObject(long objectID)
 		{
 			Schema.ObjectHeader header = GetObjectHeader(objectID);
 			if (header.CatalogObjectID == -1)
@@ -1612,13 +1612,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache, null otherwise.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(int objectID)
+		public Schema.CatalogObject ResolveCachedCatalogObject(long objectID)
 		{
 			return ResolveCachedCatalogObject(objectID, false);
 		}
 		
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache. An error is thrown if the object is not in the cache and AMustResolve is true, otherwise null is returned.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(int objectID, bool mustResolve)
+		public Schema.CatalogObject ResolveCachedCatalogObject(long objectID, bool mustResolve)
 		{
 			lock (Catalog)
 			{
@@ -2092,7 +2092,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void MarkViewForRecompile(int objectID)
+		public void MarkViewForRecompile(long objectID)
 		{
 			string objectName;
 			if (Device.CatalogIndex.TryGetValue(objectID, out objectName))

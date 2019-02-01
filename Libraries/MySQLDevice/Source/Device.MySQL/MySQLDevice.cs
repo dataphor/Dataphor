@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 
     public class MySQLDevice : SQLDevice
     {        
-		public MySQLDevice(int iD, string name) : base(iD, name){}
+		public MySQLDevice(long iD, string name) : base(iD, name){}
 
 		protected override void RegisterSystemObjectMaps(ServerProcess process)
 		{
@@ -301,7 +301,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     /// </summary>
     public class MySQLBoolean : SQLScalarType
     {
-		public MySQLBoolean(int iD, string name) : base(iD, name) {}
+		public MySQLBoolean(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -333,7 +333,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLByte : SQLScalarType
     {
-		public MySQLByte(int iD, string name) : base(iD, name) {}
+		public MySQLByte(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -369,7 +369,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 		public static readonly DateTime MinValue = new DateTime(1753, 1, 1);
 		public static readonly DateTime Accuracy = new DateTime((long)(TimeSpan.TicksPerMillisecond * 3.33));
 
-		public MySQLDateTime(int iD, string name) : base(iD, name) {}
+		public MySQLDateTime(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -402,7 +402,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLDate : SQLScalarType
     {
-		public MySQLDate(int iD, string name) : base(iD, name) {}
+		public MySQLDate(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -435,7 +435,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLTime : SQLScalarType
     {
-		public MySQLTime(int iD, string name) : base(iD, name) {}
+		public MySQLTime(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -467,7 +467,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	/// </summary>
     public class MySQLText : SQLText
     {
-		public MySQLText(int iD, string name) : base(iD, name) {}
+		public MySQLText(long iD, string name) : base(iD, name) {}
 		//public MySQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MySQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
@@ -483,7 +483,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     /// </summary>
     public class MySQLBinary : SQLBinary
     {
-		public MySQLBinary(int iD, string name) : base(iD, name) {}
+		public MySQLBinary(long iD, string name) : base(iD, name) {}
 		//public MySQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MySQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 

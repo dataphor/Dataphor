@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Server
 		internal ServerSession ServerSession { get { return _serverSession; } }
         
 		// SessionID
-		public int SessionID { get { return _serverSession.SessionID; } }
+		public long SessionID { get { return _serverSession.SessionID; } }
 		
 		// SessionInfo
 		public SessionInfo SessionInfo { get { return _serverSession.SessionInfo; } }

@@ -12,6 +12,6 @@ namespace Alphora.Dataphor.DAE.Debug
 {
 	public class DebugSessionInfo
 	{
-		public int SessionID;
+		public long SessionID;
 	}
 }

@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// <summary> Works around the fact that as of PostgreSQL 9.1, UNION is not optimized at all, but UNION ALL is.</summary>
 	public class PostgreSQLUnion : SQLUnion
 	{
-		public PostgreSQLUnion(int iD, string name) : base(iD, name) { }
+		public PostgreSQLUnion(long iD, string name) : base(iD, name) { }
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLRetrieve : SQLRetrieve
 	{
-		public PostgreSQLRetrieve(int iD, string name) : base(iD, name) { }
+		public PostgreSQLRetrieve(long iD, string name) : base(iD, name) { }
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{

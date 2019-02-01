@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public bool IncludeGenerated;
 		public bool IncludeDependents;
 		public bool IncludeObject;
-		public Dictionary<int, Schema.Object> EmittedObjects = new Dictionary<int, Schema.Object>();
+		public Dictionary<long, Schema.Object> EmittedObjects = new Dictionary<long, Schema.Object>();
 		public LoadedLibraries EmittedLibraries = new LoadedLibraries();
 		public Block Block = new Block();
 		

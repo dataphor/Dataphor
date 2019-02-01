@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLAggregateOperator : SQLAggregateOperator
 	{
-		public MSSQLAggregateOperator(int iD, string name) : base(iD, name) { }
+		public MSSQLAggregateOperator(long iD, string name) : base(iD, name) { }
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
 			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;

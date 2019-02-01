@@ -71,7 +71,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         protected bool _shouldReconcileRowGUIDCol;
         protected bool _useIntegratedSecurity;
 
-        public MSSQLDevice(int iD, string name) : base(iD, name)
+        public MSSQLDevice(long iD, string name) : base(iD, name)
         {
             SupportsOrderByNullsFirstLast = false;
             IsOrderByInContext = false;

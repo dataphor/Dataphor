@@ -401,12 +401,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
         }
         
-        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, int referenceID)
+        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, long referenceID)
         {
 			return DeriveSourceReferenceName(reference, referenceID, reference.SourceKey);
         }
         
-        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, int referenceID, Schema.JoinKey sourceKey)
+        protected string DeriveSourceReferenceName(Schema.ReferenceBase reference, long referenceID, Schema.JoinKey sourceKey)
         {
 			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
 			name.AppendFormat("_{0}", Keywords.Source);
@@ -417,12 +417,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return name.ToString();
         }
         
-        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, int referenceID)
+        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, long referenceID)
         {
 			return DeriveTargetReferenceName(reference, referenceID, reference.TargetKey);
         }
         
-        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, int referenceID, Schema.JoinKey targetKey)
+        protected string DeriveTargetReferenceName(Schema.ReferenceBase reference, long referenceID, Schema.JoinKey targetKey)
         {
 			StringBuilder name = new StringBuilder(reference.OriginatingReferenceName());
 			name.AppendFormat("_{0}", Keywords.Target);
@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         protected void CopySourceReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
-			int newReferenceID = Schema.Object.GetNextObjectID();
+			var newReferenceID = Schema.Object.GetNextObjectID();
 			string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID);
 			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;
@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         protected void CopyTargetReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
-			int newReferenceID = Schema.Object.GetNextObjectID();
+			var newReferenceID = Schema.Object.GetNextObjectID();
 			string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID);
 			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;

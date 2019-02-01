@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public abstract class EventHandler : CatalogObject
     {
 		public EventHandler(string name) : base(name) {}
-		public EventHandler(int iD, string name) : base(iD, name) {}
+		public EventHandler(long iD, string name) : base(iD, name) {}
 		
 		// Operator
 		[Reference]
@@ -162,7 +162,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class ScalarTypeEventHandler : EventHandler
     {
-		public ScalarTypeEventHandler(int iD, string name) : base(iD, name) {}
+		public ScalarTypeEventHandler(long iD, string name) : base(iD, name) {}
 		
 		[Reference]
 		internal ScalarType _scalarType;
@@ -187,9 +187,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		//public override int CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		//public override long CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 
-		//public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		//public override long ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 		
 		public override Statement EmitStatement(EmitMode mode)
 		{
@@ -227,7 +227,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class TableVarColumnEventHandler : EventHandler
     {
-		public TableVarColumnEventHandler(int iD, string name) : base(iD, name) {}
+		public TableVarColumnEventHandler(long iD, string name) : base(iD, name) {}
 		
 		[Reference]
 		internal TableVarColumn _tableVarColumn;
@@ -252,9 +252,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		//public override int CatalogObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.CatalogObjectID; } }
+		//public override long CatalogObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.CatalogObjectID; } }
 
- 		//public override int ParentObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.ID; } }
+ 		//public override long ParentObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.ID; } }
 		
 		public override Statement EmitStatement(EmitMode mode)
 		{
@@ -293,7 +293,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public class TableVarEventHandler : EventHandler
     {
 		public TableVarEventHandler(string name) : base(name) {}
-		public TableVarEventHandler(int iD, string name) : base(iD, name) {}
+		public TableVarEventHandler(long iD, string name) : base(iD, name) {}
 		
 		[Reference]
 		internal TableVar _tableVar;
@@ -318,9 +318,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		//public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		//public override long CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
 
-		//public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		//public override long ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
 		
 		public override Statement EmitStatement(EmitMode mode)
 		{

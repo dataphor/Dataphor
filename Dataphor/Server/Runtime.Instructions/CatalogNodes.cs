@@ -676,11 +676,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 
-					int iD;
+					long iD;
 					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
 						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						iD = (int)Nodes[0].Execute(program);
+						iD = (long)Nodes[0].Execute(program);
 						
 					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependents(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					
@@ -783,11 +783,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 					
-					int iD;
+					long iD;
 					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
 						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						iD = (int)Nodes[0].Execute(program);
+						iD = (long)Nodes[0].Execute(program);
 						
 					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependencies(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					

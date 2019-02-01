@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public const string DefaultUserID = "";
 		
-		public ServerLink(int iD, string name) : base(iD, name)
+		public ServerLink(long iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 		}

@@ -53,8 +53,8 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		// constructor
 		public Constraint(string name) : base(name) {}
-		public Constraint(int iD, string name) : base(iD, name) {}
-		public Constraint(int iD, string name, MetaData metaData) : base(iD, name)
+		public Constraint(long iD, string name) : base(iD, name) {}
+		public Constraint(long iD, string name, MetaData metaData) : base(iD, name)
 		{
 			MetaData = metaData;
 		}
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public abstract class SimpleConstraint : Constraint
     {
-		public SimpleConstraint(int iD, string name) : base(iD, name) {}
+		public SimpleConstraint(long iD, string name) : base(iD, name) {}
 		
 		// Expression
 		private PlanNode _node;
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
     public class ScalarTypeConstraint : SimpleConstraint
     {
-		public ScalarTypeConstraint(int iD, string name) : base(iD, name) {}
+		public ScalarTypeConstraint(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeConstraint"), DisplayName, _scalarType.DisplayName); } }
 
@@ -181,9 +181,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
-		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 		
 		public ConstraintDefinition EmitDefinition(EmitMode mode)
 		{
@@ -259,7 +259,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class TableVarColumnConstraint : SimpleConstraint
     {
-		public TableVarColumnConstraint(int iD, string name) : base(iD, name) {}
+		public TableVarColumnConstraint(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnConstraint"), DisplayName, _tableVarColumn.DisplayName, _tableVarColumn.TableVar.DisplayName); } }
 
@@ -277,9 +277,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		public override int CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
+		public override long CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
+		public override long ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
 		
 		public override bool IsATObject { get { return _tableVarColumn == null ? false : _tableVarColumn.IsATObject; } }
 		
@@ -357,7 +357,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public abstract class TableVarConstraint : Constraint
     {
 		public TableVarConstraint(string name) : base(name) {}
-		public TableVarConstraint(int iD, string name) : base(iD, name) {}
+		public TableVarConstraint(long iD, string name) : base(iD, name) {}
 		
 		[Reference]
 		internal TableVar _tableVar;
@@ -376,9 +376,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Table var constraints are always persistent.</summary>
 		public override bool IsPersistent { get { return true; } }
 
-		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
 		public override bool IsATObject { get { return _tableVar == null ? false : _tableVar.IsATObject; } }
 		
@@ -410,7 +410,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class RowConstraint : TableVarConstraint
     {
-		public RowConstraint(int iD, string name) : base(iD, name) {}
+		public RowConstraint(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.RowConstraint"), DisplayName, TableVar.DisplayName); } }
 
@@ -507,7 +507,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public class TransitionConstraint : TableVarConstraint
     {
 		public TransitionConstraint(string name) : base(name) {}
-		public TransitionConstraint(int iD, string name) : base(iD, name) {}
+		public TransitionConstraint(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TransitionConstraint"), DisplayName, TableVar.DisplayName); } }
 
@@ -850,7 +850,7 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		// constructor
 		public CatalogConstraint(string name) : base(name) {}
-		public CatalogConstraint(int iD, string name) : base(iD, name) {}
+		public CatalogConstraint(long iD, string name) : base(iD, name) {}
 		public CatalogConstraint(int iD, string name, PlanNode node) : base(iD, name)
 		{
 			_node = node;

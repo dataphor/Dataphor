@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public override Schema.CatalogObjectHeaders SelectGeneratedObjects(int objectID)
+		public override Schema.CatalogObjectHeaders SelectGeneratedObjects(long objectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public int GetMaxObjectID()
+		public long GetMaxObjectID()
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -394,21 +394,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		private void ComputeLoadOrderForHandlers(Schema.FullObjectHeaders loadOrder, int objectID)
+		private void ComputeLoadOrderForHandlers(Schema.FullObjectHeaders loadOrder, long objectID)
 		{
-			List<int> handlers = CatalogStoreConnection.SelectObjectHandlers(objectID);
+			var handlers = CatalogStoreConnection.SelectObjectHandlers(objectID);
 			for (int index = 0; index < handlers.Count; index++)
 				ComputeLoadOrder(loadOrder, handlers[index], -1);
 		}
 
-		private void ComputeLoadOrderForGeneratedObjects(Schema.FullObjectHeaders loadOrder, int objectID)
+		private void ComputeLoadOrderForGeneratedObjects(Schema.FullObjectHeaders loadOrder, long objectID)
 		{
 			Schema.CatalogObjectHeaders generatedObjects = CatalogStoreConnection.SelectGeneratedObjects(objectID);
 			for (int index = 0; index < generatedObjects.Count; index++)
 				ComputeLoadOrder(loadOrder, generatedObjects[index].ID, -1);
 		}
 
-		private void ComputeLoadOrderForImplicitConversions(Schema.FullObjectHeaders loadOrder, int objectID)
+		private void ComputeLoadOrderForImplicitConversions(Schema.FullObjectHeaders loadOrder, long objectID)
 		{
 			Schema.DependentObjectHeaders dependents = CatalogStoreConnection.SelectObjectDependents(objectID, false);
 			for (int index = 0; index < dependents.Count; index++)
@@ -416,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ComputeLoadOrder(loadOrder, dependents[index].ID, -1);
 		}
 
-		private void ComputeLoadOrderForConstraints(Schema.FullObjectHeaders loadOrder, int objectID)
+		private void ComputeLoadOrderForConstraints(Schema.FullObjectHeaders loadOrder, long objectID)
 		{
 			Schema.DependentObjectHeaders dependents = CatalogStoreConnection.SelectObjectDependents(objectID, false);
 			for (int index = 0; index < dependents.Count; index++)
@@ -424,7 +424,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ComputeLoadOrder(loadOrder, dependents[index].ID, -1);
 		}
 
-		private void ComputeLoadOrderForDependencies(Schema.FullObjectHeaders loadOrder, int objectID)
+		private void ComputeLoadOrderForDependencies(Schema.FullObjectHeaders loadOrder, long objectID)
 		{
 			Schema.DependentObjectHeaders dependencies = CatalogStoreConnection.SelectObjectDependencies(objectID, false);
 			for (int index = 0; index < dependencies.Count; index++)
@@ -434,7 +434,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ComputeLoadOrder(loadOrder, dependencies[index].ID, dependencies[index].CatalogObjectID);
 		}
 
-		private void ComputeLoadOrder(Schema.FullObjectHeaders loadOrder, int objectID, int catalogObjectID)
+		private void ComputeLoadOrder(Schema.FullObjectHeaders loadOrder, long objectID, long catalogObjectID)
 		{
 			// If this object is not already in the load order and it is not in the cache
 			if
@@ -1223,7 +1223,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				Load Each Object in load order (do not allow loading while loading)
 					Perform Fixups as each object is loaded
 		*/
-		private Schema.CatalogObject LoadCatalogObject(int objectID)
+		private Schema.CatalogObject LoadCatalogObject(long objectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1275,7 +1275,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		private Schema.CatalogObject LoadCatalogObject(Program program, int objectID, Schema.User user, string libraryName, string script, bool isGenerated, bool isATObject)
+		private Schema.CatalogObject LoadCatalogObject(Program program, long objectID, Schema.User user, string libraryName, string script, bool isGenerated, bool isATObject)
 		{
 			// Load the object itself
 			LoadPersistentObject(program, objectID, user, libraryName, script, isATObject);
@@ -1343,7 +1343,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void LoadPersistentObject(Program program, int objectID, Schema.User user, string libraryName, string script, bool isATObject)
+		private void LoadPersistentObject(Program program, long objectID, Schema.User user, string libraryName, string script, bool isATObject)
 		{
 			// Ensure that the required library is loaded
 			EnsureLibraryLoaded(program, libraryName, user);
@@ -1536,7 +1536,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// the catalog store, and the object is deserialized using that information. After this routine returns, the object
 		/// will be present in the catalog cache.
 		/// </remarks>
-		public override Schema.CatalogObject ResolveCatalogObject(int objectID)
+		public override Schema.CatalogObject ResolveCatalogObject(long objectID)
 		{
 			// TODO: Catalog deserialization concurrency
 			// Right now, use the same lock as the user's cache to ensure no deadlocks can occur during deserialization.
@@ -1560,7 +1560,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.ObjectHeader SelectObjectHeader(int objectID)
+		public Schema.ObjectHeader SelectObjectHeader(long objectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1573,7 +1573,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public override Schema.ObjectHeader GetObjectHeader(int objectID)
+		public override Schema.ObjectHeader GetObjectHeader(long objectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1647,7 +1647,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Object Selection
 
-		public override List<int> SelectOperatorHandlers(int operatorID)
+		public override List<long> SelectOperatorHandlers(long operatorID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1660,7 +1660,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public override List<int> SelectObjectHandlers(int sourceObjectID)
+		public override List<long> SelectObjectHandlers(long sourceObjectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1674,7 +1674,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		}
 
-		public override Schema.DependentObjectHeaders SelectObjectDependents(int objectID, bool recursive)
+		public override Schema.DependentObjectHeaders SelectObjectDependents(long objectID, bool recursive)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1687,7 +1687,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public override Schema.DependentObjectHeaders SelectObjectDependencies(int objectID, bool recursive)
+		public override Schema.DependentObjectHeaders SelectObjectDependencies(long objectID, bool recursive)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1975,7 +1975,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void InsertUserRole(string userID, int roleID)
+		public void InsertUserRole(string userID, long roleID)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1989,7 +1989,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ClearUserCachedRightAssignments(userID);
 		}
 
-		public void DeleteUserRole(string userID, int roleID)
+		public void DeleteUserRole(string userID, long roleID)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -2007,7 +2007,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				MarkUserOperatorsForRecompile(userID);
 		}
 
-		private void MarkRoleOperatorsForRecompile(int roleID)
+		private void MarkRoleOperatorsForRecompile(long roleID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -2039,7 +2039,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void GrantRightToRole(string rightName, int roleID)
+		public void GrantRightToRole(string rightName, long roleID)
 		{
 			lock (Catalog)
 			{
@@ -2086,7 +2086,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				MarkUserOperatorsForRecompile(userID);
 		}
 
-		public void RevokeRightFromRole(string rightName, int roleID)
+		public void RevokeRightFromRole(string rightName, long roleID)
 		{
 			lock (Catalog)
 			{
@@ -2131,7 +2131,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				MarkUserOperatorsForRecompile(userID);
 		}
 
-		public void RevertRightForRole(string rightName, int roleID)
+		public void RevertRightForRole(string rightName, long roleID)
 		{
 			lock (Catalog)
 			{
@@ -2176,7 +2176,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				MarkUserOperatorsForRecompile(userID);
 		}
 
-		public void SetCatalogObjectOwner(int catalogObjectID, string userID)
+		public void SetCatalogObjectOwner(long catalogObjectID, string userID)
 		{
 			lock (Catalog)
 			{
@@ -2394,7 +2394,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				int deviceObjectID = CatalogStoreConnection.SelectDeviceObjectID(device.ID, objectValue.ID);
+				var deviceObjectID = CatalogStoreConnection.SelectDeviceObjectID(device.ID, objectValue.ID);
 				if (deviceObjectID >= 0)
 				{
 					// If we are already loading, then a resolve that must load from the cache will fail, 

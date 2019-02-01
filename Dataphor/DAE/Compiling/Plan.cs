@@ -526,7 +526,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public Schema.Objects SessionOperators { get { return _serverProcess.ServerSession.SessionOperators; } }
 		
-		public int SessionID { get { return _serverProcess.ServerSession.SessionID; } }
+		public long SessionID { get { return _serverProcess.ServerSession.SessionID; } }
 		
 		// Catalog		
 		public bool IsEngine { get { return _serverProcess.ServerSession.Server.IsEngine; } }

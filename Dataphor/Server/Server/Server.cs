@@ -788,7 +788,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return ((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).GetBaseCatalogObjects();
 		}
 
-		protected override Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
+		protected override Schema.User ValidateLogin(long sessionID, SessionInfo sessionInfo)
 		{
 			if (sessionInfo == null)
 				throw new ServerException(ServerException.Codes.SessionInformationRequired);

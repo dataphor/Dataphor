@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
 	public class SQLTimeSpanMilliseconds : DeviceOperator
 	{
-		public SQLTimeSpanMilliseconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanMilliseconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanSeconds : DeviceOperator
 	{
-		public SQLTimeSpanSeconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanSeconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanMinutes : DeviceOperator
 	{
-		public SQLTimeSpanMinutes(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanMinutes(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanHours : DeviceOperator
 	{
-		public SQLTimeSpanHours(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanHours(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanHours(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanHours(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -74,7 +74,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanDays : DeviceOperator
 	{
-		public SQLTimeSpanDays(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanDays(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanDays(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanDays(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpan5Operands : DeviceOperator
 	{
-		public SQLTimeSpan5Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpan5Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpan5Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpan5Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpan4Operands : DeviceOperator
 	{
-		public SQLTimeSpan4Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpan4Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpan4Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpan4Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpan3Operands : DeviceOperator
 	{
-		public SQLTimeSpan3Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpan3Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpan3Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpan3Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpan2Operands : DeviceOperator
 	{
-		public SQLTimeSpan2Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpan2Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpan2Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpan2Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpan1Operand : DeviceOperator
 	{
-		public SQLTimeSpan1Operand(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpan1Operand(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpan1Operand(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpan1Operand(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -189,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanTime4Operands : DeviceOperator
 	{
-		public SQLTimeSpanTime4Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanTime4Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanTime4Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanTime4Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -212,7 +212,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanTime3Operands : DeviceOperator
 	{
-		public SQLTimeSpanTime3Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanTime3Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanTime3Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanTime3Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -232,7 +232,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanTime2Operands : DeviceOperator
 	{
-		public SQLTimeSpanTime2Operands(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanTime2Operands(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanTime2Operands(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanTime2Operands(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -249,7 +249,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanTime1Operand : DeviceOperator
 	{
-		public SQLTimeSpanTime1Operand(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanTime1Operand(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanTime1Operand(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanTime1Operand(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -264,7 +264,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanReadDays : DeviceOperator
 	{
-		public SQLTimeSpanReadDays(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanReadDays(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanReadDays(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanReadDays(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -279,7 +279,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanWriteDays : DeviceOperator
 	{
-		public SQLTimeSpanWriteDays(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanWriteDays(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanWriteDays(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanWriteDays(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -294,7 +294,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLTimeSpanReadHours : DeviceOperator
 	{
-		public SQLTimeSpanReadHours(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanReadHours(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanReadHours(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanReadHours(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -308,7 +308,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	}
 	public class SQLTimeSpanWriteHours : DeviceOperator
 	{
-		public SQLTimeSpanWriteHours(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanWriteHours(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanWriteHours(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanWriteHours(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -323,7 +323,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanReadMinutes : DeviceOperator
 	{
-		public SQLTimeSpanReadMinutes(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanReadMinutes(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanReadMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanReadMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -338,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanReadMilliseconds : DeviceOperator
 	{
-		public SQLTimeSpanReadMilliseconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanReadMilliseconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanReadMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanReadMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -352,7 +352,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanWriteMilliseconds : DeviceOperator
 	{
-		public SQLTimeSpanWriteMilliseconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanWriteMilliseconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanWriteMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanWriteMilliseconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -366,7 +366,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanWriteSeconds : DeviceOperator
 	{
-		public SQLTimeSpanWriteSeconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanWriteSeconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanWriteSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanWriteSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -380,7 +380,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanReadSeconds : DeviceOperator
 	{
-		public SQLTimeSpanReadSeconds(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanReadSeconds(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanReadSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanReadSeconds(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -394,7 +394,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanWriteMinutes : DeviceOperator
 	{
-		public SQLTimeSpanWriteMinutes(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanWriteMinutes(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanWriteMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanWriteMinutes(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 
@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLTimeSpanAddTicks : DeviceOperator
 	{
-		public SQLTimeSpanAddTicks(int iD, string name) : base(iD, name) {}
+		public SQLTimeSpanAddTicks(long iD, string name) : base(iD, name) {}
 		//public SQLTimeSpanAddTicks(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SQLTimeSpanAddTicks(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 

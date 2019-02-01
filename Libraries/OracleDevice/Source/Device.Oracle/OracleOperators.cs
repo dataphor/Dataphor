@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	
 	public class OracleRetrieve : SQLDeviceOperator
 	{
-		public OracleRetrieve(int iD, string name) : base(iD, name)
+		public OracleRetrieve(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -70,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleJoin : SQLDeviceOperator
 	{
-		public OracleJoin(int iD, string name) : base(iD, name)
+		public OracleJoin(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -414,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleFrac : DeviceOperator
 	{
-		public OracleFrac(int iD, string name) : base(iD, name)
+		public OracleFrac(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -436,7 +436,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	// TimeSpan
 	public class OracleTimeSpanReadMillisecond : DeviceOperator
 	{
-		public OracleTimeSpanReadMillisecond(int iD, string name) : base(iD, name)
+		public OracleTimeSpanReadMillisecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -461,7 +461,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanReadSecond : DeviceOperator
 	{
-		public OracleTimeSpanReadSecond(int iD, string name) : base(iD, name)
+		public OracleTimeSpanReadSecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanReadMinute : DeviceOperator
 	{
-		public OracleTimeSpanReadMinute(int iD, string name) : base(iD, name)
+		public OracleTimeSpanReadMinute(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -497,7 +497,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanReadHour : DeviceOperator
 	{
-		public OracleTimeSpanReadHour(int iD, string name) : base(iD, name)
+		public OracleTimeSpanReadHour(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -515,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanReadDay : DeviceOperator
 	{
-		public OracleTimeSpanReadDay(int iD, string name) : base(iD, name)
+		public OracleTimeSpanReadDay(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanWriteMillisecond : DeviceOperator
 	{
-		public OracleTimeSpanWriteMillisecond(int iD, string name) : base(iD, name)
+		public OracleTimeSpanWriteMillisecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -568,7 +568,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanWriteSecond : DeviceOperator
 	{
-		public OracleTimeSpanWriteSecond(int iD, string name) : base(iD, name)
+		public OracleTimeSpanWriteSecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -603,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanWriteMinute : DeviceOperator
 	{
-		public OracleTimeSpanWriteMinute(int iD, string name) : base(iD, name)
+		public OracleTimeSpanWriteMinute(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -638,7 +638,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanWriteHour : DeviceOperator
 	{
-		public OracleTimeSpanWriteHour(int iD, string name) : base(iD, name)
+		public OracleTimeSpanWriteHour(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -673,7 +673,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanWriteDay : DeviceOperator
 	{
-		public OracleTimeSpanWriteDay(int iD, string name) : base(iD, name)
+		public OracleTimeSpanWriteDay(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -708,7 +708,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleAddYears : DeviceOperator
 	{
-		public OracleAddYears(int iD, string name) : base(iD, name)
+		public OracleAddYears(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -739,7 +739,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDayOfWeek : DeviceOperator
 	{
-		public OracleDayOfWeek(int iD, string name) : base(iD, name)
+		public OracleDayOfWeek(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -761,7 +761,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDayOfYear : DeviceOperator
 	{
-		public OracleDayOfYear(int iD, string name) : base(iD, name)
+		public OracleDayOfYear(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -783,7 +783,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadYear : DeviceOperator
 	{
-		public OracleDateTimeReadYear(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadYear(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -805,7 +805,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadMonth : DeviceOperator
 	{
-		public OracleDateTimeReadMonth(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadMonth(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -827,7 +827,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadDay : DeviceOperator
 	{
-		public OracleDateTimeReadDay(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadDay(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -849,7 +849,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadHour : DeviceOperator
 	{
-		public OracleDateTimeReadHour(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadHour(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -871,7 +871,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadMinute : DeviceOperator
 	{
-		public OracleDateTimeReadMinute(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadMinute(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -893,7 +893,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadSecond : DeviceOperator
 	{
-		public OracleDateTimeReadSecond(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadSecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -915,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeReadMillisecond : DeviceOperator
 	{
-		public OracleDateTimeReadMillisecond(int iD, string name) : base(iD, name)
+		public OracleDateTimeReadMillisecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -930,7 +930,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteMillisecond : DeviceOperator
 	{
-		public OracleDateTimeWriteMillisecond(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteMillisecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -946,7 +946,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteSecond : DeviceOperator
 	{
-		public OracleDateTimeWriteSecond(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteSecond(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1069,7 +1069,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteMinute : DeviceOperator
 	{
-		public OracleDateTimeWriteMinute(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteMinute(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1192,7 +1192,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteHour : DeviceOperator
 	{
-		public OracleDateTimeWriteHour(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteHour(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1315,7 +1315,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteDay : DeviceOperator
 	{
-		public OracleDateTimeWriteDay(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteDay(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1438,7 +1438,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteMonth : DeviceOperator
 	{
-		public OracleDateTimeWriteMonth(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteMonth(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1561,7 +1561,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeWriteYear : DeviceOperator
 	{
-		public OracleDateTimeWriteYear(int iD, string name) : base(iD, name)
+		public OracleDateTimeWriteYear(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1683,7 +1683,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeDatePart : DeviceOperator
 	{
-		public OracleDateTimeDatePart(int iD, string name) : base(iD, name)
+		public OracleDateTimeDatePart(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1750,7 +1750,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeTimePart : DeviceOperator
 	{
-		public OracleDateTimeTimePart(int iD, string name) : base(iD, name)
+		public OracleDateTimeTimePart(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1817,7 +1817,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeSelector : DeviceOperator
 	{
-		public OracleDateTimeSelector(int iD, string name) : base(iD, name)
+		public OracleDateTimeSelector(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1943,7 +1943,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleDateTimeToTimeSpan : DeviceOperator
 	{
-		public OracleDateTimeToTimeSpan(int iD, string name) : base(iD, name)
+		public OracleDateTimeToTimeSpan(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -1992,7 +1992,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleTimeSpanToDateTime : DeviceOperator
 	{
-		public OracleTimeSpanToDateTime(int iD, string name) : base(iD, name)
+		public OracleTimeSpanToDateTime(long iD, string name) : base(iD, name)
 		{
 		}
 
@@ -2072,7 +2072,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleAggregateOperator : SQLAggregateOperator
 	{
-		public OracleAggregateOperator(int iD, string name) : base(iD, name) {}
+		public OracleAggregateOperator(long iD, string name) : base(iD, name) {}
 
 		protected override AggregateCallExpression CreateAggregateCallExpression(SQLDevicePlan devicePlan, PlanNode planNode)
 		{

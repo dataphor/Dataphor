@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region IServerSessionBase Members
 
-		public int SessionID
+		public long SessionID
 		{
 			get { return _sessionDescriptor.ID; }
 		}

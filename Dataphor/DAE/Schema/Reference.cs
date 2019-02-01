@@ -28,8 +28,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class ReferenceBase : CatalogObject
 	{
 		public ReferenceBase(string name) : base(name) {}
-		public ReferenceBase(int iD, string name) : base(iD, name) {}
-		public ReferenceBase(int iD, string name, MetaData metaData) : base(iD, name)
+		public ReferenceBase(long iD, string name) : base(iD, name) {}
+		public ReferenceBase(long iD, string name, MetaData metaData) : base(iD, name)
 		{
 			MetaData = metaData;
 		}
@@ -101,12 +101,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			ParentReference = parentReference;
 		}
 
-		public DerivedReference(int iD, string name, Schema.ReferenceBase parentReference) : base(iD, name)
+		public DerivedReference(long iD, string name, Schema.ReferenceBase parentReference) : base(iD, name)
 		{
 			ParentReference = parentReference;
 		}
 
-		public DerivedReference(int iD, string name, Schema.ReferenceBase parentReference, MetaData metaData) : base(iD, name, metaData)
+		public DerivedReference(long iD, string name, Schema.ReferenceBase parentReference, MetaData metaData) : base(iD, name, metaData)
 		{
 			ParentReference = parentReference;
 		}
@@ -155,8 +155,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		// constructor
 		public Reference(string name) : base(name) {}
-		public Reference(int iD, string name) : base(iD, name) {}
-		public Reference(int iD, string name, MetaData metaData) : base(iD, name, metaData) {}
+		public Reference(long iD, string name) : base(iD, name) {}
+		public Reference(long iD, string name, MetaData metaData) : base(iD, name, metaData) {}
 
 		// UpdateReferenceAction
 		private ReferenceAction _updateReferenceAction;

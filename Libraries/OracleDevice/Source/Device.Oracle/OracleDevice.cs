@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         protected string _hostName = String.Empty;
         protected bool _shouldEnsureOperators = true;
 
-        public OracleDevice(int iD, string name) : base(iD, name)
+        public OracleDevice(long iD, string name) : base(iD, name)
         {
             UseStatementTerminator = false;
             SupportsNestedCorrelation = false;

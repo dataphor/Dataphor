@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public abstract class DeviceObject : Schema.CatalogObject
 	{
-		public DeviceObject(int iD, string name) : base(iD, name)
+		public DeviceObject(long iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 		}
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public abstract class DeviceOperator : DeviceObject
     {		
-		public DeviceOperator(int iD, string name) : base(iD, name){}
+		public DeviceOperator(long iD, string name) : base(iD, name){}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceOperator"), _operator.OperatorName, _operator.Signature.ToString(), Device.DisplayName); } }
 
@@ -204,7 +204,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
     public abstract class DeviceScalarType : DeviceObject
     {
-		public DeviceScalarType(int iD, string name) : base(iD, name) {}
+		public DeviceScalarType(long iD, string name) : base(iD, name) {}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceScalarType"), _scalarType.DisplayName, Device.DisplayName); } }
 
@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Device : CatalogObject
     {						        
 		// constructor
-		public Device(int iD, string name) : base(iD, name)
+		public Device(long iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 			_reconcileMode = ReconcileMode.Command;

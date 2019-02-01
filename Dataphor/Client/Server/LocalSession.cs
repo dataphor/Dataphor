@@ -56,8 +56,8 @@ namespace Alphora.Dataphor.DAE.Server
         /// <value>Returns the <see cref="IServer"/> instance for this session.</value>
         public IServer Server { get { return _server; } }
         
-		private int _sessionID;
-		public int SessionID { get { return _sessionID; } } 
+		private long _sessionID;
+		public long SessionID { get { return _sessionID; } } 
 		
 		protected internal IServerSession _internalSession;
 

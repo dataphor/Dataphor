@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			InternalInitialize();
 		}
 		
-		public Operator(int iD, string name) : base(iD, name)
+		public Operator(long iD, string name) : base(iD, name)
 		{
 			OperatorName = name;
 			InternalInitialize();
@@ -594,7 +594,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public class AggregateOperator : Operator
     {
 		public AggregateOperator(string name) : base(name) {}
-		public AggregateOperator(int iD, string name) : base(iD, name) {}
+		public AggregateOperator(long iD, string name) : base(iD, name) {}
 
 		// System constructor -> any operator created with this constructor will have IsSystem set to true
 		public AggregateOperator(int iD, string name, Operand[] operands, IDataType returnType, ClassDefinition initialization, ClassDefinition aggregation, ClassDefinition finalization) : base(iD, name, operands, returnType)

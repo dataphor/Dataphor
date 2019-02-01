@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDevice : MemoryDevice
 	{
-		public CatalogDevice(int iD, string name) : base(iD, name){}
+		public CatalogDevice(long iD, string name) : base(iD, name){}
 		
 		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
@@ -48,8 +48,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		// Catalog index, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession
 		// The catalog index stores the name of each object in the catalog cache by it's object ID
 		// Note that the names are stored rooted in this index.
-		private Dictionary<int, string> _catalogIndex = new Dictionary<int, string>();
-		protected internal Dictionary<int, string> CatalogIndex { get { return _catalogIndex; } }
+		private Dictionary<long, string> _catalogIndex = new Dictionary<long, string>();
+		protected internal Dictionary<long, string> CatalogIndex { get { return _catalogIndex; } }
 		
 		private NameResolutionCache _nameCache = new NameResolutionCache(DefaultNameResolutionCacheSize);
 		protected internal NameResolutionCache NameCache { get { return _nameCache; } }

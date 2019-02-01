@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class ServerCatalogDevice : CatalogDevice
 	{
-		public ServerCatalogDevice(int iD, string name) : base(iD, name) { }
+		public ServerCatalogDevice(long iD, string name) : base(iD, name) { }
 		
 		private CatalogStore _store;
 		internal CatalogStore Store
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		internal new Users UsersCache { get { return base.UsersCache; } }
 		
-		internal new Dictionary<int, string> CatalogIndex { get { return base.CatalogIndex; } }
+		internal new Dictionary<long, string> CatalogIndex { get { return base.CatalogIndex; } }
 		
 		internal new NameResolutionCache NameCache { get { return base.NameCache; } }
 		

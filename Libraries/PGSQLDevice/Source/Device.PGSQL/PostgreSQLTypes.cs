@@ -400,7 +400,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLString : SQLString
 	{
-		public PostgreSQLString(int id, string name) : base(id, name) { }
+		public PostgreSQLString(long iD, string name) : base(iD, name) { }
 
 		protected override string InternalNativeDomainName(MetaData metaData)
 		{

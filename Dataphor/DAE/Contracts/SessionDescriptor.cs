@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public class SessionDescriptor
 	{
-		public SessionDescriptor(int handle, int iD)
+		public SessionDescriptor(int handle, long iD)
 		{
 			_handle = handle;
 			_iD = iD;
@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public int Handle { get { return _handle; } }
 
 		[DataMember]
-		internal int _iD;
-		public int ID { get { return _iD; } }
+		internal long _iD;
+		public long ID { get { return _iD; } }
 	}
 }
