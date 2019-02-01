@@ -16,14 +16,5 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 
 	class SQLiteServerConfigurationManager : ServerConfigurationManager
 	{
-		public override ServerConfiguration GetTestConfiguration(string AInstanceName)
-		{
-			ServerConfiguration LResult = base.GetTestConfiguration(AInstanceName);
-			
-			LResult.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
-			LResult.CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";		
-
-			return LResult;
-		}
 	}
 }
