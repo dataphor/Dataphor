@@ -522,38 +522,29 @@ namespace Alphora.Dataphor.DAE.Schema
 			try
 			{
 				IMetaData result;
-				if ((mode != EmitMode.ForRemote) && (_declarationText != null))
+				CreateOperatorStatement statement = new CreateOperatorStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand operand in Operands)
 				{
-					SourceStatement statement = new SourceStatement();
-					statement.Source = _declarationText + _bodyText;
-					result = statement;
+					FormalParameter formalParameter = new FormalParameter();
+					formalParameter.Identifier = operand.Name;
+					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+					formalParameter.Modifier = operand.Modifier;
+					statement.FormalParameters.Add(formalParameter);
 				}
+				if (ReturnDataType != null)
+					statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
+				#if USEVIRTUAL
+				statement.IsVirtual = IsVirtual;
+				statement.IsAbstract = IsAbstract;
+				statement.IsOverride = IsOverride;
+				statement.IsReintroduced = IsReintroduced;
+				#endif
+				if ((mode == EmitMode.ForRemote) && !IsRemotable)
+					statement.Block.Block = new Block();
 				else
-				{
-					CreateOperatorStatement statement = new CreateOperatorStatement();
-					statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-					foreach (Operand operand in Operands)
-					{
-						FormalParameter formalParameter = new FormalParameter();
-						formalParameter.Identifier = operand.Name;
-						formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
-						formalParameter.Modifier = operand.Modifier;
-						statement.FormalParameters.Add(formalParameter);
-					}
-					if (ReturnDataType != null)
-						statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
-					#if USEVIRTUAL
-					statement.IsVirtual = IsVirtual;
-					statement.IsAbstract = IsAbstract;
-					statement.IsOverride = IsOverride;
-					statement.IsReintroduced = IsReintroduced;
-					#endif
-					if ((mode == EmitMode.ForRemote) && !IsRemotable)
-						statement.Block.Block = new Block();
-					else
-						Block.EmitStatement(mode, statement.Block);
-					result = statement;
-				}
+					Block.EmitStatement(mode, statement.Block);
+				result = statement;
 
 				result.MetaData = MetaData == null ? null : MetaData.Copy();
 
@@ -663,45 +654,36 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				IMetaData result;
 			
-				if ((mode != EmitMode.ForRemote) && (DeclarationText != null))
+				CreateAggregateOperatorStatement statement = new CreateAggregateOperatorStatement();
+				statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand operand in Operands)
 				{
-					SourceStatement statement = new SourceStatement();
-					statement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
-					result = statement;
+					FormalParameter formalParameter = new FormalParameter();
+					formalParameter.Identifier = operand.Name;
+					formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
+					formalParameter.Modifier = operand.Modifier;
+					statement.FormalParameters.Add(formalParameter);
+				}
+				statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
+				#if USEVIRTUAL
+				statement.IsVirtual = IsVirtual;
+				statement.IsAbstract = IsAbstract;
+				statement.IsOverride = IsOverride;
+				statement.IsReintroduced = IsReintroduced;
+				#endif
+				if ((mode == EmitMode.ForRemote) && !IsRemotable)
+				{
+					statement.Initialization.Block = new Block();
+					statement.Aggregation.Block = new Block();
+					statement.Finalization.Block = new Block();
 				}
 				else
 				{
-					CreateAggregateOperatorStatement statement = new CreateAggregateOperatorStatement();
-					statement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-					foreach (Operand operand in Operands)
-					{
-						FormalParameter formalParameter = new FormalParameter();
-						formalParameter.Identifier = operand.Name;
-						formalParameter.TypeSpecifier = operand.DataType.EmitSpecifier(mode);
-						formalParameter.Modifier = operand.Modifier;
-						statement.FormalParameters.Add(formalParameter);
-					}
-					statement.ReturnType = ReturnDataType.EmitSpecifier(mode);
-					#if USEVIRTUAL
-					statement.IsVirtual = IsVirtual;
-					statement.IsAbstract = IsAbstract;
-					statement.IsOverride = IsOverride;
-					statement.IsReintroduced = IsReintroduced;
-					#endif
-					if ((mode == EmitMode.ForRemote) && !IsRemotable)
-					{
-						statement.Initialization.Block = new Block();
-						statement.Aggregation.Block = new Block();
-						statement.Finalization.Block = new Block();
-					}
-					else
-					{
-						Initialization.EmitStatement(mode, statement.Initialization);
-						Aggregation.EmitStatement(mode, statement.Aggregation);
-						Finalization.EmitStatement(mode, statement.Finalization);
-					}
-					result = statement;
+					Initialization.EmitStatement(mode, statement.Initialization);
+					Aggregation.EmitStatement(mode, statement.Aggregation);
+					Finalization.EmitStatement(mode, statement.Finalization);
 				}
+				result = statement;
 
 				result.MetaData = MetaData == null ? null : MetaData.Copy();
 				if (SessionObjectName != null)
