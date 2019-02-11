@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -203,7 +203,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			base.InternalBindingTraversal(plan, visitor);
-			if (_distinctRequired)
+			// If _distinctRequired is true, _equalNode will only be null if the key is not comparable (i.e. a hashtable is being used to support the distinct)
+			if (_distinctRequired && _equalNode != null)
 			{
 				plan.EnterRowContext();
 				try
