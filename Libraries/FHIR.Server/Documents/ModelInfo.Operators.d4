@@ -111,6 +111,77 @@ begin
   end;
 end;
 
+//* Operator: ResolveType(String)
+// Resolves a type info from its name
+SafeDrop("ResolveType(String)");
+create operator ResolveType(const name: String): TypeInfo
+begin
+  result := TypeInfos[name].Value;
+end;
+
+//* Operator: ResolveType(TypeSpecifier)
+// Resolves an element type from its type specifier
+// If the type specifier is a list type specifier, this will return the element type info
+// If this is a named type specifier, this will return the resolved type info
+// Otherwise, this will return nil
+SafeDrop("ResolveType(TypeSpecifier)");
+create operator ResolveType(const typeSpecifier: TypeSpecifier): TypeInfo
+begin
+  result := nil;
+  if typeSpecifier is NamedTypeSpecifier then
+  begin
+    var namedTypeSpecifier := typeSpecifier as NamedTypeSpecifier;
+    result := ResolveType(namedTypeSpecifier.GetTypeName());
+  end
+  else if typeSpecifier is ListTypeSpecifier then
+  begin
+    var listTypeSpecifier := typeSpecifier as ListTypeSpecifier;
+    result :=
+      if listTypeSpecifier.elementType.IsNotNil() then
+        listTypeSpecifier.elementType.ResolveType()
+      else
+        listTypeSpecifier.elementTypeSpecifier.ResolveType();
+  end;
+end;
+
+//* Operator: ResolveType(ClassInfoElement)
+// Resolves an element type for the given class info element
+SafeDrop("ResolveType(ClassInfoElement)");
+create operator ResolveType(const classInfoElement: ClassInfoElement): TypeInfo
+begin
+  result :=
+    if classInfoElement.type.IsNotNil() then
+      ResolveType(classInfoElement.type)
+    else
+      ResolveType(classInfoElement.typeSpecifier);
+end;
+
+//* Operator: GetQualifier(String)
+SafeDrop("GetQualifier(String)");
+create operator GetQualifier(const name: String): String
+begin
+  result := nil;
+  var index := name.IndexOf(".");
+  if index > 0 then
+    result := name.SubString(0, index);
+end;
+
+//select GetQualifier("FHIR.Patient");
+//select GetQualifier("Patient");
+
+//* Operator: UnQualify(String)
+SafeDrop("UnQualify(String)");
+create operator UnQualify(const name: String): String
+begin
+  result := nil;
+  var index := name.IndexOf(".");
+  if index > 0 then
+    result := name.SubString(index + 1);
+end;
+
+//select UnQualify("FHIR.Patient");
+//select UnQualify("Patient");
+
 //* Operator: BuildTypeSpecifier(String, String)
 // Builds a NamedTypeSpecifier from the given type name  	  
 SafeDrop("BuildTypeSpecifier(String, String)");
@@ -170,6 +241,30 @@ begin
     result := nil;
 end;
 
+//* Operator: GetTypeSpecifier(ClassInfoElement)
+// Gets the type specifier for the given class info element
+SafeDrop("GetTypeSpecifier(ClassInfoElement)");
+create operator GetTypeSpecifier(const classInfoElement: ClassInfoElement): TypeSpecifier
+begin
+  result := nil;
+  if classInfoElement.type.IsNotNil() then
+    result := BuildTypeSpecifier(classInfoElement.type.GetQualifier(), classInfoElement.type.UnQualify())
+  else if classInfoElement.typeSpecifier.IsNotNil() then
+  begin
+    if classInfoElement.typeSpecifier is ListTypeSpecifier then
+    begin
+      var listTypeSpecifier := classInfoElement.typeSpecifier as ListTypeSpecifier;
+      result :=
+        if listTypeSpecifier.elementType.IsNotNil() then
+          BuildTypeSpecifier(listTypeSpecifier.elementType.GetQualifier(), listTypeSpecifier.elementType.UnQualify())
+        else
+          listTypeSpecifier.elementTypeSpecifier;
+    end;
+  end;
+end;
+
+//select GetTypeSpecifier(ClassInfoElement(row { }));
+
 //* Operator: Capitalize(String)
 // Returns the given string with the first letter capitalized
 SafeDrop("Capitalize(String)");
@@ -217,6 +312,7 @@ end;
 //select StripRoot("Patient", "Patient"); // Empty string
 //select StripRoot("Patient.name", "Patient");
 //select StripRoot("Patient.name.value", "Patient.name");
+//select StripRoot("#Bundle.link", "#");
 
 //* Operator: StripChoice(String)
 // Strips the [x] suffix of an element name which indicates a choice in FHIR
@@ -325,6 +421,24 @@ begin
   end;
 end;
 
+//* Operator: Element(list(ElementDefinition), String)
+// Returns the given element definition if it exists
+SafeDrop("Element(list(ElementDefinition), String)");
+create operator Element(const elements: list(ElementDefinition), const path: String): ElementDefinition
+begin
+  if elements.IsNotNil() then
+    foreach var ed in elements do
+      if ed.Path = path then
+      begin
+        result := ed;
+        break;
+      end;
+end;
+
+//select (StructureDefinitions["Patient"].StructureDefinition.Snapshot.Element.Element("Patient.gender").Binding.Extension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").Value as FHIRString).Value
+
+//select StructureDefinitions["Patient"].StructureDefinition.Snapshot.Element.Element("Patient.gender").Binding.Strength
+
 //* Operator: ForPath(list(ElementDefinition), String)
 // Returns the element definition for the given path
 SafeDrop("ForPath(list(ElementDefinition), String)");
@@ -340,6 +454,119 @@ begin
       end;
 end;
 
+//* Operator: Element(list(ClassInfoElement), String)
+// Returns the element with the given name, if it exists
+SafeDrop("Element(list(ClassInfoElement), String)");
+create operator Element(const elements: list(ClassInfoElement), const name: String): ClassInfoElement
+begin
+  result := nil;
+  foreach var e in elements do
+    if e.name = name then
+    begin
+      result := e;
+      break;
+    end;
+end;
+
+//* Operator: ForPath(list(ClassInfoElement), String)
+// Returns the element with the given path
+SafeDrop("ForPath(list(ClassInfoElement), String)");
+create operator ForPath(elements: list(ClassInfoElement), const path: String) : ClassInfoElement
+begin
+  result := nil;
+  foreach var p in path.Split(".") do
+  begin
+    var elementList := "";
+    foreach var e in elements do
+      elementList := elementList + ", " + e.name;
+    Message("ForPath: path: " + path + ", p: " + p + ", elements: " + elements.Count().ToString() + elementList);
+    result := elements.Element(p);
+    if result.IsNotNil() then
+    begin
+      Message("ForPath: result: " + result.name);
+      var elementType := result.ResolveType();
+      Message("ForPath: elementType: " + IfNil(elementType.AsString, "<No Value>"));
+      elements := (elementType as ClassInfo).element;
+    end;
+  end;
+end;
+
+//* Operator: ResolveContentReference(String, String)
+create operator ResolveContentReference(const modelName: String, const path: String): TypeSpecifier
+begin
+  var root := path.StripRoot("#").GetQualifier();
+  var elementPath := path.StripRoot("#").UnQualify();
+  var rootType := ResolveType(modelName + "." + root);
+  var element := (rootType as ClassInfo).element.ForPath(elementPath);
+  result := element.GetTypeSpecifier();
+end;
+
+//* Operator: IsContentReferenceTypeSpecifier(TypeSpecifier)
+SafeDrop("IsContentReferenceTypeSpecifier(TypeSpecifier)");
+create operator IsContentReferenceTypeSpecifier(const typeSpecifier: TypeSpecifier): Boolean
+begin
+  result := false;
+  if typeSpecifier is NamedTypeSpecifier then
+  begin
+    if (typeSpecifier as NamedTypeSpecifier).name.StartsWith("#") then
+    begin
+      result := true;
+    end;
+  end
+  else if (typeSpecifier is ListTypeSpecifier) then
+  begin
+    var listTypeSpecifier := typeSpecifier as ListTypeSpecifier;
+    if listTypeSpecifier.elementType.StartsWith("#") then
+      result := true
+    else if listTypeSpecifier.elementTypeSpecifier.IsNotNil() then
+      result := listTypeSpecifier.elementTypeSpecifier.IsContentReferenceTypeSpecifier();
+  end;
+end;
+
+//* Operator: GetContentReference(TypeSpecifier)
+SafeDrop("GetContentReference(TypeSpecifier)");
+create operator GetContentReference(const typeSpecifier: TypeSpecifier): String
+begin
+  result := nil;
+  if typeSpecifier is NamedTypeSpecifier then
+  begin
+    if (typeSpecifier as NamedTypeSpecifier).name.StartsWith("#") then
+      result := (typeSpecifier as NamedTypeSpecifier).name;
+  end
+  else if typeSpecifier is ListTypeSpecifier then
+  begin
+    var listTypeSpecifier := typeSpecifier as ListTypeSpecifier;
+    if listTypeSpecifier.elementType.StartsWith("#") then
+      result := listTypeSpecifier.elementType
+    else
+      result := GetContentReference(listTypeSpecifier.elementTypeSpecifier);
+  end;
+end;      
+
+//* Operator: HasContentReferenceTypeSpecifier(ClassInfoElement)
+SafeDrop("HasContentReferenceTypeSpecifier(ClassInfoElement)");
+create operator HasContentReferenceTypeSpecifier(const element: ClassInfoElement): Boolean
+begin
+  result := element.type.StartsWith("#") or element.typeSpecifier.IsContentReferenceTypeSpecifier();
+end;
+
+//* Operator: FixupContentReferenceTypeSpecifier(String, ClassInfoElement)
+SafeDrop("FixupContentReferenceTypeSpecifier(String, ClassInfoElement)");
+create operator FixupContentReferenceTypeSpecifier(const modelName: String, const element: ClassInfoElement): ClassInfoElement
+begin
+  result := nil;
+  if element.HasContentReferenceTypeSpecifier() then
+  begin
+    result := element;
+    if element.type.StartsWith("#") then
+      result.type := (ResolveContentReference(modelName, element.type) as NamedTypeSpecifier).GetTypeName()
+    else if element.typeSpecifier is ListTypeSpecifier then
+      result.typeSpecifier := ListTypeSpecifier(row { ResolveContentReference(modelName, element.typeSpecifier.GetContentReference()) elementTypeSpecifier })
+    else
+      result.typeSpecifier := ResolveContentReference(modelName, element.typeSpecifier.GetContentReference());
+  end;
+end;
+      
 /*
 If the element is of type code and has a required binding, use the binding name element definition extension to construct a type
 ModelInfo doesn't support enumerated types...
@@ -352,6 +579,11 @@ SafeDrop("BuildClassInfoElement(String, ElementDefinition, ElementDefinition, Ty
 create operator BuildClassInfoElement(const root: String, const ed: ElementDefinition, const structureEd: ElementDefinition, typeSpecifier: TypeSpecifier): ClassInfoElement
 begin
   Message("BuildClassInfoElement: root: " + root + ", ed.Path: " + ed.Path + ", structureEd.Path: " + IfNil(structureEd.Path, "<No Value>"));
+  if ed.ContentReference.IsNotNil() then
+  begin
+    typeSpecifier := NamedTypeSpecifier(row { nil as String modelName, ed.ContentReference name });
+  end;
+  
   if structureEd.IsNil() then
   begin
     // The element ed is a new element
@@ -392,24 +624,6 @@ end;
 
 //select (BuildTypeSpecifier(StructureDefinitions["Patient"].StructureDefinition.Snapshot.Element[1].Type) as NamedTypeSpecifier).name;
 
-//* Operator: Element(list(ElementDefinition), String)
-// Returns the given element definition if it exists
-SafeDrop("Element(list(ElementDefinition), String)");
-create operator Element(const elements: list(ElementDefinition), const path: String): ElementDefinition
-begin
-  if elements.IsNotNil() then
-    foreach var ed in elements do
-      if ed.Path = path then
-      begin
-        result := ed;
-        break;
-      end;
-end;
-
-//select (StructureDefinitions["Patient"].StructureDefinition.Snapshot.Element.Element("Patient.gender").Binding.Extension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").Value as FHIRString).Value
-
-//select StructureDefinitions["Patient"].StructureDefinition.Snapshot.Element.Element("Patient.gender").Binding.Strength
-
 //* Operator: Extension(Element, String)
 // Returns the given extension if it exists
 SafeDrop("Extension(Element, String)");
@@ -424,7 +638,7 @@ begin
       end;
 end;
 
-//* Operator: BuildElementTypeSpecifier(list(TypeRefComponent))
+//* Operator: BuildElementTypeSpecifier(String, String, ElementDefinition)
 // Builds the type specifier for the given element
 SafeDrop("BuildElementTypeSpecifier(String, String, ElementDefinition)");
 create operator BuildElementTypeSpecifier(const modelName: String, const root: String, const ed: ElementDefinition): TypeSpecifier
@@ -442,7 +656,7 @@ begin
           typeName name,
           modelName + ".Element" baseType,
           false retrievable,
-          { ClassInfoElement(row { "Value" name, "System.String" type }) } element // Map directly to System.String here, this is a "Primitive" type
+          { ClassInfoElement(row { "value" name, "System.String" type }) } element // Map directly to System.String here, this is a "Primitive" type
         });
       insert row { modelName + "." + typeName Name, modelName ModelName, typeInfo Value } into TypeInfos;
     end;

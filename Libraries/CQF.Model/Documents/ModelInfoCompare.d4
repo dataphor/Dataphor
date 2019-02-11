@@ -1,0 +1,25 @@
+/*
+Compare two model infos for equality
+*/
+
+var LCurrent := CQF.Model.Base.AsXML(LoadDocument("CQF.Model", "CurrentFHIRModelInfo")) as ModelInfo;
+var LNew := CQF.Model.Base.AsXML(LoadDocument("CQF.Model.FHIR", "FHIRModelInfo")) as ModelInfo;
+
+var LCurrentTable :=
+  LCurrent.typeInfo.ToTable() 
+    add { (value as ClassInfo).name name }
+    adorn { key { name } }
+    { name, value as ClassInfo value };
+
+var LNewTable :=  
+  LNew.typeInfo.ToTable()
+    add { (value as ClassInfo).name name }
+    adorn { key { name } }
+    { name, value as ClassInfo value };
+  
+select (LCurrentTable { name }) minus (LNewTable { name });
+select (LNewTable { name }) minus (LCurrentTable { name });  
+  
+//{ (value as ClassInfo).name name, value as ClassInfo value };
+
+

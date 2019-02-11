@@ -64,7 +64,7 @@ insert
 		row { "QUICK.Age", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
 		row { "QUICK.Distance", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
 		row { "QUICK.SimpleQuantity", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
-		row { "QUICK.Duration", NamedTypeSpecifier(row { "System" modelName, "Duration" name }) },
+		row { "QUICK.Duration", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
 		row { "QUICK.Count", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) },
 		row { "QUICK.Money", NamedTypeSpecifier(row { "System" modelName, "Quantity" name }) }
 	}

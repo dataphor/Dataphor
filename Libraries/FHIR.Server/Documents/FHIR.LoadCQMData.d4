@@ -1,0 +1,163 @@
+// Import patient resources and histories for cancer screening measures
+
+// Uses the operators defined in FHIR.LoadConformance
+
+//select ListFiles("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\measure-test-patient-data-v5", "*.json");
+
+ImportResourcesFromDirectory("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\measure-test-patient-data-v5");
+
+select ListDirectories("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\measure-test-patient-data-v5\histories");
+
+foreach var directory in ListDirectories("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\measure-test-patient-data-v5\histories") do
+begin
+  ImportResourcesFromDirectory(directory.Path);
+end;
+
+select Count(Resource)
+select Resource group by { Type } add { Count() Count }
+
+select Patient
+
+// CQM Solution Data
+select 
+create table CQMSolutionData from
+  table 
+  {
+		row { 'Patient-6484' Id },
+		row { 'Patient-6489' Id },
+		row { 'Patient-6492' Id },
+		row { 'Patient-6503' Id },
+		row { 'Patient-6506' Id },
+		row { 'Patient-6514' Id },
+		row { 'Patient-6520' Id },
+		row { 'Patient-6523' Id },
+		row { 'Patient-6526' Id },
+		row { 'Patient-6557' Id },
+		row { 'Patient-1138' Id },
+		row { 'Patient-1153' Id },
+		row { 'Patient-6486' Id },
+		row { 'Patient-6488' Id },
+		row { 'Patient-6499' Id },
+		row { 'Patient-6515' Id },
+		row { 'Patient-6535' Id },
+		row { 'Patient-6538' Id }
+  }
+
+select
+drop table CQFData
+create table CQFData from
+  table
+  {
+		row { 'Patient-6522' Id },
+		row { 'Patient-6558' Id },
+		row { 'Patient-6484' Id },
+		row { 'Patient-6489' Id },
+		row { 'Patient-6492' Id },
+		row { 'Patient-6503' Id },
+		row { 'Patient-6506' Id },
+		row { 'Patient-6514' Id },
+		row { 'Patient-6520' Id },
+		row { 'Patient-6523' Id },
+		row { 'Patient-6526' Id },
+		row { 'Patient-6557' Id },
+		row { 'Patient-1138' Id },
+		row { 'Patient-6487' Id },
+		row { 'Patient-6491' Id },
+		row { 'Patient-6512' Id },
+		row { 'Patient-6516' Id },
+		row { 'Patient-6517' Id },
+		row { 'Patient-6533' Id },
+		row { 'Patient-6554' Id },
+		row { 'Patient-22276' Id },
+		row { 'Patient-2276' Id },
+		row { 'Patient-66535' Id },
+		row { 'Patient-1153' Id },
+		row { 'Patient-6486' Id },
+		row { 'Patient-6488' Id },
+		row { 'Patient-6499' Id },
+		row { 'Patient-6515' Id },
+		row { 'Patient-6535' Id },
+		row { 'Patient-6538' Id }
+  }
+
+select CQMSolutionData
+select CQFData
+
+select Count(CQMSolutionData)
+select Resource where Type = 'Patient' { Id }
+  intersect CQMSolutionData
+select Count(CQFData)  
+select Resource where Type = 'Patient' { Id }
+  intersect CQFData
+
+select CQFData minus (Resource where Type = 'Patient' { Id })  
+
+// Patient-22276: Andrea Montgomery Woodward, patient is present in default CQF Ruler, but not part of measure test data
+// Patient-2276: Andrea Montgomery Woodward, patient is present in default CQF Ruler, but not part of measure test data
+// Patient-66535: Barbara April Howe, patient is present in default CQF Ruler, but not part of measure test data
+// Patient-6487: No encounters in 1997
+// Patient-6491: No encounters in 1997
+// Patient-6512: No encounters in 1997
+// Patient-6516: No encounters in 1997
+// Patient-6517: No encounters in 1997
+// Patient-6533: No encounters in 1997
+// Patient-6554: No encounters in 1997
+// Patient-6522: Encounter-809 - 99345|http://www.ama-assn.org/go/cpt (Present in the Home Healthcare Services value set, which is not loaded in the CQF Ruler default)
+// Patient-6558: Encounter-780 - 99203|http://www.ama-assn.org/go/cpt (Present in the Office Visit value set, and has the appropriate settings, should be present in Initial Population)
+
+select CQMSolutionData
+
+select Resource 
+  where Id = 'Patient-6558'
+  add { Content as Patient Patient }
+  { Id, Patient.Name Name }
+
+select Resource 
+  where Type = 'Encounter' 
+  add { Content as Encounter Encounter }
+  where Encounter.Subject.Reference.Value = 'Patient/Patient-6558'
+  { Id, Encounter.Period.Start StartDateTime, Encounter.Period.End EndDateTime }
+  order by { StartDateTime }
+  
+select Resource where Id = 'Encounter-780'
+  add { Content as Encounter Encounter }
+  { Id, Encounter.Type[0].Coding[0].Code Type, Encounter.Status Status }
+  
+ValueSet [43:1] [[http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/benzodiazepines/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/discharge-to-hospice/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/end-of-life-care/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/end-of-life-conditions/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/hospice-finding/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/hospice-procedure/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/illicit-drug-urine-screening/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/limited-life-expectancy-conditions/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/long-acting-opioids/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/metastatic-cancer/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/naloxone/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioid-abuse-assessment/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioid-urine-screening/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioids-abused-in-ambulatory-care/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioids-codeine-cough-meds/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioids-indicating-end-of-life/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/opioids/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/short-acting-opioids/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/substance-abuse/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1123.17/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1123.18/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1123.19/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1102.39/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1335.16/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1064.30/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1330.2/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1064.31/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1102.38/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1250.46/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1250.44/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1250.45/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1383/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1102.40/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1346/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1347/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1389/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1386/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1023/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1387/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1024/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1384/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1385/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1148.7/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1168.11/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1420.35/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1418/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1420.37/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1168.10/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1420.36/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1339/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1334.15/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1337/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1139/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1123.20/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1123.21/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1256.13/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1256.14/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1042.3/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1042.4/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1208.22/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1179/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1256/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1453/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1208.25/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1208.24/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1208.23/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1449/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1208/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1421.34/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1326/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1447/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1448/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1230.12/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1042/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1331.6/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1401/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1325/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1168/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1441/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1442/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1168.9/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1044/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1168.8/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1440/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1064.29/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1439/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1437/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1065.32/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1065.33/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1074/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1390/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1329.1/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1043.5/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1399/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1355/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1356/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1265.28/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1093.43/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1351/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1265.26/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1093.41/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1352/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1265.27/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1093.42/_history/2], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.4.5/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.4.6/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.4.7/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.4.8/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.4.9/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.5.0/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.5.1/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.5.2/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/1.2.3.5.3/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/ncqa-payer/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/hedismedrecvalueset/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/hedis-med-rec-practitioner/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1011/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.114222.4.11.837/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113762.1.4.1080.2/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.3157.1004.20/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113762.1.4.1/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.3157.1004.26/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1008/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.600.1.1579/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.114222.4.11.3591/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1030/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.114222.4.11.836/_history/1], [http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113762.1.4.1029.33/_history/1]]
+
+
+/*
+library Retrieve1 version '1.0'
+
+using FHIR version '3.0.0'
+
+include FHIRHelpers version '3.0.0'
+
+valueset "Office Visit": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1001'
+valueset "Annual Wellness Visit": 'urn:oid:2.16.840.1.113883.3.526.3.1240' // Not present
+valueset "Preventive Care Services - Established Office Visit, 18 and Up": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1025'
+valueset "Preventive Care Services-Initial Office Visit, 18 and Up": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1023'
+valueset "Home Healthcare Services": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1016' // Not present
+
+context Patient
+// context Population
+
+define Test: [Encounter]
+
+define function "Qualifying Encounters"(MeasurementPeriod Interval<DateTime>):
+	(
+	    [Encounter: "Office Visit"]
+		union [Encounter: "Annual Wellness Visit"] 
+		union [Encounter: "Preventive Care Services - Established Office Visit, 18 and Up"] 
+		union [Encounter: "Preventive Care Services-Initial Office Visit, 18 and Up"] 
+		union [Encounter: "Home Healthcare Services"]
+    ) ValidEncounter
+		where ValidEncounter.period during day of MeasurementPeriod
+		and ValidEncounter.status  = 'finished' 
+
+
+define Encounters: "Qualifying Encounters"(Interval[@1997-01-01T00:00:00.0, @1998-01-01T00:00:00.0))
+*/
+
+
+{ Encounter.Subject.Reference.Value EncounterReference } return 5

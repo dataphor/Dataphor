@@ -29,7 +29,7 @@ select
 do
 begin
   delete Messages;
-  BuildClassInfo(StructureDefinitions['us-core-allergyintolerance'].StructureDefinition);
+  BuildClassInfo("USCore", StructureDefinitions['us-core-allergyintolerance'].StructureDefinition);
 end;
 select Messages;
 select StructureDefinitions['us-core-allergyintolerance'].StructureDefinition.AsXML
@@ -57,11 +57,11 @@ begin
   BuildClassInfo(StructureDefinition);
 end;
 
-delete Documents where Library_Name = "CQF.Model.QUICK" and Name <> "Register";
+delete Documents where Library_Name = "CQF.Model.USCore" and Name <> "Register";
 foreach row in TypeInfos do
 begin
   var name := Name.Replace("-", "_");
-  CreateAndSave("CQF.Model.QUICK", name, "xml", Value.AsXML);
+  CreateAndSave("CQF.Model.USCore", name, "xml", Value.AsXML);
 end
 
 //    <ns4:conversionInfo fromType="FHIR.Coding" toType="System.Code" functionName="FHIRHelpers.ToCode"/>

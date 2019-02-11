@@ -1,28 +1,37 @@
-// FHIR.CreateModelInfo
-// Creates the base FHIR Model Info
-// This creates a "Pure" Model Info that exposes the FHIR model directly in CQL
+// QUICKFHIR.CreateModelInfo
+// Creates the base FHIR Model Info, but with primitives replaced with CQL primitives
 
 // Needs FHIR.LoadConformance to load the structure definitions for FHIR
 // Needs FHIR.LoadConformanceCache to load the structure definitions into in-memory tables for processing
 // Needs ModelInfo.Operators to create the required operators
 
 delete Models where Url = "http://hl7.org/fhir";
-insert row { "FHIR" Name, "http://hl7.org/fhir" Url } into Models;
+insert row { "QUICKFHIR" Name, "http://hl7.org/fhir" Url } into Models;
 
 select TypeInfos
 delete TypeInfos where ModelName <> 'System';
 
 select Models
 select ModelInfoSettings
-update ModelInfoSettings set { UseCQLPrimitives := false };
+update ModelInfoSettings set { UseCQLPrimitives := true };
+
+// TODO: Don't define types for FHIR types that are not referenced due to the use of CQL Primitives
+// All the FHIR Primitives
+// Age, Money, Count, Duration, Range, Period, Quantity, SimpleQuantity
+// If underlying quantity values have a comparator, we have an issue
+// In addition, we lose the fact that some integer are positiveInt, some uri are oid, etc. Should try to preserve those, but would require new types in QUICKFHIR
 
 select PrimitiveTypeMappings
+// TODO: Construct actual mappings here, this is a shortcut...
+update PrimitiveTypeMappings set { SourceTypeName := 'QUICK' + SourceTypeName };
 select CQLTypeMappings
+// TODO: Construct actual mappings here, this is a shortcut...
+update CQLTypeMappings set { SourceTypeName := 'QUICK' + SourceTypeName };
 // Generate Primitive Types
 foreach row in 
 	StructureDefinitions where StructureDefinition.Kind = "PrimitiveType" 
 do
-  BuildClassInfo("FHIR", StructureDefinition);
+  BuildClassInfo("QUICKFHIR", StructureDefinition);
   
 // Generate Complex Types
 foreach row in 
@@ -32,7 +41,7 @@ foreach row in
 do
 begin
   delete Messages;
-  BuildClassInfo("FHIR", StructureDefinition);
+  BuildClassInfo("QUICKFHIR", StructureDefinition);
 end;  
 
 // Generate Resources
@@ -43,14 +52,14 @@ foreach row in
 do
 begin
   delete Messages;
-  BuildClassInfo("FHIR", StructureDefinition);
+  BuildClassInfo("QUICKFHIR", StructureDefinition);
 end;
 
 // Walk all the types and fixup any content reference types (NamedTypeSpecifiers with no modelName and a name that begins with #)
 create table Fixups in Temp from TypeInfos where false;
 foreach row in
   TypeInfos
-    where ModelName = "FHIR"
+    where ModelName = "QUICKFHIR"
       and Value is ClassInfo
 do
 begin
@@ -62,7 +71,7 @@ begin
     if e.HasContentReferenceTypeSpecifier() then
     begin
       hasFixups := true;
-      elements.Add(FixupContentReferenceTypeSpecifier("FHIR", e));
+      elements.Add(FixupContentReferenceTypeSpecifier("QUICKFHIR", e));
     end
     else
       elements.Add(e);
@@ -75,9 +84,9 @@ begin
   end;
 end;
 
-select TypeInfos where ModelName = "FHIR"
-select TypeInfos where Value is ClassInfo and ModelName = "FHIR" and Name = "FHIR.Bundle.EntryComponent"
-var elements := ((TypeInfos where Value is ClassInfo and ModelName = "FHIR" and Name = "FHIR.Bundle.EntryComponent")[].Value as ClassInfo).element;
+select TypeInfos where ModelName = "QUICKFHIR"
+select TypeInfos where Value is ClassInfo and ModelName = "QUICKFHIR" and Name = "QUICKFHIR.Bundle.EntryComponent"
+var elements := ((TypeInfos where Value is ClassInfo and ModelName = "QUICKFHIR" and Name = "QUICKFHIR.Bundle.EntryComponent")[].Value as ClassInfo).element;
 var linkElement := elements.ForPath("link");
 var linkElementTypeSpecifier := linkElement.typeSpecifier as ListTypeSpecifier;
 select IsContentReferenceTypeSpecifier(linkElement.typeSpecifier);
@@ -104,57 +113,20 @@ select StructureDefinitions["Bundle"].StructureDefinition.AsXML
 
 select 
   TypeInfos 
-    where Value is ClassInfo and Value.baseType = "FHIR.Element"
+    where Value is ClassInfo and Value.baseType = "QUICKFHIR.Element"
     where (Value as ClassInfo).element.Count() = 1
     
 
-DeleteDocument("CQF.Model.FHIR", "FHIRModelInfo");
-CreateAndSave("CQF.Model.FHIR", "FHIRModelInfo", "xml",
+DeleteDocument("CQF.Model.FHIR", "QUICKFHIRModelInfo");
+CreateAndSave("CQF.Model.FHIR", "QUICKFHIRModelInfo", "xml",
   ModelInfo(row { 
     { ModelSpecifier(row { "System" name, "1.0.0" version }) } requiredModelInfo, 
-    foreach row in TypeInfos where ModelName = "FHIR" do Value typeInfo,
-    foreach row in 
-      (TypeInfos 
-        where Value is ClassInfo 
-          and Value.baseType = "FHIR.Element"
-        where (Value as ClassInfo).element.Count() = 1
-        { Name, Value as ClassInfo Value } 
-        { Name, Value, Value.name sourceTypeName, Value.element[0].type targetTypeName }
-        { Name, sourceTypeName, targetTypeName, "To" + Unqualify(targetTypeName) functionName }
-       where sourceTypeName.IsNotNil() and targetTypeName.IsNotNil() and functionName.IsNotNil())
-       union (table {
-         row { "Coding" Name, "Coding" sourceTypeName, "System.Code" targetTypeName, "ToCode" functionName },
-         row { "CodeableConcept" Name, "CodeableConcept" sourceTypeName, "System.Concept" targetTypeName, "ToCode" functionName },
-         row { "Quantity" Name, "Quantity" sourceTypeName, "System.Quantity" targetTypeName, "ToQuantity" functionName },
-         row { "Period" Name, "Period" sourceTypeName, "Interval<System.DateTime>", "ToInterval" functionName },
-         row { "Range" Name, "Range" sourceTypeName, "Interval<System.Quantity>", "ToInterval" functionName }
-       })
-    do
-      //<ns4:conversionInfo fromType="FHIR.string" toType="System.String" functionName="FHIRHelpers.ToString"/>
-      ConversionInfo(row { sourceTypeName fromType, targetTypeName toType, "FHIRHelpers." + functionName functionName })
-   conversionInfo, 
-	"FHIR" name, 
+    foreach row in TypeInfos where ModelName = "QUICKFHIR" do Value typeInfo,
+	"QUICKFHIR" name, 
 	"3.0.1" version, 
-	Models["FHIR"].Url url, 
+	Models["QUICKFHIR"].Url url, 
 	//"fhir" targetQualifier, 
-	"FHIR.Patient" patientClassName, 
-	"birthDate.value" patientBirthDatePropertyName
+	"QUICKFHIR.Patient" patientClassName, 
+	"birthDate" patientBirthDatePropertyName
 }).AsXML);
 
-// Build FHIRHelpers CQL
-var statements := list(String) { };
-foreach row in 
-  TypeInfos 
-    where Value is ClassInfo 
-      and Value.baseType = "FHIR.Element" 
-    where (Value as ClassInfo).element.Count() = 1
-    { Name, Value as ClassInfo Value } 
-    { Name, Value, Value.name sourceTypeName, Value.element[0].type targetTypeName }
-    { Name, Value, sourceTypeName, targetTypeName, "To" + Unqualify(targetTypeName) functionName }
-   where sourceTypeName.IsNotNil() and targetTypeName.IsNotNil() and functionName.IsNotNil()
-do
-begin
-  statements.Add("define function " + functionName + "(value " + sourceTypeName + "): value.value");
-end;
-select statements;
-  

@@ -1,10 +1,15 @@
 // FHIR.CreateModelInfo
 // Creates the base FHIR Model Info
-// This creates a "Pure" Model Info that exposes the FHIR model directly in CQL
+// This creates a "Simple" Model Info that exposes the FHIR model in CQL with:
+// 1) Primitives mapped to CQL primitives
 
 // Needs FHIR.LoadConformance to load the structure definitions for FHIR
 // Needs FHIR.LoadConformanceCache to load the structure definitions into in-memory tables for processing
 // Needs ModelInfo.Operators to create the required operators
+
+// TODO: Resolve type names for reused anonymous types (such as http://hl7.org/fhir/STU3/codesystem.html#CodeSystem.concept)
+// TODO: Determine why FHIR.SimpleQuantity is not mapping to System.Quantity
+// TODO: Implement references directly
 
 delete Models where Url = "http://hl7.org/fhir";
 insert row { "FHIR" Name, "http://hl7.org/fhir" Url } into Models;
@@ -13,8 +18,7 @@ select TypeInfos
 delete TypeInfos where ModelName <> 'System';
 
 select Models
-select ModelInfoSettings
-update ModelInfoSettings set { UseCQLPrimitives := false };
+update ModelInfoSettings set { UseCQLPrimitives := true };
 
 select PrimitiveTypeMappings
 select CQLTypeMappings
@@ -46,47 +50,6 @@ begin
   BuildClassInfo("FHIR", StructureDefinition);
 end;
 
-// Walk all the types and fixup any content reference types (NamedTypeSpecifiers with no modelName and a name that begins with #)
-create table Fixups in Temp from TypeInfos where false;
-foreach row in
-  TypeInfos
-    where ModelName = "FHIR"
-      and Value is ClassInfo
-do
-begin
-  delete Messages;
-  var elements := list(ClassInfoElement) { };
-  var hasFixups := false;
-  foreach var e in (Value as ClassInfo).element do
-  begin
-    if e.HasContentReferenceTypeSpecifier() then
-    begin
-      hasFixups := true;
-      elements.Add(FixupContentReferenceTypeSpecifier("FHIR", e));
-    end
-    else
-      elements.Add(e);
-  end;
-  if hasFixups then
-  begin
-    var typeInfo := Value as ClassInfo;
-    typeInfo.element := elements;
-    insert row { Name Name, ModelName ModelName, typeInfo Value } into Fixups;
-  end;
-end;
-
-select TypeInfos where ModelName = "FHIR"
-select TypeInfos where Value is ClassInfo and ModelName = "FHIR" and Name = "FHIR.Bundle.EntryComponent"
-var elements := ((TypeInfos where Value is ClassInfo and ModelName = "FHIR" and Name = "FHIR.Bundle.EntryComponent")[].Value as ClassInfo).element;
-var linkElement := elements.ForPath("link");
-var linkElementTypeSpecifier := linkElement.typeSpecifier as ListTypeSpecifier;
-select IsContentReferenceTypeSpecifier(linkElement.typeSpecifier);
-select linkElementTypeSpecifier.elementType;
-
-select Fixups
-
-select StructureDefinitions["Bundle"].StructureDefinition.AsXML
-
 //delete Documents where Library_Name = "CQF.Model.FHIR" and Name <> "Register"
 //foreach row in TypeInfos do
 //begin
@@ -100,19 +63,13 @@ select StructureDefinitions["Bundle"].StructureDefinition.AsXML
 //    <ns4:conversionInfo fromType="FHIR.Period" toType="Interval&lt;System.DateTime&gt;" functionName="FHIRHelpers.ToInterval"/>
 //    <ns4:conversionInfo fromType="FHIR.Range" toType="Interval&lt;System.Quantity&gt;" functionName="FHIRHelpers.ToInterval"/>
 
-// TODO: Figure out why primitives are not being added to the conversion lists here...
-
-select 
-  TypeInfos 
-    where Value is ClassInfo and Value.baseType = "FHIR.Element"
-    where (Value as ClassInfo).element.Count() = 1
-    
-
 DeleteDocument("CQF.Model.FHIR", "FHIRModelInfo");
 CreateAndSave("CQF.Model.FHIR", "FHIRModelInfo", "xml",
   ModelInfo(row { 
     { ModelSpecifier(row { "System" name, "1.0.0" version }) } requiredModelInfo, 
     foreach row in TypeInfos where ModelName = "FHIR" do Value typeInfo,
+/*
+// ConversionInfo is not necessary if primitives are mapped to CQL types...
     foreach row in 
       (TypeInfos 
         where Value is ClassInfo 
@@ -133,6 +90,7 @@ CreateAndSave("CQF.Model.FHIR", "FHIRModelInfo", "xml",
       //<ns4:conversionInfo fromType="FHIR.string" toType="System.String" functionName="FHIRHelpers.ToString"/>
       ConversionInfo(row { sourceTypeName fromType, targetTypeName toType, "FHIRHelpers." + functionName functionName })
    conversionInfo, 
+*/
 	"FHIR" name, 
 	"3.0.1" version, 
 	Models["FHIR"].Url url, 
