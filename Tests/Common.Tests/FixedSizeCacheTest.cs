@@ -1108,7 +1108,7 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		const BindingFlags CFieldFlags = BindingFlags.Instance | BindingFlags.NonPublic;
-		const string CHeadName = "FLRUHead";
+		const string CHeadName = "_lRUHead";
 		private Type FFixedSizeCacheType;
 		private FixedSizeCache<string, string>.Entry GetHead()
 		{
@@ -1118,7 +1118,7 @@ namespace Alphora.Dataphor.Common.Tests
 			return FFixedSizeCacheType.GetField(CHeadName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
 		}
 
-		const string CCutoffName = "FLRUCutoff";
+		const string CCutoffName = "_lRUCutoff";
 		private FixedSizeCache<string, string>.Entry GetCutoff()
 		{
 			if (FFixedSizeCacheType == null)
@@ -1127,7 +1127,7 @@ namespace Alphora.Dataphor.Common.Tests
 			return FFixedSizeCacheType.GetField(CCutoffName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
 		}
 
-		const string CTailName = "FLRUTail";
+		const string CTailName = "_lRUTail";
 		private FixedSizeCache<string, string>.Entry GetTail()
 		{
 			if (FFixedSizeCacheType == null)
@@ -1136,7 +1136,7 @@ namespace Alphora.Dataphor.Common.Tests
 			return FFixedSizeCacheType.GetField(CTailName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
 		}
 
-		const string CPriorName = "FPrior";
+		const string CPriorName = "_prior";
 		private FixedSizeCache<string, string>.Entry GetEntry(int AKey)
 		{
 			FixedSizeCache<string, string>.Entry LEntry = GetHead();
@@ -1154,13 +1154,13 @@ namespace Alphora.Dataphor.Common.Tests
 			return AEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(AEntry) as FixedSizeCache<string, string>.Entry;
 		}
 
-		const string CFNextName = "FNext";
+		const string CFNextName = "_next";
 		private FixedSizeCache<string, string>.Entry GetNext(FixedSizeCache<string, string>.Entry AEntry)
 		{
 			return AEntry.GetType().GetField(CFNextName, CFieldFlags).GetValue(AEntry) as FixedSizeCache<string, string>.Entry;
 		}
 
-		const string CPreCutoffName = "FPreCutoff";
+		const string CPreCutoffName = "_preCutoff";
 		private bool GetPreCutoff(FixedSizeCache<string, string>.Entry AEntry)
 		{
 			return (bool)AEntry.GetType().GetField(CPreCutoffName, CFieldFlags).GetValue(AEntry);
@@ -1171,13 +1171,13 @@ namespace Alphora.Dataphor.Common.Tests
 
 		}
 
-		const string CLastAccessName = "FLastAccess";
+		const string CLastAccessName = "_lastAccess";
 		private int GetLastAccess(FixedSizeCache<string, string>.Entry AEntry)
 		{
 			return (int)AEntry.GetType().GetField(CLastAccessName, CFieldFlags).GetValue(AEntry);
 		}
 
-		const string CPreCutoffCountName = "FLRUPreCutoffCount";
+		const string CPreCutoffCountName = "_lRUPreCutoffCount";
 		private int PreCutoffCount()
 		{
 			if (FFixedSizeCacheType == null)
@@ -1186,7 +1186,7 @@ namespace Alphora.Dataphor.Common.Tests
 			return (int)FFixedSizeCacheType.GetField(CPreCutoffCountName, CFieldFlags).GetValue(FTestCache);
 		}
 
-		const string CNextName = "FNext";
+		const string CNextName = "_next";
 		private bool ValidateList()
 		{
 			FixedSizeCache<string, string>.Entry LEntry = GetHead();

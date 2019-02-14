@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	using Alphora.Dataphor.DAE.Store;
 	using Alphora.Dataphor.DAE.Store.MSSQL;
 	using Alphora.Dataphor.DAE.Store.SQLCE;
+    using Alphora.Dataphor.DAE.Store.SQLite;
 
     [TestFixture]
     public class SQLStoreTest
@@ -87,8 +88,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				}
 			}
 		}
-		
-		[Test]
+
+        [Test]
+        public void SQLiteReadAfterUpdateTest()
+        {
+            SQLStore LSQLStore = new SQLiteStore();
+            LSQLStore.ConnectionString = @"Data Source=TestDatabase";
+            LSQLStore.Initialize();
+            SQLStoreReadAfterUpdateTest(LSQLStore);
+        }
+
+        [Test]
 		public void SQLCEReadAfterUpdateTest()
 		{
             SQLStore LSQLStore = new SQLCEStore();
@@ -172,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				}
 			}
 		}
-		
+
         [Test]        
         public void SQLCEStoreTest()
         {
