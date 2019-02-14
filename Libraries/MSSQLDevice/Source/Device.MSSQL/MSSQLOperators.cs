@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLRetrieve : SQLDeviceOperator
 	{
-		public MSSQLRetrieve(int iD, string name)
+		public MSSQLRetrieve(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToday : SQLDeviceOperator
 	{
-		public MSSQLToday(int iD, string name)
+		public MSSQLToday(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -131,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLSubString : SQLDeviceOperator
 	{
-		public MSSQLSubString(int iD, string name)
+		public MSSQLSubString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// Pos(ASubString, AString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class MSSQLPos : SQLDeviceOperator
 	{
-		public MSSQLPos(int iD, string name)
+		public MSSQLPos(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -209,7 +209,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class MSSQLIndexOf : SQLDeviceOperator
 	{
-		public MSSQLIndexOf(int iD, string name)
+		public MSSQLIndexOf(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -257,7 +257,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// CompareText(ALeftValue, ARightValue) ::= case when Upper(ALeftValue) = Upper(ARightValue) then 0 when Upper(ALeftValue) < Upper(ARightValue) then -1 when Upper(ALeftValue) > Upper(ARightValue) then 1 else null end
 	public class MSSQLCompareText : SQLDeviceOperator
 	{
-		public MSSQLCompareText(int iD, string name)
+		public MSSQLCompareText(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -382,7 +382,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToString(AValue) ::= Convert(varchar, AValue)
 	public class MSSQLToString : SQLDeviceOperator
 	{
-		public MSSQLToString(int iD, string name)
+		public MSSQLToString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToBit : SQLDeviceOperator
 	{
-		public MSSQLToBit(int iD, string name)
+		public MSSQLToBit(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -428,7 +428,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToTinyInt : SQLDeviceOperator
 	{
-		public MSSQLToTinyInt(int iD, string name)
+		public MSSQLToTinyInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -452,7 +452,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToByte(AValue) ::= convert(tinyint, AValue & (power(2, 8) - 1))	
 	public class MSSQLToByte : SQLDeviceOperator
 	{
-		public MSSQLToByte(int iD, string name)
+		public MSSQLToByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToSmallInt : SQLDeviceOperator
 	{
-		public MSSQLToSmallInt(int iD, string name)
+		public MSSQLToSmallInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -517,7 +517,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToSByte(AValue) ::= convert(smallint, ((AValue & (power(2, 8) - 1) & ~power(2, 7)) - (power(2, 7) & AValue)))
 	public class MSSQLToSByte : SQLDeviceOperator
 	{
-		public MSSQLToSByte(int iD, string name)
+		public MSSQLToSByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -594,7 +594,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToShort(AValue) ::= convert(smallint, ((AValue & (power(2, 16) - 1) & ~power(2, 15)) - (power(2, 15) & AValue)))
 	public class MSSQLToShort : SQLDeviceOperator
 	{
-		public MSSQLToShort(int iD, string name)
+		public MSSQLToShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -670,7 +670,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToInt : SQLDeviceOperator
 	{
-		public MSSQLToInt(int iD, string name)
+		public MSSQLToInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -694,7 +694,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToUShort(AValue) ::= convert(int, AValue & (power(2, 16) - 1))	
 	public class MSSQLToUShort : SQLDeviceOperator
 	{
-		public MSSQLToUShort(int iD, string name)
+		public MSSQLToUShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -736,7 +736,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToInteger(AValue) ::= convert(int, ((AValue & ((power(convert(bigint, 2), 32) - 1) & ~(power(convert(bigint, 2), 31)) - (power(convert(bigint, 2), 31) & AValue)))
 	public class MSSQLToInteger : SQLDeviceOperator
 	{
-		public MSSQLToInteger(int iD, string name)
+		public MSSQLToInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -836,7 +836,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToBigInt : SQLDeviceOperator
 	{
-		public MSSQLToBigInt(int iD, string name)
+		public MSSQLToBigInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -860,7 +860,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToUInteger(AValue) ::= convert(bigint, AValue & (power(convert(bigint, 2), 32) - 1))	
 	public class MSSQLToUInteger : SQLDeviceOperator
 	{
-		public MSSQLToUInteger(int iD, string name)
+		public MSSQLToUInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -910,7 +910,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToLong(AValue) ::= convert(bigint, ((AValue & ((power(2, 64) * 1) - 1) & ~power(2, 63)) - (power(2, 63) & AValue)))
 	public class MSSQLToLong : SQLDeviceOperator
 	{
-		public MSSQLToLong(int iD, string name)
+		public MSSQLToLong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -991,7 +991,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToDecimal20 : SQLDeviceOperator
 	{
-		public MSSQLToDecimal20(int iD, string name)
+		public MSSQLToDecimal20(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1014,7 +1014,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToDecimal288 : SQLDeviceOperator
 	{
-		public MSSQLToDecimal288(int iD, string name)
+		public MSSQLToDecimal288(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1038,7 +1038,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// ToULong(AValue) ::= convert(decimal(20, 0), AValue & (power(2, 64) - 1))	
 	public class MSSQLToULong : SQLDeviceOperator
 	{
-		public MSSQLToULong(int iD, string name)
+		public MSSQLToULong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1079,7 +1079,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToDecimal : SQLDeviceOperator
 	{
-		public MSSQLToDecimal(int iD, string name)
+		public MSSQLToDecimal(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1102,7 +1102,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToMoney : SQLDeviceOperator
 	{
-		public MSSQLToMoney(int iD, string name)
+		public MSSQLToMoney(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1125,7 +1125,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLToUniqueIdentifier : SQLDeviceOperator
 	{
-		public MSSQLToUniqueIdentifier(int iD, string name)
+		public MSSQLToUniqueIdentifier(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1250,7 +1250,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// Math
 	public class MSSQLPower : SQLDeviceOperator
 	{
-		public MSSQLPower(int iD, string name)
+		public MSSQLPower(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1273,7 +1273,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTruncate : SQLDeviceOperator
 	{
-		public MSSQLTruncate(int iD, string name)
+		public MSSQLTruncate(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1288,7 +1288,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLFrac : SQLDeviceOperator
 	{
-		public MSSQLFrac(int iD, string name)
+		public MSSQLFrac(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1304,7 +1304,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLLogB : SQLDeviceOperator
 	{
-		public MSSQLLogB(int iD, string name)
+		public MSSQLLogB(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1323,7 +1323,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	// TimeSpan
 	public class MSSQLTimeSpanReadMillisecond : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanReadMillisecond(int iD, string name)
+		public MSSQLTimeSpanReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1338,7 +1338,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanReadSecond : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanReadSecond(int iD, string name)
+		public MSSQLTimeSpanReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1353,7 +1353,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanReadMinute : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanReadMinute(int iD, string name)
+		public MSSQLTimeSpanReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1368,7 +1368,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanReadHour : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanReadHour(int iD, string name)
+		public MSSQLTimeSpanReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1383,7 +1383,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanReadDay : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanReadDay(int iD, string name)
+		public MSSQLTimeSpanReadDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1398,7 +1398,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanWriteMillisecond : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanWriteMillisecond(int iD, string name)
+		public MSSQLTimeSpanWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1418,7 +1418,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanWriteSecond : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanWriteSecond(int iD, string name)
+		public MSSQLTimeSpanWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1438,7 +1438,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanWriteMinute : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanWriteMinute(int iD, string name)
+		public MSSQLTimeSpanWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1458,7 +1458,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanWriteHour : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanWriteHour(int iD, string name)
+		public MSSQLTimeSpanWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1478,7 +1478,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLTimeSpanWriteDay : SQLDeviceOperator
 	{
-		public MSSQLTimeSpanWriteDay(int iD, string name)
+		public MSSQLTimeSpanWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1499,7 +1499,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLAddMonths : SQLDeviceOperator
 	{
-		public MSSQLAddMonths(int iD, string name)
+		public MSSQLAddMonths(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1515,7 +1515,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLAddYears : SQLDeviceOperator
 	{
-		public MSSQLAddYears(int iD, string name)
+		public MSSQLAddYears(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1532,7 +1532,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	public class MSSQLDayOfWeek : SQLDeviceOperator
 	// TODO: do for removal as replaced with Storage.TranslationString in SystemCatalog.d4
 	{
-		public MSSQLDayOfWeek(int iD, string name)
+		public MSSQLDayOfWeek(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1547,7 +1547,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDayOfYear : SQLDeviceOperator
 	{
-		public MSSQLDayOfYear(int iD, string name)
+		public MSSQLDayOfYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1562,7 +1562,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeReadHour : SQLDeviceOperator
 	{
-		public MSSQLDateTimeReadHour(int iD, string name)
+		public MSSQLDateTimeReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1577,7 +1577,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeReadMinute : SQLDeviceOperator
 	{
-		public MSSQLDateTimeReadMinute(int iD, string name)
+		public MSSQLDateTimeReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1592,7 +1592,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeReadSecond : SQLDeviceOperator
 	{
-		public MSSQLDateTimeReadSecond(int iD, string name)
+		public MSSQLDateTimeReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1607,7 +1607,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeReadMillisecond : SQLDeviceOperator
 	{
-		public MSSQLDateTimeReadMillisecond(int iD, string name)
+		public MSSQLDateTimeReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1622,7 +1622,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteMillisecond : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteMillisecond(int iD, string name)
+		public MSSQLDateTimeWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1642,7 +1642,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteSecond : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteSecond(int iD, string name)
+		public MSSQLDateTimeWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1662,7 +1662,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteMinute : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteMinute(int iD, string name)
+		public MSSQLDateTimeWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1682,7 +1682,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteHour : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteHour(int iD, string name)
+		public MSSQLDateTimeWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1702,7 +1702,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteDay : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteDay(int iD, string name)
+		public MSSQLDateTimeWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1719,7 +1719,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteMonth : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteMonth(int iD, string name)
+		public MSSQLDateTimeWriteMonth(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1736,7 +1736,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeWriteYear : SQLDeviceOperator
 	{
-		public MSSQLDateTimeWriteYear(int iD, string name)
+		public MSSQLDateTimeWriteYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1753,7 +1753,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeDatePart : SQLDeviceOperator
 	{
-		public MSSQLDateTimeDatePart(int iD, string name)
+		public MSSQLDateTimeDatePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1770,7 +1770,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLDateTimeTimePart : SQLDeviceOperator
 	{
-		public MSSQLDateTimeTimePart(int iD, string name)
+		public MSSQLDateTimeTimePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1793,7 +1793,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLDateTimeSelector : SQLDeviceOperator
 	{
-		public MSSQLDateTimeSelector(int iD, string name)
+		public MSSQLDateTimeSelector(long iD, string name)
 			: base(iD, name)
 		{
 		}

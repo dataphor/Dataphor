@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			InternalInitialize();
 		}
 
-		public Operator(int iD, string name, Operand[] operands, IDataType returnType) : base(iD, name)
+		public Operator(long iD, string name, Operand[] operands, IDataType returnType) : base(iD, name)
 		{
 			OperatorName = name;
 			_returnDataType = returnType;
@@ -157,15 +157,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			OperandsChanged();
 		}
 
-		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands) 
+		public Operator(long iD, string name, string className, IDataType returnType, Operand[] operands) 
 			: this(iD, name, className, returnType, operands, false)
 		{ }
 		
-		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin) 
+		public Operator(long iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin) 
 			: this(iD, name, className, returnType, operands, isBuiltin, true)
 		{ }
 		
-		public Operator(int iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin, bool isRemotable) 
+		public Operator(long iD, string name, string className, IDataType returnType, Operand[] operands, bool isBuiltin, bool isRemotable) 
 			: base(iD, name)
 		{
 			OperatorName = name;
@@ -597,7 +597,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public AggregateOperator(long iD, string name) : base(iD, name) {}
 
 		// System constructor -> any operator created with this constructor will have IsSystem set to true
-		public AggregateOperator(int iD, string name, Operand[] operands, IDataType returnType, ClassDefinition initialization, ClassDefinition aggregation, ClassDefinition finalization) : base(iD, name, operands, returnType)
+		public AggregateOperator(long iD, string name, Operand[] operands, IDataType returnType, ClassDefinition initialization, ClassDefinition aggregation, ClassDefinition finalization) : base(iD, name, operands, returnType)
 		{
 			Initialization.ClassDefinition = initialization;
 			Aggregation.ClassDefinition = aggregation;

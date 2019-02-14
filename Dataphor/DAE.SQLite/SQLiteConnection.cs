@@ -19,8 +19,10 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new System.Data.SQLite.SQLiteConnection(connectionString);
-		}
+            var builder = new System.Data.SQLite.SQLiteConnectionStringBuilder(connectionString);
+            builder.JournalMode = SQLiteJournalModeEnum.Wal;
+			return new System.Data.SQLite.SQLiteConnection(builder.ConnectionString);
+        }
 		
 		protected override SQLCommand InternalCreateCommand()
 		{
@@ -57,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			SQLiteException localException = exception as SQLiteException;
 			if (localException != null)
-				return IsTransactionFailure(localException.ErrorCode);
+				return IsTransactionFailure(localException.ResultCode);
 
 			return false;
 		}
@@ -86,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			SQLiteException localException = exception as SQLiteException;
 			if (localException != null)
 			{
-				if (!IsUserCorrectableError(localException.ErrorCode))
+				if (!IsUserCorrectableError(localException.ResultCode))
 					return ErrorSeverity.Application;
 				return ErrorSeverity.User;
 			}

@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLBoolean : SQLScalarType
 	{
-		public MSSQLBoolean(int AID, string AName)
+		public MSSQLBoolean(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLByte : SQLScalarType
 	{
-		public MSSQLByte(int AID, string AName)
+		public MSSQLByte(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLMoney : SQLScalarType
 	{
-		public MSSQLMoney(int AID, string AName)
+		public MSSQLMoney(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -192,7 +192,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 		private string FDateTimeFormat = CDateTimeFormat;
 
-		public MSSQLDateTime(int AID, string AName) : base(AID, AName) { }
+		public MSSQLDateTime(long AID, string AName) : base(AID, AName) { }
 
 		public string DateTimeFormat
 		{
@@ -257,7 +257,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 		private string FDateFormat = CDateFormat;
 
-		public MSSQLDate(int AID, string AName) : base(AID, AName) { }
+		public MSSQLDate(long AID, string AName) : base(AID, AName) { }
 
 		public string DateFormat
 		{
@@ -323,7 +323,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 		private string FTimeFormat = CTimeFormat;
 
-		public MSSQLTime(int AID, string AName) : base(AID, AName) { }
+		public MSSQLTime(long AID, string AName) : base(AID, AName) { }
 
 		public string TimeFormat
 		{
@@ -382,7 +382,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLGuid : SQLScalarType
 	{
-		public MSSQLGuid(int AID, string AName) : base(AID, AName) { }
+		public MSSQLGuid(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -422,7 +422,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLText : SQLText
 	{
-		public MSSQLText(int AID, string AName) : base(AID, AName) { }
+		public MSSQLText(long AID, string AName) : base(AID, AName) { }
 
 		//public MSSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MSSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -439,7 +439,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLBinary : SQLBinary
 	{
-		public MSSQLBinary(int AID, string AName) : base(AID, AName) { }
+		public MSSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		//public MSSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MSSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -456,7 +456,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLGraphic : SQLGraphic
 	{
-		public MSSQLGraphic(int AID, string AName) : base(AID, AName) { }
+		public MSSQLGraphic(long AID, string AName) : base(AID, AName) { }
 
 		//public MSSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MSSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -473,7 +473,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	/// </summary>
 	public class MSSQLMSSQLBinary : SQLScalarType
 	{
-		public MSSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
+		public MSSQLMSSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{

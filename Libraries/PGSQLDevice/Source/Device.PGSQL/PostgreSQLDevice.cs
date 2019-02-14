@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
         protected string _searchPath;
         
 
-        public PostgreSQLDevice(int iD, string name)
+        public PostgreSQLDevice(long iD, string name)
             : base(iD, name)
         {
             SupportsOrderByNullsFirstLast = true;

@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleInteger : OracleWholeNumberType
 	{
-		public OracleInteger(int iD, string name)
+		public OracleInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}

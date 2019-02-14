@@ -25,6 +25,7 @@ namespace Alphora.Dataphor.DAE.Connection
 				
 				if (_command != null)
 				{
+                    _command.Transaction = null;
 					_command.Dispose();
 					_command = null;
 				}

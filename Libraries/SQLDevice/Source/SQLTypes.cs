@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     /// </summary>
     public class SQLBoolean : SQLScalarType
     {
-		public SQLBoolean(int AID, string AName) : base(AID, AName) {}
+		public SQLBoolean(long AID, string AName) : base(AID, AName) {}
 		
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -221,7 +221,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLByte : SQLScalarType
     {
-		public SQLByte(int AID, string AName) : base(AID, AName) {}
+		public SQLByte(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -289,7 +289,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLShort : SQLScalarType
     {
-		public SQLShort(int AID, string AName) : base(AID, AName) {}
+		public SQLShort(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLInteger : SQLScalarType
     {
-		public SQLInteger(int AID, string AName) : base(AID, AName) {}
+		public SQLInteger(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -431,7 +431,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLLong : SQLScalarType
     {
-		public SQLLong(int AID, string AName) : base(AID, AName) {}
+		public SQLLong(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -500,7 +500,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLDecimal : SQLScalarType
     {
-		public SQLDecimal(int AID, string AName) : base(AID, AName) {}
+		public SQLDecimal(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -556,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public const string CDateTimeFormat = "yyyy/MM/dd HH:mm:ss";
 
-		public SQLDateTime(int AID, string AName) : base(AID, AName) {}
+		public SQLDateTime(long AID, string AName) : base(AID, AName) {}
 		
 		private string FDateTimeFormat = CDateTimeFormat;
 		public string DateTimeFormat
@@ -600,7 +600,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>    
     public class SQLTimeSpan : SQLScalarType
     {
-		public SQLTimeSpan(int AID, string AName) : base(AID, AName) {}
+		public SQLTimeSpan(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -640,7 +640,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public const string CDateFormat = "yyyy/MM/dd";
 		
-		public SQLDate(int AID, string AName) : base(AID, AName) {}
+		public SQLDate(long AID, string AName) : base(AID, AName) {}
 
 		private string FDateFormat = CDateFormat;
 		public string DateFormat
@@ -686,7 +686,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public const string CTimeFormat = "yyyy/MM/dd HH:mm:ss";
 		
-		public SQLTime(int AID, string AName) : base(AID, AName) {}
+		public SQLTime(long AID, string AName) : base(AID, AName) {}
 
 		private string FTimeFormat = CTimeFormat;
 		public string TimeFormat
@@ -731,7 +731,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLMoney : SQLScalarType
     {
-		public SQLMoney(int AID, string AName) : base(AID, AName) {}
+		public SQLMoney(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -768,7 +768,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLGuid : SQLScalarType
     {
-		public SQLGuid(int AID, string AName) : base(AID, AName) {}
+		public SQLGuid(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -934,7 +934,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public const int CStreamAllocationThreshold = 32767;
 		
-		public SQLGraphic(int AID, string AName) : base(AID, AName) {}
+		public SQLGraphic(long AID, string AName) : base(AID, AName) {}
 
 		private byte[] GetNativeValue(IValueManager AManager, object AValue)
 		{
@@ -995,7 +995,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	/// </summary>
     public class SQLVersionNumber : SQLScalarType
     {
-		public SQLVersionNumber(int AID, string AName) : base(AID, AName) {}
+		public SQLVersionNumber(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{

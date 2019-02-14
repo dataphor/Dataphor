@@ -1449,7 +1449,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		public static string GetTagName(int AID)
+		public static string GetTagName(long AID)
 		{
 			string LName;
 			if (FTagNameIndex.TryGetValue(AID, out LName))

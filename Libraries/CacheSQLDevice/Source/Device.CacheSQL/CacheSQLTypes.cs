@@ -65,7 +65,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLBoolean : SQLScalarType
 	{
-		public CacheSQLBoolean(int AID, string AName)
+		public CacheSQLBoolean(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLByte : SQLScalarType
 	{
-		public CacheSQLByte(int AID, string AName)
+		public CacheSQLByte(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLMoney : SQLScalarType
 	{
-		public CacheSQLMoney(int AID, string AName)
+		public CacheSQLMoney(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 		private string FDateTimeFormat = CDateTimeFormat;
 
-		public CacheSQLDateTime(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLDateTime(long AID, string AName) : base(AID, AName) { }
 
 		public string DateTimeFormat
 		{
@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 		private string FDateFormat = CDateFormat;
 
-		public CacheSQLDate(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLDate(long AID, string AName) : base(AID, AName) { }
 
 		public string DateFormat
 		{
@@ -317,7 +317,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 		private string FTimeFormat = CTimeFormat;
 
-		public CacheSQLTime(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLTime(long AID, string AName) : base(AID, AName) { }
 
 		public string TimeFormat
 		{
@@ -377,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLGuid : SQLScalarType
 	{
-		public CacheSQLGuid(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLGuid(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -417,7 +417,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLText : SQLText
 	{
-		public CacheSQLText(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLText(long AID, string AName) : base(AID, AName) { }
 
 		//public CacheSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public CacheSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -434,7 +434,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLBinary : SQLBinary
 	{
-		public CacheSQLBinary(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		//public CacheSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public CacheSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -451,7 +451,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLGraphic : SQLGraphic
 	{
-		public CacheSQLGraphic(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLGraphic(long AID, string AName) : base(AID, AName) { }
 
 		//public CacheSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public CacheSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -468,7 +468,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLMSSQLBinary : SQLScalarType
 	{
-		public CacheSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
+		public CacheSQLMSSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{

@@ -17,7 +17,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLBoolean : SQLScalarType
 	{
-		public PostgreSQLBoolean(int AID, string AName)
+		public PostgreSQLBoolean(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLByte : SQLScalarType
 	{
-		public PostgreSQLByte(int AID, string AName)
+		public PostgreSQLByte(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -97,7 +97,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLMoney : SQLScalarType
 	{
-		public PostgreSQLMoney(int AID, string AName)
+		public PostgreSQLMoney(long AID, string AName)
 			: base(AID, AName)
 		{
 		}
@@ -131,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	{
 		public const string CDateTimeFormat = "yyyy/MM/dd HH:mm:ss";
 
-        public PostgreSQLDateTime(int AID, string AName) : base(AID, AName) { }
+        public PostgreSQLDateTime(long AID, string AName) : base(AID, AName) { }
 		
 		private string FDateTimeFormat = CDateTimeFormat;
 		public string DateTimeFormat
@@ -178,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	{
 		public const string CDateFormat = "yyyy/MM/dd";
 
-        public PostgreSQLDate(int AID, string AName) : base(AID, AName) { }
+        public PostgreSQLDate(long AID, string AName) : base(AID, AName) { }
 
 		private string FDateFormat = CDateFormat;
 		public string DateFormat
@@ -225,7 +225,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	{
 		public const string CTimeFormat = "HH:mm:ss";
 		
-		public PostgreSQLTime(int AID, string AName) : base(AID, AName) {}
+		public PostgreSQLTime(long AID, string AName) : base(AID, AName) {}
 
 		private string FTimeFormat = CTimeFormat;
 		public string TimeFormat
@@ -271,7 +271,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLGuid : SQLScalarType
 	{
-		public PostgreSQLGuid(int AID, string AName) : base(AID, AName) { }
+		public PostgreSQLGuid(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -311,7 +311,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLText : SQLText
 	{
-		public PostgreSQLText(int AID, string AName) : base(AID, AName) { }
+		public PostgreSQLText(long AID, string AName) : base(AID, AName) { }
 
 		//public PostgreSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public PostgreSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -328,7 +328,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLBinary : SQLBinary
 	{
-		public PostgreSQLBinary(int AID, string AName) : base(AID, AName) { }
+		public PostgreSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		//public PostgreSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public PostgreSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -345,7 +345,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLGraphic : SQLGraphic
 	{
-		public PostgreSQLGraphic(int AID, string AName) : base(AID, AName) { }
+		public PostgreSQLGraphic(long AID, string AName) : base(AID, AName) { }
 
 		//public PostgreSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public PostgreSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -362,7 +362,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLMSSQLBinary : SQLScalarType
 	{
-        public PostgreSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
+        public PostgreSQLMSSQLBinary(long AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{

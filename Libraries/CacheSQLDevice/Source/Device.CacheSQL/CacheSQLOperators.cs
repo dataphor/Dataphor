@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToday : SQLDeviceOperator
 	{
-		public CacheSQLToday(int iD, string name)
+		public CacheSQLToday(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLSubString : SQLDeviceOperator
 	{
-		public CacheSQLSubString(int iD, string name)
+		public CacheSQLSubString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -70,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// Pos(ASubString, AString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class CacheSQLPos : SQLDeviceOperator
 	{
-		public CacheSQLPos(int iD, string name)
+		public CacheSQLPos(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class CacheSQLIndexOf : SQLDeviceOperator
 	{
-		public CacheSQLIndexOf(int iD, string name)
+		public CacheSQLIndexOf(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// CompareText(ALeftValue, ARightValue) ::= case when Upper(ALeftValue) = Upper(ARightValue) then 0 when Upper(ALeftValue) < Upper(ARightValue) then -1 when Upper(ALeftValue) > Upper(ARightValue) then 1 else null end
 	public class CacheSQLCompareText : SQLDeviceOperator
 	{
-		public CacheSQLCompareText(int iD, string name)
+		public CacheSQLCompareText(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -291,7 +291,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToString(AValue) ::= Convert(varchar, AValue)
 	public class CacheSQLToString : SQLDeviceOperator
 	{
-		public CacheSQLToString(int iD, string name)
+		public CacheSQLToString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -314,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToBit : SQLDeviceOperator
 	{
-		public CacheSQLToBit(int iD, string name)
+		public CacheSQLToBit(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -337,7 +337,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToTinyInt : SQLDeviceOperator
 	{
-		public CacheSQLToTinyInt(int iD, string name)
+		public CacheSQLToTinyInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -361,7 +361,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToByte(AValue) ::= convert(tinyint, AValue & (power(2, 8) - 1))	
 	public class CacheSQLToByte : SQLDeviceOperator
 	{
-		public CacheSQLToByte(int iD, string name)
+		public CacheSQLToByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -402,7 +402,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToSmallInt : SQLDeviceOperator
 	{
-		public CacheSQLToSmallInt(int iD, string name)
+		public CacheSQLToSmallInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -426,7 +426,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToSByte(AValue) ::= convert(smallint, ((AValue & (power(2, 8) - 1) & ~power(2, 7)) - (power(2, 7) & AValue)))
 	public class CacheSQLToSByte : SQLDeviceOperator
 	{
-		public CacheSQLToSByte(int iD, string name)
+		public CacheSQLToSByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -503,7 +503,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToShort(AValue) ::= convert(smallint, ((AValue & (power(2, 16) - 1) & ~power(2, 15)) - (power(2, 15) & AValue)))
 	public class CacheSQLToShort : SQLDeviceOperator
 	{
-		public CacheSQLToShort(int iD, string name)
+		public CacheSQLToShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -579,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToInt : SQLDeviceOperator
 	{
-		public CacheSQLToInt(int iD, string name)
+		public CacheSQLToInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -603,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToUShort(AValue) ::= convert(int, AValue & (power(2, 16) - 1))	
 	public class CacheSQLToUShort : SQLDeviceOperator
 	{
-		public CacheSQLToUShort(int iD, string name)
+		public CacheSQLToUShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -645,7 +645,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToInteger(AValue) ::= convert(int, ((AValue & ((power(convert(bigint, 2), 32) - 1) & ~(power(convert(bigint, 2), 31)) - (power(convert(bigint, 2), 31) & AValue)))
 	public class CacheSQLToInteger : SQLDeviceOperator
 	{
-		public CacheSQLToInteger(int iD, string name)
+		public CacheSQLToInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -745,7 +745,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToBigInt : SQLDeviceOperator
 	{
-		public CacheSQLToBigInt(int iD, string name)
+		public CacheSQLToBigInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -769,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToUInteger(AValue) ::= convert(bigint, AValue & (power(convert(bigint, 2), 32) - 1))	
 	public class CacheSQLToUInteger : SQLDeviceOperator
 	{
-		public CacheSQLToUInteger(int iD, string name)
+		public CacheSQLToUInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -819,7 +819,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToLong(AValue) ::= convert(bigint, ((AValue & ((power(2, 64) * 1) - 1) & ~power(2, 63)) - (power(2, 63) & AValue)))
 	public class CacheSQLToLong : SQLDeviceOperator
 	{
-		public CacheSQLToLong(int iD, string name)
+		public CacheSQLToLong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -900,7 +900,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToDecimal20 : SQLDeviceOperator
 	{
-		public CacheSQLToDecimal20(int iD, string name)
+		public CacheSQLToDecimal20(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -923,7 +923,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToDecimal288 : SQLDeviceOperator
 	{
-		public CacheSQLToDecimal288(int iD, string name)
+		public CacheSQLToDecimal288(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -947,7 +947,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// ToULong(AValue) ::= convert(decimal(20, 0), AValue & (power(2, 64) - 1))	
 	public class CacheSQLToULong : SQLDeviceOperator
 	{
-		public CacheSQLToULong(int iD, string name)
+		public CacheSQLToULong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -988,7 +988,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToDecimal : SQLDeviceOperator
 	{
-		public CacheSQLToDecimal(int iD, string name)
+		public CacheSQLToDecimal(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1011,7 +1011,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToMoney : SQLDeviceOperator
 	{
-		public CacheSQLToMoney(int iD, string name)
+		public CacheSQLToMoney(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1034,7 +1034,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLToUniqueIdentifier : SQLDeviceOperator
 	{
-		public CacheSQLToUniqueIdentifier(int iD, string name)
+		public CacheSQLToUniqueIdentifier(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1159,7 +1159,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// Math
 	public class CacheSQLPower : SQLDeviceOperator
 	{
-		public CacheSQLPower(int iD, string name)
+		public CacheSQLPower(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1182,7 +1182,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTruncate : SQLDeviceOperator
 	{
-		public CacheSQLTruncate(int iD, string name)
+		public CacheSQLTruncate(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1197,7 +1197,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLFrac : SQLDeviceOperator
 	{
-		public CacheSQLFrac(int iD, string name)
+		public CacheSQLFrac(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1213,7 +1213,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLLogB : SQLDeviceOperator
 	{
-		public CacheSQLLogB(int iD, string name)
+		public CacheSQLLogB(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1232,7 +1232,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	// TimeSpan
 	public class CacheSQLTimeSpanReadMillisecond : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanReadMillisecond(int iD, string name)
+		public CacheSQLTimeSpanReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1247,7 +1247,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanReadSecond : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanReadSecond(int iD, string name)
+		public CacheSQLTimeSpanReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1262,7 +1262,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanReadMinute : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanReadMinute(int iD, string name)
+		public CacheSQLTimeSpanReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1277,7 +1277,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanReadHour : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanReadHour(int iD, string name)
+		public CacheSQLTimeSpanReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1292,7 +1292,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanReadDay : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanReadDay(int iD, string name)
+		public CacheSQLTimeSpanReadDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1307,7 +1307,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanWriteMillisecond : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanWriteMillisecond(int iD, string name)
+		public CacheSQLTimeSpanWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1327,7 +1327,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanWriteSecond : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanWriteSecond(int iD, string name)
+		public CacheSQLTimeSpanWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1347,7 +1347,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanWriteMinute : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanWriteMinute(int iD, string name)
+		public CacheSQLTimeSpanWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1367,7 +1367,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanWriteHour : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanWriteHour(int iD, string name)
+		public CacheSQLTimeSpanWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1387,7 +1387,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLTimeSpanWriteDay : SQLDeviceOperator
 	{
-		public CacheSQLTimeSpanWriteDay(int iD, string name)
+		public CacheSQLTimeSpanWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1408,7 +1408,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLAddMonths : SQLDeviceOperator
 	{
-		public CacheSQLAddMonths(int iD, string name)
+		public CacheSQLAddMonths(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1424,7 +1424,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLAddYears : SQLDeviceOperator
 	{
-		public CacheSQLAddYears(int iD, string name)
+		public CacheSQLAddYears(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1441,7 +1441,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	public class CacheSQLDayOfWeek : SQLDeviceOperator
 	// TODO: do for removal as replaced with Storage.TranslationString in SystemCatalog.d4
 	{
-		public CacheSQLDayOfWeek(int iD, string name)
+		public CacheSQLDayOfWeek(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1456,7 +1456,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDayOfYear : SQLDeviceOperator
 	{
-		public CacheSQLDayOfYear(int iD, string name)
+		public CacheSQLDayOfYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1471,7 +1471,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeReadHour : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeReadHour(int iD, string name)
+		public CacheSQLDateTimeReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1486,7 +1486,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeReadMinute : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeReadMinute(int iD, string name)
+		public CacheSQLDateTimeReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1501,7 +1501,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeReadSecond : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeReadSecond(int iD, string name)
+		public CacheSQLDateTimeReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1516,7 +1516,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeReadMillisecond : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeReadMillisecond(int iD, string name)
+		public CacheSQLDateTimeReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1531,7 +1531,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteMillisecond : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteMillisecond(int iD, string name)
+		public CacheSQLDateTimeWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1551,7 +1551,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteSecond : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteSecond(int iD, string name)
+		public CacheSQLDateTimeWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1571,7 +1571,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteMinute : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteMinute(int iD, string name)
+		public CacheSQLDateTimeWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1591,7 +1591,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteHour : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteHour(int iD, string name)
+		public CacheSQLDateTimeWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1611,7 +1611,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteDay : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteDay(int iD, string name)
+		public CacheSQLDateTimeWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1628,7 +1628,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteMonth : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteMonth(int iD, string name)
+		public CacheSQLDateTimeWriteMonth(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1645,7 +1645,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeWriteYear : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeWriteYear(int iD, string name)
+		public CacheSQLDateTimeWriteYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1662,7 +1662,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeDatePart : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeDatePart(int iD, string name)
+		public CacheSQLDateTimeDatePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1679,7 +1679,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 
 	public class CacheSQLDateTimeTimePart : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeTimePart(int iD, string name)
+		public CacheSQLDateTimeTimePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1702,7 +1702,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 	/// </summary>
 	public class CacheSQLDateTimeSelector : SQLDeviceOperator
 	{
-		public CacheSQLDateTimeSelector(int iD, string name)
+		public CacheSQLDateTimeSelector(long iD, string name)
 			: base(iD, name)
 		{
 		}

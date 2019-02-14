@@ -851,12 +851,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		// constructor
 		public CatalogConstraint(string name) : base(name) {}
 		public CatalogConstraint(long iD, string name) : base(iD, name) {}
-		public CatalogConstraint(int iD, string name, PlanNode node) : base(iD, name)
+		public CatalogConstraint(long iD, string name, PlanNode node) : base(iD, name)
 		{
 			_node = node;
 		}
 		
-		public CatalogConstraint(int iD, string name, MetaData metaData, PlanNode node) : base(iD, name)
+		public CatalogConstraint(long iD, string name, MetaData metaData, PlanNode node) : base(iD, name)
 		{
 			MetaData = metaData;
 			_node = node;

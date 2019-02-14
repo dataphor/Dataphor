@@ -760,11 +760,11 @@ begin
 				create table Generators
 				{
 					ID : System.Name,
-					NextKey : System.Integer,
+					NextKey : System.Long,
 					key { ID }
 				} tags { DAE.ShouldTranslate = 'false' };
 				
-				create operator GetNextGenerator(const AID : System.Name) : System.Integer
+				create operator GetNextGenerator(const AID : System.Name) : System.Long
 				begin
 					update Generators set { NextKey := NextKey + 1 } where ID = AID;
 					if not exists (Generators where ID = AID) then
@@ -818,9 +818,9 @@ begin
 	create operator Diagnostics.LockCount() : Integer class "System.SystemLockCountNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator Diagnostics.RowCount() : Integer class "System.SystemRowCountNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator Diagnostics.UsedRowCount() : Integer class "System.SystemUsedRowCountNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
-	create operator Diagnostics.IsCatalogObjectLoaded(const AObjectID : Integer) : Boolean class "System.SystemIsCatalogObjectLoadedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator Diagnostics.IsCatalogObjectLoaded(const AObjectID : Long) : Boolean class "System.SystemIsCatalogObjectLoadedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator Diagnostics.IsCatalogObjectLoaded(const AObjectName : Name) : Boolean class "System.SystemIsCatalogObjectLoadedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator Diagnostics.ClearCatalogObject(const AObjectID : Integer) class "System.SystemClearCatalogObjectNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator Diagnostics.ClearCatalogObject(const AObjectID : Long) class "System.SystemClearCatalogObjectNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ClearCatalogObject(const AObjectName : Name) class "System.SystemClearCatalogObjectNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ClearLibrary(const ALibraryName : Name) class "System.SystemClearLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ClearCatalog() class "System.SystemClearCatalogNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -846,37 +846,37 @@ begin
 	create operator PushNonLoggedContext() class "System.SystemPushNonLoggedContextNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator PopNonLoggedContext() class "System.SystemPopNonLoggedContextNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator IsNonLoggedContext() class "System.SystemIsNonLoggedContextNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectID(const AName : Name) : Integer class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectID(const ASpecifier : String) : Integer class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectID(const AName : Name) : Long class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectID(const ASpecifier : String) : Long class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectName(const ASpecifier : String) : Name class "System.FullObjectNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectName(const AName : Name) : Name class "System.FullObjectNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectName(const AID : Integer) : Name class "System.SystemObjectNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectName(const AID : Long) : Name class "System.SystemObjectNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectDisplayName(const AName : Name) : String class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectDisplayName(const ASpecifier : String) : String class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectDisplayName(const AID : Integer) : String class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectDisplayName(const AID : Long) : String class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectDescription(const AName : Name) : String class "System.ObjectDescriptionNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectDescription(const ASpecifier : String) : String class "System.ObjectDescriptionNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectDescription(const AID : Integer) : String class "System.ObjectDescriptionNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectDescription(const AID : Long) : String class "System.ObjectDescriptionNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator OperatorSignature(const AName : Name) : String class "System.OperatorSignatureNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator OperatorSignature(const ASpecifier : String) : String class "System.OperatorSignatureNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator OperatorSignature(const AID : Integer) : String class "System.OperatorSignatureNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator ObjectMetaData(const AID : Integer, const ATagName : String, const ADefaultValue : String) : String class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator OperatorSignature(const AID : Long) : String class "System.OperatorSignatureNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator ObjectMetaData(const AID : Long, const ATagName : String, const ADefaultValue : String) : String class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectMetaData(const AName : Name, const ATagName : String, const ADefaultValue : String) : String class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator ObjectMetaData(const ASpecifier : String, const ATagName : String, const ADefaultValue : String) : String class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator RequiredObjects(const AObjectID : Integer) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator RequiredObjects(const AObjectID : Integer, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator RequiredObjects(const AObjectName : Name) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator RequiredObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator DependentObjects(const AObjectID : Integer) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator DependentObjects(const AObjectID : Integer, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator DependentObjects(const AObjectName : Name) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator DependentObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator RequiredObjects(const AObjectID : Long) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator RequiredObjects(const AObjectID : Long, const ARecursive : Boolean) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator RequiredObjects(const AObjectName : Name) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator RequiredObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemRequiredObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator DependentObjects(const AObjectID : Long) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator DependentObjects(const AObjectID : Long, const ARecursive : Boolean) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator DependentObjects(const AObjectName : Name) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator DependentObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Long, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer } class "System.SystemDependentObjectsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator IsSystem(const AName : Name) : Boolean class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator IsSystem(const ASpecifier : String) : Boolean class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator IsSystem(const AID : Integer) : Boolean class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator IsSystem(const AID : Long) : Boolean class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator IsGenerated(const AName : Name) : Boolean class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator IsGenerated(const AString : String) : Boolean class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator IsGenerated(const AID : Integer) : Boolean class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator IsGenerated(const AID : Long) : Boolean class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator NameFromGuid(const AID : Guid) : Name class "System.SystemNameFromGuidNode";
 	create operator iEqual(const ALeftValue : FileReference, const ARightValue : FileReference) : Boolean class "System.FileReferenceEqualNode" static tags { DAE.IsBuiltin = "True" };
     create operator iEqual(const ALeftValue : LibraryDescriptor, const ARightValue : LibraryDescriptor) : Boolean class "System.SystemLibraryDescriptorEqualNode" static tags { DAE.IsBuiltin = "True" };
@@ -909,7 +909,7 @@ begin
 	create operator UpgradeLibraries() class "System.SystemUpgradeLibrariesNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator LibraryName() : Name class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator LibraryName(const AObjectName : Name) : Name class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator LibraryName(const AObjectID : Integer) : Name class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+	create operator LibraryName(const AObjectID : Long) : Name class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator SetLibrary(const AName : Name) class "System.SystemSetLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator UpgradeVersions(const ALibraryName : Name) : table { Version : VersionNumber } class "System.UpgradeVersionsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator LoadUpgrade(const ALibraryName : Name, const AVersion : VersionNumber) : String class "System.LoadUpgradeNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
@@ -1432,7 +1432,7 @@ begin
 
 	create table Sessions in Catalog
 	{
-		ID : Integer, 
+		ID : Long, 
 		User_ID : UserID,
 		HostName : String,
 		Connection_Name : String nil,
@@ -1442,9 +1442,9 @@ begin
 		DefaultUseDTC : Boolean,
 		DefaultUseImplicitTransactions : Boolean,
 		Language : String,
-		FetchCount : Integer,
-		DefaultMaxStackDepth : Integer,
-		DefaultMaxCallDepth : Integer,
+		FetchCount : Long,
+		DefaultMaxStackDepth : Long,
+		DefaultMaxCallDepth : Long,
 		UsePlanCache : Boolean,
 		ShouldEmitIL : Boolean,
 		ShouldElaborate : Boolean,
@@ -1475,7 +1475,7 @@ begin
 
 	create table Scripts in Catalog
 	{
-		ID : Integer, 
+		ID : Long, 
 		Process_ID : Integer, 
 		key { ID } static tags { DAE.Enforced = "False" },
 		reference Scripts_Processes { Process_ID } references Processes { ID } static tags { DAE.Enforced = "False" }
@@ -1495,7 +1495,7 @@ begin
 
 	create table Objects in Catalog
 	{
-		ID : Integer,
+		ID : Long,
 		Name : String,
 		Library_Name : String,
 		DisplayName : String tags { Frontend.Preview.Include = "True" },
@@ -1507,9 +1507,9 @@ begin
 		IsATObject : Boolean,
 		IsSessionObject : Boolean,
 		IsPersistent : Boolean,
-		Catalog_Object_ID : Integer,
-		Parent_Object_ID : Integer,
-		Generator_Object_ID : Integer,
+		Catalog_Object_ID : Long,
+		Parent_Object_ID : Long,
+		Generator_Object_ID : Long,
 		ServerData : String nil
 			tags { Frontend.TextBox.Height = "10", Frontend.TextBox.WordWrap = "False", Frontend.TextBox.Width = "60" }, 
 		key { ID } static tags { DAE.Enforced = "False" }
@@ -1519,8 +1519,8 @@ begin
 
 	create table ObjectDependencies in Catalog
 	{
-		Object_ID : Integer, 
-		Dependency_Object_ID : Integer, 
+		Object_ID : Long, 
+		Dependency_Object_ID : Long, 
 		key { Object_ID, Dependency_Object_ID } static tags { DAE.Enforced = "False" },
 		reference ObjectDependencies_Objects { Object_ID } references Objects { ID } static tags { DAE.Enforced = "False" },
 		reference ObjectDependencies_Dependency_Objects { Dependency_Object_ID } references Objects { ID } static tags { DAE.Enforced = "False" }
@@ -1530,7 +1530,7 @@ begin
 
 	create table CatalogObjects in Catalog
 	{
-		ID : Integer,
+		ID : Long,
 		Name : Name, 
 		Library_Name : Name,
 		Owner_User_ID : UserID,
@@ -1547,7 +1547,7 @@ begin
 	{
 		Name : Name,
 		Owner_User_ID : UserID,
-		Catalog_Object_ID : Integer,
+		Catalog_Object_ID : Long,
 		key { Name } static tags { DAE.Enforced = "False" },
 		reference Rights_Users { Owner_User_ID } references Users { ID } static tags { DAE.Enforced = "False" },
 		reference Rights_CatalogObjects { Catalog_Object_ID } references CatalogObjects { ID } static tags { DAE.Enforced = "False" }
@@ -1581,7 +1581,7 @@ begin
 
 	create table Operators in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1601,7 +1601,7 @@ begin
 
 	create table ScalarTypes in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1616,7 +1616,7 @@ begin
 	
 	create table Sorts in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1631,7 +1631,7 @@ begin
 	
 	create table Devices in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1753,7 +1753,7 @@ begin
 	
 	create table TableVars in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1768,7 +1768,7 @@ begin
 
 	create table BaseTableVars in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1795,9 +1795,9 @@ begin
 	
 	create table ApplicationTransactionTableMaps in Catalog
 	{
-		Source_TableVar_ID : Integer,
-		Translated_TableVar_ID : Integer,
-		Deleted_TableVar_ID : Integer,
+		Source_TableVar_ID : Long,
+		Translated_TableVar_ID : Long,
+		Deleted_TableVar_ID : Long,
 		key { Source_TableVar_ID } static tags { DAE.Enforced = "False" }
 	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "StoreTable" };
 	
@@ -1814,8 +1814,8 @@ begin
 	
 	create table ApplicationTransactionOperatorMaps in Catalog
 	{
-		Source_Operator_ID : Integer,
-		Translated_Operator_ID : Integer,
+		Source_Operator_ID : Long,
+		Translated_Operator_ID : Long,
 		key { Source_Operator_ID } static tags { DAE.Enforced = "False" }
 	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "StoreTable" };
 	
@@ -1823,7 +1823,7 @@ begin
 	
 	create table DerivedTableVars in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1838,7 +1838,7 @@ begin
 
 	create table References in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1917,7 +1917,7 @@ begin
 
 	create table CatalogConstraints in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -1932,7 +1932,7 @@ begin
 
 	create table Roles in Catalog
 	{
-		ID : Integer static tags { Storage.Name = "C.ID" },
+		ID : Long static tags { Storage.Name = "C.ID" },
 		Name : Name static tags { Storage.Name = "C.Name" }, 
 		Library_Name : Name static tags { Storage.Name = "C.Library_Name" },
 		Owner_User_ID : UserID,
@@ -2095,8 +2095,8 @@ begin
 	grant usage on Delete(cursor) to role User;                                                                                                 
 	grant usage on DependentLibraries(Name) to role CatalogUser;                                                                                
 	grant usage on DependentLibraries(Name, Boolean) to role CatalogUser;                                                                
-	grant usage on DependentObjects(Integer) to role CatalogUser;                                                                               
-	grant usage on DependentObjects(Integer, Boolean) to role CatalogUser;                                                               
+	grant usage on DependentObjects(Long) to role CatalogUser;                                                                               
+	grant usage on DependentObjects(Long, Boolean) to role CatalogUser;                                                               
 	grant usage on DependentObjects(Name) to role CatalogUser;                                                                                  
 	grant usage on DependentObjects(Name, Boolean) to role CatalogUser;                                                                  
 	grant usage on DerivationTimeStamp() to role User;                                                                                          
@@ -2404,7 +2404,7 @@ begin
 	grant usage on iRightJoin(table, table) to role User;                                                                                       
 	grant usage on IsDigit(String) to role User;                                                                                         
 	grant usage on IsDigit(String, Integer) to role User;                                                                         
-	grant usage on IsGenerated(Integer) to role CatalogUser;                                                                                    
+	grant usage on IsGenerated(Long) to role CatalogUser;                                                                                    
 	grant usage on IsGenerated(Name) to role CatalogUser;                                                                                       
 	grant usage on IsGenerated(String) to role CatalogUser;                                                                                     
 	grant usage on iShiftLeft(Byte, Integer) to role User;                                                                        
@@ -2427,7 +2427,7 @@ begin
 	grant usage on IsNonLoggedContext() to role User;                                                                                           
 	grant usage on IsNotNil(row, String) to role User;                                                                                      
 	grant usage on IsNotNil(generic) to role User;                                                                                          
-	grant usage on IsSystem(Integer) to role CatalogUser;                                                                                       
+	grant usage on IsSystem(Long) to role CatalogUser;                                                                                       
 	grant usage on IsSystem(Name) to role CatalogUser;                                                                                          
 	grant usage on IsSystem(String) to role CatalogUser;                                                                                        
 	grant usage on iSubtraction(Byte, Byte) to role User;                                                                         
@@ -2468,7 +2468,7 @@ begin
 	grant usage on LibraryDescriptor(Name, VersionNumber) to role User;                                                           
 	grant usage on LibraryDescriptor(Name, VersionNumber, Name) to role User;                                              
 	grant usage on LibraryName() to role User;                                                                                                  
-	grant usage on LibraryName(Integer) to role CatalogUser;                                                                                    
+	grant usage on LibraryName(Long) to role CatalogUser;                                                                                    
 	grant usage on LibraryName(Name) to role CatalogUser;                                                                                       
 	grant usage on LibrarySetting(Name, String) to role User;                                                                     
 	grant usage on LibrarySetting(String) to role User;                                                                                  
@@ -2527,24 +2527,24 @@ begin
 	grant usage on NameFromGuid(Guid) to role User;                                                                                      
 	grant usage on NewGuid() to role User;                                                                                                      
 	grant usage on Next(cursor) to role User;                                                                                                   
-	grant usage on ObjectDescription(Integer) to role CatalogUser;                                                                              
+	grant usage on ObjectDescription(Long) to role CatalogUser;                                                                              
 	grant usage on ObjectDescription(Name) to role CatalogUser;                                                                                 
 	grant usage on ObjectDescription(String) to role CatalogUser;                                                                               
-	grant usage on ObjectDisplayName(Integer) to role CatalogUser;                                                                              
+	grant usage on ObjectDisplayName(Long) to role CatalogUser;                                                                              
 	grant usage on ObjectDisplayName(Name) to role CatalogUser;                                                                                 
 	grant usage on ObjectDisplayName(String) to role CatalogUser;                                                                               
 	grant usage on ObjectExists(Name) to role CatalogUser;                                                                                      
 	grant usage on ObjectExists(String) to role CatalogUser;                                                                                    
 	grant usage on ObjectID(Name) to role CatalogUser;                                                                                          
 	grant usage on ObjectID(String) to role CatalogUser;                                                                                        
-	grant usage on ObjectMetaData(Integer, String, String) to role CatalogUser;                                                   
+	grant usage on ObjectMetaData(Long, String, String) to role CatalogUser;                                                   
 	grant usage on ObjectMetaData(Name, String, String) to role CatalogUser;                                                      
 	grant usage on ObjectMetaData(String, String, String) to role CatalogUser;                                                    
-	grant usage on ObjectName(Integer) to role CatalogUser;                                                                                     
+	grant usage on ObjectName(Long) to role CatalogUser;                                                                                     
 	grant usage on ObjectName(Name) to role CatalogUser;                                                                                        
 	grant usage on ObjectName(String) to role CatalogUser;                                                                                      
 	grant usage on Open(String) to role User;                                                                                            
-	grant usage on OperatorSignature(Integer) to role CatalogUser;                                                                              
+	grant usage on OperatorSignature(Long) to role CatalogUser;                                                                              
 	grant usage on OperatorSignature(Name) to role CatalogUser;                                                                                 
 	grant usage on OperatorSignature(String) to role CatalogUser;                                                                               
 	grant usage on PadLeft(String, Integer) to role User;                                                                         
@@ -2569,8 +2569,8 @@ begin
 	grant usage on Replace(String, String, String, Boolean) to role User;                                           
 	grant usage on RequiredLibraries(Name) to role CatalogUser;                                                                                 
 	grant usage on RequiredLibraries(Name, Boolean) to role CatalogUser;                                                                 
-	grant usage on RequiredObjects(Integer) to role CatalogUser;                                                                                
-	grant usage on RequiredObjects(Integer, Boolean) to role CatalogUser;                                                                
+	grant usage on RequiredObjects(Long) to role CatalogUser;                                                                                
+	grant usage on RequiredObjects(Long, Boolean) to role CatalogUser;                                                                
 	grant usage on RequiredObjects(Name) to role CatalogUser;                                                                                   
 	grant usage on RequiredObjects(Name, Boolean) to role CatalogUser;                                                                   
 	grant usage on Reset(cursor) to role User;                                                                                                  

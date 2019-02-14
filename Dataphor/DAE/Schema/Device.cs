@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			IsRemotable = false;
 		}
 
-		public DeviceObject(int iD, string name, bool isSystem) : base(iD, name)
+		public DeviceObject(long iD, string name, bool isSystem) : base(iD, name)
 		{
 			IsRemotable = false;
 			IsSystem = isSystem;

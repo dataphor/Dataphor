@@ -977,7 +977,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Special : Object
     {
 		public Special(long iD, string name) : base(iD, name) {}
-		public Special(int iD, string name, PlanNode valueNode) : base(iD, name)
+		public Special(long iD, string name, PlanNode valueNode) : base(iD, name)
 		{
 			_valueNode = valueNode;
 		}
