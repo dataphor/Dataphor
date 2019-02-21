@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
-	
+
 	public abstract class InProcessTestFixture
 	{
 		private ServerConfigurationManager FServerConfigurationManager;
@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
-			FServerConfigurationManager = new SQLCEServerConfigurationManager();
+			FServerConfigurationManager = new SQLiteServerConfigurationManager();
 			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
 			FServerConfigurationManager.ResetInstance();
 			FServer = FServerConfigurationManager.GetServer();

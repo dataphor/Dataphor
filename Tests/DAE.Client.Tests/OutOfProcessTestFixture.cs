@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 		{
 			InstanceManager.Load();
 
-			FConfigurationManager = new SQLCEServerConfigurationManager();
+			FConfigurationManager = new SQLiteServerConfigurationManager();
 			FConfiguration = FConfigurationManager.GetTestConfiguration("TestOOPInstance");
 			
 			if (InstanceManager.Instances.HasInstance("TestOOPInstance"))

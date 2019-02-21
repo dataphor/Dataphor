@@ -534,8 +534,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerSessions _sessions;
 		public ServerSessions Sessions { get { return _sessions; } }
 
-		private long _nextSessionID = 1;
-		private long GetNextSessionID()
+		private int _nextSessionID = 1;
+		private int GetNextSessionID()
 		{
 			return Interlocked.Increment(ref _nextSessionID);
 		}
@@ -906,7 +906,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return ((IServer)this).Connect(sessionInfo);
 		}
 		
-		private ServerSession InternalConnect(long sessionID, SessionInfo sessionInfo)
+		private ServerSession InternalConnect(int sessionID, SessionInfo sessionInfo)
 		{
 			Schema.User user = ValidateLogin(sessionID, sessionInfo);
 			ServerSession session = new ServerSession(this, sessionID, sessionInfo, user);

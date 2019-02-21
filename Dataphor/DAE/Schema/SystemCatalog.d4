@@ -1432,7 +1432,7 @@ begin
 
 	create table Sessions in Catalog
 	{
-		ID : Long, 
+		ID : Integer, 
 		User_ID : UserID,
 		HostName : String,
 		Connection_Name : String nil,

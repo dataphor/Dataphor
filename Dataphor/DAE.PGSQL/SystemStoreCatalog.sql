@@ -117,7 +117,7 @@ create table DAELibraryOwners
 
 create table DAEObjects
 (
-	ID int not null,
+	ID bigint not null,
 	Name character varying(200) not null,
 	Library_Name character varying(200) not null,
 	DisplayName character varying(200) not null,
@@ -129,9 +129,9 @@ create table DAEObjects
 	IsATObject boolean not null default false, -- check (IsATObject in (0, 1)),
 	IsSessionObject boolean not null default false, -- check (IsSessionObject in (0, 1)),
 	IsPersistent boolean not null default false, -- check (IsPersistent in (0, 1)),
-	Catalog_Object_ID int null,
-	Parent_Object_ID int null,
-	Generator_Object_ID int null,
+	Catalog_Object_ID bigint null,
+	Parent_Object_ID bigint null,
+	Generator_Object_ID bigint null,
 	ServerData text,
 	constraint PK_DAEObjects primary key (ID)
 	--reference Objects_Objects { Parent_Object_ID } references Objects { ID },
@@ -156,8 +156,8 @@ create index IDX_DAEObjects_Generator_Object_ID on DAEObjects (Generator_Object_
 
 create table DAEObjectDependencies
 (
-	Object_ID int not null,
-	Dependency_Object_ID int not null,
+	Object_ID bigint not null,
+	Dependency_Object_ID bigint not null,
 	constraint PK_DAEObjectDependencies primary key (Object_ID, Dependency_Object_ID)
 	--reference ObjectDependencies_Objects { Object_ID } references Objects { ID },
 	--reference ObjectDependencies_Dependency_Objects { Dependency_Object_ID } references Objects { ID }
@@ -175,7 +175,7 @@ create index IDX_DAEObjectDependencies_Dependency_Object_ID on DAEObjectDependen
 
 create table DAECatalogObjects
 (
-	ID int not null,
+	ID bigint not null,
 	Name character varying(200) not null,
 	Library_Name character varying(200) not null,
 	Owner_User_ID character varying(200) not null,
@@ -205,7 +205,7 @@ create table DAECatalogObjectNames
 (
 	Depth int not null,
 	Name character varying(200) not null, --This is the name of the object specified by ID with name dequalified Depth times
-	ID int not null,
+	ID bigint not null,
 	constraint PK_DAECatalogObjectNames primary key (Depth, Name, ID)
 	--reference CatalogObjectNames_CatalogObjects { ID } references CatalogObjects { ID }
 )
@@ -222,7 +222,7 @@ create index IDX_DAECatalogObjectNames_ID on DAECatalogObjectNames (ID)
 
 create table DAEBaseCatalogObjects
 (
-	ID int not null,
+	ID bigint not null,
 	constraint PK_DAEBaseCatalogObjects primary key (ID)
 	--reference BaseCatalogObjects_CatalogObjects { ID } references CatalogObjects { ID }
 )
@@ -236,9 +236,9 @@ create table DAEBaseCatalogObjects
 
 create table DAEScalarTypes
 (
-	ID int not null,
-	Unique_Sort_ID int not null,
-	Sort_ID int not null,
+	ID bigint not null,
+	Unique_Sort_ID bigint not null,
+	Sort_ID bigint not null,
 	constraint PK_DAEScalarTypes primary key (ID)
 	--reference ScalarTypes_CatalogObjects { ID } references CatalogObjects { ID }
 	--reference ScalarTypes_Sorts { Sort_ID } references Sorts { ID }
@@ -290,7 +290,7 @@ create index IDX_DAEOperatorNameNames_OperatorName on DAEOperatorNameNames (Oper
 
 create table DAEOperators
 (
-	ID int not null,
+	ID bigint not null,
 	OperatorName character varying(200) not null,
 	Signature text not null,
 	Locator text not null,
@@ -313,9 +313,9 @@ create index IDX_DAEOperators_OperatorName on DAEOperators (OperatorName)
 
 create table DAEEventHandlers
 (
-	ID int not null, -- Object ID of the event handler
-	Operator_ID int not null, -- Object ID of the operator handling the event
-	Source_Object_ID int not null, -- Object ID of the object raising the event
+	ID bigint not null, -- Object ID of the event handler
+	Operator_ID bigint not null, -- Object ID of the operator handling the event
+	Source_Object_ID bigint not null, -- Object ID of the object raising the event
 	constraint PK_DAEEventHandlers primary key (ID)
 	--reference EventHandlers_CatalogObjects { ID } references CatalogObjects { ID },
 	--reference EventHandlers_Operators { Operator_ID } references Operators {ID },
@@ -337,9 +337,9 @@ create index IDX_DAEEventHandlers_Source_Object_ID on DAEEventHandlers (Source_O
 
 create table DAEApplicationTransactionTableMaps
 (
-	Source_TableVar_ID int not null,
-	Translated_TableVar_ID int not null,
-	Deleted_TableVar_ID int not null,
+	Source_TableVar_ID bigint not null,
+	Translated_TableVar_ID bigint not null,
+	Deleted_TableVar_ID bigint not null,
 	constraint PK_DAEApplicationTransactionTableMaps primary key (Source_TableVar_ID)
 )
 ;
@@ -366,8 +366,8 @@ create table DAEApplicationTransactionOperatorNameMaps
 
 create table DAEApplicationTransactionOperatorMaps
 (
-	Source_Operator_ID int not null,
-	Translated_Operator_ID int not null,
+	Source_Operator_ID bigint not null,
+	Translated_Operator_ID bigint not null,
 	constraint PK_DAEApplicationTransactionOperatorMaps primary key (Source_Operator_ID)
 )
 ;
@@ -384,7 +384,7 @@ create index IDX_DAEApplicationTransactionOperatorMaps_Translated_Operator_ID on
 create table DAEUserRoles
 (
 	User_ID character varying(200) not null,
-	Role_ID int not null,
+	Role_ID bigint not null,
 	constraint PK_DAEUserRoles primary key (User_ID, Role_ID)
 	--reference UserRoles_Users { User_ID } references Users { ID },
 	--reference UserRoles_Roles { Role_ID } references Roles { ID }	
@@ -406,7 +406,7 @@ create table DAERights
 (
 	Name character varying(200) not null,
 	Owner_User_ID character varying(200) not null,
-	Catalog_Object_ID int not null,
+	Catalog_Object_ID bigint not null,
 	constraint PK_DAERights primary key (Name)
 	--reference Rights_Users { Owner_User_ID } references Users { ID }
 	--reference Rights_CatalogObjects { Catalog_Object_ID } references CatalogObjects { ID }
@@ -427,7 +427,7 @@ create index IDX_DAERights_Catalog_Object_ID on DAERights (Catalog_Object_ID)
 
 create table DAERoleRightAssignments
 (
-	Role_ID int not null,
+	Role_ID bigint not null,
 	Right_Name character varying(200) not null,
 	IsGranted boolean not null default false, -- check (IsGranted in (0, 1)),
 	constraint PK_DAERoleRightAssignments primary key (Role_ID, Right_Name)
@@ -467,7 +467,7 @@ create index IDX_DAEUserRightAssignments_Right_Name on DAEUserRightAssignments (
 
 create table DAEDevices
 (
-	ID int not null,
+	ID bigint not null,
 	ReconciliationMaster character varying(20) not null,
 	ReconciliationMode character varying(80) not null,
 	constraint PK_DAEDevices primary key (ID)
@@ -484,7 +484,7 @@ create table DAEDevices
 create table DAEDeviceUsers
 (
 	User_ID character varying(200) not null,
-	Device_ID int not null,
+	Device_ID bigint not null,
 	UserID character varying(200) not null,
 	Data character varying(200) not null,
 	ConnectionParameters character varying(500) not null,
@@ -505,9 +505,9 @@ create index IDX_DAEDeviceUsers_Device_ID on DAEDeviceUsers (Device_ID)
 
 create table DAEDeviceObjects
 (
-	ID int not null,
-	Device_ID int not null,
-	Mapped_Object_ID int not null,
+	ID bigint not null,
+	Device_ID bigint not null,
+	Mapped_Object_ID bigint not null,
 	constraint PK_DAEDeviceObjects primary key (ID, Device_ID, Mapped_Object_ID)
 	--reference DeviceObjects_CatalogObjects { ID } references CatalogObjects { ID },
 	--reference DeviceObjects_Devices { Device_ID } references Devices { ID },

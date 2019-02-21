@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Server
 		internal ServerSession
 		(
 			Engine server, 
-			long sessionID, 
+			int sessionID, 
 			SessionInfo sessionInfo,
 			Schema.User user
 		) : base()
@@ -125,8 +125,8 @@ namespace Alphora.Dataphor.DAE.Server
 		IServer IServerSession.Server { get { return _server; } }
         
 		// SessionID
-		private long _sessionID = -1;
-		public long SessionID  { get { return _sessionID; } }
+		private int _sessionID = -1;
+		public int SessionID  { get { return _sessionID; } }
         
 		// User        
 		private Schema.User _user;

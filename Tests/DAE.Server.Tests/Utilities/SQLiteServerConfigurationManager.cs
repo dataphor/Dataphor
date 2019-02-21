@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.Windows;
 
-	class SQLiteServerConfigurationManager : ServerConfigurationManager
+	public class SQLiteServerConfigurationManager : ServerConfigurationManager
 	{
 	}
 }

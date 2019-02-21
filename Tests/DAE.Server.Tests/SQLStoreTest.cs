@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-        [Test]        
+        [Test, Ignore("Uses dataset that's unavailable")]
         public void SQLCEStoreTest()
         {
             SQLStore LSQLStore = new SQLCEStore();
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
         //Data Source=
 
-        [Test]
+        [Test, Ignore("Uses dataset that's unavailable")]
         public void MSSQLStoreTest()
         {
             SQLStore LSQLStore;

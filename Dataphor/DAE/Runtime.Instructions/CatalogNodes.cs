@@ -129,9 +129,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -213,9 +213,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -304,9 +304,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -385,9 +385,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -472,9 +472,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -559,9 +559,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -643,8 +643,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Key_ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Column_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Key_ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("Column_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Column_Name", plan.DataTypes.SystemName));
 
 			foreach (Schema.Column column in DataType.Columns)
@@ -710,9 +710,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -790,9 +790,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Order_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Order_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Column_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Column_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Column_Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("Ascending", plan.DataTypes.SystemBoolean));
 			DataType.Columns.Add(new Schema.Column("IncludeNils", plan.DataTypes.SystemBoolean));
@@ -870,9 +870,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -979,9 +979,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -1063,9 +1063,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("ParentObjectID", plan.DataTypes.SystemLong));
+			DataType.Columns.Add(new Schema.Column("CatalogObjectID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
 			DataType.Columns.Add(new Schema.Column("DisplayName", plan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
@@ -1190,11 +1190,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Reference_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Reference_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Source_Column_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Source_Column_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Source_Column_Name", plan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Target_Column_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Target_Column_ID", plan.DataTypes.SystemLong));
 			DataType.Columns.Add(new Schema.Column("Target_Column_Name", plan.DataTypes.SystemName));
 
 			foreach (Schema.Column column in DataType.Columns)

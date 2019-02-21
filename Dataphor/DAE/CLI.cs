@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.DAE
     public interface IServerSessionBase : IDisposableNotify
     {
 		/// <value> Returns the Dataphor Server assigned ID for this session. </value>
-		long SessionID { get; }
+		int SessionID { get; }
 		
         /// <value> Returns the <see cref="SessionInfo"/> object for this session. </value>
         SessionInfo SessionInfo { get; }
