@@ -31,3 +31,109 @@ select
       and S.StructureDefinition.Kind = 'Resource'
 
 select StructureDefinitions where Id.StartsWith("us-core-")
+
+// HTTP(verb, url, headers, body)
+
+// For each library and measure, get the resource
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-fhir-helpers", nil, nil);
+
+//drop operator GetFileNameWithoutExtension(String);
+create operator GetFileNameWithoutExtension(AFileName: String): String
+begin
+  result := GetFileName(AFileName);
+  var index := LastIndexOf(result, ".");
+  if index > 0 then
+    result := SubString(result, 0, index);
+end;
+
+drop operator RefreshGeneratedContent(String);
+create operator RefreshGeneratedContent(url: String): String
+begin
+  var resource := HTTP("GET", url, nil, nil);
+  result := HTTP("POST", url + "/$refresh-generated-content", nil, resource);
+end;
+
+select RefreshGeneratedContent("http://localhost:8080/cqf-ruler/baseDstu3/Library/library-fhir-helpers");
+
+// Libraries:
+C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library
+select ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library");
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library") do
+begin
+  var resourceId := GetFileNameWithoutExtension(Path);
+  var url := "http://localhost:8080/cqf-ruler/baseDstu3/Library/" + resourceId;
+  RefreshGeneratedContent(url);
+  var resource := HTTP("GET", url, nil, nil);
+  SaveTextFile(Path, resource);
+end;
+
+
+select LastIndexOf("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json", ".");
+
+select GetFileNameWithoutExtension("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json");
+  
+select GetFileName("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json"), "");
+
+create operator RefreshGeneratedContentFile(Path: String): String
+begin
+  var resourceId := GetFileNameWithoutExtension(Path);
+  var url := "http://localhost:8080/cqf-ruler/baseDstu3/Library/" + resourceId;
+  result := RefreshGeneratedContent(url);
+  var resource := HTTP("GET", url, nil, nil);
+  SaveTextFile(Path, resource);
+end;
+
+
+HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-adult-outpatient-encounters-FHIR", nil, LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json"));
+HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-vte-1-FHIR", nil, LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-vte-1-FHIR.json"));
+
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-QDM.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-cms124-QDM.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-cms125-QDM.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-cms130-QDM.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-common-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm-logic.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm124-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm125-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm130-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm146-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-exm55-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-fhir-helpers-FHIR2.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-fhir-helpers.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-fhir-model-definition-FHIR2.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-fhir-model-definition.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-hospice-FHIR.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-hospice-QDM.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-mat-global-common-functions-FHIR.json");
+//RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-mat-global-common-functions-QDM.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-risk-adjustment-FHIR2.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-supplemental-data-elements-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-supplemental-data-elements-FHIR2.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-terminology-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-vte-1-FHIR.json");
+RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-vte-icu-FHIR.json");
+
+create operator RefreshGeneratedMeasureFile(Path: String): String
+begin
+  var resourceId := GetFileNameWithoutExtension(Path);
+  var url := "http://localhost:8080/cqf-ruler/baseDstu3/Measure/" + resourceId;
+  result := RefreshGeneratedContent(url);
+  var resource := HTTP("GET", url, nil, nil);
+  SaveTextFile(Path, resource);
+end;
+
+
+select ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure");
+
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm.xml");                   
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm124-FHIR.json");           
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm125-FHIR.json");           
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm130-FHIR.json");           
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm146-FHIR.json");           
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-exm55-FHIR.json");            
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-risk-adjustment-FHIR2.json"); 
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-terminology-FHIR.json");      
+RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-vte-1-FHIR.json");            

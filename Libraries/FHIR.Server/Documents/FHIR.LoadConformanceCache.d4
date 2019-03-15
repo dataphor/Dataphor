@@ -185,7 +185,7 @@ create table PrimaryCodePaths in Temp from
 		row { 'MedicationStatement' ResourceType, 'medicationCodeableConcept' PrimaryCodePath }, 
 		row { 'MessageDefinition' ResourceType, 'event' PrimaryCodePath },
 		row { 'Observation' ResourceType, 'code' PrimaryCodePath }, 
-		row { 'OperationOutcome' ResourceTYpe, 'issue.code' PrimaryCodePath },
+		row { 'OperationOutcome' ResourceType, 'issue.code' PrimaryCodePath },
 		row { 'Procedure' ResourceType, 'code' PrimaryCodePath }, 
 		row { 'ProcedureRequest' ResourceType, 'code' PrimaryCodePath }, 
 		row { 'Questionnaire' ResourceType, 'name' PrimaryCodePath },
