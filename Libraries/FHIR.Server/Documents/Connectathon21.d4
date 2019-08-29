@@ -1,0 +1,310 @@
+// Connectathon 21 Data Load
+
+drop table SessionSettings;
+create table SessionSettings
+{
+  BaseURL: String tags { Storage.Length = "200" },
+  key { }
+};
+
+//delete SessionSettings;
+//insert row { "http://localhost:8080/cqf-ruler/baseDstu3/" BaseURL } into SessionSettings;
+insert row { "https://themis.dev.alphora.com/bryn_databaseconsultinggroupcom/fhir/baseDstu3/" BaseURL } into SessionSettings;
+
+create operator PostBundle(Path: String): String
+begin
+  result :=
+    HTTP(
+      "POST", 
+      SessionSettings[].BaseURL,
+      table { row { "ContentType" Header, "application/fhir+json" Value } },
+      LoadTextFile(Path)
+    );
+end;
+
+// Value Sets for measure content
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms124-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms125-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms130-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\vte1-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\bcs-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\ccs-tx.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\col-tx.json");
+//select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\mrp-tx.json");
+
+// Base FHIR Libaries
+select 
+  HTTP(
+    "PUT", 
+    "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-fhir-model-definition", 
+    nil, 
+    LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\library-fhir-model-definition.json")
+  );
+
+select 
+  HTTP(
+    "PUT", 
+    "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-fhir-helpers", 
+    nil, 
+    LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\library-fhir-helpers.json")
+  );
+
+// Measure Content
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\all-cms-cqm-bundle.json");
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\all-cqm-bundle.json");
+
+// Load Network Bundle
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\network-bundle.json");
+
+// Load Patient Bundle
+select PostBundle("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\patient-bundle.json");
+
+// Load Patient Histories
+foreach row in ListDirectories("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\histories") do
+begin
+  foreach row in ListFiles(Path) do
+  begin
+    var json := LoadTextFile(Path);
+    var resource := Base.AsJSON(json) as Bundle;
+    if resource.IsNotNil() then
+    begin
+      try
+        HTTP("POST", "http://localhost:8080/cqf-ruler/baseDstu3/", table { row { "ContentType" Header, "application/fhir+json" Value } }, json);
+      except
+        on E: Error do
+          LogMessage("Error posting bundle " + Path + ": " + E.Message);
+      end;
+    end;
+  end;
+end;
+
+// Summary Reports for all measures
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm125-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm124-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm130-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\vte-1-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\ccs-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\col-summary.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\mrp-summary.json", "");
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm125-summary.json",
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm125-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm124-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm124-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm130-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm130-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// FAILS on Patient-406 (Singleton from fails)
+/*
+Caused by: java.lang.IllegalArgumentException: Expected a list with at most one element, but found a list with multiple elements.
+        at org.opencds.cqf.cql.elm.execution.SingletonFromEvaluator.singletonFrom(SingletonFromEvaluator.java:33)
+        at org.opencds.cqf.cql.elm.execution.SingletonFromEvaluator.evaluate(SingletonFromEvaluator.java:43)
+        at org.opencds.cqf.cql.elm.execution.FunctionRefEvaluator.evaluate(FunctionRefEvaluator.java:36)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.evaluate(QueryEvaluator.java:232)
+        at org.opencds.cqf.cql.elm.execution.FunctionRefEvaluator.evaluate(FunctionRefEvaluator.java:36)
+        at org.opencds.cqf.cql.elm.execution.PropertyEvaluator.evaluate(PropertyEvaluator.java:16)
+        at org.opencds.cqf.cql.elm.execution.AsEvaluator.evaluate(AsEvaluator.java:57)
+        at org.opencds.cqf.cql.elm.execution.IntervalEvaluator.evaluate(IntervalEvaluator.java:12)
+        at org.opencds.cqf.cql.elm.execution.IncludedInEvaluator.evaluate(IncludedInEvaluator.java:111)
+        at org.opencds.cqf.cql.elm.execution.AndEvaluator.evaluate(AndEvaluator.java:38)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.resolveRelationship(QueryEvaluator.java:52)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.evaluate(QueryEvaluator.java:242)
+        at org.opencds.cqf.cql.elm.execution.IntersectEvaluator.evaluate(IntersectEvaluator.java:100)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.cql.elm.execution.ExpressionRefEvaluator.evaluate(ExpressionRefEvaluator.java:14)
+        at org.opencds.cqf.cql.elm.execution.IntersectEvaluator.evaluate(IntersectEvaluator.java:100)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.cql.elm.execution.ExpressionRefEvaluator.evaluate(ExpressionRefEvaluator.java:14)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluateCriteria(MeasureEvaluation.java:349)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluatePopulationCriteria(MeasureEvaluation.java:404)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluate(MeasureEvaluation.java:874)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluatePatientListMeasure(MeasureEvaluation.java:73)
+        at org.opencds.cqf.providers.FHIRMeasureResourceProvider.evaluateMeasure(FHIRMeasureResourceProvider.java:211)
+*/
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\vte-1-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-vte-1-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\ccs-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-ccs/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\col-summary.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-col/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// ValueSet 2.16.840.1.113762.1.4.1165.44 not found
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\mrp-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-mrp/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+
+// Patient-list Reports for all measures
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm125-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm124-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm130-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\vte-1-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\ccs-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\col-patient-list.json", "");
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\mrp-patient-list.json", "");
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm125-patient-list.json",
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm125-FHIR/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm124-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm124-FHIR/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\exm130-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm130-FHIR/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// FAILS on Patient-406 (Singleton from fails)
+/*
+Caused by: java.lang.IllegalArgumentException: Expected a list with at most one element, but found a list with multiple elements.
+        at org.opencds.cqf.cql.elm.execution.SingletonFromEvaluator.singletonFrom(SingletonFromEvaluator.java:33)
+        at org.opencds.cqf.cql.elm.execution.SingletonFromEvaluator.evaluate(SingletonFromEvaluator.java:43)
+        at org.opencds.cqf.cql.elm.execution.FunctionRefEvaluator.evaluate(FunctionRefEvaluator.java:36)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.evaluate(QueryEvaluator.java:232)
+        at org.opencds.cqf.cql.elm.execution.FunctionRefEvaluator.evaluate(FunctionRefEvaluator.java:36)
+        at org.opencds.cqf.cql.elm.execution.PropertyEvaluator.evaluate(PropertyEvaluator.java:16)
+        at org.opencds.cqf.cql.elm.execution.AsEvaluator.evaluate(AsEvaluator.java:57)
+        at org.opencds.cqf.cql.elm.execution.IntervalEvaluator.evaluate(IntervalEvaluator.java:12)
+        at org.opencds.cqf.cql.elm.execution.IncludedInEvaluator.evaluate(IncludedInEvaluator.java:111)
+        at org.opencds.cqf.cql.elm.execution.AndEvaluator.evaluate(AndEvaluator.java:38)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.resolveRelationship(QueryEvaluator.java:52)
+        at org.opencds.cqf.cql.elm.execution.QueryEvaluator.evaluate(QueryEvaluator.java:242)
+        at org.opencds.cqf.cql.elm.execution.IntersectEvaluator.evaluate(IntersectEvaluator.java:100)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.cql.elm.execution.ExpressionRefEvaluator.evaluate(ExpressionRefEvaluator.java:14)
+        at org.opencds.cqf.cql.elm.execution.IntersectEvaluator.evaluate(IntersectEvaluator.java:100)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.cql.elm.execution.ExpressionRefEvaluator.evaluate(ExpressionRefEvaluator.java:14)
+        at org.opencds.cqf.cql.elm.execution.ExpressionDefEvaluator.evaluate(ExpressionDefEvaluator.java:23)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluateCriteria(MeasureEvaluation.java:349)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluatePopulationCriteria(MeasureEvaluation.java:404)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluate(MeasureEvaluation.java:874)
+        at org.opencds.cqf.evaluation.MeasureEvaluation.evaluatePatientListMeasure(MeasureEvaluation.java:73)
+        at org.opencds.cqf.providers.FHIRMeasureResourceProvider.evaluateMeasure(FHIRMeasureResourceProvider.java:211)
+*/
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\vte-1-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-vte-1-FHIR/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\ccs-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-ccs/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\col-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-col/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// ValueSet 2.16.840.1.113762.1.4.1165.44 not found
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\mrp-patient-list.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-mrp/$evaluate-measure?reportType=patient-list&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// Patient/Patient-416
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-patient-416.json", "");
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-patient-416.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$evaluate-measure?patient=Patient/Patient-418&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-416.json", "");
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-416.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$collect-data?patient=Patient/Patient-418&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-416.json", "");
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-416.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$collect-data?patient=Patient/Patient-416&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+// BCS Patients
+Patient/Patient-416
+Patient/Patient-411
+
+CreateTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-411.json", "");
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\bcs-collect-data-patient-411.json", 
+  HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$collect-data?patient=Patient/Patient-411&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+);
+
+create operator CollectDataForPatient(const measureId: String, const patientId: String)
+begin
+  var fileName := "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\" + measureId + "-collect-data-" + patientId + ".json";
+  CreateTextFile(fileName, "");
+  SaveTextFile(
+  	 fileName, 
+  	 HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/" + measureId + "/$collect-data?patient=" + patientId + "&periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+  );
+end;
+
+CollectDataForPatient("measure-bcs", "Patient-449");
+CollectDataForPatient("measure-bcs", "Patient-446");
+CollectDataForPatient("measure-bcs", "Patient-474");
+CollectDataForPatient("measure-bcs", "Patient-429");
+CollectDataForPatient("measure-bcs", "Patient-489");
+
+CreateTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\measure-bcs-collect-data\measure-bcs-collect-data-bundle.json", 
+	BundleResourcesInDirectory(
+	  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\measure-bcs-collect-data",
+	  "http://localhost:8080/cqf-ruler/baseDstu3"
+	).AsJSON
+);
+
+
+// COL Patients
+CollectDataForPatient("measure-col", "Patient-487");
+CollectDataForPatient("measure-col", "Patient-490");
+CollectDataForPatient("measure-col", "Patient-411");
+CollectDataForPatient("measure-col", "Patient-474");
+CollectDataForPatient("measure-col", "Patient-477");
+
+CreateTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\measure-col-collect-data\measure-col-collect-data-bundle.json", 
+	BundleResourcesInDirectory(
+	  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\expected-results\measure-col-collect-data",
+	  "http://localhost:8080/cqf-ruler/baseDstu3"
+	).AsJSON
+);
+
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-vte-1-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)

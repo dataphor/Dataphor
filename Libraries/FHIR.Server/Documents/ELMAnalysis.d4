@@ -1,0 +1,92 @@
+// For each measure
+// List terminologies used
+// List retrieves with type and terminology target
+
+// Data Structures to support the above queries
+create table ELMLibrary {
+  Id: String not nil,
+  Name: String not nil,
+  Version: String not nil,
+  Content: String not nil,
+  key { Id }
+}
+
+create table ELMLibraryDependency {
+  LibraryId: String not nil,
+  RequiredLibraryId: String not nil,
+  key { LibraryId, RequiredLibraryId }
+}
+
+create table ELMLibraryTerminology {
+  LibraryId: String not nil,
+  Name: String not nil,
+  key { LibraryId, Name }
+}
+
+create table ELMLibraryCodeSystem {
+  LibraryId: String not nil,
+  Name: String not nil,
+  Identifier: String not nil,
+  Version: String not nil,
+  key { LibraryId, Name }
+}
+
+create table ELMLibraryValueSet {
+  LibraryId: String not nil,
+  Name: String not nil,
+  Identifier: String not nil,
+  Version: String not nil,
+  key { LibraryId, Name }
+}
+
+create table ELMLibraryCode {
+  LibraryId: String not nil,
+  Name: String not nil,
+  Identifier: String not nil,
+  CodeSystemName: String not nil,
+  Display: String nil,
+  key { LibraryId, Name }
+}
+
+create table ELMLibraryDataRequirement {
+  Id: Guid not nil default NewGuid(),
+  LibraryId: String not nil,
+  DataType: String not nil,
+  TemplateId: String not nil,
+  CodePath: String nil,
+  TerminologyTarget: String nil,
+  key { Id }
+}
+
+create table ELMMeasure {
+  MeasureId: String not nil,
+  Version: String not nil,
+  key { MeasureId }
+}
+
+create table ELMMeasureLibrary {
+  MeasureId: String not nil,
+  LibraryId: String not nil,
+  key { MeasureId, LibraryId }
+}
+
+
+select ListDirectories("C:\Users\Bryn\Documents\Src\CMS\EH_CAH_eCQM_2018-05");
+select ListDirectories("C:\Users\Bryn\Documents\Src\CMS\EP_EC_eCQM_2018-05");
+
+create operator LoadMeasure(const path: String)
+begin
+  // Get the file name from the "html", use it as the MeasureId
+  foreach var row in ListFiles(path) do
+  begin
+  end;
+end;
+
+foreach var row in ListDirectories("C:\Users\Bryn\Documents\Src\CMS\EH_CAH_eCQM_2018-05") do
+begin
+  LoadMeasure(Path);
+end;
+
+foreach var row in ListDirectories("C:\Users\Bryn\Documents\Src\CMS\EP_EC_eCQM_2018-05") do
+begin
+end;

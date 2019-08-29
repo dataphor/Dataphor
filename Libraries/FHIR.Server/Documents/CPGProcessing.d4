@@ -1,0 +1,28 @@
+
+
+select ListDirectories("C:\Users\Bryn\Documents\Src\CDC\cdc-acg\pages\examples\anthrax");
+select ListDirectories("C:\Users\Bryn\Documents\Src\CDC\cdc-acg\pages\examples\anthrax\cql");
+select ListFiles("C:\Users\Bryn\Documents\Src\CDC\cdc-acg\pages\examples\anthrax\resources\PlanDefinition\FHIRv400");
+
+select
+	foreach row in ListFiles("C:\Users\Bryn\Documents\Src\CDC\cdc-acg\pages\examples\anthrax\resources\PlanDefinition\FHIRv400") do
+		'* [' + GetFileName(Path) + '](' + ChangeFileExtension(GetFileName(Path), "html") + ')'
+
+// 
+
+create operator GetMdContent(const AResourceType: String, const AFileName: String) : String
+begin
+  result :=
+'---
+layout: example-default
+title: Anthrax Post-Exposure Prophylaxis Example - ' + ChangeFileExtension(AFileName, "") + '
+---
+
+{% highlight sql %}{% include_relative cql/FHIRv400/Anthrax_Post_Exposure_Prophylaxis_FHIRv400.cql %}{% endhighlight %}
+
+';
+end;
+
+select
+	foreach row in ListFiles("C:\Users\Bryn\Documents\Src\CDC\cdc-acg\pages\examples\anthrax\resources\PlanDefinition\FHIRv400") do
+		'* [' + GetFileName(Path) + '](' + ChangeFileExtension(GetFileName(Path), "html") + ')'

@@ -116,6 +116,20 @@ RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-
 RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-vte-1-FHIR.json");
 RefreshGeneratedContentFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-vte-icu-FHIR.json");
 
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\library\ToLoad") do
+begin
+  try
+  	 RefreshGeneratedContentFile(Path);
+  except
+    on E: Error do
+      LogMessage("Error refreshing content for path " + Path + ": " + E.Message);
+  end;
+end;
+
+select ShowLog()
+
+
+
 create operator RefreshGeneratedMeasureFile(Path: String): String
 begin
   var resourceId := GetFileNameWithoutExtension(Path);
@@ -137,3 +151,535 @@ RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-
 RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-risk-adjustment-FHIR2.json"); 
 RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-terminology-FHIR.json");      
 RefreshGeneratedMeasureFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure\measure-vte-1-FHIR.json");            
+
+
+select ListFiles("C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\bundle\cqm\all-cqm");
+
+select ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library");
+
+select 
+  foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\bundle\all-cms-cqm") do
+    Bundle.EntryComponent(row {
+    	(Base.AsJSON(LoadTextFile(Path)) as FHIR3.Core.Resource) Resource,
+    	Bundle.RequestComponent(row {
+    	  "PUT" Method,
+    	  "http://localhost:8080/cqf-ruler/baseDstu3/Library/" + GetFileNameWithoutExtension(Path) Url
+ 		}) Request
+	 })
+
+
+create operator BundleResources(const Resources: list(FHIR3.Core.Resource), const TargetURL: String): Bundle
+begin
+  result :=
+    Bundle(row {
+      'transaction' Type,
+      (foreach var resource in Resources do
+        Bundle.EntryComponent(row {
+          resource Resource,
+          Bundle.RequestComponent(row {
+            "PUT" Method,
+            TargetURL + '/' + resource.TypeName + '/' + resource.Id Url
+          }) Request
+        })
+      ) Entry
+    });
+end;
+  
+create operator BundleResourcesInDirectory(const DirectoryName: String, const TargetURL: String): Bundle
+begin
+  result := BundleResources(
+    foreach row in ListFiles(DirectoryName) do
+      Base.AsJSON(LoadTextFile(Path)) as FHIR3.Core.Resource,
+    TargetURL
+  );
+end;
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\quick-start-bundle\opioid-cds-content-bundle.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\quick-start-bundle\Bundle",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+select
+  
+
+select 
+	BundleResourcesInDirectory(
+	  "C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\bundle\all-cms-cqm",
+	  "http://localhost:8080/cqf-ruler/baseDstu3"
+	).AsJSON;
+	
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\bundle\all-cms-cqm-bundle.json", 
+	BundleResourcesInDirectory(
+	  "C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\bundle\all-cms-cqm",
+	  "http://localhost:8080/cqf-ruler/baseDstu3"
+	).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\bundle\cqm\all-cqm-bundle.json", 
+	BundleResourcesInDirectory(
+	  "C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\bundle\cqm\all-cqm",
+	  "http://localhost:8080/cqf-ruler/baseDstu3"
+	).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\bcs-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\bcs",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\ccs-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\ccs",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\col-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\hedis-valuesets\col",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms124-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms124",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms125-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms125",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms130-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\cms130",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+SaveTextFile(
+  "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\vte1-tx.json",
+  BundleResourcesInDirectory(
+    "C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\cms-valuesets\vte1",
+    "http://localhost:8080/cqf-ruler/baseDstu3"
+  ).AsJSON
+);
+
+
+var entries := list(Resource) { };
+var bundle := Bundle(row { 'transaction' Type, entries Entry });
+
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library") do
+begin
+  HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/" + GetFileNameWithoutExtension(Path), nil, LoadTextFile(Path));
+end;
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\measure") do
+begin
+  HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/" + GetFileNameWithoutExtension(Path), nil, LoadTextFile(Path));
+end;
+
+// Load draft value sets
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\NCQA_Draft_VSD_ValueSets") do
+begin
+  var json := LoadTextFile(Path);
+  var valueSet := Base.AsJSON(json) as ValueSet;
+  try
+    HTTP("GET", "http://fhir.alphora.com/cqf-ruler/baseDstu3/ValueSet/" + valueSet.Id, nil, nil);
+  except
+    LogMessage("Posting value set " + valueSet.Id);
+    try
+      HTTP("PUT", "http://fhir.alphora.com/cqf-ruler/baseDstu3/ValueSet/" + valueSet.Id, nil, json);
+    except
+      LogMessage("Error posting value set " + valueSet.Id);
+    end;
+  end;
+end;
+
+select HTTP("GET", "http://fhir.alphora.com/cqf-ruler/baseDstu3/ValueSet/notreal", nil, nil);
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 21\eh_only_cms_220180917-CMS108") do
+begin
+  var json := LoadTextFile(Path);
+  var valueSet := Base.AsJSON(json) as ValueSet;
+  HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/ValueSet/" + valueSet.Id, nil, json);
+end;
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\library\ToLoad") do
+begin
+  var json := LoadTextFile(Path);
+  var library := Base.AsJSON(json) as Library;
+  try
+    HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/" + library.Id, nil, json);
+  except
+    on E: Error do
+      LogMessage("Error posting library " + library.Id + ": " + E.Message);
+  end;
+end;
+
+select ShowLog()
+
+HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-adult-outpatient-encounters-FHIR", nil, LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQF-Measures\resources\library\library-adult-outpatient-encounters-FHIR.json"));
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure", nil, nil);
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library", nil, nil);
+
+select HTTP("POST", "http://localhost:8080/cqf-ruler/baseDstu3", nil, LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\network-bundle.json"));
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-vte-1-FHIR", nil, nil)
+
+// library-mat-global-common-functions-FHIR
+// library-vte-icu-FHIR
+// library-supplemental-data-elements-FHIR
+
+drop table SessionSettings;
+create table SessionSettings
+{
+  BaseURL: String tags { Storage.Length = "200" },
+  key { }
+};
+
+insert row { "http://localhost:8080/cqf-ruler/baseDstu3/" BaseURL } into SessionSettings;
+
+drop operator GetResource(String);
+create operator GetResource(const path: String): FHIR3.Core.Resource
+begin
+  result := Base.AsJSON(HTTP("GET", SessionSettings[].BaseURL + path, nil, nil)) as FHIR3.Core.Resource;
+end;
+
+create operator GetValueSetIds(const library: Library): list(String)
+begin
+  result :=
+    foreach var V in library.DataRequirement do
+      if V.CodeFilter.Count() = 1 then
+        if V.CodeFilter[0].ValueSet is FHIRString and (V.CodeFilter[0].ValueSet as FHIRString).Value <> "" then
+		     //row { V.Type Type, V.CodeFilter[0].Path CodePath, V.CodeFilter[0].ValueSet as FHIRString ValueSetString }
+          GetTail((V.CodeFilter[0].ValueSet as FHIRString).Value)
+        else
+          nil
+      else
+        nil;
+end;      
+
+create operator GetReferencedLibraries(const library: Library): list(Library)
+begin
+  result :=
+    foreach var R in library.RelatedArtifact do
+      if R.Type = "DependsOn" and R.Resource.Reference.StartsWith("Library/") then
+        //row { R.Type Type, R.Resource.Reference Reference }
+        (GetResource(R.Resource.Reference) as Library)
+      else
+        nil;
+end;
+
+
+select Base.AsJSON('{
+          "resourceType": "Endpoint",
+          "id": "fhir-ext-apelon-com",
+          "address": "http://fhir.ext.apelon.com:7080/dts/fhir"
+        }') as Endpoint
+        
+select HTTP("PUT", SessionSettings[].BaseURL + "Endpoint/fhir-ext-apelon-com", nil, '{
+          "resourceType": "Endpoint",
+          "id": "fhir-ext-apelon-com",
+          "address": "http://fhir.ext.apelon.com:7080/dts/fhir"
+        }');
+        
+create operator GetAllValueSetIds(const library: Library): list(String)
+begin
+  var ids := GetValueSetIds(library).ToTable() { value };
+  foreach var referencedLibrary in GetReferencedLibraries(library) do
+    ids := ids union (GetValueSetIds(referencedLibrary).ToTable() { value });
+  result := foreach var id in ids.ToList() do id.value;
+end;
+
+select GetAllValueSetIds(GetResource("Library/library-vte-1-FHIR") as Library);
+
+foreach var id in GetAllValueSetIds(GetResource("Library/library-vte-1-FHIR") as Library) do
+  select HTTP("GET", SessionSettings[].BaseURL + "Endpoint/fhir-ext-apelon-com/$cache-valuesets?valuesets=" + id + "&user=brhodes&pass=BR123!", nil, nil);
+  
+select HTTP("GET", "http://fhir.ext.apelon.com:7080/dts/fhir/ValueSet/1.3.6.1.4.1.33895.1.3.0.45", nil, nil);
+
+
+table { row { "Authorization" Header, "Basic ZHRzYWRtaW51c2VyOkFwZWxvbjEyMyE=" Value }
+
+select GetReferencedLibraries(GetResource("Library/library-vte-1-FHIR") as Library);
+
+select GetValueSetIds(GetResource("Library/library-vte-1-FHIR") as Library);
+
+select
+  foreach var R in (GetResource("Library/library-vte-1-FHIR") as Library).RelatedArtifact do
+    if R.Type = "DependsOn" and R.Resource.Reference.StartsWith("Library/") then
+      row { R.Type Type, R.Resource.Reference Reference }
+    else
+      nil
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library", nil, nil)
+          
+
+select 
+  ToTable(
+	  foreach var V in (Base.AsJSON(HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-vte-1-FHIR", nil, nil)) as Library).DataRequirement do
+	    if V.CodeFilter.Count() = 1 then
+	      if V.CodeFilter[0].ValueSet is FHIRString and (V.CodeFilter[0].ValueSet as FHIRString).Value <> "" then
+	        GetTail((V.CodeFilter[0].ValueSet as FHIRString).Value)
+		     //row { V.Type Type, V.CodeFilter[0].Path CodePath, V.CodeFilter[0].ValueSet as FHIRString ValueSetString }
+		   else
+		     nil
+	    else
+	      nil
+  ) { value }
+  union (
+	  ToTable(
+		  foreach var V in (Base.AsJSON(HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-mat-global-common-functions-FHIR", nil, nil)) as Library).DataRequirement do
+		    if V.CodeFilter.Count() = 1 then
+		      if V.CodeFilter[0].ValueSet is FHIRString and (V.CodeFilter[0].ValueSet as FHIRString).Value <> "" then
+		        GetTail((V.CodeFilter[0].ValueSet as FHIRString).Value)
+			     //row { V.Type Type, V.CodeFilter[0].Path CodePath, V.CodeFilter[0].ValueSet as FHIRString ValueSetString }
+			   else
+			     nil
+		    else
+		      nil
+	  ) { value }
+  )	  
+  union (
+	  ToTable(
+		  foreach var V in (Base.AsJSON(HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-vte-icu-FHIR", nil, nil)) as Library).DataRequirement do
+		    if V.CodeFilter.Count() = 1 then
+		      if V.CodeFilter[0].ValueSet is FHIRString and (V.CodeFilter[0].ValueSet as FHIRString).Value <> "" then
+		        GetTail((V.CodeFilter[0].ValueSet as FHIRString).Value)
+			     //row { V.Type Type, V.CodeFilter[0].Path CodePath, V.CodeFilter[0].ValueSet as FHIRString ValueSetString }
+			   else
+			     nil
+		    else
+		      nil
+	  ) { value }
+  )	  
+  union (
+	  ToTable(
+		  foreach var V in (Base.AsJSON(HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-supplemental-data-elements-FHIR", nil, nil)) as Library).DataRequirement do
+		    if V.CodeFilter.Count() = 1 then
+		      if V.CodeFilter[0].ValueSet is FHIRString and (V.CodeFilter[0].ValueSet as FHIRString).Value <> "" then
+		        GetTail((V.CodeFilter[0].ValueSet as FHIRString).Value)
+			     //row { V.Type Type, V.CodeFilter[0].Path CodePath, V.CodeFilter[0].ValueSet as FHIRString ValueSetString }
+			   else
+			     nil
+		    else
+		      nil
+	  ) { value }
+  )	  
+  
+
+
+select HTTP("GET", "http://fhir.ext.apelon.com:7080/dtsserverws/fhir/ValueSet/2.16.840.1.113883.3.464.1004.1509.159/$expand", table { row { "Authorization" Header, "Basic ZHRzYWRtaW51c2VyOkFwZWxvbjEyMyE=" Value } }, nil);    
+    
+
+// Summary Reports for all measures
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm125-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm124-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-exm130-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-vte-1-FHIR/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-ccs/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-bcs/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-col/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-mrp/$evaluate-measure?periodStart=2018-01-01&periodEnd=2018-12-31", nil, nil)
+
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Measure/measure-mrp", nil, nil);
+select HTTP("GET", "http://localhost:8080/cqf-ruler/baseDstu3/Library?name=NCQACommon_FHIR", nil, nil);
+
+select HTTP("PUT", "http://localhost:8080/cqf-ruler/baseDstu3/Library/library-common-logic", nil, LoadTextFile("C:\Users\Bryn\Documents\Src\NCQA\hedis-ig\resources\library\library-common-logic.json"));
+
+// Loading Patient Histories
+
+select ListDirectories("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\histories");
+
+foreach row in ListDirectories("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\histories") do
+begin
+  foreach row in ListFiles(Path) do
+  begin
+    var json := LoadTextFile(Path);
+    var resource := Base.AsJSON(json) as Bundle;
+    if resource.IsNotNil() then
+    begin
+      LogMessage("Posting bundle " + Path + "...");
+      try
+        HTTP("POST", "http://localhost:8080/cqf-ruler/baseDstu3/", table { row { "ContentType" Header, "application/fhir+json" Value } }, json);
+        LogMessage("Posting complete.");
+      except
+        on E: Error do
+          LogMessage("Error posting bundle: " + E.Message);
+      end;
+    end;
+  end;
+end;
+net
+select HTTP("POST", "http://localhost:8080/cqf-ruler/baseDstu3/", table { row { "ContentType" Header, "application/fhir+json" Value } }, LoadTextFile("C:\Users\Bryn\Documents\Src\HL7\Connectathons\Connectathon 20\docs\bundles\histories\Willard Chambers House\Willard-Chambers-House-495-Encounter-5651.json"));
+
+
+
+select ShowLog()
+
+
+select HTTP("GET", "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/Library/library-mrp-logic", nil, nil)
+select HTTP("GET", "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.666.5.307", nil, nil);
+select HTTP("GET", "http://measure.eval.kanvix.com/cqf-ruler/baseDstu3/ValueSet/2.16.840.1.113883.3.464.1004.1174", nil, nil)
+
+//drop operator ExtensionToContentType(String);
+create operator ExtensionToContentType(const AExtension : String) : String
+begin
+  result :=
+	  case AExtension.Lower()
+	    when "cql" then "text/cql"
+	    when "xml" then "application/elm+xml"
+	    when "json" then "application/elm+json"
+	    when "xsd" then "application/xsd"
+	    else "Unknown content type:" + AExtension
+	  end;
+end;
+
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\spec\examples") do
+begin
+	var content := LoadTextFile(Path);
+	var extension := GetFileExtension(Path).SubString(1).Lower();
+	var resourceId := "binary-example-" + GetFileNameWithoutExtension(Path).Lower().Replace("_", "-") + "-" + extension;
+	var fileName := resourceId + ".json";
+	
+	var directoryName := CombinePath(GetDirectoryName(Path), "output");
+	if not(DirectoryExists(directoryName)) then
+	  CreateDirectory(directoryName);
+	  
+	var binary := '{
+          "resourceType": "Binary",
+          "id": "' + resourceId + '",
+          "contentType": "' + ExtensionToContentType(extension) + '",
+          "data": "' + Base64Encode(content) + '"
+		}';
+	  
+	var outputFileName := CombinePath(directoryName, fileName);
+	if not(FileExists(outputFileName)) then
+	  CreateTextFile(outputFileName, binary)
+	else
+	  SaveTextFile(outputFileName, binary);
+end;
+
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\spec\elm\schema") do
+begin
+	var content := LoadTextFile(Path);
+	var extension := GetFileExtension(Path).SubString(1).Lower();
+	var resourceId := "binary-schema-" + GetFileNameWithoutExtension(Path).Lower().Replace("_", "-");
+	var fileName := resourceId + ".json";
+	
+	var directoryName := CombinePath(GetDirectoryName(Path), "output");
+	if not(DirectoryExists(directoryName)) then
+	  CreateDirectory(directoryName);
+	  
+	var binary := '{
+          "resourceType": "Binary",
+          "id": "' + resourceId + '",
+          "contentType": "' + ExtensionToContentType(extension) + '",
+          "data": "' + Base64Encode(content) + '"
+		}';
+	  
+	var outputFileName := CombinePath(directoryName, fileName);
+	if not(FileExists(outputFileName)) then
+	  CreateTextFile(outputFileName, binary)
+	else
+	  SaveTextFile(outputFileName, binary);
+end;
+
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\tests") do
+begin
+	var content := LoadTextFile(Path);
+	var extension := GetFileExtension(Path).SubString(1).Lower();
+	var resourceId := "binary-schema-" + GetFileNameWithoutExtension(Path).Lower().Replace("_", "-");
+	var fileName := resourceId + ".json";
+	
+	var directoryName := CombinePath(GetDirectoryName(Path), "output");
+	if not(DirectoryExists(directoryName)) then
+	  CreateDirectory(directoryName);
+	  
+	var binary := '{
+          "resourceType": "Binary",
+          "id": "' + resourceId + '",
+          "contentType": "' + ExtensionToContentType(extension) + '",
+          "data": "' + Base64Encode(content) + '"
+		}';
+	  
+	var outputFileName := CombinePath(directoryName, fileName);
+	if not(FileExists(outputFileName)) then
+	  CreateTextFile(outputFileName, binary)
+	else
+	  SaveTextFile(outputFileName, binary);
+end;
+
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\tests\cql") do
+begin
+	var content := LoadTextFile(Path);
+	var extension := GetFileExtension(Path).SubString(1).Lower();
+	var resourceId := "binary-test-" + GetFileNameWithoutExtension(Path).Lower().Replace("_", "-");
+	var fileName := resourceId + ".json";
+	
+	var directoryName := CombinePath(GetDirectoryName(Path), "output");
+	if not(DirectoryExists(directoryName)) then
+	  CreateDirectory(directoryName);
+	  
+	var binary := '{
+          "resourceType": "Binary",
+          "id": "' + resourceId + '",
+          "contentType": "' + ExtensionToContentType(extension) + '",
+          "data": "' + Base64Encode(content) + '"
+		}';
+	  
+	var outputFileName := CombinePath(directoryName, fileName);
+	if not(FileExists(outputFileName)) then
+	  CreateTextFile(outputFileName, binary)
+	else
+	  SaveTextFile(outputFileName, binary);
+end;
+
+
+
+
+select
+  Concat(
+  foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\resources") do
+    '"Binary/' + GetFileNameWithoutExtension(Path) + '": {
+      "source": "' + GetFileName(Path) + '"
+    }',
+    ", 
+    "
+  );
+  
+select
+  Concat(
+  foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\Specifications\CQL\Specifications\DSTU-Updates\R1.4\Source\resources") do
+    '<resource>
+      <reference>
+        <reference value="Binary/' + GetFileNameWithoutExtension(Path) + '"/>
+      </reference>
+    </resource>',
+    "
+    "
+  );

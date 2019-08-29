@@ -1,0 +1,190 @@
+/*
+Process Profiles
+Unbundle - For each entry in a bundle, create a file resources\<resourceType>\<resourceType>-<id>.json
+*/
+
+create operator UnbundleJsonFile(const bundlePath: String)
+begin
+  var bundle := Dynamic(LoadTextFile(bundlePath));
+  var directory := GetDirectoryName(bundlePath);
+  var resourceDirectory := CombinePath(directory, "resources");
+  CreateDirectory(resourceDirectory);
+  foreach var element in bundle.Get("entry").ToList() do
+  begin
+    var resource := element.Get("resource");
+
+    var resourceType := resource.Get("resourceType").ToString();
+    var resourceTypeDirectory := CombinePath(resourceDirectory, resourceType);
+    if not(DirectoryExists(resourceTypeDirectory)) then
+      CreateDirectory(resourceTypeDirectory);
+
+    var id := resource.Get("id").ToString();
+    var fileName := resourceType + '-' + id + '.json';
+    var filePath := CombinePath(resourceTypeDirectory, fileName);
+    
+    CreateTextFile(filePath, resource.ToString());
+  end;
+end;
+
+
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\conceptmaps.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\profiles-types.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\profiles-resources.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\extension-definitions.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\profiles-others.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\search-parameters.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\v2-tables.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\v3-codesystems.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\valuesets.json");
+UnbundleJsonFile("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\profiles-types.json");
+
+
+
+// Foreach structure definition...
+// Foreach element in the snapshot
+
+StructureDefinition["CapabilityStatement"]
+  .snapshot
+  .element
+  .where(
+    binding
+    .extension
+    .where(
+      url = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName"
+    )
+    .exists()
+  )
+  
+create operator CapitalizeWebId(const input: String): String
+begin
+  result := Concat(
+    foreach var s in input.Split("-") do
+      s.Capitalize()
+  );
+end;
+
+select CapitalizeWebId("");
+select CapitalizeWebId("blah");
+select CapitalizeWebId("blah-blah");
+
+var bindingNames := list(String) {};
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\resources\StructureDefinition") do
+begin
+  var sd := Dynamic(LoadTextFile(Path));
+  if sd.Get("kind").ToString() = "resource" and 
+      sd.Get("baseDefinition").ToString() in { "http://hl7.org/fhir/StructureDefinition/DomainResource", "http://hl7.org/fhir/StructureDefinition/Resource" }
+    then
+  begin
+    foreach var element in sd.Get("differential").Get("element").ToList() do
+    begin
+      if element.Get("type").ToList()[0].Get("code").ToString() = "code" and element.Get("binding").Get("strength").ToString() = "required" then
+      begin
+      	var bindingName := nil as String;
+	      foreach var extension in element.Get("binding").Get("extension").ToList() do
+	      begin
+	        if extension.Get("url").ToString() = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName" then
+	        begin
+	          bindingName := CapitalizeWebId(extension.Get("valueString").ToString());
+	        end
+	        else if extension.Get("url").ToString() = "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding" then
+	        begin
+	          if extension.Get("valueBoolean").ToBoolean() then
+	            bindingName := nil as String;
+	        end;
+	      end;
+	      if bindingName.IsNotNil() then
+	      begin
+           //bindingNames.Add(element.Get("id").ToString() + ': ' + bindingName);
+           bindingNames.Add("case """ + bindingName + """: typeName = """ + sd.Get("id").ToString() + "$" + bindingName + """; break;");
+         end;
+	   end;
+    end;
+  end;
+end;
+select bindingNames;
+
+// Search Parameters
+// Convert a path to a search parameter with that path
+// base must be singleton
+// expression must start with <base>.
+// path is expression without <base>.
+// search param name is code
+
+var searchPathNames := list(String) {};
+var currentBase := nil as String;
+searchPathNames.Add("switch (type) {");
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\resources\SearchParameter") do
+begin
+  var sp := Dynamic(LoadTextFile(Path));
+  if sp.Get("base").ToList().Count() = 1 then
+  begin
+    var base := sp.Get("base").ToList()[0].ToString();
+    if currentBase.IsNil() or currentBase <> base then
+    begin
+      if currentBase.IsNotNil() then
+      begin
+        searchPathNames.Add("}");
+        searchPathNames.Add("break;");
+      end;
+      currentBase := base;
+      searchPathNames.Add("case """ + currentBase + """:");
+      searchPathNames.Add("switch (path) {");
+    end;
+
+    var expression := sp.Get("expression").ToString();
+    if expression.StartsWith(base + ".") then
+    begin
+      var path := expression.SubString(base.Length() + 1);
+      var code := sp.Get("code").ToString();
+      searchPathNames.Add("case """ + path + """: return """ + code + """;"); 
+    end;
+  end;
+end;
+searchPathNames.Add("}");
+searchPathNames.Add("break;");
+searchPathNames.Add("}");
+select searchPathNames;
+
+// Compartment definitions define the patient relationship
+// CompartmentDefinition.code is CQL context
+// CompartmentDefinition.resource.code is the class
+// CompartmentDefinition.resource.code.param is the search parameters
+// If there are multiple search parameters, it indicates different roles the patient can play in the context
+// We don't do anything with these right now
+
+var searchPathNames := list(String) {};
+var currentBase := nil as String;
+searchPathNames.Add("switch (contextType) {");
+foreach row in ListFiles("C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec\4.0.0\resources\CompartmentDefinition") do
+begin
+  var cd := Dynamic(LoadTextFile(Path));
+  var base := cd.Get("code").ToString();
+  if currentBase.IsNil() or currentBase <> base then
+  begin
+    if currentBase.IsNotNil() then
+    begin
+      searchPathNames.Add("}");
+      searchPathNames.Add("break;");
+    end;
+    currentBase := base;
+    searchPathNames.Add("case """ + currentBase + """:");
+    searchPathNames.Add("switch (dataType) {");
+  end;
+  
+  foreach var resource in cd.Get("resource").ToList() do
+  begin
+    searchPathNames.Add("case """ + resource.Get("code").ToString() + """: ");
+    var params := resource.Get("param").ToList();
+    if params.Count() = 1 then
+      searchPathNames.Add("return """ + params[0].ToString() + """;")
+    else
+      searchPathNames.Add("break;");
+  end;
+end;
+searchPathNames.Add("}");
+searchPathNames.Add("break;");
+searchPathNames.Add("}");
+select searchPathNames;
+
+
+

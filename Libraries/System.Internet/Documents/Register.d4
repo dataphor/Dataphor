@@ -58,6 +58,14 @@ grant usage on URLEncode(String) to role User;
 create operator URLDecode(const AValue : String) : String
 	class "System.Internet.URLDecodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on URLDecode(String) to role User;
+
+create operator Base64Encode(const AValue : String) : String
+	class "System.Internet.Base64EncodeNode" static tags {DAE.IsRemotable = "False"};
+grant usage on Base64Encode(String) to role User;
+
+create operator Base64Decode(const AValue : String) : String
+	class "System.Internet.Base64DecodeNode" static tags {DAE.IsRemotable = "False"};
+grant usage on Base64Decode(String) to role User;
 // TODO: End in-theory remotable operators
 
 /* HTTP Post Support */

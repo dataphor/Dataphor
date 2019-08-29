@@ -109,6 +109,24 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 		}
 	}
 
+	// operator Base64Encode(const AValue : String) : String
+	public class Base64EncodeNode : InstructionNode
+	{
+		public override object InternalExecute(Program program, object[] arguments)
+		{
+			return Convert.ToBase64String(Encoding.UTF8.GetBytes(((string)arguments[0])));
+		}
+	}
+
+	// operator Base64Decode(const AValue : String) : String
+	public class Base64DecodeNode : InstructionNode
+	{
+		public override object InternalExecute(Program program, object[] arguments)
+		{
+			return Encoding.UTF8.GetString(Convert.FromBase64String((string)arguments[0]));
+		}
+	}
+
 	// operator HTTP(const AVerb : String, const AURL : String, const AHeaders : table { Header : String, Value : String }, const ABody : String) : String
 	public class HTTPNode : InstructionNode
 	{
@@ -127,6 +145,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			request.Method = verb;
 			request.ProtocolVersion = new Version(1, 1);
 			request.KeepAlive = false;
+			request.Timeout = 3600000; // Setting to an hour to account for long running queries in the ruler
 
 			if (headers != null)
 			{
@@ -136,7 +155,14 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					{
 						headers.Select(row);
 
-						request.Headers[(HttpRequestHeader)Enum.Parse(typeof(HttpRequestHeader), (string)row["Header"])] = (string)row["Value"];
+						var header = (HttpRequestHeader)Enum.Parse(typeof(HttpRequestHeader), (string)row["Header"]);
+
+						switch (header) 
+						{
+							case HttpRequestHeader.Accept: request.Accept = (string)row["Value"]; break;
+							case HttpRequestHeader.ContentType: request.ContentType = (string)row["Value"]; break;
+							default: request.Headers[header] = (string)row["Value"]; break;
+						}
 					}
 				}
 			}
