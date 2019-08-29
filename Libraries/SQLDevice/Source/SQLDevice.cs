@@ -3587,8 +3587,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return connection;
 		}
 		
-		private SQLConnectionPool _browsePool = new SQLConnectionPool();
-		private SQLConnectionPool _executePool = new SQLConnectionPool();
+		protected SQLConnectionPool _browsePool = new SQLConnectionPool();
+		protected SQLConnectionPool _executePool = new SQLConnectionPool();
 		
 		public SQLConnection Connection { get { return RequestConnection(false).Connection; } }
 		
@@ -3776,8 +3776,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 		
 		// BeginTransaction
-		private SQLIsolationLevel _isolationLevel;
-		private bool _transactionStarted;
+		protected SQLIsolationLevel _isolationLevel;
+		protected bool _transactionStarted;
 		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
 			if (Device.UseTransactions && (Transactions.Count == 1)) // If this is the first transaction
@@ -3790,7 +3790,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		private bool _transactionFailure;
+		protected bool _transactionFailure;
 		/// <summary> Indicates whether the DBMS-side transaction has been rolled-back. </summary>
 		public bool TransactionFailure
 		{

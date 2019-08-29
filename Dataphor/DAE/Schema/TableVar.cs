@@ -1750,16 +1750,22 @@ namespace Alphora.Dataphor.DAE.Schema
 		#else
         protected override void Adding(Key tempValue, int index)
 		{
- 			 //base.Adding(AValue, AIndex);
-			 tempValue._tableVar = _tableVar;
+            //base.Adding(AValue, AIndex)
+            if (_tableVar != null)
+            {
+                tempValue._tableVar = _tableVar;
+            }
 		}
 		
 		protected override void Removing(Key tempValue, int index)
 		{
- 			 tempValue._tableVar = null;
- 			 //base.Removing(AValue, AIndex);
-		}
-		#endif
+            if (_tableVar != null)
+            {
+                tempValue._tableVar = null;
+            }
+            //base.Removing(AValue, AIndex);
+        }
+#endif
 
         public bool IsKeyColumnName(string columnName)
         {
