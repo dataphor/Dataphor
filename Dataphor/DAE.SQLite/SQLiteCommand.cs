@@ -16,7 +16,6 @@ namespace Alphora.Dataphor.DAE.Connection
         {
             _useOrdinalBinding = true;
         }
-		
         protected override void PrepareParameters()
         {
             // Prepare parameters

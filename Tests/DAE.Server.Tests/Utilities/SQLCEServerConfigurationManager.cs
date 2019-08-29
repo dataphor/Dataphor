@@ -20,5 +20,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 
 	public class SQLCEServerConfigurationManager: ServerConfigurationManager
 	{
-	}
+        public override ServerConfiguration GetTestConfiguration(string AInstanceName)
+        {
+            ServerConfiguration LResult = base.GetTestConfiguration(AInstanceName);
+
+            LResult.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore,Alphora.Dataphor.DAE.SQLCE";
+            LResult.CatalogStoreConnectionString = String.Format("Data Source={0};Password={1};Mode={2}", "%CatalogPath%" + Path.DirectorySeparatorChar + "DAECatalog.sdf", String.Empty, "Read Write");
+
+            return LResult;
+        }
+    }
 }

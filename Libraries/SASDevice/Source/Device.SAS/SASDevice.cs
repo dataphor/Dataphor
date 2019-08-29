@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 	
 	public class SASDevice : SQLDevice
 	{
-		public SASDevice(int AID, string AName) : base(AID, AName)
+		public SASDevice(long AID, string AName) : base(AID, AName)
 		{
 			_supportsTransactions = false;
 			UseTransactions = false; // The SAS CLI does not support explicit transactions
@@ -500,7 +500,7 @@ order by libname, memname, indxname, indxpos
 
     public class SASRetrieve : SQLDeviceOperator
     {
-		public SASRetrieve(int AID, string AName) : base(AID, AName) {}
+		public SASRetrieve(long AID, string AName) : base(AID, AName) {}
 		//public SASRetrieve(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
 		//public SASRetrieve(Operator AOperator, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AOperator, AClassDefinition, AIsSystem){}
 		
@@ -535,7 +535,7 @@ order by libname, memname, indxname, indxpos
 
 	public class SASBoolean : SQLScalarType, IADOFilterLiteralBuilder
 	{
-		public SASBoolean(int AID, string AName) : base(AID, AName) {}
+		public SASBoolean(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -565,7 +565,7 @@ order by libname, memname, indxname, indxpos
 
 	public class SASByte : SQLScalarType, IADOFilterLiteralBuilder
 	{
-		public SASByte(int AID, string AName) : base(AID, AName) {}
+		public SASByte(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -595,7 +595,7 @@ order by libname, memname, indxname, indxpos
 
 	public class SASShort : SQLScalarType, IADOFilterLiteralBuilder
 	{
-		public SASShort(int AID, string AName) : base(AID, AName) {}
+		public SASShort(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -625,7 +625,7 @@ order by libname, memname, indxname, indxpos
 
 	public class SASInteger : SQLScalarType, IADOFilterLiteralBuilder
 	{
-		public SASInteger(int AID, string AName) : base(AID, AName) {}
+		public SASInteger(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -655,7 +655,7 @@ order by libname, memname, indxname, indxpos
 
 	public class SASLong : SQLScalarType, IADOFilterLiteralBuilder
 	{
-		public SASLong(int AID, string AName) : base(AID, AName) {}
+		public SASLong(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -689,7 +689,7 @@ order by libname, memname, indxname, indxpos
 	/// </summary>
     public class SASDecimal : SQLScalarType, IADOFilterLiteralBuilder
     {
-		public SASDecimal(int AID, string AName) : base(AID, AName) {}
+		public SASDecimal(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -739,7 +739,7 @@ order by libname, memname, indxname, indxpos
 	/// </summary>    
     public class SASTimeSpan : SQLScalarType, IADOFilterLiteralBuilder
     {
-		public SASTimeSpan(int AID, string AName) : base(AID, AName) {}
+		public SASTimeSpan(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -775,7 +775,7 @@ order by libname, memname, indxname, indxpos
     {
 		public const string CDateTimeFormat = "dd/MMM/yyyy hh:mm:ss tt";
 		
-		public SASDateTime(int AID, string AName) : base(AID, AName) {}
+		public SASDateTime(long AID, string AName) : base(AID, AName) {}
 		
 		private string FDateTimeFormat = CDateTimeFormat;
 		public string DateTimeFormat
@@ -825,7 +825,7 @@ order by libname, memname, indxname, indxpos
     {
 		public const string CDateFormat = "dd/MMM/yyyy";
 		
-		public SASDate(int AID, string AName) : base(AID, AName) {}
+		public SASDate(long AID, string AName) : base(AID, AName) {}
 		
 		private string FDateFormat = CDateFormat;
 		public string DateFormat
@@ -875,7 +875,7 @@ order by libname, memname, indxname, indxpos
     {
 		public const string CTimeFormat = "HH:mm:ss";
 		
-		public SASTime(int AID, string AName) : base(AID, AName) {}
+		public SASTime(long AID, string AName) : base(AID, AName) {}
 		
 		private string FTimeFormat = CTimeFormat;
 		public string TimeFormat
@@ -924,7 +924,7 @@ order by libname, memname, indxname, indxpos
 	/// </summary>
     public class SASMoney : SQLScalarType, IADOFilterLiteralBuilder
     {
-		public SASMoney(int AID, string AName) : base(AID, AName) {}
+		public SASMoney(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -954,7 +954,7 @@ order by libname, memname, indxname, indxpos
 
     public class SASGuid : SQLGuid, IADOFilterLiteralBuilder
     {
-		public SASGuid(int AID, string AName) : base(AID, AName) {}
+		public SASGuid(long AID, string AName) : base(AID, AName) {}
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 		
@@ -970,7 +970,7 @@ order by libname, memname, indxname, indxpos
 	/// </summary>
     public class SASString : SQLScalarType, IADOFilterLiteralBuilder
     {
-		public SASString(int AID, string AName) : base(AID, AName) {}
+		public SASString(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{

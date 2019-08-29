@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.FHIR.Server
 	/// </summary>
 	public class SQLResource : SQLScalarType
 	{
-		public SQLResource(int iD, string name) : base(iD, name) { }
+		public SQLResource(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{

@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Default : Object
     {
 		// constructor
-		public Default(int iD, string name) : base(iD, name) {}
+		public Default(long iD, string name) : base(iD, name) {}
 
 		public override bool IsPersistent { get { return true; } }
 
@@ -63,13 +63,13 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class ScalarTypeDefault : Default
     {
-		public ScalarTypeDefault(int iD, string name) : base(iD, name) {}
+		public ScalarTypeDefault(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeDefault"), _scalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
-		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
 		internal ScalarType _scalarType;
@@ -104,13 +104,13 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class TableVarColumnDefault : Default
     {
-		public TableVarColumnDefault(int iD, string name) : base(iD, name) {}
+		public TableVarColumnDefault(long iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnDefault"), _tableVarColumn.DisplayName, _tableVarColumn.TableVar.DisplayName); } }
 
-		public override int CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
+		public override long CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
+		public override long ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
 		
 		public override bool IsATObject { get { return _tableVarColumn == null ? false : _tableVarColumn.IsATObject; } }
 

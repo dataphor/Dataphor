@@ -22,7 +22,7 @@ namespace Alphora.Shipping
 	/// </summary>
     public class SQLCoordinate : SQLScalarType
     {
-		public SQLCoordinate(int iD, string name) : base(iD, name) {}
+		public SQLCoordinate(long iD, string name) : base(iD, name) {}
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{

@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 		#endregion
 		
-		public int DebuggerID { get { return _session.SessionID; } }
+		public long DebuggerID { get { return _session.SessionID; } }
 
 		private ServerSession _session;
 		public ServerSession Session { get { return _session; } }

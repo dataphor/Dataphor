@@ -27,7 +27,7 @@ namespace Aphora.Dataphor.FHIR.Device
 {
 	public class FHIRDevice : Schema.Device
 	{
-		public FHIRDevice(int iD, string name) : base(iD, name) 
+		public FHIRDevice(long iD, string name) : base(iD, name) 
 		{ 
 			_supportsTransactions = true;
 			_supportsNestedTransactions = true;

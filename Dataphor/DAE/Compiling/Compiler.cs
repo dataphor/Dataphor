@@ -3875,7 +3875,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.ScalarTypeDefault CompileScalarTypeDefault(Plan plan, Schema.ScalarType scalarType, DefaultDefinition defaultValue)
 		{
-			int defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
+			var defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
 			string defaultName = Schema.Object.EnsureNameLength(String.Format("{0}_Default", scalarType.Name));
 			Schema.ScalarTypeDefault localDefaultValue = new Schema.ScalarTypeDefault(defaultID, defaultName);
 			localDefaultValue.Library = scalarType.Library == null ? null : plan.CurrentLibrary;
@@ -3885,7 +3885,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TableVarColumnDefault CompileTableVarColumnDefault(Plan plan, Schema.TableVar tableVar, Schema.TableVarColumn column, DefaultDefinition defaultValue)
 		{
-			int defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
+			var defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
 			string defaultName = Schema.Object.EnsureNameLength(String.Format("{0}_{1}_Default", tableVar.Name, column.Name));
 			Schema.TableVarColumnDefault localDefaultValue = new Schema.TableVarColumnDefault(defaultID, defaultName);
 			localDefaultValue.Library = tableVar.Library == null ? null : plan.CurrentLibrary;
@@ -5772,7 +5772,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Sort CompileSortDefinition(Plan plan, Schema.IDataType dataType, SortDefinition sortDefinition, bool isScalarSort)
 		{
-			int objectID = Schema.Object.GetObjectID(sortDefinition.MetaData);
+			var objectID = Schema.Object.GetObjectID(sortDefinition.MetaData);
 			Schema.Sort sort = new Schema.Sort(objectID, String.Format("{0}Sort{1}", dataType.Name, isScalarSort ? String.Empty : objectID.ToString()), dataType);
 			sort.IsGenerated = true;
 			sort.Owner = plan.User;
@@ -8879,7 +8879,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (requiredScalarType == null)
 				plan.CheckRight(Schema.RightNames.HostImplementation);
 
-			int objectID = Schema.Object.GetObjectID(deviceScalarTypeMap.MetaData);
+			var objectID = Schema.Object.GetObjectID(deviceScalarTypeMap.MetaData);
 			string deviceScalarTypeName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, dataType.Name), objectID);
 			object deviceScalarTypeObject = plan.CreateObject(classDefinition, new object[]{objectID, deviceScalarTypeName});
 			if (!(deviceScalarTypeObject is Schema.DeviceScalarType))
@@ -8937,7 +8937,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					throw new CompilerException(CompilerException.Codes.DuplicateDeviceOperator, deviceOperatorMap, device.Name, operatorValue.OperatorName, operatorValue.Signature.ToString());
 			}
 				
-			int objectID = Schema.Object.GetObjectID(deviceOperatorMap.MetaData);
+			var objectID = Schema.Object.GetObjectID(deviceOperatorMap.MetaData);
 			string deviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, operatorValue.Name), objectID);
 			object deviceOperatorObject = plan.CreateObject(deviceOperatorMap.ClassDefinition, new object[]{objectID, deviceOperatorName});
 			if (!(deviceOperatorObject is Schema.DeviceOperator))
@@ -8971,7 +8971,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (deviceOperator == null)
 			{
 				deviceScalarType.AddDependency(baseDeviceScalarType);
-				int objectID = Schema.Object.GetNextObjectID();
+				var objectID = Schema.Object.GetNextObjectID();
 				string deviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, operatorValue.Name), objectID);
 				deviceOperator = (Schema.DeviceOperator)plan.CreateObject(classDefinition, new object[] { objectID, deviceOperatorName });
 				deviceOperator.Library = deviceScalarType.Library;
@@ -10346,7 +10346,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			bool creationObjectPushed = false;
 			try
 			{
-				int objectID = Schema.Object.GetObjectID(statement.MetaData);
+				var objectID = Schema.Object.GetObjectID(statement.MetaData);
 				if (statement.EventSourceSpecifier is ObjectEventSourceSpecifier)
 				{
 					node.EventSource = ResolveCatalogIdentifier(plan, ((ObjectEventSourceSpecifier)statement.EventSourceSpecifier).ObjectName, true);

@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public abstract class SQLDeviceOperator : DeviceOperator
 	{
-		public SQLDeviceOperator(int iD, string name) : base(iD, name)
+		public SQLDeviceOperator(long iD, string name) : base(iD, name)
 		{
 			_isTruthValued = GetIsTruthValued();
 		}
@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLRetrieve : SQLDeviceOperator
     {
-		public SQLRetrieve(int iD, string name) : base(iD, name) {}
+		public SQLRetrieve(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLAdorn : SQLDeviceOperator
     {
-		public SQLAdorn(int iD, string name) : base(iD, name) {}
+		public SQLAdorn(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public class SQLRestrict : SQLDeviceOperator
     {
-		public SQLRestrict(int iD, string name) : base(iD, name) {}
+		public SQLRestrict(long iD, string name) : base(iD, name) {}
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -222,7 +222,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public class SQLProject : SQLDeviceOperator
     {
-		public SQLProject(int iD, string name) : base(iD, name) {}
+		public SQLProject(long iD, string name) : base(iD, name) {}
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     //		select c_id as c_id, c_name as c_name from (select id as c_id, name as c_name from customer) as T1
     public class SQLRename : SQLDeviceOperator
     {
-		public SQLRename(int iD, string name) : base(iD, name) {}
+		public SQLRename(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{									
@@ -326,7 +326,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/    
     public class SQLExtend : SQLDeviceOperator
     {
-		public SQLExtend(int iD, string name) : base(iD, name) {}
+		public SQLExtend(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -393,7 +393,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/    
     public class SQLRedefine : SQLDeviceOperator
     {
-		public SQLRedefine(int iD, string name) : base(iD, name) {}
+		public SQLRedefine(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -452,7 +452,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	*/
     public class SQLAggregate : SQLDeviceOperator
     {
-		public SQLAggregate(int iD, string name) : base(iD, name) {}
+		public SQLAggregate(long iD, string name) : base(iD, name) {}
 
 		protected AggregateCallExpression FindAggregateCallExpression(Expression expression)
 		{
@@ -563,7 +563,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLAggregateOperator : SQLDeviceOperator
     {
-		public SQLAggregateOperator(int iD, string name) : base(iD, name) {}
+		public SQLAggregateOperator(long iD, string name) : base(iD, name) {}
 		
 		private string _operatorName;
 		public string OperatorName
@@ -694,7 +694,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLOrder : SQLDeviceOperator
     {
-		public SQLOrder(int iD, string name) : base(iD, name) {}
+		public SQLOrder(long iD, string name) : base(iD, name) {}
 		
 		// Order is ignored until the very last order in the expression, which is translated in the device
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
@@ -705,7 +705,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public class SQLUnion : SQLDeviceOperator
     {
-		public SQLUnion(int iD, string name) : base(iD, name) {}
+		public SQLUnion(long iD, string name) : base(iD, name) {}
 		
 		public static void NormalizeSelectClause(DevicePlan devicePlan, ColumnExpressions normalColumns, ColumnExpressions nonNormalColumns)
 		{
@@ -780,7 +780,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLDifference : SQLDeviceOperator
     {
-		public SQLDifference(int iD, string name) : base(iD, name) {}
+		public SQLDifference(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -846,7 +846,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLJoin : SQLDeviceOperator
     {
-		public SQLJoin(int iD, string name) : base(iD, name) {}
+		public SQLJoin(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1171,7 +1171,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLScalarSelector : SQLDeviceOperator
     {
-		public SQLScalarSelector(int iD, string name) : base(iD, name) {}
+		public SQLScalarSelector(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1182,7 +1182,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLScalarReadAccessor : SQLDeviceOperator
     {
-		public SQLScalarReadAccessor(int iD, string name) : base(iD, name) {}
+		public SQLScalarReadAccessor(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1193,7 +1193,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLScalarWriteAccessor : SQLDeviceOperator
     {
-		public SQLScalarWriteAccessor(int iD, string name) : base(iD, name) {}
+		public SQLScalarWriteAccessor(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1204,7 +1204,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLScalarIsSpecialOperator : SQLDeviceOperator
     {
-		public SQLScalarIsSpecialOperator(int iD, string name) : base(iD, name) {}
+		public SQLScalarIsSpecialOperator(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1251,7 +1251,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLVersionNumberIsUndefinedOperator : SQLDeviceOperator
     {
-		public SQLVersionNumberIsUndefinedOperator(int iD, string name) : base(iD, name)  {}
+		public SQLVersionNumberIsUndefinedOperator(long iD, string name) : base(iD, name)  {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1268,7 +1268,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public abstract class SQLOperator : SQLDeviceOperator
     {
-		public SQLOperator(int iD, string name) : base(iD, name) {}
+		public SQLOperator(long iD, string name) : base(iD, name) {}
 		
 		public abstract string GetInstruction();
 		public abstract bool GetIsBooleanContext();
@@ -1276,7 +1276,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public abstract class SQLUnaryOperator : SQLOperator
     {
-		public SQLUnaryOperator(int iD, string name) : base(iD, name) {}
+		public SQLUnaryOperator(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1287,7 +1287,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public abstract class SQLBinaryOperator : SQLOperator
     {
-		public SQLBinaryOperator(int iD, string name) : base(iD, name) {}
+		public SQLBinaryOperator(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1303,7 +1303,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLCallOperator : SQLDeviceOperator
     {
-		public SQLCallOperator(int iD, string name) : base(iD, name) {}
+		public SQLCallOperator(long iD, string name) : base(iD, name) {}
 	
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1333,7 +1333,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLUserOperator : SQLDeviceOperator
     {
-		public SQLUserOperator(int iD, string name) : base(iD, name) {}
+		public SQLUserOperator(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1363,7 +1363,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLIntegerDivision : SQLDeviceOperator
     {
-		public SQLIntegerDivision(int iD, string name) : base(iD, name) {}
+		public SQLIntegerDivision(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1388,7 +1388,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLDecimalDiv : SQLDeviceOperator
     {
-		public SQLDecimalDiv(int iD, string name) : base(iD, name) {}
+		public SQLDecimalDiv(long iD, string name) : base(iD, name) {}
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1410,7 +1410,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Comparison operators    
     public class SQLEqual : SQLBinaryOperator 
     { 
-		public SQLEqual(int iD, string name) : base(iD, name) {}
+		public SQLEqual(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1423,7 +1423,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public class SQLNotEqual : SQLBinaryOperator 
     { 
-		public SQLNotEqual(int iD, string name) : base(iD, name) {}
+		public SQLNotEqual(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1436,7 +1436,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLLess : SQLBinaryOperator 
     { 
-		public SQLLess(int iD, string name) : base(iD, name) {}
+		public SQLLess(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1449,7 +1449,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLInclusiveLess : SQLBinaryOperator 
     { 
-		public SQLInclusiveLess(int iD, string name) : base(iD, name) {}
+		public SQLInclusiveLess(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1462,7 +1462,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLGreater : SQLBinaryOperator 
     { 
-		public SQLGreater(int iD, string name) : base(iD, name) {}
+		public SQLGreater(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1475,7 +1475,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLInclusiveGreater : SQLBinaryOperator 
     { 
-		public SQLInclusiveGreater(int iD, string name) : base(iD, name) {}
+		public SQLInclusiveGreater(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1488,7 +1488,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLLike : SQLBinaryOperator 
     { 
-		public SQLLike(int iD, string name) : base(iD, name) {}
+		public SQLLike(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1501,7 +1501,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
     public class SQLMatches : SQLBinaryOperator 
     { 
-		public SQLMatches(int iD, string name) : base(iD, name) {}
+		public SQLMatches(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1515,7 +1515,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Left ?= Right ::= case when Left = Right then 0 when Left < Right then -1 else 1 end
 	public class SQLCompare : SQLDeviceOperator
 	{
-		public SQLCompare(int iD, string name) : base(iD, name) {}
+		public SQLCompare(long iD, string name) : base(iD, name) {}
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1563,7 +1563,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLBetween : SQLDeviceOperator
 	{
-		public SQLBetween(int iD, string name) : base(iD, name) {}
+		public SQLBetween(long iD, string name) : base(iD, name) {}
 
 		protected override bool GetIsTruthValued()
 		{
@@ -1588,7 +1588,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// ToString(AValue) ::= case when AValue = 0 then 'False' else 'True' end
 	public class SQLBooleanToString : SQLDeviceOperator
 	{
-		public SQLBooleanToString(int iD, string name) : base(iD, name) {}
+		public SQLBooleanToString(long iD, string name) : base(iD, name) {}
 	
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -1617,7 +1617,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Null handling operators
 	public class SQLIsNull : SQLUnaryOperator
 	{
-		public SQLIsNull(int iD, string name) : base(iD, name) {}
+		public SQLIsNull(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1654,7 +1654,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Null handling operators
 	public class SQLIsNotNull : SQLUnaryOperator
 	{
-		public SQLIsNotNull(int iD, string name) : base(iD, name) {}
+		public SQLIsNotNull(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1690,7 +1690,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLIfNull : SQLBinaryOperator
 	{
-		public SQLIfNull(int iD, string name) : base(iD, name) {}
+		public SQLIfNull(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iNullValue"; }
 		public override bool GetIsBooleanContext() { return false; }
@@ -1726,7 +1726,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // Logical operators
     public class SQLNot : SQLDeviceOperator
     { 
-		public SQLNot(int iD, string name) : base(iD, name) {}
+		public SQLNot(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1745,7 +1745,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLAnd : SQLBinaryOperator 
     { 
-		public SQLAnd(int iD, string name) : base(iD, name) {}
+		public SQLAnd(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1758,7 +1758,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLOr : SQLBinaryOperator 
     { 
-		public SQLOr(int iD, string name) : base(iD, name) {}
+		public SQLOr(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1771,7 +1771,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLXor : SQLBinaryOperator 
     { 
-		public SQLXor(int iD, string name) : base(iD, name) {}
+		public SQLXor(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1798,7 +1798,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // Arithmetic operators
     public class SQLNegate : SQLUnaryOperator 
     { 
-		public SQLNegate(int iD, string name) : base(iD, name) {}
+		public SQLNegate(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iNegate"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1806,7 +1806,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
 	public class SQLConcatenation : SQLBinaryOperator
 	{
-		public SQLConcatenation(int iD, string name) : base(iD, name) {}
+		public SQLConcatenation(long iD, string name) : base(iD, name) {}
 
 		public override string GetInstruction() { return "iConcatenation"; }
 		public override bool GetIsBooleanContext() { return false; }
@@ -1814,7 +1814,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLAddition : SQLBinaryOperator 
     { 
-		public SQLAddition(int iD, string name) : base(iD, name) {}
+		public SQLAddition(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iAddition"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1822,7 +1822,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLSubtraction : SQLBinaryOperator 
     { 
-		public SQLSubtraction(int iD, string name) : base(iD, name) {}
+		public SQLSubtraction(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iSubtraction"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1830,7 +1830,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLMultiplication : SQLBinaryOperator 
     { 
-		public SQLMultiplication(int iD, string name) : base(iD, name) {}
+		public SQLMultiplication(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iMultiplication"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1838,7 +1838,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLDivision : SQLBinaryOperator 
     { 
-		public SQLDivision(int iD, string name) : base(iD, name) {}
+		public SQLDivision(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iDivision"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1846,7 +1846,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLMod : SQLBinaryOperator 
     { 
-		public SQLMod(int iD, string name) : base(iD, name) {}
+		public SQLMod(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iMod"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1854,7 +1854,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLPower : SQLBinaryOperator 
     { 
-		public SQLPower(int iD, string name) : base(iD, name) {}
+		public SQLPower(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iPower"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1863,7 +1863,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // Bitwise operators
     public class SQLBitwiseNot : SQLUnaryOperator 
     { 
-		public SQLBitwiseNot(int iD, string name) : base(iD, name) {}
+		public SQLBitwiseNot(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseNot"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1871,7 +1871,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseAnd : SQLBinaryOperator 
     { 
-		public SQLBitwiseAnd(int iD, string name) : base(iD, name) {}
+		public SQLBitwiseAnd(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseAnd"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1879,7 +1879,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseOr : SQLBinaryOperator 
     { 
-		public SQLBitwiseOr(int iD, string name) : base(iD, name) {}
+		public SQLBitwiseOr(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseOr"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1887,7 +1887,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLBitwiseXor : SQLBinaryOperator 
     { 
-		public SQLBitwiseXor(int iD, string name) : base(iD, name) {}
+		public SQLBitwiseXor(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iBitwiseXor"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1895,7 +1895,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLLeftShift : SQLBinaryOperator 
     { 
-		public SQLLeftShift(int iD, string name) : base(iD, name) {}
+		public SQLLeftShift(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iShiftLeft"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1903,7 +1903,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLRightShift : SQLBinaryOperator 
     { 
-		public SQLRightShift(int iD, string name) : base(iD, name) {}
+		public SQLRightShift(long iD, string name) : base(iD, name) {}
 		
 		public override string GetInstruction() { return "iShiftRight"; } 
 		public override bool GetIsBooleanContext() { return false; }
@@ -1912,7 +1912,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	// Existential
     public class SQLExists : SQLDeviceOperator
     { 
-		public SQLExists(int iD, string name) : base(iD, name) {}
+		public SQLExists(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1944,7 +1944,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     
     public class SQLIn : SQLBinaryOperator 
     { 
-		public SQLIn(int iD, string name) : base(iD, name) {}
+		public SQLIn(long iD, string name) : base(iD, name) {}
 		
 		protected override bool GetIsTruthValued()
 		{
@@ -1981,7 +1981,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	public class SQLDoNothing : SQLDeviceOperator
 	{
-		public SQLDoNothing(int iD, string name) : base(iD, name) {}
+		public SQLDoNothing(long iD, string name) : base(iD, name) {}
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{

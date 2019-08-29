@@ -205,7 +205,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							foreach (Schema.TableVarColumn column in reference.SourceKey.Columns)
 								sourceKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 					
-							int newReferenceID = Schema.Object.GetNextObjectID();
+							var newReferenceID = Schema.Object.GetNextObjectID();
 							string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID, sourceKey);
 
 							Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
@@ -231,7 +231,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							foreach (Schema.TableVarColumn column in reference.TargetKey.Columns)
 								targetKey.Columns.Add(TableVar.Columns[SourceTableVar.Columns.IndexOfName(column.Name)]);
 				
-							int newReferenceID = Schema.Object.GetNextObjectID();
+							var newReferenceID = Schema.Object.GetNextObjectID();
 							string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID, targetKey);
 				
 							Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);

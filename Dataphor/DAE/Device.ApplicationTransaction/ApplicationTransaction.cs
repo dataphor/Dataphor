@@ -509,16 +509,16 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class TableMapHeader : System.Object
 	{
-		public TableMapHeader(int sourceTableVarID, int translatedTableVarID, int deletedTableVarID) : base()
+		public TableMapHeader(long sourceTableVarID, long translatedTableVarID, long deletedTableVarID) : base()
 		{
 			SourceTableVarID = sourceTableVarID;
 			TranslatedTableVarID = translatedTableVarID;
 			DeletedTableVarID = deletedTableVarID;
 		}
 		
-		public int SourceTableVarID;
-		public int TranslatedTableVarID;
-		public int DeletedTableVarID;
+		public long SourceTableVarID;
+		public long TranslatedTableVarID;
+		public long DeletedTableVarID;
 	}
 
 	public class TableMap : Schema.Object
@@ -1168,7 +1168,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class ApplicationTransactionDevice : MemoryDevice
 	{
-		public ApplicationTransactionDevice(int iD, string name) : base(iD, name)
+		public ApplicationTransactionDevice(long iD, string name) : base(iD, name)
 		{
 			IgnoreUnsupported = true;
 		}
@@ -1490,7 +1490,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 							if (aTOperator != null)
 							{
 								// Check for tables with event handlers attached to this operator
-								List<int> handlerIDs = process.CatalogDeviceSession.SelectOperatorHandlers(operatorValue.ID);
+								var handlerIDs = process.CatalogDeviceSession.SelectOperatorHandlers(operatorValue.ID);
 
 								for (int index = 0; index < handlerIDs.Count; index++)
 								{

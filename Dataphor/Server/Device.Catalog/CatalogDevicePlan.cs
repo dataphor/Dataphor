@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	/// <summary>Stub class to indicate the device does support a given operator. Not actually used to implement the translation.</summary>
 	public class CatalogDeviceOperator : DeviceOperator
 	{
-		public CatalogDeviceOperator(int iD, string name) : base(iD, name) {}
+		public CatalogDeviceOperator(long iD, string name) : base(iD, name) {}
 		
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{

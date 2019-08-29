@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// <summary> Works around the fact that as of PostgreSQL 9.1, UNION is not optimized at all, but UNION ALL is.</summary>
 	public class PostgreSQLUnion : SQLUnion
 	{
-		public PostgreSQLUnion(int iD, string name) : base(iD, name) { }
+		public PostgreSQLUnion(long iD, string name) : base(iD, name) { }
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLRetrieve : SQLRetrieve
 	{
-		public PostgreSQLRetrieve(int iD, string name) : base(iD, name) { }
+		public PostgreSQLRetrieve(long iD, string name) : base(iD, name) { }
 
 		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToday : SQLDeviceOperator
 	{
-		public PostgreSQLToday(int iD, string name)
+		public PostgreSQLToday(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLSubString : SQLDeviceOperator
 	{
-		public PostgreSQLSubString(int iD, string name)
+		public PostgreSQLSubString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// Pos(ASubString, AString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class PostgreSQLPos : SQLDeviceOperator
 	{
-		public PostgreSQLPos(int iD, string name)
+		public PostgreSQLPos(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -180,7 +180,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
 	public class PostgreSQLIndexOf : SQLDeviceOperator
 	{
-		public PostgreSQLIndexOf(int iD, string name)
+		public PostgreSQLIndexOf(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// CompareText(ALeftValue, ARightValue) ::= case when Upper(ALeftValue) = Upper(ARightValue) then 0 when Upper(ALeftValue) < Upper(ARightValue) then -1 else 1 end
 	public class PostgreSQLCompareText : SQLDeviceOperator
 	{
-		public PostgreSQLCompareText(int iD, string name)
+		public PostgreSQLCompareText(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -281,7 +281,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToString(AValue) ::= Convert(varchar, AValue)
 	public class PostgreSQLToString : SQLDeviceOperator
 	{
-		public PostgreSQLToString(int iD, string name)
+		public PostgreSQLToString(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -295,7 +295,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToBit : SQLDeviceOperator
 	{
-		public PostgreSQLToBit(int iD, string name)
+		public PostgreSQLToBit(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToTinyInt : SQLDeviceOperator
 	{
-		public PostgreSQLToTinyInt(int iD, string name)
+		public PostgreSQLToTinyInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -324,7 +324,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToByte(AValue) ::= convert(tinyint, AValue & (power(2, 8) - 1))	
 	public class PostgreSQLToByte : SQLDeviceOperator
 	{
-		public PostgreSQLToByte(int iD, string name)
+		public PostgreSQLToByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -365,7 +365,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToSmallInt : SQLDeviceOperator
 	{
-		public PostgreSQLToSmallInt(int iD, string name)
+		public PostgreSQLToSmallInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -380,7 +380,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToSByte(AValue) ::= convert(smallint, ((AValue & (power(2, 8) - 1) & ~power(2, 7)) - (power(2, 7) & AValue)))
 	public class PostgreSQLToSByte : SQLDeviceOperator
 	{
-		public PostgreSQLToSByte(int iD, string name)
+		public PostgreSQLToSByte(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -457,7 +457,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToShort(AValue) ::= convert(smallint, ((AValue & (power(2, 16) - 1) & ~power(2, 15)) - (power(2, 15) & AValue)))
 	public class PostgreSQLToShort : SQLDeviceOperator
 	{
-		public PostgreSQLToShort(int iD, string name)
+		public PostgreSQLToShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToInt : SQLDeviceOperator
 	{
-		public PostgreSQLToInt(int iD, string name)
+		public PostgreSQLToInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -557,7 +557,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToUShort(AValue) ::= convert(int, AValue & (power(2, 16) - 1))	
 	public class PostgreSQLToUShort : SQLDeviceOperator
 	{
-		public PostgreSQLToUShort(int iD, string name)
+		public PostgreSQLToUShort(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -599,7 +599,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToInteger(AValue) ::= convert(int, ((AValue & ((power(convert(bigint, 2), 32) - 1) & ~(power(convert(bigint, 2), 31)) - (power(convert(bigint, 2), 31) & AValue)))
 	public class PostgreSQLToInteger : SQLDeviceOperator
 	{
-		public PostgreSQLToInteger(int iD, string name)
+		public PostgreSQLToInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -699,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToBigInt : SQLDeviceOperator
 	{
-		public PostgreSQLToBigInt(int iD, string name)
+		public PostgreSQLToBigInt(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -723,7 +723,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToUInteger(AValue) ::= convert(bigint, AValue & (power(convert(bigint, 2), 32) - 1))	
 	public class PostgreSQLToUInteger : SQLDeviceOperator
 	{
-		public PostgreSQLToUInteger(int iD, string name)
+		public PostgreSQLToUInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -773,7 +773,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToLong(AValue) ::= convert(bigint, ((AValue & ((power(2, 64) * 1) - 1) & ~power(2, 63)) - (power(2, 63) & AValue)))
 	public class PostgreSQLToLong : SQLDeviceOperator
 	{
-		public PostgreSQLToLong(int iD, string name)
+		public PostgreSQLToLong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -854,7 +854,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToDecimal20 : SQLDeviceOperator
 	{
-		public PostgreSQLToDecimal20(int iD, string name)
+		public PostgreSQLToDecimal20(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -877,7 +877,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToDecimal288 : SQLDeviceOperator
 	{
-		public PostgreSQLToDecimal288(int iD, string name)
+		public PostgreSQLToDecimal288(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -901,7 +901,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// ToULong(AValue) ::= convert(decimal(20, 0), AValue & (power(2, 64) - 1))	
 	public class PostgreSQLToULong : SQLDeviceOperator
 	{
-		public PostgreSQLToULong(int iD, string name)
+		public PostgreSQLToULong(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -942,7 +942,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToDecimal : SQLDeviceOperator
 	{
-		public PostgreSQLToDecimal(int iD, string name)
+		public PostgreSQLToDecimal(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -965,7 +965,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToMoney : SQLDeviceOperator
 	{
-		public PostgreSQLToMoney(int iD, string name)
+		public PostgreSQLToMoney(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -988,7 +988,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLToUniqueIdentifier : SQLDeviceOperator
 	{
-		public PostgreSQLToUniqueIdentifier(int iD, string name)
+		public PostgreSQLToUniqueIdentifier(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1104,7 +1104,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// Math
 	public class PostgreSQLPower : SQLDeviceOperator
 	{
-		public PostgreSQLPower(int iD, string name)
+		public PostgreSQLPower(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1127,7 +1127,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTruncate : SQLDeviceOperator
 	{
-		public PostgreSQLTruncate(int iD, string name)
+		public PostgreSQLTruncate(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1142,7 +1142,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLFrac : SQLDeviceOperator
 	{
-		public PostgreSQLFrac(int iD, string name)
+		public PostgreSQLFrac(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1158,7 +1158,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLLogB : SQLDeviceOperator
 	{
-		public PostgreSQLLogB(int iD, string name)
+		public PostgreSQLLogB(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1177,7 +1177,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	// TimeSpan
 	public class PostgreSQLTimeSpanReadMillisecond : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanReadMillisecond(int iD, string name)
+		public PostgreSQLTimeSpanReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1192,7 +1192,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanReadSecond : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanReadSecond(int iD, string name)
+		public PostgreSQLTimeSpanReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1207,7 +1207,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanReadMinute : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanReadMinute(int iD, string name)
+		public PostgreSQLTimeSpanReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1222,7 +1222,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanReadHour : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanReadHour(int iD, string name)
+		public PostgreSQLTimeSpanReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1237,7 +1237,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanReadDay : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanReadDay(int iD, string name)
+		public PostgreSQLTimeSpanReadDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1252,7 +1252,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanWriteMillisecond : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanWriteMillisecond(int iD, string name)
+		public PostgreSQLTimeSpanWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1272,7 +1272,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanWriteSecond : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanWriteSecond(int iD, string name)
+		public PostgreSQLTimeSpanWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1292,7 +1292,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanWriteMinute : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanWriteMinute(int iD, string name)
+		public PostgreSQLTimeSpanWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1312,7 +1312,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanWriteHour : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanWriteHour(int iD, string name)
+		public PostgreSQLTimeSpanWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1332,7 +1332,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLTimeSpanWriteDay : SQLDeviceOperator
 	{
-		public PostgreSQLTimeSpanWriteDay(int iD, string name)
+		public PostgreSQLTimeSpanWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1353,7 +1353,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLAddMonths : SQLDeviceOperator
 	{
-		public PostgreSQLAddMonths(int iD, string name)
+		public PostgreSQLAddMonths(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1369,7 +1369,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLAddYears : SQLDeviceOperator
 	{
-		public PostgreSQLAddYears(int iD, string name)
+		public PostgreSQLAddYears(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1386,7 +1386,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	public class PostgreSQLDayOfWeek : SQLDeviceOperator
 	// TODO: do for removal as replaced with Storage.TranslationString in SystemCatalog.d4
 	{
-		public PostgreSQLDayOfWeek(int iD, string name)
+		public PostgreSQLDayOfWeek(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1401,7 +1401,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDayOfYear : SQLDeviceOperator
 	{
-		public PostgreSQLDayOfYear(int iD, string name)
+		public PostgreSQLDayOfYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1416,7 +1416,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeReadHour : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeReadHour(int iD, string name)
+		public PostgreSQLDateTimeReadHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1431,7 +1431,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeReadMinute : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeReadMinute(int iD, string name)
+		public PostgreSQLDateTimeReadMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1446,7 +1446,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeReadSecond : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeReadSecond(int iD, string name)
+		public PostgreSQLDateTimeReadSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1461,7 +1461,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeReadMillisecond : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeReadMillisecond(int iD, string name)
+		public PostgreSQLDateTimeReadMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1476,7 +1476,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteMillisecond : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteMillisecond(int iD, string name)
+		public PostgreSQLDateTimeWriteMillisecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1496,7 +1496,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteSecond : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteSecond(int iD, string name)
+		public PostgreSQLDateTimeWriteSecond(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1516,7 +1516,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteMinute : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteMinute(int iD, string name)
+		public PostgreSQLDateTimeWriteMinute(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1536,7 +1536,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteHour : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteHour(int iD, string name)
+		public PostgreSQLDateTimeWriteHour(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1556,7 +1556,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteDay : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteDay(int iD, string name)
+		public PostgreSQLDateTimeWriteDay(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1573,7 +1573,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteMonth : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteMonth(int iD, string name)
+		public PostgreSQLDateTimeWriteMonth(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1590,7 +1590,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeWriteYear : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeWriteYear(int iD, string name)
+		public PostgreSQLDateTimeWriteYear(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1607,7 +1607,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeDatePart : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeDatePart(int iD, string name)
+		public PostgreSQLDateTimeDatePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1624,7 +1624,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	public class PostgreSQLDateTimeTimePart : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeTimePart(int iD, string name)
+		public PostgreSQLDateTimeTimePart(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -1647,7 +1647,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	/// </summary>
 	public class PostgreSQLDateTimeSelector : SQLDeviceOperator
 	{
-		public PostgreSQLDateTimeSelector(int iD, string name)
+		public PostgreSQLDateTimeSelector(long iD, string name)
 			: base(iD, name)
 		{
 		}

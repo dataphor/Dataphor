@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	internal class StoreIndexHeaders : Dictionary<string, StoreIndexHeader> {}
 
-	public class CatalogStore : System.Object
+	public class CatalogStore : Disposable
 	{
 		public CatalogStore() { }
 		
@@ -120,9 +120,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			_store.ConnectionString = _storeConnectionString;
 			_store.MaxConnections = _maxConnections;
 		}
-		
-		/// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
-		public void Initialize(Server.Engine server)
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _store?.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
+        public void Initialize(Server.Engine server)
 		{
 			CreateStore();
 			_store.Initialize();
@@ -1126,7 +1136,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				if (cursor.Next())
-					return new Schema.Right((string)cursor[0], (string)cursor[1], (int)cursor[2]);
+					return new Schema.Right((string)cursor[0], (string)cursor[1], (long)cursor[2]);
 					
 				return null;
 			}
@@ -1187,7 +1197,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			DeletePersistentObject(role);
 		}
 		
-		public List<string> SelectRoleUsers(int roleID)
+		public List<string> SelectRoleUsers(long roleID)
 		{
 			List<string> users = new List<string>();
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEUserRoles_Role_ID", false, roleID);
@@ -1204,7 +1214,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.RightAssignment SelectRoleRightAssignment(int roleID, string rightName)
+		public Schema.RightAssignment SelectRoleRightAssignment(long roleID, string rightName)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAERoleRightAssignments", false, roleID, rightName);
 			try
@@ -1219,7 +1229,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void EnsureRoleRightAssignment(int roleID, string rightName, bool granted)
+		public void EnsureRoleRightAssignment(long roleID, string rightName, bool granted)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAERoleRightAssignments", true, roleID, rightName);
 			try
@@ -1238,7 +1248,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void DeleteRoleRightAssignment(int roleID, string rightName)
+		public void DeleteRoleRightAssignment(long roleID, string rightName)
 		{
 			DeleteRows("PK_DAERoleRightAssignments", roleID, rightName);
 		}
@@ -1367,7 +1377,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				for (int index = 0; index < objectList.Count; index++)
 					if (operators.FindKey(new object[] { objectList[index][0] }))
-						headers.Add(new Schema.CatalogObjectHeader((int)objectList[index][0], (string)objectList[index][1], (string)objectList[index][2], (string)objectList[index][3]));
+						headers.Add(new Schema.CatalogObjectHeader((long)objectList[index][0], (string)objectList[index][1], (string)objectList[index][2], (string)objectList[index][3]));
 
 				return headers;
 			}
@@ -1377,12 +1387,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void InsertUserRole(string userID, int roleID)
+		public void InsertUserRole(string userID, long roleID)
 		{
 			InsertRow("DAEUserRoles", userID, roleID); 
 		}
 		
-		public void DeleteUserRole(string userID, int roleID)
+		public void DeleteUserRole(string userID, long roleID)
 		{
 			DeleteRows("PK_DAEUserRoles", userID, roleID);
 		}
@@ -1498,7 +1508,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Returns true if there are any device objects registered for the given device, false otherwise.</summary>
-		public bool HasDeviceObjects(int deviceID)
+		public bool HasDeviceObjects(long deviceID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEDeviceObjects_Device_ID_Mapped_Object_ID", false, deviceID);
 			try
@@ -1512,13 +1522,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Returns the ID of the device object map for the device with ID ADeviceID and object AObjectID, if it exists, -1 otherwise.</summary>
-		public int SelectDeviceObjectID(int deviceID, int objectID)
+		public long SelectDeviceObjectID(long deviceID, long objectID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEDeviceObjects_Device_ID_Mapped_Object_ID", false, deviceID, objectID);
 			try
 			{
 				if (cursor.Next())
-					return (int)cursor[0];
+					return (long)cursor[0];
 				return -1;
 			}
 			finally
@@ -1605,7 +1615,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 				for (int index = 0; index < objectList.Count; index++)
 					if (objects.FindKey(objectList[index]))
-						headers.Add(new Schema.CatalogObjectHeader((int)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
+						headers.Add(new Schema.CatalogObjectHeader((long)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
 						
 				return headers;
 			}
@@ -1623,7 +1633,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				Schema.CatalogObjectHeaders headers = new Schema.CatalogObjectHeaders();
 				
 				while (objects.Next())
-					headers.Add(new Schema.CatalogObjectHeader((int)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
+					headers.Add(new Schema.CatalogObjectHeader((long)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
 					
 				return headers;
 			}
@@ -1633,7 +1643,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.CatalogObjectHeaders SelectGeneratedObjects(int objectID)
+		public Schema.CatalogObjectHeaders SelectGeneratedObjects(long objectID)
 		{
 			List<object[]> objectList = new List<object[]>();
 			
@@ -1655,7 +1665,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					
 				for (int index = 0; index < objectList.Count; index++)
 					if (catalogObjects.FindKey(objectList[index]))
-						headers.Add(new Schema.CatalogObjectHeader((int)catalogObjects[0], (string)catalogObjects[1], (string)catalogObjects[2], (string)catalogObjects[3]));
+						headers.Add(new Schema.CatalogObjectHeader((long)catalogObjects[0], (string)catalogObjects[1], (string)catalogObjects[2], (string)catalogObjects[3]));
 							
 				return headers;
 			}
@@ -1665,14 +1675,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public int GetMaxObjectID()
+		public long GetMaxObjectID()
 		{
 			SQLStoreCursor cursor = OpenCursor("PK_DAEObjects", false);
 			try
 			{
 				cursor.Last();
 				if (cursor.Prior())
-					return (int)cursor[0];
+					return (long)cursor[0];
 				return 0;
 			}
 			finally
@@ -1927,7 +1937,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					#else
 					if (cursor.Next())
 					#endif
-						headers.Add(new Schema.CatalogObjectHeader((int)cursor[0], (string)cursor[1], (string)cursor[2], (string)cursor[3]));
+						headers.Add(new Schema.CatalogObjectHeader((long)cursor[0], (string)cursor[1], (string)cursor[2], (string)cursor[3]));
 						
 					return headers;
 				}
@@ -1967,7 +1977,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							#else
 							if (objects.FindKey(names[nameIndex]))
 							#endif
-								headers.Add(new Schema.CatalogObjectHeader((int)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
+								headers.Add(new Schema.CatalogObjectHeader((long)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
 					}
 					finally
 					{
@@ -2031,7 +2041,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							#else
 							if (objects.FindKey(nameList[nameIndex]))
 							#endif
-								headers.Add(new Schema.CatalogObjectHeader((int)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
+								headers.Add(new Schema.CatalogObjectHeader((long)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
 					}
 					finally
 					{
@@ -2085,7 +2095,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					{
 						for (int operatorIndex = 0; operatorIndex < operatorList.Count; operatorIndex++)
 							if (objects.FindKey(new object[] { operatorList[operatorIndex] }))
-								headers.Add(new Schema.CatalogObjectHeader((int)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
+								headers.Add(new Schema.CatalogObjectHeader((long)objects[0], (string)objects[1], (string)objects[2], (string)objects[3]));
 					}
 					finally
 					{
@@ -2097,7 +2107,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return headers;
 		}
 		
-		public string SelectOperatorName(int objectID)
+		public string SelectOperatorName(long objectID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEOperators", false, objectID);
 			try
@@ -2113,7 +2123,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.PersistentObjectHeader SelectPersistentObject(int objectID)
+		public Schema.PersistentObjectHeader SelectPersistentObject(long objectID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEObjects", false, objectID);
 			try
@@ -2122,7 +2132,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					return
 						new Schema.PersistentObjectHeader
 						(
-							(int)cursor[0], // ID
+							(long)cursor[0], // ID
 							(string)cursor[1], // Name
 							(string)cursor[2], // Library_Name
 							(string)cursor[15], // Script
@@ -2143,7 +2153,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.FullCatalogObjectHeader SelectCatalogObject(int objectID)
+		public Schema.FullCatalogObjectHeader SelectCatalogObject(long objectID)
 		{
 			object[] objectValue = null;
 			SQLStoreCursor objects = OpenMatchedCursor("PK_DAEObjects", false, objectID);
@@ -2166,7 +2176,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						return
 							new Schema.FullCatalogObjectHeader
 							(
-								(int)objectValue[0], // ID
+								(long)objectValue[0], // ID
 								(string)objectValue[1], // Name
 								(string)objectValue[2], // LibraryName
 								(string)catalogObjects[3], // OwnerID
@@ -2178,7 +2188,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 								(bool)objectValue[8], // IsGenerated
 								(bool)objectValue[9], // IsATObject
 								(bool)objectValue[10], // IsSessionObject
-								(int)objectValue[14] // GeneratorObjectID
+								(long)objectValue[14] // GeneratorObjectID
 							);
 				}
 				finally
@@ -2493,7 +2503,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void SetCatalogObjectOwner(int catalogObjectID, string userID)
+		public void SetCatalogObjectOwner(long catalogObjectID, string userID)
 		{
 			SQLStoreCursor catalogObjects = OpenMatchedCursor("PK_DAECatalogObjects", true, catalogObjectID);
 			try
@@ -2525,29 +2535,29 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.ObjectHeader SelectObject(int objectID)
+		public Schema.ObjectHeader SelectObject(long objectID)
 		{
 			SQLStoreCursor objects = OpenMatchedCursor("PK_DAEObjects", false, objectID);
 			try
 			{
-				if (objects.Next())
-					return
-						new Schema.ObjectHeader
-						(
-							(int)objects[0], // ID
-							(string)objects[1], // Name
-							(string)objects[2], // LibraryName,
-							(string)objects[3], // DisplayName,
-							(string)objects[5], // Type,
-							(bool)objects[6], // IsSystem,
-							(bool)objects[7], // IsRemotable,
-							(bool)objects[8], // IsGenerated,
-							(bool)objects[9], // IsATObject,
-							(bool)objects[10], // IsSessionObject,
-							(bool)objects[11], // IsPersistent,
-							(int)objects[12], // CatalogObjectID,
-							(int)objects[13], // ParentObjectID
-							(int)objects[14] // GeneratorObjectID
+                if (objects.Next())
+                    return
+                        new Schema.ObjectHeader
+                        (
+                            (long)objects[0], // ID
+                            (string)objects[1], // Name
+                            (string)objects[2], // LibraryName,
+                            (string)objects[3], // DisplayName,
+                            (string)objects[5], // Type,
+                            (bool)objects[6], // IsSystem,
+                            (bool)objects[7], // IsRemotable,
+                            (bool)objects[8], // IsGenerated,
+                            (bool)objects[9], // IsATObject,
+                            (bool)objects[10], // IsSessionObject,
+                            (bool)objects[11], // IsPersistent,
+                            (long)objects[12], // CatalogObjectID,
+                            (long)objects[13], // ParentObjectID
+                            (long)objects[14] // GeneratorObjectID
 						);
 						
 				return null;
@@ -2558,30 +2568,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.FullObjectHeader SelectFullObject(int objectID)
+		public Schema.FullObjectHeader SelectFullObject(long objectID)
 		{
 			SQLStoreCursor objects = OpenMatchedCursor("PK_DAEObjects", false, objectID);
 			try
 			{
-				if (objects.Next())
-					return
-						new Schema.FullObjectHeader
-						(
-							(int)objects[0], // ID
-							(string)objects[1], // Name
-							(string)objects[2], // LibraryName,
-							(string)objects[15], // Script,
-							(string)objects[3], // DisplayName,
-							(string)objects[5], // Type,
-							(bool)objects[6], // IsSystem,
-							(bool)objects[7], // IsRemotable,
-							(bool)objects[8], // IsGenerated,
-							(bool)objects[9], // IsATObject,
-							(bool)objects[10], // IsSessionObject,
-							(bool)objects[11], // IsPersistent,
-							(int)objects[12], // CatalogObjectID,
-							(int)objects[13], // ParentObjectID
-							(int)objects[14] // GeneratorObjectID
+                if (objects.Next())
+                    return
+                        new Schema.FullObjectHeader
+                        (
+                            (long)objects[0], // ID
+                            (string)objects[1], // Name
+                            (string)objects[2], // LibraryName,
+                            (string)objects[15], // Script,
+                            (string)objects[3], // DisplayName,
+                            (string)objects[5], // Type,
+                            (bool)objects[6], // IsSystem,
+                            (bool)objects[7], // IsRemotable,
+                            (bool)objects[8], // IsGenerated,
+                            (bool)objects[9], // IsATObject,
+                            (bool)objects[10], // IsSessionObject,
+                            (bool)objects[11], // IsPersistent,
+                            (long)objects[12], // CatalogObjectID,
+                            (long)objects[13], // ParentObjectID
+                            (long)objects[14] // GeneratorObjectID
 						);
 						
 				return null;
@@ -2592,7 +2602,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.FullObjectHeaders SelectChildObjects(int parentObjectID)
+		public Schema.FullObjectHeaders SelectChildObjects(long parentObjectID)
 		{
 			Schema.FullObjectHeaders headers = new Schema.FullObjectHeaders();
 			SQLStoreCursor objects = OpenMatchedCursor("IDX_DAEObjects_Parent_Object_ID", false, parentObjectID);
@@ -2604,7 +2614,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					(
 						new Schema.FullObjectHeader
 						(
-							(int)objects[0], // ID
+							(long)objects[0], // ID
 							(string)objects[1], // Name
 							(string)objects[2], // LibraryName,
 							(string)objects[15], // Script,
@@ -2616,9 +2626,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(bool)objects[9], // IsATObject,
 							(bool)objects[10], // IsSessionObject,
 							(bool)objects[11], // IsPersistent,
-							(int)objects[12], // CatalogObjectID,
-							(int)objects[13], // ParentObjectID
-							(int)objects[14] // GeneratorObjectID
+							(long)objects[12], // CatalogObjectID,
+							(long)objects[13], // ParentObjectID
+							(long)objects[14] // GeneratorObjectID
 						)
 					);
 				}
@@ -2630,7 +2640,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return headers;
 		}
 		
-		public Schema.PersistentObjectHeaders SelectPersistentChildObjects(int catalogObjectID)
+		public Schema.PersistentObjectHeaders SelectPersistentChildObjects(long catalogObjectID)
 		{
 			Schema.PersistentObjectHeaders headers = new Schema.PersistentObjectHeaders();
 			SQLStoreCursor objects = OpenMatchedCursor("IDX_DAEObjects_Catalog_Object_ID", false, catalogObjectID);
@@ -2644,7 +2654,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						(
 							new Schema.PersistentObjectHeader
 							(
-								(int)objects[0], // ID
+								(long)objects[0], // ID
 								(string)objects[1], // Name
 								(string)objects[2], // LibraryName
 								(string)objects[15], // Script
@@ -2667,7 +2677,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return headers;
 		}
 		
-		private object[] SelectObjectRow(int objectID)
+		private object[] SelectObjectRow(long objectID)
 		{
 			SQLStoreCursor objects = OpenCursor("PK_DAEObjects", false);
 			try
@@ -2682,15 +2692,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		private void SelectObjectDependents(int objectID, int level, Schema.DependentObjectHeaders headers, bool recursive)
+		private void SelectObjectDependents(long objectID, int level, Schema.DependentObjectHeaders headers, bool recursive)
 		{
-			List<int> dependencyList = new List<int>();
+			var dependencyList = new List<long>();
 			SQLStoreCursor dependencies = OpenMatchedCursor("IDX_DAEObjectDependencies_Dependency_Object_ID", false, objectID);
 			try
 			{
 				while (dependencies.Next())
-					if (!headers.Contains((int)dependencies[0]))
-						dependencyList.Add((int)dependencies[0]);
+					if (!headers.Contains((long)dependencies[0]))
+						dependencyList.Add((long)dependencies[0]);
 			}
 			finally
 			{
@@ -2702,7 +2712,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				object[] objectValue = SelectObjectRow(dependencyList[dependencyIndex]);
 				if (objectValue != null)
 				{
-				    var iD = (int)objectValue[0];
+				    var iD = (long)objectValue[0];
 				    var name = (string)objectValue[1];
                     var libraryName = (string)objectValue[2];
 				    var displayName = (string)objectValue[3];
@@ -2714,9 +2724,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				    var isATObject = (bool)objectValue[9];
 				    var isSessionObject = (bool)objectValue[10];
 				    var isPersistent = (bool)objectValue[11];
-				    var catalogObjectID = (int)objectValue[12];
-				    var parentObjectID = (int)objectValue[13];
-				    var generatorObjectID = (int)objectValue[14];
+				    var catalogObjectID = (long)objectValue[12];
+				    var parentObjectID = (long)objectValue[13];
+				    var generatorObjectID = (long)objectValue[14];
 				    var header = new Schema.DependentObjectHeader
 				        (
                             iD, name, 
@@ -2739,22 +2749,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.DependentObjectHeaders SelectObjectDependents(int objectID, bool recursive)
+		public Schema.DependentObjectHeaders SelectObjectDependents(long objectID, bool recursive)
 		{
 			Schema.DependentObjectHeaders headers = new Schema.DependentObjectHeaders();
 			SelectObjectDependents(objectID, 1, headers, recursive);
 			return headers;
 		}
 		
-		private void SelectObjectDependencies(int objectID, int level, Schema.DependentObjectHeaders headers, bool recursive)
+		private void SelectObjectDependencies(long objectID, int level, Schema.DependentObjectHeaders headers, bool recursive)
 		{
-			List<int> dependencyList = new List<int>();
+			var dependencyList = new List<long>();
 			SQLStoreCursor dependencies = OpenMatchedCursor("PK_DAEObjectDependencies", false, objectID);
 			try
 			{
 				while (dependencies.Next())
-					if (!headers.Contains((int)dependencies[1]))
-						dependencyList.Add((int)dependencies[1]);
+					if (!headers.Contains((long)dependencies[1]))
+						dependencyList.Add((long)dependencies[1]);
 			}
 			finally
 			{
@@ -2770,7 +2780,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					(
 						new Schema.DependentObjectHeader
 						(
-							(int)objectValue[0], // ID
+							(long)objectValue[0], // ID
 							(string)objectValue[1], // Name
 							(string)objectValue[2], // LibraryName
 							(string)objectValue[3], // DisplayName
@@ -2782,9 +2792,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(bool)objectValue[9], // IsATObject
 							(bool)objectValue[10], // IsSessionObject
 							(bool)objectValue[11], // IsPersistent
-							(int)objectValue[12], // CatalogObjectID
-							(int)objectValue[13], // ParentObjectID,
-							(int)objectValue[14], // GeneratorObjectID,
+							(long)objectValue[12], // CatalogObjectID
+							(long)objectValue[13], // ParentObjectID,
+							(long)objectValue[14], // GeneratorObjectID,
 							level, // Level
 							headers.Count + 1 // Sequence
 						)
@@ -2796,20 +2806,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.DependentObjectHeaders SelectObjectDependencies(int objectID, bool recursive)
+		public Schema.DependentObjectHeaders SelectObjectDependencies(long objectID, bool recursive)
 		{
 			Schema.DependentObjectHeaders headers = new Schema.DependentObjectHeaders();
 			SelectObjectDependencies(objectID, 1, headers, recursive);
 			return headers;
 		}
 		
-		public Schema.ScalarTypeHeader SelectScalarType(int scalarTypeID)
+		public Schema.ScalarTypeHeader SelectScalarType(long scalarTypeID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEScalarTypes", false, scalarTypeID);
 			try
 			{
-				if (cursor.Next())
-					return new Schema.ScalarTypeHeader((int)cursor[0], (int)cursor[1], (int)cursor[2]);
+                if (cursor.Next())
+                    return new Schema.ScalarTypeHeader((long)cursor[0], (long)cursor[1], (long)cursor[2]);
 					
 				return null;
 			}
@@ -2820,15 +2830,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Returns the set of handlers that invoke the given operator</summary>
-		public List<int> SelectOperatorHandlers(int operatorID)
+		public List<long> SelectOperatorHandlers(long operatorID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEEventHandlers_Operator_ID", false, operatorID);
 			try
 			{
-				List <int> handlers = new List<int>();
+				var handlers = new List<long>();
 				
 				while (cursor.Next())
-					handlers.Add((int)cursor[0]);
+					handlers.Add((long)cursor[0]);
 				
 				return handlers;
 			}
@@ -2838,15 +2848,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public List<int> SelectObjectHandlers(int sourceObjectID)
+		public List<long> SelectObjectHandlers(long sourceObjectID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEEventHandlers_Source_Object_ID", false, sourceObjectID);
 			try
 			{
-				List<int> handlers = new List<int>();
+				var handlers = new List<long>();
 				
 				while (cursor.Next())
-					handlers.Add((int)cursor[0]);
+					handlers.Add((long)cursor[0]);
 				
 				return handlers;
 			}
@@ -2856,13 +2866,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public TableMapHeader SelectApplicationTransactionTableMap(int sourceTableVarID)
+		public TableMapHeader SelectApplicationTransactionTableMap(long sourceTableVarID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEApplicationTransactionTableMaps", false, sourceTableVarID);
 			try
 			{
 				if (cursor.Next())
-					return new TableMapHeader((int)cursor[0], (int)cursor[1], (int)cursor[2]);
+					return new TableMapHeader((long)cursor[0], (long)cursor[1], (long)cursor[2]);
 					
 				return null;
 			}
@@ -2872,12 +2882,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void InsertApplicationTransactionTableMap(int sourceTableVarID, int translatedTableVarID)
+		public void InsertApplicationTransactionTableMap(long sourceTableVarID, long translatedTableVarID)
 		{
 			InsertRow("DAEApplicationTransactionTableMaps", sourceTableVarID, translatedTableVarID, -1);
 		}
 
-		public void UpdateApplicationTransactionTableMap(int sourceTableVarID, int deletedTableVarID)
+		public void UpdateApplicationTransactionTableMap(long sourceTableVarID, long deletedTableVarID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEApplicationTransactionTableMaps", true, sourceTableVarID);
 			try
@@ -2894,18 +2904,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void DeleteApplicationTransactionTableMap(int sourceTableVarID)
+		public void DeleteApplicationTransactionTableMap(long sourceTableVarID)
 		{
 			DeleteRows("PK_DAEApplicationTransactionTableMaps", sourceTableVarID);
 		}
 
-		public int SelectTranslatedApplicationTransactionOperatorID(int sourceOperatorID)
+		public long SelectTranslatedApplicationTransactionOperatorID(long sourceOperatorID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("PK_DAEApplicationTransactionOperatorMaps", false, sourceOperatorID);
 			try
 			{
 				if (cursor.Next())
-					return (int)cursor[1];
+					return (long)cursor[1];
 				return -1;
 			}
 			finally
@@ -2914,13 +2924,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public int SelectSourceApplicationTransactionOperatorID(int translatedOperatorID)
+		public long SelectSourceApplicationTransactionOperatorID(long translatedOperatorID)
 		{
 			SQLStoreCursor cursor = OpenMatchedCursor("IDX_DAEApplicationTransactionOperatorMaps_Translated_Operator_ID", false, translatedOperatorID);
 			try
 			{
 				if (cursor.Next())
-					return (int)cursor[0];
+					return (long)cursor[0];
 				return -1;
 			}
 			finally
@@ -2929,12 +2939,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void InsertApplicationTransactionOperatorMap(int sourceOperatorID, int translatedOperatorID)
+		public void InsertApplicationTransactionOperatorMap(long sourceOperatorID, long translatedOperatorID)
 		{
 			InsertRow("DAEApplicationTransactionOperatorMaps", sourceOperatorID, translatedOperatorID);
 		}
 
-		public void DeleteApplicationTransactionOperatorMap(int sourceOperatorID)
+		public void DeleteApplicationTransactionOperatorMap(long sourceOperatorID)
 		{
 			DeleteRows("PK_DAEApplicationTransactionOperatorMaps", sourceOperatorID);
 		}

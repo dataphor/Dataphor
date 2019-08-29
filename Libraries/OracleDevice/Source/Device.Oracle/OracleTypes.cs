@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	/// </summary>
 	public class OracleTimeSpan : SQLScalarType
 	{
-		public OracleTimeSpan(int iD, string name) : base(iD, name) { }
+		public OracleTimeSpan(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -79,7 +79,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleBoolean : SQLScalarType
 	{
-		public OracleBoolean(int iD, string name) : base(iD, name) { }
+		public OracleBoolean(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public abstract class OracleWholeNumberType : SQLScalarType
 	{
-		public OracleWholeNumberType(int iD, string name)
+		public OracleWholeNumberType(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleInteger : OracleWholeNumberType
 	{
-		public OracleInteger(int iD, string name)
+		public OracleInteger(long iD, string name)
 			: base(iD, name)
 		{
 		}
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleShort : OracleWholeNumberType
 	{
-		public OracleShort(int iD, string name) : base(iD, name) { }
+		public OracleShort(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -221,7 +221,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleByte : OracleWholeNumberType
 	{
-		public OracleByte(int iD, string name) : base(iD, name) { }
+		public OracleByte(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -268,7 +268,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleLong : OracleWholeNumberType
 	{
-		public OracleLong(int iD, string name) : base(iD, name) { }
+		public OracleLong(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{
@@ -288,7 +288,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleString : SQLString
 	{
-		public OracleString(int iD, string name) : base(iD, name) { }
+		public OracleString(long iD, string name) : base(iD, name) { }
 
 		/*
 			Oracle cannot distinguish between an empty string and a null once the empty string has been inserted into a table.
@@ -320,7 +320,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
 	public class OracleSQLText : SQLScalarType
 	{
-		public OracleSQLText(int iD, string name) : base(iD, name) { }
+		public OracleSQLText(long iD, string name) : base(iD, name) { }
 
 		public override object ToScalar(IValueManager manager, object tempValue)
 		{

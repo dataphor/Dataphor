@@ -1,0 +1,8 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Default" />
+  <Config name="Default" binpathtype="Auto">
+    <assembly path="DAE.Client.Tests\bin\Debug\DAE.Client.Tests.dll" />
+    <assembly path="DAE.Server.Tests\bin\Debug\DAE.Server.Tests.dll" />
+    <assembly path="Common.Tests\bin\Debug\Common.Tests.dll" />
+  </Config>
+</NUnitProject>

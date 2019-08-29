@@ -353,13 +353,13 @@ namespace Alphora.Dataphor.DAE.Server
 			_debugger = debugger;
 		}
 		
-		private int _debuggedByID;
-		public int DebuggedByID { get { return _debuggedByID; } }
+		private long _debuggedByID;
+		public long DebuggedByID { get { return _debuggedByID; } }
 		
 		/// <summary>
 		/// Sets the ID of the debugger to which this session is attached.
 		/// </summary>
-		internal void SetDebuggedByID(int debuggedByID)
+		internal void SetDebuggedByID(long debuggedByID)
 		{
 			if (String.IsNullOrEmpty(_sessionInfo.CatalogCacheName))
 				throw new ServerException(ServerException.Codes.CannotAttachToAnInProcessSession, _sessionID);
@@ -492,7 +492,7 @@ namespace Alphora.Dataphor.DAE.Server
 			set { base[index] = value; } 
 		}
 		
-		public ServerSession GetSession(int sessionID)
+		public ServerSession GetSession(long sessionID)
 		{
 			foreach (ServerSession session in this)
 				if (session.SessionID == sessionID)

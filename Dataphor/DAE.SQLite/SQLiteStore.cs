@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Connection;
+using System;
 
 // To specify that a SQLite store be used for catalog persistence, add the following attributes to the alias definition in the ServerAliases.config file:
 // catalogstoreclassname="Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite" 
@@ -32,5 +33,18 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 		{
 			return new SQLiteStoreConnection(this);
 		}
-	}
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                System.Data.SQLite.SQLiteConnection.ClearAllPools();
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            base.Dispose(disposing);
+        }
+    }
 }

@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	*/
 	public class DB2Device : SQLDevice
 	{
-		public DB2Device(int AID, string AName) : base(AID, AName) {}
+		public DB2Device(long AID, string AName) : base(AID, AName) {}
 
 		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
 		{
@@ -502,7 +502,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2Binary : SQLBinary
 	{
-		public DB2Binary(int AID, string AName) : base(AID, AName) {}
+		public DB2Binary(long AID, string AName) : base(AID, AName) {}
 
         protected override string InternalNativeDomainName(D4.MetaData AMetaData)
 		{
@@ -516,7 +516,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2Graphic : SQLGraphic
 	{
-		public DB2Graphic(int AID, string AName) : base(AID, AName) {}
+		public DB2Graphic(long AID, string AName) : base(AID, AName) {}
 
         protected override string InternalNativeDomainName(D4.MetaData AMetaData)
 		{
@@ -530,7 +530,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2400Binary : SQLBinary
 	{
-		public DB2400Binary(int AID, string AName) : base(AID, AName) {}
+		public DB2400Binary(long AID, string AName) : base(AID, AName) {}
 
         protected override string InternalNativeDomainName(D4.MetaData AMetaData)
 		{
@@ -544,7 +544,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2400Graphic : SQLGraphic
 	{
-		public DB2400Graphic(int AID, string AName) : base(AID, AName) {}
+		public DB2400Graphic(long AID, string AName) : base(AID, AName) {}
 
         protected override string InternalNativeDomainName(D4.MetaData AMetaData)
 		{
@@ -558,7 +558,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2Text : SQLText
 	{
-		public DB2Text(int AID, string AName) : base(AID, AName) {}
+		public DB2Text(long AID, string AName) : base(AID, AName) {}
 
         protected override string InternalNativeDomainName(D4.MetaData AMetaData)
 		{
@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	// CompareText(ALeftValue, ARightValue) ::= case when UCase(ALeftValue) = UCase(ARightValue) then 0 when UCase(ALeftValue) < UCase(ARightValue) then -1 else 1 end
 	public class DB2CompareText : SQLDeviceOperator
 	{
-		public DB2CompareText(int AID, string AName) : base(AID, AName) {}
+		public DB2CompareText(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -608,7 +608,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	// DB2 uses 1 based strings.
 	public class DB2Copy : SQLDeviceOperator
 	{
-		public DB2Copy(int AID, string AName) : base(AID, AName) {}
+		public DB2Copy(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -635,7 +635,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	// IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else PosStr(AString, ASubstring) end - 1
 	public class DB2IndexOf : SQLDeviceOperator
 	{
-		public DB2IndexOf(int AID, string AName) : base(AID, AName) {}
+		public DB2IndexOf(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -680,7 +680,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	// IndexOf(ASubString, AString) ::= case when ASubstring = '' then 1 else PosStr(AString, ASubstring) end - 1
 	public class DB2Pos : SQLDeviceOperator
 	{
-		public DB2Pos(int AID, string AName) : base(AID, AName) {}
+		public DB2Pos(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -724,7 +724,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 
 	public class DB2ToBooleanInt : SQLDeviceOperator
 	{
-		public DB2ToBooleanInt(int AID, string AName) : base(AID, AName) {}
+		public DB2ToBooleanInt(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -755,7 +755,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 
 	public class DB2ToBooleanString : SQLDeviceOperator
 	{
-		public DB2ToBooleanString(int AID, string AName) : base(AID, AName) {}
+		public DB2ToBooleanString(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -826,7 +826,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 
 	public class DB2ToStringBoolean : SQLDeviceOperator
 	{
-		public DB2ToStringBoolean(int AID, string AName) : base(AID, AName) {}
+		public DB2ToStringBoolean(long AID, string AName) : base(AID, AName) {}
 
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
@@ -857,7 +857,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 
 	public class DB2Long : SQLScalarType
 	{
-		public DB2Long(int AID, string AName) : base(AID, AName) {}
+		public DB2Long(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
@@ -1003,7 +1003,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	/// </summary>
 	public class DB2TimeSpan : SQLScalarType
 	{
-		public DB2TimeSpan(int AID, string AName) : base(AID, AName) {}
+		public DB2TimeSpan(long AID, string AName) : base(AID, AName) {}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{										  
@@ -1067,7 +1067,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public const string CDB2DateFormat = "MM/dd/yyyy";
 		
-		public DB2Date(int AID, string AName) : base(AID, AName)
+		public DB2Date(long AID, string AName) : base(AID, AName)
 		{
 			DateFormat = CDB2DateFormat;
 		}
@@ -1081,7 +1081,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public const string CDateFormat = "MM/dd/yyyy";
 		
-		public DB2400Date(int AID, string AName) : base(AID, AName)  {}
+		public DB2400Date(long AID, string AName) : base(AID, AName)  {}
 
 		private string FDateFormat = CDateFormat;
 		public string DateFormat
@@ -1147,7 +1147,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public const string CDateTimeFormat = "yyyy-MM-dd HH24:mm:ss";
 		
-		public DB2DateTime(int AID, string AName) : base(AID, AName) {}
+		public DB2DateTime(long AID, string AName) : base(AID, AName) {}
 		
 		private string FDateTimeFormat = CDateTimeFormat;
 		public string DateTimeFormat
@@ -1193,7 +1193,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public const string CDateTimeFormat = "yyyy-MM-dd-HH.mm.ss";
 	
-		public DB2400DateTime(int AID, string AName) : base(AID, AName) {}
+		public DB2400DateTime(long AID, string AName) : base(AID, AName) {}
 		
 		private string FDateTimeFormat = CDateTimeFormat;
 		public string DateTimeFormat
@@ -1265,7 +1265,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
     {
 		public const string CTimeFormat = "HH:mm:ss";
 
-		public DB2Time(int AID, string AName) : base(AID, AName) {}
+		public DB2Time(long AID, string AName) : base(AID, AName) {}
 		
 		private string FTimeFormat = CTimeFormat;
 		public string TimeFormat
@@ -1312,7 +1312,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public const string CTimeFormat = "HH:mm:ss";
 
-		public DB2400Time(int AID, string AName) : base(AID, AName) {}
+		public DB2400Time(long AID, string AName) : base(AID, AName) {}
 
 		private string FTimeFormat = CTimeFormat;
 		public string TimeFormat

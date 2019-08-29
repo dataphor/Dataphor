@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		protected virtual Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
+		protected virtual Schema.User ValidateLogin(long sessionID, SessionInfo sessionInfo)
 		{
 			return _systemUser;
 		}
@@ -966,7 +966,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public Debug.Debugger GetDebugger(int debuggerID)
+		public Debug.Debugger GetDebugger(long debuggerID)
 		{
 			BeginCall();
 			try

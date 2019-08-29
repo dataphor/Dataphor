@@ -29,18 +29,18 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Property : Object
 	{
-		public Property(int iD, string name) : base(iD, name) {}
+		public Property(long iD, string name) : base(iD, name) {}
 		
-		public Property(int iD, string name, IDataType dataType) : base(name)
+		public Property(long iD, string name, IDataType dataType) : base(name)
 		{
 			_dataType = dataType;
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Property"), DisplayName, _representation.DisplayName, _representation.ScalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return _representation == null ? -1 : _representation.CatalogObjectID; } }
+		public override long CatalogObjectID { get { return _representation == null ? -1 : _representation.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return _representation == null ? -1 : _representation.ID; } }
+		public override long ParentObjectID { get { return _representation == null ? -1 : _representation.ID; } }
 
 		[Reference]
 		internal Representation _representation;
@@ -71,8 +71,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDefaultReadAccessor = value; }
 		}
 		
-		private int _readAccessorID = -1;
-		public int ReadAccessorID
+		private long _readAccessorID = -1;
+		public long ReadAccessorID
 		{
 			get { return _readAccessorID; }
 			set { _readAccessorID = value; }
@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.ReadAccessorID");
 			if (tag != Tag.None)
-				_readAccessorID = Int32.Parse(tag.Value);
+				_readAccessorID = Int64.Parse(tag.Value);
 		}
 		
 		public void SaveReadAccessorID()
@@ -121,8 +121,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDefaultWriteAccessor = value; }
 		}
 		
-		private int _writeAccessorID = -1;
-		public int WriteAccessorID
+		private long _writeAccessorID = -1;
+		public long WriteAccessorID
 		{
 			get { return _writeAccessorID; }
 			set { _writeAccessorID = value; }
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.WriteAccessorID");
 			if (tag != Tag.None)
-				_writeAccessorID = Int32.Parse(tag.Value);
+				_writeAccessorID = Int64.Parse(tag.Value);
 		}
 		
 		public void SaveWriteAccessorID()
@@ -260,16 +260,16 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Representation : Object
 	{
-		public Representation(int iD, string name) : base(iD, name) 
+		public Representation(long iD, string name) : base(iD, name) 
 		{
 			_properties = new Properties(this);
 		}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Representation"), DisplayName, _scalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
- 		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+ 		public override long ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
 		internal ScalarType _scalarType;
@@ -292,8 +292,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _isDefaultSelector = value; }
 		}
 
-		private int _selectorID = -1;
-		public int SelectorID
+		private long _selectorID = -1;
+		public long SelectorID
 		{
 			get { return _selectorID; }
 			set { _selectorID = value; }
@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.SelectorID");
 			if (tag != Tag.None)
-				_selectorID = Int32.Parse(tag.Value);
+				_selectorID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
@@ -535,12 +535,12 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class Sort : CatalogObject
     {
-		public Sort(int iD, string name, IDataType dataType) : base(iD, name) 
+		public Sort(long iD, string name, IDataType dataType) : base(iD, name) 
 		{
 			_dataType = dataType;
 		}
 
-		public Sort(int iD, string name, IDataType dataType, PlanNode compareNode) : base(iD, name) 
+		public Sort(long iD, string name, IDataType dataType, PlanNode compareNode) : base(iD, name) 
 		{
 			_dataType = dataType;
 			_compareNode = compareNode;
@@ -641,7 +641,7 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class Conversion : CatalogObject
     {
-		public Conversion(int iD, string name, ScalarType sourceScalarType, ScalarType targetScalarType, Operator operatorValue, bool isNarrowing) : base(iD, name) 
+		public Conversion(long iD, string name, ScalarType sourceScalarType, ScalarType targetScalarType, Operator operatorValue, bool isNarrowing) : base(iD, name) 
 		{
 			_sourceScalarType = sourceScalarType;
 			_targetScalarType = targetScalarType;
@@ -976,8 +976,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class Special : Object
     {
-		public Special(int iD, string name) : base(iD, name) {}
-		public Special(int iD, string name, PlanNode valueNode) : base(iD, name)
+		public Special(long iD, string name) : base(iD, name) {}
+		public Special(long iD, string name, PlanNode valueNode) : base(iD, name)
 		{
 			_valueNode = valueNode;
 		}
@@ -987,9 +987,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Specials are always persistent.</summary>
 		public override bool IsPersistent { get { return true; } }
 
-		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 		
-		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
+		public override long ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
 		internal ScalarType _scalarType;
@@ -1012,8 +1012,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _valueNode = value; }
 		}
 		
-		private int _selectorID = -1;
-		public int SelectorID
+		private long _selectorID = -1;
+		public long SelectorID
 		{
 			get { return _selectorID; }
 			set { _selectorID = value; }
@@ -1023,7 +1023,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.SelectorID");
 			if (tag != Tag.None)
-				_selectorID = Int32.Parse(tag.Value);
+				_selectorID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveSelectorID()
@@ -1054,8 +1054,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		private int _comparerID = -1;
-		public int ComparerID
+		private long _comparerID = -1;
+		public long ComparerID
 		{
 			get { return _comparerID; }
 			set { _comparerID = value; }
@@ -1065,7 +1065,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.ComparerID");
 			if (tag != Tag.None)
-				_comparerID = Int32.Parse(tag.Value);
+				_comparerID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveComparerID()
@@ -1209,7 +1209,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class ScalarType : CatalogObject, IScalarType
     {
 		// constructor
-		public ScalarType(int iD, string name) : base(iD, name)
+		public ScalarType(long iD, string name) : base(iD, name)
 		{
 			InternalInitialize();
 		}
@@ -1533,8 +1533,8 @@ namespace Alphora.Dataphor.DAE.Schema
         private Specials _specials;
         public Specials Specials { get { return _specials; } }
         
-		private int _isSpecialOperatorID = -1;
-		public int IsSpecialOperatorID
+		private long _isSpecialOperatorID = -1;
+		public long IsSpecialOperatorID
 		{
 			get { return _isSpecialOperatorID; }
 			set { _isSpecialOperatorID = value; }
@@ -1544,7 +1544,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.IsSpecialOperatorID");
 			if (tag != Tag.None)
-				_isSpecialOperatorID = Int32.Parse(tag.Value);
+				_isSpecialOperatorID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveIsSpecialOperatorID()
@@ -1576,8 +1576,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-		private int _equalityOperatorID = -1;
-		public int EqualityOperatorID
+		private long _equalityOperatorID = -1;
+		public long EqualityOperatorID
 		{
 			get { return _equalityOperatorID; }
 			set { _equalityOperatorID = value; }
@@ -1587,7 +1587,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.EqualityOperatorID");
 			if (tag != Tag.None)
-				_equalityOperatorID = Int32.Parse(tag.Value);
+				_equalityOperatorID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveEqualityOperatorID()
@@ -1619,8 +1619,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		private int _comparisonOperatorID = -1;
-		public int ComparisonOperatorID
+		private long _comparisonOperatorID = -1;
+		public long ComparisonOperatorID
 		{
 			get { return _comparisonOperatorID; }
 			set { _comparisonOperatorID = value; }
@@ -1630,7 +1630,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.ComparisonOperatorID");
 			if (tag != Tag.None)
-				_comparisonOperatorID = Int32.Parse(tag.Value);
+				_comparisonOperatorID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveComparisonOperatorID()
@@ -1692,8 +1692,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		private int _sortID = -1;
-		public int SortID
+		private long _sortID = -1;
+		public long SortID
 		{
 			get { return _sortID; }
 			set { _sortID = value; }
@@ -1703,7 +1703,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.SortID");
 			if (tag != Tag.None)
-			_sortID = Int32.Parse(tag.Value);
+			_sortID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveSortID()
@@ -1728,8 +1728,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		private int _uniqueSortID = -1;
-		public int UniqueSortID
+		private long _uniqueSortID = -1;
+		public long UniqueSortID
 		{
 			get { return _uniqueSortID; }
 			set { _uniqueSortID = value; }
@@ -1739,7 +1739,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			Tag tag = RemoveMetaDataTag("DAE.UniqueSortID");
 			if (tag != Tag.None)
-				_uniqueSortID = Int32.Parse(tag.Value);
+				_uniqueSortID = Int64.Parse(tag.Value);
 		}
 
 		public void SaveUniqueSortID()

@@ -77,6 +77,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			
 			// Stop the server
 			LServer.Stop();
+            LServer.Dispose();
+            LServer = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 			
 			// Reset the instance
 			AServerConfigurationManager.ResetInstance();

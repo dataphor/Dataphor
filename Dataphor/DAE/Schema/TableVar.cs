@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			ReadOnly = !((_columnType == TableVarColumnType.Stored) || (_columnType == TableVarColumnType.RowExists) || !IsComputed);
 		}
 		
-		public TableVarColumn(int iD, Column column, MetaData metaData, TableVarColumnType columnType) : base(iD, column.Name)
+		public TableVarColumn(long iD, Column column, MetaData metaData, TableVarColumnType columnType) : base(iD, column.Name)
 		{
 			SetColumn(column);
 			MergeMetaData(metaData);
@@ -300,9 +300,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumn"), DisplayName, TableVar.DisplayName); } }
 
-		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
 		public override bool IsATObject { get { return _tableVar == null ? false : _tableVar.IsATObject; } }
 
@@ -1121,14 +1121,14 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Order : Object
     {		
 		public Order() : base(String.Empty) {}
-		public Order(int iD) : base(iD, String.Empty) {}
+		public Order(long iD, string name) : base(iD, name) {}
 
 		public Order(MetaData metaData) : base(String.Empty)
 		{
 			MetaData = metaData;
 		}
 		
-		public Order(int iD, MetaData metaData) : base(iD, String.Empty)
+		public Order(long iD, MetaData metaData) : base(iD, String.Empty)
 		{
 			MetaData = metaData;
 		}
@@ -1169,9 +1169,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Order"), DisplayName); } }
 
-		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
 		/// <summary>Returns the full name of the order, a guaranteed parsable D4 order definition.</summary>
 		/// <remarks>The Name property, in contrast, returns the full name limited to the max object name length of 200 characters.</remarks>
@@ -1422,7 +1422,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateKeyName();
 		}
 		
-		public Key(int iD) : base(iD, String.Empty)
+		public Key(long iD, string name) : base(iD, name)
 		{
 			InternalInitialize();
 			UpdateKeyName();
@@ -1435,7 +1435,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateKeyName();
         }
         
-        public Key(int iD, MetaData metaData) : base(iD, String.Empty)
+        public Key(long iD, MetaData metaData) : base(iD, String.Empty)
         {
 			MetaData = metaData;
 			InternalInitialize();
@@ -1465,9 +1465,9 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Key"), DisplayName); } }
 
-		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
+		public override long ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
         private void InternalInitialize()
         {
@@ -1915,7 +1915,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			InternalInitialize();
 		}
 		
-		public TableVar(int iD, string name) : base(iD, name)
+		public TableVar(long iD, string name) : base(iD, name)
 		{
 			IsRemotable = false;
 			InternalInitialize();
@@ -2817,7 +2817,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class BaseTableVar : TableVar
     {
 		public BaseTableVar(string name) : base(name) {}
-		public BaseTableVar(int iD, string name) : base(iD, name) {}
+		public BaseTableVar(long iD, string name) : base(iD, name) {}
 		public BaseTableVar(string name, ITableType tableType) : base(name)
 		{
 			DataType = tableType;
@@ -2952,7 +2952,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class DerivedTableVar : TableVar
     {	
 		public DerivedTableVar(string name) : base(name) {}
-		public DerivedTableVar(int iD, string name) : base(iD, name) {}
+		public DerivedTableVar(long iD, string name) : base(iD, name) {}
 		public DerivedTableVar(string name, ITableType tableType) : base(name)
 		{
 			DataType = tableType;

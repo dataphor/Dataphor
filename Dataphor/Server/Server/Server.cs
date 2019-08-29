@@ -141,13 +141,13 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Gets the class name of the store used to persist the system catalog.
 		/// </summary>
-		/// <returns>The value of the CatalogStoreClassName property if it is set, otherwise, the assembly qualified class name of the SQLCEStore.</returns>
+		/// <returns>The value of the CatalogStoreClassName property if it is set, otherwise, the assembly qualified class name of the SQLiteStore.</returns>
 		public string GetCatalogStoreClassName()
 		{
 			return
 				String.IsNullOrEmpty(_catalogStoreClassName)
-					? "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore,Alphora.Dataphor.DAE.SQLCE"
-					: _catalogStoreClassName;
+					? "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite"
+                    : _catalogStoreClassName;
 		}
 
 		private string _catalogStoreConnectionString;
@@ -157,8 +157,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks>
 		/// <para>
 		/// This property cannot be changed once the server has been started. If this property is not
-		/// set, a default SQLCE connection string will be built that specifies the catalog will be
-		/// stored in the Catalog subfolder of the instance directory, and named DAECatalog.sdf.
+		/// set, a default SQLite connection string will be built that specifies the catalog will be
+		/// stored in the Catalog subfolder of the instance directory, and named DAECatalog.
 		/// </para>
 		/// <para>
 		/// If the CatalogStoreConnectionString is specified, the token %CatalogPath% will be replaced
@@ -178,12 +178,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Gets the connection string for the store used to persist the system catalog.
 		/// </summary>
-		/// <returns>The value of the CatalogStoreCnnectionString property if it set, otherwise, a default SQL CE connection string.</returns>
+		/// <returns>The value of the CatalogStoreCnnectionString property if it set, otherwise, a default SQLite connection string.</returns>
 		public string GetCatalogStoreConnectionString()
 		{
-			return
-				String.IsNullOrEmpty(_catalogStoreConnectionString)
-					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), String.Empty, "Read Write")
+            return
+                String.IsNullOrEmpty(_catalogStoreConnectionString)
+                    ? String.Format("Data Source={0}", GetCatalogStoreDatabaseFileName())
 					: _catalogStoreConnectionString.Replace("%CatalogPath%", GetCatalogDirectory());
 		}
 
@@ -200,7 +200,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		public string GetCatalogStoreDatabaseFileName()
 		{
-			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(DefaultCatalogDatabaseName, ".sdf"));
+			return Path.Combine(GetCatalogDirectory(), DefaultCatalogDatabaseName);
 		}
 
 		private string _libraryDirectory = String.Empty;
@@ -788,7 +788,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return ((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).GetBaseCatalogObjects();
 		}
 
-		protected override Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
+		protected override Schema.User ValidateLogin(long sessionID, SessionInfo sessionInfo)
 		{
 			if (sessionInfo == null)
 				throw new ServerException(ServerException.Codes.SessionInformationRequired);

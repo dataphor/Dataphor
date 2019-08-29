@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class Right : System.Object
 	{
-		public Right(string name, string ownerID, int catalogObjectID) : base() 
+		public Right(string name, string ownerID, long catalogObjectID) : base() 
 		{
 			_name = name;
 			_ownerID = ownerID;
@@ -225,8 +225,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { _ownerID = value; }
 		}
 		
-		private int _catalogObjectID = -1;
-		public int CatalogObjectID
+		private long _catalogObjectID = -1;
+		public long CatalogObjectID
 		{
 			get { return _catalogObjectID; }
 			set { _catalogObjectID = value; }
@@ -383,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Role : CatalogObject
 	{
 		public Role(string name) : base(name) {}
-		public Role(int iD, string name) : base(iD, name) {}
+		public Role(long iD, string name) : base(iD, name) {}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Role"), DisplayName); } }
 

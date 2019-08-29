@@ -181,7 +181,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public const string SQLTextScalarType = "SQLDevice.SQLText";
 		public const string SQLITextScalarType = "SQLDevice.SQLIText";
 
-		public SQLDevice(int iD, string name) : base(iD, name)
+		public SQLDevice(long iD, string name) : base(iD, name)
 		{
 			SetMaxIdentifierLength();
 			_supportsTransactions = true;

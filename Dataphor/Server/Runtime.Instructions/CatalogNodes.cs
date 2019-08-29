@@ -70,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).Name;
+				return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((long)argument1).Name;
 		}
 	}
 	
@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
 					return program.ResolveCatalogIdentifier((string)argument1).Description;
 				else
-					return program.CatalogDeviceSession.ResolveObject((int)argument1).Description;
+					return program.CatalogDeviceSession.ResolveObject((long)argument1).Description;
 		}
 	}
 	
@@ -112,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
 					return program.ResolveCatalogIdentifier((string)argument1).DisplayName;
 				else
-					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).DisplayName;
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((long)argument1).DisplayName;
 		}
 	}
 	
@@ -180,7 +180,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
 					return program.ResolveCatalogObjectSpecifier((string)argument1).IsSystem;
 				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
-					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).IsSystem;
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((long)argument1).IsSystem;
 				else
 					return program.ResolveCatalogIdentifier((string)argument1).IsSystem;
 		}
@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
-					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).IsGenerated;
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((long)argument1).IsGenerated;
 				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
 					return program.ResolveCatalogObjectSpecifier((string)argument1).IsGenerated;
 				else
@@ -218,7 +218,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string libraryName;
 				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
-					libraryName = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)arguments[0]).LibraryName;
+					libraryName = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((long)arguments[0]).LibraryName;
 				else
 				{
 					Schema.Object objectValue = program.ResolveCatalogIdentifier((string)arguments[0], true);
@@ -676,11 +676,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 
-					int iD;
+					long iD;
 					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
 						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						iD = (int)Nodes[0].Execute(program);
+						iD = (long)Nodes[0].Execute(program);
 						
 					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependents(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					
@@ -783,11 +783,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					row.ValuesOwned = false;
 					
-					int iD;
+					long iD;
 					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
 						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						iD = (int)Nodes[0].Execute(program);
+						iD = (long)Nodes[0].Execute(program);
 						
 					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependencies(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					

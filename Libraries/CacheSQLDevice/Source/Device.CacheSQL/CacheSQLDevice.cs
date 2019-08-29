@@ -79,7 +79,7 @@ namespace Alphora.Dataphor.DAE.Device.CacheSQL
 		protected string _serverName = String.Empty;
 		protected string _port = "1972";
 
-		public CacheSQLDevice(int iD, string name) : base(iD, name)
+		public CacheSQLDevice(long iD, string name) : base(iD, name)
 		{
 			UseStatementTerminator = false;
 			SupportsOrderByNullsFirstLast = false;
