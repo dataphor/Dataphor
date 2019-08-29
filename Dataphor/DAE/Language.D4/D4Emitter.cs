@@ -1622,48 +1622,50 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		protected override void EmitStatement(Statement statement)
 		{
-			if (statement is D4Statement)
-				EmitD4Statement((D4Statement)statement);
-			else if (statement is AssignmentStatement)
-				EmitAssignmentStatement((AssignmentStatement)statement);
-			else if (statement is VariableStatement)
-				EmitVariableStatement((VariableStatement)statement);
-			else if (statement is ExpressionStatement)
-				EmitExpressionStatement((ExpressionStatement)statement);
-			else if (statement is CursorSelectorExpression)
-				EmitCursorSelectorExpression((CursorSelectorExpression)statement);
-			else if (statement is IfStatement)
-				EmitIfStatement((IfStatement)statement);
-			else if (statement is DelimitedBlock)
-				EmitDelimitedBlock((DelimitedBlock)statement);
-			else if (statement is Block)
-				EmitBlock((Block)statement);
-			else if (statement is ExitStatement)
-				EmitExitStatement((ExitStatement)statement);
-			else if (statement is WhileStatement)
-				EmitWhileStatement((WhileStatement)statement);
-			else if (statement is DoWhileStatement)
-				EmitDoWhileStatement((DoWhileStatement)statement);
-			else if (statement is ForEachStatement)
-				EmitForEachStatement((ForEachStatement)statement);
-			else if (statement is BreakStatement)
-				EmitBreakStatement((BreakStatement)statement);
-			else if (statement is ContinueStatement)
-				EmitContinueStatement((ContinueStatement)statement);
-			else if (statement is CaseStatement)
-				EmitCaseStatement((CaseStatement)statement);
-			else if (statement is RaiseStatement)
-				EmitRaiseStatement((RaiseStatement)statement);
-			else if (statement is TryFinallyStatement)
-				EmitTryFinallyStatement((TryFinallyStatement)statement);
-			else if (statement is TryExceptStatement)
-				EmitTryExceptStatement((TryExceptStatement)statement);
-			else if (statement is EmptyStatement)
-				EmitEmptyStatement((EmptyStatement)statement);
-			else if (statement is SourceStatement)
-				EmitSourceStatement((SourceStatement)statement);
-			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
+            if (statement is D4Statement)
+                EmitD4Statement((D4Statement)statement);
+            else if (statement is AssignmentStatement)
+                EmitAssignmentStatement((AssignmentStatement)statement);
+            else if (statement is VariableStatement)
+                EmitVariableStatement((VariableStatement)statement);
+            else if (statement is ExpressionStatement)
+                EmitExpressionStatement((ExpressionStatement)statement);
+            else if (statement is CursorSelectorExpression)
+                EmitCursorSelectorExpression((CursorSelectorExpression)statement);
+            else if (statement is IfStatement)
+                EmitIfStatement((IfStatement)statement);
+            else if (statement is DelimitedBlock)
+                EmitDelimitedBlock((DelimitedBlock)statement);
+            else if (statement is Block)
+                EmitBlock((Block)statement);
+            else if (statement is ExitStatement)
+                EmitExitStatement((ExitStatement)statement);
+            else if (statement is WhileStatement)
+                EmitWhileStatement((WhileStatement)statement);
+            else if (statement is DoWhileStatement)
+                EmitDoWhileStatement((DoWhileStatement)statement);
+            else if (statement is ForEachStatement)
+                EmitForEachStatement((ForEachStatement)statement);
+            else if (statement is BreakStatement)
+                EmitBreakStatement((BreakStatement)statement);
+            else if (statement is ContinueStatement)
+                EmitContinueStatement((ContinueStatement)statement);
+            else if (statement is CaseStatement)
+                EmitCaseStatement((CaseStatement)statement);
+            else if (statement is RaiseStatement)
+                EmitRaiseStatement((RaiseStatement)statement);
+            else if (statement is TryFinallyStatement)
+                EmitTryFinallyStatement((TryFinallyStatement)statement);
+            else if (statement is TryExceptStatement)
+                EmitTryExceptStatement((TryExceptStatement)statement);
+            else if (statement is EmptyStatement)
+                EmitEmptyStatement((EmptyStatement)statement);
+            else if (statement is SourceStatement)
+                EmitSourceStatement((SourceStatement)statement);
+            else if (statement is CallExpression)
+                EmitCallExpression((CallExpression)statement);
+            else
+                throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
 		protected virtual void EmitAssignmentStatement(AssignmentStatement statement)
