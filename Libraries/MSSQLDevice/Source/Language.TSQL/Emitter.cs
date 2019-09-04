@@ -47,7 +47,26 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 			}
 		}
 
-		
+		protected override void EmitSelectExpression(SQL.SelectExpression expression)
+		{
+			var topClause = _topClauses.Count > 0 ? _topClauses.Peek() : null;
+			if (topClause != null)
+			{
+				AppendFormat("top({0})", topClause.IsPercent ? topClause.Quota.ToString() : ((int)topClause.Quota).ToString());
+				if (topClause.IsPercent)
+				{
+					AppendFormat(" percent");
+				}
+
+				if (topClause.WithTies)
+				{
+					AppendFormat(" with ties");
+				}
+			}
+
+			base.EmitSelectExpression(expression);
+		}
+
 		protected override void EmitDropIndexStatement(SQL.DropIndexStatement statement)
 		{
 			if (statement is DropIndexStatement)

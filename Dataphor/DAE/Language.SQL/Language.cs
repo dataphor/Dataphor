@@ -641,9 +641,17 @@ namespace Alphora.Dataphor.DAE.Language.SQL
             get { return _havingClause; }
             set { _havingClause = value; }
         }
-    }
-    
-    public enum TableOperator { Union, Intersect, Difference }
+
+		// OrderClause
+		protected OrderClause _orderClause;
+		public OrderClause OrderClause
+		{
+			get { return _orderClause; }
+			set { _orderClause = value; }
+		}
+	}
+
+	public enum TableOperator { Union, Intersect, Difference }
     
     public class TableOperatorExpression : Expression
     {
@@ -734,14 +742,6 @@ namespace Alphora.Dataphor.DAE.Language.SQL
         {
             get { return _queryExpression; }
             set { _queryExpression = value; }
-        }
-
-        // OrderClause
-        protected OrderClause _orderClause;
-        public OrderClause OrderClause
-        {
-            get { return _orderClause; }
-            set { _orderClause = value; }
         }
     }
     

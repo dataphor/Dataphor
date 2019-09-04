@@ -6,37 +6,37 @@
 namespace Alphora.Dataphor.DAE.Language.TSQL
 {
 	using System;
-	
+
 	using Alphora.Dataphor.DAE.Language;
 	using SQL = Alphora.Dataphor.DAE.Language.SQL;
-	
+
 	public class TableExpression : SQL.TableExpression
 	{
-		public TableExpression() : base(){}
-		public TableExpression(string tableName) : base(tableName){}
+		public TableExpression() : base() { }
+		public TableExpression(string tableName) : base(tableName) { }
 		public TableExpression(string tableName, string optimizerHints) : base(tableName)
 		{
 			_optimizerHints = optimizerHints;
 		}
-		
+
 		public TableExpression(string tableSchema, string tableName, string optimizerHints) : base(tableSchema, tableName)
 		{
 			_optimizerHints = optimizerHints;
 		}
 
-        // OptimizerHints
-        protected string _optimizerHints = String.Empty;
-        public virtual string OptimizerHints
-        {
+		// OptimizerHints
+		protected string _optimizerHints = String.Empty;
+		public virtual string OptimizerHints
+		{
 			get { return _optimizerHints; }
 			set { _optimizerHints = value == null ? String.Empty : value; }
-        }
+		}
 	}
-	
+
 	public class DropIndexStatement : SQL.DropIndexStatement
 	{
-		public DropIndexStatement() : base(){}
-		
+		public DropIndexStatement() : base() { }
+
 		// TableSchema
 		protected string _tableSchema = String.Empty;
 		public string TableSchema
@@ -51,6 +51,41 @@ namespace Alphora.Dataphor.DAE.Language.TSQL
 		{
 			get { return _tableName; }
 			set { _tableName = value == null ? String.Empty : value; }
+		}
+	}
+
+	public class TopClause : Statement
+	{
+		protected decimal _quota;
+		public decimal Quota
+		{
+			get { return _quota; }
+			set { _quota = value; }
+		}
+
+		protected bool _isPercent;
+		public bool IsPercent
+		{
+			get { return _isPercent; }
+			set { _isPercent = value; }
+		}
+
+		protected bool _withTies;
+		public bool WithTies
+		{
+			get { return _withTies; }
+			set { _withTies = value; }
+		}
+	}
+
+	public class SelectExpression : SQL.SelectExpression
+	{
+		// TopClause
+		protected TopClause _topClause;
+		public TopClause TopClause
+		{
+			get { return _topClause; }
+			set { _topClause = value; }
 		}
 	}
 }
