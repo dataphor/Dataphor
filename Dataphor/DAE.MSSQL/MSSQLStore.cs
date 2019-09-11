@@ -57,16 +57,18 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 					try
 					{
 						#if USESQLCONNECTION
-						MSSQLConnection connection = new MSSQLConnection(builder.ConnectionString);
-						connection.Execute(String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName));
-						#else
-						SqlConnection connection = new SqlConnection(builder.ConnectionString);
-						connection.Open();
-						SqlCommand command = connection.CreateCommand();
-						command.CommandType = CommandType.Text;
-						command.CommandText = String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName);
-						command.ExecuteNonQuery();
-						#endif
+						using (MSSQLConnection connection = new MSSQLConnection(builder.ConnectionString))
+						{
+							connection.Execute(String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName));
+							#else
+							SqlConnection connection = new SqlConnection(builder.ConnectionString);
+							connection.Open();
+							SqlCommand command = connection.CreateCommand();
+							command.CommandType = CommandType.Text;
+							command.CommandText = String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName);
+							command.ExecuteNonQuery();
+							#endif
+						}
 					}
 					catch
 					{

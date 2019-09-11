@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	internal class StoreIndexHeaders : Dictionary<string, StoreIndexHeader> {}
 
-	public class CatalogStore : System.Object
+	public class CatalogStore : System.Object, IDisposable
 	{
 		public CatalogStore() { }
 		
@@ -707,8 +707,23 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				return indexHeader;
 			}
 		}
-			
+
 		#endregion
+
+		public virtual void Dispose()
+		{
+			if (_store != null)
+			{
+				lock (_connectionPool)
+				{
+					while (_connectionPool.Count > 0)
+					{
+						AcquireConnection().Dispose();
+					}
+				}
+				_store = null;
+			}
+		}
 	}
 	
 	public class SQLStoreCursorCache : Dictionary<string, SQLStoreCursor> {}
