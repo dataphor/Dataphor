@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public static string GetInfoFileName(string libraryName)
 		{
-			return String.Format("{0}.d4l.info", libraryName);
+			return String.Format("{0}.d4l.info", Object.EnsureUnrooted(libraryName));
 		}
 		
 		public static Library LoadFromStream(Stream stream)
@@ -54,12 +54,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public static string GetFileName(string libraryName)
 		{
-			return String.Format("{0}.d4l", libraryName);
+			return String.Format("{0}.d4l", Object.EnsureUnrooted(libraryName));
 		}
 		
 		public static string GetLibraryDirectory(string serverLibraryDirectory, string libraryName, string libraryDirectory)
 		{
-			return libraryDirectory == String.Empty ? Path.Combine(GetDefaultLibraryDirectory(serverLibraryDirectory), libraryName) : libraryDirectory;
+			return libraryDirectory == String.Empty ? Path.Combine(GetDefaultLibraryDirectory(serverLibraryDirectory), Object.EnsureUnrooted(libraryName)) : libraryDirectory;
 		}
 		
 		public static string GetDefaultLibraryDirectory(string serverLibraryDirectory)

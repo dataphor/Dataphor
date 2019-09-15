@@ -18,7 +18,7 @@ begin
 		
 	LErrorHit := false;
 	try
-		RenameLibrary('System', 'Test');
+		RenameLibrary('System', 'TestSystem');
 	except
 		LErrorHit := true;
 	end;
@@ -37,7 +37,7 @@ begin
 		
 	LErrorHit := false;
 	try
-		RenameLibrary('General', 'Test');
+		RenameLibrary('General', 'TestGeneral');
 	except
 		LErrorHit := true;
 	end;
@@ -81,26 +81,26 @@ begin
 		raise Error("General library drop allowed.");
 end;
 
-CreateLibrary(LibraryDescriptor("Test", VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}));
-if not exists (Libraries where Name = 'Test') then
+CreateLibrary(LibraryDescriptor('LibraryTest', VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}));
+if not exists (Libraries where Name = 'LibraryTest') then
 	raise Error("CreateLibrary failed.");
 	
-if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}) then
+if GetLibraryDescriptor('LibraryTest') <> LibraryDescriptor('LibraryTest', VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}) then
 	raise Error('GetLibraryDescriptor failed.');
 	
-SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}));
-if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}) then
+SetLibraryDescriptor('LibraryTest', LibraryDescriptor('LibraryTest', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}));
+if GetLibraryDescriptor('LibraryTest') <> LibraryDescriptor('LibraryTest', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}) then
 	raise Error("SetLibraryDescriptor failed.");
 	
-if (GetDefaultDeviceName("Test") <> "TestingDevice") then
+if (GetDefaultDeviceName('LibraryTest') <> "TestingDevice") then
 	raise Error("GetDefaultDeviceName for library failed.");
 	
-SetDefaultDeviceName("Test", "TestDevice");
-if (GetDefaultDeviceName("Test") <> "TestDevice") then
+SetDefaultDeviceName('LibraryTest', "TestDevice");
+if (GetDefaultDeviceName('LibraryTest') <> "TestDevice") then
 	raise Error("SetDefaultDeviceName for library failed.");
 	
-RenameLibrary('Test', 'NewTest');
-if exists (Libraries where Name = 'Test') then
+RenameLibrary('LibraryTest', 'NewTest');
+if exists (Libraries where Name = 'LibraryTest') then
 	raise Error('RenameLibrary failed.');
 
 if not exists (Libraries where Name = 'NewTest') then
@@ -108,24 +108,24 @@ if not exists (Libraries where Name = 'NewTest') then
 	
 begin
 	var LLibraryDescriptor : LibraryDescriptor := GetLibraryDescriptor('NewTest');
-	LLibraryDescriptor.Name := 'Test';
+	LLibraryDescriptor.Name := 'LibraryTest';
 	SetLibraryDescriptor('NewTest', LLibraryDescriptor);
 	if exists (Libraries where Name = 'NewTest') then
 		raise Error("Rename through SetLibraryDescriptor failed.");
 		
-	if not exists (Libraries where Name = 'Test') then
+	if not exists (Libraries where Name = 'LibraryTest') then
 		raise Error("Rename through SetLibraryDescriptor failed.");
 end;
 
-RegisterLibrary('Test');
-if not exists (LoadedLibraries where Name = 'Test') then
+RegisterLibrary('LibraryTest');
+if not exists (LoadedLibraries where Name = 'LibraryTest') then
 	raise Error("RegisterLibrary failed.");
 	
-UnregisterLibrary('Test');
-if exists (LoadedLibraries where Name = 'Test') then
+UnregisterLibrary('LibraryTest');
+if exists (LoadedLibraries where Name = 'LibraryTest') then
 	raise Error("UnregisterLibrary failed.");
 
-CreateLibrary(LibraryDescriptor("TestDependent", VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(3))}));
+CreateLibrary(LibraryDescriptor("TestDependent", VersionNumber(1), "", list(FileReference){}, {LibraryReference('LibraryTest', VersionNumber(3))}));
 
 if (GetDefaultDeviceName("TestDependent") <> "TestDevice") then
 	raise Error("Default device from required libraries failed.");
@@ -141,11 +141,11 @@ begin
 		raise Error("Version mismatch allowed.");
 end;
 
-SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('LibraryTest', VersionNumber(2))}));
 
 RegisterLibrary('TestDependent');
 
-if not exists (LoadedLibraries where Name = 'Test') then
+if not exists (LoadedLibraries where Name = 'LibraryTest') then
 	raise Error("Required library registration failed.");
 	
 if (GetDefaultDeviceName() <> "TestDevice") then
@@ -155,12 +155,12 @@ SetDefaultDeviceName("TestingDevice");
 if (GetDefaultDeviceName() <> "TestingDevice") then
 	raise Error("SetDefaultDeviceName for current library failed.");
 	
-SetLibrary("Test");
-if LibraryName() <> "Test" then
+SetLibrary('LibraryTest');
+if LibraryName() <> 'LibraryTest' then
 	raise Error("SetLibrary failed.");
 	
 UnregisterLibrary("TestDependent");
-UnregisterLibrary("Test");
+UnregisterLibrary('LibraryTest');
 
 if LibraryName() <> "General" then
 	raise Error("Unregistering current library does not set current library to general.");
@@ -168,9 +168,9 @@ if LibraryName() <> "General" then
 SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
 RegisterLibrary('TestDependent');
 
-SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('LibraryTest', VersionNumber(2))}));
 
-if not exists (LoadedLibraries where Name = 'Test') then
+if not exists (LoadedLibraries where Name = 'LibraryTest') then
 	raise Error("Adding requisite to registered library does not register required library.");
 	
 begin
@@ -185,7 +185,7 @@ begin
 
 	LErrorHit := false;
 	try
-		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependencies', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependencies', VersionNumber(1), "", list(FileReference){}, {LibraryReference('LibraryTest', VersionNumber(2))}));
 	except
 		LErrorHit := true;
 	end;
@@ -194,7 +194,7 @@ begin
 
 	LErrorHit := false;
 	try
-		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(2), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(2), "", list(FileReference){}, {LibraryReference('LibraryTest', VersionNumber(2))}));
 	except
 		LErrorHit := true;
 	end;
@@ -212,7 +212,7 @@ begin
 		
 	LErrorHit := false;
 	try
-		SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "", list(FileReference){}, {LibraryReference('System', VersionNumber(3)), LibraryReference('TestDependent', VersionNumber(-1))}));
+		SetLibraryDescriptor('LibraryTest', LibraryDescriptor('LibraryTest', VersionNumber(2, 0), "", list(FileReference){}, {LibraryReference('System', VersionNumber(3)), LibraryReference('TestDependent', VersionNumber(-1))}));
 	except
 		LErrorHit := true;
 	end;
@@ -221,12 +221,12 @@ begin
 end;
 
 UnregisterLibrary('TestDependent');
-UnregisterLibrary('Test');
+UnregisterLibrary('LibraryTest');
 
 DropLibrary("TestDependent");
-DropLibrary("Test");
+DropLibrary('LibraryTest');
 
-if exists (Libraries where Name in {'Test', 'TestDependent'}) then
+if exists (Libraries where Name in {'LibraryTest', 'TestDependent'}) then
 	raise Error("DropLibrary failed.");
 
 // TODO: Test assemblies	

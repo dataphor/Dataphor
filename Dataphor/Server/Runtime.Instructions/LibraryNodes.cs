@@ -33,9 +33,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				string libraryDirectory = library.GetLibraryDirectory(((Server)program.ServerProcess.ServerSession.Server).LibraryDirectory);
-				if (program.Catalog.Libraries.Contains(library.Name))
+				if (program.Catalog.Libraries.Contains(Object.EnsureRooted(library.Name)))
 				{
-					Schema.Library existingLibrary = program.Catalog.Libraries[library.Name];
+					Schema.Library existingLibrary = program.Catalog.Libraries[Object.EnsureRooted(library.Name)];
 
 					if (library.Directory != String.Empty)
 					{
