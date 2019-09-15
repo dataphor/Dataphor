@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private IServerProcess FProcess;
 		protected IServerProcess Process { get { return FProcess; } }
 		
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void SetUpFixture()
 		{
 			FServerConfigurationManager = new SQLCEServerConfigurationManager();
@@ -61,7 +61,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 		
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void TearDownFixture()
 		{
 			FServer.Stop();

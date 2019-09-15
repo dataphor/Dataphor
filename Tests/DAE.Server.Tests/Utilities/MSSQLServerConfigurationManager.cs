@@ -80,7 +80,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 					using (SqlCommand LCommand = LConnection.CreateCommand())
 					{
 						LCommand.CommandType = CommandType.Text;
-						LCommand.CommandText = String.Format("if exists (select * from sysdatabases where name = '{0}') drop database {0}", LDatabaseName);
+						LCommand.CommandText = String.Format(
+							@"if exists (select * from sysdatabases where name = '{0}') 
+							begin
+								--alter database {0} set single_user with rollback immediate
+								drop database {0}
+							end", 
+							LDatabaseName
+						);
 						LCommand.ExecuteNonQuery();
 					}
 				}

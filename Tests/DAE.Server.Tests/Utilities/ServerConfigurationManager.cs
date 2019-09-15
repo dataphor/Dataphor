@@ -19,9 +19,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 		public static string GetInstallationDirectory()
 		{
 			var LDirectoryName = AppDomain.CurrentDomain.BaseDirectory;
-			if (Path.GetFileName(LDirectoryName) != "Tests")
-				LDirectoryName = PathUtility.GetInstallationDirectory();
-			return Path.GetDirectoryName(LDirectoryName);
+			var match = System.Text.RegularExpressions.Regex.Match(LDirectoryName, @"[\\|/]Tests[\\|/]");
+			return match.Success
+				? LDirectoryName.Substring(0, match.Index)
+				: Path.GetDirectoryName(LDirectoryName);
 		}
 		
 		private ServerConfiguration FTestConfiguration;
@@ -53,9 +54,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 		{
 			FTestConfiguration = new ServerConfiguration();
 			FTestConfiguration.Name = AInstanceName;
-			var LDirectoryName = AppDomain.CurrentDomain.BaseDirectory;
-			if (Path.GetFileName(LDirectoryName) != "Tests")
-				LDirectoryName = PathUtility.GetInstallationDirectory();
 			FTestConfiguration.LibraryDirectories = Path.Combine(GetInstallationDirectory(), "Libraries");
 			FTestConfiguration.PortNumber = 8061;			
 

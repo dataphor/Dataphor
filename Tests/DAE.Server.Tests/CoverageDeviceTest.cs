@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private IServerSession FSession;
 		private IServerProcess FProcess;
 		
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void SetUpFixture()
 		{
 			MSSQLServerConfigurationManager.ResetDatabase("DataphorTests");
@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 		
-		[TestFixtureTearDown]
+		[OneTimeTearDown]
 		public void TearDownFixture()
 		{
 			FServer.Stop();
