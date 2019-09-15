@@ -21,3 +21,4 @@ Dataphor/packages
 $RANDOM_SEED$
 node_modules/
 .vs/
+*.xml
