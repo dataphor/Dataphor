@@ -4,16 +4,16 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-CreateLibrary(LibraryDescriptor('Test', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
+CreateLibrary(LibraryDescriptor('LibraryTest', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
 
-RenameLibrary('Test', 'Test2');
+RenameLibrary('LibraryTest', 'LibraryTest2');
 
-CreateLibrary(LibraryDescriptor('Test', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
+CreateLibrary(LibraryDescriptor('LibraryTest', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
 
-RenameLibrary('Test', 'Test3');
+RenameLibrary('LibraryTest', 'LibraryTest3');
 
-DropLibrary('Test3');
+DropLibrary('LibraryTest3');
 
-DropLibrary('Test2');
+DropLibrary('LibraryTest2');
 
 
