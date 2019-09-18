@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -1321,13 +1321,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						plan.Dispose();
 					}
 				}
-				catch (Exception e)
+				catch
 				{
 					try
 					{
 						ReportTableChange(process, sourceTableVar, false);
 					}
-					catch (Exception ne)
+					catch
 					{
 						// Ignore errors here, this is cleanup code
 					}
@@ -1893,7 +1893,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					plan.Dispose();
 				}
 			}
-			catch (Exception e)
+			catch
 			{
 				RemoveOperatorMap(process, operatorMap);
 				throw;
