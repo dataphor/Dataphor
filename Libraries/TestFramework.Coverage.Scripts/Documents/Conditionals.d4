@@ -2,11 +2,30 @@
 	Conditionals
 */
 
-// TODO: These should all compile to type String, but they are all Generic, except the last one, which is String.
+var x1 := if true then nil else "";
+var y1 : typeof (x1) := '';	// Cause error if not a string
+
+var x2 := if true then "" else nil;
+var y2 : typeof (x1) := '';	// Cause error if not a string
+
+var x3 := case when true then "" else nil end;
+var y3 : typeof (x1) := '';	// Cause error if not a string
+
+var x4 := case when true then nil else "" end;
+var y4 : typeof (x1) := '';	// Cause error if not a string
+
+var x5 := case true when true then "" else nil end;
+var y5 : typeof (x1) := '';	// Cause error if not a string
+
+var x6 := case true when true then nil else "" end;
+var y6 : typeof (x1) := '';	// Cause error if not a string
+
 // TODO: The ternary also is not translated to SQL?
-raise Error("Fix this");
-select table { row { 1 ID, if true then nil else "" Value } };
-select table { row { 1 ID, if true then "" else nil Value } };
-select table { row { 1 ID, case when true then nil else "" end Value } };
-select table { row { 1 ID, case when true then "" else nil end Value } };
+//select table { row { 1 ID, if true then nil else "" Value } };
+//select table { row { 1 ID, if true then "" else nil Value } };
+//select table { row { 1 ID, case when true then nil else "" end Value } };
+//select table { row { 1 ID, case when true then "" else nil end Value } };
+//select table { row { 1 ID, case true when true then nil else "" end Value } };
+//select table { row { 1 ID, case true when true then "" else nil end Value } };
+
 

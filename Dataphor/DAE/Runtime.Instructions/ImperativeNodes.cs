@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -30,6 +30,7 @@ using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -1412,7 +1413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!Nodes[0].DataType.Is(plan.DataTypes.SystemBoolean))
 				throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, plan.CurrentStatement());
 				
-			if (Nodes[2].DataType.Is(Nodes[1].DataType) || Nodes[2].DataType.IsNil)
+			if ((!Nodes[1].DataType.IsNil && Nodes[2].DataType.Is(Nodes[1].DataType)) || Nodes[2].DataType.IsNil)
 			{
 				_dataType = Nodes[1].DataType;
 				Nodes[2] = Compiler.Upcast(plan, Nodes[2], _dataType);
@@ -1476,7 +1477,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 
-			_dataType = Nodes[0].Nodes[1].DataType;
+			// Data type is first item that doesn't result in nil literal
+			_dataType = Nodes.FirstOrDefault(n => !n.Nodes.Last.DataType.IsNil)
+				?.Nodes.Last.DataType ?? plan.DataTypes.SystemGeneric;
 			for (int index = 1; index < Nodes.Count; index++)
 			{
 				int nodeIndex = Nodes[index].Nodes.Count - 1;
@@ -1543,17 +1546,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
-			_dataType = Nodes[2].Nodes[1].DataType;
+			// Data type is first item that doesn't result in nil literal
+			_dataType = Nodes.Skip(2).FirstOrDefault(n => !n.Nodes.Last.DataType.IsNil)
+				?.Nodes.Last.DataType ?? plan.DataTypes.SystemGeneric;
 			for (int index = 3; index < Nodes.Count; index++)
 			{
-				int nodeIndex = Nodes[index].Nodes.Count - 1;
-				if (Nodes[index].Nodes[nodeIndex].DataType.Is(_dataType))
-					Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Nodes[index].Nodes[nodeIndex], _dataType);
+				var other = Nodes[index].Nodes.Last;
+				if (other.DataType.Is(_dataType))
+					other = Compiler.Upcast(plan, other, _dataType);
 				else
 				{	
-					ConversionContext context = Compiler.FindConversionPath(plan, Nodes[index].Nodes[nodeIndex].DataType, _dataType);
+					ConversionContext context = Compiler.FindConversionPath(plan, other.DataType, _dataType);
 					if (context.CanConvert)
-						Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[index].Nodes[nodeIndex], context), _dataType);
+						other = Compiler.Upcast(plan, Compiler.ConvertNode(plan, other, context), _dataType);
 					else
 						Compiler.CheckConversionContext(plan, context);
 				}
