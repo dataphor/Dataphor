@@ -332,12 +332,12 @@ begin
 	create operator iXor(const ALeftValue : Boolean, const ARightValue : Boolean) : Boolean class "System.BooleanXorNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iIndexer(const AList : list, const AIndex : Integer) : generic class "System.IndexerNode" static tags { DAE.IsBuiltin = "True" };
 	create operator Count(const AList : list) : Integer class "System.ListCountNode";
-	create operator Clear(var AList : list) class "System.ListClearNode" static tags { DAE.IsLocallyFunctional = "False" };
-	create operator Add(var AList : list, AValue : generic) : Integer class "System.ListAddNode" static tags { DAE.IsLocallyFunctional = "False" };
+	create operator Clear(var AList : list) class "System.ListClearNode" static tags { DAE.IsFunctional = "False" };
+	create operator Add(var AList : list, AValue : generic) : Integer class "System.ListAddNode" static tags { DAE.IsFunctional = "False" };
 	create operator Distinct(const AList : list) : list class "System.DistinctListNode";
-	create operator Insert(var AList : list, AValue : generic, const AIndex : Integer) class "System.ListInsertNode" static tags { DAE.IsLocallyFunctional = "False" };
-	create operator Remove(var AList : list, const AValue : generic) class "System.ListRemoveNode" static tags { DAE.IsLocallyFunctional = "False" };
-	create operator RemoveAt(var AList : list, const AInteger : Integer) class "System.ListRemoveAtNode" static tags { DAE.IsLocallyFunctional = "False" };
+	create operator Insert(var AList : list, AValue : generic, const AIndex : Integer) class "System.ListInsertNode" static tags { DAE.Functional = "False" };
+	create operator Remove(var AList : list, const AValue : generic) class "System.ListRemoveNode" static tags { DAE.Functional = "False" };
+	create operator RemoveAt(var AList : list, const AInteger : Integer) class "System.ListRemoveAtNode" static tags { DAE.Functional = "False" };
 	create operator IndexOf(const AList : list, const AValue : generic) : Integer class "System.ListIndexOfNode";
 	create operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer) : Integer class "System.ListIndexOfStartNode";
 	create operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer, const ALength : Integer) : Integer class "System.ListIndexOfStartLengthNode";
