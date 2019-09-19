@@ -18,15 +18,6 @@
 		<DataphorOutputName Condition=" '$(DataphorOutputName)' == '' ">Dataphor</DataphorOutputName>
 	</PropertyGroup>
 
-  <!-- Synchronize DocumentationFiles -->
-  <ItemGroup>
-    <DocumentationFiles Include="..\Deploy\Documentation\*.*" />
-  </ItemGroup>
-  <Target Name="SyncDocumentation" >
-    <Message Text="Synchronize Documentation files with WiX." />
-    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="DocumentationFiles" SourceFiles="@(DocumentationFiles)" />
-  </Target>
-
 
   <!-- Synchronize LibraryFiles -->
   <ItemGroup>
@@ -76,5 +67,5 @@
 	</Target>
 
 	<!-- Main Build -->
-	<Target Name="Build" DependsOnTargets="SyncDocumentation; SyncBin; SyncLibraries; SyncWebClient; SyncDataphoriaWeb" />
+	<Target Name="Build" DependsOnTargets="SyncBin; SyncLibraries; SyncWebClient; SyncDataphoriaWeb" />
 </Project>

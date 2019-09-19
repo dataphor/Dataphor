@@ -40,20 +40,6 @@
       <ComponentGroupRef Id="LibraryFilesGroup"/>
 
       <Feature
-        Id="DataphorDocumentation"
-        Title="Dataphor Documentation"
-        Description="Dataphor Documentation in CHM and PDF Formats"
-        Level="1">
-
-        <ComponentRef Id="DocumentationFiles"/>
-
-        <!--Shortcut ref-->
-
-        <ComponentRef Id="ApplicationShortcut"/>
-
-      </Feature>
-
-      <Feature
         Id="WebClient"
         Title="Dataphor Web Client"
         Description="Dataphor Web Client Application Files (Does not install the actual site, just the files)"
