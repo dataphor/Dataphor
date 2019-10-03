@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -134,11 +134,22 @@ namespace Alphora.Dataphor.BOP
 
 		public string Write()
 		{
-			// Use a stream because if we use a StringWriter it uses UTF16 encoding
-			var memoryStream = new MemoryStream();
-			var writer = new StreamWriter(memoryStream);
+			// Use a special string writer because the default one uses UTF16 encoding
+			var writer = new StringWriterWithEncoding(Encoding.UTF8);
 			InternalWrite(XmlWriter.Create(writer, GetXmlWriterSettings()));
-			return Encoding.UTF8.GetString(memoryStream.ToArray());
+			return writer.ToString();
+		}
+
+		public sealed class StringWriterWithEncoding : StringWriter
+		{
+			private readonly Encoding _encoding;
+			
+			public StringWriterWithEncoding(Encoding desiredEncoding) : base()
+			{
+				_encoding = desiredEncoding;
+			}
+
+			public override Encoding Encoding => this._encoding;
 		}
 
 		private void InternalWrite(XmlWriter writer)
