@@ -4,9 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-using System.Text;
-using System.Collections.Generic;
-
 using Alphora.Dataphor.DAE.Connection;
 
 // To specify that a SQLite store be used for catalog persistence, add the following attributes to the alias definition in the ServerAliases.config file:
