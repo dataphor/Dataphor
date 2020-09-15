@@ -6300,7 +6300,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				block = CompileStatement(plan, statement);
 
 				for (int index = 0; index < operatorValue.Operands.Count; index++)
-					if (!plan.Symbols[operatorValue.Operands.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
+					if (!plan.Symbols[plan.Symbols.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
 					{
 						operatorValue.Operands[index].Modifier = Modifier.Const;
 						operatorValue.OperandsChanged();
