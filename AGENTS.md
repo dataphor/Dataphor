@@ -35,7 +35,8 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 | `Setup/` | WiX installer (v3.5, being replaced) |
 | `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
 | `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries, the Oracle/ADO/SAS device and connection libraries and the DocBook generator library `Documentation` (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
-| `Utilities/` | Dead or parked — see the plan before touching. `Images/` and the one file left in `Dataphor/` are waiting to be deleted (`hygiene-large-binaries`) |
+| `Utilities/Wix` | The copy of WiX 3.5 that `Setup/` builds with; deleted with `Setup/` when WS9 lands |
+| `Images/`, `Dataphor/` | Unreferenced source art and the one file left in `Dataphor/`, waiting to be deleted (`hygiene-large-binaries`) |
 
 ## Build and test
 

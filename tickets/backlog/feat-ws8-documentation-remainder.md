@@ -17,7 +17,7 @@ Scope per the plan's WS8 section and work-item table.
 - `docs-remove-old-sources` — delete `Documentation/`, `legacy/Documentation/` and `book.json`; repoint the root `README.md`.
 - `docs-contributing` — build, test, layout, release checklist; fold `CompilerDefines.txt` and the error prefix list into `docs/reference/`.
 - `docs-link-check-ci` — link checker in CI (needs `build-ci`).
-- `docs-reference-generator` — Markdown emitter for the catalog documentation operator; regenerate and diff.
+- `docs-reference-generator` — Markdown emitter for the catalog documentation operator; regenerate and diff. The operator's library (`Documentation`) was parked under `legacy/libraries/Documentation` by the reorganization, and `legacy/` is excluded from the build and "not to be fixed" (AGENTS.md). Planning this item has to decide whether to move the library back to `libraries/` (and into the build) or write the emitter somewhere else.
 - `docs-admin-guide` — needs `store-rebuild-workflow` (`feat-ws4-store-followups`) and `installer-msi` (`feat-ws9-installer-and-release`).
 - `docs-migration-guide-custom-code` — needs `ui-windows-client-runs` (`feat-ws6-windows-client-and-ide`).
 
