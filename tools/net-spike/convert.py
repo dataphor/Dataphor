@@ -23,6 +23,8 @@ def is_converted(path):
 
 def compiled_files(path):
     """normcased absolute paths of the Compile items an SDK-style project lists."""
+    # NOTE: literal Include paths only; if converted projects switch to wildcard or $(Property) includes
+    # (build-globbing-cleanup), run.py's check_overrides stops seeing their files and needs MSBuild's evaluated items.
     d = os.path.dirname(os.path.abspath(path))
     return {os.path.normcase(os.path.abspath(os.path.join(d, c.get("Include"))))
             for c in ET.parse(path).getroot().iter("Compile") if c.get("Include")}
@@ -188,7 +190,7 @@ def main():
         lines.append("  <ItemGroup>")
         for pk, v in sorted(pkgs.items()):
             lines.append(f'    <PackageReference Include="{pk}" Version="{central.get(pk, v)}" />')
-        lines.append('    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />')
+        lines.append(f'    <PackageReference Include="System.Resources.Extensions" Version="{central.get("System.Resources.Extensions", "8.0.0")}" />')
         for name_, path_ in binrefs:
             lines.append(f'    <Reference Include="{name_}"><HintPath>{path_}</HintPath></Reference>')
         for pr in prefs:
