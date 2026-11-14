@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ApplicationTransactionTest.cs" />
     <Compile Include="CatalogStoreTest.cs" />
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
     <Compile Include="ConcurrentDDLTest.cs" />

@@ -86,10 +86,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// transaction for each of the session's open transaction levels that has none, so that the writes commit and roll back
 		/// with the process transaction; the first of those begins takes the store's write lock (on SQLite, BEGIN IMMEDIATE),
 		/// and the session holds it until that process transaction ends. (A statement that changes the catalog begins it
-		/// earlier, before it takes the catalog's lock; see BeginStoreWriteTransaction.) Until then the session keeps the
-		/// connection, and every read of the session goes through it, so a transaction sees its own uncommitted writes. Reads
-		/// before a transaction's first write run on whichever connection the session holds, in autocommit when no store
-		/// transaction is open. Outside any process transaction, writes autocommit.
+		/// earlier, before it takes the catalog's lock, unless it already runs inside that lock and writes nothing to the store;
+		/// see BeginStoreWriteTransaction.) Until then the session keeps the connection, and every read of the session goes
+		/// through it, so a transaction sees its own uncommitted writes. Reads before a transaction's first write run on
+		/// whichever connection the session holds, in autocommit when no store transaction is open. Outside any process
+		/// transaction, writes autocommit.
 		/// </remarks>
 		protected void AcquireCatalogStoreConnection(bool isUpdatable)
 		{
@@ -163,19 +164,23 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			int openLevels = OpenTransactionLevels;
 			CheckStoreTransactionLevels(openLevels);
 			// Only this begin waits for the store's write lock. A session that holds that lock can be waiting for the catalog's
-			// lock, so waiting here while holding it deadlocks until the busy timeout (130103); see BeginStoreWriteTransaction.
+			// lock, so waiting here while holding it deadlocks until the busy timeout (130103); see BeginStoreWriteTransaction,
+			// which skips its early begin inside the catalog's lock, so that only a real store write there reaches this check.
 			if ((_catalogStoreConnection.TransactionCount == 0) && (openLevels > 0))
 				Error.DebugAssertFail(!Monitor.IsEntered(Catalog), "The catalog store's write transaction is beginning inside the catalog's lock.");
 			while (_catalogStoreConnection.TransactionCount < openLevels)
 				_catalogStoreConnection.BeginTransaction(ServerProcess.Transactions[_catalogStoreConnection.TransactionCount].IsolationLevel);
 		}
 
+		// Inside the catalog's lock this begin can no longer come before it, so it does nothing: the DDL that runs there, an
+		// application transaction's copy of a table made when a statement first references it, writes nothing to the store. A
+		// statement there that does write the store still begins the transaction at its first write, which asserts in Debug.
 		// NOTE: outside any process transaction (a process with implicit transactions off) a DDL statement's store writes
 		// autocommit, and each still waits for the write lock inside the catalog's lock, as before this lazy begin; if such
 		// processes change the catalog while others hold long write transactions, begin a store transaction for the statement.
 		public override void BeginStoreWriteTransaction()
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine && (OpenTransactionLevels > 0))
+			if (!ServerProcess.ServerSession.Server.IsEngine && (OpenTransactionLevels > 0) && !Monitor.IsEntered(Catalog))
 			{
 				AcquireCatalogStoreConnection(true);
 				ReleaseCatalogStoreConnection();

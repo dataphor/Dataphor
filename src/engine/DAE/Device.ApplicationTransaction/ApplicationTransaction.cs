@@ -940,6 +940,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
+		// NOTE: the copy's DDL (CopyTableVar) runs inside the catalog's lock, so it does not begin the catalog store's write
+		// transaction, and it relies on writing no store rows (AT objects are not persistent); if AT objects ever become
+		// persistent, the store write transaction must begin before this lock.
 		public Schema.TableVar AddTableVar(ServerProcess process, Schema.TableVar sourceTableVar)
 		{
 			lock (process.Catalog)

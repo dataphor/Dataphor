@@ -23,7 +23,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Takes the catalog store's write lock before the node takes the catalog's lock (many drops and alters write the store
 		// inside lock (program.Catalog)): waiting for it inside would deadlock with a session that holds the store's write lock
 		// and waits for the catalog's lock, until the store's busy timeout. Loading an object runs its DDL without writing the
-		// store, and a read must not take the write lock.
+		// store, and a read must not take the write lock. A DDL statement already inside the catalog's lock, such as an
+		// application transaction's copy of a table, does not begin it (see the server's BeginStoreWriteTransaction).
 		protected override void InternalBeforeExecute(Program program)
 		{
 			if (!program.ServerProcess.InLoadingContext())
