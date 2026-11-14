@@ -88,7 +88,7 @@ Where that stands, honestly:
 
 - The engine, compiler, server libraries and SQL Server device compile on .NET 10 essentially unchanged, and the engine boots and runs D4 there on a SQLite catalog. 62 of 76 existing D4 regression scripts pass untouched.
 - The Windows client and Dataphoria compile on .NET 10 but have not yet been run there; that is the largest remaining piece of work.
-- There is no one-command build yet. Until it lands, the old solution (`Dataphor/Dataphor.sln`) needs Visual Studio and .NET Framework 4.5.2 targeting packs.
+- There is no one-command build yet. Until it lands, the old solution (`Dataphor.sln` at the repository root) needs Visual Studio and .NET Framework 4.5.2 targeting packs.
 
 The full plan, with evidence and sequencing, is in [docs/modernization-plan.md](docs/modernization-plan.md). How the system fits together is in [docs/architecture.md](docs/architecture.md). Changes that existing applications will notice are tracked in [docs/migration-notes.md](docs/migration-notes.md).
 
@@ -101,7 +101,7 @@ The existing guides are thorough and still accurate about the language and the m
 - [Form automation](Documentation/DevelopersGuide/FormAutomation.adoc) — how derivation decides what to build
 - [Storage integration architecture](Documentation/DevelopersGuide/StorageIntegrationArchitecture.adoc) — how federation works
 - [The full User's Guide](Documentation/UsersGuide/UsersGuide.adoc), [Developer's Guide](Documentation/DevelopersGuide/DevelopersGuide.adoc) and [Reference](Documentation/DataphorReference/DataphorReference.adoc)
-- [Sample libraries](Libraries/) (`Sample.*`), from a one-form demonstration to a complete shipping application
+- [Sample libraries](samples/) (`Sample.*`), from a one-form demonstration to a complete shipping application
 
 ## Contributing
 
@@ -109,4 +109,4 @@ Work is planned and tracked as tickets under [tickets/](tickets/); [AGENTS.md](A
 
 ## License
 
-Dataphor was created at Alphora, beginning in 2000, and is released under a [BSD-style license](dataphor_license.txt).
+Dataphor was created at Alphora, beginning in 2000, and is released under a [BSD-style license](LICENSE).

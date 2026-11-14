@@ -34,8 +34,8 @@ See also [https://jclingo.gitbooks.io/dataphor/content/DevelopersGuide/D4Lexical
 https://jclingo.gitbooks.io/dataphor/content/DevelopersGuide/D4LexicalElements.html)
 which documents the D4 syntax.
 
-See also [https://github.com/DBCG/Dataphor/blob/master/Dataphor/Dataphoria/TextEditor/Modes/D4-Mode.xshd](
-https://github.com/DBCG/Dataphor/blob/master/Dataphor/Dataphoria/TextEditor/Modes/D4-Mode.xshd)
+See also [src/windows/Dataphoria/TextEditor/Modes/D4-Mode.xshd](
+../../../src/windows/Dataphoria/TextEditor/Modes/D4-Mode.xshd)
 which is the ```ICSharpCode.TextEditor``` syntax definition XML file that
 is used internally by Dataphoria.
 

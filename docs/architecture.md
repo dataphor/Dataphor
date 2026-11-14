@@ -1,6 +1,6 @@
 # Dataphor architecture
 
-How the system fits together as of the last 3.1-era commit (2019), written as the orientation map for the modernization. Where the modernization changes something, the change is described in [modernization-plan.md](modernization-plan.md); this document describes what exists.
+How the system fits together as of the last 3.1-era commit (2019), written as the orientation map for the modernization. Where the modernization changes something, the change is described in [modernization-plan.md](modernization-plan.md); this document describes what exists. Paths are those of the reorganized repository; the plan's [old → new table](modernization-plan.md#repository-layout) maps the paths used before it.
 
 ## The idea in one paragraph
 
@@ -10,8 +10,9 @@ An application is written as a **D4 library**: scripts that declare types, table
 
 ```
  ┌──────────────────────────── clients ─────────────────────────────┐
- │ Dataphoria IDE        Windows client                             │
- │ Dataphor/Dataphoria   Frontend.Client.Windows(.Executable)       │
+ │ Dataphoria IDE          Windows client                           │
+ │ src/windows/Dataphoria  src/windows/WindowsClient (exe),         │
+ │                         src/windows/Frontend.Client.Windows      │
  │        └── Frontend.Client  — node tree, form loader, Pipe       │
  │        └── DAE.Client.Controls — WinForms data-aware controls    │
  │        └── DAE.Client — DataSession, DataView, DataSource        │
@@ -27,27 +28,27 @@ An application is written as a **D4 library**: scripts that declare types, table
  │ Base — utilities, BOP serializer                                 │
  └──────┬──────────────────────┬────────────────────────┬───────────┘
    catalog store          devices (D4 objects)      D4 libraries
-   SQLCE│SQLite│MSSQL│PG   Memory, Simple, MSSQL,    Libraries/<Name>/
+   SQLCE│SQLite│MSSQL│PG   Memory, Simple, MSSQL,    libraries/<Name>/
    (27 DAE* tables)       PGSQL, …                  .d4l + Documents/ + dll
 ```
 
 | Assembly | Project | Role |
 |---|---|---|
-| `Alphora.Dataphor` | `Dataphor/Base` | Collections, exceptions, streams, reflection helpers; **BOP** (`Base/BOP`) |
-| `Alphora.Dataphor.DAE` | `Dataphor/DAE/Engine.csproj` | Engine: `Language*/` (lexer, parser, emitters for D4, SQL, RealSQL), `Compiling/` (`Compiler.cs` is 13k lines), `Runtime.Instructions/` (one class per operator, ~1,080 registered), `Schema/`, `Device.Memory/`, `Device.Catalog/`, `Store/`, `Server/` (`Engine`, `ServerSession`, `ServerProcess`, plans, cursors), `Debug/` |
-| `AlphoraDataphorServer` | `Dataphor/Server` | `Server : Engine` adds the persistent catalog (`ServerCatalogDevice*`), libraries (`Schema/LibraryUtility.cs`), instances (`InstanceManager`, `ServerConfiguration`), the remote object layer (`RemoteServer*`), WCF services (`Service/`), `NativeCLI/`, .NET connections (`Connection/`) |
-| `AlphoraDataphorCommon` | `Dataphor/Common` | WCF binding and URI helpers (`DataphorServiceUtility`), channel factory cache, listener client |
-| `AlphoraDataphorClient` | `Dataphor/Client` | `ClientServer` (WCF proxy) wrapped by `LocalServer` (client-side catalog cache, local plans/cursors/streams) |
-| `Alphora.Dataphor.DAE.NativeCLI` | `Dataphor/DAE.NativeCLI` | Simplified, JSON-friendly call interface and its WCF client |
-| `Alphora.Dataphor.DAE.Client` | `Dataphor/DAE.Client` | `DataSession`, `DataView`/`TableDataSet`, `DataSource`/`DataLink`, aliases (`AliasManager`) |
-| store assemblies | `Dataphor/DAE.SQLite`, `DAE.MSSQL`, `DAE.PGSQL` | `SQLStore` implementations |
-| library assemblies | `Libraries/*/Source` | Devices, connections, Frontend server, System.* operators |
+| `Alphora.Dataphor` | `src/engine/Base` | Collections, exceptions, streams, reflection helpers; **BOP** (`Base/BOP`) |
+| `Alphora.Dataphor.DAE` | `src/engine/DAE/DAE.csproj` | Engine: `Language*/` (lexer, parser, emitters for D4, SQL, RealSQL), `Compiling/` (`Compiler.cs` is 13k lines), `Runtime.Instructions/` (one class per operator, ~1,080 registered), `Schema/`, `Device.Memory/`, `Device.Catalog/`, `Store/`, `Server/` (`Engine`, `ServerSession`, `ServerProcess`, plans, cursors), `Debug/` |
+| `AlphoraDataphorServer` | `src/engine/Server` | `Server : Engine` adds the persistent catalog (`ServerCatalogDevice*`), libraries (`Schema/LibraryUtility.cs`), instances (`InstanceManager`, `ServerConfiguration`), the remote object layer (`RemoteServer*`), WCF services (`Service/`), `NativeCLI/`, .NET connections (`Connection/`) |
+| `AlphoraDataphorCommon` | `src/protocol/Common` | WCF binding and URI helpers (`DataphorServiceUtility`), channel factory cache, listener client |
+| `AlphoraDataphorClient` | `src/protocol/Client` | `ClientServer` (WCF proxy) wrapped by `LocalServer` (client-side catalog cache, local plans/cursors/streams) |
+| `Alphora.Dataphor.DAE.NativeCLI` | `src/protocol/NativeCLI` | Simplified, JSON-friendly call interface and its WCF client |
+| `Alphora.Dataphor.DAE.Client` | `src/client/DAE.Client` | `DataSession`, `DataView`/`TableDataSet`, `DataSource`/`DataLink`, aliases (`AliasManager`) |
+| store assemblies | `src/engine/Store.SQLite`, `Store.MSSQL`, `Store.PGSQL` | `SQLStore` implementations |
+| library assemblies | `libraries/*/Source` (and `samples/`, `tests/libraries/`) | Devices, connections, Frontend server, System.* operators |
 
 The engine can run without the server layer (`Engine` alone has an in-memory catalog); everything a real deployment uses goes through `Server`.
 
 ## Sessions, processes, plans
 
-A client **connects** and gets a *session* (`ServerSession`, one per login). A session starts *processes* (`ServerProcess`): a process is one logical thread of execution with its own transaction stack and device sessions. A process **prepares** a statement or expression into a *plan* (compile → bind → optimize into a tree of `PlanNode`s), **executes** or **opens** it, and for table results gets a *cursor*. Every one of these has a remote counterpart (`RemoteServerSession`, `RemoteServerProcess`, …) that the WCF service exposes by integer handle (`Service/HandleManager.cs`). In-process callers and tests use the `IServer*` interfaces in `Dataphor/DAE/CLI.cs` directly.
+A client **connects** and gets a *session* (`ServerSession`, one per login). A session starts *processes* (`ServerProcess`): a process is one logical thread of execution with its own transaction stack and device sessions. A process **prepares** a statement or expression into a *plan* (compile → bind → optimize into a tree of `PlanNode`s), **executes** or **opens** it, and for table results gets a *cursor*. Every one of these has a remote counterpart (`RemoteServerSession`, `RemoteServerProcess`, …) that the WCF service exposes by integer handle (`Service/HandleManager.cs`). In-process callers and tests use the `IServer*` interfaces in `src/engine/DAE/CLI.cs` directly.
 
 Compilation is entirely in `Compiler.cs`; execution is interpretation of the plan-node tree (`PlanNode.Execute`). There is **no IL generation**: a `ShouldEmitIL` session flag is plumbed end to end but nothing reads it, and the one remaining `EmitInstructionIL` method (`ArithmeticNodes.cs`) is commented out.
 
@@ -67,11 +68,11 @@ Everything D4 binds to C# goes through that name map (`ClassLoader.CreateObject`
 
 ## Devices
 
-A device translates plan nodes it claims to support into a native command and leaves the rest to the engine (`Compiling/Visitors/DetermineDeviceVisitor`). `System.MemoryDevice` (in the engine) and `SimpleDevice` (memory plus file persistence) need nothing external. `SQLDevice` is the base for SQL translation (10k lines); `MSSQLDevice` and `PGSQLDevice` specialize it and call into a `SQLConnection` implementation (the Oracle, ADO and SAS device and connection libraries that did the same are parked under `legacy/libraries/` and not built). The connection base classes are in `Dataphor/DAE/Connection` and `Dataphor/Server/Connection` (the `.cs` files of the same names under `Libraries/Connection/Source` are uncompiled leftovers).
+A device translates plan nodes it claims to support into a native command and leaves the rest to the engine (`Compiling/Visitors/DetermineDeviceVisitor`). `System.MemoryDevice` (in the engine) and `SimpleDevice` (memory plus file persistence) need nothing external. `SQLDevice` is the base for SQL translation (10k lines); `MSSQLDevice` and `PGSQLDevice` specialize it and call into a `SQLConnection` implementation (the Oracle, ADO and SAS device and connection libraries that did the same are parked under `legacy/libraries/` and not built). The connection base classes are in `src/engine/DAE/Connection` and `src/engine/Server/Connection` (the `.cs` files of the same names under `libraries/Connection/Source` are uncompiled leftovers).
 
 ## Frontend: from schema to screen
 
-Server side (`Libraries/Frontend`, assembly `Alphora.Dataphor.Frontend.Server`): a device that exposes each library's `Documents/` folder as tables, plus the derivation pipeline `Derivation → Elaboration → Structuring → Production` that turns a query expression and a page type into a form document.
+Server side (`libraries/Frontend`, assembly `Alphora.Dataphor.Frontend.Server`): a device that exposes each library's `Documents/` folder as tables, plus the derivation pipeline `Derivation → Elaboration → Structuring → Production` that turns a query expression and a page type into a form document.
 
 A **form document** is BOP XML describing a node tree (`.dfd`). A **customized form** (`.dfdx`, DILX) names one or more ancestor documents — themselves D4 expressions such as `.Frontend.Derive('Lib.Table', 'Browse')` — and a delta to merge onto them.
 
@@ -87,7 +88,7 @@ Client side: `Frontend.Client.Session.SetApplication` asks the server which node
 | Native CLI | `…/<instance>/service/native` | `INativeCLIService`, 11 operations |
 | Listener | `net.tcp://<host>:8060/listener/service` | `IListenerService`: instance name → URI |
 
-The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronous copies (`Dataphor/Client/Contracts`, `Dataphor/DAE.NativeCLI`) are separate declarations of the same contracts. `RemoteServerObject` still derives from `MarshalByRefObject` and manipulates .NET Remoting leases — a leftover from the pre-WCF protocol. A client alias (`Aliases.config`) is either a connection alias (host, instance, port) or an in-process alias that starts a server inside the client process.
+The server interfaces (`src/engine/Server/Contracts`) and the client's asynchronous copies (`src/protocol/Client/Contracts`, `src/protocol/NativeCLI`) are separate declarations of the same contracts. `RemoteServerObject` still derives from `MarshalByRefObject` and manipulates .NET Remoting leases — a leftover from the pre-WCF protocol. A client alias (`Aliases.config`) is either a connection alias (host, instance, port) or an in-process alias that starts a server inside the client process.
 
 ## On disk
 
@@ -104,11 +105,11 @@ The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronou
 
 | State | Projects |
 |---|---|
-| Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows(.Executable), Dataphoria, DAEServer, DAE.Service(.ConfigurationUtility), D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
-| Working, lightly used | DAE.Client.Provider, DAE.NativeCLI, Frontend.Client.WPF (one scheduler control), PGSQL device and connection, DAE.MSSQL/DAE.PGSQL stores, samples |
-| Parked under `legacy/`, not built | Side projects (2015–2019): FHIR*, CQF*, PHINVADS* libraries (`legacy/libraries/`); `legacy/Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes), with the cloud prototype's sample library `legacy/Processor/` and design documents `legacy/Design/`. Also the Oracle (Microsoft provider), ADO and SAS device and connection libraries (`legacy/libraries/`) |
+| Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows, WindowsClient, Dataphoria, DAEServer, DAEService, ConfigurationUtility, D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
+| Working, lightly used | DAE.Client.Provider, NativeCLI, Frontend.Client.WPF (one scheduler control), PGSQL device and connection, Store.MSSQL/Store.PGSQL stores, samples |
+| Parked under `legacy/`, not built | Side projects (2015–2019): FHIR*, CQF*, PHINVADS* libraries (`legacy/libraries/`); `legacy/Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes), with the cloud prototype's sample library `legacy/Processor/` and design documents `legacy/Design/`. Also the Oracle (Microsoft provider), ADO and SAS device and connection libraries, and the DocBook reference generator library `Documentation` (`legacy/libraries/`) |
 | Cannot survive .NET 10 as written | SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
 
-ICSharpCode.TextEditor (binary, `External/`), DockPanel Suite and Ascend controls (binaries in `Dataphor/Dataphoria/`), System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security, ADODB interop (used only by parked code under `legacy/`), Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet; used only by parked code under `legacy/`), plus a complete copy of WiX 3.5 under `Utilities/`.
+ICSharpCode.TextEditor, DockPanel Suite (WeifenLuo) and Ascend controls, System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security (all binaries in `external/`), ADODB interop (used only by parked code under `legacy/`), Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet; used only by parked code under `legacy/`), plus a complete copy of WiX 3.5 under `Utilities/`.

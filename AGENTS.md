@@ -12,30 +12,34 @@ Settled direction (details in the plan): .NET 10 only, no .NET Framework build; 
 
 ## Layout
 
-We own this codebase.  **This is the layout before the reorganization.** The plan's "Repository layout" section gives the target tree (`src/`, `libraries/`, `samples/`, `tests/`, …) and an old → new table; the ticket that performs the move rewrites this table.
+We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#repository-layout) section gives the target tree, and its old → new table maps any path from before the reorganization (in an old ticket, commit or document) to where it is now.
 
 | Path | What |
 |---|---|
-| `Dataphor/Base` | Shared utilities and **BOP**, the XML object serializer used for forms, `.d4l` files and config (assembly `Alphora.Dataphor`) |
-| `Dataphor/DAE` (`Engine.csproj`) | The engine: D4 lexer/parser/compiler, plan nodes (`Runtime.Instructions/`), schema, memory device, catalog device, store abstraction |
-| `Dataphor/Server` | The full server on top of the engine: persistent catalog, library loading, WCF services, .NET ADO connections |
-| `Dataphor/DAE.SQLite`, `DAE.MSSQL`, `DAE.PGSQL` | Catalog *store* back ends (where the catalog persists) — not to be confused with devices |
-| `Dataphor/Common`, `Client`, `DAE.NativeCLI` | WCF contracts/binding, client proxy + client-side catalog cache, simplified "native" call interface |
-| `Dataphor/DAE.Client`, `DAE.Client.Controls`, `DAE.Client.Provider` | `DataSession`/`DataView` data-binding model, WinForms data-aware controls, ADO.NET provider |
-| `Dataphor/Frontend.Client`, `Frontend.Client.Windows(.Executable)` | UI node model + form loader; the WinForms renderer and the Windows client exe |
-| `Dataphor/Dataphoria` | The IDE (WinForms) |
-| `Dataphor/DAEServer`, `DAE.Service`, `DAE.Service.ConfigurationUtility`, `D4Runner` | Console host, Windows service, tray config tool, script runner |
-| `Libraries/<Name>/` | D4 libraries: `<Name>.d4l` descriptor, `Documents/` (D4 scripts, forms), optional C# in `Source/`. Devices (`MSSQLDevice`, `SQLDevice`, …), `Frontend` (server side of the UI), `System.*`, samples, and the D4 test scripts (`TestFramework.Coverage.Scripts`) |
-| `Tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process |
+| `src/engine/Base` | Shared utilities and **BOP**, the XML object serializer used for forms, `.d4l` files and config (assembly `Alphora.Dataphor`). `src/engine/Base.Windows` holds the Windows-only helpers (assembly resolve hook, `PathUtility`) |
+| `src/engine/DAE` (`DAE.csproj`) | The engine: D4 lexer/parser/compiler, plan nodes (`Runtime.Instructions/`), schema, memory device, catalog device, store abstraction |
+| `src/engine/Server` | The full server on top of the engine: persistent catalog, library loading, WCF services, .NET ADO connections |
+| `src/engine/Store.SQLite`, `Store.MSSQL`, `Store.PGSQL` | Catalog *store* back ends (where the catalog persists) — not to be confused with devices. The project files keep their old names: `DAE.SQLite.csproj`, `DAE.MSSQL.csproj`, `DAE.PGSQL.csproj` |
+| `src/protocol/Common`, `Client`, `NativeCLI` | WCF contracts/binding, client proxy + client-side catalog cache, simplified "native" call interface (`DAE.NativeCLI.csproj`) |
+| `src/client/DAE.Client`, `DAE.Client.Provider`, `Frontend.Client` | `DataSession`/`DataView` data-binding model, ADO.NET provider, UI node model + form loader |
+| `src/windows/DAE.Client.Controls`, `Frontend.Client.Windows`, `Frontend.Client.WPF`, `WindowsClient` | WinForms data-aware controls, the WinForms renderer, the WPF scheduler control, and the Windows client exe (`WindowsClient/Frontend.Client.Windows.Executable.csproj`) |
+| `src/windows/Dataphoria` | The IDE (WinForms) |
+| `src/windows/ConfigurationUtility` | Tray config tool (`DAE.Service.ConfigurationUtility.csproj`) |
+| `src/hosts/DAEServer`, `DAEService`, `D4Runner` | Console host, Windows service (`DAEService/DAE.Service.csproj`), script runner |
+| `libraries/<Name>/` | Shipped D4 libraries: `<Name>.d4l` descriptor, `Documents/` (D4 scripts, forms), optional C# in `Source/`. Devices (`MSSQLDevice`, `SQLDevice`, …), connections, `Frontend` (server side of the UI), `System.*`, `Security`, `General` |
+| `samples/` | The `Sample.*` libraries, same structure |
+| `tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process. `tests/libraries/` holds the D4 test libraries (`TestFramework*`); `TestFramework.Coverage.Scripts` has the coverage scripts |
+| `external/` | Third-party binaries not yet replaced by NuGet packages (text editor, docking, Ascend, Npgsql, Mono.Security, System.Data.SQLite) |
+| `docs/` | Plan, architecture, migration notes; `docs/reference/` holds `CompilerDefines.txt` and `Error Message Prefix Codes.txt` |
+| `tools/` | `net-spike/` (throwaway harness that builds and runs the code on modern .NET without modifying the repo) and `editor-support/` |
 | `Setup/` | WiX installer (v3.5, being replaced) |
 | `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
-| `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries and the Oracle/ADO/SAS device and connection libraries (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
-| `Utilities/` | Dead or parked — see the plan before touching |
-| `tools/net-spike/` | Throwaway harness that builds and runs the code on modern .NET without modifying the repo |
+| `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries, the Oracle/ADO/SAS device and connection libraries and the DocBook generator library `Documentation` (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
+| `Utilities/` | Dead or parked — see the plan before touching. `Images/` and the one file left in `Dataphor/` are waiting to be deleted (`hygiene-large-binaries`) |
 
 ## Build and test
 
-There is **no working in-repo build yet**: the legacy `Dataphor/Dataphor.sln` needs Visual Studio/MSBuild and .NET Framework 4.5.2 targeting packs, and nothing here builds with `dotnet build`. Plan workstream WS1 replaces it. **The ticket that lands the SDK-style build must rewrite this section.**
+There is **no working in-repo build yet**: the legacy `Dataphor.sln` at the repository root needs Visual Studio/MSBuild and .NET Framework 4.5.2 targeting packs, and nothing here builds with `dotnet build`. Plan workstream WS1 replaces it. **The ticket that lands the SDK-style build must rewrite this section.**
 
 Until then the only build/test loop is the spike (needs Python 3 and the .NET 10 SDK pinned by `global.json`; work dir must be outside the repo):
 
@@ -47,12 +51,12 @@ It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite
 
 ## Rules that are easy to break
 
-- **Compatibility surfaces — do not change without a ticket that says so:** D4 semantics and operator signatures; D4 class names (the strings in `create operator … class "Lib.XNode"`, registered by each assembly's `DAERegister.GetClasses()`); assembly names; `.d4l`/`.dfd`/`.dfdx`/`.dnt`/BOP formats; error codes (`Dataphor/Error Message Prefix Codes.txt`); WCF contracts in `Dataphor/Server/Contracts` + `Dataphor/Client/Contracts` (two copies that must stay in step); ports 8060/8061.
+- **Compatibility surfaces — do not change without a ticket that says so:** D4 semantics and operator signatures; D4 class names (the strings in `create operator … class "Lib.XNode"`, registered by each assembly's `DAERegister.GetClasses()`); assembly names; `.d4l`/`.dfd`/`.dfdx`/`.dnt`/BOP formats; error codes (`docs/reference/Error Message Prefix Codes.txt`); WCF contracts in `src/engine/Server/Contracts` + `src/protocol/Client/Contracts` (two copies that must stay in step); ports 8060/8061.
 - **Formatting:** tabs, CRLF, UTF-8 with BOM in most `.cs` files. Preserve them. Never reformat or re-encode a file you are not otherwise changing.
-- **A file on disk is not necessarily compiled.** Legacy csproj files list sources explicitly; strays exist (`DAE.Client/View-263.cs`, most of `Libraries/Connection/Source`). Check the csproj before trusting or fixing a file.
-- **Same-named files exist in both `Dataphor/DAE` and `Dataphor/Server`** (`SecurityNodes.cs`, `LibraryNodes.cs`, `CatalogNodes.cs`, …). They are different files; check both.
-- **Behaviour switches are `#define`s at the top of individual files** plus csproj constants; `Dataphor/CompilerDefines.txt` is the index. `NILPROPOGATION` (sic) etc. are load-bearing.
-- **A running server writes into its library directory** (creates `General/`, may rewrite `.d4l` files) and defaults its instance directory to `%ProgramData%\Alphora\Dataphor\Instances\<name>`. Tests and experiments must set `InstanceDirectory` to a temp path and point `LibraryDirectories` at a *copy* of `Libraries/`, never the repo.
+- **A file on disk is not necessarily compiled.** Legacy csproj files list sources explicitly; strays exist (`src/client/DAE.Client/View-263.cs`, most of `libraries/Connection/Source`). Check the csproj before trusting or fixing a file.
+- **Same-named files exist in both `src/engine/DAE` and `src/engine/Server`** (`SecurityNodes.cs`, `LibraryNodes.cs`, `CatalogNodes.cs`, …). They are different files; check both.
+- **Behaviour switches are `#define`s at the top of individual files** plus csproj constants; `docs/reference/CompilerDefines.txt` is the index. `NILPROPOGATION` (sic) etc. are load-bearing.
+- **A running server writes into its library directory** (creates `General/`, may rewrite `.d4l` files) and defaults its instance directory to `%ProgramData%\Alphora\Dataphor\Instances\<name>`. Tests and experiments must set `InstanceDirectory` to a temp path and point `LibraryDirectories` at a *copy* of `libraries/` (plus `tests/libraries/` or `samples/` when needed), never the repo.
 - **Catalog store ≠ device.** A *store* persists the server's own catalog (SQL CE by default today; SQLite going forward). A *device* is a D4 object that maps tables to an external DBMS or to memory.
 - **On .NET 10, "it compiles" does not mean "it runs".** WinForms' old `ContextMenu`, `MenuItem`, `MainMenu`, `ToolBar` and `StatusBar` types exist again but throw `PlatformNotSupportedException` when constructed (warning `WFDEV006`); remoting and `Delegate.BeginInvoke` members compile and throw the same way. Never silence `WFDEV006` or `SYSLIB` warnings to get a build green.
 - The engine's built-in admin user is `Admin` with an empty password; tests connect as `new SessionInfo("Admin", "")`.
@@ -89,7 +93,7 @@ Project-specific ticket rules (testing policy, compatibility, source hygiene) ar
 
 **What's indexed:** git-tracked project source, minus `node_modules/`, `dist/`, `build/`, `.git/`, `tickets/`, `team/`, `docs/`, few cache dirs. If query about prose-heavy material (long-form architecture docs, design notes, nested READMEs) returns nothing, file may be outside indexed set — fall back to `Read`/`Glob` for those paths. Projects can override filter via `tickets/index-config.json` (see tess README § Customize what gets indexed).
 
-This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and drops dead or vendored trees (`legacy/`, `Utilities/`, `Documentation/`, Silverlight, vendored JavaScript, generated FHIR scripts). Use `Read`/`Glob` for those.
+This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and WiX/MSBuild files (`.wxs`, `.props`, `.targets`), and drops dead, vendored or bulky trees (`legacy/`, `Utilities/`, `Images/`, `external/`, `Documentation/`, `tests/libraries/TestFramework.Coverage.Devices/Documents/`). Use `Read`/`Glob` for those.
 
 ## Mannered prose
 

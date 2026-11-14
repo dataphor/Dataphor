@@ -117,6 +117,8 @@ The reorganization goes first because it touches every path and is cheapest whil
 
 ## Repository layout
 
+**Status: done (November 2026).** The move was made by three chained tickets: `repo-move-renames` (one rename-only commit, so that `git log --follow` and `git blame` follow every file), `repo-move-fix-references` (paths inside project files, the legacy solution, `.gitignore`, the code-search configuration and the spike, whose results did not change) and `repo-move-to-new-layout` (the documentation). The old → new table below is kept as the record of where each old path went; use it to map an old path found in a pre-move ticket, commit or document. The parts of the target tree that later work items create (`installer/`, `assets/`, `artifacts/`, `Dataphor.slnx` and the root props files) do not exist yet.
+
 **Target.**
 
 ```
@@ -171,23 +173,41 @@ artifacts/             build output (ignored)
 | `External/`, binaries in `Dataphor/bin`, `Dataphor/Dataphoria/*.dll` | `external/` until replaced by packages |
 | `Tooling/BBEdit` | `tools/editor-support/bbedit` |
 | `Documentation/`, `Legacy/Documentation/` | stay until WS8 converts and deletes them. `Legacy/` and the new `legacy/` are the same folder on Windows (Git runs here with `core.ignorecase=true`), so `library-park-side-projects` first renames `Legacy/` to `legacy/` (two-step case rename); the DocBook sources then sit at `legacy/Documentation/` |
-| Anything else not listed here (the legacy solution, `Dataphor/.editorconfig`, the licence files, `Dataphor.snk`, `book.json`, `Tests/Frontend.Client.WPF.Tests`, …) | listed with a default destination in `repo-move-to-new-layout` |
+| `Dataphor/Dataphor.sln` (the legacy solution) | `Dataphor.sln` at the root, until `build-remove-legacy-build` deletes it |
+| `Dataphor/.editorconfig` | `src/.editorconfig`; `hygiene-gitattributes-editorconfig` replaces it with one `.editorconfig` at the root |
+| `dataphor_license.txt` (root), `Dataphor/dataphor_license.txt` | `LICENSE`; the identical copy under `Dataphor/` deleted |
+| `Dataphor.snk`, `book.json` | stay at the root (`docs-remove-old-sources` deletes `book.json`) |
+| `Tests/Frontend.Client.WPF.Tests` | `tests/Frontend.Client.WPF.Tests` (a manual WPF test application; WS6 decides its future) |
+| `Tests/Dataphor.Tests.nunit` | deleted |
+| `Dataphor/netsh_address_reservations.txt` | left in place; `hygiene-large-binaries` deletes it |
+| `Dataphor/packages` (NuGet restore folder, never tracked) | `packages/` at the root, still ignored |
+| `Dataphor/bin` as the core projects' build output (`OutputPath` `..\bin\`) | the same setting now means `src/<area>/bin/` (ignored) until the SDK-style projects and the runtime layout replace it |
 | `Utilities/`, `dataphor-mono/`, Silverlight projects, `Frontend.Client.Browser`, `Frontend.Client.Web*`, `Dataphor/BOP`, `Libraries/Libraries.sln`, `Dataphor.proj`, build batch files | deleted |
+
+**Project files whose name differs from their folder.** Only `Engine.csproj` was renamed (to `DAE.csproj`); every other project file kept its name: `src/engine/Store.SQLite/DAE.SQLite.csproj`, `src/engine/Store.MSSQL/DAE.MSSQL.csproj`, `src/engine/Store.PGSQL/DAE.PGSQL.csproj`, `src/protocol/NativeCLI/DAE.NativeCLI.csproj`, `src/windows/WindowsClient/Frontend.Client.Windows.Executable.csproj`, `src/windows/ConfigurationUtility/DAE.Service.ConfigurationUtility.csproj`, `src/hosts/DAEService/DAE.Service.csproj`. Library projects keep their names too (`libraries/MSSQLDevice/Source/DAEDeviceMSSQL.csproj`, `tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj`, …). Assembly names and namespaces did not change.
+
+**Old paths left on purpose.**
+
+- `Setup/` (WS9) and `Documentation/` (WS8) still cite pre-move paths. They are not fixed, because those workstreams replace them.
+- Signing key paths: the `#if SIGNASSEMBLIES` `AssemblyKeyFile` paths in the `AssemblyInfo.cs` files (relative paths written for the old folder depth) and `AssemblyOriginatorKeyFile` `..\Alphora.snk` in the Frontend.Client and Frontend.Client.Windows project files (a key that was never in the repository). `build-version-and-signing` replaces signing.
+- The run-time library paths in `src/engine/DAE/Runtime.Instructions/TestNodes.cs`: the file is not in `DAE.csproj`, so nothing compiles it; `build-globbing-cleanup` deletes such strays.
+- Four references to the deleted SQL CE project and DLL, in `libraries/Connection/Source/DAE.Connection.csproj`, `tests/DAE.Server.Tests/DAE.Server.Tests.csproj` and `tests/DAE.Client.Tests/DAE.Client.Tests.csproj`: `store-remove-sqlce-references` removes the test ones and `build-server-project` replaces the library project.
+- `libraries/Connection/Source/DAE.Connection.ODBC.csproj`, a Visual Studio 2003-format copy of the ODBC connection project that nothing builds, still names the old shared build-output folder; `build-remove-legacy-build` deletes it.
 
 **Rules for the move.**
 
 - Delete and park first, then move what is left; there is no point relocating dead code.
 - A move commit contains **only renames** (`git mv`), no content edits, so that Git records exact renames and `git log --follow` and `git blame` keep working across the move. Reference fixes (project paths, solution, scripts, documentation) go in the commits after it.
-- Case-only renames (`Libraries` → `libraries`, `Tests` → `tests`) need two steps on Windows (`git mv Libraries libraries.tmp`, then to `libraries`).
+- Case-only renames (`Libraries` → `libraries`, `Tests` → `tests`, `External` → `external`) need two steps on Windows (`git mv Libraries libraries.tmp`, then to `libraries`).
 - Proof that the move changed nothing: `tools/net-spike` gives the same results before and after (update its path tables in the reference-fix commit).
-- The same ticket updates `AGENTS.md`, `README.md` (its links into `Documentation/` and `Libraries/`), `docs/architecture.md`, `tickets/index-config.json` and the paths cited in this plan (the [known defects](#known-defects) table and the appendices cite pre-move paths until then).
+- The same work item updates `AGENTS.md`, `README.md`, `docs/architecture.md`, `tickets/index-config.json` and the paths cited in this plan. `README.md`'s links into `Documentation/` stay until WS8 repoints them; Appendices A and B keep the paths they were measured on.
 - The server discovers libraries as the immediate subfolders of each directory in its `LibraryDirectories` setting (a semicolon-separated list), so splitting shipped, sample and test libraries into separate source folders is safe; the runtime layout recombines them.
 
 ## WS1 Build and workspace
 
 **Objective.** One command builds everything that ships; one command tests it; both work on a clean clone with only the .NET 10 SDK.
 
-**Current state.** 88 legacy-format csproj files with explicit file lists, seven solutions (one current), per-project `AssemblyInfo.cs` versions (`3.1.*`), signing only in Release, core assemblies built into `Dataphor/bin`, library assemblies built *into their source folders* next to the `.d4l`, four third-party DLLs tracked inside `Dataphor/bin`, packages restored to a gitignored `Dataphor/packages`. `Dataphor.proj` and two batch files assemble a `Deploy/` tree by wildcard copy.
+**Current state.** 88 legacy-format csproj files with explicit file lists, seven solutions (one current), per-project `AssemblyInfo.cs` versions (`3.1.*`), signing only in Release, core assemblies built into a shared `bin` folder per area (`src/<area>/bin`), library assemblies built *into their source folders* next to the `.d4l`, third-party DLLs tracked in `external/`, packages restored to a gitignored `packages/` at the root. `Dataphor.proj` and two batch files assembled a `Deploy/` tree by wildcard copy (both since deleted).
 
 **Target.**
 
@@ -210,7 +230,7 @@ artifacts/             build output (ignored)
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
 | `repo-delete-dead-trees` | Delete what the layout table marks deleted (Silverlight, browser shell, WebForms client, empty and template projects, mono solution, stale solutions, `Utilities/NUnit*`, SQL CE project and native DLLs, committed catalog database and logs). Leave `Utilities/Wix` and `Setup/` until WS9 and the documentation trees until WS8. | — | easy |
-| `repo-move-to-new-layout` | The moves in the layout table, as rename-only commits, followed by reference fixes; update AGENTS.md, architecture.md, the tess index configuration, the spike's path tables and the paths cited in this plan; spike results unchanged. | `repo-delete-dead-trees`, `library-park-side-projects`, `library-remove-dead-devices` | medium |
+| `repo-move-to-new-layout` | The moves in the layout table, as rename-only commits, followed by reference fixes; update AGENTS.md, architecture.md, the tess index configuration, the spike's path tables and the paths cited in this plan; spike results unchanged. **Done** as three chained tickets, rename-only first: `repo-move-renames`, `repo-move-fix-references`, `repo-move-to-new-layout`. | `repo-delete-dead-trees`, `library-park-side-projects`, `library-remove-dead-devices` | medium |
 | `build-core-sdk-projects` | SDK-style projects for Base, Base.Windows, DAE, Common, NativeCLI, Client and the libraries SQLDevice, System.Platform/Internet/Integration; `Directory.Build.props`, `Directory.Packages.props`, `Dataphor.slnx`. Apply the Appendix A compile patches whose files are in these projects, and fix K4 (Base). Rewrite the "Build and test" section of AGENTS.md. | `repo-move-to-new-layout` | hard |
 | `build-server-project` | Server on .NET 10, plus the projects that reference the server assembly: Store.SQLite (`SQLiteConnection` derives from the server's `DotNetConnection`), Connection, MSSQLDevice, SimpleDevice and Frontend (verified from their project references), with their Appendix A compile patches and K19. Remove remoting lifetime, tracking and sponsor code (K6) and the COM+ transaction class (K11, with a clear "not supported" error on the D4 surface that reached it); leave the WCF service and host classes out of compilation pending WS5; an in-process `Server` starts and runs D4. | `build-core-sdk-projects` | hard |
 | `build-runtime-layout` | MSBuild targets that assemble `artifacts/layout/`; fix library projects whose Release output went to `bin\Release` (K15). | `build-server-project` | medium |
@@ -253,7 +273,7 @@ artifacts/             build output (ignored)
 
 **Objective.** A comprehensive, isolated, one-command test suite that defines "still works", plus the habit of extending it (see `tickets/rules/10-dataphor.md`).
 
-**Current state.** `Tests/DAE.Server.Tests` starts a `Server` in-process and runs D4 scripts from `Libraries/TestFramework.Coverage.Scripts` (135 scripts, 23,500 lines, about 2,100 assertions written as `raise Error`). 89 are wired to NUnit by hand (a 90th is commented out), 14 of those ignored, one names a script that does not exist (`TableIndexer`), so 88 scripts are wired and 47 are not wired at all (verified). The spike ran 76 of them: the 75 wired and not ignored, plus `SecurityLibrary`, whose `Ignore` sits on the line above its test and so escaped the spike's filter (it ran without the `SetUseImplicitTransactions(false)` step the old test runs first). The other 59 scripts have not yet been run on .NET 10. The fixture uses SQL CE (being deleted), writes to `%ProgramData%`, reads libraries from the source tree, and registers a helper library (`TestFramework.Coverage.Base`) that requires `TestFramework`, which creates a SQL Server device against `localhost` — so the "in-memory" suite fails without a local SQL Server (K14). Other fixtures depend on a developer's drive paths and server names (K18), a pre-configured machine alias, or a built `DAEServer.exe`.
+**Current state.** `tests/DAE.Server.Tests` starts a `Server` in-process and runs D4 scripts from `tests/libraries/TestFramework.Coverage.Scripts` (135 scripts, 23,500 lines, about 2,100 assertions written as `raise Error`). 89 are wired to NUnit by hand (a 90th is commented out), 14 of those ignored, one names a script that does not exist (`TableIndexer`), so 88 scripts are wired and 47 are not wired at all (verified). The spike ran 76 of them: the 75 wired and not ignored, plus `SecurityLibrary`, whose `Ignore` sits on the line above its test and so escaped the spike's filter (it ran without the `SetUseImplicitTransactions(false)` step the old test runs first). The other 59 scripts have not yet been run on .NET 10. The fixture uses SQL CE (being deleted), writes to `%ProgramData%`, reads libraries from the source tree, and registers a helper library (`TestFramework.Coverage.Base`) that requires `TestFramework`, which creates a SQL Server device against `localhost` — so the "in-memory" suite fails without a local SQL Server (K14). Other fixtures depend on a developer's drive paths and server names (K18), a pre-configured machine alias, or a built `DAEServer.exe`.
 
 **Target: layers.**
 
@@ -405,7 +425,7 @@ Cross-cutting requirements:
 | ADO (COM) connection, SAS device | COM interop | Park |
 | System.Internet | `HttpWebRequest`, `FtpWebRequest`, `SmtpClient`, Newtonsoft.Json 9 | Works on .NET 10 as obsolete API; update Newtonsoft; modernizing HTTP is optional follow-up |
 | Frontend (server) | Compiles with one name collision fixed; contains leftover `System.Web` page and handler classes | Delete the web leftovers; WS3 L5 covers derivation |
-| MySQL, DB2, DB2400, DataDirect, ODP (`OracleConnection`, the unmanaged Oracle driver), Caché connections; MySQL, DB2, Caché, Linter, Fastore devices | Most are still listed in `Dataphor/Dataphor.sln`, but none has a working driver on .NET 10 | Remove (D12 keeps them in history) |
+| MySQL, DB2, DB2400, DataDirect, ODP (`OracleConnection`, the unmanaged Oracle driver), Caché connections; MySQL, DB2, Caché, Linter, Fastore devices | Most were listed in the legacy solution, but none has a working driver on .NET 10 | Remove (D12 keeps them in history) |
 | FHIR*, CQF*, PHINVADS*, TestCQL, TestCache | Side projects on pre-1.0 HL7 packages | Park (D6). The four `FHIRCore.*` class names once thought to need rescuing are not registered by any code (see Q7), so nothing moves; the migration notes say so |
 | Samples | D4 and forms only, except Shipping | Keep; they are test corpus (WS3 L7). Samples that require SQL Server get a SimpleDevice variant where practical |
 
@@ -424,7 +444,7 @@ Cross-cutting requirements:
 
 **Objective.** All user, developer and reference documentation in Markdown under `docs/`, complete, with working links.
 
-**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — assembled only by `SUMMARY.adoc` files and `book.json` (GitBook style; no master files or includes). It has 107 image files plus 9 CorelDraw sources (the BMPs are 28 MB), 649 explicit anchors, about 525 cross-references (about 500 of which target heading text rather than an anchor, and about 22 of which are already broken), 757 literal blocks holding every code sample with no language tag (about 150 of them are grammar productions that begin with `&lt;` and are not XML), 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `Libraries/Documentation` contains a D4 operator that generates DocBook reference pages from a live catalog.
+**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — assembled only by `SUMMARY.adoc` files and `book.json` (GitBook style; no master files or includes). It has 107 image files plus 9 CorelDraw sources (the BMPs are 28 MB), 649 explicit anchors, about 525 cross-references (about 500 of which target heading text rather than an anchor, and about 22 of which are already broken), 757 literal blocks holding every code sample with no language tag (about 150 of them are grammar productions that begin with `&lt;` and are not XML), 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `legacy/libraries/Documentation` (parked by the reorganization) contains a D4 operator that generates DocBook reference pages from a live catalog.
 
 **Target tree.**
 
@@ -445,7 +465,7 @@ docs/
   images/                   PNG and SVG only
 ```
 
-**Design notes.** Convert with scripts kept under `tools/` until the sources are deleted: AsciiDoc → DocBook (Asciidoctor) → GitHub-flavoured Markdown (pandoc) is the high-fidelity route and handles the legacy DocBook with the same second step; a rewrite pass then maps anchors and cross-references to file-relative links, tags literal blocks as `d4`, `sql` or `xml`, converts BMP to PNG, and rewrites the 206 dead links to the converted reference pages. The source files declare `iso-8859-1`, but all 75 are valid UTF-8 (verified); treat them as UTF-8 and fix the one double-encoded character the ticket survey found. A link checker runs in CI. After conversion the generator in `Libraries/Documentation` gets a Markdown emitter so the system library reference can be regenerated from the catalog and compared with the hand-written text. Longer term, self-contained D4 samples in the docs are extracted and run as tests.
+**Design notes.** Convert with scripts kept under `tools/` until the sources are deleted: AsciiDoc → DocBook (Asciidoctor) → GitHub-flavoured Markdown (pandoc) is the high-fidelity route and handles the legacy DocBook with the same second step; a rewrite pass then maps anchors and cross-references to file-relative links, tags literal blocks as `d4`, `sql` or `xml`, converts BMP to PNG, and rewrites the 206 dead links to the converted reference pages. The source files declare `iso-8859-1`, but all 75 are valid UTF-8 (verified); treat them as UTF-8 and fix the one double-encoded character the ticket survey found. A link checker runs in CI. After conversion the generator in `legacy/libraries/Documentation` gets a Markdown emitter so the system library reference can be regenerated from the catalog and compared with the hand-written text. Longer term, self-contained D4 samples in the docs are extracted and run as tests.
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
@@ -601,33 +621,33 @@ When the work starts, the corpus is located by an environment variable (never co
 
 | # | Defect | Where | Status | Fix in |
 |---|---|---|---|---|
-| K1 | A static, non-thread-safe `D4TextEmitter` is shared by all catalog sessions; concurrent DDL interleaves the text of the object scripts written to the catalog store. Possible silent catalog corruption on any store. | `Dataphor/Server/Device.Catalog/ServerCatalogDeviceSession.cs`, field `_emitter` (~line 2615) | verified | WS2 `port-catalog-emitter-race` |
-| K2 | `CopySection` computes the end offset from the start position instead of the line start when a section begins and ends on the same line, overshooting by the start column; `create operator` written on one indented line at the end of a script throws "Index and length must refer to a location within the string" (surfaced as an internal compiler error). Worse elsewhere in a script (static): the copied text becomes the operator's stored source, so a one-line operator in the middle of a script is silently stored with the following text appended. | `Dataphor/DAE/Debug/SourceUtility.cs` | verified (end of script), static (middle) | WS2 `port-engine-runtime-fixes` |
-| K3 | "Collection was modified; enumeration operation may not execute" from concurrent DDL: 1–4 times per 120 cycles before store writes were serialized, about once per few thousand cycles after. The operator resolution cache, one per catalog and shared by all sessions, was a plain `Dictionary` with no lock of its own: `Clear(operatorName)`, called while compiling `create`/`drop operator` with no lock held, enumerated it while another session's operator resolution added to it (stack: `OperatorResolutionCache.Clear(String)` ← `Compiler.CompileCreateOperatorStatement`). Every cache member now takes a private lock that is held only inside the cache. | `Dataphor/DAE/Compiling/OperatorResolutionCache.cs` | fixed | WS2 (pre-existing-failure triage, 2026-11-14) |
-| K4 | `SetThreadName` reflects on the private field `Thread.m_Name`, absent on modern .NET: null reference at server start in DEBUG builds. | `Dataphor/Base/ThreadUtility.cs` | verified | WS1 `build-core-sdk-projects` |
-| K5 | `Delegate.BeginInvoke` is unsupported on modern .NET: D4 asynchronous execution operators and Dataphoria's script executor throw. A fourth site in `DAE.Client/DAEDataSet.cs` is dead code (under `USEASYNCSTOPPROCESS`, which nothing defines). | `Dataphor/DAE/Runtime.Instructions/SystemNodes.cs` (3 sites); `Dataphor/Dataphoria/TextEditor/ScriptExecutor.cs` | verified (engine), static (IDE) | WS2 `port-engine-runtime-fixes`, WS6 |
-| K6 | `RemoteServerObject.Dispose` calls remoting lifetime services, which throw on modern .NET — on every remote object disposal. | `Dataphor/Server/Server/RemoteServerObject.cs`, `RemoteServerConnection.cs`, `RemoteServer.cs`, `Streams/FileStreamProvider.cs` | static | WS1 `build-server-project` |
-| K7 | `Thread.ResetAbort()` in catch blocks throws on modern .NET. | `Frontend.Client/Pipe.cs`, `Dataphoria/Program.cs`, `DAE.Service.ConfigurationUtility/Program.cs` | static | WS6 |
-| K8 | `ScriptAction` compiles scripts with CodeDom, unsupported on modern .NET. | `Dataphor/Frontend.Client/ScriptAction.cs` | static | WS6 |
+| K1 | A static, non-thread-safe `D4TextEmitter` is shared by all catalog sessions; concurrent DDL interleaves the text of the object scripts written to the catalog store. Possible silent catalog corruption on any store. | `src/engine/Server/Device.Catalog/ServerCatalogDeviceSession.cs`, field `_emitter` (~line 2615) | verified | WS2 `port-catalog-emitter-race` |
+| K2 | `CopySection` computes the end offset from the start position instead of the line start when a section begins and ends on the same line, overshooting by the start column; `create operator` written on one indented line at the end of a script throws "Index and length must refer to a location within the string" (surfaced as an internal compiler error). Worse elsewhere in a script (static): the copied text becomes the operator's stored source, so a one-line operator in the middle of a script is silently stored with the following text appended. | `src/engine/DAE/Debug/SourceUtility.cs` | verified (end of script), static (middle) | WS2 `port-engine-runtime-fixes` |
+| K3 | "Collection was modified; enumeration operation may not execute" from concurrent DDL: 1–4 times per 120 cycles before store writes were serialized, about once per few thousand cycles after. The operator resolution cache, one per catalog and shared by all sessions, was a plain `Dictionary` with no lock of its own: `Clear(operatorName)`, called while compiling `create`/`drop operator` with no lock held, enumerated it while another session's operator resolution added to it (stack: `OperatorResolutionCache.Clear(String)` ← `Compiler.CompileCreateOperatorStatement`). Every cache member now takes a private lock that is held only inside the cache. | `src/engine/DAE/Compiling/OperatorResolutionCache.cs` | fixed | WS2 (pre-existing-failure triage, 2026-11-14) |
+| K4 | `SetThreadName` reflects on the private field `Thread.m_Name`, absent on modern .NET: null reference at server start in DEBUG builds. | `src/engine/Base/ThreadUtility.cs` | verified | WS1 `build-core-sdk-projects` |
+| K5 | `Delegate.BeginInvoke` is unsupported on modern .NET: D4 asynchronous execution operators and Dataphoria's script executor throw. A fourth site in `DAE.Client/DAEDataSet.cs` is dead code (under `USEASYNCSTOPPROCESS`, which nothing defines). | `src/engine/DAE/Runtime.Instructions/SystemNodes.cs` (3 sites); `src/windows/Dataphoria/TextEditor/ScriptExecutor.cs` | verified (engine), static (IDE) | WS2 `port-engine-runtime-fixes`, WS6 |
+| K6 | `RemoteServerObject.Dispose` calls remoting lifetime services, which throw on modern .NET — on every remote object disposal. | `src/engine/Server/Server/RemoteServerObject.cs`, `RemoteServerConnection.cs`, `RemoteServer.cs`, `Streams/FileStreamProvider.cs` | static | WS1 `build-server-project` |
+| K7 | `Thread.ResetAbort()` in catch blocks throws on modern .NET. | `src/client/Frontend.Client/Pipe.cs`, `src/windows/Dataphoria/Program.cs`, `src/windows/ConfigurationUtility/Program.cs` | static | WS6 |
+| K8 | `ScriptAction` compiles scripts with CodeDom, unsupported on modern .NET. | `src/client/Frontend.Client/ScriptAction.cs` | static | WS6 |
 | K9 | `Process.Start` on a URL or document needs `UseShellExecute = true` on modern .NET (9 sites). | Dataphoria, Frontend.Client.Windows | static | WS6 |
-| K10 | SQLite catalog store deadlocks under concurrent sessions. | `Dataphor/DAE.SQLite`, `Dataphor/DAE/Store` | verified, fix validated | WS4 |
-| K11 | The distributed-transaction class is created by reflection under an assembly name that does not exist. | `Dataphor/DAE/Server/ServerProcess.cs` (~line 1268), `Dataphor/Server/Server/ServerDTCTransaction.cs` | static | WS2 |
-| K12 | The service reads configuration section `instance`; the shipped `app.config` declares section `dataphor`. | `Dataphor/Server/Service/DataphorService.cs`, `Dataphor/DAE.Service/app.config` | static, unconfirmed | WS5 |
-| K13 | Password encryption key and IV are compiled into the product, in two places. | `Dataphor/DAE/Schema/Security.cs`, `Dataphor/DAE.NativeCLI/SecurityUtility.cs` | static | WS11 |
-| K14 | The coverage helper library cannot register without a SQL Server on `localhost`. | `Libraries/TestFramework/Documents`, `Libraries/TestFramework.Coverage.Base/*.d4l` | verified | WS3 |
+| K10 | SQLite catalog store deadlocks under concurrent sessions. | `src/engine/Store.SQLite`, `src/engine/DAE/Store` | verified, fix validated | WS4 |
+| K11 | The distributed-transaction class is created by reflection under an assembly name that does not exist. | `src/engine/DAE/Server/ServerProcess.cs` (~line 1268), `src/engine/Server/Server/ServerDTCTransaction.cs` | static | WS2 |
+| K12 | The service reads configuration section `instance`; the shipped `app.config` declares section `dataphor`. | `src/engine/Server/Service/DataphorService.cs`, `src/hosts/DAEService/app.config` | static, unconfirmed | WS5 |
+| K13 | Password encryption key and IV are compiled into the product, in two places. | `src/engine/DAE/Schema/Security.cs`, `src/protocol/NativeCLI/SecurityUtility.cs` | static | WS11 |
+| K14 | The coverage helper library cannot register without a SQL Server on `localhost`. | `tests/libraries/TestFramework/Documents`, `tests/libraries/TestFramework.Coverage.Base/*.d4l` | verified | WS3 |
 | K15 | Six library projects write Release output where the server does not look. | CQF.Model, FHIR.API, FHIR.Server, PHINVADS.Core, PHINVADS.Device, TestFramework.Coverage.Base (the first five are now parked under `legacy/libraries/` and not built, leaving TestFramework.Coverage.Base) | static | WS1 |
 | K16 | Installer: no upgrade logic, regenerated component GUIDs, missing licence file, placeholder registry keys, undefined shortcut directory, no service registration. | `Setup/` | static | WS9 |
 | K17 | 206 documentation links point at pages that do not exist. | `Documentation/` | verified | WS8 |
-| K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `Tests/DAE.Server.Tests/SQLStoreTest.cs`, `Tests/DAE.Client.Tests` | static | WS3 |
-| K19 | The base `Connection` library has a hard reference to SQL CE. | `Libraries/Connection/Source/Register.cs` | verified | WS1 `build-server-project` |
-| K20 | 14 coverage tests are ignored (one names a script that does not exist) and 47 scripts are not wired to any test. | `Tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |
-| K21 | A 34 MB catalog database, server logs and a file naming a developer's machine account are committed. | `Dataphor/Dataphoria/Default Server Configurations`, `Dataphor/netsh_address_reservations.txt` | verified | WS12 |
-| K23 | The vendored command-line parser uses `field` as a variable name inside a property accessor; `field` is a keyword there from C# 14, so the file does not compile with the .NET 10 default language version. | `Dataphor/DAEServer/CommandLineArguments.cs` (~line 1384); check the copy in `Dataphor/D4Runner` | verified | WS10 `tool-cli-skeleton` (rename earlier if it blocks WS1) |
+| K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `tests/DAE.Server.Tests/SQLStoreTest.cs`, `tests/DAE.Client.Tests` | static | WS3 |
+| K19 | The base `Connection` library has a hard reference to SQL CE. | `libraries/Connection/Source/Register.cs` | verified | WS1 `build-server-project` |
+| K20 | 14 coverage tests are ignored (one names a script that does not exist) and 47 scripts are not wired to any test. | `tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |
+| K21 | A 34 MB catalog database, server logs and a file naming a developer's machine account are committed. | `Dataphor/netsh_address_reservations.txt` (the catalog database and logs, in Dataphoria's `Default Server Configurations` folder, are already deleted) | verified | WS12 |
+| K23 | The vendored command-line parser uses `field` as a variable name inside a property accessor; `field` is a keyword there from C# 14, so the file does not compile with the .NET 10 default language version. | `src/hosts/DAEServer/CommandLineArguments.cs` (~line 1384); check the copy in `src/hosts/D4Runner` | verified | WS10 `tool-cli-skeleton` (rename earlier if it blocks WS1) |
 | K24 | Legacy WinForms menu, toolbar and status-bar controls compile on .NET 10 but throw `PlatformNotSupportedException` when constructed (~270 references). | `DAE.Client.Controls`, `Frontend.Client.Windows`, `Dataphoria`, `DAE.Service.ConfigurationUtility` | verified | WS6 |
-| K22 | `PathUtility` relies on `AppDomain.RelativeSearchPath`, always null on modern .NET. On closer reading this changes nothing: null gives the same result a desktop .NET Framework host got; only the removed web client set it. The fix is deleting the dead branch. | `Dataphor/Base.Windows/PathUtility.cs` | static | WS2 `port-engine-runtime-fixes` |
-| K25 | Five keyword tables (D4 keywords, reserved words and instructions; the SQL and RealSQL keyword tables) are lazily built by assigning the array before filling it, so a concurrent first use can see a partly filled table and misparse. | `Dataphor/DAE/Language.D4/Keywords.cs`, `Instructions.cs`; the SQL language keyword files | static | WS2 `port-catalog-emitter-race` |
-| K26 | Under the lowest isolation level the store opens no SQLite transaction, so rolling back a process transaction undoes the in-memory catalog but not the store writes. SQL CE behaved the same. | `Dataphor/DAE.SQLite/SQLiteConnection.cs` | static | WS4 `store-sqlite-concurrency` |
-| K27 | The default instances folder (`%ProgramData%\Alphora\Dataphor\Instances`) does not include the version, so a 4.0 server installed beside 3.1 would read and write 3.1's instance configuration. | `Dataphor/Server/Server/InstanceManager.cs` (`GetInstanceDirectory` passes `VersionModifier.None`) | static | WS5 `host-instance-configuration` |
+| K22 | `PathUtility` relies on `AppDomain.RelativeSearchPath`, always null on modern .NET. On closer reading this changes nothing: null gives the same result a desktop .NET Framework host got; only the removed web client set it. The fix is deleting the dead branch. | `src/engine/Base.Windows/PathUtility.cs` | static | WS2 `port-engine-runtime-fixes` |
+| K25 | Five keyword tables (D4 keywords, reserved words and instructions; the SQL and RealSQL keyword tables) are lazily built by assigning the array before filling it, so a concurrent first use can see a partly filled table and misparse. | `src/engine/DAE/Language.D4/Keywords.cs`, `Instructions.cs`; the SQL language keyword files | static | WS2 `port-catalog-emitter-race` |
+| K26 | Under the lowest isolation level the store opens no SQLite transaction, so rolling back a process transaction undoes the in-memory catalog but not the store writes. SQL CE behaved the same. | `src/engine/Store.SQLite/SQLiteConnection.cs` | static | WS4 `store-sqlite-concurrency` |
+| K27 | The default instances folder (`%ProgramData%\Alphora\Dataphor\Instances`) does not include the version, so a 4.0 server installed beside 3.1 would read and write 3.1's instance configuration. | `src/engine/Server/Server/InstanceManager.cs` (`GetInstanceDirectory` passes `VersionModifier.None`) | static | WS5 `host-instance-configuration` |
 
 ## Risks
 
@@ -657,21 +677,21 @@ When the work starts, the corpus is located by an environment variable (never co
 
 ## Appendix A Spike results
 
-Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Run twice on Windows 11: against `net8.0` (SDK 8.0.411, runtime 8.0.17) and against `net10.0` (SDK 10.0.404, runtime 10.0.15). Runtime results — engine start, concurrency, and the 62/14 coverage split with the same 14 scripts failing for the same reasons — were identical. Compile results differ only where noted.
+Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Run twice on Windows 11: against `net8.0` (SDK 8.0.411, runtime 8.0.17) and against `net10.0` (SDK 10.0.404, runtime 10.0.15). Runtime results — engine start, concurrency, and the 62/14 coverage split with the same 14 scripts failing for the same reasons — were identical. Compile results differ only where noted. The runs, and the paths and project names in this appendix, are from the pre-move layout; the patch table's "Now at" column gives each patched file's location after the [reorganization](#repository-layout). The spike was then updated to the new paths and gave the same results (`repo-move-fix-references`).
 
 **Conditions behind the baseline numbers.** The 62/14 coverage split was measured with *all* the patches below applied, including two runtime fixes that land after the test harness (K1 and "begin immediate"); with the Debug engine constants (`ACCUMULATOR`, `USEVISIT`), whereas 3.1 shipped Release builds without them; and without NLS globalization, because the spike's hosts sit outside the repository's props. The in-repo harness should expect small differences from each and tie them to the ticket that changes the condition.
 
 **Source patches the spike applies** (each is required by the real port):
 
-| File | Change | Kind |
-|---|---|---|
-| `Dataphor/DAE/Runtime.Instructions/SecurityNodes.cs` (and its `Server` twin) | Unused `using System.Runtime.Remoting.Messaging` (handled by an empty stub namespace in the spike) | dead code |
-| `Dataphor/Common/WCF/ServiceClient.cs`, `Dataphor/Client/Client/ClientServer.cs` | `ChannelFactory<T>(string endpointConfigurationName)` does not exist in the client packages | API gap |
-| `Dataphor/Base/ThreadUtility.cs` | K4 | runtime bug |
-| `Dataphor/DAE.SQLite/SQLiteConnection.cs` | `SQLiteException.ErrorCode` → `ResultCode`; begin transactions immediate | API drift; K10 |
-| `Dataphor/Server/Device.Catalog/ServerCatalogDeviceSession.cs` | K1: emitter per call | defect |
-| `Libraries/Frontend/Source/Device/FrontendDevice.cs` | `IStreamProvider` now ambiguous with `System.Xml.IStreamProvider` | name collision |
-| `Libraries/Connection/Source/Register.cs` | K19 | dependency |
+| File | Now at | Change | Kind |
+|---|---|---|---|
+| `Dataphor/DAE/Runtime.Instructions/SecurityNodes.cs` (and its `Server` twin) | `src/engine/DAE/Runtime.Instructions/SecurityNodes.cs`, `src/engine/Server/Runtime.Instructions/SecurityNodes.cs` | Unused `using System.Runtime.Remoting.Messaging` (handled by an empty stub namespace in the spike) | dead code |
+| `Dataphor/Common/WCF/ServiceClient.cs`, `Dataphor/Client/Client/ClientServer.cs` | `src/protocol/Common/WCF/ServiceClient.cs`, `src/protocol/Client/Client/ClientServer.cs` | `ChannelFactory<T>(string endpointConfigurationName)` does not exist in the client packages | API gap |
+| `Dataphor/Base/ThreadUtility.cs` | `src/engine/Base/ThreadUtility.cs` | K4 | runtime bug |
+| `Dataphor/DAE.SQLite/SQLiteConnection.cs` | `src/engine/Store.SQLite/SQLiteConnection.cs` | `SQLiteException.ErrorCode` → `ResultCode`; begin transactions immediate | API drift; K10 |
+| `Dataphor/Server/Device.Catalog/ServerCatalogDeviceSession.cs` | `src/engine/Server/Device.Catalog/ServerCatalogDeviceSession.cs` | K1: emitter per call | defect |
+| `Libraries/Frontend/Source/Device/FrontendDevice.cs` | `libraries/Frontend/Source/Device/FrontendDevice.cs` | `IStreamProvider` now ambiguous with `System.Xml.IStreamProvider` | name collision |
+| `Libraries/Connection/Source/Register.cs` | `libraries/Connection/Source/Register.cs` | K19 | dependency |
 
 **Compile results** (distinct errors after the patches):
 
@@ -689,6 +709,8 @@ Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Ru
 
 ## Appendix B Inventory
 
+Measured on the pre-move layout during the baseline survey (November 2026). Directory names in the measurements are as measured; the [Repository layout](#repository-layout) table maps them to the current tree.
+
 **Size.** 4,452 tracked files; 1,237 C# files, about 400,000 lines; 387 D4 scripts; 88 project files; 1,551 commits from March 2008 to October 2019.
 
 | Project | Lines of C# |
@@ -705,9 +727,9 @@ Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Ru
 | Dataphor/Client | 7,700 |
 | Dataphor/Base | 7,300 |
 
-**Non-default compiler constants to preserve.** Engine: `USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT` (Debug; Release omits `ACCUMULATOR` and `USEVISIT` and adds `DISABLE_PERFORMANCE_COUNTERS`, which no code reads — decide deliberately which set ships, and test with it). SQLDevice: `USEVISIT`. Frontend server: `USEINCLUDETAG`. Dataphoria: `TRACEFOCUS`. `SIGNASSEMBLIES` (Release) becomes unconditional signing (D7). File-level `#define`s are catalogued in `Dataphor/CompilerDefines.txt`.
+**Non-default compiler constants to preserve.** Engine: `USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT` (Debug; Release omits `ACCUMULATOR` and `USEVISIT` and adds `DISABLE_PERFORMANCE_COUNTERS`, which no code reads — decide deliberately which set ships, and test with it). SQLDevice: `USEVISIT`. Frontend server: `USEINCLUDETAG`. Dataphoria: `TRACEFOCUS`. `SIGNASSEMBLIES` (Release) becomes unconditional signing (D7). File-level `#define`s are catalogued in `docs/reference/CompilerDefines.txt`.
 
-**Wire contracts.** `IDataphorService` 88 operations, `INativeCLIService` 11, `IListenerService` 3; 55 data-contract types, mostly in `Dataphor/DAE/Contracts`.
+**Wire contracts.** `IDataphorService` 88 operations, `INativeCLIService` 11, `IListenerService` 3; 55 data-contract types, mostly in `src/engine/DAE/Contracts`.
 
 **Tests today.** About 125 NUnit tests: 89 script runners (14 ignored), 12 cache tests, the rest cursor, store and client tests. 135 coverage scripts, 23,548 lines.
 
