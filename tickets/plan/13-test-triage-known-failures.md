@@ -93,3 +93,16 @@ If this splits, the ticket that finishes the work item keeps the slug `test-tria
 ## Note from planning `test-harness-inprocess`
 
 There are 136 scripts, not 135 (`DistributedTransactions` was added by `server-remove-remoting-and-dtc`). The harness runs each script on its own server copied from a template catalog, because on one shared server scripts interfered: `SerializationOperators`, `SerializationTables`, `SerializationViews` and `TestNetworkApplicationTransactions` failed with "object already defined" after other scripts and pass alone, and `DebugTest` (an infinite loop by design, a debugger exercise) left the catalog locked for every later script. So a failure in the manifest is the script's own, not an effect of order. The planning run's observed errors for every failing script are in the `test-harness-inprocess` ticket; nine passing scripts contain no `raise` at all and carry `"note": "no assertions"` in the manifest.
+
+## Note from `test-decouple-coverage-base`
+
+With the helper library registering, 15 of the 25 scripts recorded against `test-decouple-coverage-base` pass. Seven of the other ten now carry this ticket's slug, each with the error observed in four full runs (Debug three times, Release once; details in that ticket's handoff):
+
+- `DAE`: `TestException: Hiding object name allowed.` at line 8 (`TestCatalog()`). Legacy ignore reason: "Rewrite for native values processing".
+- `Exceptions`: `TestExceptions` is not defined: its `create operator` is commented out of `tests/libraries/TestFramework.Coverage.Base/Documents/DiagnosticsLogic.d4` (the class `TestExceptionsNode` exists in `TestNodes.cs`).
+- `SecurityLibrary` (run with implicit transactions off, as the legacy test did): `DataphorException: constraint failed  UNIQUE constraint failed: DAERights.Name`. The error has no D4 locator and the server log (`DATAPHOR_TEST_LOGGING=1`) shows only start and stop. The script's only `CreateRight` is its first statement, and `CreateRightNode` checks `RightExists` before inserting, so the duplicate insert probably comes from somewhere else (not traced).
+- `StreamAllocation`: `Object "Coverage" not found` at line 5 (`Load('Coverage', 'CursorLibrary')`: the harness does not copy `TestFramework.Coverage`, which holds only forms, and `CursorLibrary` is a document of `TestFramework.Coverage.Scripts`). Legacy ignore reason: "Doesn't run 1/17/2004".
+- `Transaction.Atomicity.Cleanup` and `Transaction.Atomicity.SetTwo`: helpers that `Transaction.Atomicity.TestDAE` runs after `Transaction.Atomicity.SetOne`; standalone, the tables `SetOne` creates do not exist. `SetOne` itself passes.
+- `Transaction.Atomicity.TestDAE`: fails inside `Transaction.Atomicity.Run` on `CurrentCaseItems`, the same cause as `Run` and `Transaction.Isolation.Run`.
+
+The three `Transaction.Atomicity.*MSSQL*` scripts point at `feat-ws7-devices-and-libraries` (they need `Coverage.Base.CoverageDevice`), which already lists them.

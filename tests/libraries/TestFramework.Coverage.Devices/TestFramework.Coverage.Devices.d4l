@@ -1,4 +1,5 @@
 <library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="TestingDevice" assembliesasstring="" librariesasstring="" settings="" name="TestFramework.Coverage.Devices" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
     <libraries.libraryreference name="TestFramework" version="*" />
     <libraries.libraryreference name="TestFramework.Coverage.Base" version="*" />
+    <libraries.libraryreference name="MSSQLDevice" version="*" />
 </library>

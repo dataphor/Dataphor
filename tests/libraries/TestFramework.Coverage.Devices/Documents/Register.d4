@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+ExecuteScript('Coverage.Devices', 'Device');
+ExecuteScript('Coverage.Devices', 'DataTypesMSSQL');
 ExecuteScript('Coverage.Devices', 'Types');
 //ExecuteScript('Coverage.Devices', 'TypesMSSQL');
 ExecuteScript('Coverage.Devices', 'Tables');

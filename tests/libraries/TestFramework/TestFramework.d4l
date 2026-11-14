@@ -1,4 +1,3 @@
-<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="TestingDevice" assembliesasstring="" librariesasstring="" settings="" name="TestFramework" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="TestFramework" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
     <libraries.libraryreference name="System" version="*" />
-    <libraries.libraryreference name="MSSQLDevice" version="*" />
 </library>

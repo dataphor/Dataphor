@@ -25,8 +25,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	public class CoverageScripts
 	{
 		/// <summary>
-		/// The library folders copied for every script's server: the set the spike measured, so that the libraries a script can
-		/// see stay the same. A fixed list rather than all of Libraries.
+		/// The library folders copied for every script's server: a fixed list rather than all of Libraries, so that the libraries
+		/// a script can see stay the same. The set the spike measured, without MSSQLDevice: nothing the template registers needs
+		/// a SQL Server (K14).
 		/// </summary>
 		public static readonly string[] Libraries =
 		[
@@ -34,7 +35,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"SimpleDevice",
 			"TestFramework.Coverage.Base",
 			"SQLDevice",
-			"MSSQLDevice",
 			"Connection",
 			"TestFramework",
 			"TestFramework.Coverage.Scripts",
@@ -159,11 +159,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				_template = new TestServerInstance("Template", Libraries);
 				_template.Server.Start();
 				RegisterInTemplate("Frontend");
-				// NOTE: TestFramework.Coverage.Base requires TestFramework, which creates a SQL Server device on localhost (K14): without
-				// a SQL Server this fails after about 25 s and the scripts that need its operators record that through their own
-				// errors; with one, it registers, a local database is touched, and those scripts' known-failure entries fail as
-				// "now passes". test-decouple-coverage-base removes the dependency and makes this failure fail the run.
 				RegisterInTemplate("TestFramework.Coverage.Base");
+				CheckNoExternalDevice();
 				_template.Server.Stop();
 			}
 			catch (Exception exception)
@@ -178,12 +175,25 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			try
 			{
 				_template.ExecuteScript(String.Format("EnsureLibraryRegistered('{0}');", library));
-				TestContext.Progress.WriteLine("Coverage template instance: registered {0}.", library);
 			}
 			catch (Exception exception)
 			{
-				TestContext.Progress.WriteLine("Coverage template instance: registering {0} failed: {1}", library, ErrorText(exception));
+				throw new InvalidOperationException(String.Format("Registering {0} failed.", library), exception);
 			}
+			TestContext.Progress.WriteLine("Coverage template instance: registered {0}.", library);
+		}
+
+		/// <summary>
+		/// K14: the helper library must register with no external DBMS. It once required TestFramework to load MSSQLDevice and
+		/// create the SQL Server device TestingDevice, which now belongs to TestFramework.Coverage.Devices; this fails the run if
+		/// an edit brings either back into the template.
+		/// </summary>
+		private void CheckNoExternalDevice()
+		{
+			if ((bool)_template.Evaluate("exists (LoadedLibraries where Name = 'MSSQLDevice')"))
+				throw new InvalidOperationException("Registering TestFramework.Coverage.Base loaded MSSQLDevice; it must register with no external DBMS.");
+			if ((bool)_template.Evaluate("exists (Devices where Name like '%TestingDevice')"))
+				throw new InvalidOperationException("Registering TestFramework.Coverage.Base created a device named TestingDevice; it must register with no external DBMS.");
 		}
 
 		[OneTimeTearDown]
