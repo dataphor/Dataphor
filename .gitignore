@@ -1,24 +1,37 @@
-*.dll
-*.dll.config
-*.pdb
-*.suo
-*.user
-
-*.DS_Store
-
+# Build output
 [Bb]in/
 [Oo]bj/
 [Dd]eploy
 [Mm][Ss][Ii][Ss]
+artifacts/
+TestResults/
+*.dll
+*.dll.config
+*.pdb
 
+# NOTE: a number of third-party .dll/.pdb files are tracked on purpose (force-added) until they
+# are replaced by NuGet packages; see docs/modernization-plan.md#ws12-repository-hygiene.
+# NOTE: do not ignore *.xml here -- library documents, DocBook sources and test data are XML.
+
+# IDE / user state
+*.suo
+*.user
+.vs/
+*.DS_Store
+.claude/settings.local.json
+
+# Package caches
 node_modules/
+Dataphor/packages
+packages/
+
+# Docs build
 _book/
 
+# Local scratch
 Sandbox
-Dataphor/packages
 /Dataphoria/Dataphoria.Web/Properties/PublishProfiles/Bobby.pubxml
-
 $RANDOM_SEED$
-node_modules/
-.vs/
-*.xml
+
+# Python
+__pycache__/

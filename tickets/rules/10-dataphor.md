@@ -1,0 +1,13 @@
+Read the root `AGENTS.md` first; it has the layout, the build/test commands and the compatibility rules. The specification for the current work is `docs/modernization-plan.md` (with `docs/architecture.md` for how the system fits together) — set `architecture:` on every ticket to the plan section it serves, e.g. `architecture: docs/modernization-plan.md#ws3-test-suite`.
+
+**Testing rule for this project (overrides "default is no new test").** This is a port of a working system whose behaviour is the specification, and it had almost no automated safety net. A ticket that ports, re-hosts or changes the behaviour of a subsystem owes a characterization test for it unless one already covers it; a bug fix owes its reproduction. Prefer the lowest layer that shows the behaviour: a D4 script run through the in-process engine harness over a client or UI test. Still no tests for wiring, getters or what the compiler already checks. Never edit an expected value in an existing D4 test script to make it pass: there is no reference runtime, so those assertions are the record of correct behaviour.
+
+**Compatibility is the constraint.** Existing applications are D4 libraries, catalog rebuild scripts and form documents. Never change, without a ticket that says so explicitly: D4 language semantics or operator signatures; D4 class names registered through `DAERegister`/`GetClasses()`; assembly names and namespaces; the `.d4l`, `.dfd`, `.dfdx`, `.dnt` and BOP file formats; error codes; WCF contract shapes; default ports and on-disk instance layout. If a change must break one of these, stop and route the question to `blocked/` with the proposed text.
+
+**Migration notes.** A change that an application, a deployment script or a custom C# extension could notice — including a public type or member that extensions use — adds an entry to `docs/migration-notes.md` in the same commit.
+
+**Bugs met along the way.** A defect with a local, obvious fix (a race, an off-by-one, a wrong API call) is fixed in the ticket that meets it, with its reproduction test, and listed in the handoff. A defect whose fix changes a design or a compatibility surface becomes its own ticket.
+
+**Source hygiene.** C# here uses tabs, CRLF line endings and, in most files, a UTF-8 byte-order mark. Preserve all three in files you edit, and never reformat or re-encode a file you are not otherwise changing. Moving a file and editing it are separate commits. On .NET 10 several removed APIs compile and then throw at run time: never suppress `WFDEV006` or `SYSLIB` warnings to get a build green.
+
+**Privacy.** This repository is public. Never write a customer's name, file paths, schema, library names or data into any tracked file, ticket or commit message; describe needs generically.
