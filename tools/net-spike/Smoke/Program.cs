@@ -117,6 +117,43 @@ class Program
 			var groups = new System.Collections.Generic.Dictionary<string,int>();
 			foreach (var e in errors) { var k = e.Substring(e.IndexOf(": ") + 2); k = System.Text.RegularExpressions.Regex.Replace(k, "[TVO][0-9]+_[0-9]+", "X"); int c; groups.TryGetValue(k, out c); groups[k] = c + 1; }
 			foreach (var kv in groups) Console.WriteLine("   x{0}: {1}", kv.Value, kv.Key.Length > 300 ? kv.Key.Substring(0, 300) : kv.Key);
+
+			// K3 reproduction: the catalog's operator resolution cache is shared by all sessions. The compiler adds to it
+			// under lock(cache) and clears entries by name while compiling create/drop operator with no lock held.
+			// Unsynchronized, this fails with "Collection was modified" within milliseconds; expected: 0 errors.
+			var cache = new Alphora.Dataphor.DAE.Compiling.OperatorResolutionCache();
+			var cachePath = new Alphora.Dataphor.DAE.Schema.NameResolutionPath();
+			var cacheSig = new Alphora.Dataphor.DAE.Schema.Signature(new Alphora.Dataphor.DAE.Schema.SignatureElement[0]);
+			for (int i = 0; i < 2000; i++) cache.Add(new Alphora.Dataphor.DAE.Compiling.OperatorBindingContext(null, "System.Seed" + i, cachePath, cacheSig, false));
+			int cacheErrors = 0;
+			string cacheError = null;
+			var cacheStop = DateTime.UtcNow.AddMilliseconds(1000);
+			var cts = new System.Collections.Generic.List<System.Threading.Thread>();
+			for (int t = 0; t < 8; t++)
+			{
+				int id = t;
+				var th = new System.Threading.Thread(() =>
+				{
+					for (int n = 0; DateTime.UtcNow < cacheStop; n++)
+					{
+						try
+						{
+							string name = "O" + id + "_" + n;
+							if (id % 2 == 0)
+								lock (cache) cache.Add(new Alphora.Dataphor.DAE.Compiling.OperatorBindingContext(null, name, cachePath, cacheSig, false));
+							else
+								cache.Clear(name);
+						}
+						catch (Exception e)
+						{
+							if (System.Threading.Interlocked.Increment(ref cacheErrors) == 1) cacheError = e.GetType().Name + ": " + e.Message;
+						}
+					}
+				});
+				cts.Add(th); th.Start();
+			}
+			foreach (var th in cts) th.Join();
+			Console.WriteLine("Resolution cache: 8 threads x 1000 ms of add/clear; {0} errors{1}", cacheErrors, cacheError == null ? "" : " (first: " + cacheError + ")");
 		}
 		finally
 		{

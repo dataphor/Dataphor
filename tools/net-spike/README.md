@@ -33,5 +33,6 @@ python tools/net-spike/run.py C:\temp\dataphor-spike --tfm net8.0 --smoke      #
 | DAEServer | 0 errors with C# 12; 4 with C# 14, where `field` became a keyword inside property accessors (vendored `CommandLineArguments.cs`) |
 | DAE.Service | needs `System.Configuration.Install` replacement |
 | Smoke | engine starts in about 1 s, 1,080 operators registered, D4 DDL/DML/views/operators work |
-| Concurrency (8 threads × 15 DDL cycles) | 0 errors in 1.6 s with WAL + immediate transactions + the emitter fix; 39–47 errors in 60–80 s without them |
+| Concurrency (8 threads × 15 DDL cycles) | 0 errors in 1.6 s with WAL + immediate transactions + the emitter fix; 39–47 errors in 60–80 s without them. A rare "Collection was modified" (K3, the operator resolution cache) is fixed in the repo |
+| Resolution cache (8 threads × 1 s of add/clear) | 0 errors. Reproduces K3 directly: before the fix, about 1.4 million "Collection was modified" errors in 5 s |
 | Coverage scripts | 62 pass, 14 fail (12 need the helper library that requires a live SQL Server; 1 uses `Delegate.BeginInvoke`; 1 needs that same helper library) |

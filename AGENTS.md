@@ -42,7 +42,7 @@ Until then the only build/test loop is the spike (needs Python 3 and the .NET 10
 python tools/net-spike/run.py <work-dir> --smoke --coverage
 ```
 
-It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the D4 coverage scripts. Expected today: engine/server/libraries 0 errors, concurrency 0 errors, coverage `pass=62 fail=14`. See [tools/net-spike/README.md](tools/net-spike/README.md).
+It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the D4 coverage scripts. Expected today: engine/server/libraries 0 errors, concurrency 0 errors, resolution cache 0 errors, coverage `pass=62 fail=14`. See [tools/net-spike/README.md](tools/net-spike/README.md).
 
 ## Rules that are easy to break
 
