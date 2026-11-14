@@ -659,7 +659,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 					program.CheckAborted();
 
-				// TODO: Compile this call, the TableNode is the only node that uses this hook
+				// TODO: Compile this call; only TableNode and DDLNode use this hook
 				InternalBeforeExecute(program);
 				if (DeviceSupported)
 					return program.DeviceExecute(_device, this);

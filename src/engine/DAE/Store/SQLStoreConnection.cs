@@ -180,9 +180,7 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
-				SQLCursor reader = readerCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
-				_openReaderCount++;
-				return reader;
+				return readerCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
 			#if SQLSTORETIMING
 			}
 			finally
@@ -193,10 +191,16 @@ namespace Alphora.Dataphor.DAE.Store
 		}
 
 		private int _openReaderCount;
-		/// <summary>The number of readers opened by ExecuteReader that have not been closed (a store cursor's reader lives until the cursor moves to another range or is disposed).</summary>
+		/// <summary>The number of store cursors on this connection with a reader open (a cursor's reader lives until the cursor moves to another range or is disposed).</summary>
 		public int OpenReaderCount { get { return _openReaderCount; } }
 
-		/// <summary>Called by a store cursor when it disposes a reader opened by ExecuteReader.</summary>
+		/// <summary>Called by a store cursor when it has opened its reader.</summary>
+		protected internal void ReaderOpened()
+		{
+			_openReaderCount++;
+		}
+
+		/// <summary>Called by a store cursor when it has disposed its reader.</summary>
 		protected internal void ReaderClosed()
 		{
 			_openReaderCount--;

@@ -145,8 +145,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>The number of this session's transaction levels that a store write now belongs to.</summary>
 		private int OpenTransactionLevels { get { return _endingTransaction ? Transactions.Count - 1 : Transactions.Count; } }
 
-		// The store connection's transaction count is 0, or the number of levels that were open when the session last wrote;
-		// it never exceeds the session's open levels.
+		// The store connection's transaction count is 0, or the number of open levels down to the deepest one that has written
+		// (an inner level that wrote and has ended no longer counts); it never exceeds the session's open levels.
 		private void CheckStoreTransactionLevels(int openLevels)
 		{
 			Error.AssertFail

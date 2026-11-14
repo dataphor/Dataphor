@@ -125,6 +125,7 @@ namespace Alphora.Dataphor.DAE.Store
 		private void CreateReader(object[] origin, bool forward, bool inclusive)
 		{
 			_reader = InternalCreateReader(origin, forward, inclusive);
+			_connection.ReaderOpened();
 			_origin = origin;
 			_forward = forward;
 			_inclusive = inclusive;
