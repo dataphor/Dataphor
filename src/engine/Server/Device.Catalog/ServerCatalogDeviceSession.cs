@@ -67,7 +67,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Catalog Store
 
-		private bool _isUpdatable;
 		private int _acquireCount;
 		private CatalogStoreConnection _catalogStoreConnection;
 
@@ -81,11 +80,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		/// <summary>Requests that the session acquire a connection to the catalog store.</summary>
-		/// <remarks>		
-		/// If the connection is requested updatable, this will be a dedicated connection owned by the session.
-		/// Otherwise, the connection is acquired from a pool of connections maintained by the store,
-		/// and must be released by a call to ReleaseCatalogConnection. Calling ReleaseCatalogConnection
-		/// with the dedicated updatable connection will have no affect.
+		/// <remarks>
+		/// The connection comes from the pool the store maintains, and each acquire must be matched by a call to
+		/// ReleaseCatalogStoreConnection. An updatable acquire, made by a method that is about to write, first begins a store
+		/// transaction for each of the session's open transaction levels that has none, so that the writes commit and roll back
+		/// with the process transaction; the first of those begins takes the store's write lock (on SQLite, BEGIN IMMEDIATE),
+		/// and the session holds it until that process transaction ends. (A statement that changes the catalog begins it
+		/// earlier, before it takes the catalog's lock; see BeginStoreWriteTransaction.) Until then the session keeps the
+		/// connection, and every read of the session goes through it, so a transaction sees its own uncommitted writes. Reads
+		/// before a transaction's first write run on whichever connection the session holds, in autocommit when no store
+		/// transaction is open. Outside any process transaction, writes autocommit.
 		/// </remarks>
 		protected void AcquireCatalogStoreConnection(bool isUpdatable)
 		{
@@ -93,51 +97,97 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				if (_catalogStoreConnection == null)
-				{
-					if (isUpdatable)
-						_catalogStoreConnection = Device.Store.Connect();
-					else
-						_catalogStoreConnection = Device.Store.AcquireConnection();
-				}
+					_catalogStoreConnection = Device.Store.AcquireConnection();
 
 				if (isUpdatable)
-				{
-					if (_isUpdatable != isUpdatable)
-					{
-						for (int index = 0; index < ServerProcess.TransactionCount; index++)
-							_catalogStoreConnection.BeginTransaction(ServerProcess.Transactions[index].IsolationLevel);
-						// Set only once the store transactions have begun. The first begin waits for the store's write lock and can
-						// fail (130103); the process rollback that follows must not then end a store transaction that never began. Only
-						// that first begin reaches the database, so a failure leaves no level begun.
-						_isUpdatable = true;
-					}
-				}
+					BeginStoreTransactions();
 			}
 			catch
 			{
-				// Callers acquire before their own try, so their release does not run.
-				if (_catalogStoreConnection == null)
-					_acquireCount--;
-				else
-					ReleaseCatalogStoreConnection();
+				// Callers acquire before their own try, so their release does not run. Only the first begin of the catch-up
+				// reaches the database, so a begin that failed waiting for the write lock (130103) leaves no store level for
+				// the process rollback that follows to end.
+				ReleaseCatalogStoreConnection();
 				throw;
 			}
 		}
 
-		/// <summary>Releases a previously acquired catalog store connection back to the connection pool.</summary>
+		/// <summary>Releases a previously acquired catalog store connection.</summary>
 		/// <remarks>
-		/// Note that if the given connection was acquired updatable, then this call will have no affect, because
-		/// the store connection is owned by the device session.
+		/// The connection goes back to the store's pool once no acquire is outstanding and no store transaction is open; while
+		/// a store transaction is open the session keeps it, and the end of the process transaction releases it.
 		/// </remarks>
 		protected void ReleaseCatalogStoreConnection()
 		{
 			_acquireCount--;
+			ReleaseIdleCatalogStoreConnection();
+		}
 
-			if ((_acquireCount == 0) && !_isUpdatable)
+		private void ReleaseIdleCatalogStoreConnection()
+		{
+			if ((_catalogStoreConnection != null) && (_acquireCount == 0) && !_catalogStoreConnection.InTransaction)
 			{
-				Device.Store.ReleaseConnection(_catalogStoreConnection);
+				CatalogStoreConnection connection = _catalogStoreConnection;
 				_catalogStoreConnection = null;
+				// A commit or rollback that failed in the database leaves its transaction open there with the store's count
+				// at 0; pooled, the connection would hold the write lock for good. Disposing it ends that transaction.
+				if (connection.InDatabaseTransaction)
+					connection.Dispose();
+				else
+					Device.Store.ReleaseConnection(connection);
 			}
+		}
+
+		// Set from the store commit of a transaction level until the device session has removed that level from its stack:
+		// the deferred device stops run in between, and a store write there belongs to the enclosing level.
+		private bool _endingTransaction;
+
+		/// <summary>The number of this session's transaction levels that a store write now belongs to.</summary>
+		private int OpenTransactionLevels { get { return _endingTransaction ? Transactions.Count - 1 : Transactions.Count; } }
+
+		// The store connection's transaction count is 0, or the number of levels that were open when the session last wrote;
+		// it never exceeds the session's open levels.
+		private void CheckStoreTransactionLevels(int openLevels)
+		{
+			Error.AssertFail
+			(
+				(_catalogStoreConnection == null) || (_catalogStoreConnection.TransactionCount <= openLevels),
+				"The catalog store connection has {0} transaction levels open, more than the session's {1}.",
+				_catalogStoreConnection == null ? 0 : _catalogStoreConnection.TransactionCount,
+				openLevels
+			);
+		}
+
+		private void BeginStoreTransactions()
+		{
+			int openLevels = OpenTransactionLevels;
+			CheckStoreTransactionLevels(openLevels);
+			// Only this begin waits for the store's write lock. A session that holds that lock can be waiting for the catalog's
+			// lock, so waiting here while holding it deadlocks until the busy timeout (130103); see BeginStoreWriteTransaction.
+			if ((_catalogStoreConnection.TransactionCount == 0) && (openLevels > 0))
+				Error.DebugAssertFail(!Monitor.IsEntered(Catalog), "The catalog store's write transaction is beginning inside the catalog's lock.");
+			while (_catalogStoreConnection.TransactionCount < openLevels)
+				_catalogStoreConnection.BeginTransaction(ServerProcess.Transactions[_catalogStoreConnection.TransactionCount].IsolationLevel);
+		}
+
+		// NOTE: outside any process transaction (a process with implicit transactions off) a DDL statement's store writes
+		// autocommit, and each still waits for the write lock inside the catalog's lock, as before this lazy begin; if such
+		// processes change the catalog while others hold long write transactions, begin a store transaction for the statement.
+		public override void BeginStoreWriteTransaction()
+		{
+			if (!ServerProcess.ServerSession.Server.IsEngine && (OpenTransactionLevels > 0))
+			{
+				AcquireCatalogStoreConnection(true);
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		// Whether the store has a transaction for the level that is ending, that is, whether the session wrote at that level. The
+		// level is still on the device session's stack while the end hooks run.
+		private bool StoreHasEndingLevel()
+		{
+			CheckStoreTransactionLevels(Transactions.Count);
+			return (_catalogStoreConnection != null) && (_catalogStoreConnection.TransactionCount == Transactions.Count);
 		}
 
 		private void DisposeCatalogStoreConnection()
@@ -889,15 +939,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(false);
 			try
 			{
+				// Read before attaching: attaching runs the catalog's library-added handlers, and a store write under an open
+				// reader would carry the reader's snapshot into the write (see CatalogStoreConnection.BeginTransaction).
+				List<KeyValuePair<string, string>> libraryDirectories = new List<KeyValuePair<string, string>>();
+				using (SQLStoreCursor cursor = CatalogStoreConnection.SelectLibraryDirectories())
+				{
+					while (cursor.Next())
+						libraryDirectories.Add(new KeyValuePair<string, string>((string)cursor[0], (string)cursor[1]));
+				}
+
 				Program program = new Program(ServerProcess);
 				program.Start(null);
 				try
 				{
-					using (SQLStoreCursor cursor = CatalogStoreConnection.SelectLibraryDirectories())
-					{
-						while (cursor.Next())
-							LibraryUtility.AttachLibrary(program, (string)cursor[0], (string)cursor[1], true);
-					}
+					foreach (KeyValuePair<string, string> libraryDirectory in libraryDirectories)
+						LibraryUtility.AttachLibrary(program, libraryDirectory.Key, libraryDirectory.Value, true);
 				}
 				finally
 				{
@@ -1633,28 +1689,47 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Transaction
 		
-		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
-		{
-			base.InternalBeginTransaction(isolationLevel);
+		// No store transaction begins here: the transaction's first store write begins it (AcquireCatalogStoreConnection), or
+		// its first statement that changes the catalog (BeginStoreWriteTransaction), so that a transaction that only reads the
+		// catalog never holds the store's write lock.
 
-			if ((_catalogStoreConnection != null) && _isUpdatable)
-				_catalogStoreConnection.BeginTransaction(isolationLevel);
+		protected override void InternalCommitTransaction()
+		{
+			try
+			{
+				base.InternalCommitTransaction();
+			}
+			finally
+			{
+				_endingTransaction = false;
+			}
 		}
 
 		protected override void InternalAfterCommitTransaction()
 		{
 			base.InternalAfterCommitTransaction();
 			
-			if ((_catalogStoreConnection != null) && _isUpdatable)
+			if (StoreHasEndingLevel())
 				_catalogStoreConnection.CommitTransaction();
+			_endingTransaction = true;
+			CheckStoreTransactionLevels(Transactions.Count - 1);
+			ReleaseIdleCatalogStoreConnection();
 		}
 
 		protected override void InternalAfterRollbackTransaction()
 		{
 			base.InternalAfterRollbackTransaction();
 			
-			if ((_catalogStoreConnection != null) && _isUpdatable)
-				_catalogStoreConnection.RollbackTransaction();
+			try
+			{
+				if (StoreHasEndingLevel())
+					_catalogStoreConnection.RollbackTransaction();
+			}
+			finally
+			{
+				ReleaseIdleCatalogStoreConnection();
+			}
+			CheckStoreTransactionLevels(Transactions.Count - 1);
 		}
 		
 		#endregion

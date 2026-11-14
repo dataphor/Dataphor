@@ -180,7 +180,9 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
-				return readerCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+				SQLCursor reader = readerCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+				_openReaderCount++;
+				return reader;
 			#if SQLSTORETIMING
 			}
 			finally
@@ -188,6 +190,16 @@ namespace Alphora.Dataphor.DAE.Store
 				Store.Counters.Add(new SQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
+		}
+
+		private int _openReaderCount;
+		/// <summary>The number of readers opened by ExecuteReader that have not been closed (a store cursor's reader lives until the cursor moves to another range or is disposed).</summary>
+		public int OpenReaderCount { get { return _openReaderCount; } }
+
+		/// <summary>Called by a store cursor when it disposes a reader opened by ExecuteReader.</summary>
+		protected internal void ReaderClosed()
+		{
+			_openReaderCount--;
 		}
 		
 		protected virtual SQLStoreCursor InternalOpenCursor(string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
@@ -211,6 +223,13 @@ namespace Alphora.Dataphor.DAE.Store
 		private int _transactionCount = 0;
 		public int TransactionCount { get { return _transactionCount; } }
 		
+		/// <summary>Whether the connection to the database is in a transaction.</summary>
+		/// <remarks>
+		/// The same as TransactionCount > 0, except after a commit or rollback that failed in the database: the count has
+		/// already gone down, and the database transaction may still be open.
+		/// </remarks>
+		public bool InDatabaseTransaction { get { return (_connection != null) && _connection.InTransaction; } }
+
 		internal abstract class SQLStoreOperation : System.Object
 		{
 			public virtual void Undo(SQLStoreConnection connection) {}

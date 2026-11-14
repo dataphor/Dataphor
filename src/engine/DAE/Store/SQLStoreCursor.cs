@@ -104,8 +104,15 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			if (_reader != null)
 			{
-				_reader.Dispose();
-				_reader = null;
+				try
+				{
+					_reader.Dispose();
+				}
+				finally
+				{
+					_reader = null;
+					_connection.ReaderClosed();
+				}
 			}
 
 			if (_readerCommand != null)

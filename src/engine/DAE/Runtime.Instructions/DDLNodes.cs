@@ -20,6 +20,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public abstract class DDLNode : PlanNode 
 	{
+		// Takes the catalog store's write lock before the node takes the catalog's lock (many drops and alters write the store
+		// inside lock (program.Catalog)): waiting for it inside would deadlock with a session that holds the store's write lock
+		// and waits for the catalog's lock, until the store's busy timeout. Loading an object runs its DDL without writing the
+		// store, and a read must not take the write lock.
+		protected override void InternalBeforeExecute(Program program)
+		{
+			if (!program.ServerProcess.InLoadingContext())
+				program.CatalogDeviceSession.BeginStoreWriteTransaction();
+		}
+
 		protected void DropDeviceMaps(Program program, Schema.Device device)
 		{
 			List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependents(device.ID, false);

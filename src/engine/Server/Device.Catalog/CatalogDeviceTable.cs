@@ -56,6 +56,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		protected override void InternalOpen()
 		{
+			// NOTE: a connection of its own, outside any store transaction (on SQLite, read uncommitted opens none), so a D4 query
+			// that the store answers sees committed catalog data only, not the calling transaction's own uncommitted store writes
+			// (those are on the session's store connection; see ServerCatalogDeviceSession.AcquireCatalogStoreConnection). Reading
+			// them would mean borrowing that connection, with its cursor cache and its rule against readers open across a begin.
 			// Connect to the Catalog Store
 			_connection = Session.Device.Store.GetSQLConnection();
 			_connection.BeginTransaction(SQLIsolationLevel.ReadUncommitted);

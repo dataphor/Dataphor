@@ -18,8 +18,9 @@ using Alphora.Dataphor.DAE.Store;
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
-	/// The SQLite catalog store under sessions that change the schema at the same time (K10), its lock-wait error, and its
-	/// rollback at every isolation level (K26).
+	/// The SQLite catalog store under sessions that change the schema at the same time (K10), its lock-wait error, its
+	/// rollback at every isolation level (K26), and its write transactions, which begin at a transaction's first store write
+	/// and through which that transaction reads.
 	/// </summary>
 	[TestFixture]
 	public class CatalogStoreConcurrencyTest
@@ -30,6 +31,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// K10: the spike's concurrency loop. Each session creates, queries and drops objects of its own; any exception fails the
 		/// test. On the rollback journal with deferred store transactions, 27 of the 120 cycles failed with "database is locked".
+		/// With the store's write transaction begun only at a transaction's first store write, a drop waited for the write lock
+		/// inside the catalog's lock while the lock's holder waited for the catalog's lock: 42 cycles failed with 130103, in 264 s.
 		/// </summary>
 		[Test]
 		public void ConcurrentDDLWithQueriesAndDrops()
@@ -224,6 +227,216 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// K10, the long transaction: while one session's transaction holds the store's write lock (it has changed the catalog
+		/// and stays open), other sessions' catalog reads run without waiting, in explicit transactions too and from a session
+		/// that has written before; only another catalog write waits, and completes once the lock is free. When every
+		/// transaction of a session that had written once began a store write transaction, B's transaction waited for A's and
+		/// failed with 130103 after 30 s.
+		/// </summary>
+		[Test]
+		public void LongDDLTransactionBlocksOnlyWriters()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(LongDDLTransactionBlocksOnlyWriters)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript
+				(
+					"create table LReadT { ID : Integer, key { ID } };\r\n" +
+					"create operator LReadO(const A : Integer) : Integer\r\nbegin\r\n\tresult := A + 1;\r\nend;"
+				);
+				// So that the readers below resolve the table and the operator from the store, not from memory. (The table's rows
+				// are in the memory device and do not survive the restart.)
+				instance.Server.Stop();
+				instance.Server.Start();
+
+				IServerSession sessionA = instance.Connect();
+				IServerSession sessionB = instance.Connect();
+				IServerSession sessionC = instance.Connect();
+				IServerSession sessionD = instance.Connect();
+				IServerProcess processA = sessionA.StartProcess(new ProcessInfo(sessionA.SessionInfo));
+				IServerProcess processB = sessionB.StartProcess(new ProcessInfo(sessionB.SessionInfo));
+				IServerProcess processC = sessionC.StartProcess(new ProcessInfo(sessionC.SessionInfo));
+				IServerProcess processD = sessionD.StartProcess(new ProcessInfo(sessionD.SessionInfo));
+				Thread writerD = null;
+				try
+				{
+					processB.ExecuteScript("create table LB0 { ID : Integer, key { ID } };");
+
+					processA.BeginTransaction(IsolationLevel.CursorStability);
+					processA.ExecuteScript("create table TA { ID : Integer, key { ID } };");
+
+					Stopwatch watch = Stopwatch.StartNew();
+					processB.BeginTransaction(IsolationLevel.CursorStability);
+					RunCatalogReads(processB);
+					processB.CommitTransaction();
+					TestContext.Progress.WriteLine("B's read transaction took {0} ms.", watch.ElapsedMilliseconds);
+					Assert.That(watch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(10)), "B's read transaction");
+
+					watch.Restart();
+					RunCatalogReads(processC);
+					TestContext.Progress.WriteLine("C's reads took {0} ms.", watch.ElapsedMilliseconds);
+					Assert.That(watch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(10)), "C's reads");
+
+					Exception failureD = null;
+					writerD =
+						new Thread(() =>
+						{
+							try
+							{
+								processD.ExecuteScript("create table TD { ID : Integer, key { ID } };");
+							}
+							catch (Exception exception)
+							{
+								failureD = exception;
+							}
+						});
+					writerD.Start();
+					Assert.That(writerD.Join(1000), Is.False, "D's create table did not wait for A's transaction: " + failureD);
+
+					processA.CommitTransaction();
+					Assert.That(writerD.Join(TimeSpan.FromSeconds(20)), Is.True, "D's create table did not complete after A committed.");
+					writerD = null;
+					Assert.That(failureD, Is.Null, failureD?.ToString());
+
+					Assert.That(Evaluate(processB, "Count(TA) + Count(TD)"), Is.EqualTo(0));
+				}
+				finally
+				{
+					if (processA.InTransaction)
+						processA.RollbackTransaction();
+					// A's rollback releases the lock D waits for.
+					writerD?.Join(TimeSpan.FromSeconds(40));
+					sessionA.StopProcess(processA);
+					sessionB.StopProcess(processB);
+					sessionC.StopProcess(processC);
+					sessionD.StopProcess(processD);
+					instance.Server.Disconnect(sessionA);
+					instance.Server.Disconnect(sessionB);
+					instance.Server.Disconnect(sessionC);
+					instance.Server.Disconnect(sessionD);
+				}
+			}
+		}
+
+		// Resolves and counts a table, queries a catalog table that the store answers, and calls an operator.
+		private static void RunCatalogReads(IServerProcess process)
+		{
+			Assert.That(Evaluate(process, "Count(LReadT)"), Is.EqualTo(0), "Count(LReadT)");
+			Assert.That(Evaluate(process, "Count(System.Objects where Name = 'General.LReadT')"), Is.EqualTo(1), "System.Objects");
+			Assert.That(Evaluate(process, "LReadO(1)"), Is.EqualTo(2), "LReadO(1)");
+		}
+
+		/// <summary>
+		/// A transaction reads its own uncommitted store writes: the dependents check of a drop reads DAEObjectDependencies from
+		/// the store (CatalogDeviceSession.SelectObjectDependents), and must see the dependency of a view created earlier in the
+		/// same transaction. After the rollback nothing of it remains, in memory or in the store.
+		/// </summary>
+		[Test]
+		public void TransactionReadsItsOwnStoreWrites()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(TransactionReadsItsOwnStoreWrites)))
+			{
+				instance.Server.Start();
+
+				IServerSession session = instance.Connect();
+				try
+				{
+					IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+					try
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("create table RWT { ID : Integer, key { ID } };\r\ninsert table { row { 1 ID } } into RWT;");
+						Assert.That(Evaluate(process, "Count(RWT)"), Is.EqualTo(1));
+
+						process.ExecuteScript("create view RWV RWT where ID > 0;");
+						Exception exception = Assert.Catch(() => process.ExecuteScript("drop table RWT;"));
+						Assert.That(FindError(exception, (int)CompilerException.Codes.ObjectHasDependents), Is.Not.Null, exception.ToString());
+
+						process.ExecuteScript("create operator RWO(const A : Integer) : Integer\r\nbegin\r\n\tresult := A + Count(RWV);\r\nend;");
+						Assert.That(Evaluate(process, "RWO(1)"), Is.EqualTo(2));
+						process.RollbackTransaction();
+
+						// Expressions not compiled before, and the operator only after the restart below: a rollback leaves the
+						// plans and operator resolutions cached in the transaction valid (bug-ddl-rollback-keeps-cached-plans), so
+						// Count(RWT) and RWO(1) themselves would still evaluate here.
+						foreach (string expression in new[] { "Count(RWT where ID = 1)", "Count(RWV where ID = 1)" })
+						{
+							Exception unknown = Assert.Catch(() => Evaluate(process, expression), expression);
+							Assert.That(FindError(unknown, (int)CompilerException.Codes.UnknownIdentifier), Is.Not.Null, unknown.ToString());
+						}
+					}
+					finally
+					{
+						session.StopProcess(process);
+					}
+				}
+				finally
+				{
+					instance.Server.Disconnect(session);
+				}
+
+				instance.Server.Stop();
+				Assert.That(CountStoredRows(instance, "DAECatalogObjects", "RWT"), Is.EqualTo(0), "RWT");
+				Assert.That(CountStoredRows(instance, "DAECatalogObjects", "RWV"), Is.EqualTo(0), "RWV");
+				Assert.That(CountStoredOperatorRows(instance, "RWO"), Is.EqualTo(0), "RWO");
+
+				instance.Server.Start();
+				Exception unknownOperator = Assert.Catch(() => instance.Evaluate("RWO(1)"));
+				Assert.That(FindError(unknownOperator, (int)CompilerException.Codes.OperatorNotFound), Is.Not.Null, unknownOperator.ToString());
+			}
+		}
+
+		/// <summary>
+		/// A session whose statement fails waiting for the store's write lock is left outside any transaction, and its later
+		/// statements commit normally. When a session that had written once began a store write transaction at the start of each
+		/// transaction, the busy error came from that begin and left the process half-begun (InTransaction true, count 1): the
+		/// next statement then ran inside it, and B3 was lost when B disconnected.
+		/// </summary>
+		[Test]
+		public void BusyAtTransactionStartLeavesNoTransaction()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(BusyAtTransactionStartLeavesNoTransaction)))
+			{
+				instance.Server.CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString + ";BusyTimeout=1000";
+				instance.Server.Start();
+
+				IServerSession sessionA = instance.Connect();
+				IServerSession sessionB = instance.Connect();
+				IServerProcess processA = sessionA.StartProcess(new ProcessInfo(sessionA.SessionInfo));
+				IServerProcess processB = sessionB.StartProcess(new ProcessInfo(sessionB.SessionInfo));
+				try
+				{
+					processB.ExecuteScript("create table B1 { ID : Integer, key { ID } };");
+
+					processA.BeginTransaction(IsolationLevel.CursorStability);
+					processA.ExecuteScript("create table A1 { ID : Integer, key { ID } };");
+
+					Exception exception = Assert.Catch(() => processB.ExecuteScript("create table B2 { ID : Integer, key { ID } };"));
+					Assert.That(FindError(exception, (int)StoreException.Codes.StoreLocked), Is.Not.Null, exception.ToString());
+					Assert.That(processB.InTransaction, Is.False, "B is in a transaction after the busy error.");
+
+					processA.CommitTransaction();
+					processB.ExecuteScript("create table B3 { ID : Integer, key { ID } };");
+				}
+				finally
+				{
+					if (processA.InTransaction)
+						processA.RollbackTransaction();
+					sessionA.StopProcess(processA);
+					sessionB.StopProcess(processB);
+					instance.Server.Disconnect(sessionA);
+					instance.Server.Disconnect(sessionB);
+				}
+
+				instance.Server.Stop();
+				instance.Server.Start();
+				Assert.That(instance.Evaluate("Count(B3)"), Is.EqualTo(0));
+				Exception unknown = Assert.Catch(() => instance.Evaluate("Count(B2)"));
+				Assert.That(FindError(unknown, (int)CompilerException.Codes.UnknownIdentifier), Is.Not.Null, unknown.ToString());
+			}
+		}
+
 		private static object Evaluate(IServerProcess process, string expression)
 		{
 			return ((ServerProcess)process).Evaluate(expression, null).AsNative;
@@ -252,6 +465,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				using (SQLiteCommand command = new SQLiteCommand(String.Format("select count(*) from {0} where Name = @Name or Name like '%.' || @Name", tableName), connection))
 				{
 					command.Parameters.AddWithValue("@Name", objectName);
+					return Convert.ToInt32(command.ExecuteScalar());
+				}
+			}
+		}
+
+		// Catalog object rows of operators of the given name, library-qualified or not (an operator's object name is mangled
+		// with its signature; DAEOperators keeps the name as written).
+		private static int CountStoredOperatorRows(TestServerInstance instance, string operatorName)
+		{
+			using (SQLiteConnection connection = instance.OpenCatalogStoreFile())
+			{
+				using
+				(
+					SQLiteCommand command =
+						new SQLiteCommand
+						(
+							"select count(*) from DAECatalogObjects C join DAEOperators O on O.ID = C.ID where O.OperatorName = @Name or O.OperatorName like '%.' || @Name",
+							connection
+						)
+				)
+				{
+					command.Parameters.AddWithValue("@Name", operatorName);
 					return Convert.ToInt32(command.ExecuteScalar());
 				}
 			}

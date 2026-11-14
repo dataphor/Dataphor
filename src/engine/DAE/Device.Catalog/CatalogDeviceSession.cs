@@ -1403,6 +1403,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
+		/// <summary>Begins the catalog store's write transaction for the open process transaction, if it has not begun.</summary>
+		/// <remarks>
+		/// A store write begins it anyway; a statement that is about to change the catalog calls this first, before it takes
+		/// the catalog's lock, so that it never waits for the store's write lock while holding the catalog's lock (the
+		/// session holding the store's write lock may be waiting for that lock). A catalog without a store does nothing.
+		/// </remarks>
+		public virtual void BeginStoreWriteTransaction()
+		{
+			// virtual
+		}
+
 		protected override void InternalPrepareTransaction()
 		{
 			base.InternalPrepareTransaction();

@@ -763,7 +763,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void BeginTransaction(IsolationLevel isolationLevel)
 		{
 			if (_connection.TransactionCount == 0)
+			{
 				FlushCache();
+				// A reader still open here belongs to a caller further up the stack, and it would carry its autocommit
+				// snapshot into the transaction: on SQLite the begin then upgrades that snapshot to a write lock, which fails
+				// if another session has committed since. Read into a list before writing instead.
+				Error.AssertFail(_connection.OpenReaderCount == 0, "A catalog store transaction is beginning on a connection with {0} reader(s) open.", _connection.OpenReaderCount);
+			}
 			_connection.BeginTransaction(SQLUtility.IsolationLevelToSQLIsolationLevel(isolationLevel));
 		}
 
@@ -785,6 +791,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public bool InTransaction { get { return _connection.TransactionCount > 0; } }
 		
+		/// <summary>Whether the store's database connection is in a transaction; see SQLStoreConnection.InDatabaseTransaction.</summary>
+		public bool InDatabaseTransaction { get { return _connection.InDatabaseTransaction; } }
+
 		private CatalogStore _store;
 		public CatalogStore Store { get { return _store; } }
 		
