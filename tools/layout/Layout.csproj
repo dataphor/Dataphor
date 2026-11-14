@@ -128,6 +128,10 @@
     folder with one file per name: the win-x64 file first, then win, then the generic one; other runtime identifiers are dropped.
     A flat folder has no .deps.json to choose for the runtime, and the generic file of a package that ships a Windows one is the
     stub that throws PlatformNotSupportedException.
+
+    NOTE: only the RID names win-x64 and win are ranked; a private package that ships its Windows file under an older name
+    (win7-x64, win10-x64) loses it here and the library folder gets the generic stub, which the .d4l check does not catch unless
+    the .d4l lists that file. If such a package appears, rank those names too (or resolve through the RID graph).
   -->
   <Target Name="_DataphorComputeLayout" DependsOnTargets="_DataphorCheckLayoutDir;_DataphorGetLayoutItems;_DataphorListLibraries">
     <ItemGroup>
@@ -135,6 +139,7 @@
         <DataphorDestination>$(_DataphorLayoutDirFull)bin\%(_DataphorBinItem.DataphorLayoutPath)</DataphorDestination>
       </_DataphorLayoutFile>
 
+      <!-- NOTE: copies what is on disk, untracked files included (a developer's scratch document in Documents\ reaches the layout and every copy of it). Fine for local runs and a clean CI checkout; if the installer harvests from here, build it from a clean checkout or restrict this to tracked files. -->
       <_DataphorLibrarySourceFile Include="%(_DataphorLibrary.Folder)**"
                                   Exclude="%(_DataphorLibrary.Folder)Source\**;%(_DataphorLibrary.Folder)bin\**;%(_DataphorLibrary.Folder)obj\**;%(_DataphorLibrary.Folder)**\*.dll;%(_DataphorLibrary.Folder)**\*.pdb;%(_DataphorLibrary.Folder)**\*.exe">
         <DataphorLibrary>%(_DataphorLibrary.Identity)</DataphorLibrary>

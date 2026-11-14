@@ -30,6 +30,7 @@ Out of scope:
 ## Settled decisions and known defects
 
 - K1 (plan, Known defects; verified by the spike).
+- Seen by the `build-runtime-layout` review (spike, 8×15 concurrency step, 26 errors): 24 "database is locked", 1 "unrecognized token" and 1 `ArgumentException: Destination is too short. (Parameter 'destination')`. The spike prints no stack; the message fits two threads writing one `StringBuilder`, so check that the reproduction test no longer produces it after the fix, and record its stack in the handoff if it still appears.
 - D2: the D4 scripts and stored catalog format are the oracle; the stored script text for an object must be exactly what single-threaded emission produces.
 - No compatibility surface changes: the emitted text, the store format and all public signatures stay the same.
 

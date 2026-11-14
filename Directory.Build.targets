@@ -4,7 +4,8 @@
     Runtime layout (plan WS1): artifacts/layout/<debug|release>/bin/ and .../Libraries/<Name>/. Only tools/layout/Layout.csproj
     writes there; every other project only answers the GetDataphorLayoutItems call below. Consumers find the folder through
     DataphorLayoutDir, never by spelling the path. It is defined here rather than in Directory.Build.props so that Configuration
-    is final; item definitions in a project body still see it, because MSBuild evaluates every property before any item.
+    is final; items and item definitions in a project body still see it, because MSBuild evaluates every property before any
+    item, but a property in a project body does not (it is evaluated before this file is imported). Read it in an item or a target.
   -->
   <PropertyGroup>
     <DataphorLayoutDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsPath)', 'layout', '$(Configuration.ToLowerInvariant())'))</DataphorLayoutDir>
@@ -42,6 +43,12 @@
                                   DestinationSubPath, and DataphorPrivate=true when no project this one references has the package.
     DataphorLayoutPath is the file's path relative to the folder it goes to, in the SDK's copy-local shape. A project in a library's
     Source folder, <F>\Source\, where <F> holds <F>.d4l, adds DataphorLibrary=<F>.
+
+    NOTE: a package a library gets through another library's project (MSSQLDevice references Connection, which has OLE DB) is
+    not private to it, so it lands only in that other library's folder, as does that library's own assembly. That
+    relies on the D4 library references loading that library first (MSSQLDevice -> SQLDevice -> Connection), so the files are
+    already loaded when this library needs them; no run registers MSSQLDevice from the layout yet. If a library ever references
+    a library's project without a D4 library reference that leads to it, check that pairing in the layout or copy those files too.
 
     The calls into referenced projects pass the same global properties as the SDK's own (see GetCopyToOutputDirectoryItems in
     Microsoft.Common.CurrentVersion.targets), so they reach the project instances the build already evaluated and built instead
