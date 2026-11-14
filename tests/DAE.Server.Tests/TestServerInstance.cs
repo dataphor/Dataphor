@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Data.SQLite;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -25,8 +26,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public const string LibrariesFolderName = "Libraries";
 		public const string InstanceFolderName = "Instance";
 		public const string CatalogStoreClassName = Server.DefaultCatalogStoreClassName;
-		// The plain default: the SQLite store applies write-ahead logging and its busy timeout itself, so the suite runs what a
-		// fresh instance gets.
+		// No connection options: the SQLite store applies write-ahead logging and its busy timeout itself, so the suite runs on
+		// the options a fresh instance gets.
 		public const string CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";
 
 		/// <summary>Copies the named libraries from the runtime layout. None is valid: System is built in, and the server creates General.</summary>
@@ -96,6 +97,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public IServerSession Connect()
 		{
 			return _server.Connect(new SessionInfo("Admin", ""));
+		}
+
+		/// <summary>Opens this instance's catalog file directly, read-only, to check what the store holds.</summary>
+		/// <remarks>Without pooling, so that nothing holds the file open when the instance directory is deleted.</remarks>
+		public SQLiteConnection OpenCatalogStoreFile()
+		{
+			SQLiteConnectionStringBuilder connectionString =
+				new SQLiteConnectionStringBuilder
+				{
+					DataSource = new SQLiteConnectionStringBuilder(_server.GetCatalogStoreConnectionString()).DataSource,
+					ReadOnly = true,
+					Pooling = false
+				};
+			SQLiteConnection connection = new SQLiteConnection(connectionString.ConnectionString);
+			try
+			{
+				connection.Open();
+				return connection;
+			}
+			catch
+			{
+				connection.Dispose();
+				throw;
+			}
 		}
 
 		/// <summary>Runs D4 on a session and process of its own.</summary>

@@ -120,6 +120,24 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The store runs in write-ahead-logging mode, so that readers never wait for the writer (K10), even when the connection
+		/// string asks for the rollback journal.
+		/// </summary>
+		[Test]
+		public void StoreForcesWriteAheadLog()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(StoreForcesWriteAheadLog)))
+			{
+				instance.Server.CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString + ";journal mode=Delete;JournalMode=Truncate";
+				instance.Server.Start();
+
+				using (SQLiteConnection connection = instance.OpenCatalogStoreFile())
+				using (SQLiteCommand command = new SQLiteCommand("pragma journal_mode", connection))
+					Assert.That(command.ExecuteScalar(), Is.EqualTo("wal"));
+			}
+		}
+
+		/// <summary>
 		/// A session that waits for the store's write lock longer than BusyTimeout fails with StoreException 130103, within about
 		/// that time, and can retry once the lock is free.
 		/// </summary>
@@ -197,8 +215,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				}
 
 				instance.Server.Stop();
-				Assert.That(CountStoredRows(instance.Server.GetCatalogStoreConnectionString(), "DAECatalogObjects", "K26T"), Is.EqualTo(0), "DAECatalogObjects");
-				Assert.That(CountStoredRows(instance.Server.GetCatalogStoreConnectionString(), "DAEObjects", "K26T"), Is.EqualTo(0), "DAEObjects");
+				Assert.That(CountStoredRows(instance, "DAECatalogObjects", "K26T"), Is.EqualTo(0), "DAECatalogObjects");
+				Assert.That(CountStoredRows(instance, "DAEObjects", "K26T"), Is.EqualTo(0), "DAEObjects");
 
 				instance.Server.Start();
 				Exception exception = Assert.Catch(() => instance.Evaluate("Count(K26T)"));
@@ -227,19 +245,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		// Rows of the given store table whose Name is the object name, library-qualified or not.
-		private static int CountStoredRows(string storeConnectionString, string tableName, string objectName)
+		private static int CountStoredRows(TestServerInstance instance, string tableName, string objectName)
 		{
-			// Without pooling, so that nothing holds the file open when the instance directory is deleted.
-			SQLiteConnectionStringBuilder connectionString =
-				new SQLiteConnectionStringBuilder
-				{
-					DataSource = new SQLiteConnectionStringBuilder(storeConnectionString).DataSource,
-					ReadOnly = true,
-					Pooling = false
-				};
-			using (SQLiteConnection connection = new SQLiteConnection(connectionString.ConnectionString))
+			using (SQLiteConnection connection = instance.OpenCatalogStoreFile())
 			{
-				connection.Open();
 				using (SQLiteCommand command = new SQLiteCommand(String.Format("select count(*) from {0} where Name = @Name or Name like '%.' || @Name", tableName), connection))
 				{
 					command.Parameters.AddWithValue("@Name", objectName);

@@ -82,6 +82,8 @@ namespace Alphora.Dataphor.DAE.Connection
 		}
 		
 		// A lock wait that outlasted BusyTimeout. The store is this class's only user, so a store error is the right report.
+		// NOTE: Locked (SQLITE_LOCKED) is a conflict on this same connection (shared cache, or a drop under an open statement),
+		// not another session's lock, so the 130103 message misleads for it; if Locked is ever seen, give it its own report.
 		private static bool IsLockTimeout(Exception exception)
 		{
 			for (; exception != null; exception = exception.InnerException)

@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				instance.Server.Stop();
 
-				Dictionary<int, string> storedScripts = ReadStoredScripts(instance.Server.GetCatalogStoreConnectionString(), expectedScripts.Keys);
+				Dictionary<int, string> storedScripts = ReadStoredScripts(instance, expectedScripts.Keys);
 				foreach (KeyValuePair<int, string> expected in expectedScripts)
 				{
 					Assert.That(storedScripts.ContainsKey(expected.Key), Is.True, String.Format("No stored script for object {0}.", expected.Key));
@@ -319,22 +319,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return qualifier >= 0 ? name.Substring(qualifier + 1) : name;
 		}
 
-		private static Dictionary<int, string> ReadStoredScripts(string storeConnectionString, IEnumerable<int> objectIDs)
+		private static Dictionary<int, string> ReadStoredScripts(TestServerInstance instance, IEnumerable<int> objectIDs)
 		{
 			Dictionary<int, string> scripts = new Dictionary<int, string>();
 			HashSet<int> wanted = objectIDs.ToHashSet();
-			// The store's file, opened read-only and without pooling, so that nothing holds it open when the instance
-			// directory is deleted.
-			SQLiteConnectionStringBuilder connectionString =
-				new SQLiteConnectionStringBuilder
-				{
-					DataSource = new SQLiteConnectionStringBuilder(storeConnectionString).DataSource,
-					ReadOnly = true,
-					Pooling = false
-				};
-			using (SQLiteConnection connection = new SQLiteConnection(connectionString.ConnectionString))
+			using (SQLiteConnection connection = instance.OpenCatalogStoreFile())
 			{
-				connection.Open();
 				using (SQLiteCommand command = new SQLiteCommand("select ID, ServerData from DAEObjects", connection))
 				using (SQLiteDataReader reader = command.ExecuteReader())
 					while (reader.Read())

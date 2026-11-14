@@ -3,7 +3,7 @@ prereq: test-harness-inprocess, port-catalog-emitter-race
 architecture: docs/modernization-plan.md#ws4-catalog-store
 files: src/engine/Store.SQLite/SQLiteStore.cs, src/engine/Store.SQLite/SQLiteStoreConnection.cs, src/engine/Store.SQLite/SQLiteConnection.cs, src/engine/DAE/Store/SQLStoreConnection.cs, src/engine/DAE/Store/StoreException.cs, src/engine/DAE/Store/StoreException.resx, src/engine/Server/Device.Catalog/ServerCatalogDeviceSession.cs, tests/DAE.Server.Tests/CatalogStoreConcurrencyTest.cs, tests/DAE.Server.Tests/ConcurrentDDLTest.cs, tests/DAE.Server.Tests/TestServerInstance.cs, tests/DAE.Server.Tests/DAE.Server.Tests.csproj, tools/net-spike/run.py, tools/net-spike/README.md, AGENTS.md, docs/migration-notes.md, docs/modernization-plan.md, tickets/implement/12.5-store-sqlite-concurrency.md, tickets/backlog/bug-process-begin-leaves-partial-transaction.md
 ----
-# Review: SQLite catalog store — WAL, immediate write transactions, busy error (first half of K10; K26)
+# Complete: SQLite catalog store — WAL, immediate write transactions, busy error (first half of K10; K26)
 
 ## What changed
 
@@ -45,3 +45,37 @@ files: src/engine/Store.SQLite/SQLiteStore.cs, src/engine/Store.SQLite/SQLiteSto
 - `docs/migration-notes.md`: five **done** rows (WAL and local disk / ignored `Journal Mode`; `BusyTimeout` default and derivation; error 130103, including the eager-lock caveat until `store-sqlite-concurrency`; K26 Browse rollback; `SQLStoreConnection.InternalBeginTransaction` now called, for custom stores).
 - `docs/modernization-plan.md`: K26 row fixed by this slug; the spike-patch "begin immediate" row and the paragraph above it marked landed here; the Appendix A sentence updated (lock errors fixed here, spike now 0 errors on the default options). The K10 row and the WS4 work-item row are left to `store-sqlite-concurrency`, as planned.
 - `AGENTS.md` and `tools/net-spike/README.md`: spike concurrency expectation is 0 errors.
+
+## Review findings
+
+Read the diff of `ticket(implement): store-sqlite-wal-busy` before the handoff, then the code around each change: `SQLStore`/`SQLStoreConnection` begin, commit and rollback; `SQLConnection.BeginTransaction` and `WrapException`; `DotNetConnection.InternalConnect`; `CatalogStore`'s connection pool; `ServerCatalogDeviceSession`'s acquire, release and transaction hooks; `Server.GetCatalogStoreConnectionString`.
+
+**Checked and correct (no change):**
+
+- Connection-string rewriting runs in `InternalInitialize`, before `SQLStore.Initialize` marks the store initialized, so the `ConnectionString` setter does not throw; every store connection (pooled and dedicated) is built from that string, and nothing else in the server opens the catalog from `GetCatalogStoreConnectionString`.
+- Busy-wait bound: no store or connection code sets a per-command `CommandTimeout` (`SQLCommand.DefaultCommandTimeout` is -1, so `DotNetCommand` leaves the provider's `Default Timeout` in effect), so the derived `(BusyTimeout - 1) / 1000` applies to every store statement. Re-measured: B fails after 1,196 ms with `BusyTimeout=1000`.
+- `BEGIN IMMEDIATE` failing: `SQLConnection.BeginTransaction` sets `InTransaction` only after the begin returns, and `SQLStoreConnection` counts the level only then, so a timed-out begin leaves nothing to roll back. Nested store levels never reach the database, so only the first begin of the catch-up loop can fail, as the new comment says.
+- `AcquireCatalogStoreConnection`'s new `catch`: when `Connect()` itself throws, only the count is undone; when a begin throws on a connection just taken, `ReleaseCatalogStoreConnection` returns it to `CatalogStore`'s pool, which accepts any connection (the pool only adds; its count is 0 after the failed begin); when an earlier acquire still holds the connection, the count drops and the connection stays. Correct in all three.
+- `SQLiteConnection` now parses `BusyTimeout` before connecting; the old `DotNetConnection(string)` constructor did nothing besides `InternalConnect`, so the change keeps behaviour.
+- Error 130103: code in the `130` (DAE.Store) range next to 130102; `docs/reference` lists prefixes only, so no reference entry is owed. Migration-notes rows read against the sections they sit in ("see the next section" is right) and the default file name (`DAECatalog.sqlite`).
+- Compatibility: no D4 semantics, class names, file formats or contracts changed; the new error code and the now-called `InternalBeginTransaction` virtual are in the migration notes.
+- The implementer's known gap, a process left half-begun when a store begin times out at the start of a transaction: reachable on this commit only for a session that has written to the catalog before and then meets another session's lock for longer than `BusyTimeout`. Accepted for this window: `store-sqlite-concurrency` is next in the queue (sequence 12.5), carries the test `BusyAtTransactionStartLeavesNoTransaction` for it, and the general engine defect is filed as `bug-process-begin-leaves-partial-transaction` with triage fields and a verified reproduction. No further ticket.
+
+**Fixed in this pass (minor):**
+
+- Duplicated test code: `CatalogStoreConcurrencyTest.CountStoredRows` and `ConcurrentDDLTest.ReadStoredScripts` each built the same read-only, unpooled connection to the catalog file. Both now use the new `TestServerInstance.OpenCatalogStoreFile()`.
+- `TestServerInstance.CatalogStoreConnectionString`'s comment said the suite runs "the plain default", but the server's default file is `DAECatalog.sqlite` and the harness's is `DAECatalog`; reworded to say the harness sets no connection options.
+- Contract left unverified: no kept test showed that the store forces write-ahead logging, and the handoff noted the concurrency tests would also pass on the rollback journal. Added `CatalogStoreConcurrencyTest.StoreForcesWriteAheadLog`: both spellings of a different journal mode in the connection string, `pragma journal_mode` on the catalog file must be `wal`. It fails (`delete`) with the override line commented out, checked once and restored.
+
+**Tripwires recorded:**
+
+- `Locked` (SQLITE_LOCKED) maps to 130103, whose message speaks of another session's lock; parked as a `NOTE:` on `IsLockTimeout` in `src/engine/Store.SQLite/SQLiteConnection.cs`.
+
+**Considered and left as is:**
+
+- "within 1 seconds" (no singular): the ticket's wording; cosmetic.
+- No test pins the default `BusyTimeout` (30 s) or the derived `Default Timeout`: the ticket decided against it, and pinning a 30 s default would cost a 30 s test; the busy test pins a user-set value end to end.
+- The tests' `FindError`/`Innermost`/`Evaluate(process, …)` helpers are local to `CatalogStoreConcurrencyTest`; no other test has the same helpers to share them with.
+- Tests: the four in `CatalogStoreConcurrencyTest` each pin a separate contract (K10 under load, the 130103 contract, K26, WAL forced) and none restates the implementation; the tightened `ConcurrentDDLTest` assertion stays.
+
+**Validation (this pass):** `dotnet build Dataphor.slnx` (Debug): 0 errors. `dotnet test Dataphor.slnx --no-build`: Common.Tests 13/13; DAE.Server.Tests 126 passed, 29 skipped (coverage manifest known failures and unstable, unchanged), 0 failed, 3 m 18 s. The store and concurrency tests on their own: 12/12; K10 loop 0 failures in 2.4 s, 16 × 15 in 6.9 s. Release was not rebuilt in this pass: the changes after the implementer's Release run are a test helper, a new test and a comment.
