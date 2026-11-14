@@ -39,6 +39,8 @@ A running list of every change that an existing application, a deployment or a c
 | planned | .NET APIs that no longer exist or throw at run time: .NET Remoting, `AppDomain` creation, `Delegate.BeginInvoke`, `Thread.Abort`, `BinaryFormatter`, CodeDom compilation, code access security attributes, `System.Web` (except `HttpUtility`), WCF service hosting. | Replace before recompiling |
 | planned | WinForms `ContextMenu`, `MenuItem`, `MainMenu`, `ToolBar` and `StatusBar` compile on .NET 10 but throw when constructed. Dataphor's own controls and form nodes move to the `…Strip` equivalents, and any public member typed with the old classes changes type. | Custom controls and form nodes must make the same replacement; specific member changes will be listed here as they happen |
 | planned | Code that reaches through a Dataphor connection to `System.Data.SqlClient` types must use `Microsoft.Data.SqlClient`. | Change the namespace |
+| done | Dataphor references Newtonsoft.Json 13 instead of 9 (the native client interface and the System.Internet library). | Build extensions that use Newtonsoft.Json against version 13 |
+| done | The WCF client constructors that take an endpoint configuration name (`ServiceClient<T>(string)`, `DataphorServiceClient<T>(string)`, `NativeCLIClient(hostName, instanceName, endpointConfigurationName)`) throw `NotSupportedException`: the .NET WCF client cannot read endpoints from an application configuration file. | Construct clients with a binding and endpoint address, or with host, instance and port; check deployed configuration files for `<system.serviceModel>` sections |
 
 ## Forms and the Windows client
 
@@ -46,6 +48,7 @@ A running list of every change that an existing application, a deployment or a c
 |---|---|---|
 | planned | `ScriptAction` scripts are compiled with Roslyn instead of CodeDom. The script contract is intended to be unchanged. | Scripts that call APIs missing from .NET 10 need editing; test every form that has a script action |
 | planned | Form documents (`.dfd`, `.dfdx`), node type tables (`.dnt`) and library files (`.d4l`) keep their formats. | Nothing |
+| done | A connection alias with the `ClientConfigurationName` setting ("Config Name" in the alias editor) fails to connect with `NotSupportedException`; aliases that carry the setting still load. | Clear the setting and connect with the host name, instance name and port settings; check deployed client configuration files for `<system.serviceModel>` sections |
 
 ## Building from source
 

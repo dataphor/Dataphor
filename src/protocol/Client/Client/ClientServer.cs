@@ -149,7 +149,15 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (!String.IsNullOrEmpty(_clientConfigurationName))
 				{
-					_channelFactory = new ChannelFactory<IClientDataphorService>(_clientConfigurationName);
+					// The .NET WCF client cannot read endpoints from an application configuration file.
+					throw new NotSupportedException
+					(
+						String.Format
+						(
+							"The connection setting ClientConfigurationName (\"Config Name\" in the alias editor) is set to \"{0}\", but endpoint configuration names (WCF endpoints read from an application configuration file) are not supported on this version of Dataphor. Clear the setting and connect with the host name, instance name and port settings instead.",
+							_clientConfigurationName
+						)
+					);
 				}
 				else
 				{

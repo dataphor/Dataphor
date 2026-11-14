@@ -49,12 +49,23 @@ namespace Alphora.Common.WCF
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the ServiceClient class using the given endpoint configuration name.
+		/// Not supported: always throws <see cref="NotSupportedException"/>.
 		/// </summary>
-		/// <param name="endpointConfigurationName">The name of the endpoint configuration to be used to connect.</param>
+		/// <param name="endpointConfigurationName">The name of a WCF endpoint configuration in an application configuration file.</param>
+		/// <remarks>
+		/// The .NET WCF client has no ChannelFactory constructor that reads an endpoint from an application
+		/// configuration file. Kept so that callers still compile; connect with a binding and endpoint address instead.
+		/// </remarks>
 		public ServiceClient(string endpointConfigurationName)
 		{
-			_channelFactoryWrapper = new ChannelFactoryWrapper<T>(endpointConfigurationName, new ChannelFactory<T>(endpointConfigurationName));
+			throw new NotSupportedException
+			(
+				String.Format
+				(
+					"Endpoint configuration names (WCF endpoints read from an application configuration file) are not supported on this version of Dataphor (endpoint configuration name \"{0}\"). Connect with a binding and endpoint address instead.",
+					endpointConfigurationName
+				)
+			);
 		}
 
 		/// <summary>

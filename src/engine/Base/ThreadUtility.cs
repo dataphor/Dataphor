@@ -5,28 +5,18 @@
 */
 using System;
 using System.Threading;
-using System.Reflection;
 
 namespace Alphora.Dataphor
 {
 	public sealed class ThreadUtility
 	{
-		private static FieldInfo _threadNameFieldInfo;
-		private static FieldInfo GetThreadNameFieldInfo()
-		{
-			// This is not thread safe, but in the unlikely event that this is called concurrently, it will simply do an extra lookup
-			if (_threadNameFieldInfo == null)
-				_threadNameFieldInfo = typeof(System.Threading.Thread).GetField("m_Name", BindingFlags.NonPublic | BindingFlags.Instance);
-			return _threadNameFieldInfo;
-		}
-
-		/// <summary> HACK: This sets a thread's name working around the perf and write-once issues. </summary>
-		/// <remarks> This method is only called if the DEBUG conditional is set.  The name argument is of type object so that it can be reset back to the initial null state. </remarks>
+		/// <summary> Sets a thread's name, for debugging. </summary>
+		/// <remarks> This method is only called if the DEBUG conditional is set. A null name clears the name. Thread.Name can be assigned any number of times on .NET 10, so the old write-once workaround (reflection on a private field) is no longer needed. </remarks>
 		[System.Diagnostics.Conditional("DEBUG")]
 		public static void SetThreadName(Thread thread, string name)
 		{
 			#if !SILVERLIGHT
-			GetThreadNameFieldInfo().SetValue(thread, name);
+			thread.Name = name;
 			#endif
 		}
 	}

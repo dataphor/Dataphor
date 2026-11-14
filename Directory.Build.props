@@ -1,0 +1,57 @@
+<Project>
+
+  <!--
+    Settings shared by every SDK-style project under the repository root. Later conversions follow the
+    same conventions; AGENTS.md "Build and test" summarizes them. Not set here, by design:
+
+    Compiler constants are set per project, outright rather than appended to $(DefineConstants), so the
+    SDK's default TRACE is not added: the legacy Release set without SIGNASSEMBLIES in both configurations,
+    plus DEBUG;TRACE in Debug (DAE.csproj records why). The SDK still appends DEBUG/RELEASE and framework
+    symbols such as NET10_0; no converted code tests them.
+  -->
+
+  <!-- Framework and language. Windows UI projects override TargetFramework with net10.0-windows. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- Explicit item lists: each project lists its Compile and EmbeddedResource items, copied from the legacy project file, because source files that are not compiled sit next to ones that are. -->
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <!-- Legacy resource names: a .resx takes the name of the first class in a .cs file only when the item names that file in DependentUpon metadata, as legacy MSBuild did; the SDK convention would rename resources that are looked up by name. -->
+  <PropertyGroup>
+    <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
+  </PropertyGroup>
+
+  <!-- Assembly attributes come from each project's Properties\AssemblyInfo.cs, which also carries DAERegister. -->
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- NOTE: AssemblyVersion("3.1.*") requires a non-deterministic build; build-version-and-signing replaces it with a fixed version and removes this. -->
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
+  <!-- Output: artifacts/bin/<project file name>/<debug|release>/ and artifacts/obj/; nothing is built into source folders. -->
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+  <!-- Windows NLS globalization, as on .NET Framework, for every executable and test host (written to its runtimeconfig.json; libraries ignore it): string comparison and culture behaviour must not change under existing applications. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.UseNls" Value="true" />
+  </ItemGroup>
+
+  <!--
+    Warning baseline: warnings stay warnings and stay visible. Never suppress CS0618, SYSLIB*, WFDEV*,
+    CA1416 or NU1900-NU1904: on .NET 10 several removed APIs compile and then throw at run time.
+  -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

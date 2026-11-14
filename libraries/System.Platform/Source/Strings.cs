@@ -10,7 +10,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 {
 	public sealed class Strings
 	{
-		public const string BaseName = "Alphora.Dataphor.Libraries.System.Integration.Strings";
+		public const string BaseName = "Alphora.Dataphor.Libraries.System.Platform.Strings";
 
 		public static string Get(string resourceName, params object[] args)
 		{

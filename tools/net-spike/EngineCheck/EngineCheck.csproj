@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Throwaway runtime check for the converted core projects. Not listed in Dataphor.slnx; deleted with tools/net-spike. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\engine\Base\Base.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\Base.Windows\Base.Windows.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\..\src\protocol\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" />
+    <ProjectReference Include="..\..\..\src\protocol\Client\Client.csproj" />
+    <ProjectReference Include="..\..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" />
+    <ProjectReference Include="..\..\..\libraries\System.Platform\Source\System.Platform.csproj" />
+    <ProjectReference Include="..\..\..\libraries\System.Internet\Source\System.Internet.csproj" />
+    <ProjectReference Include="..\..\..\libraries\System.Integration\Source\System.Integration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+
+</Project>

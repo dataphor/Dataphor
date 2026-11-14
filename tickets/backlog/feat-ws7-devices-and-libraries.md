@@ -13,14 +13,14 @@ An umbrella for WS7 after Phase 1 (Phase 1 already removes dead devices and park
 Scope per the plan's WS7 library table and work-item table.
 
 - `test-device-sql-golden` (from WS3) — L3 golden translation tests for the SQL Server device, no database needed; the harness takes the device as a parameter so PostgreSQL reuses it.
-- `device-mssql-port` — `Microsoft.Data.SqlClient`. Compatibility trap: the new driver encrypts by default and validates the server certificate; a device definition that connected under 3.1 must still connect unless its own settings say otherwise. Migration-notes entry exists as "planned".
+- `device-mssql-port` — `Microsoft.Data.SqlClient`. Compatibility trap: the new driver encrypts by default and validates the server certificate; a device definition that connected under 3.1 must still connect unless its own settings say otherwise. Migration-notes entry exists as "planned". Also: the engine's `Engine.Dispose` (`src/engine/DAE/Server/Engine.cs`) calls `System.Data.SqlClient.SqlConnection.ClearAllPools()`, which is the only reason `DAE.csproj` references the `System.Data.SqlClient` package; when SQL Server access moves to `Microsoft.Data.SqlClient`, that call must clear the new driver's pools (or move into the code that owns them) and the engine's package reference must go.
 - `test-device-live` (from WS3) — live tests driven by an environment variable, reported as inconclusive (visibly) when no server is configured; SQL Server LocalDB in CI.
 - `device-sqlserver-version-matrix` — minimum supported SQL Server version and settings for older servers. Q12 is answered: the production version is unknown, so support versions from roughly the last five years — SQL Server 2022 and later tested and supported, SQL Server 2019 documented as working if it needs no extra code — and keep 3.1's connection defaults so an older server still connects.
 - `device-connection-cleanup` — delete the uncompiled duplicates and VS2003 project files in the Connection library; ODBC and OLE DB on packages if that is a project-file change only, else park.
 - `device-pgsql-port` — current Npgsql from NuGet, Mono.Security dropped, golden and live tests, minimum PostgreSQL version documented; the PostgreSQL catalog store if it then needs only the store contract tests.
 - `library-frontend-web-leftovers` — delete the `System.Web` classes from the Frontend server library (after `test-frontend-derivation-golden` exists, from `feat-ws3-test-layers`).
 - `library-upgrade-scripts` — establish what runs `Upgrades/Upgrade.<version>.d4`, document it, test a library upgrade from an older version.
-- Not in the plan's table but in its library table: update Newtonsoft.Json in System.Internet (also flagged by WS11's dependency audit).
+- Not in the plan's table but in its library table: update Newtonsoft.Json in System.Internet (also flagged by WS11's dependency audit). Done by `build-core-sdk-convert`: System.Internet and NativeCLI use Newtonsoft.Json 13.0.4 from `Directory.Packages.props`; nothing is left here unless a later version is needed.
 
 ## Cutting rules
 

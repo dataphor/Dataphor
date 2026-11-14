@@ -39,9 +39,11 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 
 ## Build and test
 
-There is **no working in-repo build yet**: the legacy `Dataphor.sln` at the repository root needs Visual Studio/MSBuild and .NET Framework 4.5.2 targeting packs, and nothing here builds with `dotnet build`. Plan workstream WS1 replaces it. **The ticket that lands the SDK-style build must rewrite this section.**
+**Interim (until `build-core-sdk-projects` rewrites this section):** `dotnet build Dataphor.slnx` (add `-c Release` for Release) now builds the ten converted SDK-style projects — Base, Base.Windows, DAE, Common, NativeCLI, Client, SQLDevice, System.Platform, System.Internet, System.Integration — into `artifacts/bin/<project file name>/<debug|release>/`, with shared settings in `Directory.Build.props` and package versions in `Directory.Packages.props`. Name the `.slnx`: the legacy `Dataphor.sln` is still at the root. `dotnet run --project tools/net-spike/EngineCheck -c Debug` checks their resource names and runs D4 on an in-process engine. The spike below is broken until `build-core-sdk-projects` updates it for the converted projects; everything else is still unconverted.
 
-Until then the only build/test loop is the spike (needs Python 3 and the .NET 10 SDK pinned by `global.json`; work dir must be outside the repo):
+The legacy `Dataphor.sln` at the repository root needs Visual Studio/MSBuild and .NET Framework 4.5.2 targeting packs, and the unconverted projects do not build with `dotnet build`. Plan workstream WS1 replaces it. **The ticket that lands the SDK-style build must rewrite this section.**
+
+For the unconverted projects and the D4 coverage scripts, the build/test loop is the spike (needs Python 3 and the .NET 10 SDK pinned by `global.json`; work dir must be outside the repo; broken for now, see above):
 
 ```
 python tools/net-spike/run.py <work-dir> --smoke --coverage

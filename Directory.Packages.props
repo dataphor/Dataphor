@@ -1,0 +1,18 @@
+<Project>
+
+  <!-- Central package management: every PackageReference takes its version from this file. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Transitive pinning is off: nothing needs pinning yet; security-dependency-audit decides that later. -->
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="10.1.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.1.0" />
+    <PackageVersion Include="System.ServiceModel.Primitives" Version="10.1.0" />
+  </ItemGroup>
+
+</Project>
