@@ -1,0 +1,79 @@
+# Builds Dataphor.slnx and runs its tests in Debug and Release on every push and pull request.
+# The commands are the ones in the "Build and test" section of AGENTS.md; keep the two in step.
+name: Build and test
+
+on:
+  push:
+    branches: [master, modernization]
+    # The ticket runner commits ticket moves that change no code.
+    # NOTE: if branch protection ever requires this check, a pull request that touches only these paths
+    # waits for a check that never runs; add a no-op job for those paths or drop the filter then.
+    paths-ignore:
+      - 'tickets/**'
+      - 'docs/**'
+  pull_request:
+    branches: [master, modernization]
+    paths-ignore:
+      - 'tickets/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+# The repository is public: pull requests from forks run with this read-only token and no secrets.
+# Never switch to pull_request_target.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build and test (${{ matrix.configuration }})
+    # Windows only: the UI projects target net10.0-windows and NLS globalization exists only on Windows.
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # Code under #if DEBUG and [Conditional("DEBUG")] differs between the two.
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: dotnet --info
+        run: dotnet --info
+
+      - name: Restore
+        run: dotnet restore Dataphor.slnx
+
+      # ContinuousIntegrationBuild is switched on by Directory.Build.props when GITHUB_ACTIONS is true.
+      - name: Build
+        run: dotnet build Dataphor.slnx -c ${{ matrix.configuration }} --no-restore -p:DataphorBuildNumber=${{ github.run_number }}
+
+      - name: Test
+        run: dotnet test Dataphor.slnx -c ${{ matrix.configuration }} --no-build --logger trx --results-directory artifacts/TestResults/${{ matrix.configuration }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-${{ matrix.configuration }}
+          path: artifacts/TestResults/
+          if-no-files-found: ignore
+          retention-days: 14
