@@ -117,7 +117,7 @@ The reorganization goes first because it touches every path and is cheapest whil
 
 ## Repository layout
 
-**Status: done (November 2026).** The move was made by three chained tickets: `repo-move-renames` (one rename-only commit, so that `git log --follow` and `git blame` follow every file), `repo-move-fix-references` (paths inside project files, the legacy solution, `.gitignore`, the code-search configuration and the spike, whose results did not change) and `repo-move-to-new-layout` (the documentation). The old → new table below is kept as the record of where each old path went; use it to map an old path found in a pre-move ticket, commit or document. The parts of the target tree that later work items create (`installer/`, `assets/`, `artifacts/`, `Dataphor.slnx`, `CHANGELOG.md`, the root props files, `.editorconfig` and `.gitattributes`) do not exist yet.
+**Status: done (November 2026).** The move was made by three chained tickets: `repo-move-renames` (one rename-only commit, so that `git log --follow` and `git blame` follow every file), `repo-move-fix-references` (paths inside project files, the legacy solution, `.gitignore`, the code-search configuration and the spike, whose results did not change) and `repo-move-to-new-layout` (the documentation). The old → new table below is kept as the record of where each old path went; use it to map an old path found in a pre-move ticket, commit or document. The parts of the target tree that later work items create (`installer/`, `assets/`, `artifacts/`, `Dataphor.slnx`, `CHANGELOG.md`, the root props files) do not exist yet; the root `.editorconfig` and `.gitattributes` were added by `hygiene-gitattributes-editorconfig`.
 
 **Target.**
 
@@ -568,7 +568,7 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 | `Images/` source art (`.psd`, `.cdr`) | 11 MB | Keep the PNG/ICO actually referenced (`assets/`); delete the rest |
 | `Dataphor/netsh_address_reservations.txt` | — | Delete (names a developer's machine account; describes an HTTP binding no code uses) |
 | `.gitignore` | — | Done in Phase 0: no longer ignores `*.xml` |
-| Line endings and encodings | — | Add `.gitattributes` *without* renormalizing existing files (declare binary types; pin `eol` only for new file types); one `.editorconfig` at the root |
+| Line endings and encodings | — | Done (November 2026): root `.gitattributes` declares binary types and pins `eol` only for types with no CRLF file in the index, with no `text=auto`, so nothing is renormalized; one `.editorconfig` at the root replaces `src/.editorconfig` and sets no charset or final-newline rule for existing types |
 | Dead `#define` switches and unused `using` directives | — | Opportunistic, in files otherwise being edited; never as a sweep |
 | `README.adoc` | — | Done in Phase 0: replaced by `README.md` |
 
