@@ -1,0 +1,27 @@
+description: Get the SQL Server and PostgreSQL devices working on current database drivers, with tests that check both the generated SQL and real execution, and tidy the remaining libraries.
+architecture: docs/modernization-plan.md#ws7-devices-and-libraries
+tradeoffs: The PostgreSQL port spans fifteen years of driver changes and has no production user in hand; a maintainer may defer it behind the SQL Server work.
+----
+## What this is
+
+An umbrella for WS7 after Phase 1 (Phase 1 already removes dead devices and parks side projects). When promoted to `plan/`, the planning agent replaces it with one ticket per work item below and deletes this file; its slug retires then.
+
+**Promote when** gate G1 holds. SQL Server comes first (D15); it is part of gate G2.
+
+## Work items
+
+Scope per the plan's WS7 library table and work-item table.
+
+- `test-device-sql-golden` (from WS3) — L3 golden translation tests for the SQL Server device, no database needed; the harness takes the device as a parameter so PostgreSQL reuses it.
+- `device-mssql-port` — `Microsoft.Data.SqlClient`. Compatibility trap: the new driver encrypts by default and validates the server certificate; a device definition that connected under 3.1 must still connect unless its own settings say otherwise. Migration-notes entry exists as "planned".
+- `test-device-live` (from WS3) — live tests driven by an environment variable, reported as inconclusive (visibly) when no server is configured; SQL Server LocalDB in CI.
+- `device-sqlserver-version-matrix` — minimum supported SQL Server version and settings for older servers. Depends on open question Q12 (production version); if unanswered, proceed with the plan's default (test against the oldest version still in mainstream support and document the minimum).
+- `device-connection-cleanup` — delete the uncompiled duplicates and VS2003 project files in the Connection library; ODBC and OLE DB on packages if that is a project-file change only, else park.
+- `device-pgsql-port` — current Npgsql from NuGet, Mono.Security dropped, golden and live tests, minimum PostgreSQL version documented; the PostgreSQL catalog store if it then needs only the store contract tests.
+- `library-frontend-web-leftovers` — delete the `System.Web` classes from the Frontend server library (after `test-frontend-derivation-golden` exists, from `feat-ws3-test-layers`).
+- `library-upgrade-scripts` — establish what runs `Upgrades/Upgrade.<version>.d4`, document it, test a library upgrade from an older version.
+- Not in the plan's table but in its library table: update Newtonsoft.Json in System.Internet (also flagged by WS11's dependency audit).
+
+## Cutting rules
+
+Re-read the WS7 section and the current code; one ticket per work item; `prereq:` only on slugs present on the board or in `tickets/.pruned-tickets.jsonl`; an item whose prerequisite is in an umbrella not yet cut is parked as a new backlog ticket `feat-ws7-devices-and-libraries-later`.
