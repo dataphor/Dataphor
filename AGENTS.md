@@ -31,7 +31,7 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 | `tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process. `tests/libraries/` holds the D4 test libraries (`TestFramework*`); `TestFramework.Coverage.Scripts` has the coverage scripts |
 | `external/` | Third-party binaries not yet replaced by NuGet packages (text editor, docking, Ascend, Npgsql, Mono.Security, System.Data.SQLite) |
 | `docs/` | Plan, architecture, migration notes; `docs/reference/` holds `CompilerDefines.txt` and `Error Message Prefix Codes.txt` |
-| `tools/` | `net-spike/` (throwaway harness that builds and runs the code on modern .NET without changing repository source; build output goes to `artifacts/`) and `editor-support/` |
+| `tools/` | `net-spike/` (throwaway harness that builds and runs the code on modern .NET without changing repository source; build output goes to `artifacts/`), `docs-link-check/` (stdlib Python link checker for the Markdown under `docs/`) and `editor-support/` |
 | `Setup/` | WiX installer (v3.5, being replaced) |
 | `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
 | `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries, the Oracle/ADO/SAS device and connection libraries and the DocBook generator library `Documentation` (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
