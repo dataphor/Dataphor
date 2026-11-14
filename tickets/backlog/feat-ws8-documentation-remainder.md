@@ -24,3 +24,12 @@ Scope per the plan's WS8 section and work-item table.
 ## Cutting rules
 
 One ticket per work item; `prereq:` only on slugs present on the board or in `tickets/.pruned-tickets.jsonl`. Items whose prerequisites are not yet filed (likely `docs-admin-guide` and `docs-migration-guide-custom-code`) are parked as a new backlog ticket `feat-ws8-documentation-later` that names what they wait for.
+
+## Notes from planning `docs-convert-asciidoc`
+
+That work item was split into `docs-link-checker`, `docs-convert-tooling` and `docs-convert-asciidoc` (implement/). What the items here can rely on once they land:
+
+- `docs-convert-legacy-reference`: `tools/docs-convert/convert.py docbook FILE.xml … --out DIR` is the standalone DocBook → Markdown stage (pandoc 3.14 DocBook reader plus the same clean-up pass), with the page map and fragment-resolution rules passed in. `tools/docs-convert/legacy-links.tsv` lists the 206 links into legacy pages (columns `page`, `line`, `text`, `legacy_page`, `target`, `source`); the converted pages already link to the computed `target` paths (`reference/system-library/operators/<Name>.md`, `reference/system-library/types/<Name>.md`, `reference/libraries/<Name>.md`, `reference/frontend-nodes/<Name>.md`; one API link goes to the placeholder `reference/data-access-components.md`), so this item creates those pages, or retargets from the list. Placeholder pages to fill or move: `docs/reference/libraries/README.md`, `docs/reference/frontend-nodes/README.md`, `docs/reference/call-level-interface.md`, `docs/reference/data-access-components.md`.
+- `docs-link-check-ci`: the checker is `python tools/docs-link-check/check_links.py docs --pending tools/docs-convert/legacy-links.tsv` (stdlib Python, exit code 1 on errors, external links never fetched). Drop `--pending` once the legacy reference pages exist.
+- `docs-remove-old-sources`: also delete `tools/docs-convert/` (the plan keeps conversion scripts only until the sources are deleted), but keep `tools/docs-link-check/`. Once `legacy-links.tsv` is gone, the CI invocation must not pass `--pending`.
+- `docs-contributing`: replaces the unconverted `Documentation/AuthoringDocumentation.adoc` (GitBook editing workflow) with a "writing docs" page, and merges `docs/reference/Error Message Prefix Codes.txt` into the converted `docs/reference/error-codes.md`.
