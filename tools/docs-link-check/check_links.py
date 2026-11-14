@@ -244,7 +244,7 @@ def _parse(text):
 
 _REFERENCE_DEFINITION = re.compile(r"^ {0,3}\[(?!\^)(?:[^\]\\]|\\.)+\]:[ \t]*(<[^>\n]*>|\S+)", re.MULTILINE)
 _EMAIL_AUTOLINK = re.compile(r"(?<!\\)<([A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)>")
-_HTML_ATTRIBUTE = re.compile(r"""\b(href|src|id|name)\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE)
+_HTML_ATTRIBUTE = re.compile(r"""(?<![\w-])(href|src|id|name)\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE)
 _TITLE = re.compile(r"""[ \t\n]+(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\((?:[^()\\]|\\.)*\))""")
 
 
@@ -390,8 +390,10 @@ def _is_within(path, folder):
 
 class _Checker:
     def __init__(self, roots, pending, repo_root):
-        self.roots = [os.path.abspath(root) for root in roots]
-        self.repo_root = os.path.abspath(repo_root) if repo_root else find_repo_root(self.roots[0])
+        # realpath gives each root its on-disk letter case on Windows; a root typed as `Docs`
+        # would otherwise make every relative link below it a wrong-case error.
+        self.roots = [os.path.realpath(root) for root in roots]
+        self.repo_root = os.path.realpath(repo_root) if repo_root else find_repo_root(self.roots[0])
         self.pending = {os.path.normpath(os.path.join(root, target)) for root in self.roots for target in pending}
         self.listings = {}
         self.anchors = {}
@@ -428,9 +430,10 @@ class _Checker:
         return current, None
 
     def file_anchors(self, path):
+        """The anchors of a Markdown file, or None when it cannot be read as UTF-8."""
         if path not in self.anchors:
-            text = _read(path)
-            self.anchors[path] = set(heading_slugs(text)) | set(extract_links(text)[1])
+            text = _read_or_none(path)
+            self.anchors[path] = None if text is None else set(heading_slugs(text)) | set(extract_links(text)[1])
         return self.anchors[path]
 
     def run(self):
@@ -446,10 +449,14 @@ class _Checker:
 
     def check_file(self, path, boundary):
         self.report.files += 1
-        text = _read(path)
+        shown = self.display(path)
+        text = _read_or_none(path)
+        if text is None:
+            self.anchors[path] = None
+            self.report.findings.append(Finding(shown, 1, "error", "cannot read as UTF-8"))
+            return
         links, ids = extract_links(text)
         self.anchors.setdefault(path, set(heading_slugs(text)) | set(ids))
-        shown = self.display(path)
         folder = os.path.relpath(os.path.dirname(path), boundary).replace(os.sep, "/")
         for line, dest, _kind in links:
             self.report.links += 1
@@ -490,14 +497,20 @@ class _Checker:
             resolved = os.path.join(resolved, "README.md")
         if not resolved.endswith(".md"):
             return None
-        if fragment not in self.file_anchors(resolved):
+        anchors = self.file_anchors(resolved)
+        if anchors is None:
+            return ("error", "cannot read %s as UTF-8 to check '#%s': %s" % (self.display(resolved), fragment, dest))
+        if fragment not in anchors:
             return ("error", "missing anchor '#%s' in %s: %s" % (fragment, self.display(resolved), dest))
         return None
 
 
-def _read(path):
-    with open(path, encoding="utf-8-sig", newline="") as stream:
-        return _normalise(stream.read())
+def _read_or_none(path):
+    try:
+        with open(path, encoding="utf-8-sig", newline="") as stream:
+            return _normalise(stream.read())
+    except (OSError, UnicodeDecodeError):
+        return None
 
 
 def check(roots, pending=(), repo_root=None):

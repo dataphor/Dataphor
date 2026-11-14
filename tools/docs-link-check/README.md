@@ -35,7 +35,7 @@ For each internal link:
 - A folder is a valid target (GitHub shows its `README.md`); a fragment on a folder link is checked against that `README.md`.
 - A fragment on a `.md` target must be one of that file's anchors: the GitHub slugs of its headings, plus the values of any raw HTML `id="…"` or `name="…"` attribute. Fragments are compared exactly, so `#Foo` against the heading "Foo" (slug `foo`) is an error, which is stricter than a browser. Fragments on other targets are not checked.
 
-Files are read as UTF-8 with or without a byte-order mark, and CRLF line endings are handled; line numbers are those of the file.
+Files are read as UTF-8 with or without a byte-order mark, and CRLF line endings are handled; line numbers are those of the file. A file that is not valid UTF-8 is an error (`cannot read as UTF-8`), as is a fragment link into one.
 
 ## Heading anchors
 
@@ -48,4 +48,4 @@ Headings are ATX (`#` to `######`, optional closing `#`s) and setext (`===` or `
 
 `slugify(text)` and `heading_slugs(markdown_text)` (the slugs of a whole document, in order, duplicates resolved) are importable, so the conversion tooling computes the same anchors: add `tools/docs-link-check` to `sys.path` and `import check_links`.
 
-Known simplifications: headings inside block quotes and list items are not anchors; a list item's indented continuation is treated as prose rather than as an indented code block; link destinations must be on one line.
+Known simplifications: headings inside block quotes and list items are not anchors; a list item's indented continuation is treated as prose rather than as an indented code block; link destinations must be on one line; HTML attribute values must be quoted (`href=x.md` without quotes is not seen).

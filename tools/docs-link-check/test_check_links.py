@@ -64,6 +64,7 @@ FIXTURE = {
         '<img src="images/missing.png" width="10">\n'
         "[later](pending/later.md)\n"
         "[external](https://example.com/)\n"
+        '<a data-href="not-a-link.md">x</a>\n'
     ),
 }
 
@@ -78,6 +79,8 @@ class FixtureTreeTest(unittest.TestCase):
             os.makedirs(os.path.dirname(full), exist_ok=True)
             with open(full, "w", encoding="utf-8", newline="") as stream:
                 stream.write(text)
+        with open(os.path.join(cls.tree, "docs", "latin1.md"), "wb") as stream:
+            stream.write(b"# Caf\xe9\n")
         pending = check_links.read_pending(os.path.join(cls.tree, "pending.tsv"))
         report = check_links.check([os.path.join(cls.tree, "docs")], pending=pending)
         cls.findings = {(f.path, f.line): f for f in report.findings}
@@ -114,6 +117,12 @@ class FixtureTreeTest(unittest.TestCase):
         self.assertIsNone(self.finding(9))
         self.assertFalse([f for f in self.report.findings if f.path == "docs/guide/a.md"])
 
+    def test_data_attribute_is_not_a_link(self):
+        self.assertIsNone(self.finding(13))
+
+    def test_undecodable_file_is_an_error_not_a_crash(self):
+        self.assertIn("cannot read as UTF-8", self.findings[("docs/latin1.md", 1)].message)
+
     def test_raw_html_image(self):
         self.assertEqual(self.finding(10).kind, "error")
         self.assertIn("images/missing.png", self.finding(10).message)
@@ -128,7 +137,7 @@ class FixtureTreeTest(unittest.TestCase):
 
     def test_external(self):
         self.assertEqual(self.finding(12).kind, "external")
-        self.assertEqual(self.report.count("error"), 5)
+        self.assertEqual(self.report.count("error"), 6)
         self.assertEqual(self.report.count("pending"), 2)
         self.assertEqual(self.report.count("external"), 1)
 

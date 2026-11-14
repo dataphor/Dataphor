@@ -23,7 +23,7 @@ Python files use 4-space indentation and LF, matching `tools/net-spike/*.py` (no
 - **Fragments** are percent-decoded before comparison with slugs (so `#caf%C3%A9` matches heading "Café").
 - `_` emphasis is stripped only as a matched pair at word boundaries, so `Event_Handlers` keeps its underscore; `*` and `~` are left for the slugger to delete.
 
-## Tests (`python -m unittest discover -s tools/docs-link-check`, 12 tests, all pass)
+## Tests (`python -m unittest discover -s tools/docs-link-check`, 14 tests after review, all pass)
 
 - `HeadingSlugTest.test_slugs` — the ticket's nine heading → slug cases (curly apostrophe, inline code, link text, double space, underscore, parentheses).
 - `HeadingSlugTest.test_duplicates` — `x`, `x-1`, `x-2` across ATX and setext headings.
@@ -45,3 +45,25 @@ Four-backtick fence containing a three-backtick line; unclosed fence runs to end
 - Bare URLs (GitHub's extended autolinks) are not counted as external links.
 - The pandoc-specific cases (`\<` escapes, footnotes, raw HTML figures) were checked against hand-made samples only; the ticket asks for a look at real converted pages once `docs-convert-tooling` produces some.
 - `slugify` uses Python's `unicodedata` tables, whose Unicode version may differ from `github-slugger`'s; only rarely assigned characters would slug differently.
+
+## Review findings
+
+Reviewed the diff of `ticket(implement): docs-link-checker` against the implement ticket's specification, ran the tests (14 pass) and the checker over `docs/` (0 errors), and probed edge cases with a scratch tree (deleted afterwards).
+
+**Fixed in this pass (minor, each with a fixture case in `test_check_links.py` except the Windows-only one):**
+
+- A `.md` file that is not valid UTF-8 crashed the run with a `UnicodeDecodeError` traceback. It is now an `error: cannot read as UTF-8` finding at line 1; a fragment link into such a file is an error saying so, rather than a crash or a misleading "missing anchor". Test: `test_undecodable_file_is_an_error_not_a_crash`.
+- On Windows, a root typed in the wrong case (`check_links.py Docs`) made every relative link below it a wrong-case error (8 false errors over today's `docs/`). Roots and an explicit `repo_root` now go through `os.path.realpath`, which returns the on-disk case; verified by running `Docs` (0 errors). Not tested: only reproducible on a case-insensitive file system.
+- The HTML attribute pattern matched `href` inside `data-href` (and `src` in `data-src`), so such attributes were checked as links. The pattern now requires no word character or hyphen before the name. Test: `test_data_attribute_is_not_a_link`.
+- README: noted that non-UTF-8 files are errors and that unquoted HTML attribute values are not seen.
+
+**Checked, no change:**
+
+- Slug algorithm and de-duplication loop match `github-slugger` (same counter-on-original behaviour). The nine slug cases and the duplicate case in the tests pin it.
+- Pending matching, repository boundary, `/`-rooted links, `..` past the boundary, directory links with fragments: read and agree with the specification.
+- Links inside a block-quoted fence (`> ```…`) are not reported: the code-span masking treats the quoted fence as a multi-line code span. Correct result by a different route; not relied on by a test.
+- Tests: the implementer's 12 all exercise specified branching (slug table, the fixture tree's one assertion per specified case); none restate implementation or mock anything, so none cut.
+- Style: 4-space indentation and LF, matching `tools/net-spike/*.py`; `__pycache__/` is ignored by the root `.gitignore`. File size 544 lines (`wc -l`) for one self-contained tool, acceptable.
+- Docs: `AGENTS.md`'s `tools/` row names the folder; the README covers the command line, pending format, rules and gaps. `docs/architecture.md`, `docs/modernization-plan.md` and `docs/migration-notes.md` need no change (a developer tool, nothing an application notices).
+
+**Tickets filed:** none. **Tripwires:** none new; the known gaps listed above (headings inside block quotes or lists, multi-line destinations, bare URLs, a stray `](` false positive, unquoted attributes) are documented in the README and only matter if the converted pages turn out to contain them, which `docs-convert-tooling`'s first real output will show.
