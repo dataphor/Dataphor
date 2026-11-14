@@ -144,10 +144,10 @@ namespace Alphora.Dataphor.DAE
         }
 
 		private bool _defaultUseDTC = false;
-		/// <summary> Determines the default UseDTC setting for processes started on this session. Defaults to false.</summary>
+		/// <summary> Determines the default UseDTC setting for processes started on this session. Defaults to false. Not supported; true makes each process raise an error when it begins a transaction.</summary>
 		/// <remarks> Defaults to false. </remarks>
 		[System.ComponentModel.DefaultValue(false)]
-		[System.ComponentModel.Description("Determines the default UseDTC setting for processes started on this session. Defaults to false.")]
+		[System.ComponentModel.Description("Determines the default UseDTC setting for processes started on this session. Defaults to false. Not supported; true makes each process raise an error when it begins a transaction.")]
 		[DataMember]
 		public bool DefaultUseDTC
 		{

@@ -50,7 +50,7 @@ The DefaultUseDTC property determines the default UseDTC setting for processes s
 
 Because of the Dataphor Server’s open-ended storage architecture, transactions must be coordinated with each system involved in a given operation. This type of transaction is known as a *distributed transaction*. The Dataphor Server coordinates distributed transactions itself.
 
-The setting exists for compatibility and must be false, which is its default value. Setting it to true, by updating the Sessions system table or through the CLI, raises error 106119 (distributed transactions are not supported).
+The setting exists for compatibility and must be false, which is its default value. Setting it to true by updating the Sessions system table raises error 106119 (distributed transactions are not supported); a session that is given true through the CLI or a server alias starts processes that raise error 106119 when they begin a transaction.
 
 For more information on transaction management in the Dataphor Server, refer to the [Transaction Management](../developers-guide/modeling-process-logic.md#transaction-management) section of the Modeling Process Logic chapter of the Logical Application Design part of the Dataphor Developer’s Guide.
 

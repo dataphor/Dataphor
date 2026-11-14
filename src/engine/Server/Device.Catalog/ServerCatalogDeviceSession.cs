@@ -2572,6 +2572,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((string)oldRow["Language"] != (string)newRow["Language"])
 				process.ProcessInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)newRow["Language"], true);
 
+			// NOTE: ServerProcess.MaxStackDepth/MaxCallDepth set the executing program's stack, so a process updating
+			// its own row changes the limits for this update statement only (seen: MaxNestingLevel reads back unchanged
+			// in the next statement); existing behaviour, kept. Revisit if these columns are meant to persist per process.
 			if ((int)oldRow["MaxStackDepth"] != (int)newRow["MaxStackDepth"])
 				process.MaxStackDepth = (int)newRow["MaxStackDepth"];
 

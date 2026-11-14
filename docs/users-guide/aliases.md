@@ -31,7 +31,7 @@ The configuration information for a session is specified through a set of proper
 | DefaultLibraryName | Determines the default library for the session. If specified, the current library for the session is initially set to this value. |
 | DefaultMaxCallDepth | Determines the default maximum call depth for processes on this session. The default value is 1024. |
 | DefaultMaxStackDepth | Determines the default maximum stack depth for processes on this session. The default value is 32767. |
-| DefaultUseDTC | Determines the default UseDTC setting for processes started on this session. Defaults to false. |
+| DefaultUseDTC | Determines the default UseDTC setting for processes started on this session. Not supported: must be false (the default); with true, each process raises error 106119 when it begins a transaction. |
 | DefaultUseImplicitTransactions | Determines the default UseImplicitTransactions setting for processes started on this session. Defaults to true. |
 | FetchAtOpen | Determines whether or not the CLI will fetch as part of the open call. |
 | FetchCount | Determines the number of rows which will be buffered by the CLI. A FetchCount of 1 effectively disables row buffering. |
