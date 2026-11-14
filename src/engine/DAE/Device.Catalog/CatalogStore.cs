@@ -827,7 +827,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				StoreIndexHeader indexHeader = Store.GetIndexHeader(indexName);
 				StoreTableHeader tableHeader = Store.GetTableHeader(indexHeader.TableName);
-				cursor = _connection.OpenCursor(indexHeader.TableName, tableHeader.Columns, indexHeader.SQLIndex, isUpdatable);
+				cursor = _connection.OpenCursor(indexHeader.TableName, tableHeader.Columns, indexHeader.SQLIndex, Store.GetIndexHeader(tableHeader.PrimaryKeyName).Columns, isUpdatable);
 			}
 			return cursor;
 		}
@@ -903,12 +903,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				StoreIndexHeader indexHeader = Store.GetIndexHeader(indexName);
 				StoreTableHeader tableHeader = Store.GetTableHeader(indexHeader.TableName);
-				if (indexHeader.IsUnique && (keyValues.Length >= indexHeader.Columns.Count))
+				// Each statement names one row by its primary key, as a cursor delete does
+				List<string> primaryKey = Store.GetIndexHeader(tableHeader.PrimaryKeyName).Columns;
+				if ((indexName == tableHeader.PrimaryKeyName) && (keyValues.Length >= indexHeader.Columns.Count))
 				{
 					object[] row = new object[tableHeader.Columns.Count];
 					for (int index = 0; index < keyValues.Length; index++)
 						row[tableHeader.Columns.IndexOf(indexHeader.Columns[index])] = keyValues[index];
-					_connection.PerformDelete(indexHeader.TableName, tableHeader.Columns, indexHeader.Columns, row);
+					_connection.PerformDelete(indexHeader.TableName, tableHeader.Columns, primaryKey, row);
 				}
 				else
 				{
@@ -925,7 +927,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 					
 					for (int index = 0; index < rows.Count; index++)
-						_connection.PerformDelete(indexHeader.TableName, tableHeader.Columns, indexHeader.Columns, rows[index]);
+						_connection.PerformDelete(indexHeader.TableName, tableHeader.Columns, primaryKey, rows[index]);
 				}
 			}
 		}

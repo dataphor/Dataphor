@@ -27,9 +27,6 @@ namespace Alphora.Dataphor.DAE.Store
 			_connection = connection;
 			_tableName = tableName;
 			_index = index;
-			_key = new List<string>(index.Columns.Count);
-			for (int localIndex = 0; localIndex < index.Columns.Count; localIndex++)
-				_key.Add(index.Columns[localIndex].Name);
 			_isUpdatable = isUpdatable;
 			_cursorName = _index.Name + isUpdatable.ToString();
 		}
@@ -37,12 +34,71 @@ namespace Alphora.Dataphor.DAE.Store
 		protected internal SQLStoreCursor(SQLStoreConnection connection, string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
 			: this(connection, tableName, index, isUpdatable)
 		{
-			if (columns != null)
+			_columns = columns;
+		}
+		
+		/// <summary>Sets the columns that identify a row of the table, normally its primary key; the cursor's updates and deletes name the row by them.</summary>
+		/// <remarks>Called before the cursor is first used. Without it, the cursor uses the index's columns if the index is unique, otherwise every column.</remarks>
+		internal void SetRowKey(List<string> rowKey)
+		{
+			Error.AssertFail(_key == null, "The row key of store cursor {0} was set after the cursor was first used.", _cursorName);
+			_rowKey = rowKey;
+		}
+		
+		private void EnsureKeys()
+		{
+			if (_key != null)
+				return;
+			
+			if (_columns == null)
+				_columns = ReadColumnNames();
+			
+			List<string> key = new List<string>(_index.Columns.Count);
+			_keyColumns = new SQLIndexColumns();
+			for (int index = 0; index < _index.Columns.Count; index++)
 			{
-				_columns = columns;
-				_keyIndexes = new List<int>();
-				for (int localIndex = 0; localIndex < _key.Count; localIndex++)
-					_keyIndexes.Add(_columns.IndexOf(_key[localIndex]));
+				key.Add(_index.Columns[index].Name);
+				_keyColumns.Add(_index.Columns[index]);
+			}
+			
+			if (_rowKey == null)
+				_rowKey = _index.IsUnique ? new List<string>(key) : new List<string>(_columns);
+			
+			// Ordered on the row key after the index's columns, the cursor's order is unique, so a seek from a row's key past
+			// that row finds exactly the row after it, even on an index that does not identify rows.
+			// NOTE: on SQLite the extra order terms sort each run of equal index values before its first row is read: measured on
+			// 100,000 rows of one owner (SQLite 3.50, in memory), the first row took 24 ms instead of 0 and the whole scan 83 ms
+			// instead of 62. If such a scan shows up as slow, keep read-only cursors on the index's own order (they re-seek only
+			// when they change direction).
+			for (int index = 0; index < _rowKey.Count; index++)
+				if (!key.Contains(_rowKey[index]))
+				{
+					key.Add(_rowKey[index]);
+					_keyColumns.Add(new SQLIndexColumn(_rowKey[index], true));
+				}
+			
+			_keyIndexes = new List<int>(key.Count);
+			for (int index = 0; index < key.Count; index++)
+				_keyIndexes.Add(_columns.IndexOf(key[index]));
+			
+			_key = key;
+		}
+		
+		private List<string> ReadColumnNames()
+		{
+			SQLCommand command;
+			SQLCursor reader = _connection.ExecuteReader(String.Format("select * from {0} where 0 = 1", _tableName), out command);
+			try
+			{
+				List<string> columns = new List<string>(reader.ColumnCount);
+				for (int index = 0; index < reader.ColumnCount; index++)
+					columns.Add(reader.GetColumnName(index));
+				return columns;
+			}
+			finally
+			{
+				reader.Dispose();
+				command.Dispose();
 			}
 		}
 		
@@ -91,10 +147,20 @@ namespace Alphora.Dataphor.DAE.Store
 		public string CursorName { get { return _cursorName; } }
 
 		private List<String> _columns;
+		// The columns that identify a row.
+		private List<String> _rowKey;
+		// The cursor's order and the key it positions by: the index's columns, then the row key's columns the index lacks.
+		// Null until the cursor is first used.
 		private List<String> _key;
+		private SQLIndexColumns _keyColumns;
 		private List<int> _keyIndexes;
 		private object[] _currentRow;
 		private object[] _editingRow;
+		// The row the cursor is on while it has no reader: the updated row after an update, or the row as it was while a
+		// write is executing. The next move seeks from it.
+		private object[] _detachedRow;
+		// After a delete, the deleted row's key: the cursor is between that row's neighbours, and the next move seeks from it.
+		private object[] _deletedKey;
 		private object[] _startValues;
 		private object[] _endValues;
 		private bool _isOnRow;
@@ -124,33 +190,28 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		private void CreateReader(object[] origin, bool forward, bool inclusive)
 		{
+			EnsureKeys();
 			_reader = InternalCreateReader(origin, forward, inclusive);
 			_connection.ReaderOpened();
 			_origin = origin;
 			_forward = forward;
 			_inclusive = inclusive;
-			if (_columns == null)
-			{
-				_columns = new List<string>();
-				for (int index = 0; index < _reader.ColumnCount; index++)
-					_columns.Add(_reader.GetColumnName(index));
-				_keyIndexes = new List<int>();
-				for (int index = 0; index < _key.Count; index++)
-					_keyIndexes.Add(_columns.IndexOf(_key[index]));
-			}
 		}
 		
 		protected virtual SQLCursor InternalCreateReader(object[] origin, bool forward, bool inclusive)
 		{
-			return _connection.ExecuteReader(GetReaderStatement(_tableName, _index.Columns, origin, forward, inclusive), out _readerCommand);
+			return _connection.ExecuteReader(GetReaderStatement(_tableName, _keyColumns, origin, forward, inclusive), out _readerCommand);
 		}
 		
 		private object[] _origin;
 		private bool _forward;
 		private bool _inclusive;
-		private List<object[]> _buffer;
-		private bool _bufferForward;
-		private int _bufferIndex;
+		
+		private void ClearWritePosition()
+		{
+			_detachedRow = null;
+			_deletedKey = null;
+		}
 		
 		protected void EnsureReader()
 		{
@@ -197,6 +258,10 @@ namespace Alphora.Dataphor.DAE.Store
 						[and] current order column is not null
 		*/
 		
+		// NOTE: a null in the origin compares as unknown, so a seek from a row with a null key value finds no row past it. Every
+		// catalog store cursor is ranged on non-null values, which excludes such rows; if a cursor ever moves after an update,
+		// a delete or a change of direction from a row with a null key value, generate "is null" terms here (and mind that the
+		// back ends sort nulls differently).
 		protected virtual string GetReaderStatement(string tableName, SQLIndexColumns indexColumns, object[] origin, bool forward, bool inclusive)
 		{
 			StringBuilder statement = new StringBuilder();
@@ -249,23 +314,6 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 			
 			return statement.ToString();
-		}
-		
-		#endregion
-		
-		#region Buffer Management
-		
-		private void ClearBuffer()
-		{
-			if (!_index.IsUnique)
-			{
-				if (_buffer == null)
-					_buffer = new List<object[]>();
-				else
-					_buffer.Clear();
-				_bufferForward = true;
-				_bufferIndex = -1;
-			}
 		}
 		
 		#endregion
@@ -382,15 +430,6 @@ namespace Alphora.Dataphor.DAE.Store
 			return key;
 		}
 		
-		/// <summary>
-		/// Returns -1 if the key values of the left row are less than the key values of the right row, 1 if they are greater, and 0 if they are equal.
-		/// </summary>
-		/// <remarks>The values of ALeftRow and ARightRow are expected to be native, not store, values.</remarks>
-		private int CompareRows(object[] leftRow, object[] rightRow)
-		{
-			return CompareKeys(RowToKey(leftRow), RowToKey(rightRow));
-		}
-		
 		private void CheckIsOnRow()
 		{
 			if (!_isOnRow)
@@ -402,8 +441,8 @@ namespace Alphora.Dataphor.DAE.Store
 			if (_editingRow != null)
 				return _editingRow[index];					
 				
-			if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
-				return _buffer[_bufferIndex][index];
+			if (_detachedRow != null)
+				return _detachedRow[index];
 				
 			return StoreToNativeValue(_reader[index]);
 		}
@@ -442,8 +481,8 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				CheckIsOnRow();
 				
-				// Save a copy of the current row before any edits if we are in a nested transaction
-				if ((_currentRow == null) && (_connection.TransactionCount > 1))
+				// The row as it was before the first edit: the update names the row by it, and a nested transaction's undo restores it
+				if (_currentRow == null)
 					_currentRow = Select();
 					
 				#if SQLSTORETIMING
@@ -512,48 +551,18 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			_editingRow = null;
 			
-			if ((_buffer != null) && ((_bufferForward && (_bufferIndex < _buffer.Count - 1)) || (!_bufferForward && (_bufferIndex > 0))))
-			{
-				if (_bufferForward)
-					_bufferIndex++;
-				else
-					_bufferIndex--;
-				return true;
-			}
-			
 			if ((_reader == null) || !_forward)
-				EnsureReader(_isOnRow ? SelectKey() : _startValues, true, !_isOnRow);
-			
-			if ((_buffer == null) && !_index.IsUnique)
 			{
-				_buffer = new List<object[]>();
-				_bufferForward = true;
-				_bufferIndex = -1;
+				if (_isOnRow)
+					EnsureReader(SelectKey(), true, false);
+				else if (_deletedKey != null)
+					EnsureReader(_deletedKey, true, false);
+				else
+					EnsureReader(_startValues, true, true);
+				ClearWritePosition();
 			}
-			
-			if (_reader.Next())
-			{
-				if (!_index.IsUnique)
-				{
-					object[] row = InternalReadRow();
-					if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
-						if (CompareRows(_buffer[_bufferIndex], row) != 0)
-						{
-							_buffer.Clear();
-							_bufferForward = true;
-							_bufferIndex = -1;
-						}
 
-					if (_bufferForward)
-						_buffer.Insert(++_bufferIndex, row);
-					else
-						_buffer.Insert(_bufferIndex, row);
-				}
-
-				return true;
-			}
-			
-			return false;
+			return _reader.Next();
 		}
 		
 		public bool Next()
@@ -591,17 +600,9 @@ namespace Alphora.Dataphor.DAE.Store
 		protected virtual bool InternalLast()
 		{
 			_editingRow = null;			
+			ClearWritePosition();
 			DisposeReader();
 			EnsureReader(null, false, true);
-			if (!_index.IsUnique)
-			{
-				if (_buffer == null)
-					_buffer = new List<object[]>();
-				else
-					_buffer.Clear();
-				_bufferForward = false;
-				_bufferIndex = _buffer.Count;
-			}
 			return false;
 		}
 		
@@ -629,48 +630,18 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			_editingRow = null;
 			
-			if ((_buffer != null) && ((_bufferForward && (_bufferIndex > 0)) || (!_bufferForward && (_bufferIndex < _buffer.Count))))
-			{
-				if (_bufferForward)
-					_bufferIndex--;
-				else
-					_bufferIndex++;
-				return true;
-			}
-			
 			if ((_reader == null) || _forward)
-				EnsureReader(_isOnRow ? SelectKey() : _endValues, false, !_isOnRow);
-			
-			if (!_index.IsUnique && (_buffer == null))
 			{
-				_buffer = new List<object[]>();
-				_bufferForward = false;
-				_bufferIndex = _buffer.Count;
+				if (_isOnRow)
+					EnsureReader(SelectKey(), false, false);
+				else if (_deletedKey != null)
+					EnsureReader(_deletedKey, false, false);
+				else
+					EnsureReader(_endValues, false, true);
+				ClearWritePosition();
 			}
-			
-			if (_reader.Next())
-			{
-				if (!_index.IsUnique)
-				{
-					object[] row = InternalReadRow();
-					if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
-						if (CompareRows(_buffer[_bufferIndex], row) != 0)
-						{
-							_buffer.Clear();
-							_bufferForward = false;
-							_bufferIndex = _buffer.Count;
-						}
 
-					if (_bufferForward)
-						_buffer.Insert(_bufferIndex, row);
-					else
-						_buffer.Insert(++_bufferIndex, row);
-				}
-				
-				return true;
-			}
-			
-			return false;
+			return _reader.Next();
 		}
 		
 		public bool Prior()
@@ -712,9 +683,9 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 			
 			_editingRow = null;
+			ClearWritePosition();
 			DisposeReader();
 			EnsureReader(null, true, true);
-			ClearBuffer();
 			return false;
 
 			#if SQLSTORETIMING
@@ -748,16 +719,16 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual bool InternalInsert(object[] row)
 		{
+			ClearWritePosition();
 			DisposeReader();
-			Connection.PerformInsert(_tableName, _columns, _key, row);
+			Connection.PerformInsert(_tableName, _columns, _rowKey, row);
 			//EnsureReader(RowToKey(ARow), true, true);
-			ClearBuffer();
 			return false;
 		}
 		
 		public void Insert(object[] row)
 		{
-			//EnsureReader();
+			EnsureKeys();
 
 			#if SQLSTORETIMING
 			long startTicks = TimingUtility.CurrentTicks;
@@ -772,20 +743,22 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 
 			if (_connection.TransactionCount > 1)
-				_connection.LogInsert(_tableName, _columns, _key, row);
+				_connection.LogInsert(_tableName, _columns, _rowKey, row);
 		}
 		
 		protected virtual bool InternalUpdate()
 		{
 			if (_currentRow == null)
 				_currentRow = InternalSelect();
+			object[] newRow = _editingRow ?? _currentRow;
 			
 			DisposeReader();
-			Connection.PerformUpdate(_tableName, _columns, _key, _currentRow, _editingRow);
-			//EnsureReader(RowToKey(FEditingRow), true, true);
-			ClearBuffer();
+			_detachedRow = _currentRow;
+			Connection.PerformUpdate(_tableName, _columns, _rowKey, _currentRow, newRow);
+			// Still on the row, as an updatable result set would be: Next and Prior seek from its new values.
+			_detachedRow = newRow;
 			
-			return false;
+			return true;
 		}
 		
 		public void Update()
@@ -801,7 +774,7 @@ namespace Alphora.Dataphor.DAE.Store
 				if (Connection.Store.SupportsUpdatableCursor)
 					newRow = InternalSelect();
 				else
-					newRow = _editingRow;
+					newRow = _editingRow ?? _currentRow;
 			}
 
 			#if SQLSTORETIMING
@@ -815,7 +788,7 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 			
 			if (_connection.TransactionCount > 1)
-				_connection.LogUpdate(_tableName, _columns, _key, _currentRow, newRow);
+				_connection.LogUpdate(_tableName, _columns, _rowKey, _currentRow, newRow);
 
 			_currentRow = null;
 			_editingRow = null;
@@ -827,9 +800,10 @@ namespace Alphora.Dataphor.DAE.Store
 				_currentRow = InternalSelect();
 			
 			DisposeReader();
-			Connection.PerformDelete(_tableName, _columns, _key, _currentRow);
-			//EnsureReader(RowToKey(FCurrentRow), true, true);
-			ClearBuffer();
+			_detachedRow = _currentRow;
+			Connection.PerformDelete(_tableName, _columns, _rowKey, _currentRow);
+			_detachedRow = null;
+			_deletedKey = RowToKey(_currentRow);
 			
 			return false;
 		}
@@ -852,7 +826,7 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 
 			if (_connection.TransactionCount > 1)
-				_connection.LogDelete(_tableName, _columns, _key, _currentRow);
+				_connection.LogDelete(_tableName, _columns, _rowKey, _currentRow);
 
 			_currentRow = null;
 			_editingRow = null;
@@ -866,7 +840,9 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 				_editingRow = null;
-				ClearBuffer();
+				ClearWritePosition();
+				// A seek repositions even to the origin the reader was opened on: that reader may have read past it.
+				DisposeReader();
 				
 				object[] localKey = new object[key.Length];
 				for (int index = 0; index < localKey.Length; index++)

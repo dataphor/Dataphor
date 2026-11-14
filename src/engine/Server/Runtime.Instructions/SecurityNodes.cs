@@ -515,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Schema.CatalogObject objectValue = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], false) as Schema.CatalogObject;
 			if (objectValue == null) 
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, objectValue.Name);
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, (string)arguments[0]);
 
 			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
 			if (program.Plan.User.ID != user.ID)

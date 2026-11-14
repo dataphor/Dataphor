@@ -219,9 +219,28 @@ namespace Alphora.Dataphor.DAE.Store
 				);
 		}
 		
+		/// <summary>Opens a cursor whose updates and deletes name the row by the index's columns if the index is unique, otherwise by every column.</summary>
 		public SQLStoreCursor OpenCursor(string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
 		{
 			return InternalOpenCursor(tableName, columns, index, isUpdatable);
+		}
+		
+		/// <summary>Opens a cursor whose updates and deletes name the row by <paramref name="rowKey"/>, normally the table's primary key columns.</summary>
+		/// <remarks>The cursor is ordered on the index's columns and then on the row key's other columns.</remarks>
+		public SQLStoreCursor OpenCursor(string tableName, List<string> columns, SQLIndex index, List<string> rowKey, bool isUpdatable)
+		{
+			// Set on the cursor that InternalOpenCursor returns, so that a store which overrides it keeps its own cursor class.
+			SQLStoreCursor cursor = InternalOpenCursor(tableName, columns, index, isUpdatable);
+			try
+			{
+				cursor.SetRowKey(rowKey);
+				return cursor;
+			}
+			catch
+			{
+				cursor.Dispose();
+				throw;
+			}
 		}
 		
 		private int _transactionCount = 0;
@@ -415,14 +434,24 @@ namespace Alphora.Dataphor.DAE.Store
 					statement.Append(",");
 				statement.AppendFormat(" {0} = {1}", columns[index], NativeToLiteralValue(newRow[index]));
 			}
-			statement.AppendFormat(" where");
+			AppendKeyCondition(statement, columns, key, oldRow);
+			return statement.ToString();
+		}
+		
+		/// <summary>Appends a where clause that names the row by the values of its key columns.</summary>
+		private void AppendKeyCondition(StringBuilder statement, List<string> columns, List<string> key, object[] row)
+		{
+			statement.Append(" where");
 			for (int index = 0; index < key.Count; index++)
 			{
 				if (index > 0)
 					statement.Append(" and");
-				statement.AppendFormat(" {0} = {1}", key[index], NativeToLiteralValue(oldRow[columns.IndexOf(key[index])]));
+				object value = row[columns.IndexOf(key[index])];
+				if (value == null)
+					statement.AppendFormat(" {0} is null", key[index]);
+				else
+					statement.AppendFormat(" {0} = {1}", key[index], NativeToLiteralValue(value));
 			}
-			return statement.ToString();
 		}
 		
 		internal void PerformDelete(string tableName, List<string> columns, List<string> key, object[] row)
@@ -446,13 +475,8 @@ namespace Alphora.Dataphor.DAE.Store
 		protected virtual string GenerateDeleteStatement(string tableName, List<string> columns, List<string> key, object[] row)
 		{
 			StringBuilder statement = new StringBuilder();
-			statement.AppendFormat("delete from {0} where", tableName);
-			for (int index = 0; index < key.Count; index++)
-			{
-				if (index > 0)
-					statement.Append(" and");
-				statement.AppendFormat(" {0} = {1}", key[index], NativeToLiteralValue(row[columns.IndexOf(key[index])]));
-			}
+			statement.AppendFormat("delete from {0}", tableName);
+			AppendKeyCondition(statement, columns, key, row);
 			return statement.ToString();
 		}
 	}

@@ -80,7 +80,7 @@
 { "script": "ScalarAllocation", "status": "pass", "note": "no assertions: the file holds only comments" },
 { "script": "ScanTable", "status": "pass" },
 { "script": "Security", "status": "pass" },
-{ "script": "SecurityLibrary", "status": "known-failure", "ticket": "store-cursor-update-wrong-rows", "error": "UNIQUE constraint failed: DAERights.Name", "preamble": "SetUseImplicitTransactions(false);", "note": "implicit transactions off, as the legacy test ran it: the script runs statements on a second process" },
+{ "script": "SecurityLibrary", "status": "pass", "preamble": "SetUseImplicitTransactions(false);", "note": "implicit transactions off, as the legacy test ran it: the script runs statements on a second process" },
 { "script": "SemiTables", "status": "pass" },
 { "script": "Serialization", "status": "known-failure", "ticket": "test-pre-3-1-scripts-policy", "error": "Syntax error near \"select\"" },
 { "script": "SerializationAggregateOperators", "status": "pass" },
