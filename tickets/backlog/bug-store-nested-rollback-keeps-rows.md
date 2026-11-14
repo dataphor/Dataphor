@@ -27,3 +27,5 @@ Not run. A D4 script or in-process test: begin a transaction, begin a nested one
 - **Log statement writes** (generic, in `CatalogStoreConnection.InsertRow` / `DeleteRows`): call `LogInsert` / `LogDelete` at nested levels. A delete's undo needs the full row, but the unique-key path of `DeleteRows` builds a row from the key values only, so it must read the row first. Also fixes the other stores.
 
 The store contract tests (`test-store-contract`, `feat-ws4-store-followups`) include nested transaction undo and should pin this either way.
+
+Related, from `test-triage-known-failures`: `store-cursor-update-wrong-rows` (fix/) changes how a cursor update or delete identifies its row (today by the columns of the index the cursor was opened on, so a cursor on a non-unique index rewrites every row sharing the value). The undo log here generates its inverse statements from the same key, so whichever lands second must keep the two consistent.
