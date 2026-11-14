@@ -169,7 +169,7 @@ artifacts/             build output (ignored)
 | `Libraries/FHIR*`, `CQF*`, `PHINVADS*`, `TestCQL`, `TestCache`; top-level `Dataphoria/`; `Processor/`; `Design/` | `legacy/` (D6) |
 | `Tests/Common.Tests`, `Tests/DAE.Server.Tests`, `Tests/DAE.Client.Tests` | `tests/…` (restructured by WS3) |
 | `Setup/` | replaced by `installer/` (WS9); old one deleted |
-| `Images/` | deleted by `hygiene-large-binaries`: nothing in the tree references the top-level `Images/` folder (the documentation uses `Documentation/Images/`, projects use their own `Images/` subfolders). Anything that turns out to be referenced goes to `assets/` |
+| `Images/` | deleted by `hygiene-large-binaries`: nothing in the tree referenced the top-level `Images/` folder (the documentation uses `Documentation/Images/`, projects use their own `Images/` subfolders), so no `assets/` folder was created |
 | `External/`, binaries in `Dataphor/bin`, `Dataphor/Dataphoria/*.dll` | `external/` until replaced by packages |
 | `Tooling/BBEdit` | `tools/editor-support/bbedit` |
 | `Documentation/`, `Legacy/Documentation/` | stay until WS8 converts and deletes them. `Legacy/` and the new `legacy/` are the same folder on Windows (Git runs here with `core.ignorecase=true`), so `library-park-side-projects` first renames `Legacy/` to `legacy/` (two-step case rename); the DocBook sources then sit at `legacy/Documentation/` |
@@ -179,7 +179,7 @@ artifacts/             build output (ignored)
 | `Dataphor.snk`, `book.json` | stay at the root (`docs-remove-old-sources` deletes `book.json`) |
 | `Tests/Frontend.Client.WPF.Tests` | `tests/Frontend.Client.WPF.Tests` (a manual WPF test application; WS6 decides its future) |
 | `Tests/Dataphor.Tests.nunit` | deleted |
-| `Dataphor/netsh_address_reservations.txt` | left in place; `hygiene-large-binaries` deletes it |
+| `Dataphor/netsh_address_reservations.txt` | deleted (`hygiene-large-binaries`); `Dataphor/` no longer exists |
 | `Dataphor/packages` (NuGet restore folder, never tracked) | `packages/` at the root, still ignored |
 | `Dataphor/bin` as the core projects' build output (`OutputPath` `..\bin\`) | the same setting now means `src/<area>/bin/` (ignored) until the SDK-style projects and the runtime layout replace it |
 | `Utilities/` (except `Utilities/Wix`, which stays until `installer-msi` deletes it with `Setup/`), `dataphor-mono/`, Silverlight projects, `Frontend.Client.Browser`, `Frontend.Client.Web*`, `Dataphor/BOP`, `Libraries/Libraries.sln`, `Dataphor.proj`, build batch files | deleted |
@@ -565,8 +565,8 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 | `legacy/Documentation` build tools, PDFs, CHMs, jars | most of 79 MB | Delete after WS8 |
 | 46 `#if SILVERLIGHT` blocks | 26 files | Remove the dead branches once the build exists to prove nothing changed |
 | Tracked third-party DLLs and executables | ~45 MB | Replace with packages as each consumer is converted (D11); `external/` ends empty |
-| `Images/` source art (`.psd`, `.cdr`) | 11 MB | Keep the PNG/ICO actually referenced (`assets/`); delete the rest |
-| `Dataphor/netsh_address_reservations.txt` | — | Delete (names a developer's machine account; describes an HTTP binding no code uses) |
+| `Images/` source art (`.psd`, `.cdr`) | 11 MB | Done (`hygiene-large-binaries`): nothing referenced any of it, so the whole folder was deleted; the same change deleted the unused Thrift code generator, the unreferenced NUnit copies in `tests/` and the unread Sybase catalog dumps under `libraries/MSSQLDevice` |
+| `Dataphor/netsh_address_reservations.txt` | — | Done (`hygiene-large-binaries`): deleted (named a developer's machine account; described an HTTP binding no code uses) |
 | `.gitignore` | — | Done in Phase 0: no longer ignores `*.xml` |
 | Line endings and encodings | — | Done (November 2026): root `.gitattributes` declares binary types and pins `eol` only for types with no CRLF file in the index, with no `text=auto`, so nothing is renormalized; one `.editorconfig` at the root replaces `src/.editorconfig` and sets no charset or final-newline rule for existing types |
 | Dead `#define` switches and unused `using` directives | — | Opportunistic, in files otherwise being edited; never as a sweep |
@@ -641,7 +641,7 @@ When the work starts, the corpus is located by an environment variable (never co
 | K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `tests/DAE.Server.Tests/SQLStoreTest.cs`, `tests/DAE.Client.Tests` | static | WS3 |
 | K19 | The base `Connection` library has a hard reference to SQL CE. | `libraries/Connection/Source/Register.cs` | verified | WS1 `build-server-project` |
 | K20 | 14 coverage tests are ignored (one names a script that does not exist) and 47 scripts are not wired to any test. | `tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |
-| K21 | A 34 MB catalog database, server logs and a file naming a developer's machine account are committed. | `Dataphor/netsh_address_reservations.txt` (the catalog database and logs, in Dataphoria's `Default Server Configurations` folder, are already deleted) | verified | WS12 |
+| K21 | A 34 MB catalog database, server logs and a file naming a developer's machine account are committed. | `Dataphor/netsh_address_reservations.txt`; the catalog database and logs were in Dataphoria's `Default Server Configurations` folder | fixed | WS12 `repo-delete-dead-trees` (database and logs), `hygiene-large-binaries` (the file) |
 | K23 | The vendored command-line parser uses `field` as a variable name inside a property accessor; `field` is a keyword there from C# 14, so the file does not compile with the .NET 10 default language version. | `src/hosts/DAEServer/CommandLineArguments.cs` (~line 1384); check the copy in `src/hosts/D4Runner` | verified | WS10 `tool-cli-skeleton` (rename earlier if it blocks WS1) |
 | K24 | Legacy WinForms menu, toolbar and status-bar controls compile on .NET 10 but throw `PlatformNotSupportedException` when constructed (~270 references). | `DAE.Client.Controls`, `Frontend.Client.Windows`, `Dataphoria`, `DAE.Service.ConfigurationUtility` | verified | WS6 |
 | K22 | `PathUtility` relies on `AppDomain.RelativeSearchPath`, always null on modern .NET. On closer reading this changes nothing: null gives the same result a desktop .NET Framework host got; only the removed web client set it. The fix is deleting the dead branch. | `src/engine/Base.Windows/PathUtility.cs` | static | WS2 `port-engine-runtime-fixes` |

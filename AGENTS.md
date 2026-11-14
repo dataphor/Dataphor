@@ -36,7 +36,6 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 | `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
 | `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries, the Oracle/ADO/SAS device and connection libraries and the DocBook generator library `Documentation` (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
 | `Utilities/Wix` | The copy of WiX 3.5 that `Setup/` builds with; deleted with `Setup/` when WS9 lands |
-| `Images/`, `Dataphor/` | Unreferenced source art and the one file left in `Dataphor/`, waiting to be deleted (`hygiene-large-binaries`) |
 
 ## Build and test
 
@@ -94,7 +93,7 @@ Project-specific ticket rules (testing policy, compatibility, source hygiene) ar
 
 **What's indexed:** git-tracked project source, minus `node_modules/`, `dist/`, `build/`, `.git/`, `tickets/`, `team/`, `docs/`, few cache dirs. If query about prose-heavy material (long-form architecture docs, design notes, nested READMEs) returns nothing, file may be outside indexed set — fall back to `Read`/`Glob` for those paths. Projects can override filter via `tickets/index-config.json` (see tess README § Customize what gets indexed).
 
-This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and WiX/MSBuild files (`.wxs`, `.props`, `.targets`), and drops dead, vendored or bulky trees (`legacy/`, `Utilities/`, `Images/`, `external/`, `Documentation/`, `tests/libraries/TestFramework.Coverage.Devices/Documents/`). Use `Read`/`Glob` for those.
+This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and WiX/MSBuild files (`.wxs`, `.props`, `.targets`), and drops dead, vendored or bulky trees (`legacy/`, `Utilities/`, `external/`, `Documentation/`, `tests/libraries/TestFramework.Coverage.Devices/Documents/`). Use `Read`/`Glob` for those.
 
 ## Mannered prose
 

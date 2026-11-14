@@ -2,7 +2,6 @@
   "exclude": [
     "legacy/",
     "Utilities/",
-    "Images/",
     "external/",
     "Documentation/",
     "tests/libraries/TestFramework.Coverage.Devices/Documents/"
