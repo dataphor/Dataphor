@@ -107,7 +107,6 @@ The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronou
 | Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows(.Executable), Dataphoria, DAEServer, DAE.Service(.ConfigurationUtility), D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
 | Working, lightly used | DAE.Client.Provider, DAE.NativeCLI, Frontend.Client.WPF (one scheduler control), Oracle/PGSQL devices and connections, DAE.MSSQL/DAE.PGSQL stores, samples |
 | Side projects (2015–2019) | FHIR*, CQF*, PHINVADS* libraries; top-level `Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes) |
-| Dead | MySQL, DB2, DB2400, DataDirect, ODP and Caché connections (not built by any solution); Fastore device |
 | Cannot survive .NET 10 as written | SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
