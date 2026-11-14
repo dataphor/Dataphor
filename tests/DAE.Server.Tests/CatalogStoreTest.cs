@@ -19,14 +19,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				Server LServer = LInstance.Server;
 				LServer.Start();
-
-				// Stop the server
 				LServer.Stop();
 
-				// Start the server, on the catalog the first start created
+				// The second start reopens the catalog the first one created
 				LServer.Start();
-
-				// Stop the server
 				LServer.Stop();
 			}
 		}
