@@ -378,7 +378,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						process.CommitTransaction();
 				}
 
-				process.ExecuteScript(String.Format("ExecuteScript('Coverage.Scripts', '{0}');", entry.Script));
+				if (entry.Batches == true)
+					process.ExecuteScript(File.ReadAllText(ServerScriptPath(instance, entry.Script)));
+				else
+					process.ExecuteScript(String.Format("ExecuteScript('Coverage.Scripts', '{0}');", entry.Script));
 			}
 			catch (Exception exception)
 			{
@@ -408,6 +411,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					worker.Error = Append(worker.Error, "HarnessCleanup: " + ErrorText(exception));
 				}
 			}
+		}
+
+		/// <summary>
+		/// The script's file in the server's own copy of the scripts library, so that a batches entry runs the text that the
+		/// nested ExecuteScript('Coverage.Scripts', name) would load.
+		/// </summary>
+		private static string ServerScriptPath(TestServerInstance instance, string script)
+		{
+			return Path.Combine(instance.Directory, TestServerInstance.LibrariesFolderName, ScriptsLibrary, "Documents", script + ScriptExtension);
 		}
 
 		private void Evaluate(CoverageEntry entry, string error)

@@ -33,6 +33,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[JsonPropertyName("error")] public string Error { get; set; }
 		[JsonPropertyName("timeoutSeconds")] public int? TimeoutSeconds { get; set; }
 		[JsonPropertyName("preamble")] public string Preamble { get; set; }
+		[JsonPropertyName("batches")] public bool? Batches { get; set; }
 		[JsonPropertyName("register")] public string[] Register { get; set; }
 		[JsonPropertyName("partOf")] public string[] PartOf { get; set; }
 		[JsonPropertyName("note")] public string Note { get; set; }
@@ -80,6 +81,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <item><c>timeoutSeconds</c> (optional): 1 to 600, default 120.</item>
 	/// <item><c>preamble</c> (optional): D4 run on the script's process before the script; a transaction it leaves open is
 	/// committed before the script starts.</item>
+	/// <item><c>batches</c> (optional, <c>true</c> only): run the script's text batch by batch on the script's process, one
+	/// implicit transaction per batch, as Dataphoria runs a script, instead of nested in one ExecuteScript statement whose
+	/// transaction stays open for the whole script. The text is read from the script server's own copy of the scripts library.
+	/// Use it only for a script that depends on batch boundaries (one that leaves an application transaction it changed, or
+	/// that must see a batch's work committed), and say why in <c>note</c>.</item>
 	/// <item><c>register</c> (optional): libraries registered in the script's server before it, each one of
 	/// <see cref="CoverageScripts.Libraries"/>.</item>
 	/// <item><c>note</c> (optional): free text for the next reader.</item>
@@ -216,6 +222,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (entry.TimeoutSeconds.HasValue && (entry.TimeoutSeconds < MinTimeoutSeconds || entry.TimeoutSeconds > MaxTimeoutSeconds))
 					Problem(String.Format("\"timeoutSeconds\" is {0}; it must be from {1} to {2}.", entry.TimeoutSeconds, MinTimeoutSeconds, MaxTimeoutSeconds));
 
+				if (entry.Batches == false)
+					Problem("\"batches\" is false; leave the field off for the default (the script runs nested in one statement).");
+
 				if (entry.Register != null)
 					foreach (string library in entry.Register)
 						if (library == null || !libraries.Contains(library))
@@ -234,6 +243,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				problem("\"timeoutSeconds\" is not allowed on a fragment entry; it is not run.");
 			if (entry.Preamble != null)
 				problem("\"preamble\" is not allowed on a fragment entry; it is not run.");
+			if (entry.Batches.HasValue)
+				problem("\"batches\" is not allowed on a fragment entry; it is not run.");
 			if (entry.Register != null)
 				problem("\"register\" is not allowed on a fragment entry; it is not run.");
 

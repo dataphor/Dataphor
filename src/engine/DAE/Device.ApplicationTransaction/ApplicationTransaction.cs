@@ -159,6 +159,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				try
 				{
 					transaction.Processes.Remove(process.ProcessID);
+					// NOTE: disconnecting disposes the AT device session, which rolls back any transaction still open on it, so leaving inside an open process transaction discards the AT work done in that transaction (legacy 3.1 behaviour); whether to keep it is engine-at-leave-discards-transaction-work.
 					process.DeviceDisconnect(transaction.Device); // Disconnect the session to ensure that the saved pointer to this AT is cleared
 				}
 				finally
