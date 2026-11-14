@@ -96,10 +96,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				{
 					string operatorName = created.Where(name => name.StartsWith(String.Format("K1O_{0}_", session))).Min();
 					if (operatorName != null)
-						Assert.That(Evaluate(instance, operatorName + "(1)"), Is.EqualTo(ExpectedOperatorResult), operatorName);
+						Assert.That(instance.Evaluate(operatorName + "(1)"), Is.EqualTo(ExpectedOperatorResult), operatorName);
 					string viewName = created.Where(name => name.StartsWith(String.Format("K1V_{0}_", session))).Min();
 					if (viewName != null)
-						Assert.That(Evaluate(instance, "Count(" + viewName + ")"), Is.EqualTo(0), viewName);
+						Assert.That(instance.Evaluate("Count(" + viewName + ")"), Is.EqualTo(0), viewName);
 				}
 			}
 		}
@@ -306,25 +306,5 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return scripts;
 		}
 
-		private static object Evaluate(TestServerInstance instance, string expression)
-		{
-			IServerSession session = instance.Connect();
-			try
-			{
-				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
-				try
-				{
-					return ((ServerProcess)process).Evaluate(expression, null).AsNative;
-				}
-				finally
-				{
-					session.StopProcess(process);
-				}
-			}
-			finally
-			{
-				instance.Server.Disconnect(session);
-			}
-		}
 	}
 }

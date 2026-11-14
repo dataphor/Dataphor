@@ -119,6 +119,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>Evaluates a D4 expression on a session and process of its own and returns its native value.</summary>
+		public object Evaluate(string expression)
+		{
+			IServerSession session = Connect();
+			try
+			{
+				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+				try
+				{
+					return ((ServerProcess)process).Evaluate(expression, null).AsNative;
+				}
+				finally
+				{
+					session.StopProcess(process);
+				}
+			}
+			finally
+			{
+				_server.Disconnect(session);
+			}
+		}
+
 		private bool _disposed;
 
 		/// <summary>

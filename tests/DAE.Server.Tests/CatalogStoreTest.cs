@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				server.CatalogStoreConnectionString = null;
 				server.Start();
 
-				Assert.That(Evaluate(instance, "1 + 1"), Is.EqualTo(2));
+				Assert.That(instance.Evaluate("1 + 1"), Is.EqualTo(2));
 				Assert.That(File.Exists(CatalogFileName(instance)), Is.True);
 			}
 		}
@@ -71,6 +71,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		[Test]
+		public void UnloadableStoreClassIsReported()
+		{
+			using (TestServerInstance instance = new TestServerInstance("UnloadableStoreClassIsReported"))
+			{
+				Server server = instance.Server;
+				server.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.Missing.MissingStore,Alphora.Dataphor.DAE.Missing";
+
+				Exception exception = Assert.Catch(() => server.Start());
+				Assert.That(FindCatalogErrorCode(exception), Is.EqualTo((int)CatalogException.Codes.CatalogStoreClassNotFound), exception.ToString());
+				Assert.That(server.State, Is.EqualTo(ServerState.Stopped));
+			}
+		}
+
 		private static string CatalogFileName(TestServerInstance instance)
 		{
 			return Path.Combine(instance.Directory, TestServerInstance.InstanceFolderName, Server.DefaultCatalogDirectory, "DAECatalog.sqlite");
@@ -82,27 +96,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (exception is CatalogException)
 					return ((CatalogException)exception).Code;
 			return null;
-		}
-
-		private static object Evaluate(TestServerInstance instance, string expression)
-		{
-			IServerSession session = instance.Connect();
-			try
-			{
-				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
-				try
-				{
-					return ((ServerProcess)process).Evaluate(expression, null).AsNative;
-				}
-				finally
-				{
-					session.StopProcess(process);
-				}
-			}
-			finally
-			{
-				instance.Server.Disconnect(session);
-			}
 		}
 	}
 }
