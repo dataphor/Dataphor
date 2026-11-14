@@ -13,89 +13,81 @@ using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
-	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
-	
+	/// <summary>
+	/// One in-process server per fixture, on a TestServerInstance, and one session and process per test.
+	/// </summary>
 	public abstract class InProcessTestFixture
 	{
-		private ServerConfigurationManager FServerConfigurationManager;
-		protected ServerConfigurationManager ServerConfigurationManager { get { return FServerConfigurationManager; } }
+		/// <summary>The runtime layout's library folders copied for this fixture's server.</summary>
+		protected virtual string[] Libraries => [];
 
-		private ServerConfiguration FConfiguration;
-		protected ServerConfiguration Configuration { get { return FConfiguration; } }
+		/// <summary>Libraries registered once the server has started; each must be in Libraries, with the libraries it requires.</summary>
+		protected virtual string[] LibrariesToRegister => [];
 
-		private IServer FServer;
-		protected IServer Server { get { return FServer; } }
-		
+		private TestServerInstance FInstance;
+		protected TestServerInstance Instance { get { return FInstance; } }
+
+		protected IServer Server { get { return FInstance.Server; } }
+
 		private IServerSession FSession;
 		protected IServerSession Session { get { return FSession; } }
-		
+
 		private IServerProcess FProcess;
 		protected IServerProcess Process { get { return FProcess; } }
-		
+
 		[OneTimeSetUp]
 		public void SetUpFixture()
 		{
-			FServerConfigurationManager = new SQLCEServerConfigurationManager();
-			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
-			FServerConfigurationManager.ResetInstance();
-			FServer = FServerConfigurationManager.GetServer();
-			FServer.Start();
-			
-			IServerSession LSession = FServer.Connect(new SessionInfo("Admin", ""));
+			FInstance = new TestServerInstance(GetType().Name, Libraries);
+			FInstance.Server.Start();
+
+			foreach (string LLibrary in LibrariesToRegister)
+				FInstance.ExecuteScript(String.Format("EnsureLibraryRegistered('{0}');", LLibrary));
+		}
+
+		[OneTimeTearDown]
+		public void TearDownFixture()
+		{
+			if (FInstance != null)
+			{
+				FInstance.Dispose();
+				FInstance = null;
+			}
+		}
+
+		[SetUp]
+		public void SetUp()
+		{
+			FSession = FInstance.Connect();
+			FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
 			try
 			{
-				IServerProcess LProcess = LSession.StartProcess(new ProcessInfo(LSession.SessionInfo));
-				try
+				if (FProcess != null)
 				{
-					LProcess.ExecuteScript("EnsureLibraryRegistered('Frontend');");
-					LProcess.ExecuteScript("EnsureLibraryRegistered('TestFramework.Coverage.Base');");
-				}
-				finally
-				{
-					LSession.StopProcess(LProcess);
+					FSession.StopProcess(FProcess);
+					FProcess = null;
 				}
 			}
 			finally
 			{
-				FServer.Disconnect(LSession);
+				if (FSession != null)
+				{
+					Server.Disconnect(FSession);
+					FSession = null;
+				}
 			}
 		}
-		
-		[OneTimeTearDown]
-		public void TearDownFixture()
-		{
-			FServer.Stop();
-			FServerConfigurationManager.ResetInstance();
-		}
-		
-		[SetUp]
-		public void SetUp()
-		{
-			FSession = FServer.Connect(new SessionInfo("Admin", ""));
-			FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
-		}
-		
-		[TearDown]
-		public void TearDown()
-		{
-			if (FProcess != null)
-			{
-				FSession.StopProcess(FProcess);
-				FProcess = null;
-			}
-			
-			if (FSession != null)
-			{
-				FServer.Disconnect(FSession);
-				FSession = null;
-			}
-		}
-		
+
 		protected void ExecuteScript(string AScript)
 		{
 			FProcess.ExecuteScript(AScript);
 		}
-		
+
 		protected void ExecuteScript(string ALibraryName, string AScriptName)
 		{
 			FProcess.ExecuteScript(String.Format("ExecuteScript('{0}', '{1}');", ALibraryName, AScriptName));

@@ -1,208 +1,50 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" />
-  <Import Project="..\..\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\..\packages\NUnit.3.12.0\build\NUnit.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor.DAE.Server.Tests</RootNamespace>
     <AssemblyName>DAE.Server.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <RootNamespace>Alphora.Dataphor.DAE.Server.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+
+  <!-- Constants: the legacy Release set (TRACE) in both configurations, plus DEBUG;TRACE in Debug as legacy Debug had them. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
     <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\nunit.mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.3409.40585, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\pnunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.SqlServerCe">
-      <HintPath>..\..\Dataphor\bin\System.Data.SqlServerCe.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml" />
-  </ItemGroup>
+
+  <!-- CoverageTest.cs stays on disk, not compiled, because tools/net-spike/run.py reads its script list; test-harness-inprocess deletes it. -->
   <ItemGroup>
     <Compile Include="CatalogStoreTest.cs" />
-    <Compile Include="CoverageDeviceTest.cs" />
-    <Compile Include="CoverageTest.cs" />
     <Compile Include="CursorTest.cs" />
     <Compile Include="InProcessTestFixture.cs" />
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SQLStoreTest.cs" />
-    <Compile Include="Utilities\SQLCEServerConfigurationManager.cs" />
-    <Compile Include="Utilities\MSSQLServerConfigurationManager.cs" />
-    <Compile Include="Utilities\ServerConfigurationManager.cs" />
-    <Compile Include="Utilities\SQLiteServerConfigurationManager.cs" />
+    <Compile Include="TestEnvironment.cs" />
+    <Compile Include="TestServerInstance.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\src\engine\Base.Windows\Base.Windows.csproj">
-      <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
-      <Name>Base.Windows</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\engine\Base\Base.csproj">
-      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
-      <Name>Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\protocol\Client\Client.csproj">
-      <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
-      <Name>Client %28Client\Client%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\client\DAE.Client\DAE.Client.csproj">
-      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
-      <Name>DAE.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\engine\Store.MSSQL\DAE.MSSQL.csproj">
-      <Project>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</Project>
-      <Name>DAE.MSSQL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
-      <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
-      <Name>DAE.SQLCE</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj">
-      <Project>{6d005ba9-2f0b-4eaa-b82f-039afa11c425}</Project>
-      <Name>DAE.SQLite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj">
-      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
-      <Name>Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\engine\Server\Server.csproj">
-      <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
-    </ProjectReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\src\engine\Server\Server.csproj" />
+    <!-- Not compiled against: the server loads the catalog store by class name, so the assembly only has to be in the test's output. -->
+    <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" />
+    <!-- Builds the runtime layout before this project, so that dotnet test and Visual Studio never run the tests against a stale or missing layout. Nothing is compiled against it or copied from it. -->
+    <ProjectReference Include="..\..\tools\layout\Layout.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="amd64\sqlceca40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="amd64\sqlcecompact40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="amd64\sqlceer40EN.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="amd64\sqlceme40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="amd64\sqlceqp40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="amd64\sqlcese40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlceca40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlcecompact40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlceer40EN.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlceme40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlceqp40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\sqlcese40.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit.3.12.0\build\NUnit.props'))" />
-    <Error Condition="!Exists('..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
+
+  <!--
+    The runtime layout of the configuration being built, which TestEnvironment reads at run time; never spell the path in code.
+    An item sees DataphorLayoutDir, which Directory.Build.targets defines, because MSBuild evaluates every property before any item.
+    The assembly embeds an absolute build-machine path, so it is not identical across machines; it is a test assembly and never ships.
   -->
+  <ItemGroup>
+    <AssemblyMetadata Include="DataphorLayoutDir" Value="$(DataphorLayoutDir)" />
+  </ItemGroup>
+
 </Project>

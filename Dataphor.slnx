@@ -29,6 +29,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Common.Tests/Common.Tests.csproj" />
+    <Project Path="tests/DAE.Server.Tests/DAE.Server.Tests.csproj" />
     <Project Path="tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj" />
   </Folder>
   <Folder Name="/tools/">

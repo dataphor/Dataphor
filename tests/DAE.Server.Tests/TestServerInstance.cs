@@ -1,0 +1,144 @@
+﻿/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
+using System.IO;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+
+using NUnit.Framework;
+
+namespace Alphora.Dataphor.DAE.Server.Tests
+{
+	/// <summary>
+	/// An in-process server on a fresh temporary directory: Libraries\ holds copies of the runtime layout's library folders it
+	/// was given, Instance\ its catalog. It opens no port, and with logging off (the default) it writes neither a log file nor
+	/// the Windows event log.
+	/// </summary>
+	// NOTE: two servers in one process share static engine state (K1, the catalog emitter race, is one known case). Before
+	// fixtures run in parallel, port-catalog-emitter-race must land and the engine's other statics need checking.
+	public sealed class TestServerInstance : IDisposable
+	{
+		public const string LibrariesFolderName = "Libraries";
+		public const string InstanceFolderName = "Instance";
+		public const string CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
+		// The spike's connection string, so that results compare with its baseline; store-sqlite-concurrency revisits it.
+		public const string CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog;Journal Mode=WAL;BusyTimeout=30000";
+
+		/// <summary>Copies the named libraries from the runtime layout. None is valid: System is built in, and the server creates General.</summary>
+		public TestServerInstance(string name, params string[] libraryNames)
+		{
+			_directory = TestEnvironment.NewDirectory(name);
+			try
+			{
+				string librariesDirectory = Path.Combine(_directory, LibrariesFolderName);
+				TestEnvironment.CopyLibraries(librariesDirectory, libraryNames);
+
+				// No PortNumber: ApplyTo does not pass it, and an in-process server listens on nothing.
+				ServerConfiguration configuration =
+					new ServerConfiguration
+					{
+						Name = name,
+						LibraryDirectories = librariesDirectory,
+						InstanceDirectory = Path.Combine(_directory, InstanceFolderName),
+						CatalogStoreClassName = CatalogStoreClassName,
+						CatalogStoreConnectionString = CatalogStoreConnectionString
+					};
+				_server = new Server();
+				configuration.ApplyTo(_server);
+				_server.LoggingEnabled = TestEnvironment.LoggingEnabled;
+			}
+			catch
+			{
+				DeleteDirectory();
+				throw;
+			}
+		}
+
+		private readonly string _directory;
+		/// <summary>The absolute path of this instance's directory.</summary>
+		public string Directory => _directory;
+
+		private readonly Server _server;
+		public Server Server => _server;
+
+		public IServerSession Connect()
+		{
+			return _server.Connect(new SessionInfo("Admin", ""));
+		}
+
+		/// <summary>Runs D4 on a session and process of its own.</summary>
+		public void ExecuteScript(string script)
+		{
+			IServerSession session = Connect();
+			try
+			{
+				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+				try
+				{
+					process.ExecuteScript(script);
+				}
+				finally
+				{
+					session.StopProcess(process);
+				}
+			}
+			finally
+			{
+				_server.Disconnect(session);
+			}
+		}
+
+		private bool _disposed;
+
+		/// <summary>
+		/// Stops the server if it is running and deletes the directory (unless KeepFiles). A failure to stop is written to the
+		/// test output and rethrown unless another exception is already propagating, so that it never hides the test's own failure.
+		/// </summary>
+		public void Dispose()
+		{
+			if (_disposed)
+				return;
+			_disposed = true;
+
+			Exception stopError = null;
+			if (_server != null && _server.State != ServerState.Stopped)
+			{
+				try
+				{
+					_server.Stop();
+				}
+				catch (Exception exception)
+				{
+					stopError = exception;
+					TestContext.Progress.WriteLine("Stopping the test server in {0} failed: {1}", _directory, exception);
+				}
+			}
+
+			DeleteDirectory();
+
+			// Non-zero while an exception is unwinding through the caller, as when Dispose runs in the finally of a using block
+			// whose body threw.
+			if (stopError != null && Marshal.GetExceptionPointers() == IntPtr.Zero)
+				ExceptionDispatchInfo.Capture(stopError).Throw();
+		}
+
+		private void DeleteDirectory()
+		{
+			if (TestEnvironment.KeepFiles)
+				return;
+
+			try
+			{
+				System.IO.Directory.Delete(_directory, true);
+			}
+			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+			{
+				// Typically a library assembly the process loaded from this copy: it stays mapped until the process exits.
+				TestContext.Progress.WriteLine("Could not delete {0}; the next test run deletes it. {1}", _directory, exception.Message);
+			}
+		}
+	}
+}
