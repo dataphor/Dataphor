@@ -7,7 +7,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -20,7 +19,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
 	/// Sessions creating objects at the same time must each store their own object's script (K1: the catalog device once
-	/// shared one emitter between sessions, and a store that accepts any text kept the mixture silently).
+	/// shared one emitter between sessions, and a store that accepts any text kept the mixture silently), and state shared by
+	/// every session must allow concurrent use (K3).
 	/// </summary>
 	[TestFixture]
 	public class ConcurrentDDLTest
@@ -70,8 +70,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				ConcurrentBag<string> created = new ConcurrentBag<string>();
 				ConcurrentBag<string> failures = new ConcurrentBag<string>();
-				int lockErrorCount = 0;
-				RunConcurrently(instance, created, failures, ref lockErrorCount);
+				int lockErrorCount = RunConcurrently(instance, created, failures);
 
 				// NOTE: store-sqlite-concurrency removes the lock errors; it then tightens this to "no exceptions at all"
 				// by failing on lockErrorCount too.
@@ -83,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				instance.Server.Stop();
 
-				Dictionary<int, string> storedScripts = ReadStoredScripts(instance.Server.GetCatalogDirectory(), expectedScripts.Keys);
+				Dictionary<int, string> storedScripts = ReadStoredScripts(instance.Server.GetCatalogStoreConnectionString(), expectedScripts.Keys);
 				foreach (KeyValuePair<int, string> expected in expectedScripts)
 				{
 					Assert.That(storedScripts.ContainsKey(expected.Key), Is.True, String.Format("No stored script for object {0}.", expected.Key));
@@ -105,10 +104,61 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		private static void RunConcurrently(TestServerInstance instance, ConcurrentBag<string> created, ConcurrentBag<string> failures, ref int lockErrorCount)
+		/// <summary>
+		/// K3: the operator resolution cache is shared by every session of a catalog. The compiler adds to it while resolving
+		/// operators and clears entries by name while compiling create or drop operator, with no common lock held; unsynchronized,
+		/// the clear's enumeration fails with "Collection was modified" within milliseconds.
+		/// </summary>
+		[Test]
+		public void OperatorResolutionCacheAllowsConcurrentAddAndClear()
+		{
+			Compiling.OperatorResolutionCache cache = new Compiling.OperatorResolutionCache();
+			Schema.NameResolutionPath path = new Schema.NameResolutionPath();
+			Schema.Signature signature = new Schema.Signature(new Schema.SignatureElement[0]);
+			// Entries that every Clear(name) enumerates, so that its enumeration overlaps the adds.
+			for (int index = 0; index < 200; index++)
+				cache.Add(new Compiling.OperatorBindingContext(null, "System.Seed" + index, path, signature, false));
+
+			ConcurrentBag<Exception> errors = new ConcurrentBag<Exception>();
+			DateTime stop = DateTime.UtcNow.AddMilliseconds(500);
+			List<Thread> threads = new List<Thread>();
+			for (int threadNumber = 0; threadNumber < 8; threadNumber++)
+			{
+				bool adds = threadNumber % 2 == 0;
+				int id = threadNumber;
+				Thread thread =
+					new Thread(() =>
+					{
+						for (int index = 0; DateTime.UtcNow < stop && errors.IsEmpty; index++)
+						{
+							string name = String.Format("O{0}_{1}", id, index);
+							try
+							{
+								if (adds)
+									cache.Add(new Compiling.OperatorBindingContext(null, name, path, signature, false));
+								else
+									cache.Clear(name);
+							}
+							catch (Exception exception)
+							{
+								errors.Add(exception);
+							}
+						}
+					});
+				threads.Add(thread);
+				thread.Start();
+			}
+			foreach (Thread thread in threads)
+				thread.Join();
+
+			Assert.That(errors, Is.Empty);
+		}
+
+		// Returns the number of cycles that stopped on a store lock.
+		private static int RunConcurrently(TestServerInstance instance, ConcurrentBag<string> created, ConcurrentBag<string> failures)
 		{
 			int lockErrors = 0;
-			Barrier start = new Barrier(SessionCount);
+			using Barrier start = new Barrier(SessionCount);
 			List<Thread> threads = new List<Thread>();
 			for (int session = 0; session < SessionCount; session++)
 			{
@@ -116,12 +166,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Thread thread =
 					new Thread(() =>
 					{
+						bool reachedStart = false;
 						try
 						{
 							IServerSession serverSession = instance.Connect();
 							IServerProcess process = serverSession.StartProcess(new ProcessInfo(serverSession.SessionInfo));
 							try
 							{
+								reachedStart = true;
 								start.SignalAndWait();
 								for (int cycle = 0; cycle < CycleCount; cycle++)
 								{
@@ -157,6 +209,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						catch (Exception exception)
 						{
 							failures.Add(String.Format("session {0}: {1}", sessionNumber, exception));
+							// Otherwise the other sessions would wait at the barrier for this one forever.
+							if (!reachedStart)
+								start.RemoveParticipant();
 						}
 					});
 				threads.Add(thread);
@@ -165,7 +220,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			foreach (Thread thread in threads)
 				thread.Join();
-			lockErrorCount = lockErrors;
+			return lockErrors;
 		}
 
 		private static Dictionary<int, string> ScriptCreatedObjects(TestServerInstance instance, HashSet<string> created)
@@ -223,13 +278,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return qualifier >= 0 ? name.Substring(qualifier + 1) : name;
 		}
 
-		private static Dictionary<int, string> ReadStoredScripts(string catalogDirectory, IEnumerable<int> objectIDs)
+		private static Dictionary<int, string> ReadStoredScripts(string storeConnectionString, IEnumerable<int> objectIDs)
 		{
 			Dictionary<int, string> scripts = new Dictionary<int, string>();
 			HashSet<int> wanted = objectIDs.ToHashSet();
-			// No pooling, so that nothing holds the file open when the instance directory is deleted.
-			string connectionString = String.Format("Data Source={0};Read Only=True;Pooling=False", Path.Combine(catalogDirectory, "DAECatalog"));
-			using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+			// The store's file, opened read-only and without pooling, so that nothing holds it open when the instance
+			// directory is deleted.
+			SQLiteConnectionStringBuilder connectionString =
+				new SQLiteConnectionStringBuilder
+				{
+					DataSource = new SQLiteConnectionStringBuilder(storeConnectionString).DataSource,
+					ReadOnly = true,
+					Pooling = false
+				};
+			using (SQLiteConnection connection = new SQLiteConnection(connectionString.ConnectionString))
 			{
 				connection.Open();
 				using (SQLiteCommand command = new SQLiteCommand("select ID, ServerData from DAEObjects", connection))

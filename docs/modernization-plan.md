@@ -262,10 +262,10 @@ artifacts/             build output (ignored)
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
 | `port-engine-runtime-fixes` | K2, K5 (engine sites), K22, dead `using` directives, and the NLS comparison test; each with its reproduction test. | `test-harness-inprocess` | medium |
-| `port-catalog-emitter-race` | K1 with a concurrency reproduction; search for other shared mutable statics in session-scoped code and report them. | `test-harness-inprocess` | easy |
+| `port-catalog-emitter-race` | K1 with a concurrency reproduction; search for other shared mutable statics in session-scoped code and report them. **Done**: per-call emitter (K1), keyword tables built by static initializers (K25), no other unsafe static found; `ConcurrentDDLTest` holds the K1 reproduction and, since its review, the K3 one. | `test-harness-inprocess` | easy |
 | `port-abandoned-session-cleanup` | Establish and test what reclaims server sessions when a client disappears now that remoting leases are gone; add idle reaping if nothing does. | `protocol-corewcf-host` | hard |
 | `port-library-loading` | Resolver for library directories including native assets; test: a library whose assembly has a private NuGet dependency and a native dependency registers from the runtime layout. | `build-runtime-layout` | medium |
-| `port-concurrent-ddl-investigation` | **Done; do not cut.** K3 was located and fixed outside the ticket flow (see the known-defects table); its reproduction is the spike's "Resolution cache" smoke step. Carry that check into the L2 concurrency tests when they exist. | `port-catalog-emitter-race` | — |
+| `port-concurrent-ddl-investigation` | **Done; do not cut.** K3 was located and fixed outside the ticket flow (see the known-defects table); its reproduction, first the spike's "Resolution cache" smoke step, is `ConcurrentDDLTest.OperatorResolutionCacheAllowsConcurrentAddAndClear`. | `port-catalog-emitter-race` | — |
 | `port-server-on-net10` | Whole server, including hosting, builds with nothing excluded; all server tests pass. | `port-abandoned-session-cleanup` | medium |
 
 **Done when** every engine-level and server-level test passes on .NET 10 and no code path reaches an API that throws `PlatformNotSupportedException`.
