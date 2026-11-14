@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -52,15 +53,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// The operator's value for argument 1: the sum over index of (1 + index).
 		private static int ExpectedOperatorResult => Enumerable.Range(0, OperatorStatementCount).Sum(index => 1 + index);
 
-		private static bool IsStoreLockError(Exception exception)
-		{
-			Exception inner = exception;
-			while (inner.InnerException != null)
-				inner = inner.InnerException;
-			return inner is SQLiteException sqliteException
-				&& (sqliteException.ResultCode == SQLiteErrorCode.Busy || sqliteException.ResultCode == SQLiteErrorCode.Locked);
-		}
-
 		[Test]
 		public void ConcurrentSessionsStoreTheirOwnScripts()
 		{
@@ -70,12 +62,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				ConcurrentBag<string> created = new ConcurrentBag<string>();
 				ConcurrentBag<string> failures = new ConcurrentBag<string>();
-				int lockErrorCount = RunConcurrently(instance, created, failures);
+				Stopwatch watch = Stopwatch.StartNew();
+				RunConcurrently(instance, created, failures);
+				TestContext.Progress.WriteLine("{0} sessions x {1} cycles in {2} ms.", SessionCount, CycleCount, watch.ElapsedMilliseconds);
 
-				// NOTE: store-sqlite-concurrency removes the lock errors; it then tightens this to "no exceptions at all"
-				// by failing on lockErrorCount too.
-				Assert.That(failures, Is.Empty, "Concurrent DDL failed other than on a store lock:\r\n" + String.Join("\r\n", failures));
-				TestContext.Progress.WriteLine("{0} of {1} creates succeeded; {2} cycles stopped on a store lock.", created.Count, SessionCount * CycleCount * 3, lockErrorCount);
+				Assert.That(failures, Is.Empty, "Concurrent DDL failed:\r\n" + String.Join("\r\n", failures));
 
 				// Expected text: each object emitted serially, from one session, after the concurrent phase.
 				Dictionary<int, string> expectedScripts = ScriptCreatedObjects(instance, created.ToHashSet());
@@ -213,10 +204,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(wrongCounts.Distinct(), Is.Empty, String.Format("Paths whose library count was not {0}.", expectedCount));
 		}
 
-		// Returns the number of cycles that stopped on a store lock.
-		private static int RunConcurrently(TestServerInstance instance, ConcurrentBag<string> created, ConcurrentBag<string> failures)
+		private static void RunConcurrently(TestServerInstance instance, ConcurrentBag<string> created, ConcurrentBag<string> failures)
 		{
-			int lockErrors = 0;
 			using Barrier start = new Barrier(SessionCount);
 			List<Thread> threads = new List<Thread>();
 			for (int session = 0; session < SessionCount; session++)
@@ -244,12 +233,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 										{
 											process.ExecuteScript(scripts[index]);
 											created.Add(names[index]);
-										}
-										catch (Exception exception) when (IsStoreLockError(exception))
-										{
-											// The statement rolled back; the rest of the cycle depends on it.
-											Interlocked.Increment(ref lockErrors);
-											break;
 										}
 										catch (Exception exception)
 										{
@@ -279,7 +262,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			foreach (Thread thread in threads)
 				thread.Join();
-			return lockErrors;
 		}
 
 		private static Dictionary<int, string> ScriptCreatedObjects(TestServerInstance instance, HashSet<string> created)

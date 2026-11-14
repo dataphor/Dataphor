@@ -29,6 +29,15 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
         }
         #endif
 
+		// Every store transaction is a SQLite write transaction begun immediate (Serializable is BEGIN IMMEDIATE in the provider),
+		// whatever the D4 isolation level. A deferred begin takes a read lock that two sessions then both try to upgrade, and one
+		// fails with "database is locked" (K10); and under Browse, which maps to read uncommitted, SQLiteConnection opens no
+		// transaction at all, so a rollback would leave the store's writes in place (K26).
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
+		{
+			Connection.BeginTransaction(SQLIsolationLevel.Serializable);
+		}
+
         public override bool HasTable(string tableName)
         {
             return Convert.ToInt32(this.ExecuteScalar(String.Format("select count(*) from SQLITE_MASTER where type = 'table' and name = '{0}'", tableName))) != 0;

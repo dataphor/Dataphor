@@ -127,8 +127,7 @@ def main():
     os.makedirs(rundir, exist_ok=True)
     if a.smoke:
         if build(out, "Smoke"):
-            env = dict(os.environ, SMOKE_CS=";Journal Mode=WAL;BusyTimeout=30000")
-            subprocess.run(["dotnet", find_dll(out, "Smoke", "Smoke.dll"), rundir, "sqlite", "8", "15"], env=env)
+            subprocess.run(["dotnet", find_dll(out, "Smoke", "Smoke.dll"), rundir, "sqlite", "8", "15"])
 
 
 if __name__ == "__main__":

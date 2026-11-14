@@ -20,6 +20,9 @@ namespace Alphora.Dataphor.DAE.Store
 			
 			/// <summary>Error code 130102: "Store settings cannot be changed once the store has been initialized."</summary>
 			StoreInitialized = 130102,
+
+			/// <summary>Error code 130103: "The catalog store is locked by another session's open transaction and did not become available within {0} seconds."</summary>
+			StoreLocked = 130103,
 		}
 
 		// Resource manager for this exception class

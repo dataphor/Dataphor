@@ -90,23 +90,37 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		protected void AcquireCatalogStoreConnection(bool isUpdatable)
 		{
 			_acquireCount++;
-
-			if (_catalogStoreConnection == null)
+			try
 			{
-				if (isUpdatable)
-					_catalogStoreConnection = Device.Store.Connect();
-				else
-					_catalogStoreConnection = Device.Store.AcquireConnection();
-			}
-
-			if (isUpdatable)
-			{
-				if (_isUpdatable != isUpdatable)
+				if (_catalogStoreConnection == null)
 				{
-					_isUpdatable = true;
-					for (int index = 0; index < ServerProcess.TransactionCount; index++)
-						_catalogStoreConnection.BeginTransaction(ServerProcess.Transactions[index].IsolationLevel);
+					if (isUpdatable)
+						_catalogStoreConnection = Device.Store.Connect();
+					else
+						_catalogStoreConnection = Device.Store.AcquireConnection();
 				}
+
+				if (isUpdatable)
+				{
+					if (_isUpdatable != isUpdatable)
+					{
+						for (int index = 0; index < ServerProcess.TransactionCount; index++)
+							_catalogStoreConnection.BeginTransaction(ServerProcess.Transactions[index].IsolationLevel);
+						// Set only once the store transactions have begun. The first begin waits for the store's write lock and can
+						// fail (130103); the process rollback that follows must not then end a store transaction that never began. Only
+						// that first begin reaches the database, so a failure leaves no level begun.
+						_isUpdatable = true;
+					}
+				}
+			}
+			catch
+			{
+				// Callers acquire before their own try, so their release does not run.
+				if (_catalogStoreConnection == null)
+					_acquireCount--;
+				else
+					ReleaseCatalogStoreConnection();
+				throw;
 			}
 		}
 

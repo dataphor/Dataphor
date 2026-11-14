@@ -25,8 +25,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public const string LibrariesFolderName = "Libraries";
 		public const string InstanceFolderName = "Instance";
 		public const string CatalogStoreClassName = Server.DefaultCatalogStoreClassName;
-		// The spike's connection string, so that results compare with its baseline; store-sqlite-concurrency revisits it.
-		public const string CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog;Journal Mode=WAL;BusyTimeout=30000";
+		// The plain default: the SQLite store applies write-ahead logging and its busy timeout itself, so the suite runs what a
+		// fresh instance gets.
+		public const string CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";
 
 		/// <summary>Copies the named libraries from the runtime layout. None is valid: System is built in, and the server creates General.</summary>
 		public TestServerInstance(string name, params string[] libraryNames)

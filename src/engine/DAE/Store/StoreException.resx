@@ -107,4 +107,7 @@
 	<data name="130102" xml:space="preserve">
 		<value>Store settings cannot be changed once the store has been initialized.</value>
 	</data>
+	<data name="130103" xml:space="preserve">
+		<value>The catalog store is locked by another session's open transaction and did not become available within {0} seconds.</value>
+	</data>
 </root>

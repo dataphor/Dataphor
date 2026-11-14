@@ -8,14 +8,22 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 
+using Alphora.Dataphor.DAE.Store;
+
 namespace Alphora.Dataphor.DAE.Connection
 {
 	public class SQLiteConnection : DotNetConnection
 	{
-		public SQLiteConnection(string connection) : base(connection) 
+		// Connects after reading BusyTimeout, because opening can itself report a lock wait.
+		public SQLiteConnection(string connection) : base() 
 		{
 			_supportsMARS = true;
+			_busyTimeoutSeconds = TimeSpan.FromMilliseconds(new SQLiteConnectionStringBuilder(connection).BusyTimeout).TotalSeconds;
+			InternalConnect(connection);
 		}
+
+		// For the lock-wait error's message.
+		private readonly double _busyTimeoutSeconds;
 		
 		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
@@ -73,8 +81,24 @@ namespace Alphora.Dataphor.DAE.Connection
 			return errorCode == SQLiteErrorCode.Constraint;
 		}
 		
+		// A lock wait that outlasted BusyTimeout. The store is this class's only user, so a store error is the right report.
+		private static bool IsLockTimeout(Exception exception)
+		{
+			for (; exception != null; exception = exception.InnerException)
+				if (exception is SQLiteException localException)
+				{
+					// The primary code, in case extended result codes are ever turned on (Busy_Recovery, Locked_SharedCache, ...).
+					SQLiteErrorCode primaryCode = (SQLiteErrorCode)((int)localException.ResultCode & 0xFF);
+					return primaryCode == SQLiteErrorCode.Busy || primaryCode == SQLiteErrorCode.Locked;
+				}
+			return false;
+		}
+
 		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
+			if (IsLockTimeout(exception))
+				return new StoreException(StoreException.Codes.StoreLocked, ErrorSeverity.Environment, exception, _busyTimeoutSeconds);
+
 			ErrorSeverity severity = GetExceptionSeverity(exception);
 			if (severity == ErrorSeverity.User)
 				return new DataphorException(ErrorSeverity.User, DataphorException.ApplicationError, exception.Message);

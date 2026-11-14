@@ -252,13 +252,15 @@ namespace Alphora.Dataphor.DAE.Store
 				#endif
 				
 				DisposeExecuteCommand();
-				_connection.BeginTransaction(isolationLevel);
+				InternalBeginTransaction(isolationLevel);
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 
 			}
+			// Counted only once the begin has succeeded: a begin that fails (a lock wait that timed out) leaves no level for the
+			// caller's rollback to end.
 			_transactionCount++;
 			
 			_operationLog.Add(new BeginTransactionOperation());
