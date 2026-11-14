@@ -451,6 +451,9 @@ namespace Alphora.Dataphor.DAE.Language
 			_token = String.Empty;
 			_tokenLine = _line;
 			_tokenLinePos = _linePos;
+			// A token that raises a lexer error ends where it starts, not where the previous token ended
+			_tokenEndLine = _line;
+			_tokenEndLinePos = _linePos;
 
 			if (!_nextEOF)
 			{

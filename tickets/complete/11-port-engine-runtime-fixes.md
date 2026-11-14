@@ -3,9 +3,9 @@ prereq: test-harness-inprocess
 architecture: docs/modernization-plan.md#ws2-engine-and-server-port
 files: src/engine/DAE/Debug/SourceUtility.cs, src/engine/DAE/Language/Lexer.cs, src/engine/DAE/Language/Language.cs, src/engine/DAE/Runtime.Instructions/SystemNodes.cs, src/engine/Base.Windows/PathUtility.cs, tests/DAE.Server.Tests/CoverageScripts.cs, tests/DAE.Server.Tests/CoverageManifest.cs, tests/DAE.Server.Tests/coverage-manifest.json, tests/Common.Tests/PathUtilityTest.cs, tests/Common.Tests/Common.Tests.csproj, tests/libraries/TestFramework.Coverage.Scripts/Documents/OperatorSourceText.d4, tests/libraries/TestFramework.Coverage.Scripts/Documents/AsyncExecution.d4, tests/libraries/TestFramework.Coverage.Scripts/Documents/Globalization.d4, docs/modernization-plan.md, docs/migration-notes.md, tickets/backlog/bug-memory-device-concurrent-access.md
 ----
-# Review: engine runtime fixes (K2, K5 engine sites, K22, K28 found here, NLS pin)
+# Complete: engine runtime fixes (K2, K5 engine sites, K22, K28 found here, NLS pin)
 
-Treat this as a starting point. Everything below was built and run; the gaps section lists what I could not settle.
+Implement-stage handoff below, followed by the review pass. Everything was built and run.
 
 ## What changed
 
@@ -54,3 +54,28 @@ Treat this as a starting point. Everything below was built and run; the gaps sec
 - **`CompareText` and NLS**: `CompareText` is `OrdinalIgnoreCase`, and the probe showed NLS and ICU disagree for letters added to Unicode lately (Georgian U+10D0 vs U+1C90 equal under ICU, not under NLS). Not pinned: the NLS answer comes from Windows' own casing table and may differ between Windows versions, and it may not match what .NET Framework did either. The plan's Globalization note says so.
 - **`ExecuteWithTimeout` without a process ID** leaks a process per call until the session ends (old behaviour, `NOTE:` at the site). Not filed; whether it deserves a ticket is your call.
 - **Plan and docs**: K2, K5 and K22 rows now say fixed; K28 and K29 rows added; the WS2 current state and the BeginInvoke and Globalization design notes are updated.
+
+## Review findings
+
+Read the diff of `ticket(implement): port-engine-runtime-fixes` before the handoff, then the touched files in full where it mattered (`SourceUtility.cs`, the tokenizer in `Lexer.cs`, `Language.cs`, the async operators in `SystemNodes.cs`, `PathUtility.cs`, the harness, the three new scripts, the docs).
+
+**Correctness, checked.**
+- K2 (`CopySection`): the end is now counted from the start of the section's first line, which matches how `PlanNode.SetLineInfo` and `Operator` treat `EndLinePos` (an absolute column of `EndLine`). The declaration section (start to the block's start) and the aggregate's initialization and aggregation sections use the same rule and stay correct. No issue.
+- K28 (tokenizer end position): `_line`/`_linePos` after the last `Advance` are those of the next character, so the recorded end is one past the token in every branch. The look-ahead buffer copies the end into each `LexerToken`, so `SetEndPosition` reads the end of the current token, not of a look-ahead one. Consumers checked: `CopySection`, the compiler's source-context offsets, `Program.GetLocation` and the debugger's after-node location. **Found (minor, fixed):** the change is wider than the handoff and migration note said: the old end also fell short for numeric literals whose value omits a prefix or suffix (`0x` hexadecimal, `$` money, the `d`/`f` suffixes). Added that to the migration-notes entry and the K28 row of the plan. **Found (minor, fixed):** when a token raised a lexer error, `Tokenizer.EndLine`/`EndLinePos` kept the previous token's end; they are now set to the token's start before it is read, so an error token ends where it starts.
+- K5 (`AsyncExecution`, `ExecuteAsync`, `ExecuteWithTimeout`, `ExecuteMultiple`): long-running tasks run on background threads, as the thread-pool threads of `BeginInvoke` did, so a hung script does not keep the host alive. Exceptions are swallowed inside the task body, so none reaches `UnobservedTaskException`. `ExecuteAsync` cleans up in a `finally` on the worker, as the old callback did. `ExecuteWithTimeout` no longer shares `_done`/`_script` fields across concurrent callers of the same plan node, a race the old code had. `ExecuteMultiple` waits on its tasks; its `finally` still unprepares, stops and disconnects each session. No issue.
+- K22 (`PathUtility`): `AppContext.BaseDirectory` ends in a separator, as `AppDomain.BaseDirectory` did, so `GetInstallationDirectory`'s `Path.GetDirectoryName` gives the same folder. No issue.
+- Harness preamble commit: commits only what the preamble left open, before the script; other entries have no preamble or one that opens no transaction. No issue.
+
+**Tests.** The three coverage scripts and `PathUtilityTest` are characterization tests the project rules require for a re-hosted subsystem, and each was shown to fail on the defect it pins (per the handoff: before K2, with K28 reverted, before K5, with NLS off). None restates the implementation or tests a mock; none cut. No new test added for the two minor fixes: the numeric-literal point is a documentation correction, and the error-token end has no consumer that reads it (`SetEndPosition` runs only after a successful parse).
+
+**Resource cleanup and error handling.** Checked each operator's `finally`. The no-process-ID form of `ExecuteWithTimeout` leaks a process per call until the session ends: old behaviour, already a `NOTE:` at the site; left as a tripwire, not filed (no current anchor needs it, and stopping the process would end a timed-out script that keeps running today).
+
+**Tripwires already parked by the implementer, confirmed in place.** The fixed-length wait and unprepare-after-timeout `NOTE:`s in `SystemExecuteWithTimeoutNode`; errors not returned (`AsyncExecution`); the 1 s wait in `AsyncExecution.d4` before reading `Processes`, which depends on K29's second arm (comment in the script). No new tripwires.
+
+**Filed.** Nothing new. K29 (`bug-memory-device-concurrent-access`, backlog) was filed by the implementer; read it: it carries `repro: verified`, severity, likelihood and tradeoffs, and both arms name their sites.
+
+**Docs.** Read the plan's WS2 section and known-defects rows (K2, K5, K22, K28, K29), the migration-notes entries and `CoverageManifest`'s format comment: they match the code, with the numeric-literal correction above. `AGENTS.md` still describes `Delegate.BeginInvoke` as throwing on .NET 10, which remains true in general (Dataphoria's `ScriptExecutor` is WS6). No change needed there.
+
+**Style and hygiene.** Tabs, CRLF and byte-order marks preserved in edited files; comments state reasons, not steps. `SystemNodes.cs` is large but was large before; the change shrank it. No issue.
+
+**Validation.** `dotnet build Dataphor.slnx` 0 errors, no new warnings in touched files; `dotnet test Dataphor.slnx --no-build` (Debug): Common.Tests 13/13; DAE.Server.Tests 101 passed, 44 skipped (known failures), 0 failed. Release and the spike were not rerun in review.
