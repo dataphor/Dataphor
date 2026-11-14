@@ -19,6 +19,7 @@ Scope per the plan's WS8 section and work-item table.
 - `docs-link-check-ci` — link checker in CI (needs `build-ci`).
 - `docs-reference-generator` — Markdown emitter for the catalog documentation operator; regenerate and diff. The operator's library (`Documentation`) was parked under `legacy/libraries/Documentation` by the reorganization, and `legacy/` is excluded from the build and "not to be fixed" (AGENTS.md). Planning this item has to decide whether to move the library back to `libraries/` (and into the build) or write the emitter somewhere else.
 - `docs-admin-guide` — needs `store-rebuild-workflow` (`feat-ws4-store-followups`) and `installer-msi` (`feat-ws9-installer-and-release`).
+  - Arm from `store-sqlite-concurrency` (planning): the SQLite catalog store always runs in write-ahead-log mode, so `DAECatalog.sqlite` has `-wal` and `-shm` files beside it and the instance's `Catalog` folder must be on a local disk (WAL does not work on network file systems); back up or copy the catalog only while the server is stopped, or all three files together. A session that waits longer than `BusyTimeout` (in `catalogstoreconnectionstring`, default 30 s) for another session's catalog write lock gets error 130103; say what that means and how to find the long transaction.
 - `docs-migration-guide-custom-code` — needs `ui-windows-client-runs` (`feat-ws6-windows-client-and-ide`).
 
 ## Cutting rules
