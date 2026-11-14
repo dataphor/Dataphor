@@ -40,3 +40,20 @@ create view CaseResultsExtended
 			Status tags { Frontend.Width = "10" },
 			Results tags { Frontend.Width = "35" }
 		};
+
+// Case results recorded by the transaction coverage scripts (Transaction.Atomicity.Run, Transaction.Isolation.Run).
+create table CurrentCaseItems
+{
+	Name : String,
+	Passed : Boolean,
+	Message : String,
+	key { Name, Message }
+};
+
+// Records a case result; raises an error naming the case when it did not pass.
+create operator RaiseCurrentCaseItem(const AName : String, const APassed : Boolean, const AMessage : String)
+begin
+	insert table { row { AName Name, APassed Passed, AMessage Message } } into CurrentCaseItems;
+	if not APassed then
+		raise Error(AName + ": " + AMessage);
+end;
