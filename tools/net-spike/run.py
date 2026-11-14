@@ -7,7 +7,9 @@ repository source is modified: each legacy csproj is wrapped by an SDK-style
 project that compiles the same source list by absolute path, and source files
 can be replaced by patched copies (see PATCHES). Projects already converted to
 SDK style are built in place, into the repository's git-ignored artifacts/
-folder, and wrappers reference them.
+folder, and wrappers reference them. The coverage run takes its D4 libraries
+from the runtime layout (artifacts/layout/debug/Libraries), which
+tools/layout/Layout.csproj assembles.
 """
 import argparse
 import os
@@ -28,18 +30,14 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 # the change (K1 emitter: port-catalog-emitter-race; BEGIN IMMEDIATE: store-sqlite-concurrency).
 PATCHES = []
 
-# D4 library folder (repo-relative) -> (project, assembly file) needed to run the coverage
-# scripts. Each is copied to covlibs/<folder name>: the server finds libraries as immediate subfolders.
-COVERAGE_LIBS = {
-    "libraries/Frontend": ("Frontend.Server", "Alphora.Dataphor.Frontend.Server.dll"),
-    "libraries/SimpleDevice": ("DAE.Device.Simple", "Alphora.Dataphor.DAE.Device.Simple.dll"),
-    "tests/libraries/TestFramework.Coverage.Base": ("DAE.Diagnostics", "Alphora.Dataphor.DAE.Diagnostics.dll"),
-    "libraries/SQLDevice": ("DAE.Device.SQL", "Alphora.Dataphor.DAE.Device.SQL.dll"),
-    "libraries/MSSQLDevice": ("DAEDeviceMSSQL", "AlphoraMSSQLDevice.dll"),
-    "libraries/Connection": ("DAE.Connection", "Alphora.Dataphor.DAE.Connection.dll"),
-    "tests/libraries/TestFramework": None,
-    "tests/libraries/TestFramework.Coverage.Scripts": None,
-}
+LAYOUT = os.path.join(REPO, "tools", "layout", "Layout.csproj")
+
+# D4 libraries the coverage run needs, copied with their assemblies from the runtime layout's Libraries folder
+# to covlibs/<name> (the server finds libraries as immediate subfolders). A list rather than all of Libraries,
+# so that the set of available libraries the coverage scripts see stays the same. Cov registers Connection and
+# System.Internet after the scripts, to show that libraries with private package dependencies load from the layout.
+COVERAGE_LIBS = ["Frontend", "SimpleDevice", "TestFramework.Coverage.Base", "SQLDevice", "MSSQLDevice", "Connection",
+                 "TestFramework", "TestFramework.Coverage.Scripts", "System.Internet"]
 
 
 # Project name -> absolute path of each listed project that is already SDK-style; filled by main().
@@ -82,8 +80,8 @@ def run(cmd, **kw):
     return subprocess.run(cmd, text=True, capture_output=True, **kw)
 
 
-def build(out, name):
-    proj = CONVERTED.get(name) or os.path.join(out, name, name + ".csproj")
+def build(out, name, proj=None):
+    proj = proj or CONVERTED.get(name) or os.path.join(out, name, name + ".csproj")
     log = os.path.join(out, name + ".log")
     r = run(["dotnet", "build", proj, "-nologo", "-v", "q", "-clp:NoSummary"])
     open(log, "w", encoding="utf-8").write(r.stdout + r.stderr)
@@ -93,17 +91,19 @@ def build(out, name):
 
 
 def find_dll(out, project, dll):
-    if project in CONVERTED:
-        # Only MSBuild knows where artifacts/ puts it; never a same-named wrapper left in an older work dir.
-        r = run(["dotnet", "msbuild", CONVERTED[project], "-nologo", "-getProperty:TargetPath", "-p:Configuration=Debug"])
-        path = r.stdout.strip()
-        if r.returncode != 0 or os.path.basename(path) != dll or not os.path.exists(path):
-            sys.exit(f"{dll} not built (MSBuild reports TargetPath {path!r})")
-        return path
     for root, _, files in os.walk(os.path.join(out, project, "bin")):
         if dll in files:
             return os.path.join(root, dll)
     sys.exit(f"{dll} not built")
+
+
+def layout_libraries():
+    # Only MSBuild knows where the layout is (DataphorLayoutDir, Directory.Build.targets).
+    r = run(["dotnet", "msbuild", LAYOUT, "-nologo", "-getProperty:DataphorLayoutDir", "-p:Configuration=Debug"])
+    path = os.path.join(r.stdout.strip(), "Libraries")
+    if r.returncode != 0 or not os.path.isdir(path):
+        sys.exit(f"runtime layout not built (MSBuild reports DataphorLayoutDir {r.stdout.strip()!r})")
+    return path
 
 
 def main():
@@ -153,13 +153,11 @@ def main():
     if a.coverage:
         libs = os.path.join(rundir, "covlibs")
         shutil.rmtree(libs, ignore_errors=True)
-        for folder, built in COVERAGE_LIBS.items():
-            lib = os.path.join(libs, os.path.basename(folder))
-            shutil.copytree(os.path.join(REPO, *folder.split("/")), lib,
-                            ignore=shutil.ignore_patterns("Source", "*.dll", "bin", "obj"))
-            if built:
-                build(out, built[0])
-                shutil.copy(find_dll(out, built[0], built[1]), lib)
+        if not build(out, "Layout", LAYOUT):
+            sys.exit("runtime layout build failed; see Layout.log in the work dir")
+        layout = layout_libraries()
+        for name in COVERAGE_LIBS:
+            shutil.copytree(os.path.join(layout, name), os.path.join(libs, name))
         if build(out, "Cov"):
             subprocess.run(["dotnet", find_dll(out, "Cov", "Cov.dll"), rundir,
                             os.path.join(REPO, "tests", "DAE.Server.Tests", "CoverageTest.cs"), "base"])

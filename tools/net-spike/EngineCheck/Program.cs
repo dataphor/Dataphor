@@ -63,6 +63,7 @@ static class Program
 		["System.Platform"] = new[] { "Alphora.Dataphor.Libraries.System.Platform.Strings.resources" },
 		["System.Internet"] = new string[0],
 		["System.Integration"] = new[] { "Alphora.Dataphor.Libraries.System.Integration.Strings.resources" },
+		["Alphora.Dataphor.DAE.Diagnostics"] = new string[0],
 	};
 
 	static readonly List<string> Failures = new List<string>();

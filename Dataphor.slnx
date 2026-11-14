@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
   </Folder>
@@ -25,5 +26,11 @@
     <Project Path="libraries/System.Platform/Source/System.Platform.csproj" />
     <Project Path="libraries/System.Internet/Source/System.Internet.csproj" />
     <Project Path="libraries/System.Integration/Source/System.Integration.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/layout/Layout.csproj" />
   </Folder>
 </Solution>

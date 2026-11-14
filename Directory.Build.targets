@@ -1,0 +1,89 @@
+<Project>
+
+  <!--
+    Runtime layout (plan WS1): artifacts/layout/<debug|release>/bin/ and .../Libraries/<Name>/. Only tools/layout/Layout.csproj
+    writes there; every other project only answers the GetDataphorLayoutItems call below. Consumers find the folder through
+    DataphorLayoutDir, never by spelling the path. It is defined here rather than in Directory.Build.props so that Configuration
+    is final; item definitions in a project body still see it, because MSBuild evaluates every property before any item.
+  -->
+  <PropertyGroup>
+    <DataphorLayoutDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsPath)', 'layout', '$(Configuration.ToLowerInvariant())'))</DataphorLayoutDir>
+  </PropertyGroup>
+
+  <!--
+    _DataphorPackageFile: the package runtime files this project's closure would copy next to a host (packages that arrive
+    through project references included), as the SDK selects them for build output: copy-local items only, minus the files
+    that lose to the shared framework in conflict resolution. Class libraries compute these lists without copying them.
+  -->
+  <Target Name="_DataphorCollectPackageFiles" DependsOnTargets="ResolvePackageAssets;ResolveAssemblyReferences">
+    <ItemGroup>
+      <_DataphorPackageFile Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_DataphorPackageFile Include="@(RuntimeTargetsCopyLocalItems)" Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
+      <_DataphorPackageFile Include="@(NativeCopyLocalItems)" Exclude="@(_NativeRestoredAppHostNETCore)" Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_DataphorPackageFile Include="@(ResourceCopyLocalItems)" Condition="'%(ResourceCopyLocalItems.CopyLocal)' == 'true'" />
+      <_DataphorPackageFile Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- The NuGet package ids in this project's closure, one item each, carrying NuGetPackageId metadata for MatchOnMetadata. -->
+  <Target Name="GetDataphorPackageIds" DependsOnTargets="_DataphorCollectPackageFiles" Returns="@(_DataphorPackageId)">
+    <ItemGroup>
+      <_DataphorPackageIdAll Include="@(_DataphorPackageFile->'%(NuGetPackageId)')" />
+    </ItemGroup>
+    <RemoveDuplicates Inputs="@(_DataphorPackageIdAll)">
+      <Output TaskParameter="Filtered" ItemName="_DataphorPackageId" />
+    </RemoveDuplicates>
+  </Target>
+
+  <!--
+    GetDataphorLayoutItems returns, and copies nothing:
+      DataphorLayoutKind=Output   the assembly, its .pdb and satellite assemblies (never .deps.json);
+      DataphorLayoutKind=Package  the package runtime files, keeping NuGetPackageId, AssetType, RuntimeIdentifier and
+                                  DestinationSubPath, and DataphorPrivate=true when no project this one references has the package.
+    DataphorLayoutPath is the file's path relative to the folder it goes to, in the SDK's copy-local shape. A project in a library's
+    Source folder, <F>\Source\, where <F> holds <F>.d4l, adds DataphorLibrary=<F>.
+
+    The calls into referenced projects pass the same global properties as the SDK's own (see GetCopyToOutputDirectoryItems in
+    Microsoft.Common.CurrentVersion.targets), so they reach the project instances the build already evaluated and built instead
+    of evaluating them a second time.
+  -->
+  <Target Name="GetDataphorLayoutItems"
+          DependsOnTargets="_DataphorCollectPackageFiles;PrepareProjectReferences;_AddOutputPathToGlobalPropertiesToRemove;SatelliteDllsProjectOutputGroup"
+          Returns="@(_DataphorLayoutItem)">
+
+    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
+             Targets="GetDataphorPackageIds"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)"
+             Condition="'@(_MSBuildProjectReferenceExistent)' != ''">
+      <Output TaskParameter="TargetOutputs" ItemName="_DataphorReferencedPackageId" />
+    </MSBuild>
+
+    <PropertyGroup>
+      <_DataphorLibraryFolder>$([System.IO.Path]::GetDirectoryName('$(MSBuildProjectDirectory)'))</_DataphorLibraryFolder>
+      <_DataphorLibraryName>$([System.IO.Path]::GetFileName('$(_DataphorLibraryFolder)'))</_DataphorLibraryName>
+      <_DataphorLibrary Condition="'$([System.IO.Path]::GetFileName($(MSBuildProjectDirectory)))' == 'Source' and Exists('$(_DataphorLibraryFolder)\$(_DataphorLibraryName).d4l')">$(_DataphorLibraryName)</_DataphorLibrary>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_DataphorPrivatePackageFile Include="@(_DataphorPackageFile)" />
+      <_DataphorPrivatePackageFile Remove="@(_DataphorReferencedPackageId)" MatchOnMetadata="NuGetPackageId" />
+      <_DataphorSharedPackageFile Include="@(_DataphorPackageFile)" Exclude="@(_DataphorPrivatePackageFile)" />
+
+      <_DataphorLayoutItem Include="$(TargetPath)" DataphorLayoutKind="Output" DataphorLayoutPath="$(TargetFileName)" />
+      <_DataphorLayoutItem Include="@(DebugSymbolsProjectOutputGroupOutput->'%(FinalOutputPath)')" Condition="Exists('%(DebugSymbolsProjectOutputGroupOutput.FinalOutputPath)')" DataphorLayoutKind="Output" DataphorLayoutPath="%(DebugSymbolsProjectOutputGroupOutput.TargetPath)" />
+      <_DataphorLayoutItem Include="@(SatelliteDllsProjectOutputGroupOutput->'%(FinalOutputPath)')" DataphorLayoutKind="Output" DataphorLayoutPath="%(SatelliteDllsProjectOutputGroupOutput.TargetPath)" />
+      <_DataphorLayoutItem Include="@(_DataphorPrivatePackageFile)" DataphorLayoutKind="Package" DataphorPrivate="true" />
+      <_DataphorLayoutItem Include="@(_DataphorSharedPackageFile)" DataphorLayoutKind="Package" DataphorPrivate="false" />
+      <_DataphorLayoutItem Condition="'%(_DataphorLayoutItem.DataphorLayoutKind)' == 'Package'">
+        <DataphorLayoutPath Condition="'%(_DataphorLayoutItem.DestinationSubPath)' != ''">%(_DataphorLayoutItem.DestinationSubPath)</DataphorLayoutPath>
+        <DataphorLayoutPath Condition="'%(_DataphorLayoutItem.DestinationSubPath)' == ''">%(_DataphorLayoutItem.Filename)%(_DataphorLayoutItem.Extension)</DataphorLayoutPath>
+      </_DataphorLayoutItem>
+      <_DataphorLayoutItem>
+        <DataphorLibrary>$(_DataphorLibrary)</DataphorLibrary>
+      </_DataphorLayoutItem>
+    </ItemGroup>
+  </Target>
+
+</Project>

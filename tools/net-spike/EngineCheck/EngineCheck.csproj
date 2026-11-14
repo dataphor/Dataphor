@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\..\libraries\System.Platform\Source\System.Platform.csproj" />
     <ProjectReference Include="..\..\..\libraries\System.Internet\Source\System.Internet.csproj" />
     <ProjectReference Include="..\..\..\libraries\System.Integration\Source\System.Integration.csproj" />
+    <ProjectReference Include="..\..\..\tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj" />
   </ItemGroup>
 
   <ItemGroup>

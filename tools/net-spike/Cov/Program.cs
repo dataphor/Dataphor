@@ -18,6 +18,15 @@ class Program
 		return s.Length > 330 ? s.Substring(0, 330) : s;
 	}
 
+	static void Register(IServer isrv, string lib)
+	{
+		var s0 = isrv.Connect(new SessionInfo("Admin", ""));
+		var p0 = s0.StartProcess(new ProcessInfo(s0.SessionInfo));
+		try { p0.ExecuteScript("EnsureLibraryRegistered('" + lib + "');"); Console.WriteLine("REGISTERED " + lib); }
+		catch (Exception e) { Console.WriteLine("REGISTER-FAIL " + lib + ": " + Flat(e)); }
+		try { s0.StopProcess(p0); isrv.Disconnect(s0); } catch { }
+	}
+
 	static int Main(string[] args)
 	{
 		string root = args[0];
@@ -40,13 +49,7 @@ class Program
 		try
 		{
 			foreach (var lib in withBase ? new[] { "Frontend", "TestFramework.Coverage.Base" } : new[] { "Frontend" })
-			{
-				var s0 = isrv.Connect(new SessionInfo("Admin", ""));
-				var p0 = s0.StartProcess(new ProcessInfo(s0.SessionInfo));
-				try { p0.ExecuteScript("EnsureLibraryRegistered('" + lib + "');"); Console.WriteLine("REGISTERED " + lib); }
-				catch (Exception e) { Console.WriteLine("REGISTER-FAIL " + lib + ": " + Flat(e)); }
-				try { s0.StopProcess(p0); isrv.Disconnect(s0); } catch { }
-			}
+				Register(isrv, lib);
 			int pass = 0, fail = 0, timeout = 0, ignored = 0;
 			foreach (var line in File.ReadAllLines(testFile))
 			{
@@ -78,6 +81,10 @@ class Program
 			}
 			Console.WriteLine("SUMMARY pass={0} fail={1} timeout={2} skipped-ignored={3}", pass, fail, timeout, ignored);
 			if (timeout > 0) Environment.Exit(2);
+			// Libraries with private package dependencies, registered from the runtime layout's copy. After the scripts, so that
+			// these registrations cannot change a script's result.
+			foreach (var lib in new[] { "Connection", "System.Internet" })
+				Register(isrv, lib);
 		}
 		finally
 		{

@@ -1,0 +1,248 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Assembles the runtime layout, $(DataphorLayoutDir) (defined in Directory.Build.targets), after every project it references
+    has built. This is the only project that writes there:
+
+      bin\                core and server assemblies and their package runtime files, in the SDK's copy-local shape
+                          (generic files at the root, runtimes\<rid>\... subtrees as they are). No host yet: no .exe,
+                          .deps.json or .runtimeconfig.json; host-generic-host adds the first one.
+      Libraries\<Name>\   the library's tracked files (.d4l, Documents\, Upgrades\, ...), its assembly and .pdb, and that
+                          assembly's private package files flattened into the folder for the Windows runtime.
+
+    The library folders come from libraries\, samples\ and tests\libraries\ together, as the server expects them: it loads each
+    immediate subfolder <Name> that holds <Name>.d4l. The layout is mirrored: a file the build does not put there is deleted.
+    A server pointed at the layout rewrites .d4l files and creates library folders in it, so tests and local runs copy
+    Libraries\ and point the server at the copy.
+
+    The project's own Layout.dll (an empty assembly in artifacts\bin\Layout\) is not part of the layout.
+
+    NOTE: when a net10.0-windows project (a UI host) joins the Bin list, switch this project to net10.0-windows or set
+    SkipGetTargetFrameworkProperties on that reference: a net10.0 project cannot reference a net10.0-windows one, even with
+    ReferenceOutputAssembly=false.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <!-- The layout copies files that are not inputs of any project (D4 documents), so Visual Studio must always call MSBuild for this project. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <_DataphorRepositoryRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</_DataphorRepositoryRoot>
+  </PropertyGroup>
+
+  <!-- References order the build (this project builds after them) and name what goes into the layout; nothing is referenced for compilation. -->
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
+  <!-- Bin: every converted project that is not a library. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\engine\Base\Base.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\Base.Windows\Base.Windows.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\Server\Server.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\protocol\Common\Common.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\protocol\Client\Client.csproj" DataphorLayoutRole="Bin" />
+  </ItemGroup>
+
+  <!-- Library: every converted library project (in <Name>\Source\, next to <Name>.d4l). The .d4l check below fails the build when one is missing here. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\libraries\Connection\Source\DAE.Connection.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\SimpleDevice\Source\DAE.Device.Simple.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\Frontend\Source\Frontend.Server.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\System.Platform\Source\System.Platform.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\System.Internet\Source\System.Internet.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\System.Integration\Source\System.Integration.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj" DataphorLayoutRole="Library" />
+  </ItemGroup>
+
+  <!-- The D4 libraries in the layout, one item per library: its .d4l file. -->
+  <ItemGroup>
+    <DataphorD4Library Include="$(_DataphorRepositoryRoot)libraries\*\*.d4l;$(_DataphorRepositoryRoot)samples\*\*.d4l;$(_DataphorRepositoryRoot)tests\libraries\*\*.d4l" />
+    <!-- Left out while their C# projects are not converted: registering them would fail on the missing assembly. Remove the line when the project joins the Library list. -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLConnection\PGSQLConnection.d4l" /><!-- device-pgsql-port -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-port -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\ODBCConnection\ODBCConnection.d4l" /><!-- device-connection-cleanup -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)samples\Sample.Shipping\Sample.Shipping.d4l" /><!-- test-samples-corpus -->
+  </ItemGroup>
+
+  <!-- Every write and delete below goes through _DataphorLayoutDirFull, which this target confines to artifacts\layout\<something>\. -->
+  <Target Name="_DataphorCheckLayoutDir">
+    <PropertyGroup>
+      <_DataphorLayoutRoot>$([MSBuild]::NormalizeDirectory('$(ArtifactsPath)', 'layout'))</_DataphorLayoutRoot>
+      <_DataphorLayoutDirFull Condition="'$(DataphorLayoutDir)' != ''">$([MSBuild]::NormalizeDirectory('$(DataphorLayoutDir)'))</_DataphorLayoutDirFull>
+    </PropertyGroup>
+    <Error Condition="'$(ArtifactsPath)' == '' or '$(_DataphorLayoutDirFull)' == '' or '$(_DataphorLayoutDirFull.ToUpperInvariant().StartsWith($(_DataphorLayoutRoot.ToUpperInvariant())))' != 'True' or '$(_DataphorLayoutDirFull.Length)' &lt;= '$(_DataphorLayoutRoot.Length)'"
+           Text="DataphorLayoutDir '$(DataphorLayoutDir)' must be a folder inside '$(_DataphorLayoutRoot)'; the layout step deletes files there and refuses to work anywhere else." />
+  </Target>
+
+  <!-- Asks each reference for its layout items, with the global properties the build used for it (see GetDataphorLayoutItems in Directory.Build.targets). -->
+  <Target Name="_DataphorGetLayoutItems" DependsOnTargets="PrepareProjectReferences;_AddOutputPathToGlobalPropertiesToRemove">
+    <ItemGroup>
+      <_DataphorBinReference Include="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.DataphorLayoutRole)' == 'Bin'" />
+      <_DataphorLibraryReference Include="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.DataphorLayoutRole)' == 'Library'" />
+      <_DataphorUnknownReference Include="@(_MSBuildProjectReferenceExistent)" Exclude="@(_DataphorBinReference);@(_DataphorLibraryReference)" />
+    </ItemGroup>
+    <Error Condition="'@(_DataphorUnknownReference)' != ''" Text="Project reference %(_DataphorUnknownReference.Identity) needs DataphorLayoutRole=&quot;Bin&quot; or &quot;Library&quot;." />
+
+    <MSBuild Projects="@(_DataphorBinReference)"
+             Targets="GetDataphorLayoutItems"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="%(_DataphorBinReference.SetConfiguration); %(_DataphorBinReference.SetPlatform); %(_DataphorBinReference.SetTargetFramework)"
+             RemoveProperties="%(_DataphorBinReference.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
+      <Output TaskParameter="TargetOutputs" ItemName="_DataphorBinItem" />
+    </MSBuild>
+    <MSBuild Projects="@(_DataphorLibraryReference)"
+             Targets="GetDataphorLayoutItems"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="%(_DataphorLibraryReference.SetConfiguration); %(_DataphorLibraryReference.SetPlatform); %(_DataphorLibraryReference.SetTargetFramework)"
+             RemoveProperties="%(_DataphorLibraryReference.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
+      <Output TaskParameter="TargetOutputs" ItemName="_DataphorLibraryItem" />
+    </MSBuild>
+  </Target>
+
+  <!-- _DataphorLibrary: one item per D4 library, named by the library, with its folder and .d4l file. -->
+  <Target Name="_DataphorListLibraries">
+    <ItemGroup>
+      <_DataphorLibrary Include="@(DataphorD4Library->'%(Filename)')">
+        <Folder>%(DataphorD4Library.RootDir)%(DataphorD4Library.Directory)</Folder>
+        <D4lFile>%(DataphorD4Library.FullPath)</D4lFile>
+        <FolderName>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(DataphorD4Library.FullPath)'))))</FolderName>
+      </_DataphorLibrary>
+    </ItemGroup>
+    <Error Condition="'%(_DataphorLibrary.Identity)' != '%(_DataphorLibrary.FolderName)'"
+           Text="%(_DataphorLibrary.D4lFile): the server loads only &lt;Name&gt;\&lt;Name&gt;.d4l, so this file is not a library; rename it or move it out of the library folders." />
+    <Error Condition="'@(_DataphorLibrary->Count())' != '1'"
+           Text="Two library folders are named %(_DataphorLibrary.Identity): @(_DataphorLibrary->'%(Folder)', ', '). The layout puts every library in one Libraries folder, so names must be unique across libraries, samples and tests\libraries." />
+  </Target>
+
+  <!--
+    _DataphorLayoutFile: every file the layout holds, with DataphorSource (the file to copy) and DataphorDestination (where it goes).
+    Library folders take only private package files (no project the library references has the package), flattened into the
+    folder with one file per name: the win-x64 file first, then win, then the generic one; other runtime identifiers are dropped.
+    A flat folder has no .deps.json to choose for the runtime, and the generic file of a package that ships a Windows one is the
+    stub that throws PlatformNotSupportedException.
+  -->
+  <Target Name="_DataphorComputeLayout" DependsOnTargets="_DataphorCheckLayoutDir;_DataphorGetLayoutItems;_DataphorListLibraries">
+    <ItemGroup>
+      <_DataphorLayoutFile Include="@(_DataphorBinItem)">
+        <DataphorDestination>$(_DataphorLayoutDirFull)bin\%(_DataphorBinItem.DataphorLayoutPath)</DataphorDestination>
+      </_DataphorLayoutFile>
+
+      <_DataphorLibrarySourceFile Include="%(_DataphorLibrary.Folder)**"
+                                  Exclude="%(_DataphorLibrary.Folder)Source\**;%(_DataphorLibrary.Folder)bin\**;%(_DataphorLibrary.Folder)obj\**;%(_DataphorLibrary.Folder)**\*.dll;%(_DataphorLibrary.Folder)**\*.pdb;%(_DataphorLibrary.Folder)**\*.exe">
+        <DataphorLibrary>%(_DataphorLibrary.Identity)</DataphorLibrary>
+      </_DataphorLibrarySourceFile>
+      <_DataphorLayoutFile Include="@(_DataphorLibrarySourceFile)">
+        <DataphorDestination>$(_DataphorLayoutDirFull)Libraries\%(_DataphorLibrarySourceFile.DataphorLibrary)\%(_DataphorLibrarySourceFile.RecursiveDir)%(_DataphorLibrarySourceFile.Filename)%(_DataphorLibrarySourceFile.Extension)</DataphorDestination>
+      </_DataphorLayoutFile>
+
+      <_DataphorLibraryOutput Include="@(_DataphorLibraryItem)" Condition="'%(_DataphorLibraryItem.DataphorLayoutKind)' == 'Output'" />
+      <_DataphorLibraryPackage Include="@(_DataphorLibraryItem)" Condition="'%(_DataphorLibraryItem.DataphorLayoutKind)' == 'Package' and '%(_DataphorLibraryItem.DataphorPrivate)' == 'true'" />
+      <_DataphorLibraryProject Include="@(_DataphorLibraryItem->'%(DataphorLibrary)')" />
+      <_DataphorLibraryProjectOutsideLayout Include="@(_DataphorLibraryProject)" Exclude="@(_DataphorLibrary)" />
+    </ItemGroup>
+
+    <Error Condition="'%(_DataphorLibraryItem.DataphorLibrary)' == ''"
+           Text="%(_DataphorLibraryItem.MSBuildSourceProjectFile) is in the Library list but is not in a library's Source folder (&lt;Name&gt;\Source\, next to &lt;Name&gt;.d4l). Move it to the Bin list if it is not a library." />
+    <Error Condition="'@(_DataphorLibraryProjectOutsideLayout)' != ''"
+           Text="%(_DataphorLibraryProjectOutsideLayout.MSBuildSourceProjectFile) builds library %(_DataphorLibraryProjectOutsideLayout.Identity), which the DataphorD4Library list leaves out; remove its exclusion in this file." />
+    <Error Condition="'%(_DataphorLibraryPackage.AssetType)' == 'native'"
+           Text="Library %(_DataphorLibraryPackage.DataphorLibrary) has a private native dependency, %(_DataphorLibraryPackage.DestinationSubPath) from package %(_DataphorLibraryPackage.NuGetPackageId). The server does not probe library folders for native files yet; port-library-loading adds that and lifts this error." />
+
+    <ItemGroup>
+      <_DataphorLayoutFile Include="@(_DataphorLibraryOutput)">
+        <DataphorDestination>$(_DataphorLayoutDirFull)Libraries\%(_DataphorLibraryOutput.DataphorLibrary)\%(_DataphorLibraryOutput.DataphorLayoutPath)</DataphorDestination>
+      </_DataphorLayoutFile>
+
+      <_DataphorLibraryPackage Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' != ''">
+        <DataphorDestination>$(_DataphorLayoutDirFull)Libraries\%(_DataphorLibraryPackage.DataphorLibrary)\%(_DataphorLibraryPackage.Filename)%(_DataphorLibraryPackage.Extension)</DataphorDestination>
+      </_DataphorLibraryPackage>
+      <_DataphorLibraryPackage Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' == ''">
+        <DataphorDestination>$(_DataphorLayoutDirFull)Libraries\%(_DataphorLibraryPackage.DataphorLibrary)\%(_DataphorLibraryPackage.DataphorLayoutPath)</DataphorDestination>
+      </_DataphorLibraryPackage>
+      <_DataphorLibraryPackageWinX64 Include="@(_DataphorLibraryPackage)" Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' == 'win-x64'" />
+      <_DataphorLibraryPackageWin Include="@(_DataphorLibraryPackage)" Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' == 'win'" />
+      <_DataphorLibraryPackageGeneric Include="@(_DataphorLibraryPackage)" Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' == ''" />
+      <_DataphorLibraryPackageWin Remove="@(_DataphorLibraryPackageWinX64)" MatchOnMetadata="DataphorDestination" MatchOnMetadataOptions="PathLike" />
+      <_DataphorLibraryPackageGeneric Remove="@(_DataphorLibraryPackageWinX64)" MatchOnMetadata="DataphorDestination" MatchOnMetadataOptions="PathLike" />
+      <_DataphorLibraryPackageGeneric Remove="@(_DataphorLibraryPackageWin)" MatchOnMetadata="DataphorDestination" MatchOnMetadataOptions="PathLike" />
+      <_DataphorLayoutFile Include="@(_DataphorLibraryPackageWinX64);@(_DataphorLibraryPackageWin);@(_DataphorLibraryPackageGeneric)" />
+
+      <_DataphorLayoutFile>
+        <DataphorSource>%(FullPath)</DataphorSource>
+      </_DataphorLayoutFile>
+      <_DataphorLayoutDestination Include="@(_DataphorLayoutFile->'%(DataphorDestination)')" />
+    </ItemGroup>
+
+    <!-- The same file reached through several projects is copied once; two different files for one destination is a version split or a name clash. -->
+    <Error Condition="'@(_DataphorLayoutDestination->Metadata('DataphorSource')->Distinct()->Count())' != '1'"
+           Text="Two different files would be copied to %(_DataphorLayoutDestination.Identity): @(_DataphorLayoutDestination->'%(DataphorSource)', ', '). Align the package versions (Directory.Packages.props) or rename one of the files." />
+    <RemoveDuplicates Inputs="@(_DataphorLayoutDestination)">
+      <Output TaskParameter="Filtered" ItemName="_DataphorLayoutTarget" />
+    </RemoveDuplicates>
+  </Target>
+
+  <!-- One run per library: the files its .d4l lists, as the layout paths they must have. -->
+  <Target Name="_DataphorReadLibraryFileList" DependsOnTargets="_DataphorComputeLayout" Outputs="%(_DataphorLibrary.Identity)">
+    <PropertyGroup>
+      <_DataphorCurrentLibrary>%(_DataphorLibrary.Identity)</_DataphorCurrentLibrary>
+      <_DataphorCurrentD4lFile>%(_DataphorLibrary.D4lFile)</_DataphorCurrentD4lFile>
+    </PropertyGroup>
+    <XmlPeek XmlInputPath="$(_DataphorCurrentD4lFile)"
+             Query="/d:library/d:files.filereference/@filename"
+             Namespaces="&lt;Namespace Prefix='d' Uri='Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE' /&gt;">
+      <Output TaskParameter="Result" ItemName="_DataphorPeekedFileName" />
+    </XmlPeek>
+    <ItemGroup>
+      <_DataphorListedFile Include="@(_DataphorPeekedFileName->'$(_DataphorLayoutDirFull)Libraries\$(_DataphorCurrentLibrary)\%(Identity)')">
+        <ListedName>%(_DataphorPeekedFileName.Identity)</ListedName>
+        <D4lFile>$(_DataphorCurrentD4lFile)</D4lFile>
+      </_DataphorListedFile>
+      <_DataphorPeekedFileName Remove="@(_DataphorPeekedFileName)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Turns the server's registration-time FileNotFoundException into a build error: every file a .d4l lists must be in its library folder. -->
+  <Target Name="_DataphorCheckLibraryFiles" DependsOnTargets="_DataphorReadLibraryFileList">
+    <ItemGroup>
+      <_DataphorMissingFile Include="@(_DataphorListedFile)" Exclude="@(_DataphorLayoutTarget)" />
+    </ItemGroup>
+    <Error Condition="'@(_DataphorMissingFile)' != ''"
+           Text="The layout does not provide files that a .d4l lists: @(_DataphorMissingFile->'%(ListedName) (listed in %(D4lFile))', '; '). Add the library's project to the Library list in this file, or check that the package file it names is private to the library." />
+  </Target>
+
+  <Target Name="AssembleDataphorLayout" AfterTargets="Build" DependsOnTargets="_DataphorComputeLayout;_DataphorCheckLibraryFiles">
+    <!-- Copies, never links: a server pointed at the layout rewrites .d4l files in place, and a link would carry that write into the source tree or the NuGet cache. -->
+    <Copy SourceFiles="@(_DataphorLayoutTarget->'%(DataphorSource)')"
+          DestinationFiles="@(_DataphorLayoutTarget)"
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="false"
+          UseSymboliclinksIfPossible="false"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)" />
+
+    <!-- Mirror: delete what the build did not put there, including library folders a server created. -->
+    <!-- NOTE: empty folders left behind inside bin\ or a library folder (a package dropped, a Documents subfolder deleted) are not removed; the server ignores them. If a consumer starts copying folders wholesale (installer harvesting), remove empty folders here too. -->
+    <ItemGroup>
+      <_DataphorLayoutExisting Include="$(_DataphorLayoutDirFull)**" />
+      <_DataphorLayoutStale Include="@(_DataphorLayoutExisting)" Exclude="@(_DataphorLayoutTarget)" />
+      <_DataphorLayoutLibraryFolder Include="$([System.IO.Directory]::GetDirectories('$(_DataphorLayoutDirFull)Libraries'))" Condition="Exists('$(_DataphorLayoutDirFull)Libraries')" />
+      <_DataphorLayoutStaleLibraryFolder Include="@(_DataphorLayoutLibraryFolder)" Exclude="@(_DataphorLibrary->'$(_DataphorLayoutDirFull)Libraries\%(Identity)')" />
+    </ItemGroup>
+    <Delete Files="@(_DataphorLayoutStale)" />
+    <RemoveDir Directories="@(_DataphorLayoutStaleLibraryFolder)" />
+    <Message Importance="normal" Text="Runtime layout: $(_DataphorLayoutDirFull) (@(_DataphorLayoutTarget->Count()) files, @(_DataphorLibrary->Count()) libraries)" />
+  </Target>
+
+  <Target Name="CleanDataphorLayout" AfterTargets="Clean" DependsOnTargets="_DataphorCheckLayoutDir">
+    <RemoveDir Directories="$(_DataphorLayoutDirFull)" />
+  </Target>
+
+</Project>
