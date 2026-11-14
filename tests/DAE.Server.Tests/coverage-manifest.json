@@ -130,7 +130,7 @@
 { "script": "TransitionConstraintWithNamedRowVariables", "status": "pass" },
 { "script": "TransitionConstraints", "status": "pass" },
 { "script": "Types", "status": "pass" },
-{ "script": "Types.Coordinate", "status": "known-failure", "ticket": "engine-compound-scalar-equality", "error": "Unknown identifier \"right.Degrees\"" },
+{ "script": "Types.Coordinate", "status": "pass" },
 { "script": "Types.Length", "status": "pass" },
 { "script": "VersionNumber", "status": "pass" },
 { "script": "ViewDependencies", "status": "known-failure", "ticket": "test-pre-3-1-scripts-policy", "error": "Unknown identifier \"Dependent_Object_ID\"" },

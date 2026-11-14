@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					try
 					{
 						#if USENAMEDROWVARIABLES
-						plan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+						plan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
 						#else
 						Schema.RowType rightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
 						APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
