@@ -139,3 +139,7 @@ New codes are additions, not changes to existing codes; no existing message text
 - Update `docs/architecture.md`, `AGENTS.md` and `docs/migration-notes.md`.
 - Add the two tests; run them and the existing build/test command from `AGENTS.md`.
 - Run the grep from "Done when" and put its output in the handoff, with the shared-instances-directory observation.
+
+## Note from planning `test-harness-inprocess`
+
+`test-server-fixture` (one of the three tickets `test-harness-inprocess` was split into) already converts `tests/DAE.Server.Tests` to an SDK-style project and deletes `Utilities/` (all four configuration managers, including `SQLCEServerConfigurationManager.cs` and `SQLiteServerConfigurationManager.cs`), `SQLStoreTest.cs`, `CoverageDeviceTest.cs`, the SQL CE and SQL Server variants of `CatalogStoreTest`, and every SQL CE reference and content item in `DAE.Server.Tests.csproj`. The test arms above for `tests/DAE.Server.Tests` are therefore done; check, and say so. `tests/DAE.Client.Tests` is untouched and still names `SQLCEServerConfigurationManager` from a class that no longer exists; it is a legacy project nobody builds, rebuilt by `test-client-server`, so remove only its SQL CE project reference, its `sqlce*.dll` content items and binaries, and leave its fixture to that ticket. Write the two new tests on `TestServerInstance` (`tests/DAE.Server.Tests/TestServerInstance.cs`), which sets the SQLite store explicitly: for the default-store test, construct the server without those two settings.

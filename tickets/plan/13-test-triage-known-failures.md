@@ -89,3 +89,7 @@ Helper-library operators the scripts rely on are defined in `tests/libraries/Tes
 - Mistaking a porting defect for "never worked": the presumption under D2 is a porting defect unless the evidence above says otherwise.
 
 If this splits, the ticket that finishes the work item keeps the slug `test-triage-known-failures`; earlier pieces get new slugs and are chained to it with `prereq:`.
+
+## Note from planning `test-harness-inprocess`
+
+There are 136 scripts, not 135 (`DistributedTransactions` was added by `server-remove-remoting-and-dtc`). The harness runs each script on its own server copied from a template catalog, because on one shared server scripts interfered: `SerializationOperators`, `SerializationTables`, `SerializationViews` and `TestNetworkApplicationTransactions` failed with "object already defined" after other scripts and pass alone, and `DebugTest` (an infinite loop by design, a debugger exercise) left the catalog locked for every later script. So a failure in the manifest is the script's own, not an effect of order. The planning run's observed errors for every failing script are in the `test-harness-inprocess` ticket; nine passing scripts contain no `raise` at all and carry `"note": "no assertions"` in the manifest.

@@ -120,3 +120,7 @@ Validated against the L1 suite (D4 coverage scripts), the L2 store tests that ex
 If this splits, the ticket that finishes the work item keeps the slug `store-sqlite-concurrency`; earlier pieces get new slugs and are chained to it with `prereq:`.
 
 A natural split, if one run cannot hold it: (a) provider decision and WAL/busy-timeout configuration with the busy error and the concurrency test; (b) lazy write transactions, read-your-writes and the long-transaction test, keeping this slug.
+
+## Note from planning `test-harness-inprocess`
+
+`test-harness-inprocess` removes the spike's coverage mode (`tools/net-spike/Cov/`, `--coverage` in `run.py`): the coverage scripts run under `dotnet test`, on `TestServerInstance` (`tests/DAE.Server.Tests/TestServerInstance.cs`), which uses the same SQLite connection string as the spike (`Journal Mode=WAL;BusyTimeout=30000`), so if this ticket changes the connection string, change it there as well as in `run.py`'s `SMOKE_CS`. The spike's `--smoke` concurrency loop stays. The harness runs each coverage script on its own server and catalog, so the L1 manifest exercises no catalog concurrency; the concurrency test this ticket adds is the only check of K10.
