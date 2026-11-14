@@ -19,7 +19,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The script must fail, with an error text that contains the entry's error substring.</summary>
 		KnownFailure,
 		/// <summary>The script's result was observed to vary between identical runs: it runs, and never fails the run.</summary>
-		Unstable
+		Unstable,
+		/// <summary>The script is a step that other scripts run (its entry's partOf); it is not run on its own.</summary>
+		Fragment
 	}
 
 	/// <summary>One manifest entry: what running one coverage script must do. The fields are described on <see cref="CoverageManifest"/>.</summary>
@@ -32,6 +34,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[JsonPropertyName("timeoutSeconds")] public int? TimeoutSeconds { get; set; }
 		[JsonPropertyName("preamble")] public string Preamble { get; set; }
 		[JsonPropertyName("register")] public string[] Register { get; set; }
+		[JsonPropertyName("partOf")] public string[] PartOf { get; set; }
 		[JsonPropertyName("note")] public string Note { get; set; }
 
 		/// <summary>Valid only once the manifest has validated the entry.</summary>
@@ -46,6 +49,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				case "pass": return CoverageStatus.Pass;
 				case "known-failure": return CoverageStatus.KnownFailure;
 				case "unstable": return CoverageStatus.Unstable;
+				case "fragment": return CoverageStatus.Fragment;
 				default: return null;
 			}
 		}
@@ -61,9 +65,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// one entry (an object) per line, sorted by <c>script</c> in ordinal order. Fields, and nothing else:</para>
 	/// <list type="bullet">
 	/// <item><c>script</c> (always): the file name in Documents/ without ".d4", exact case.</item>
-	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c> or <c>unstable</c> (see <see cref="CoverageStatus"/>).
-	/// Use <c>unstable</c> only with evidence that the result varies between identical runs.</item>
-	/// <item><c>ticket</c> (required unless <c>pass</c>, forbidden on <c>pass</c>): the slug of the ticket that owns the cause,
+	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c>, <c>unstable</c> or <c>fragment</c> (see
+	/// <see cref="CoverageStatus"/>). Use <c>unstable</c> only with evidence that the result varies between identical runs, and
+	/// <c>fragment</c> only for a script that fails on its own because it needs what other scripts run before it; a helper
+	/// script that passes on its own stays <c>pass</c>.</item>
+	/// <item><c>partOf</c> (<c>fragment</c> only, required there): a non-empty array of the scripts that run the fragment.
+	/// Each must have an entry, not be the fragment itself and not be a <c>fragment</c>; discovery also fails the fragment's
+	/// case unless each one's file text mentions the fragment's name as a D4 string literal.</item>
+	/// <item><c>ticket</c> (required on <c>known-failure</c> and <c>unstable</c>, forbidden otherwise): the slug of the ticket that owns the cause,
 	/// lower-case and hyphenated, without a sequence prefix.</item>
 	/// <item><c>error</c> (<c>known-failure</c> only, required there): an ordinal, case-sensitive substring the actual error
 	/// text must contain. Never the full text, and never a part that changes between runs (program identifiers, the line
@@ -75,6 +84,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <see cref="CoverageScripts.Libraries"/>.</item>
 	/// <item><c>note</c> (optional): free text for the next reader.</item>
 	/// </list>
+	/// <para>On a <c>fragment</c> entry only <c>script</c>, <c>status</c>, <c>partOf</c> and <c>note</c> are allowed.</para>
 	/// </remarks>
 	public sealed class CoverageManifest
 	{
@@ -139,6 +149,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			List<string> problems = new List<string>();
 			HashSet<string> scripts = new HashSet<string>(StringComparer.Ordinal);
+			Dictionary<string, CoverageStatus?> statuses = new Dictionary<string, CoverageStatus?>(StringComparer.Ordinal);
+			foreach (CoverageEntry entry in entries)
+				if (entry?.Script != null)
+					statuses.TryAdd(entry.Script, CoverageEntry.ParseStatus(entry.StatusText));
 			string previous = null;
 			for (int index = 0; index < entries.Count; index++)
 			{
@@ -165,7 +179,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				CoverageStatus? status = CoverageEntry.ParseStatus(entry.StatusText);
 				if (status == null)
-					Problem(entry.StatusText == null ? "\"status\" is missing." : String.Format("unknown status \"{0}\"; expected pass, known-failure or unstable.", entry.StatusText));
+					Problem(entry.StatusText == null ? "\"status\" is missing." : String.Format("unknown status \"{0}\"; expected pass, known-failure, unstable or fragment.", entry.StatusText));
+
+				if (status == CoverageStatus.Fragment)
+				{
+					ValidateFragment(entry, statuses, Problem);
+					continue;
+				}
+
+				if (entry.PartOf != null)
+					Problem("\"partOf\" is allowed only on a fragment entry.");
 
 				if (status == CoverageStatus.Pass)
 				{
@@ -199,6 +222,35 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							Problem(String.Format("\"register\" names \"{0}\", which is not one of the libraries copied for the coverage scripts ({1}).", library, String.Join(", ", libraries)));
 			}
 			return problems;
+		}
+
+		private static void ValidateFragment(CoverageEntry entry, Dictionary<string, CoverageStatus?> statuses, Action<string> problem)
+		{
+			if (entry.Ticket != null)
+				problem("\"ticket\" is not allowed on a fragment entry.");
+			if (entry.Error != null)
+				problem("\"error\" is not allowed on a fragment entry.");
+			if (entry.TimeoutSeconds.HasValue)
+				problem("\"timeoutSeconds\" is not allowed on a fragment entry; it is not run.");
+			if (entry.Preamble != null)
+				problem("\"preamble\" is not allowed on a fragment entry; it is not run.");
+			if (entry.Register != null)
+				problem("\"register\" is not allowed on a fragment entry; it is not run.");
+
+			if (entry.PartOf == null || entry.PartOf.Length == 0)
+			{
+				problem("\"partOf\" is required on a fragment entry and must name at least one script.");
+				return;
+			}
+			foreach (string parent in entry.PartOf)
+			{
+				if (parent == null || !statuses.TryGetValue(parent, out CoverageStatus? parentStatus))
+					problem(String.Format("\"partOf\" names \"{0}\", which has no entry.", parent));
+				else if (String.Equals(parent, entry.Script, StringComparison.Ordinal))
+					problem("\"partOf\" names the fragment itself.");
+				else if (parentStatus == CoverageStatus.Fragment)
+					problem(String.Format("\"partOf\" names \"{0}\", which is itself a fragment; name the scripts that run it.", parent));
+			}
 		}
 
 		/// <summary>Whether a script's error text is the failure a known-failure entry expects.</summary>

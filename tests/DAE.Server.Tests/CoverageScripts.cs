@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// How long a timed-out script's thread gets to end once its process is aborted, and an abandoned server to stop.
 		private static readonly TimeSpan AbortWait = TimeSpan.FromSeconds(10);
 
-		public enum CaseKind { Script, NotInManifest, FileMissing, ManifestInvalid, LayoutMissing }
+		public enum CaseKind { Script, NotInManifest, FileMissing, FragmentNotMentioned, ManifestInvalid, LayoutMissing }
 
 		public sealed class CoverageCase
 		{
@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					)
 				);
 
-			string layoutProblem = FindScripts(out List<string> scripts);
+			string layoutProblem = FindScripts(out string documents, out List<string> scripts);
 			if (layoutProblem != null)
 				problems.Add(new CoverageCase(CaseKind.LayoutMissing, "Harness.LayoutMissing", null, layoutProblem));
 
@@ -113,17 +113,37 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					cases.Add(new CoverageCase(CaseKind.NotInManifest, name, null, String.Format("The coverage script {0}{1} is not in the manifest; add an entry for it to tests/DAE.Server.Tests/{2}.", name, ScriptExtension, CoverageManifest.ResourceName)));
 				else if (!hasFile)
 					cases.Add(new CoverageCase(CaseKind.FileMissing, name, entry, String.Format("The manifest has an entry for {0}, but the script file is missing from {1}/Documents.", name, ScriptsLibrary)));
+				else if (entry.Status == CoverageStatus.Fragment && FindUnmentioningParent(documents, files, entry) is string parent)
+					cases.Add(new CoverageCase(CaseKind.FragmentNotMentioned, name, entry, String.Format("{0} is listed as part of {1}, but {1}{2} does not mention it; correct partOf or the entry's status.", name, parent, ScriptExtension)));
 				else
 					cases.Add(new CoverageCase(CaseKind.Script, name, entry, null));
 			}
 			return cases;
 		}
 
+		/// <summary>
+		/// The first script in a fragment's partOf whose file text does not mention the fragment as a D4 string literal, or null.
+		/// A text check, so a mention in a comment counts; it catches a parent that renamed or dropped the step. A parent with no
+		/// file is skipped: its own case reports that.
+		/// </summary>
+		private static string FindUnmentioningParent(string documents, HashSet<string> files, CoverageEntry fragment)
+		{
+			foreach (string parent in fragment.PartOf)
+			{
+				if (!files.Contains(parent))
+					continue;
+				string text = File.ReadAllText(Path.Combine(documents, parent + ScriptExtension));
+				if (!text.Contains("\"" + fragment.Script + "\"", StringComparison.Ordinal) && !text.Contains("'" + fragment.Script + "'", StringComparison.Ordinal))
+					return parent;
+			}
+			return null;
+		}
+
 		/// <summary>Returns null and the script names, or a description of what is wrong with the layout.</summary>
-		private static string FindScripts(out List<string> scripts)
+		private static string FindScripts(out string documents, out List<string> scripts)
 		{
 			scripts = new List<string>();
-			string documents;
+			documents = null;
 			try
 			{
 				documents = Path.Combine(TestEnvironment.LibrariesDirectory, ScriptsLibrary, "Documents");
@@ -221,6 +241,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				_summary.DiscoveryProblems++;
 				Assert.Fail(coverageCase.Message);
+				return;
+			}
+
+			if (coverageCase.Entry.Status == CoverageStatus.Fragment)
+			{
+				_summary.Fragments++;
+				Assert.Warn(String.Format("fragment: run by {0}; not run on its own", String.Join(", ", coverageCase.Entry.PartOf)));
 				return;
 			}
 
@@ -449,6 +476,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			public int PassFailed;
 			public int DiscoveryProblems;
 			public int TemplateFailures;
+			public int Fragments;
 			public readonly SortedDictionary<string, int> KnownMatched = new SortedDictionary<string, int>(StringComparer.Ordinal);
 			public readonly SortedDictionary<string, int> KnownMismatched = new SortedDictionary<string, int>(StringComparer.Ordinal);
 			public readonly SortedDictionary<string, int> KnownPassing = new SortedDictionary<string, int>(StringComparer.Ordinal);
@@ -471,6 +499,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				text.AppendLine(String.Format("  unstable: {0} passed, {1} failed", UnstablePassed.Values.Sum(), UnstableFailed.Values.Sum()));
 				foreach (string ticket in UnstablePassed.Keys.Union(UnstableFailed.Keys).OrderBy(ticket => ticket, StringComparer.Ordinal))
 					text.AppendLine(String.Format("    {0}: {1} passed, {2} failed", ticket, UnstablePassed.GetValueOrDefault(ticket), UnstableFailed.GetValueOrDefault(ticket)));
+				text.AppendLine(String.Format("  fragment: {0} (run only as part of other scripts)", Fragments));
 				text.Append(String.Format("  discovery problems: {0}", DiscoveryProblems));
 				if (TemplateFailures > 0)
 					text.Append(String.Format(Environment.NewLine + "  not run, template instance failed: {0}", TemplateFailures));
