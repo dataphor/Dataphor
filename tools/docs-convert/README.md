@@ -43,6 +43,8 @@ python tools/docs-link-check/check_links.py C:\temp\docs-out --pending tools/doc
 
 The whole run takes about 7 seconds. Running it twice over the same inputs gives byte-identical pages, images and tables.
 
+`python -m unittest discover -s tools/docs-convert` runs the converter's few tests (link resolution only; they need neither Node nor pandoc). The rest is checked by the link checker over the output and by the reproduction run.
+
 **Nothing is written unless the run succeeds.** Errors (an unresolved reference without `--allow-unresolved`, a code-block table mismatch, an unreviewed block with `--require-reviewed`) are printed at the end of the report and the run exits 1 having written nothing; a setup problem (a missing tool, a bad table) exits 2. Exit 0 means the pages, images and tables were written.
 
 **What it writes.** Pages at the paths `pages.tsv` names, images at `images/<name>` (flat), both under `--out`; `legacy-links.tsv` (every run) and `code-blocks.tsv` (with `--seed-code-table`) in this folder. It never deletes anything and never writes any other path, so `--out docs` leaves `architecture.md`, `modernization-plan.md`, `migration-notes.md` and `docs/reference/*.txt` alone. The report goes to standard output, not into `--out`.

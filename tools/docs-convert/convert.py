@@ -351,7 +351,7 @@ class Page:
         self.sources = [source]   # every source merged into this page
         self.segments = []        # [(source or None, blocks)]; None: not link-rewritten
         self.headings = []
-        self.legacy = []          # [(text, legacy page, target, source)] in document order
+        self.legacy = []          # [(text, legacy page, target, source, href as written)] in document order
         self.dropped_headings = 0
         self.markdown = None
 
@@ -747,15 +747,20 @@ class Resolver:
         return item
 
     def legacy(self, current, source, item, path, text):
+        url = item["c"][2][0]
         name = posixpath.basename(path)
         if name != path:
             self.report.add("legacy-unresolved", "%s: %s has a folder; rule applied to %s" % (source, path, name))
+        if url != path:
+            self.report.add("legacy-unresolved", "%s: %s; the fragment is dropped" % (source, url))
         target = legacy_target(name)
-        current.legacy.append((text, name, target or "", source))
+        if target is not None:
+            item["c"][2][0] = posixpath.relpath(target, posixpath.dirname(current.output) or ".")
+        # The destination as written, which legacy_rows looks for in the rendered page.
+        current.legacy.append((text, name, target or "", source, item["c"][2][0]))
         if target is None:
             self.report.add("legacy-unresolved", "%s: %s" % (source, path))
             return self.fail(current, source, path, text, "legacy page with no rule")
-        item["c"][2][0] = posixpath.relpath(target, posixpath.dirname(current.output) or ".")
         return item
 
     def fail(self, current, source, ref, text, problem):
@@ -897,6 +902,9 @@ def tag_code_blocks(pages, settings, report):
         for n, block in enumerate(blocks, 1):
             text = block["c"][1]
             sha = code_sha(text)
+            # NOTE: rows are keyed by position, so a block added or removed earlier in a page
+            # re-seeds every later row of that page and clears its review; fine while the sources
+            # are frozen, but if they are edited after the review, carry rows over by sha first.
             key = (page.output, n)
             seen.add(key)
             row = table.get(key)
@@ -1029,8 +1037,7 @@ def legacy_rows(pages):
         lines_by_dest = {}
         for line, dest, _kind in links:
             lines_by_dest.setdefault(dest, []).append(line)
-        for text, name, target, source in page.legacy:
-            dest = posixpath.relpath(target, posixpath.dirname(page.output) or ".") if target else name
+        for text, name, target, source, dest in page.legacy:
             lines = lines_by_dest.get(dest)
             if not lines:
                 fail("%s: cannot find the rendered link to %s" % (page.output, dest))
@@ -1242,6 +1249,7 @@ def assemble_index(pages, settings, api, report):
     heading = node("Header", [2, empty_attr(), text_inlines("Contents")])
     intro.segments = intro.segments + [(None, [heading]), (INDEX_CONTENTS, body), (None, json.loads(extra.decode("utf-8"))["blocks"])]
     intro.sources = [INDEX_INTRO, INDEX_CONTENTS]
+    intro.dropped_headings += contents.dropped_headings
     pages.remove(contents)
 
 
@@ -1347,11 +1355,11 @@ def convert_docbook(args):
             if page.output and page.output in seen:
                 fail("%s and %s are both written to %s" % (seen[page.output], page.source, page.output))
             seen[page.output] = page.source
+        settings.unconverted = [page.source for page in pages if not page.output]
+        pages = [page for page in pages if page.output]
         api, trees = docbook_to_trees([(page, sources[page.source]) for page in pages], settings, report)
         for page, tree, has_part in trees:
             load_page(page, tree, has_part, settings, report)
-        settings.unconverted = [page.source for page in pages if not page.output]
-        pages = [page for page in pages if page.output]
         status = finish(pages, api, settings, report)
     except ConvertError as error:
         report.error(str(error))
