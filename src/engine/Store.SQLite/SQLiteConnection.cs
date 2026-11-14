@@ -67,6 +67,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			return false;
 		}
 		
+		// NOTE: compares primary result codes; System.Data.SQLite 1.0.119 reports a unique violation as Constraint (19) unless extended result codes are turned on. If they ever are (SetExtendedResultCodes or a connection flag), mask with 0xFF first or Constraint_Unique and the like become Application errors.
 		protected bool IsUserCorrectableError(SQLiteErrorCode errorCode)
 		{
 			return errorCode == SQLiteErrorCode.Constraint;

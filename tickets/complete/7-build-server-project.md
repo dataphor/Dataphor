@@ -1,10 +1,10 @@
-description: Review the conversion of the Dataphor server, its SQLite catalog store and the four libraries that depend on the server to modern .NET 10 projects, which lets a real server start inside a test process from the normal build output.
+description: Converted the Dataphor server, its SQLite catalog store and the four libraries that depend on the server to modern .NET 10 projects; a real server can now start inside a test process from the normal build output.
 prereq: server-remove-remoting-and-dtc
 architecture: docs/modernization-plan.md#ws1-build-and-workspace
-files: src/engine/Server/Server.csproj, src/engine/Server/Properties/AssemblyInfo.cs, src/engine/Store.SQLite/DAE.SQLite.csproj, src/engine/Store.SQLite/SQLiteConnection.cs, src/engine/Store.SQLite/Properties/AssemblyInfo.cs, libraries/Connection/Source/DAE.Connection.csproj, libraries/Connection/Source/Register.cs, libraries/MSSQLDevice/Source/DAEDeviceMSSQL.csproj, libraries/SimpleDevice/Source/DAE.Device.Simple.csproj, libraries/Frontend/Source/Frontend.Server.csproj, libraries/Frontend/Source/Device/FrontendDevice.cs, src/engine/Base/StreamUtility.cs, Directory.Packages.props, Dataphor.slnx, tools/net-spike/run.py, tools/net-spike/convert.py, tools/net-spike/EngineCheck/EngineCheck.csproj, tools/net-spike/EngineCheck/Program.cs, tools/net-spike/README.md, AGENTS.md, docs/migration-notes.md, docs/modernization-plan.md
+files: src/engine/Server/Server.csproj, docs/architecture.md, tickets/plan/12-store-sqlite-concurrency.md, src/engine/Server/Properties/AssemblyInfo.cs, src/engine/Store.SQLite/DAE.SQLite.csproj, src/engine/Store.SQLite/SQLiteConnection.cs, src/engine/Store.SQLite/Properties/AssemblyInfo.cs, libraries/Connection/Source/DAE.Connection.csproj, libraries/Connection/Source/Register.cs, libraries/MSSQLDevice/Source/DAEDeviceMSSQL.csproj, libraries/SimpleDevice/Source/DAE.Device.Simple.csproj, libraries/Frontend/Source/Frontend.Server.csproj, libraries/Frontend/Source/Device/FrontendDevice.cs, src/engine/Base/StreamUtility.cs, Directory.Packages.props, Dataphor.slnx, tools/net-spike/run.py, tools/net-spike/convert.py, tools/net-spike/EngineCheck/EngineCheck.csproj, tools/net-spike/EngineCheck/Program.cs, tools/net-spike/README.md, AGENTS.md, docs/migration-notes.md, docs/modernization-plan.md
 difficulty: hard
 ----
-# Review: server project on .NET 10
+# Server project on .NET 10
 
 ## What was done
 
@@ -69,3 +69,30 @@ No new test. Under the project rule the characterization owed here is the spike'
 - Three Store.SQLite sources (`SQLiteCommand.cs`, `SQLiteStoreConnection.cs`, `SQLiteStoreCursor.cs`) are not UTF-8 (a © in a legacy code page in the header comment). They compile, and the byte is inside a comment. Untouched.
 - The smoke's deps file lists every converted Dataphor assembly twice, once as a project and once as `<name>.Reference/4.0.0.0`. It applies to all converted assemblies, not just this ticket's. It is a quirk of Smoke being an out-of-repository project and has no effect at run time, since the files are identical. Not investigated further.
 - `test-harness-inprocess` (plan stage) still says "76 scripts … 62 pass" in places written before `server-remove-remoting-and-dtc`. I appended the current baseline (63/14 with no spike patches) next to its "Spike patches" paragraph, without rewriting the rest.
+
+## Review findings
+
+Read the diff of `ticket(implement): build-server-project` first, then the handoff above.
+
+**Re-ran the validation (all pass, numbers as the handoff states):** `dotnet build Dataphor.slnx --no-incremental` and `-c Release`, 0 errors (warnings by code: CA1416, CA2022, CA2200, CS0162, CS0168, CS0618, CS0672, SYSLIB0014/0021/0023/0051; no NU1900–1904, nothing suppressed). EngineCheck Debug `RESULT: pass` (1,060 operators, 23 scalar types). Spike `--smoke --coverage` in a fresh work dir: server started in 1,015 ms, concurrency 18 errors in 17.6 s (inside the documented 10–25 range), resolution cache 0, coverage `pass=63 fail=14 timeout=0 skipped-ignored=13` with the Appendix A failing set; wrapper errors exactly as listed in the handoff.
+
+**Checked, nothing wrong:**
+- Project files: for all six, the `Compile` and `EmbeddedResource` items are the legacy set and in legacy order, minus only the six WCF files (Server) and non-compiled `Content`/`None` items (`clientaccesspolicy.xml`, `Thrift_NativeCLI.idl`, `packages.config`, MSSQLDevice `BNF.txt`, SimpleDevice `Register.d4`, Frontend `app.config`, which only named the .NET Framework 4.5.2 runtime). `DependentUpon` metadata copied; constants match the legacy Release set minus `SIGNASSEMBLIES` plus `DEBUG;TRACE` in Debug; no `OutputPath`; versionless package references.
+- `AssemblyInfo.cs`: only the allowed attributes kept; byte-order mark and CRLF preserved in all six. Edited `.cs` files keep their BOM state and CRLF.
+- `SQLiteConnection.cs`: `ResultCode` is the right translation (in 1.0.60 `ErrorCode` was the `SQLiteErrorCode` enum; in 1.0.119 `ErrorCode` is the base `int` and `ResultCode` is the enum). Verified with a throwaway program on 1.0.119 that a primary-key violation reports `ResultCode = Constraint (19)`, so `IsUserCorrectableError` still classifies it as a user error. "Begin immediate" correctly not applied.
+- Spike: `map_converted` and the empty `PATCHES` mechanism behave (Smoke and Cov built against the real server and store projects); the `convert.py` ConfigurationManager bump is needed and documented with a `NOTE:`.
+- Compatibility surfaces: no assembly name, `DAERegister` class name (other than the intended `Connection.SQLCEConnection` removal, K19, recorded in migration notes), contract or resource name changed.
+
+**Found and fixed in this pass (minor):**
+- `docs/architecture.md` "Third-party code in the tree" still listed System.Data.SQLite 1.0.60 as a binary in `external/` and said the server project still referenced Newtonsoft.Json 9.0.1. Updated to the package and versions in use.
+- AGENTS.md "Converting another project" still named the spike's `STUBS` table, which this ticket removed. Dropped the mention.
+- `tickets/plan/12-store-sqlite-concurrency.md` pointed at the spike `PATCHES` entry for `SQLiteConnection.cs` and the `convert.py` package map as live; both are gone. Added that the entry was removed (the patch text is quoted there in full) and that the store project now references the package.
+
+**Tripwires recorded:**
+- `src/engine/Store.SQLite/SQLiteConnection.cs` `IsUserCorrectableError`: `NOTE:` that it compares primary result codes; if extended result codes are ever turned on, mask with `0xFF` first.
+
+**Tickets filed:** none. The known gaps in the handoff (concurrency until K1/K10, `DAE.Client` against `DataphorServiceHost` until WS5, Newtonsoft 13 defaults, library package dependencies at run time) are each already owned by an open ticket (`port-catalog-emitter-race`, `store-sqlite-concurrency`, `feat-ws5-protocol-and-hosting`/`protocol-corewcf-host`, `ui-client-layering`, `build-runtime-layout`), with context appended by the implementer.
+
+**Tests:** no tests added or cut. The project rule's characterization for this conversion is the spike's smoke and coverage run plus EngineCheck's resource-name step, which now covers the six assemblies' legacy names; permanent NUnit coverage comes with `test-harness-inprocess`. The SQLite result-code check was a one-off confirmation, not a contract worth a standing test before that harness exists.
+
+**Not checked:** the Linux and macOS native SQLite interop at run time (only Windows was run); the hosts do not build yet, so the runtime layout is untested (`build-runtime-layout`).
