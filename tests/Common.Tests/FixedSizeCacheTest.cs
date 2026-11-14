@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 
 using NUnit.Framework;
@@ -979,7 +977,8 @@ namespace Alphora.Dataphor.Common.Tests
 		{
 			{
 
-				new RandomFixedSizeCacheAccess(new FixedSizeCache<string, string>(50), 50, 100000, 100).Run();
+				FTestCache = new FixedSizeCache<string, string>(50);
+				new RandomFixedSizeCacheAccess(FTestCache, 50, 100000, 100).Run();
 				ClassicAssert.True(ValidateList());
 			}
 		}
@@ -1253,7 +1252,8 @@ namespace Alphora.Dataphor.Common.Tests
 						case 4:
 						case 5:
 						case 6:
-							FFixedSizeCache[FixedSizeCacheTest.GetKey(LEntry)] = FixedSizeCacheTest.GetValue(LRandom.Next(1, FSeed));
+							// The key's own value: ValidateList requires every entry's value to match its key.
+							FFixedSizeCache[FixedSizeCacheTest.GetKey(LEntry)] = FixedSizeCacheTest.GetValue(LEntry);
 							break;
 						case 8:
 							FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
