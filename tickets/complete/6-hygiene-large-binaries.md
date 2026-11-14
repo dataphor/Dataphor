@@ -1,0 +1,24 @@
+description: Removed large or sensitive files that nothing in the product uses (image-editor source art, an unused code-generator executable, stray test-framework copies, unread database dumps, and a note that named a developer's machine account), so the repository holds only what is built, tested or documented.
+prereq: repo-move-to-new-layout
+architecture: docs/modernization-plan.md#ws12-repository-hygiene
+files: Images/ (deleted), Dataphor/netsh_address_reservations.txt (deleted), src/protocol/NativeCLI/Thrift/thrift-0.9.0.exe (deleted), tests/Common.Tests/nunit.framework.dll, tests/DAE.Server.Tests/nunit.framework.{dll,xml}, tests/DAE.Client.Tests/nunit.framework.{dll,xml} (deleted), libraries/MSSQLDevice/SybaseCatalogTables/ (deleted), tickets/index-config.json, AGENTS.md, docs/modernization-plan.md, tickets/plan/9-build-runtime-layout.md
+difficulty: easy
+----
+# Remove unreferenced large files — complete
+
+Deleted with `git rm` (no history rewrite, decision D12) about 17.3 MB of files nothing in the product builds, tests, loads or documents: the top-level `Images/` source art (228 files), `Dataphor/netsh_address_reservations.txt` (it named a developer's machine account; `Dataphor/` is now gone), the Thrift 0.9.0 code-generator executable under `src/protocol/NativeCLI/Thrift/` (the `.idl` stays), the local `nunit.framework.dll`/`.xml` copies in `tests/Common.Tests`, `tests/DAE.Server.Tests` and `tests/DAE.Client.Tests`, and the unread Sybase system-table dumps in `libraries/MSSQLDevice/SybaseCatalogTables/`. Nothing was referenced, so no `assets/` folder was created. Doc and config edits: `tickets/index-config.json` no longer excludes `Images/`; `AGENTS.md` lost the `Images/`, `Dataphor/` layout row; `docs/modernization-plan.md` marks the old → new rows, the WS12 rows and known defect K21 as done.
+
+No code changed, so no characterization test is owed and no migration-notes entry is needed (nothing shipped or read by the product).
+
+## Review findings
+
+Read the diff of `ticket(implement): hygiene-large-binaries` first, then the handoff.
+
+- **Reference checks (re-run independently).** `git grep -I -i` for `SybaseCatalogTables`, `thrift-0.9`, `netsh_address`, `ClientImages`, `DataphoriaImages` outside `tickets/` finds only the plan's own "deleted"/"done" rows. `Dataphor.sln`, `Setup/*.wxs` and `README.md` name none of the deleted paths. The remaining "Thrift" hits are `Thrift.dll` for a parked device in `Setup/Files.wxs` and the `.idl` files — unrelated to the executable. No csproj includes `nunit.framework.xml` or the local `nunit.framework.dll` as an item; the `nunit.framework` reference `HintPath` in all three test projects points at `..\..\packages\NUnit.3.12.0\…`. `nunit.mocks.dll` and `pnunit.framework.dll`, which are referenced by local `HintPath`, are still present. Found nothing.
+- **Sybase folder (the implementer's addition beyond the ticket's list).** Agree with deleting it: no source, `.d4l`, csproj or script reads it, and Sybase is not a supported device. Found nothing.
+- **Docs.** Read `AGENTS.md`, `docs/modernization-plan.md` (old → new table, WS12 table, K21 row), `docs/architecture.md`, `docs/migration-notes.md`, `tools/net-spike/README.md`. Plan line ~736 ("`Images/` 11 MB") is a dated inventory and correctly left alone; the target-tree sketch's `assets/` is a future folder, left alone. The `Images/Working` mention in `tickets/plan/6-docs-convert-asciidoc.md` refers to `Documentation/Images/`, not the deleted folder. **Minor, fixed:** `tickets/plan/9-build-runtime-layout.md` line 62 still told the runtime-layout work not to copy `libraries/MSSQLDevice/SybaseCatalogTables/`, an instruction about a folder that no longer exists; removed that clause.
+- **Spike build/test.** `python tools/net-spike/run.py <scratch dir> --smoke --coverage`: concurrency 0 errors, resolution cache 0 errors, `SUMMARY pass=62 fail=14 timeout=0 skipped-ignored=13` — the recorded baseline. The test-project and host errors it prints (Common.Tests cannot find NUnit, NU1201 on DAE.Server/Client.Tests and D4Runner, DAEService, Dataphoria, DAEServer) are pre-existing: `tools/net-spike/convert.py` (around line 91) references a binary only when its `HintPath` exists, and the `HintPath` was the never-restored `packages/` folder, not the deleted local copy, so the deletion cannot have changed it.
+- **Tests.** None added and none owed: deletions of unreferenced files change no behaviour. No tests to cut.
+- **Code-quality angles (DRY, modularity, error handling, type safety, resource cleanup, performance).** Not applicable: the change contains no code.
+- **Tripwires.** None.
+- **Tickets filed.** None. Already known and owned elsewhere: `tests/DAE.Server.Tests/DAE.Server.Tests.csproj` still has a `HintPath` to an old `Dataphor\bin\System.Data.SqlServerCe.dll` path (SQL CE removal owns it); `src/client/DAE.Client/View-263.cs` is a stray source file (`build-globbing-cleanup` owns it).

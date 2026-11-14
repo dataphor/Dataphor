@@ -59,7 +59,7 @@ Out of scope:
 
 D4-only (no assembly): `General`, `Security`; samples `Sample.Common`, `.Components`, `.Demo`, `.DetailAdd`, `.Forms`, `.Forum`, `.IssueTracker`, `.Pubs`, `.Rental`, `.ScriptAction`, `.SendEmail`; tests `TestFramework`, `TestFramework.Controls`, `TestFramework.Coverage`, `TestFramework.Coverage.Devices`, `TestFramework.Coverage.Scripts`, `TestFramework.StressTest`. Libraries with an unconverted C# project: `PGSQLConnection` (also lists `Npgsql.dll` and `Mono.Security.dll`, tracked under `external/`), `PGSQLDevice`, `ODBCConnection`, `Sample.Shipping` (`Alphora.Shipping.dll`).
 
-Folder contents to copy: `<Name>.d4l`, `Documents/`, `Upgrades/` where present. Not to copy: `Source/`; `libraries/MSSQLDevice/SybaseCatalogTables/` (text dumps and a zip that no code reads).
+Folder contents to copy: `<Name>.d4l`, `Documents/`, `Upgrades/` where present. Not to copy: `Source/`.
 
 The spike's `COVERAGE_LIBS` table in `tools/net-spike/run.py` maps libraries to assemblies for the coverage run and is the starting point for the table above; its copy step (`shutil.copytree` with `ignore_patterns("Source", "*.dll", "bin", "obj")`, then one assembly copied in) is what this ticket replaces.
 
