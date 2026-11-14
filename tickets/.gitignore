@@ -1,0 +1,6 @@
+.logs/
+.stop
+.in-progress
+.sync-blocked
+.pre-existing-error.md
+.index/

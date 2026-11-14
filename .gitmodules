@@ -1,0 +1,3 @@
+[submodule "tess"]
+	path = tess
+	url = https://github.com/gotchoices/tess.git

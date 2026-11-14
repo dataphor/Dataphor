@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "code-search": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "tess/scripts/mcp-search.mjs"
+      ],
+      "env": {}
+    }
+  }
+}
