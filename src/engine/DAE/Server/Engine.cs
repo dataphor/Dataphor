@@ -1128,6 +1128,12 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 		}
 		
+		// NOTE: The D4 System library's version was the engine assembly version (3.1.<build>.<revision>). The assembly is now 4.0.0.0 (decision D7),
+		// but library references may pin System's major version: the LibraryCoverage script references System 3, and an application library may do the same.
+		// It stays 3.1 until a decision moves it (blocked ticket system-library-version); a fixed value also makes it the same on every build.
+		// The catalog store records this value, not the assembly version, for System in DAELibraryVersions and DAEServerInfo, as it did when the two were equal.
+		private static readonly VersionNumber SystemLibraryVersion = new VersionNumber(3, 1, 0, 0);
+
 		public virtual void LoadAvailableLibraries()
 		{
 			lock (_catalog.Libraries)
@@ -1138,8 +1144,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// Create the implicit system library
 				Schema.Library systemLibrary = new Schema.Library(SystemLibraryName);
 				systemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
-				Version version = AssemblyNameUtility.GetVersion(typeof(Engine).Assembly.FullName); // HACK: Have to use this instead of Assembly.GetName() to work around Silverlight security
-				systemLibrary.Version = new VersionNumber(version.Major, version.Minor, version.Build, version.Revision);
+				systemLibrary.Version = SystemLibraryVersion;
 				systemLibrary.DefaultDeviceName = TempDeviceName;
 				_catalog.Libraries.Add(systemLibrary);
 			}

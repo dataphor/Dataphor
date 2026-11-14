@@ -41,7 +41,7 @@ dotnet run --project tools/net-spike/EngineCheck -c Debug                       
 | DAEServer | 0 errors with C# 12; 4 with C# 14, where `field` became a keyword inside property accessors (vendored `CommandLineArguments.cs`) |
 | DAE.Service | needs `System.Configuration.Install` replacement |
 | D4Runner, test projects | blocked by `DAE.Client` requiring a Windows target and by the missing NUnit package reference |
-| Smoke | engine starts in about 1 s, 1,080 operators and 23 scalar types registered, D4 DDL/DML/views/operators work |
+| Smoke | engine starts in about 1 s, 1,080 operators and 23 scalar types registered, the `System` library and its catalog version row report `3.1.0.0`, D4 DDL/DML/views/operators work |
 | Concurrency (8 threads × 15 DDL cycles) | 0 errors in 1.7 s with WAL + immediate transactions + the emitter fix; 39–47 errors in 60–80 s without them. A rare "Collection was modified" (K3, the operator resolution cache) is fixed in the repo |
 | Resolution cache (8 threads × 1 s of add/clear) | 0 errors. Reproduces K3 directly: before the fix, about 1.4 million "Collection was modified" errors in 5 s |
 | Coverage scripts | 62 pass, 14 fail (12 need the helper library that requires a live SQL Server; 1 uses `Delegate.BeginInvoke`; 1 needs that same helper library). Unchanged since the engine is built in place with the constants 3.1 shipped |

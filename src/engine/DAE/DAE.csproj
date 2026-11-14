@@ -11,7 +11,7 @@
     Constants: the set 3.1 shipped, in both configurations, plus DEBUG;TRACE in Debug, so that a Debug
     build and its tests run the same code paths as the shipped engine. 3.1 was built and deployed in
     Release, whose set this is; the legacy Debug set also had ACCUMULATOR and USEVISIT, which users never
-    ran. Dropped from the legacy Release set: SIGNASSEMBLIES (signing comes with build-version-and-signing)
+    ran. Dropped from the legacy Release set: SIGNASSEMBLIES (signing is set in Directory.Build.props)
     and DISABLE_PERFORMANCE_COUNTERS (no code reads it). Set outright; see Directory.Build.props.
   -->
   <PropertyGroup>

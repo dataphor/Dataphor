@@ -37,6 +37,8 @@ class Program
 				"Count(System.Operators)",
 				"Count(System.ScalarTypes)",
 				"Sum(X from table { row { 1 X }, row { 2 X }, row { 3 X } })",
+				"ToString(System.Libraries['System'].Version)",
+				"ToString(System.LibraryVersions['System'].Version)",
 			};
 			foreach (var e in exprs)
 			{

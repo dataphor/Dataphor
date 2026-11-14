@@ -5,7 +5,7 @@
     same conventions; AGENTS.md "Build and test" summarizes them. Not set here, by design:
 
     Compiler constants are set per project, outright rather than appended to $(DefineConstants), so the
-    SDK's default TRACE is not added: the legacy Release set without SIGNASSEMBLIES in both configurations,
+    SDK's default TRACE is not added: the legacy Release set without SIGNASSEMBLIES (signing is set below) in both configurations,
     plus DEBUG;TRACE in Debug (DAE.csproj records why). The SDK still appends DEBUG/RELEASE and framework
     symbols such as NET10_0; no converted code tests them.
   -->
@@ -28,11 +28,42 @@
     <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
 
-  <!-- Assembly attributes come from each project's Properties\AssemblyInfo.cs, which also carries DAERegister. -->
+  <!--
+    Version and identity (decision D7): one version for every assembly, set here and nowhere else. The SDK
+    generates AssemblyVersion 4.0.0.0, AssemblyInformationalVersion 4.0.0-preview+<commit>, AssemblyFileVersion,
+    company, product and copyright. Each project's Properties\AssemblyInfo.cs keeps only what differs per project
+    or is Dataphor's own: AssemblyTitle, AssemblyDescription, DAERegister (library registration reads it),
+    ComVisible, Guid. An attribute left there that the SDK also generates fails the build with CS0579.
+  -->
   <PropertyGroup>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <!-- NOTE: AssemblyVersion("3.1.*") requires a non-deterministic build; build-version-and-signing replaces it with a fixed version and removes this. -->
-    <Deterministic>false</Deterministic>
+    <VersionPrefix>4.0.0</VersionPrefix>
+    <VersionSuffix>preview</VersionSuffix>
+    <!--
+      NOTE: with DataphorBuildNumber left at 0 every build has FileVersion 4.0.0.0, and Windows Installer does not
+      replace a file of equal version during a minor upgrade. installer-msi must either pass a build number
+      (dotnet build -p:DataphorBuildNumber=<run number>) or schedule RemoveExistingProducts early.
+      AssemblyVersion stays 4.0.0.0 whatever the build number.
+    -->
+    <DataphorBuildNumber Condition="'$(DataphorBuildNumber)' == ''">0</DataphorBuildNumber>
+    <FileVersion>$(VersionPrefix).$(DataphorBuildNumber)</FileVersion>
+    <Company>Alphora</Company>
+    <Product>Dataphor</Product>
+    <Copyright>© Copyright 2000-2015 Alphora</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+  </PropertyGroup>
+
+  <!-- Deterministic builds: two builds of the same commit produce identical assemblies. CI builds also map source paths. -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Strong names in every configuration, with the repository-root key pair. The key is public: a strong name here is identity, not a security boundary. -->
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Dataphor.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <!-- Output: artifacts/bin/<project file name>/<debug|release>/ and artifacts/obj/; nothing is built into source folders. -->

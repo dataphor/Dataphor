@@ -6,7 +6,7 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
-  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing comes with build-version-and-signing) in both configurations, plus DEBUG;TRACE in Debug as legacy Debug had them. Set outright; see Directory.Build.props. -->
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug as legacy Debug had them. Set outright; see Directory.Build.props. -->
   <PropertyGroup>
     <DefineConstants>TRACE</DefineConstants>
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>

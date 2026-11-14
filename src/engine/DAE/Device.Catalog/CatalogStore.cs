@@ -155,7 +155,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					);
 					
 					connection.ExecuteStatement(String.Format("insert into DAELoadedLibraries (Library_Name) values ('{0}')", Server.Engine.SystemLibraryName));
-					connection.ExecuteStatement(String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Engine.SystemLibraryName, GetType().Assembly.GetName().Version.ToString()));
+					connection.ExecuteStatement(String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Engine.SystemLibraryName, server.Catalog.Libraries[server.SystemLibrary.Name].Version.ToString()));
 					connection.ExecuteStatement(String.Format("insert into DAELibraryOwners (Library_Name, Owner_User_ID) values ('{0}', '{1}')", Server.Engine.SystemLibraryName, Server.Engine.SystemUserID));
 				}
 			}
@@ -1120,7 +1120,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						{
 							"ID",
 							server.Name,
-							GetType().Assembly.GetName().Version.ToString(),
+							server.Catalog.Libraries[server.SystemLibrary.Name].Version.ToString(),
 							server.MaxConcurrentProcesses,
 							(int)server.ProcessWaitTimeout.TotalMilliseconds,
 							(int)server.ProcessTerminationTimeout.TotalMilliseconds,
