@@ -12,8 +12,9 @@ A running list of every change that an existing application, a deployment or a c
 | planned | Clients and server must be the same major version; a 3.1 client is not expected to connect to a 4.0 server. | Upgrade the server and all clients together |
 | planned | The embedded catalog store is SQLite; SQL Server Compact is gone and existing catalog files are not converted. | Create a new instance and rebuild the catalog from the application's scripts, as in a routine catalog rebuild. Remove any `catalogstoreclassname`/`catalogstoreconnectionstring` instance settings that name the SQL CE store |
 | planned | The Windows service is registered by the installer or the `dataphor` command-line tool, not by an installer class inside the service executable. | Re-register services with the new tooling; existing command-line switches are kept as aliases where practical |
-| planned | The ASP.NET WebForms web client is removed. | Anything built on it must be rewritten against another front end |
-| planned | The Silverlight client and the `AllowSilverlightClients` instance setting are removed. | Remove the setting |
+| done | The ASP.NET WebForms web client is removed. | Anything built on it must be rewritten against another front end |
+| done | The Silverlight client is removed. | Nothing; it had no users |
+| planned | The `AllowSilverlightClients` instance setting is removed. | Remove the setting |
 | planned | ClickOnce deployment of the Windows client moves to the .NET publishing tools. | Republish the client with the new profile; existing ClickOnce installations will not update themselves across this change |
 | planned | String comparison and culture behaviour are pinned to Windows NLS, as on .NET Framework. | Nothing, unless a host process is built by hand: set `System.Globalization.UseNls` |
 
@@ -23,8 +24,8 @@ A running list of every change that an existing application, a deployment or a c
 |---|---|---|
 | planned | The D4 class `Connection.SQLCEConnection` no longer exists. | Remove references to it |
 | planned | Distributed (DTC) transactions raise "not supported". They have not functioned since 2009. | Remove any use |
-| planned | The FHIR, CQF and PHINVADS libraries are parked and not shipped. D4 class names they registered (for example `FHIRCore.ObjectAsJSONSelectorNode` and its accessors, `FHIRCore.FHIRBaseDisplayString`) are either moved to a shipped library under the same names or unavailable — to be settled by `library-park-side-projects`. | Check scripts for `class "FHIRCore.…"` |
-| planned | Devices and connections for Oracle, ADO (COM) and SAS are parked; MySQL, DB2, Caché, Linter, DataDirect and Fastore are deleted. | SQL Server, PostgreSQL, the in-memory device and SimpleDevice ship in 4.0 |
+| planned | The FHIR, CQF and PHINVADS libraries are parked and not shipped, with every D4 class name they register (prefix `FHIR.`, `CQF.`, `PHINVADS.`). The general-purpose dynamic and JSON nodes in System.Internet keep shipping under their existing `FHIR.Core.` names. The names `FHIRCore.ObjectAsJSON*` and `FHIRCore.FHIRBaseDisplayString` were never registered by this codebase; they appear only in commented-out D4. | Check scripts for `class "FHIR…"` references outside comments; any that name a parked library need another implementation |
+| planned | Devices and connections for Oracle, ADO (COM) and SAS are parked; MySQL, DB2, DB2/400, Caché, Linter, DataDirect, the unmanaged Oracle (ODP) connection and Fastore are deleted. | SQL Server, PostgreSQL, the in-memory device and SimpleDevice ship in 4.0 |
 | planned | The PostgreSQL device moves from Npgsql 2.0 to the current Npgsql. Type mapping (notably timestamps and time zones), connection-string keywords and error details may differ. | Test against the production PostgreSQL version; specific differences will be listed here as the port finds them |
 | planned | The SQL Server device uses `Microsoft.Data.SqlClient`. The intent is that existing device definitions connect unchanged, including to servers without a trusted certificate. | Test against the production SQL Server version; the minimum supported version will be documented |
 

@@ -19,7 +19,7 @@ Slugs, scope, prerequisites and difficulty are in the plan's WS5 and WS2 tables;
 
 Found while cutting Phase 1 (static, not run): the default instances directory, `%ProgramData%\Alphora\Dataphor\Instances`, does not include the version, so a 4.0 server installed beside 3.1 (as the plan's WS9 target and Q9 expect) would read and write 3.1's instance configuration file. `host-instance-configuration` must settle this, for example with a version-specific default directory or by refusing a 3.x configuration file. The plan does not decide which, so if the choice has a visible cost, take it to `blocked/` with a proposal.
 
-Open question Q8 (is `UseServiceConfiguration` or secured transport used in production?) governs `protocol-transport-security` and the removal of `UseServiceConfiguration`. If unanswered when reached, file that item to `blocked/` with the plan's default (not used; plain TCP inside the LAN) as the proposal.
+Q8 (is `UseServiceConfiguration` or secured transport used in production?) is answered "not known": proceed as if neither is used. `UseServiceConfiguration` is removed with a migration-notes entry telling the application move to check deployed configuration files for it and for `<system.serviceModel>` sections; `protocol-transport-security` still makes secured connections work on CoreWCF or documents why not. Nothing here needs `blocked/` for Q8.
 
 ## Cutting rules
 

@@ -36,7 +36,7 @@ The baseline survey (November 2026) established the following. Details are in [A
 | The engine **boots and runs D4 on .NET 10 with a SQLite catalog**; **62 of the 76 D4 coverage scripts it was given pass** with no engine changes (verified) | The existing D4 scripts are a ready-made regression suite; behaviour carried over |
 | The SQLite catalog store's concurrency failure is reproduced and understood; three small changes take a 16-thread DDL stress test from dozens of errors to zero and make it ~50× faster (verified) | SQL CE (which has no modern .NET version) can be dropped; see WS4 |
 | What does **not** carry over: WCF *server* hosting, .NET Remoting leftovers, a COM+ transaction class, the Windows service installer class, runtime C# compilation via CodeDom, `Delegate.BeginInvoke`, removed WinForms controls (~270 references), third-party UI binaries, the WebForms web client, Silverlight | These are the real work: WS2, WS5, WS6 |
-| Tests: 126 NUnit tests, of which 90 are one-liners that each run a D4 script; many need a local SQL Server, machine-wide state or a developer's own paths | WS3 rebuilds the harness around isolation |
+| Tests: about 125 NUnit tests, of which 89 are one-liners that each run a D4 script; many need a local SQL Server, machine-wide state or a developer's own paths | WS3 rebuilds the harness around isolation |
 | Reference documentation for operators, libraries and form nodes exists only in the legacy DocBook sources; the AsciiDoc books have 206 dead links to it | WS8 converts both sources |
 | The installer is WiX 3.5 with no upgrade logic and per-build component GUIDs | WS9 replaces rather than repairs it |
 | ~140 MB of the tree is vendored tools, binaries, build outputs and source art; a third of the projects are dead | WS12 |
@@ -77,18 +77,20 @@ Answered (November 2026):
 | Q4 | Custom C#? | Yes, many extensions, some depending on third-party UI and reporting components. Deferred (D16); record what will affect them in the migration notes |
 | Q5 | Compatibility corpus? | Available on the owner's machine; never copied into this repository. WS13 locates it by environment variable when that work starts |
 | Q6 | `ScriptAction` use? | Heavy: on the order of 240 script actions across about 100 forms. `ui-scriptaction-roslyn` is not optional |
-| Q7 | FHIR/CQF and web prototypes? | Park. One wrinkle: the application references four D4 class names registered by the FHIR core library (`FHIRCore.ObjectAsJSON*`, `FHIRCore.FHIRBaseDisplayString`); see `library-park-side-projects` |
+| Q7 | FHIR/CQF and web prototypes? | Park. One wrinkle: the application was thought to reference four D4 class names registered by the FHIR core library (`FHIRCore.ObjectAsJSON*`, `FHIRCore.FHIRBaseDisplayString`). **Correction (verified while cutting tickets):** no code in this repository registers or implements those names; they appear only inside `//` comments in `System.Internet/Documents/Dynamic.d4` and the three `FHIR*.Core/Documents/Types.Core.d4` files. Either the application's references are commented out too, or its build had code that is not in this repository; the owner should check which when WS13 starts. Parking therefore moves no code for them. The general-purpose dynamic/JSON nodes that do ship are in System.Internet (19 class names with a `FHIR.Core.` prefix) and stay there under the same names |
 | Q9 | Upgrade expectations? | Catalogs are rebuilt from scripts, not migrated; install side by side |
 | Q10 | Continuous integration on the repository? | The owner controls the repository; assume yes |
 | Q13 | History rewrite to shed old binaries? | No. History-preserving cleanup only (D12) |
 
-Still open:
+Answered (November 2026, second round):
 
-| # | Question | Why it matters | Default if unanswered |
-|---|---|---|---|
-| Q8 | Is the `UseServiceConfiguration` option (WCF endpoints from `app.config`) or secured transport used in production? | Scope of WS5 | Not used; plain TCP inside the LAN |
-| Q11 | Current WiX releases carry an "Open Source Maintenance Fee" for commercial use; is that acceptable, or should we pin an earlier major version? | WS9 toolchain choice | Verify terms, pin the newest version that fits |
-| Q12 | Which SQL Server version and patch level is in production? | Current drivers require TLS 1.2 and encrypt by default; an old server may refuse them | Test against the oldest version still in mainstream use and document the minimum |
+| # | Question | Answer |
+|---|---|---|
+| Q8 | Is the `UseServiceConfiguration` option (WCF endpoints from `app.config`) or secured transport used in production? | Not known. Proceed on the assumption that neither is used (plain TCP inside the LAN): `UseServiceConfiguration` is removed, and the removal gets a migration-notes entry so that moving the application includes checking its deployed client and server configuration files for `<system.serviceModel>` sections and that setting. `protocol-transport-security` still makes secured connections possible on CoreWCF or documents why not |
+| Q11 | Current WiX releases carry an "Open Source Maintenance Fee" for commercial use; is that acceptable, or should we pin an earlier major version? | Pin the newest major version that does not carry the fee. Dataphor is open source; commercial use, and any fee it attracts, is downstream. `installer-msi` confirms which version that is and records the pin and its reason beside the package reference |
+| Q12 | Which SQL Server version and patch level is in production? | Not known. Support SQL Server versions released in roughly the last five years: SQL Server 2022 and later are the supported minimum and are tested; SQL Server 2019 (in extended support until January 2030) is documented as working if it needs no extra code. Because the production version is unknown, the device keeps 3.1's connection defaults (no forced encryption, no certificate validation unless the device's settings ask for it), so an older server still connects where the driver allows |
+
+Still open: none.
 
 ## Sequencing
 
@@ -155,19 +157,21 @@ artifacts/             build output (ignored)
 | `Dataphor/Frontend.Client.Windows.Executable` | `src/windows/WindowsClient` |
 | `Dataphor/DAE.Service.ConfigurationUtility` | `src/windows/ConfigurationUtility` |
 | `Dataphor/DAEServer`, `Dataphor/DAE.Service`, `Dataphor/D4Runner` | `src/hosts/DAEServer`, `src/hosts/DAEService`, `src/hosts/D4Runner` |
-| `Dataphor/Language.SQL` | delete if confirmed unreferenced (only the old solution names it); otherwise `src/engine/` |
-| `Dataphor/CompilerDefines.txt`, `Dataphor/Error Message Prefix Codes.txt` | `docs/reference/` (WS8) |
+| `Dataphor/Language.SQL` | deleted (`repo-delete-dead-trees`; only the old solution referenced it) |
+| `Dataphor/CompilerDefines.txt`, `Dataphor/Error Message Prefix Codes.txt` | `docs/reference/`, moved unchanged by the reorganization (since `Dataphor/` is emptied); WS8 converts them |
 | `Libraries/` — Connection, SQLDevice, MSSQLDevice, PGSQLDevice, PGSQLConnection, SimpleDevice, Frontend, Security, General, System.Platform, System.Internet, System.Integration | `libraries/<Name>` (internal structure unchanged) |
 | `Libraries/Sample.*` | `samples/` |
 | `Libraries/TestFramework*` | `tests/libraries/` |
-| `Libraries/` — Oracle, ODBC, ADO, SAS devices and connections, Documentation | `legacy/libraries/` (D15), except what `library-remove-dead-devices` deletes |
+| `Libraries/` — Oracle, ADO, SAS devices and connections, Documentation | `legacy/libraries/` (D15), except what `library-remove-dead-devices` deletes |
+| `Libraries/ODBCConnection` | `libraries/ODBCConnection`; `device-connection-cleanup` converts it or parks it (WS7) |
 | `Libraries/FHIR*`, `CQF*`, `PHINVADS*`, `TestCQL`, `TestCache`; top-level `Dataphoria/`; `Processor/`; `Design/` | `legacy/` (D6) |
 | `Tests/Common.Tests`, `Tests/DAE.Server.Tests`, `Tests/DAE.Client.Tests` | `tests/…` (restructured by WS3) |
 | `Setup/` | replaced by `installer/` (WS9); old one deleted |
-| `Images/` | `assets/` (referenced files only) |
+| `Images/` | deleted by `hygiene-large-binaries`: nothing in the tree references the top-level `Images/` folder (the documentation uses `Documentation/Images/`, projects use their own `Images/` subfolders). Anything that turns out to be referenced goes to `assets/` |
 | `External/`, binaries in `Dataphor/bin`, `Dataphor/Dataphoria/*.dll` | `external/` until replaced by packages |
 | `Tooling/BBEdit` | `tools/editor-support/bbedit` |
-| `Documentation/`, `Legacy/Documentation/` | stay where they are until WS8 converts and deletes them |
+| `Documentation/`, `Legacy/Documentation/` | stay until WS8 converts and deletes them. `Legacy/` and the new `legacy/` are the same folder on Windows (Git runs here with `core.ignorecase=true`), so `library-park-side-projects` first renames `Legacy/` to `legacy/` (two-step case rename); the DocBook sources then sit at `legacy/Documentation/` |
+| Anything else not listed here (the legacy solution, `Dataphor/.editorconfig`, the licence files, `Dataphor.snk`, `book.json`, `Tests/Frontend.Client.WPF.Tests`, …) | listed with a default destination in `repo-move-to-new-layout` |
 | `Utilities/`, `dataphor-mono/`, Silverlight projects, `Frontend.Client.Browser`, `Frontend.Client.Web*`, `Dataphor/BOP`, `Libraries/Libraries.sln`, `Dataphor.proj`, build batch files | deleted |
 
 **Rules for the move.**
@@ -196,7 +200,7 @@ artifacts/             build output (ignored)
 
 **Design notes.**
 
-- Convert by generating from the legacy file: keep the exact `Compile` list first (set `EnableDefaultCompileItems=false`), get green, then a later item switches to globbing after deleting the stray files the explicit lists were hiding. [tools/net-spike/convert.py](../tools/net-spike/convert.py) already does the generation out of tree and is the reference.
+- Convert by generating from the legacy file: keep the exact `Compile` list first (set `EnableDefaultCompileItems=false`), get green, then a later item switches to globbing after deleting the stray files the explicit lists were hiding. [tools/net-spike/convert.py](../tools/net-spike/convert.py) already does the generation out of tree and is the reference, except for embedded-resource names: it gets them wrong for a `.resx` with `DependentUpon` (SimpleDevice) and for a project with an empty root namespace (MSSQLDevice), so check names against the legacy build rather than the spike.
 - `GenerateAssemblyInfo=false` initially (the `AssemblyInfo.cs` files carry `DAERegister` attributes that must stay); a later item moves version, company and signing attributes into the props file and leaves only the Dataphor-specific attributes.
 - `AssemblyVersion("3.1.*")` requires non-deterministic builds; replace with a fixed version from the props file.
 - Preserve each project's `DefineConstants` exactly ([Appendix B](#appendix-b-inventory)); several are behaviour switches.
@@ -207,8 +211,8 @@ artifacts/             build output (ignored)
 |---|---|---|---|
 | `repo-delete-dead-trees` | Delete what the layout table marks deleted (Silverlight, browser shell, WebForms client, empty and template projects, mono solution, stale solutions, `Utilities/NUnit*`, SQL CE project and native DLLs, committed catalog database and logs). Leave `Utilities/Wix` and `Setup/` until WS9 and the documentation trees until WS8. | — | easy |
 | `repo-move-to-new-layout` | The moves in the layout table, as rename-only commits, followed by reference fixes; update AGENTS.md, architecture.md, the tess index configuration, the spike's path tables and the paths cited in this plan; spike results unchanged. | `repo-delete-dead-trees`, `library-park-side-projects`, `library-remove-dead-devices` | medium |
-| `build-core-sdk-projects` | SDK-style projects for Base, Base.Windows, DAE, Common, NativeCLI, Client, Store.SQLite and the libraries Connection, SQLDevice, MSSQLDevice, SimpleDevice, Frontend, System.Platform/Internet/Integration; `Directory.Build.props`, `Directory.Packages.props`, `Dataphor.slnx`. Apply the Appendix A patches that are plain fixes. Rewrite the "Build and test" section of AGENTS.md. | `repo-move-to-new-layout` | hard |
-| `build-server-project` | Server on .NET 10: remove remoting lifetime, tracking and sponsor code (K6) and the COM+ transaction class (K11, with a clear "not supported" error on the D4 surface that reached it); leave the WCF service and host classes out of compilation pending WS5; an in-process `Server` starts and runs D4. | `build-core-sdk-projects` | hard |
+| `build-core-sdk-projects` | SDK-style projects for Base, Base.Windows, DAE, Common, NativeCLI, Client and the libraries SQLDevice, System.Platform/Internet/Integration; `Directory.Build.props`, `Directory.Packages.props`, `Dataphor.slnx`. Apply the Appendix A compile patches whose files are in these projects, and fix K4 (Base). Rewrite the "Build and test" section of AGENTS.md. | `repo-move-to-new-layout` | hard |
+| `build-server-project` | Server on .NET 10, plus the projects that reference the server assembly: Store.SQLite (`SQLiteConnection` derives from the server's `DotNetConnection`), Connection, MSSQLDevice, SimpleDevice and Frontend (verified from their project references), with their Appendix A compile patches and K19. Remove remoting lifetime, tracking and sponsor code (K6) and the COM+ transaction class (K11, with a clear "not supported" error on the D4 surface that reached it); leave the WCF service and host classes out of compilation pending WS5; an in-process `Server` starts and runs D4. | `build-core-sdk-projects` | hard |
 | `build-runtime-layout` | MSBuild targets that assemble `artifacts/layout/`; fix library projects whose Release output went to `bin\Release` (K15). | `build-server-project` | medium |
 | `build-ci` | GitHub Actions workflow: restore, build, test, upload results. | `test-harness-inprocess` | easy |
 | `build-version-and-signing` | Single version source (4.0.0 plus prerelease label), signing in all configurations, generated assembly attributes; remove per-project version attributes. | `build-core-sdk-projects` | easy |
@@ -236,7 +240,7 @@ artifacts/             build output (ignored)
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
-| `port-engine-runtime-fixes` | K2, K4, K5 (engine sites), K22, dead `using` directives; each with its reproduction test. | `test-harness-inprocess` | medium |
+| `port-engine-runtime-fixes` | K2, K5 (engine sites), K22, dead `using` directives, and the NLS comparison test; each with its reproduction test. | `test-harness-inprocess` | medium |
 | `port-catalog-emitter-race` | K1 with a concurrency reproduction; search for other shared mutable statics in session-scoped code and report them. | `test-harness-inprocess` | easy |
 | `port-abandoned-session-cleanup` | Establish and test what reclaims server sessions when a client disappears now that remoting leases are gone; add idle reaping if nothing does. | `protocol-corewcf-host` | hard |
 | `port-library-loading` | Resolver for library directories including native assets; test: a library whose assembly has a private NuGet dependency and a native dependency registers from the runtime layout. | `build-runtime-layout` | medium |
@@ -249,7 +253,7 @@ artifacts/             build output (ignored)
 
 **Objective.** A comprehensive, isolated, one-command test suite that defines "still works", plus the habit of extending it (see `tickets/rules/10-dataphor.md`).
 
-**Current state.** `Tests/DAE.Server.Tests` starts a `Server` in-process and runs D4 scripts from `Libraries/TestFramework.Coverage.Scripts` (135 scripts, 23,500 lines, about 2,100 assertions written as `raise Error`). 90 are wired to NUnit by hand, 14 of those ignored, one names a script that does not exist, and 45 scripts are not wired at all. The fixture uses SQL CE (being deleted), writes to `%ProgramData%`, reads libraries from the source tree, and registers a helper library (`TestFramework.Coverage.Base`) that requires `TestFramework`, which creates a SQL Server device against `localhost` — so the "in-memory" suite fails without a local SQL Server (K14). Other fixtures depend on a developer's drive paths and server names (K18), a pre-configured machine alias, or a built `DAEServer.exe`.
+**Current state.** `Tests/DAE.Server.Tests` starts a `Server` in-process and runs D4 scripts from `Libraries/TestFramework.Coverage.Scripts` (135 scripts, 23,500 lines, about 2,100 assertions written as `raise Error`). 89 are wired to NUnit by hand (a 90th is commented out), 14 of those ignored, one names a script that does not exist (`TableIndexer`), so 88 scripts are wired and 47 are not wired at all (verified). The spike ran 76 of them: the 75 wired and not ignored, plus `SecurityLibrary`, whose `Ignore` sits on the line above its test and so escaped the spike's filter (it ran without the `SetUseImplicitTransactions(false)` step the old test runs first). The other 59 scripts have not yet been run on .NET 10. The fixture uses SQL CE (being deleted), writes to `%ProgramData%`, reads libraries from the source tree, and registers a helper library (`TestFramework.Coverage.Base`) that requires `TestFramework`, which creates a SQL Server device against `localhost` — so the "in-memory" suite fails without a local SQL Server (K14). Other fixtures depend on a developer's drive paths and server names (K18), a pre-configured machine alias, or a built `DAEServer.exe`.
 
 **Target: layers.**
 
@@ -274,7 +278,7 @@ Cross-cutting requirements:
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
-| `test-harness-inprocess` | New isolated in-process fixture (temp instance, layout libraries, SQLite store), data-driven script discovery with manifest. Starting manifest: the 62 passing scripts as `pass`, the rest `known-failure`. Port the existing cursor and catalog tests onto it; delete machine-dependent tests after capturing what they intended to check. | `build-runtime-layout` | hard |
+| `test-harness-inprocess` | New isolated in-process fixture (temp instance, layout libraries, SQLite store), data-driven script discovery with manifest. Starting manifest: the 62 passing scripts as `pass`, the rest of the spike's 76 as `known-failure`, and the 59 scripts the spike never ran as whatever their first run shows. Port the existing cursor and catalog tests onto it; delete machine-dependent tests after capturing what they intended to check. | `build-runtime-layout` | hard |
 | `test-decouple-coverage-base` | K14. Expect the 12 blocked scripts to turn green or reveal real failures. | `test-harness-inprocess` | medium |
 | `test-triage-known-failures` | One `fix/` ticket per remaining `known-failure` and per unwired script (group by cause); includes the 14 ignored tests (K20). | `test-decouple-coverage-base` | medium |
 | `test-parser-roundtrip-corpus` | L0 property test over all `.d4` files. | `test-harness-inprocess` | easy |
@@ -296,7 +300,7 @@ Cross-cutting requirements:
 
 **Diagnosis of the SQLite problem (verified).** Eight sessions each running fifteen create/query/drop cycles against a SQLite-backed server produced 39–47 failures in 60–80 seconds. Three independent causes:
 
-1. **Lock upgrades between connections.** Every catalog device session holds its own store connection and opens a store transaction for the life of the process transaction. SQLite transactions were begun deferred, so two sessions each take a read lock and then both try to write: one must fail with "database is locked", after waiting out the busy timeout. (Isolation level "read uncommitted" is mapped to *no* transaction at all in `SQLiteConnection`, which is harmless but means those statements autocommit.)
+1. **Lock upgrades between connections.** From its first store write onward, a catalog device session holds its own store connection and opens a store transaction for the life of every later process transaction, whether or not that transaction writes (static: the flag that marks the session as writing is never reset). SQLite transactions were begun deferred, so two sessions each take a read lock and then both try to write: one must fail with "database is locked", after waiting out the busy timeout. (Isolation level "read uncommitted" is mapped to *no* transaction at all in `SQLiteConnection`, which is harmless but means those statements autocommit.)
 2. **Rollback-journal mode**, in which a writer blocks all readers.
 3. **A race that has nothing to do with SQLite** (K1): one static `D4TextEmitter` shared by all sessions builds the object script that is stored in the catalog. Under concurrent DDL the text is interleaved. With SQLite the garbled script broke the generated `insert` statement ("SQL logic error … unrecognized token"); with SQL CE, which inserts through a cursor, the garbled text would be *stored* and fail only when the object is next loaded from the catalog.
 
@@ -316,8 +320,8 @@ Cross-cutting requirements:
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
-| `store-sqlite-concurrency` | Implement the target design; concurrency and long-transaction tests; SQLite is the default store class. | `test-harness-inprocess`, `port-catalog-emitter-race` | hard |
-| `store-remove-sqlce-references` | K19 and every remaining mention of SQL CE in code, configuration defaults, the instance editing forms and documentation; record the removed D4 class name in the migration notes. | `build-core-sdk-projects` | easy |
+| `store-sqlite-concurrency` | Implement the target design, with SQLite's default connection options (WAL, busy timeout); concurrency and long-transaction tests (the spike's concurrency loop becomes the K10 reproduction here); settle K26. | `test-harness-inprocess`, `port-catalog-emitter-race` | hard |
+| `store-remove-sqlce-references` | Every mention of SQL CE that `build-server-project` (which does K19) leaves: code, configuration defaults, the instance editing forms and documentation; SQLite becomes the server's built-in default store; an instance that still names the SQL CE store fails to start with a clear error. | `build-server-project`, `test-harness-inprocess` | easy |
 | `store-mssql-port` | Port the SQL Server catalog store to `Microsoft.Data.SqlClient` if trivial, else park it; run the store contract tests where a server is configured. | `test-store-contract` | medium |
 | `store-rebuild-workflow` | Test and document rebuilding a catalog from scripts on a fresh instance (libraries, security, device users), including a restart afterwards; measure how long the sample set takes. | `store-sqlite-concurrency` | medium |
 | `store-parameterized-statements` | The store builds SQL by string concatenation with quote doubling (a long-standing `TODO`). Parameterize inserts and updates; measure. | `test-store-contract` | medium |
@@ -335,16 +339,16 @@ Cross-cutting requirements:
 - **CoreWCF** hosts the three existing contracts, unchanged, on the same binding, addresses and ports. *First work item is a proof:* a .NET 10 client using the existing client code completes a session (connect, prepare, execute, cursor fetch, stream read) against a CoreWCF-hosted server with the existing binding settings. If the binding cannot be reproduced, stop and bring the options to the owner; do not improvise a new protocol.
 - One host built on the .NET Generic Host: `DAEServer` runs in a console; the same executable runs as a Windows service (`UseWindowsService`), with service registration done by the installer and by a CLI command rather than by an installer class.
 - Server interface declarations and the client's asynchronous copies stay in step by a test that compares the two contract shapes.
-- `UseServiceConfiguration` (endpoints from `app.config`) is removed unless Q8 says it is used.
+- `UseServiceConfiguration` (endpoints from `app.config`) is removed, with a migration-notes entry (Q8: use unknown, assumed unused).
 - Logging through `Microsoft.Extensions.Logging` to the existing log file format and the Windows Event Log.
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
 | `protocol-corewcf-proof` | Minimal CoreWCF host for `IListenerService` and a subset of `IDataphorService`; a full session demonstrated; write up findings. | `build-server-project` | hard |
-| `protocol-corewcf-host` | Full hosting of all three services on `net10.0`; replace the four files in `Server/Service`; client constructors fixed. | `protocol-corewcf-proof` | hard |
+| `protocol-corewcf-host` | Full hosting of all three services on `net10.0`; replace the WCF files in `Server/Service` (five) and `NativeCLI/NativeCLIService.cs` (`ConnectionManager` and `HandleManager` do not use WCF and stay); client constructors fixed. | `protocol-corewcf-proof` | hard |
 | `protocol-contract-parity-test` | Reflection test: server and client contract declarations match operation for operation. | `build-server-project` | easy |
 | `host-generic-host` | `DAEServer` on the Generic Host, console and service modes, graceful shutdown; retire `DAE.Service`'s installer class. | `protocol-corewcf-host` | medium |
-| `host-instance-configuration` | Keep `ServerConfigurations.config` (BOP) readable and writable; document every setting; default new instances to the SQLite store. | `host-generic-host` | easy |
+| `host-instance-configuration` | Keep `ServerConfigurations.config` (BOP) readable and writable; document every setting; settle K27 (side-by-side installs share the instance folder). The SQLite default is already set by `store-remove-sqlce-references`. | `host-generic-host` | easy |
 | `protocol-transport-security` | Make the secured-connection options work on CoreWCF, or document their removal (Q8). | `protocol-corewcf-host` | medium |
 
 **Done when** gate G2's hosted-server half holds.
@@ -394,15 +398,15 @@ Cross-cutting requirements:
 |---|---|---|
 | SQLDevice, SimpleDevice, System.Platform, System.Integration, Security, General | Compile unchanged | Convert projects; tests |
 | Connection | References SQL CE; holds 2,600 lines of uncompiled duplicates | K19; delete the duplicates |
-| MSSQLDevice + `MSSQLConnection` (in Server) | `System.Data.SqlClient` | Move to `Microsoft.Data.SqlClient`. **Compatibility trap:** the new driver encrypts by default and validates the server certificate; a device definition that worked in 3.1 must still connect, so keep the old defaults unless the device's settings say otherwise, and document it. Check behaviour against the SQL Server version in production (Q12) |
+| MSSQLDevice + `MSSQLConnection` (in Server) | `System.Data.SqlClient` | Move to `Microsoft.Data.SqlClient`. **Compatibility trap:** the new driver encrypts by default and validates the server certificate; a device definition that worked in 3.1 must still connect, so keep the old defaults unless the device's settings say otherwise, and document it. The production version is unknown; the supported minimum is SQL Server 2022 (Q12) |
 | PGSQLDevice + PGSQLConnection (+ the PostgreSQL catalog store, which references the connection library) | Compiles against Npgsql 2.0.4 and Mono.Security, both checked-in binaries from about 2009 | **Port** (D15): current Npgsql from NuGet, Mono.Security dropped. Fifteen years of driver changes sit in between — type mapping (timestamps and time zones, numerics, booleans, large objects), parameter handling, connection-string keywords, error codes — so this is driven by the live tests, not by getting it to compile. The device has had little maintenance since 2017; expect to find its own defects too |
 | OracleDevice and its connections | Default connection uses `System.Data.OracleClient` (gone) | Park under `legacy/libraries` (D15); a later self-contained ticket (managed ODP.NET) |
 | ODBC, OLE DB connections | Available as packages (OLE DB is Windows-only) | Convert if it is a project-file change only; otherwise park |
 | ADO (COM) connection, SAS device | COM interop | Park |
 | System.Internet | `HttpWebRequest`, `FtpWebRequest`, `SmtpClient`, Newtonsoft.Json 9 | Works on .NET 10 as obsolete API; update Newtonsoft; modernizing HTTP is optional follow-up |
 | Frontend (server) | Compiles with one name collision fixed; contains leftover `System.Web` page and handler classes | Delete the web leftovers; WS3 L5 covers derivation |
-| MySQL, DB2, DB2400, DataDirect, ODP, Caché connections; MySQL, DB2, Caché, Linter, Fastore devices | Not built by any solution, or have no working driver | Remove (D12 keeps them in history) |
-| FHIR*, CQF*, PHINVADS*, TestCQL, TestCache | Side projects on pre-1.0 HL7 packages | Park (D6). Before parking, move the general-purpose object-as-JSON nodes that the FHIR core library registers (`FHIRCore.ObjectAsJSONSelectorNode`, `…ReadAccessorNode`, `…WriteAccessorNode`, `FHIRCore.FHIRBaseDisplayString`) somewhere that stays in the build if they have no FHIR dependency, keeping the D4 class names; otherwise record them in the migration notes — an application is known to reference them |
+| MySQL, DB2, DB2400, DataDirect, ODP (`OracleConnection`, the unmanaged Oracle driver), Caché connections; MySQL, DB2, Caché, Linter, Fastore devices | Most are still listed in `Dataphor/Dataphor.sln`, but none has a working driver on .NET 10 | Remove (D12 keeps them in history) |
+| FHIR*, CQF*, PHINVADS*, TestCQL, TestCache | Side projects on pre-1.0 HL7 packages | Park (D6). The four `FHIRCore.*` class names once thought to need rescuing are not registered by any code (see Q7), so nothing moves; the migration notes say so |
 | Samples | D4 and forms only, except Shipping | Keep; they are test corpus (WS3 L7). Samples that require SQL Server get a SimpleDevice variant where practical |
 
 | Work item | Scope | Prereq | Difficulty |
@@ -410,9 +414,9 @@ Cross-cutting requirements:
 | `device-mssql-port` | `Microsoft.Data.SqlClient`, default-compatibility rules, golden and live tests. | `test-device-sql-golden` | medium |
 | `device-connection-cleanup` | Delete uncompiled duplicates and the VS2003 project files; ODBC and OLE DB on packages. | `build-core-sdk-projects` | easy |
 | `library-remove-dead-devices` | Delete the dead connections and devices listed above. | — | easy |
-| `library-park-side-projects` | Move FHIR/CQF/PHINVADS, the top-level `Dataphoria/` tree and the Oracle, ADO and SAS libraries under `legacy/`, out of the build; handle the object-as-JSON nodes as described above. | — | medium |
+| `library-park-side-projects` | Rename `Legacy/` to `legacy/`; move FHIR/CQF/PHINVADS, the top-level `Dataphoria/` tree and the Oracle, ADO and SAS libraries under `legacy/`, out of the build; keep the samples registering (`Sample.Demo` requires `ADOConnection` without using it). | — | medium |
 | `device-pgsql-port` | PostgreSQL connection and device on current Npgsql: SDK projects, binaries removed, golden translation tests, live tests against a PostgreSQL server (environment-driven; in CI if the runner can supply one); document the minimum supported PostgreSQL version; port the PostgreSQL catalog store if it then needs only the store contract tests to pass. | `test-device-live` | hard |
-| `device-sqlserver-version-matrix` | Establish and document the minimum supported SQL Server version and the connection settings needed for older servers (Q12). | `test-device-live` | medium |
+| `device-sqlserver-version-matrix` | Test SQL Server 2022 and later (the supported minimum, Q12), check SQL Server 2019, and document the result and the connection settings an older server needs. | `test-device-live` | medium |
 | `library-frontend-web-leftovers` | Delete `System.Web` classes from the Frontend server library. | `test-frontend-derivation-golden` | easy |
 | `library-upgrade-scripts` | Establish what runs `Upgrades/Upgrade.<version>.d4`, document it, and test a library upgrade from an older version. | `test-harness-inprocess` | medium |
 
@@ -420,7 +424,7 @@ Cross-cutting requirements:
 
 **Objective.** All user, developer and reference documentation in Markdown under `docs/`, complete, with working links.
 
-**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — with 116 images (59 of them BMP, 30 MB), 649 anchors, 523 cross-references, about 750 literal blocks holding every code sample with no language tag, 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `Legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `Libraries/Documentation` contains a D4 operator that generates DocBook reference pages from a live catalog.
+**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — assembled only by `SUMMARY.adoc` files and `book.json` (GitBook style; no master files or includes). It has 107 image files plus 9 CorelDraw sources (the BMPs are 28 MB), 649 explicit anchors, about 525 cross-references (about 500 of which target heading text rather than an anchor, and about 22 of which are already broken), 757 literal blocks holding every code sample with no language tag (about 150 of them are grammar productions that begin with `&lt;` and are not XML), 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `Legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `Libraries/Documentation` contains a D4 operator that generates DocBook reference pages from a live catalog.
 
 **Target tree.**
 
@@ -441,7 +445,7 @@ docs/
   images/                   PNG and SVG only
 ```
 
-**Design notes.** Convert with scripts kept under `tools/` until the sources are deleted: AsciiDoc → DocBook (Asciidoctor) → GitHub-flavoured Markdown (pandoc) is the high-fidelity route and handles the legacy DocBook with the same second step; a rewrite pass then maps anchors and cross-references to file-relative links, tags literal blocks as `d4`, `sql` or `xml`, converts BMP to PNG, and rewrites the 206 dead links to the converted reference pages. The source files declare `iso-8859-1`; check the actual bytes before converting. A link checker runs in CI. After conversion the generator in `Libraries/Documentation` gets a Markdown emitter so the system library reference can be regenerated from the catalog and compared with the hand-written text. Longer term, self-contained D4 samples in the docs are extracted and run as tests.
+**Design notes.** Convert with scripts kept under `tools/` until the sources are deleted: AsciiDoc → DocBook (Asciidoctor) → GitHub-flavoured Markdown (pandoc) is the high-fidelity route and handles the legacy DocBook with the same second step; a rewrite pass then maps anchors and cross-references to file-relative links, tags literal blocks as `d4`, `sql` or `xml`, converts BMP to PNG, and rewrites the 206 dead links to the converted reference pages. The source files declare `iso-8859-1`, but all 75 are valid UTF-8 (verified); treat them as UTF-8 and fix the one double-encoded character the ticket survey found. A link checker runs in CI. After conversion the generator in `Libraries/Documentation` gets a Markdown emitter so the system library reference can be regenerated from the catalog and compared with the hand-written text. Longer term, self-contained D4 samples in the docs are extracted and run as tests.
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
@@ -474,7 +478,7 @@ docs/
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
 | `installer-publish-profiles` | `dotnet publish` profiles producing the install image from the layout. | `build-runtime-layout`, `host-generic-host` | medium |
-| `installer-msi` | New WiX project; delete `Setup/` and `Utilities/Wix`. Depends on Q11. | `installer-publish-profiles` | hard |
+| `installer-msi` | New WiX project, on the newest WiX major version without the maintenance fee (Q11); delete `Setup/` and `Utilities/Wix`. | `installer-publish-profiles` | hard |
 | `installer-service-and-firewall` | Service, firewall and Event Log registration; default instance option. | `installer-msi` | medium |
 | `installer-test` | L8 scripted install, upgrade and uninstall test. | `installer-service-and-firewall` | medium |
 | `installer-clickonce-client` | ClickOnce publish profile and signing for the Windows client; documented update procedure. | `ui-windows-client-runs` | medium |
@@ -598,10 +602,10 @@ When the work starts, the corpus is located by an environment variable (never co
 | # | Defect | Where | Status | Fix in |
 |---|---|---|---|---|
 | K1 | A static, non-thread-safe `D4TextEmitter` is shared by all catalog sessions; concurrent DDL interleaves the text of the object scripts written to the catalog store. Possible silent catalog corruption on any store. | `Dataphor/Server/Device.Catalog/ServerCatalogDeviceSession.cs`, field `_emitter` (~line 2615) | verified | WS2 `port-catalog-emitter-race` |
-| K2 | `CopySection` computes the end offset from the start position instead of the line start when a section begins and ends on the same line, overshooting by the start column; `create operator` written on one indented line at the end of a script throws "Index and length must refer to a location within the string" (surfaced as an internal compiler error). | `Dataphor/DAE/Debug/SourceUtility.cs` | verified | WS2 |
+| K2 | `CopySection` computes the end offset from the start position instead of the line start when a section begins and ends on the same line, overshooting by the start column; `create operator` written on one indented line at the end of a script throws "Index and length must refer to a location within the string" (surfaced as an internal compiler error). Worse elsewhere in a script (static): the copied text becomes the operator's stored source, so a one-line operator in the middle of a script is silently stored with the following text appended. | `Dataphor/DAE/Debug/SourceUtility.cs` | verified (end of script), static (middle) | WS2 `port-engine-runtime-fixes` |
 | K3 | "Collection was modified; enumeration operation may not execute" from concurrent DDL, 1–4 times per 120 cycles before store writes were serialized. Site unknown. | engine or catalog device | verified, unlocated | WS2 |
-| K4 | `SetThreadName` reflects on the private field `Thread.m_Name`, absent on modern .NET: null reference at server start in DEBUG builds. | `Dataphor/Base/ThreadUtility.cs` | verified | WS2 |
-| K5 | `Delegate.BeginInvoke` is unsupported on modern .NET: D4 asynchronous execution operators and Dataphoria's script executor throw. | `Dataphor/DAE/Runtime.Instructions/SystemNodes.cs` (3 sites); `Dataphor/Dataphoria/TextEditor/ScriptExecutor.cs` | verified (engine), static (IDE) | WS2, WS6 |
+| K4 | `SetThreadName` reflects on the private field `Thread.m_Name`, absent on modern .NET: null reference at server start in DEBUG builds. | `Dataphor/Base/ThreadUtility.cs` | verified | WS1 `build-core-sdk-projects` |
+| K5 | `Delegate.BeginInvoke` is unsupported on modern .NET: D4 asynchronous execution operators and Dataphoria's script executor throw. A fourth site in `DAE.Client/DAEDataSet.cs` is dead code (under `USEASYNCSTOPPROCESS`, which nothing defines). | `Dataphor/DAE/Runtime.Instructions/SystemNodes.cs` (3 sites); `Dataphor/Dataphoria/TextEditor/ScriptExecutor.cs` | verified (engine), static (IDE) | WS2 `port-engine-runtime-fixes`, WS6 |
 | K6 | `RemoteServerObject.Dispose` calls remoting lifetime services, which throw on modern .NET — on every remote object disposal. | `Dataphor/Server/Server/RemoteServerObject.cs`, `RemoteServerConnection.cs`, `RemoteServer.cs`, `Streams/FileStreamProvider.cs` | static | WS1 `build-server-project` |
 | K7 | `Thread.ResetAbort()` in catch blocks throws on modern .NET. | `Frontend.Client/Pipe.cs`, `Dataphoria/Program.cs`, `DAE.Service.ConfigurationUtility/Program.cs` | static | WS6 |
 | K8 | `ScriptAction` compiles scripts with CodeDom, unsupported on modern .NET. | `Dataphor/Frontend.Client/ScriptAction.cs` | static | WS6 |
@@ -615,12 +619,15 @@ When the work starts, the corpus is located by an environment variable (never co
 | K16 | Installer: no upgrade logic, regenerated component GUIDs, missing licence file, placeholder registry keys, undefined shortcut directory, no service registration. | `Setup/` | static | WS9 |
 | K17 | 206 documentation links point at pages that do not exist. | `Documentation/` | verified | WS8 |
 | K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `Tests/DAE.Server.Tests/SQLStoreTest.cs`, `Tests/DAE.Client.Tests` | static | WS3 |
-| K19 | The base `Connection` library has a hard reference to SQL CE. | `Libraries/Connection/Source/Register.cs` | verified | WS4 `store-remove-sqlce-references` |
-| K20 | 14 coverage tests are ignored (one names a script that does not exist) and 45 scripts are not wired to any test. | `Tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |
+| K19 | The base `Connection` library has a hard reference to SQL CE. | `Libraries/Connection/Source/Register.cs` | verified | WS1 `build-server-project` |
+| K20 | 14 coverage tests are ignored (one names a script that does not exist) and 47 scripts are not wired to any test. | `Tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |
 | K21 | A 34 MB catalog database, server logs and a file naming a developer's machine account are committed. | `Dataphor/Dataphoria/Default Server Configurations`, `Dataphor/netsh_address_reservations.txt` | verified | WS12 |
 | K23 | The vendored command-line parser uses `field` as a variable name inside a property accessor; `field` is a keyword there from C# 14, so the file does not compile with the .NET 10 default language version. | `Dataphor/DAEServer/CommandLineArguments.cs` (~line 1384); check the copy in `Dataphor/D4Runner` | verified | WS10 `tool-cli-skeleton` (rename earlier if it blocks WS1) |
 | K24 | Legacy WinForms menu, toolbar and status-bar controls compile on .NET 10 but throw `PlatformNotSupportedException` when constructed (~270 references). | `DAE.Client.Controls`, `Frontend.Client.Windows`, `Dataphoria`, `DAE.Service.ConfigurationUtility` | verified | WS6 |
-| K22 | `PathUtility` relies on `AppDomain.RelativeSearchPath`, always null on modern .NET. | `Dataphor/Base.Windows/PathUtility.cs` | static | WS2 |
+| K22 | `PathUtility` relies on `AppDomain.RelativeSearchPath`, always null on modern .NET. On closer reading this changes nothing: null gives the same result a desktop .NET Framework host got; only the removed web client set it. The fix is deleting the dead branch. | `Dataphor/Base.Windows/PathUtility.cs` | static | WS2 `port-engine-runtime-fixes` |
+| K25 | Five keyword tables (D4 keywords, reserved words and instructions; the SQL and RealSQL keyword tables) are lazily built by assigning the array before filling it, so a concurrent first use can see a partly filled table and misparse. | `Dataphor/DAE/Language.D4/Keywords.cs`, `Instructions.cs`; the SQL language keyword files | static | WS2 `port-catalog-emitter-race` |
+| K26 | Under the lowest isolation level the store opens no SQLite transaction, so rolling back a process transaction undoes the in-memory catalog but not the store writes. SQL CE behaved the same. | `Dataphor/DAE.SQLite/SQLiteConnection.cs` | static | WS4 `store-sqlite-concurrency` |
+| K27 | The default instances folder (`%ProgramData%\Alphora\Dataphor\Instances`) does not include the version, so a 4.0 server installed beside 3.1 would read and write 3.1's instance configuration. | `Dataphor/Server/Server/InstanceManager.cs` (`GetInstanceDirectory` passes `VersionModifier.None`) | static | WS5 `host-instance-configuration` |
 
 ## Risks
 
@@ -646,9 +653,13 @@ When the work starts, the corpus is located by an environment variable (never co
 - Each known defect is fixed inside the named work item with its reproduction test; do not file K-items as separate tickets unless the work item is split.
 - Every ticket that changes something an application, a deployment script or a custom extension could notice appends an entry to `docs/migration-notes.md` in the same commit.
 
+**How the board was cut (November 2026).** Phase 1, through gate G1, has one ticket per work item, numbered in the order above. Phases 2–5 are held as one umbrella ticket per workstream in `tickets/backlog/` (`feat-ws5-protocol-and-hosting` and so on), each saying which gate to promote it at. Promoted to `plan/`, an umbrella is replaced by its work items using the slugs in this document. The umbrellas stay in `backlog/` until then because the runner treats a plan ticket's prerequisite as satisfied once that prerequisite reaches `implement/`; in `plan/`, Phase 2 work would be planned before the reorganization, against old paths. A few items are grouped with the workstream whose code they wait on: `port-abandoned-session-cleanup` and `port-server-on-net10` and `test-client-server` with WS5; `test-store-contract` with WS4; `test-device-sql-golden` and `test-device-live` with WS7; `test-ui-smoke` with WS6; `build-globbing-cleanup`, `build-remove-legacy-build` and a new item, `hygiene-remove-net-spike`, with the WS12 remainder. The test that pins NLS string comparison (WS2 "Globalization") is in `port-engine-runtime-fixes`.
+
 ## Appendix A Spike results
 
 Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Run twice on Windows 11: against `net8.0` (SDK 8.0.411, runtime 8.0.17) and against `net10.0` (SDK 10.0.404, runtime 10.0.15). Runtime results — engine start, concurrency, and the 62/14 coverage split with the same 14 scripts failing for the same reasons — were identical. Compile results differ only where noted.
+
+**Conditions behind the baseline numbers.** The 62/14 coverage split was measured with *all* the patches below applied, including two runtime fixes that land after the test harness (K1 and "begin immediate"); with the Debug engine constants (`ACCUMULATOR`, `USEVISIT`), whereas 3.1 shipped Release builds without them; and without NLS globalization, because the spike's hosts sit outside the repository's props. The in-repo harness should expect small differences from each and tie them to the ticket that changes the condition.
 
 **Source patches the spike applies** (each is required by the real port):
 
@@ -698,7 +709,7 @@ Reproduce with `python tools/net-spike/run.py <work-dir> --smoke --coverage`. Ru
 
 **Wire contracts.** `IDataphorService` 88 operations, `INativeCLIService` 11, `IListenerService` 3; 55 data-contract types, mostly in `Dataphor/DAE/Contracts`.
 
-**Tests today.** 126 NUnit tests (112 active): 90 script runners, 12 cache tests, the rest cursor, store and client tests. 135 coverage scripts, 23,548 lines.
+**Tests today.** About 125 NUnit tests: 89 script runners (14 ignored), 12 cache tests, the rest cursor, store and client tests. 135 coverage scripts, 23,548 lines.
 
 **Checked-in binaries and bulk.** 133 DLLs (31 MB), 34 executables (15 MB), 18 WiX SDK `.lib` files (39 MB), one 34 MB SQL CE database, 60 MB of BMP images. By directory: `Legacy/` 79 MB, `Utilities/` 63 MB, `Dataphor/` 61 MB, `Documentation/` 31 MB, `Libraries/` 18 MB, `Images/` 11 MB.
 
