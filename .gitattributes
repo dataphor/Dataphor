@@ -1,0 +1,46 @@
+# No `* text=auto` and no `text` on any type with CRLF files in the index: that would renormalize
+# existing files, which docs/modernization-plan.md#ws12-repository-hygiene forbids.
+
+# Binary types (Git already detects these as binary; declared so nothing depends on detection).
+# Patterns are case-sensitive, so upper-case extensions present in the tree are listed too.
+*.png binary
+*.PNG binary
+*.bmp binary
+*.BMP binary
+*.gif binary
+*.jpg binary
+*.ico binary
+*.ICO binary
+*.psd binary
+*.cdr binary
+*.ai binary
+*.clk binary
+*.emf binary
+*.dll binary
+*.DLL binary
+*.exe binary
+*.pdb binary
+*.lib binary
+*.wixlib binary
+*.zip binary
+*.jar binary
+*.chm binary
+*.pdf binary
+*.PDF binary
+*.doc binary
+*.docx binary
+*.pptx binary
+*.vsdx binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.cub binary
+*.snk binary
+
+# Line endings pinned only for types with no CRLF file in the index (new with the modernization).
+*.slnx text eol=crlf
+*.props text eol=crlf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf

@@ -8,7 +8,7 @@ Read the root `AGENTS.md` first; it has the layout, the build/test commands and 
 
 **Bugs met along the way.** A defect with a local, obvious fix (a race, an off-by-one, a wrong API call) is fixed in the ticket that meets it, with its reproduction test, and listed in the handoff. A defect whose fix changes a design or a compatibility surface becomes its own ticket.
 
-**Source hygiene.** C# here uses tabs, CRLF line endings and, in most files, a UTF-8 byte-order mark. Preserve all three in files you edit, and never reformat or re-encode a file you are not otherwise changing. Moving a file and editing it are separate commits. On .NET 10 several removed APIs compile and then throw at run time: never suppress `WFDEV006` or `SYSLIB` warnings to get a build green.
+**Source hygiene.** Source files here mostly use tabs and CRLF line endings; some `.cs` and `.d4l` files have a UTF-8 byte-order mark and others do not. Preserve each file's indentation, line endings and byte-order-mark state in files you edit, and never reformat or re-encode a file you are not otherwise changing. Moving a file and editing it are separate commits. On .NET 10 several removed APIs compile and then throw at run time: never suppress `WFDEV006` or `SYSLIB` warnings to get a build green.
 
 **Privacy.** This repository is public. Never write a customer's name, file paths, schema, library names or data into any tracked file, ticket or commit message; describe needs generically.
 

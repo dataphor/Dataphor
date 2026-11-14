@@ -53,7 +53,7 @@ It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite
 ## Rules that are easy to break
 
 - **Compatibility surfaces — do not change without a ticket that says so:** D4 semantics and operator signatures; D4 class names (the strings in `create operator … class "Lib.XNode"`, registered by each assembly's `DAERegister.GetClasses()`); assembly names; `.d4l`/`.dfd`/`.dfdx`/`.dnt`/BOP formats; error codes (`docs/reference/Error Message Prefix Codes.txt`); WCF contracts in `src/engine/Server/Contracts` + `src/protocol/Client/Contracts` (two copies that must stay in step); ports 8060/8061.
-- **Formatting:** tabs, CRLF, UTF-8 with BOM in most `.cs` files. Preserve them. Never reformat or re-encode a file you are not otherwise changing.
+- **Formatting:** tabs and CRLF in most source files; a UTF-8 byte-order mark in some `.cs` and `.d4l` files and not others (about 40 % of `.cs` files have one). Preserve whatever each file has. The root `.editorconfig` and `.gitattributes` describe this and deliberately set no charset, final-newline or `text=auto` rule. Never reformat or re-encode a file you are not otherwise changing.
 - **A file on disk is not necessarily compiled.** Legacy csproj files list sources explicitly; strays exist (`src/client/DAE.Client/View-263.cs`, most of `libraries/Connection/Source`). Check the csproj before trusting or fixing a file.
 - **Same-named files exist in both `src/engine/DAE` and `src/engine/Server`** (`SecurityNodes.cs`, `LibraryNodes.cs`, `CatalogNodes.cs`, …). They are different files; check both.
 - **Behaviour switches are `#define`s at the top of individual files** plus csproj constants; `docs/reference/CompilerDefines.txt` is the index. `NILPROPOGATION` (sic) etc. are load-bearing.
