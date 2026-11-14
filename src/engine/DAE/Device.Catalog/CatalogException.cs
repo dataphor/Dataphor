@@ -34,6 +34,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			/// <summary>Error code 115106: "Catalog store class name required."</summary>
 			CatalogStoreClassNameRequired = 115106,
+
+			/// <summary>Error code 115107: "Catalog store class "{0}" could not be loaded. Check the catalog store class name setting (catalogstoreclassname) of this instance."</summary>
+			CatalogStoreClassNotFound = 115107,
+
+			/// <summary>Error code 115108: "The SQL Server Compact catalog store is no longer supported. Remove the catalog store class name and connection string settings (catalogstoreclassname, catalogstoreconnectionstring) from this instance to use the default SQLite store, then rebuild the catalog from the application's scripts."</summary>
+			SQLCEStoreNotSupported = 115108,
 		}
 
 		// Resource manager for this exception class

@@ -68,11 +68,60 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalStart(process);
 			if (!process.ServerSession.Server.IsEngine)
 			{
+				Server.Server server = (Server.Server)process.ServerSession.Server;
+				CheckNotSQLCEStore(server);
+				LogIgnoredSQLCECatalog(server);
 				_store = new CatalogStore();
-				_store.StoreClassName = ((Server.Server)process.ServerSession.Server).GetCatalogStoreClassName();
-				_store.StoreConnectionString = ((Server.Server)process.ServerSession.Server).GetCatalogStoreConnectionString();
+				_store.StoreClassName = server.GetCatalogStoreClassName();
+				_store.StoreConnectionString = server.GetCatalogStoreConnectionString();
 				_store.Initialize(process.ServerSession.Server);
 			}
+		}
+
+		private const string SQLCEStoreTypeName = "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore";
+		private const string SQLCEStoreAssemblyName = "Alphora.Dataphor.DAE.SQLCE";
+		private const string SQLCEFileExtension = ".sdf";
+
+		/// <summary>
+		/// Stops the start of an instance whose settings still name the 3.1 SQL Server Compact store, rather than letting it fail
+		/// to load the store class or hand a SQL Server Compact connection string to the default SQLite store.
+		/// </summary>
+		private static void CheckNotSQLCEStore(Server.Server server)
+		{
+			string className = server.CatalogStoreClassName;
+			if (String.IsNullOrEmpty(className))
+			{
+				string connectionString = server.CatalogStoreConnectionString;
+				if (connectionString != null && connectionString.IndexOf(SQLCEFileExtension, StringComparison.OrdinalIgnoreCase) >= 0)
+					throw new CatalogException(CatalogException.Codes.SQLCEStoreNotSupported);
+			}
+			else
+			{
+				string[] parts = className.Trim().Split(',');
+				if
+				(
+					String.Equals(parts[0].Trim(), SQLCEStoreTypeName, StringComparison.OrdinalIgnoreCase)
+						|| (parts.Length > 1 && String.Equals(parts[1].Trim(), SQLCEStoreAssemblyName, StringComparison.OrdinalIgnoreCase))
+				)
+					throw new CatalogException(CatalogException.Codes.SQLCEStoreNotSupported);
+			}
+		}
+
+		/// <summary>
+		/// A 3.1 catalog file left in the catalog directory is not converted; the default store starts a new catalog beside it.
+		/// Say so in the log, so that an operator who expected the old catalog sees why this one is empty.
+		/// </summary>
+		private static void LogIgnoredSQLCECatalog(Server.Server server)
+		{
+			if (!String.IsNullOrEmpty(server.CatalogStoreClassName))
+				return;
+			string oldFileName = Path.ChangeExtension(server.GetCatalogStoreDatabaseFileName(), SQLCEFileExtension);
+			if (File.Exists(oldFileName))
+				server.LogMessage
+				(
+					LogEntryType.Warning,
+					String.Format("The SQL Server Compact catalog file \"{0}\" is not used; the catalog is stored in \"{1}\" and must be rebuilt from the application's scripts.", oldFileName, server.GetCatalogStoreDatabaseFileName())
+				);
 		}
 
 		protected override void InternalStop(ServerProcess process)

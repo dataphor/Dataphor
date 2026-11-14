@@ -39,6 +39,8 @@ namespace Alphora.Dataphor.DAE.Server
 		public const string DefaultInstanceDirectory = @"Instances";
 		public const string DefaultCatalogDirectory = @"Catalog";
 		public const string DefaultCatalogDatabaseName = @"DAECatalog";
+		/// <summary>The assembly qualified class name of the catalog store used when CatalogStoreClassName is not set.</summary>
+		public const string DefaultCatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
 		public const string DefaultBackupDirectory = @"Backup";
 		public const string DefaultSaveDirectory = @"Save";
 		public const string DefaultLogDirectory = @"Log";
@@ -126,7 +128,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </summary>
 		/// <remarks>
 		/// This property cannot be changed once the server has been started. If this property
-		/// is not set, the default store class (SQLCEStore in the DAE.SQLCE assembly) will be used.
+		/// is not set, the default store class (SQLiteStore in the DAE.SQLite assembly) will be used.
 		/// </remarks>
 		public string CatalogStoreClassName
 		{
@@ -141,12 +143,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Gets the class name of the store used to persist the system catalog.
 		/// </summary>
-		/// <returns>The value of the CatalogStoreClassName property if it is set, otherwise, the assembly qualified class name of the SQLCEStore.</returns>
+		/// <returns>The value of the CatalogStoreClassName property if it is set, otherwise, DefaultCatalogStoreClassName (the SQLite store).</returns>
 		public string GetCatalogStoreClassName()
 		{
 			return
 				String.IsNullOrEmpty(_catalogStoreClassName)
-					? "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore,Alphora.Dataphor.DAE.SQLCE"
+					? DefaultCatalogStoreClassName
 					: _catalogStoreClassName;
 		}
 
@@ -157,8 +159,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks>
 		/// <para>
 		/// This property cannot be changed once the server has been started. If this property is not
-		/// set, a default SQLCE connection string will be built that specifies the catalog will be
-		/// stored in the Catalog subfolder of the instance directory, and named DAECatalog.sdf.
+		/// set, a default SQLite connection string will be built that specifies the catalog will be
+		/// stored in the Catalog subfolder of the instance directory, and named DAECatalog.sqlite.
 		/// </para>
 		/// <para>
 		/// If the CatalogStoreConnectionString is specified, the token %CatalogPath% will be replaced
@@ -178,12 +180,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Gets the connection string for the store used to persist the system catalog.
 		/// </summary>
-		/// <returns>The value of the CatalogStoreCnnectionString property if it set, otherwise, a default SQL CE connection string.</returns>
+		/// <returns>The value of the CatalogStoreCnnectionString property if it set, otherwise, a default SQLite connection string naming GetCatalogStoreDatabaseFileName().</returns>
 		public string GetCatalogStoreConnectionString()
 		{
 			return
 				String.IsNullOrEmpty(_catalogStoreConnectionString)
-					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), String.Empty, "Read Write")
+					? String.Format("Data Source={0}", GetCatalogStoreDatabaseFileName())
 					: _catalogStoreConnectionString.Replace("%CatalogPath%", GetCatalogDirectory());
 		}
 
@@ -198,9 +200,10 @@ namespace Alphora.Dataphor.DAE.Server
 			return directory;
 		}
 
+		/// <summary>The file of the default catalog store: DAECatalog.sqlite in the catalog directory of this instance.</summary>
 		public string GetCatalogStoreDatabaseFileName()
 		{
-			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(DefaultCatalogDatabaseName, ".sdf"));
+			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(DefaultCatalogDatabaseName, ".sqlite"));
 		}
 
 		private string _libraryDirectory = String.Empty;

@@ -28,7 +28,7 @@ An application is written as a **D4 library**: scripts that declare types, table
  │ Base — utilities, BOP serializer                                 │
  └──────┬──────────────────────┬────────────────────────┬───────────┘
    catalog store          devices (D4 objects)      D4 libraries
-   SQLCE│SQLite│MSSQL│PG   Memory, Simple, MSSQL,    libraries/<Name>/
+   SQLite│MSSQL│PG         Memory, Simple, MSSQL,    libraries/<Name>/
    (27 DAE* tables)       PGSQL, …                  .d4l + Documents/ + dll
 ```
 
@@ -56,9 +56,9 @@ Compilation is entirely in `Compiler.cs`; execution is interpretation of the pla
 
 The **catalog** is the set of all schema objects. In memory it is `Schema.Catalog`, loaded lazily: on a name-resolution miss the catalog device reads the object's *D4 script* from the store and compiles it (`ServerCatalogDeviceSession`, `NameResolutionCache`, `ClassLoader`). The **catalog store** (`Device.Catalog/CatalogStore.cs`) is a small ISAM-style layer over a SQL database: 27 `DAE*` tables — object headers and scripts (`DAEObjects`, `DAECatalogObjects`, `DAEOperators`, …), dependencies, loaded libraries and versions, registered classes, **and data that exists nowhere else**: users, roles, rights and assignments, device users with their encrypted external passwords, and server settings.
 
-`SQLStore` (`DAE/Store`) abstracts the back end; `SQLStoreConnection` emulates nested transactions with an undo log of inverse statements; `SQLStoreCursor` implements seek/range navigation by generating `select … where … order by` statements, or uses an updatable cursor where the back end has one (SQL CE). Each catalog device session holds its own store connection (pooled in `CatalogStore`) and opens a store transaction for every process transaction.
+`SQLStore` (`DAE/Store`) abstracts the back end; `SQLStoreConnection` emulates nested transactions with an undo log of inverse statements; `SQLStoreCursor` implements seek/range navigation by generating `select … where … order by` statements. Each catalog device session holds its own store connection (pooled in `CatalogStore`) and opens a store transaction for every process transaction.
 
-The default store is **SQL Server Compact 4.0** (`Server.GetCatalogStoreClassName()`), a file at `<instance>\Catalog\DAECatalog.sdf`. The store class and connection string are per-instance settings (`catalogstoreclassname`, `catalogstoreconnectionstring`; `%CatalogPath%` is substituted).
+The default store is **SQLite** (`Server.DefaultCatalogStoreClassName`, returned by `Server.GetCatalogStoreClassName()` when the setting is empty), a file at `<instance>\Catalog\DAECatalog.sqlite`. The store class and connection string are per-instance settings (`catalogstoreclassname`, `catalogstoreconnectionstring`; `%CatalogPath%` is substituted). An instance whose settings still name the 3.1 SQL Server Compact store, or a `.sdf` connection string, does not start (error 115108, checked in `ServerCatalogDevice.InternalStart`); a store class that cannot be loaded raises 115107.
 
 ## Libraries and class loading
 
@@ -94,7 +94,7 @@ The server interfaces (`src/engine/Server/Contracts`) and the client's asynchron
 
 | Location | Content |
 |---|---|
-| `<install>\` | Binaries, native SQL CE DLLs |
+| `<install>\` | Binaries, with the native SQLite interop library |
 | `<install>\Libraries\<Name>\` | Shipped libraries; library assemblies are built *into* these folders |
 | `%ProgramData%\Alphora\Dataphor\Instances\ServerConfigurations.config` | Instance list |
 | `%ProgramData%\Alphora\Dataphor\Instances\<name>\Catalog\` | Catalog store file |
@@ -108,7 +108,7 @@ The server interfaces (`src/engine/Server/Contracts`) and the client's asynchron
 | Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows, WindowsClient, Dataphoria, DAEServer, DAEService, ConfigurationUtility, D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
 | Working, lightly used | DAE.Client.Provider, NativeCLI, Frontend.Client.WPF (one scheduler control), PGSQL device and connection, Store.MSSQL/Store.PGSQL stores, samples |
 | Parked under `legacy/`, not built | Side projects (2015–2019): FHIR*, CQF*, PHINVADS* libraries (`legacy/libraries/`); `legacy/Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes), with the cloud prototype's sample library `legacy/Processor/` and design documents `legacy/Design/`. Also the Oracle (Microsoft provider), ADO and SAS device and connection libraries, and the DocBook reference generator library `Documentation` (`legacy/libraries/`) |
-| Cannot survive .NET 10 as written | SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
+| Cannot survive .NET 10 as written | WCF self-hosting, COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
 

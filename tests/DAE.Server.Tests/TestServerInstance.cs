@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	{
 		public const string LibrariesFolderName = "Libraries";
 		public const string InstanceFolderName = "Instance";
-		public const string CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
+		public const string CatalogStoreClassName = Server.DefaultCatalogStoreClassName;
 		// The spike's connection string, so that results compare with its baseline; store-sqlite-concurrency revisits it.
 		public const string CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog;Journal Mode=WAL;BusyTimeout=30000";
 

@@ -100,20 +100,10 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected abstract SQLStoreConnection InternalConnect();
 
-		/// <summary>Default maximum number of connections to an SSCE server.</summary>
+		/// <summary>Default maximum number of connections the store pools.</summary>
 		/// <remarks>
-		/// According to Microsoft, the ceiling for connections to an SSCE device is around 70:
-		/// <para>
-		/// In SSCE technically we support 256 connections. But do not scale that well when you cross 70 connections.  
-		/// To get good performance with 70 concurrent connections, you need to increase the lock time out period in connection string.  
-		/// Data Source = �./local.sdf�;Max Buffer Size = 10240;Default Lock Timeout = 5000;Flush Interval = 20; AutoShrink Threshold = 10
-		///	
-		/// You need to make sure that the connections, sessions are properly disposed in your application.  
-		/// Dispose it explicitly and don�t depend on GC to Dispose it, since it may take longer time to dispose. 
-		/// </para>
-		/// Based on this, it may be worthwhile to investigate some of these other settings as well, however,
-		/// with the connection pooling and name resolution cache we are implementing in the catalog device,
-		/// we should never get even close to this kind of concurrent access.
+		/// A ceiling on the connections the store keeps open to its back end at one time. The catalog device's
+		/// connection pooling and name resolution cache keep actual concurrent use well below it.
 		/// </remarks>
 		public const int DefaultMaxConnections = 60;
 

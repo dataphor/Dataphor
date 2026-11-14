@@ -138,4 +138,10 @@
 	<data name="115106" xml:space="preserve">
 		<value>Catalog store class name required.</value>
 	</data>
+	<data name="115107" xml:space="preserve">
+		<value>Catalog store class "{0}" could not be loaded. Check the catalog store class name setting (catalogstoreclassname) of this instance.</value>
+	</data>
+	<data name="115108" xml:space="preserve">
+		<value>The SQL Server Compact catalog store is no longer supported. Remove the catalog store class name and connection string settings (catalogstoreclassname, catalogstoreconnectionstring) from this instance to use the default SQLite store, then rebuild the catalog from the application's scripts.</value>
+	</data>
 </root>

@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Alphora Dataphor - SQL CE Store Support")]
-[assembly: AssemblyDescription("Provides the implementation of a SQL CE store for use by the DAE.")]
+[assembly: AssemblyTitle("Alphora Dataphor - SQL Server Store Support")]
+[assembly: AssemblyDescription("Provides the implementation of a SQL Server store for use by the DAE.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("Dataphor")]

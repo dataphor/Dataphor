@@ -116,7 +116,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void CreateStore()
 		{
-			_store = (SQLStore)Activator.CreateInstance(Type.GetType(_storeClassName, true, true));
+			Type storeType;
+			try
+			{
+				storeType = Type.GetType(_storeClassName, true, true);
+			}
+			catch (Exception exception)
+			{
+				throw new CatalogException(CatalogException.Codes.CatalogStoreClassNotFound, exception, _storeClassName);
+			}
+			_store = (SQLStore)Activator.CreateInstance(storeType);
 			_store.ConnectionString = _storeConnectionString;
 			_store.MaxConnections = _maxConnections;
 		}
