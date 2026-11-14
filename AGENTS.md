@@ -19,7 +19,7 @@ We own this codebase.  **This is the layout before the reorganization.** The pla
 | `Dataphor/Base` | Shared utilities and **BOP**, the XML object serializer used for forms, `.d4l` files and config (assembly `Alphora.Dataphor`) |
 | `Dataphor/DAE` (`Engine.csproj`) | The engine: D4 lexer/parser/compiler, plan nodes (`Runtime.Instructions/`), schema, memory device, catalog device, store abstraction |
 | `Dataphor/Server` | The full server on top of the engine: persistent catalog, library loading, WCF services, .NET ADO connections |
-| `Dataphor/DAE.SQLite`, `DAE.SQLCE`, `DAE.MSSQL`, `DAE.PGSQL` | Catalog *store* back ends (where the catalog persists) — not to be confused with devices |
+| `Dataphor/DAE.SQLite`, `DAE.MSSQL`, `DAE.PGSQL` | Catalog *store* back ends (where the catalog persists) — not to be confused with devices |
 | `Dataphor/Common`, `Client`, `DAE.NativeCLI` | WCF contracts/binding, client proxy + client-side catalog cache, simplified "native" call interface |
 | `Dataphor/DAE.Client`, `DAE.Client.Controls`, `DAE.Client.Provider` | `DataSession`/`DataView` data-binding model, WinForms data-aware controls, ADO.NET provider |
 | `Dataphor/Frontend.Client`, `Frontend.Client.Windows(.Executable)` | UI node model + form loader; the WinForms renderer and the Windows client exe |
@@ -29,7 +29,7 @@ We own this codebase.  **This is the layout before the reorganization.** The pla
 | `Tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process |
 | `Setup/` | WiX installer (v3.5, being replaced) |
 | `Documentation/` (AsciiDoc), `Legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
-| `Dataphoria/` (top level), `Dataphor/*Silverlight*`, `Frontend.Client.Web*`, `Frontend.Client.Browser`, `dataphor-mono/`, `Utilities/` | Dead or parked — see the plan before touching |
+| `Dataphoria/` (top level), `Utilities/` | Dead or parked — see the plan before touching |
 | `tools/net-spike/` | Throwaway harness that builds and runs the code on modern .NET without modifying the repo |
 
 ## Build and test
@@ -42,7 +42,7 @@ Until then the only build/test loop is the spike (needs Python 3 and the .NET 10
 python tools/net-spike/run.py <work-dir> --smoke --coverage
 ```
 
-It compiles 32 projects against .NET 10, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the D4 coverage scripts. Expected today: engine/server/libraries 0 errors, concurrency 0 errors, coverage `pass=62 fail=14`. See [tools/net-spike/README.md](tools/net-spike/README.md).
+It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the D4 coverage scripts. Expected today: engine/server/libraries 0 errors, concurrency 0 errors, coverage `pass=62 fail=14`. See [tools/net-spike/README.md](tools/net-spike/README.md).
 
 ## Rules that are easy to break
 

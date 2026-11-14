@@ -25,7 +25,7 @@ python tools/net-spike/run.py C:\temp\dataphor-spike --tfm net8.0 --smoke      #
 
 | Step | Result |
 |---|---|
-| Base, Engine (164k lines), Language.SQL, Common, NativeCLI, Client, DAE.Client, DAE.Client.Provider, SQLite store | compile with 0 errors (three one-line patches) |
+| Base, Engine (164k lines), Common, NativeCLI, Client, DAE.Client, DAE.Client.Provider, SQLite store | compile with 0 errors (three one-line patches) |
 | Server | 0 errors **with stubs**; real work is 4 WCF host files, remoting leases in 3 files, one COM+ class |
 | SQLDevice, MSSQLDevice, SimpleDevice, Connection, Frontend server, System.Platform/Internet/Integration, Diagnostics | 0 errors (two one-line patches) |
 | DAE.Client.Controls, Frontend.Client, Frontend.Client.WPF, Frontend.Client.Windows | **0 errors on .NET 10** (with the checked-in third-party binaries referenced). On .NET 8 they stop at the removed WinForms types `ContextMenu`, `MenuItem`, `ToolBar`, `StatusBar`. **.NET 10 brought those types back only as shells that throw `PlatformNotSupportedException` when constructed** (obsolete, diagnostic `WFDEV006`) — compiling is not working |

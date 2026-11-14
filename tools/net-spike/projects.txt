@@ -1,5 +1,4 @@
 Dataphor/Base/Base.csproj
-Dataphor/BOP/BOP.csproj
 Dataphor/DAE/Engine.csproj
 Dataphor/DAE.NativeCLI/DAE.NativeCLI.csproj
 Dataphor/Common/Common.csproj
@@ -7,7 +6,6 @@ Dataphor/Base.Windows/Base.Windows.csproj
 Dataphor/Server/Server.csproj
 Dataphor/Client/Client.csproj
 Dataphor/DAE.Client/DAE.Client.csproj
-Dataphor/Language.SQL/Language.SQL.csproj
 Dataphor/Frontend.Client/Frontend.Client.csproj
 Dataphor/DAE.SQLite/DAE.SQLite.csproj
 Dataphor/DAE.Client.Controls/DAE.Client.Controls.csproj

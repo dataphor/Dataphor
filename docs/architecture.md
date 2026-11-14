@@ -10,7 +10,7 @@ An application is written as a **D4 library**: scripts that declare types, table
 
 ```
  ┌──────────────────────────── clients ─────────────────────────────┐
- │ Dataphoria IDE        Windows client        (web client, dead)   │
+ │ Dataphoria IDE        Windows client                             │
  │ Dataphor/Dataphoria   Frontend.Client.Windows(.Executable)       │
  │        └── Frontend.Client  — node tree, form loader, Pipe       │
  │        └── DAE.Client.Controls — WinForms data-aware controls    │
@@ -107,8 +107,8 @@ The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronou
 | Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows(.Executable), Dataphoria, DAEServer, DAE.Service(.ConfigurationUtility), D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
 | Working, lightly used | DAE.Client.Provider, DAE.NativeCLI, Frontend.Client.WPF (one scheduler control), Oracle/PGSQL devices and connections, DAE.MSSQL/DAE.PGSQL stores, samples |
 | Side projects (2015–2019) | FHIR*, CQF*, PHINVADS* libraries; top-level `Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes) |
-| Dead | Silverlight client and `SilverlightDAE`; `Frontend.Client.Browser` (empty shell around vendored AngularJS); `Dataphor/BOP` (empty project); `Dataphor/Dataphoria/Dataphoria.Web.API` (ASP.NET Core 1.0 template); `dataphor-mono/`; `Libraries/Libraries.sln`; MySQL, DB2, DB2400, DataDirect, ODP and Caché connections (not built by any solution); Fastore device |
-| Cannot survive .NET 10 as written | WebForms web client (`Frontend.Client.Web*`), SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
+| Dead | MySQL, DB2, DB2400, DataDirect, ODP and Caché connections (not built by any solution); Fastore device |
+| Cannot survive .NET 10 as written | SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
 

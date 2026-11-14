@@ -1,2 +1,0 @@
-// TSQL Language BNF
-
