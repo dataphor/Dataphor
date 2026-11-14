@@ -1,0 +1,213 @@
+﻿/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+
+namespace Alphora.Dataphor.DAE.Server.Tests
+{
+	public enum CoverageStatus
+	{
+		/// <summary>The script must succeed.</summary>
+		Pass,
+		/// <summary>The script must fail, with an error text that contains the entry's error substring.</summary>
+		KnownFailure,
+		/// <summary>The script's result was observed to vary between identical runs: it runs, and never fails the run.</summary>
+		Unstable
+	}
+
+	/// <summary>One manifest entry: what running one coverage script must do. The fields are described on <see cref="CoverageManifest"/>.</summary>
+	public sealed class CoverageEntry
+	{
+		[JsonPropertyName("script")] public string Script { get; set; }
+		[JsonPropertyName("status")] public string StatusText { get; set; }
+		[JsonPropertyName("ticket")] public string Ticket { get; set; }
+		[JsonPropertyName("error")] public string Error { get; set; }
+		[JsonPropertyName("timeoutSeconds")] public int? TimeoutSeconds { get; set; }
+		[JsonPropertyName("preamble")] public string Preamble { get; set; }
+		[JsonPropertyName("register")] public string[] Register { get; set; }
+		[JsonPropertyName("note")] public string Note { get; set; }
+
+		/// <summary>Valid only once the manifest has validated the entry.</summary>
+		[JsonIgnore] public CoverageStatus Status => ParseStatus(StatusText).Value;
+
+		[JsonIgnore] public int Timeout => TimeoutSeconds ?? CoverageManifest.DefaultTimeoutSeconds;
+
+		internal static CoverageStatus? ParseStatus(string text)
+		{
+			switch (text)
+			{
+				case "pass": return CoverageStatus.Pass;
+				case "known-failure": return CoverageStatus.KnownFailure;
+				case "unstable": return CoverageStatus.Unstable;
+				default: return null;
+			}
+		}
+	}
+
+	/// <summary>
+	/// The coverage manifest, tests/DAE.Server.Tests/coverage-manifest.json, embedded in the test assembly: one entry for each
+	/// D4 script in the TestFramework.Coverage.Scripts library, saying what running it must do. A script with no entry, or an
+	/// entry with no script, fails the run.
+	/// </summary>
+	/// <remarks>
+	/// <para>Format: strict JSON (no comments, no trailing commas), UTF-8 without a byte-order mark, LF line endings; one array,
+	/// one entry (an object) per line, sorted by <c>script</c> in ordinal order. Fields, and nothing else:</para>
+	/// <list type="bullet">
+	/// <item><c>script</c> (always): the file name in Documents/ without ".d4", exact case.</item>
+	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c> or <c>unstable</c> (see <see cref="CoverageStatus"/>).
+	/// Use <c>unstable</c> only with evidence that the result varies between identical runs.</item>
+	/// <item><c>ticket</c> (required unless <c>pass</c>, forbidden on <c>pass</c>): the slug of the ticket that owns the cause,
+	/// lower-case and hyphenated, without a sequence prefix.</item>
+	/// <item><c>error</c> (<c>known-failure</c> only, required there): an ordinal, case-sensitive substring the actual error
+	/// text must contain. Never the full text, and never a part that changes between runs (program identifiers, the line
+	/// positions of program locators, timings).</item>
+	/// <item><c>timeoutSeconds</c> (optional): 1 to 600, default 120.</item>
+	/// <item><c>preamble</c> (optional): D4 run on the script's process before the script.</item>
+	/// <item><c>register</c> (optional): libraries registered in the script's server before it, each one of
+	/// <see cref="CoverageScripts.Libraries"/>.</item>
+	/// <item><c>note</c> (optional): free text for the next reader.</item>
+	/// </list>
+	/// </remarks>
+	public sealed class CoverageManifest
+	{
+		/// <summary>The LogicalName of the embedded resource in DAE.Server.Tests.csproj.</summary>
+		public const string ResourceName = "coverage-manifest.json";
+
+		public const int DefaultTimeoutSeconds = 120;
+		public const int MinTimeoutSeconds = 1;
+		public const int MaxTimeoutSeconds = 600;
+
+		private static readonly Regex TicketSlug = new Regex("^[a-z0-9]+(-[a-z0-9]+)*$");
+
+		private static readonly JsonSerializerOptions Options =
+			new JsonSerializerOptions
+			{
+				UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+				AllowDuplicateProperties = false
+			};
+
+		private CoverageManifest(List<CoverageEntry> entries, List<string> problems)
+		{
+			Entries = problems.Count == 0 ? entries : new List<CoverageEntry>();
+			Problems = problems;
+		}
+
+		/// <summary>Empty when the manifest has problems.</summary>
+		public IReadOnlyList<CoverageEntry> Entries { get; }
+
+		/// <summary>Every problem found; the manifest is usable only when there are none.</summary>
+		public IReadOnlyList<string> Problems { get; }
+
+		/// <summary>Reads the manifest embedded in the test assembly.</summary>
+		public static CoverageManifest Load(ICollection<string> libraries)
+		{
+			using (Stream stream = typeof(CoverageManifest).Assembly.GetManifestResourceStream(ResourceName))
+			{
+				if (stream == null)
+					return new CoverageManifest(null, new List<string> { String.Format("The test assembly has no embedded resource \"{0}\".", ResourceName) });
+				return Parse(stream, libraries);
+			}
+		}
+
+		public static CoverageManifest Parse(Stream json, ICollection<string> libraries)
+		{
+			List<CoverageEntry> entries;
+			try
+			{
+				entries = JsonSerializer.Deserialize<List<CoverageEntry>>(json, Options);
+			}
+			catch (JsonException exception)
+			{
+				return new CoverageManifest(null, new List<string> { exception.Message });
+			}
+
+			if (entries == null)
+				return new CoverageManifest(null, new List<string> { "The manifest is null; it must be a JSON array of entries." });
+
+			return new CoverageManifest(entries, Validate(entries, libraries));
+		}
+
+		private static List<string> Validate(List<CoverageEntry> entries, ICollection<string> libraries)
+		{
+			List<string> problems = new List<string>();
+			HashSet<string> scripts = new HashSet<string>(StringComparer.Ordinal);
+			string previous = null;
+			for (int index = 0; index < entries.Count; index++)
+			{
+				CoverageEntry entry = entries[index];
+				if (entry == null)
+				{
+					problems.Add(String.Format("Entry {0} is null.", index + 1));
+					continue;
+				}
+
+				string where = String.Format("Entry {0} ({1})", index + 1, entry.Script ?? "no script");
+				void Problem(string text) => problems.Add(where + ": " + text);
+
+				if (String.IsNullOrEmpty(entry.Script))
+					Problem("\"script\" is missing or empty.");
+				else
+				{
+					if (!scripts.Add(entry.Script))
+						Problem("the script has another entry.");
+					else if (previous != null && String.CompareOrdinal(previous, entry.Script) > 0)
+						Problem(String.Format("out of order: entries are sorted by script in ordinal order, and it follows \"{0}\".", previous));
+					previous = entry.Script;
+				}
+
+				CoverageStatus? status = CoverageEntry.ParseStatus(entry.StatusText);
+				if (status == null)
+					Problem(entry.StatusText == null ? "\"status\" is missing." : String.Format("unknown status \"{0}\"; expected pass, known-failure or unstable.", entry.StatusText));
+
+				if (status == CoverageStatus.Pass)
+				{
+					if (entry.Ticket != null)
+						Problem("\"ticket\" is not allowed on a pass entry.");
+				}
+				else if (status != null)
+				{
+					if (entry.Ticket == null)
+						Problem("\"ticket\" is required unless the status is pass.");
+					else if (!TicketSlug.IsMatch(entry.Ticket))
+						Problem(String.Format("\"ticket\" \"{0}\" is not a ticket slug (lower-case words joined by hyphens, no sequence prefix or .md).", entry.Ticket));
+				}
+
+				if (status == CoverageStatus.KnownFailure)
+				{
+					if (entry.Error == null)
+						Problem("\"error\" is required on a known-failure entry.");
+					else if (entry.Error.Length == 0)
+						Problem("\"error\" is empty; it would match any failure.");
+				}
+				else if (status != null && entry.Error != null)
+					Problem("\"error\" is allowed only on a known-failure entry.");
+
+				if (entry.TimeoutSeconds.HasValue && (entry.TimeoutSeconds < MinTimeoutSeconds || entry.TimeoutSeconds > MaxTimeoutSeconds))
+					Problem(String.Format("\"timeoutSeconds\" is {0}; it must be from {1} to {2}.", entry.TimeoutSeconds, MinTimeoutSeconds, MaxTimeoutSeconds));
+
+				if (entry.Register != null)
+					foreach (string library in entry.Register)
+						if (library == null || !libraries.Contains(library))
+							Problem(String.Format("\"register\" names \"{0}\", which is not one of the libraries copied for the coverage scripts ({1}).", library, String.Join(", ", libraries)));
+			}
+			return problems;
+		}
+
+		/// <summary>Whether a script's error text is the failure a known-failure entry expects.</summary>
+		// NOTE: an ordinal substring test on English text: the engine, server and libraries ship only neutral resources (no
+		// satellite resource folders for them in artifacts/bin). If localized resources ever ship, matching must pin the UI
+		// culture or move to error codes. Messages from Windows or from packages that do ship satellites (sockets, WCF) are
+		// localized already, so an entry for such a failure names the exception type instead.
+		public static bool Matches(string errorText, string expected)
+		{
+			return errorText.Contains(expected, StringComparison.Ordinal);
+		}
+	}
+}

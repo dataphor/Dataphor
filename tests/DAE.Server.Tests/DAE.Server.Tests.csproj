@@ -12,15 +12,21 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
-  <!-- CoverageTest.cs stays on disk, not compiled, because tools/net-spike/run.py reads its script list; test-harness-inprocess deletes it. -->
   <ItemGroup>
     <Compile Include="CatalogStoreTest.cs" />
+    <Compile Include="CoverageManifest.cs" />
+    <Compile Include="CoverageScripts.cs" />
     <Compile Include="CursorTest.cs" />
     <Compile Include="InProcessTestFixture.cs" />
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="TestServerInstance.cs" />
+  </ItemGroup>
+
+  <!-- The coverage manifest (see CoverageManifest.cs), read from the assembly so that an edit to it rebuilds the tests and nothing reads a stale copy. -->
+  <ItemGroup>
+    <EmbeddedResource Include="coverage-manifest.json" LogicalName="coverage-manifest.json" />
   </ItemGroup>
 
   <ItemGroup>

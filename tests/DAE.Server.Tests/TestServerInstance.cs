@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using NUnit.Framework;
 
@@ -14,8 +15,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
 	/// An in-process server on a fresh temporary directory: Libraries\ holds copies of the runtime layout's library folders it
-	/// was given, Instance\ its catalog. It opens no port, and with logging off (the default) it writes neither a log file nor
-	/// the Windows event log.
+	/// was given (or of a template instance's), Instance\ its catalog. It opens no port, and with logging off (the default) it
+	/// writes neither a log file nor the Windows event log.
 	/// </summary>
 	// NOTE: two servers in one process share static engine state (K1, the catalog emitter race, is one known case). Before
 	// fixtures run in parallel, port-catalog-emitter-race must land and the engine's other statics need checking.
@@ -33,28 +34,55 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			_directory = TestEnvironment.NewDirectory(name);
 			try
 			{
-				string librariesDirectory = Path.Combine(_directory, LibrariesFolderName);
-				TestEnvironment.CopyLibraries(librariesDirectory, libraryNames);
-
-				// No PortNumber: ApplyTo does not pass it, and an in-process server listens on nothing.
-				ServerConfiguration configuration =
-					new ServerConfiguration
-					{
-						Name = name,
-						LibraryDirectories = librariesDirectory,
-						InstanceDirectory = Path.Combine(_directory, InstanceFolderName),
-						CatalogStoreClassName = CatalogStoreClassName,
-						CatalogStoreConnectionString = CatalogStoreConnectionString
-					};
-				_server = new Server();
-				configuration.ApplyTo(_server);
-				_server.LoggingEnabled = TestEnvironment.LoggingEnabled;
+				TestEnvironment.CopyLibraries(Path.Combine(_directory, LibrariesFolderName), libraryNames);
+				_server = CreateServer(name);
 			}
 			catch
 			{
 				DeleteDirectory();
 				throw;
 			}
+		}
+
+		/// <summary>
+		/// Copies the whole directory of a stopped instance (library folders, catalog and library data), so that the server
+		/// starts with whatever the template registered. A registered library's assembly is still loaded only once per process,
+		/// from the first copy that loaded it.
+		/// </summary>
+		public TestServerInstance(string name, TestServerInstance template)
+		{
+			if (template._server.State != ServerState.Stopped)
+				throw new InvalidOperationException(String.Format("The template instance in {0} must be stopped before it is copied.", template._directory));
+
+			_directory = TestEnvironment.NewDirectory(name);
+			try
+			{
+				TestEnvironment.CopyDirectory(template._directory, _directory);
+				_server = CreateServer(name);
+			}
+			catch
+			{
+				DeleteDirectory();
+				throw;
+			}
+		}
+
+		private Server CreateServer(string name)
+		{
+			// No PortNumber: ApplyTo does not pass it, and an in-process server listens on nothing.
+			ServerConfiguration configuration =
+				new ServerConfiguration
+				{
+					Name = name,
+					LibraryDirectories = Path.Combine(_directory, LibrariesFolderName),
+					InstanceDirectory = Path.Combine(_directory, InstanceFolderName),
+					CatalogStoreClassName = CatalogStoreClassName,
+					CatalogStoreConnectionString = CatalogStoreConnectionString
+				};
+			Server server = new Server();
+			configuration.ApplyTo(server);
+			server.LoggingEnabled = TestEnvironment.LoggingEnabled;
+			return server;
 		}
 
 		private readonly string _directory;
@@ -123,6 +151,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			// whose body threw.
 			if (stopError != null && Marshal.GetExceptionPointers() == IntPtr.Zero)
 				ExceptionDispatchInfo.Capture(stopError).Throw();
+		}
+
+		/// <summary>
+		/// Gives up on a server that a thread still runs a script on: stops it on a background task, waits at most
+		/// <paramref name="wait"/> for that, and leaves the directory for the next run's sweep. Dispose then does nothing.
+		/// </summary>
+		public void Abandon(TimeSpan wait)
+		{
+			if (_disposed)
+				return;
+			_disposed = true;
+
+			Task stop = Task.Run(() => _server.Stop());
+			try
+			{
+				if (!stop.Wait(wait))
+					TestContext.Progress.WriteLine("Abandoned the test server in {0}; it did not stop within {1} s.", _directory, wait.TotalSeconds);
+			}
+			catch (AggregateException exception)
+			{
+				TestContext.Progress.WriteLine("Abandoned the test server in {0}; stopping it failed: {1}", _directory, exception.InnerException.Message);
+			}
 		}
 
 		private void DeleteDirectory()

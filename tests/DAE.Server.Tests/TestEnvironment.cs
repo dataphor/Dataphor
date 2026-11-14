@@ -160,7 +160,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		private static void CopyDirectory(string source, string target)
+		/// <summary>Copies a folder recursively; <paramref name="target"/> may exist, but must not already hold the files copied.</summary>
+		public static void CopyDirectory(string source, string target)
 		{
 			Directory.CreateDirectory(target);
 			foreach (string file in Directory.GetFiles(source))

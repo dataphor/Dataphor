@@ -1,15 +1,14 @@
 """Modern-.NET feasibility spike driver. See README.md in this folder.
 
-    python tools/net-spike/run.py <work-dir> [--tfm net10.0] [--smoke] [--coverage] [--only A,B]
+    python tools/net-spike/run.py <work-dir> [--tfm net10.0] [--smoke] [--only A,B]
 
 Everything is generated under <work-dir> (keep it OUTSIDE the repository). No
 repository source is modified: each legacy csproj is wrapped by an SDK-style
 project that compiles the same source list by absolute path, and source files
 can be replaced by patched copies (see PATCHES). Projects already converted to
 SDK style are built in place, into the repository's git-ignored artifacts/
-folder, and wrappers reference them. The coverage run takes its D4 libraries
-from the runtime layout (artifacts/layout/debug/Libraries), which
-tools/layout/Layout.csproj assembles.
+folder, and wrappers reference them. The D4 coverage scripts run under
+`dotnet test` (tests/DAE.Server.Tests), not here.
 """
 import argparse
 import os
@@ -29,16 +28,6 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 # conversion of the project that compiles the file, or were dropped for the ticket that owns
 # the change (K1 emitter: port-catalog-emitter-race; BEGIN IMMEDIATE: store-sqlite-concurrency).
 PATCHES = []
-
-LAYOUT = os.path.join(REPO, "tools", "layout", "Layout.csproj")
-
-# D4 libraries the coverage run needs, copied with their assemblies from the runtime layout's Libraries folder
-# to covlibs/<name> (the server finds libraries as immediate subfolders). A list rather than all of Libraries,
-# so that the set of available libraries the coverage scripts see stays the same. Cov registers Connection and
-# System.Internet after the scripts, to show that libraries with private package dependencies load from the layout.
-COVERAGE_LIBS = ["Frontend", "SimpleDevice", "TestFramework.Coverage.Base", "SQLDevice", "MSSQLDevice", "Connection",
-                 "TestFramework", "TestFramework.Coverage.Scripts", "System.Internet"]
-
 
 # Project name -> absolute path of each listed project that is already SDK-style; filled by main().
 CONVERTED = {}
@@ -97,21 +86,11 @@ def find_dll(out, project, dll):
     sys.exit(f"{dll} not built")
 
 
-def layout_libraries():
-    # Only MSBuild knows where the layout is (DataphorLayoutDir, Directory.Build.targets).
-    r = run(["dotnet", "msbuild", LAYOUT, "-nologo", "-getProperty:DataphorLayoutDir", "-p:Configuration=Debug"])
-    path = os.path.join(r.stdout.strip(), "Libraries")
-    if r.returncode != 0 or not os.path.isdir(path):
-        sys.exit(f"runtime layout not built (MSBuild reports DataphorLayoutDir {r.stdout.strip()!r})")
-    return path
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("work")
     ap.add_argument("--tfm", default="net10.0")
     ap.add_argument("--smoke", action="store_true", help="boot the engine in-process and run D4, incl. concurrent DDL")
-    ap.add_argument("--coverage", action="store_true", help="run the D4 coverage scripts listed in tests/DAE.Server.Tests/CoverageTest.cs")
     ap.add_argument("--only", help="comma list of projects to build (default: all in projects.txt)")
     a = ap.parse_args()
     work = os.path.abspath(a.work)
@@ -129,7 +108,7 @@ def main():
     apply_patches(out)
     r = run([sys.executable, os.path.join(HERE, "convert.py"), REPO, out, a.tfm] + projects)
     print(r.stdout + r.stderr)
-    for tool in ("Smoke", "Cov"):
+    for tool in ("Smoke",):
         shutil.copytree(os.path.join(HERE, tool), os.path.join(out, tool), dirs_exist_ok=True)
         # Stored as .csproj.txt so IDEs and `dotnet build` at the repo root do not pick them up.
         os.remove(os.path.join(out, tool, tool + ".csproj.txt"))
@@ -150,17 +129,6 @@ def main():
         if build(out, "Smoke"):
             env = dict(os.environ, SMOKE_CS=";Journal Mode=WAL;BusyTimeout=30000")
             subprocess.run(["dotnet", find_dll(out, "Smoke", "Smoke.dll"), rundir, "sqlite", "8", "15"], env=env)
-    if a.coverage:
-        libs = os.path.join(rundir, "covlibs")
-        shutil.rmtree(libs, ignore_errors=True)
-        if not build(out, "Layout", LAYOUT):
-            sys.exit("runtime layout build failed; see Layout.log in the work dir")
-        layout = layout_libraries()
-        for name in COVERAGE_LIBS:
-            shutil.copytree(os.path.join(layout, name), os.path.join(libs, name))
-        if build(out, "Cov"):
-            subprocess.run(["dotnet", find_dll(out, "Cov", "Cov.dll"), rundir,
-                            os.path.join(REPO, "tests", "DAE.Server.Tests", "CoverageTest.cs"), "base"])
 
 
 if __name__ == "__main__":
