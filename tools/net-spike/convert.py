@@ -4,6 +4,8 @@ Usage: python convert.py <repo_root> <out_dir> <tfm> <legacy.csproj> [...]
 
 Each generated project compiles exactly the Compile/EmbeddedResource items the
 legacy project lists (by absolute path), so nothing in the repo is modified.
+A listed project that is already SDK-style gets no wrapper: wrappers reference
+its real project file, and it builds in place into the repository's artifacts/.
 """
 import os
 import re
@@ -11,6 +13,28 @@ import sys
 import xml.etree.ElementTree as ET
 
 NS = {"m": "http://schemas.microsoft.com/developer/msbuild/2003"}
+
+
+def is_converted(path):
+    """True for an SDK-style project file: root <Project Sdk="..."> with no MSBuild 2003 namespace."""
+    root = ET.parse(path).getroot()
+    return root.tag == "Project" and root.get("Sdk") is not None
+
+
+def compiled_files(path):
+    """normcased absolute paths of the Compile items an SDK-style project lists."""
+    d = os.path.dirname(os.path.abspath(path))
+    return {os.path.normcase(os.path.abspath(os.path.join(d, c.get("Include"))))
+            for c in ET.parse(path).getroot().iter("Compile") if c.get("Include")}
+
+
+def central_versions(repo):
+    """PackageVersion items of the repository's Directory.Packages.props, so wrappers never pin below the
+    converted projects they reference (a lower version fails restore with NU1605)."""
+    props = os.path.join(repo, "Directory.Packages.props")
+    if not os.path.exists(props):
+        return {}
+    return {e.get("Include"): e.get("Version") for e in ET.parse(props).getroot().iter("PackageVersion")}
 
 # Framework assembly reference -> NuGet package(s) on modern .NET
 PACKAGE_MAP = {
@@ -39,13 +63,21 @@ ALWAYS = [("System.Data.SqlClient", "4.9.0"), ("System.Data.Odbc", "8.0.1"), ("S
 def main():
     repo, out, tfm = sys.argv[1], sys.argv[2], sys.argv[3]
     projects = sys.argv[4:]
+    central = central_versions(repo)
     names = {}
+    converted = set()
     for p in projects:
-        names[os.path.normcase(os.path.abspath(os.path.join(repo, p)))] = os.path.splitext(os.path.basename(p))[0]
+        src = os.path.normcase(os.path.abspath(os.path.join(repo, p)))
+        names[src] = os.path.splitext(os.path.basename(p))[0]
+        if is_converted(src):
+            converted.add(src)
     for p in projects:
         src = os.path.abspath(os.path.join(repo, p))
         srcdir = os.path.dirname(src)
         name = names[os.path.normcase(src)]
+        if os.path.normcase(src) in converted:
+            print(f"{name}: SDK-style, used in place")
+            continue
         root = ET.parse(src).getroot()
 
         def first(tag):
@@ -98,9 +130,12 @@ def main():
             pkgs.setdefault(pk, v)
         prefs = []
         for r in root.findall(".//m:ProjectReference", NS):
-            inc = os.path.normcase(os.path.abspath(os.path.join(srcdir, r.get("Include"))))
-            if inc in names:
-                prefs.append(names[inc])
+            real = os.path.abspath(os.path.join(srcdir, r.get("Include")))
+            inc = os.path.normcase(real)
+            if inc in converted:
+                prefs.append(real)
+            elif inc in names:
+                prefs.append(f"..\\{names[inc]}\\{names[inc]}.csproj")
             else:
                 missing_refs.append("PROJECT:" + r.get("Include"))
         lines = ['<Project Sdk="Microsoft.NET.Sdk">', "  <PropertyGroup>"]
@@ -152,19 +187,19 @@ def main():
         lines.append("  </ItemGroup>")
         lines.append("  <ItemGroup>")
         for pk, v in sorted(pkgs.items()):
-            lines.append(f'    <PackageReference Include="{pk}" Version="{v}" />')
+            lines.append(f'    <PackageReference Include="{pk}" Version="{central.get(pk, v)}" />')
         lines.append('    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />')
         for name_, path_ in binrefs:
             lines.append(f'    <Reference Include="{name_}"><HintPath>{path_}</HintPath></Reference>')
         for pr in prefs:
-            lines.append(f'    <ProjectReference Include="..\\{pr}\\{pr}.csproj" />')
+            lines.append(f'    <ProjectReference Include="{pr}" />')
         lines.append("  </ItemGroup>")
         lines.append("</Project>")
         d = os.path.join(out, name)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, name + ".csproj"), "w", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
-        print(f"{name}: {n_compile} compile items, refs->{prefs}, binary={[b[0] for b in binrefs]}, unmapped={missing_refs}, winforms={winforms}, wpf={wpf}")
+        print(f"{name}: {n_compile} compile items, refs->{[os.path.splitext(os.path.basename(r))[0] for r in prefs]}, binary={[b[0] for b in binrefs]}, unmapped={missing_refs}, winforms={winforms}, wpf={wpf}")
 
 
 if __name__ == "__main__":

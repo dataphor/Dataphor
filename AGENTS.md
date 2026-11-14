@@ -39,17 +39,33 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 
 ## Build and test
 
-**Interim (until `build-core-sdk-projects` rewrites this section):** `dotnet build Dataphor.slnx` (add `-c Release` for Release) now builds the ten converted SDK-style projects — Base, Base.Windows, DAE, Common, NativeCLI, Client, SQLDevice, System.Platform, System.Internet, System.Integration — into `artifacts/bin/<project file name>/<debug|release>/`, with shared settings in `Directory.Build.props` and package versions in `Directory.Packages.props`. Name the `.slnx`: the legacy `Dataphor.sln` is still at the root. `dotnet run --project tools/net-spike/EngineCheck -c Debug` checks their resource names and runs D4 on an in-process engine. The spike below is broken until `build-core-sdk-projects` updates it for the converted projects; everything else is still unconverted.
+Needs only the .NET 10 SDK that `global.json` pins.
 
-The legacy `Dataphor.sln` at the repository root needs Visual Studio/MSBuild and .NET Framework 4.5.2 targeting packs, and the unconverted projects do not build with `dotnet build`. Plan workstream WS1 replaces it. **The ticket that lands the SDK-style build must rewrite this section.**
+```
+dotnet build Dataphor.slnx
+dotnet build Dataphor.slnx -c Release
+```
 
-For the unconverted projects and the D4 coverage scripts, the build/test loop is the spike (needs Python 3 and the .NET 10 SDK pinned by `global.json`; work dir must be outside the repo; broken for now, see above):
+Name the `.slnx`: the legacy `Dataphor.sln` is still at the root, and it no longer builds (its .NET Framework projects reference the converted `net10.0` ones); `build-remove-legacy-build` deletes it. Output goes to `artifacts/bin/<project file name>/<debug|release>/`, intermediate files to `artifacts/obj/`; nothing is built into source folders. A runtime layout with hosts and libraries side by side (`artifacts/layout/`) arrives with `build-runtime-layout`. Shared settings are in `Directory.Build.props`, package versions in `Directory.Packages.props`.
+
+**Converted so far** (SDK-style, in `Dataphor.slnx`): Base, Base.Windows, DAE, Common, NativeCLI, Client, SQLDevice, System.Platform, System.Internet, System.Integration. Everything else (Server, the catalog stores, the other libraries, the UI, the hosts, the tests) is still in legacy format and builds only through the spike, which is also the only way to run the D4 coverage scripts until `test-harness-inprocess`:
 
 ```
 python tools/net-spike/run.py <work-dir> --smoke --coverage
+dotnet run --project tools/net-spike/EngineCheck -c Debug
 ```
 
-It compiles 30 projects against .NET 10, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the D4 coverage scripts. Expected today: engine/server/libraries 0 errors, concurrency 0 errors, resolution cache 0 errors, coverage `pass=62 fail=14`. See [tools/net-spike/README.md](tools/net-spike/README.md).
+The spike needs Python 3, and its work dir must be outside the repo. It builds the converted projects in place (into `artifacts/`) and wraps the other 20 of its 30 projects in generated projects in the work dir, boots the engine in-process on a SQLite catalog, runs concurrent DDL, then runs the coverage scripts. Expected today: engine/server/libraries 0 errors, smoke 1,080 operators and 23 scalar types, concurrency 0 errors, resolution cache 0 errors, coverage `pass=62 fail=14` (the 14 are listed in plan Appendix A). The engine check compares the converted assemblies' resource names with the legacy names and runs D4 on a bare engine; expected `RESULT: pass`. See [tools/net-spike/README.md](tools/net-spike/README.md).
+
+**Converting another project.** The reasons are in the `Directory.Build.props` comments and plan WS1.
+
+- Generate the new file from the legacy one and keep its explicit `Compile` and `EmbeddedResource` items, in order: default items are off in `Directory.Build.props`, because uncompiled files sit next to compiled ones.
+- Copy each resource's `DependentUpon` metadata. The SDK's dependent-upon naming convention is off, so resource names follow the legacy rules; verify them by listing `Assembly.GetManifestResourceNames()` against the legacy names, as the engine check does for the ten.
+- Constants: the legacy Release set minus `SIGNASSEMBLIES` and `DISABLE_PERFORMANCE_COUNTERS`, the same in both configurations (so `TRACE` only where legacy Release had it), plus `DEBUG;TRACE` in Debug. Set `DefineConstants` outright, never appended to `$(DefineConstants)`.
+- No `OutputPath`. `PackageReference` items carry no version; add the version to `Directory.Packages.props`.
+- Warnings stay visible. Never suppress `CS0618`, `SYSLIB*`, `WFDEV*`, `CA1416` or `NU1900`–`NU1904`; any `NoWarn` code goes in `Directory.Build.props` with a reason.
+- Output is keyed by project file name, so two projects with the same file name collide; today only `DAE.Connection.ODBC.csproj` appears twice, until `device-connection-cleanup`.
+- Add the project to `Dataphor.slnx`. Once its project file is SDK-style, the spike builds it in place and would ignore a spike `PATCHES` or `STUBS` entry for its files, so remove each such entry in the same change, landing the fix in the repository unless another ticket owns it (`run.py` stops with a message otherwise).
 
 ## Rules that are easy to break
 

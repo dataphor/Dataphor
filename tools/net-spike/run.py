@@ -2,12 +2,13 @@
 
     python tools/net-spike/run.py <work-dir> [--tfm net10.0] [--smoke] [--coverage] [--only A,B]
 
-Everything is generated under <work-dir> (keep it OUTSIDE the repository). The
-repository is never modified: each legacy csproj is wrapped by an SDK-style
+Everything is generated under <work-dir> (keep it OUTSIDE the repository). No
+repository source is modified: each legacy csproj is wrapped by an SDK-style
 project that compiles the same source list by absolute path, a handful of
 source files are replaced by patched copies (see PATCHES), and API surface
 that no longer exists is stubbed (see stubs/) so the compiler reaches the real
-usage sites.
+usage sites. Projects already converted to SDK style are built in place, into
+the repository's git-ignored artifacts/ folder, and wrappers reference them.
 """
 import argparse
 import os
@@ -15,21 +16,15 @@ import shutil
 import subprocess
 import sys
 
+sys.dont_write_bytecode = True  # importing convert must not leave __pycache__ in the repository
+from convert import compiled_files, is_converted
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 # (repo-relative file, [(old, new), ...]) -- every patch here is a change the
 # real port must make. docs/modernization-plan.md, Appendix A explains each.
 PATCHES = [
-    # WCF client package has no ChannelFactory(string endpointConfigurationName) ctor.
-    (r"src\protocol\Common\WCF\ServiceClient.cs",
-     [("new ChannelFactory<T>(endpointConfigurationName))", "null /* SPIKE: config-name ctor n/a */)")]),
-    (r"src\protocol\Client\Client\ClientServer.cs",
-     [("new ChannelFactory<IClientDataphorService>(_clientConfigurationName);", "null; /* SPIKE */")]),
-    # Reflection on the private field Thread.m_Name; the field does not exist on modern .NET (DEBUG builds only).
-    (r"src\engine\Base\ThreadUtility.cs",
-     [("GetThreadNameFieldInfo().SetValue(thread, name);",
-       "var fi = GetThreadNameFieldInfo(); if (fi != null) fi.SetValue(thread, name); /* SPIKE */")]),
     # System.Data.SQLite API drift, and take the write lock up front (BEGIN IMMEDIATE) -- see plan, catalog store.
     (r"src\engine\Store.SQLite\SQLiteConnection.cs",
      [("localException.ErrorCode", "localException.ResultCode"),
@@ -48,9 +43,9 @@ PATCHES = [
        "/* SPIKE: SQLCE removed */")]),
 ]
 
-STUBS = {"DAE": "Engine.cs", "Server": "Server.cs"}
+STUBS = {"Server": "Server.cs"}
 
-# D4 library folder (repo-relative) -> (wrapper project, assembly file) needed to run the coverage
+# D4 library folder (repo-relative) -> (project, assembly file) needed to run the coverage
 # scripts. Each is copied to covlibs/<folder name>: the server finds libraries as immediate subfolders.
 COVERAGE_LIBS = {
     "libraries/Frontend": ("Frontend.Server", "Alphora.Dataphor.Frontend.Server.dll"),
@@ -62,6 +57,24 @@ COVERAGE_LIBS = {
     "tests/libraries/TestFramework": None,
     "tests/libraries/TestFramework.Coverage.Scripts": None,
 }
+
+
+# Project name -> absolute path of each listed project that is already SDK-style; filled by main().
+CONVERTED = {}
+
+
+def check_overrides():
+    """A converted project compiles the repository's files, so a patch or stub aimed at it would be ignored."""
+    for name, proj in CONVERTED.items():
+        if name in STUBS:
+            sys.exit(f"STUBS has an entry for {name}, which is SDK-style and builds in place without it: "
+                     "remove the API use from the repository and the entry from STUBS")
+        files = compiled_files(proj)
+        for rel, _ in PATCHES:
+            if os.path.normcase(os.path.abspath(os.path.join(REPO, rel))) in files:
+                sys.exit(f"PATCHES entry {rel} is compiled by {name}, which is SDK-style and builds in place "
+                         "without it: land the change in the repository (or leave it to the ticket that owns it) "
+                         "and remove the entry")
 
 
 def apply_patches(out):
@@ -82,7 +95,7 @@ def run(cmd, **kw):
 
 
 def build(out, name):
-    proj = os.path.join(out, name, name + ".csproj")
+    proj = CONVERTED.get(name) or os.path.join(out, name, name + ".csproj")
     log = os.path.join(out, name + ".log")
     r = run(["dotnet", "build", proj, "-nologo", "-v", "q", "-clp:NoSummary"])
     open(log, "w", encoding="utf-8").write(r.stdout + r.stderr)
@@ -92,6 +105,13 @@ def build(out, name):
 
 
 def find_dll(out, project, dll):
+    if project in CONVERTED:
+        # Only MSBuild knows where artifacts/ puts it; never a same-named wrapper left in an older work dir.
+        r = run(["dotnet", "msbuild", CONVERTED[project], "-nologo", "-getProperty:TargetPath", "-p:Configuration=Debug"])
+        path = r.stdout.strip()
+        if r.returncode != 0 or os.path.basename(path) != dll or not os.path.exists(path):
+            sys.exit(f"{dll} not built (MSBuild reports TargetPath {path!r})")
+        return path
     for root, _, files in os.walk(os.path.join(out, project, "bin")):
         if dll in files:
             return os.path.join(root, dll)
@@ -104,7 +124,7 @@ def main():
     ap.add_argument("--tfm", default="net10.0")
     ap.add_argument("--smoke", action="store_true", help="boot the engine in-process and run D4, incl. concurrent DDL")
     ap.add_argument("--coverage", action="store_true", help="run the D4 coverage scripts listed in tests/DAE.Server.Tests/CoverageTest.cs")
-    ap.add_argument("--only", help="comma list of wrapper projects to build (default: all in projects.txt)")
+    ap.add_argument("--only", help="comma list of projects to build (default: all in projects.txt)")
     a = ap.parse_args()
     work = os.path.abspath(a.work)
     if os.path.commonpath([work, REPO]) == REPO:
@@ -113,6 +133,11 @@ def main():
     os.makedirs(out, exist_ok=True)
 
     projects = [l.strip() for l in open(os.path.join(HERE, "projects.txt")) if l.strip()]
+    for p in projects:
+        path = os.path.join(REPO, *p.split("/"))
+        if is_converted(path):
+            CONVERTED[os.path.splitext(os.path.basename(p))[0]] = path
+    check_overrides()
     apply_patches(out)
     r = run([sys.executable, os.path.join(HERE, "convert.py"), REPO, out, a.tfm] + projects)
     print(r.stdout + r.stderr)
