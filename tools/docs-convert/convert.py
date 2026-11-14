@@ -659,29 +659,30 @@ class Resolver:
         return path + (hash_ + fragment if fragment else "")
 
     def locate(self, source, ref):
-        """(page, heading or None, problem): the page and heading a reference names."""
+        """(page, heading or None, problem, note): the page and heading a reference names; note is
+        find_heading's (report section, line) when the heading was matched loosely."""
         path, _, fragment = ref.partition("#")
         path = unquote(path)
         key = posixpath.normpath(posixpath.join(posixpath.dirname(source), path)) if path else source
         page = self.by_source.get(key)
         if page is None:
-            return None, None, "no such page" if key != ".." and not key.startswith("../") else "outside the sources"
+            return None, None, "no such page" if key != ".." and not key.startswith("../") else "outside the sources", None
         if page.output is None:
-            return None, None, "page is not converted"
+            return None, None, "page is not converted", None
         if not fragment:
-            return page, None, None
+            return page, None, None, None
         heading, note = self.find_heading(page, fragment)
         if heading is None and self.settings.global_ids and not path:
             matches = self.ids.get(fragment, [])
             if len(matches) == 1:
                 page, heading = matches[0]
             elif matches:
-                return None, None, "id '#%s' is in %d pages" % (fragment, len(matches))
+                return None, None, "id '#%s' is in %d pages" % (fragment, len(matches)), None
         if heading is None:
-            return None, None, "no heading matches '#%s' in %s" % (fragment, page.output)
+            return None, None, "no heading matches '#%s' in %s" % (fragment, page.output), None
         if note:
-            self.report.add(note[0], "%s -> %s#%s: %s" % (source, page.output, heading.slug, note[1]))
-        return page, heading, None
+            note = (note[0], "%s -> %s#%s: %s" % (source, page.output, heading.slug, note[1]))
+        return page, heading, None, note
 
     def find_heading(self, page, fragment):
         for heading in page.headings:
@@ -725,23 +726,27 @@ class Resolver:
         if path.endswith(".html") and self.settings.legacy_links:
             return self.legacy(current, source, item, path, text)
         ref = self.normalise_ref(url)
-        page, heading, problem = self.locate(source, ref)
-        if problem:
-            fix = self.settings.xref_fixes.get((source, ref))
-            if fix is None:
-                # Left in the form the report prints, so the link checker names the same reference.
-                item["c"][2][0] = ref
-                return self.fail(current, source, ref, text, problem)
+        page, heading, problem, note = self.locate(source, ref)
+        fix = self.settings.xref_fixes.get((source, ref))
+        # A row settles a reference that does not resolve, or one that resolved only by taking the
+        # first of several same-named headings; a reference that resolves cleanly ignores its row.
+        if fix is not None and (problem or note and note[0] == "ambiguous"):
             self.used_fixes.add((source, ref))
             replacement = fix["replacement"]
             if not replacement:
                 self.report.add("fixes", "%s: %s -> unlinked (%s)" % (source, ref, fix["reason"]))
                 return item["c"][1]
-            page, heading, problem = self.locate(source, self.normalise_ref(replacement))
+            page, heading, problem, note = self.locate(source, self.normalise_ref(replacement))
             if problem:
                 item["c"][2][0] = ref
                 return self.fail(current, source, ref, text, "xref-fixes replacement %s: %s" % (replacement, problem))
             self.report.add("fixes", "%s: %s -> %s (%s)" % (source, ref, replacement, fix["reason"]))
+        elif problem:
+            # Left in the form the report prints, so the link checker names the same reference.
+            item["c"][2][0] = ref
+            return self.fail(current, source, ref, text, problem)
+        if note:
+            self.report.add(*note)
         item["c"][2][0] = self.href(current, page, heading)
         self.resolved += 1
         return item

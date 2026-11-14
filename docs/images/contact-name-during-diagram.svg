@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+	 id="Layer_1" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" text-rendering="geometricPrecision"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 180 180"
+	 style="enable-background:new 0 0 180 180;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#1F1A17;}
+	.st2{font-family:'Arial-BoldMT';}
+	.st3{font-size:9.9995px;}
+	.st4{font-family:'MyriadPro-Regular';}
+	.st5{fill:none;stroke:#1F1A17;stroke-width:0.6945;}
+	.st6{font-size:9.9998px;}
+</style>
+<rect class="st0" width="180" height="180"/>
+<g id="Layer_x0020_1">
+	<g id="_174568568">
+		<text id="_172766240" transform="matrix(1 0 0 1 49.7607 24.5078)" class="st1 st2 st3">Contact</text>
+		<text id="_136850080" transform="matrix(1 0 0 1 49.7607 37.9478)" class="st1 st4 st3">ID</text>
+		<text id="_136850080_1_" transform="matrix(1 0 0 1 49.7607 49.1191)" class="st1 st4 st3">Name</text>
+		<text id="_136850080_2_" transform="matrix(1 0 0 1 49.7607 60.2905)" class="st1 st4 st3">NameSince</text>
+		<text id="_136850080_3_" transform="matrix(1 0 0 1 49.7607 71.4619)" class="st1 st4 st3">NameBy</text>
+		<rect id="_136849608" x="37.8" y="13.9" class="st5" width="82.9" height="64.1"/>
+		<line id="_137648912" class="st5" x1="37.8" y1="28.1" x2="120.6" y2="28.1"/>
+		<text id="_174568928" transform="matrix(1 0 0 1 42.7656 39.9351)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_138053672">
+		<text id="_172958904" transform="matrix(1 0 0 1 57.2788 100.7505)" class="st1 st2 st6">ContactNameDuring</text>
+		<text id="_172291848" transform="matrix(1 0 0 1 57.2788 114.1904)" class="st1 st4 st6">Contact_ID</text>
+		<text id="_172291848_1_" transform="matrix(1 0 0 1 57.2788 125.3613)" class="st1 st4 st6">From</text>
+		<text id="_172291848_2_" transform="matrix(1 0 0 1 57.2788 136.5332)" class="st1 st4 st6">To</text>
+		<text id="_172291848_3_" transform="matrix(1 0 0 1 57.2788 147.7046)" class="st1 st4 st6">Name</text>
+		<text id="_172291848_4_" transform="matrix(1 0 0 1 57.2788 158.876)" class="st1 st4 st6">By</text>
+		<rect id="_138920944" x="38.1" y="90.2" class="st5" width="118.2" height="74"/>
+		<line id="_138920616" class="st5" x1="38.1" y1="104.4" x2="156.3" y2="104.4"/>
+		<text id="_137471544" transform="matrix(1 0 0 1 42.9443 116.2612)" class="st1 st4 st6">*</text>
+		<text id="_137471296" transform="matrix(1 0 0 1 42.9443 125.8613)" class="st1 st4 st6">*</text>
+		<text id="_173413688" transform="matrix(1 0 0 1 50.0049 116.2612)" class="st1 st4 st6">*</text>
+		<text id="_173413192" transform="matrix(1 0 0 1 50.0049 137.8599)" class="st1 st4 st6">*</text>
+	</g>
+	<g>
+		<path class="st1" d="M22.5,110.8l0.3-0.3h15.3v0.5H22.8L22.5,110.8z M22.8,111.1h-0.3v-0.3L22.8,111.1z M22.8,33.3v0.5l0.3-0.3V36
+			v2.4v2.4v2.4v2.4V48v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4v2.4V94v2.4v2.4v2.4v2.4v2.4v2.4v2.4
+			h-0.5v-2.4V106v-2.4v-2.4v-2.4v-2.4V94v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4v-2.4
+			v-2.4V48v-2.4v-2.4v-2.4v-2.4V36v-2.4L22.8,33.3z M22.5,33.6v-0.3h0.3L22.5,33.6z M33.3,33.8H22.8v-0.5h10.5V33.8z M32.9,31
+			l4.8,2.6l-4.8,2.6V31z"/>
+	</g>
+</g>
+</svg>

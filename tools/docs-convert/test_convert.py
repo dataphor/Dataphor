@@ -67,6 +67,23 @@ class FragmentTest(unittest.TestCase):
     def test_same_page_fragment(self):
         self.assertEqual(self.href("#Event_Handlers", current=self.page), "#event-handlers")
 
+    def test_fix_row_settles_ambiguous_match(self):
+        # Two headings share a text: without a row the first is taken, as GitBook's id did; an
+        # xref-fixes.tsv row for that reference redirects it (here by the second heading's id).
+        page = make_page("C.adoc", "c.md", [
+            ("", "C", "c"),
+            ("", "Metadata", "metadata"),
+            ("C-Types-Metadata", "Metadata", "metadata-1"),
+        ])
+        resolver = make_resolver([page, self.other])
+        resolver.settings.xref_fixes = {("A.adoc", "C.adoc#Metadata"): {"replacement": "C.adoc#C-Types-Metadata", "reason": "", "_line": 2}}
+        hrefs = []
+        for source in ("B.adoc", "A.adoc"):
+            item = link("C.adoc#Metadata")
+            resolver.link(self.other, source, item)
+            hrefs.append(item["c"][2][0])
+        self.assertEqual(hrefs, ["c.md#metadata", "c.md#metadata-1"])
+
     def test_file_name_case_is_exact(self):
         self.assertEqual(self.href("a.adoc#Summary"), "a.adoc#Summary")
         self.assertEqual([problem for *_, problem in self.resolver.unresolved],

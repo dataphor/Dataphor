@@ -469,7 +469,7 @@ docs/
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
-| `docs-convert-asciidoc` | Conversion tooling and the three books; images to PNG; anchors and cross-references resolved; link check clean within the converted set. | — | hard |
+| `docs-convert-asciidoc` | Conversion tooling and the three books; images to PNG; anchors and cross-references resolved; link check clean within the converted set. **Done** as three chained tickets: `docs-link-checker` (`tools/docs-link-check/`), `docs-convert-tooling` (`tools/docs-convert/`) and `docs-convert-asciidoc` (the reviewed code-block tags and cross-reference decisions, and the converted books, glossary, bibliography and images under `docs/`; link check 0 errors, the legacy links pending). | — | hard |
 | `docs-convert-legacy-reference` | DocBook reference material into `docs/reference/`; repair the 206 links. | `docs-convert-asciidoc` | hard |
 | `docs-remove-old-sources` | Delete `Documentation/`, `legacy/Documentation/` and `book.json`; repoint the links in the root `README.md` to the converted pages. | `docs-convert-legacy-reference` | easy |
 | `docs-admin-guide` | New: installation, instance configuration, running as a service, ports and firewall, backup, rebuilding a catalog from scripts, moving an application from 3.x. | `store-rebuild-workflow`, `installer-msi` | medium |
@@ -637,7 +637,7 @@ When the work starts, the corpus is located by an environment variable (never co
 | K14 | The coverage helper library cannot register without a SQL Server on `localhost`. | `tests/libraries/TestFramework/Documents`, `tests/libraries/TestFramework.Coverage.Base/*.d4l` | verified | WS3 |
 | K15 | Six library projects write Release output where the server does not look. | CQF.Model, FHIR.API, FHIR.Server, PHINVADS.Core, PHINVADS.Device, TestFramework.Coverage.Base (the first five are now parked under `legacy/libraries/` and not built, leaving TestFramework.Coverage.Base) | static | WS1 |
 | K16 | Installer: no upgrade logic, regenerated component GUIDs, missing licence file, placeholder registry keys, undefined shortcut directory, no service registration. | `Setup/` | static | WS9 |
-| K17 | 206 documentation links point at pages that do not exist. | `Documentation/` | verified | WS8 |
+| K17 | 206 documentation links point at pages that do not exist. The converted pages under `docs/` carry 204 of them (two sit in broken table markup in the source), listed with their targets in `tools/docs-convert/legacy-links.tsv`; 203 are still pending (one already goes to the `reference/data-access-components.md` placeholder). | `Documentation/`, `docs/` | verified | WS8 `docs-convert-legacy-reference` |
 | K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `tests/DAE.Server.Tests/SQLStoreTest.cs`, `tests/DAE.Client.Tests` | static | WS3 |
 | K19 | The base `Connection` library has a hard reference to SQL CE. | `libraries/Connection/Source/Register.cs` | verified | WS1 `build-server-project` |
 | K20 | 14 coverage tests are ignored (one names a script that does not exist) and 47 scripts are not wired to any test. | `tests/DAE.Server.Tests/CoverageTest.cs` | verified | WS3 |

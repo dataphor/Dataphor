@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 20.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+	 id="Layer_1" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" text-rendering="geometricPrecision"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 396 288"
+	 style="enable-background:new 0 0 396 288;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#1F1A17;}
+	.st2{font-family:'Arial-BoldMT';}
+	.st3{font-size:9.9998px;}
+	.st4{font-family:'MyriadPro-Regular';}
+	.st5{fill:none;stroke:#1F1A17;stroke-width:0.6945;}
+</style>
+<rect class="st0" width="396" height="288"/>
+<g id="Layer_x0020_1">
+	<g id="_173984176">
+		<text id="_137069272" transform="matrix(1 0 0 1 57.3125 36.6816)" class="st1 st2 st3">Location</text>
+		<text id="_137093744" transform="matrix(1 0 0 1 57.3125 50.1216)" class="st1 st4 st3">ID</text>
+		<text id="_137093744_1_" transform="matrix(1 0 0 1 57.3125 61.293)" class="st1 st4 st3">Name</text>
+		<text id="_137093744_2_" transform="matrix(1 0 0 1 57.3125 72.4639)" class="st1 st4 st3">Phone</text>
+		<text id="_137093744_3_" transform="matrix(1 0 0 1 57.3125 83.6353)" class="st1 st4 st3">Street</text>
+		<text id="_137093744_4_" transform="matrix(1 0 0 1 57.3125 94.8066)" class="st1 st4 st3">City</text>
+		<text id="_137093744_5_" transform="matrix(1 0 0 1 57.3125 105.9785)" class="st1 st4 st3">State_ID</text>
+		<text id="_137093744_6_" transform="matrix(1 0 0 1 57.3125 117.1494)" class="st1 st4 st3">ZipCode</text>
+		<rect id="_137279512" x="45.3" y="26.1" class="st5" width="72" height="96"/>
+		<line id="_174198792" class="st5" x1="45.3" y1="40.3" x2="117.3" y2="40.3"/>
+		<text id="_137157408" transform="matrix(1 0 0 1 50.3169 52.1084)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_174713912">
+		<text id="_137180880" transform="matrix(1 0 0 1 163.2129 168.8389)" class="st1 st2 st3">SalesOrder</text>
+		<text id="_138709264" transform="matrix(1 0 0 1 163.2129 182.2788)" class="st1 st4 st3">ID</text>
+		<text id="_138709264_1_" transform="matrix(1 0 0 1 163.2129 193.4502)" class="st1 st4 st3">Customer_ID</text>
+		<text id="_138709264_2_" transform="matrix(1 0 0 1 163.2129 204.6211)" class="st1 st4 st3">Location_ID</text>
+		<text id="_138709264_3_" transform="matrix(1 0 0 1 163.2129 215.793)" class="st1 st4 st3">User_ID</text>
+		<text id="_138709264_4_" transform="matrix(1 0 0 1 163.2129 226.9644)" class="st1 st4 st3">Date</text>
+		<text id="_138709264_5_" transform="matrix(1 0 0 1 163.2129 238.1357)" class="st1 st4 st3">Items</text>
+		<text id="_138709264_6_" transform="matrix(1 0 0 1 163.2129 249.3066)" class="st1 st4 st3">Status</text>
+		<rect id="_174724952" x="151.2" y="158.3" class="st5" width="83.6" height="96"/>
+		<line id="_174718656" class="st5" x1="151.2" y1="172.4" x2="234.8" y2="172.4"/>
+		<text id="_174713840" transform="matrix(1 0 0 1 156.2178 184.2661)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_137582704">
+		<text id="_174694296" transform="matrix(1 0 0 1 290.3291 168.6348)" class="st1 st2 st3">PurchaseOrder</text>
+		<text id="_174684784" transform="matrix(1 0 0 1 290.3291 182.0742)" class="st1 st4 st3">ID</text>
+		<text id="_174684784_1_" transform="matrix(1 0 0 1 290.3291 193.2461)" class="st1 st4 st3">Vendor_ID</text>
+		<text id="_174684784_2_" transform="matrix(1 0 0 1 290.3291 204.4175)" class="st1 st4 st3">Location_ID</text>
+		<text id="_174684784_3_" transform="matrix(1 0 0 1 290.3291 215.5889)" class="st1 st4 st3">User_ID</text>
+		<text id="_174684784_4_" transform="matrix(1 0 0 1 290.3291 226.7598)" class="st1 st4 st3">Date</text>
+		<text id="_174684784_5_" transform="matrix(1 0 0 1 290.3291 237.9316)" class="st1 st4 st3">Items</text>
+		<text id="_174684784_6_" transform="matrix(1 0 0 1 290.3291 249.1025)" class="st1 st4 st3">Status</text>
+		<rect id="_174675672" x="278.3" y="158.1" class="st5" width="95.7" height="96"/>
+		<line id="_137581880" class="st5" x1="278.3" y1="172.2" x2="374" y2="172.2"/>
+		<text id="_137582600" transform="matrix(1 0 0 1 283.3335 184.0615)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_174449336">
+		<text id="_174562536" transform="matrix(1 0 0 1 163.4478 36.5117)" class="st1 st2 st3">Customer</text>
+		<text id="_174535232" transform="matrix(1 0 0 1 163.4478 49.9517)" class="st1 st4 st3">ID</text>
+		<text id="_174535232_1_" transform="matrix(1 0 0 1 163.4478 61.123)" class="st1 st4 st3">Name</text>
+		<text id="_174535232_2_" transform="matrix(1 0 0 1 163.4478 72.2944)" class="st1 st4 st3">Phone</text>
+		<text id="_174535232_3_" transform="matrix(1 0 0 1 163.4478 83.4653)" class="st1 st4 st3">Street</text>
+		<text id="_174535232_4_" transform="matrix(1 0 0 1 163.4478 94.6367)" class="st1 st4 st3">City</text>
+		<text id="_174535232_5_" transform="matrix(1 0 0 1 163.4478 105.8086)" class="st1 st4 st3">State_ID</text>
+		<text id="_174535232_6_" transform="matrix(1 0 0 1 163.4478 116.98)" class="st1 st4 st3">ZipCode</text>
+		<rect id="_174539752" x="151.4" y="26" class="st5" width="72" height="96"/>
+		<line id="_174540040" class="st5" x1="151.4" y1="40.1" x2="223.4" y2="40.1"/>
+		<text id="_174448048" transform="matrix(1 0 0 1 156.4521 51.9385)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_174352328">
+		<text id="_174366200" transform="matrix(1 0 0 1 290.3501 36.7446)" class="st1 st2 st3">Vendor</text>
+		<text id="_174430320" transform="matrix(1 0 0 1 290.3501 50.1846)" class="st1 st4 st3">ID</text>
+		<text id="_174430320_1_" transform="matrix(1 0 0 1 290.3501 61.356)" class="st1 st4 st3">Name</text>
+		<text id="_174430320_2_" transform="matrix(1 0 0 1 290.3501 72.5273)" class="st1 st4 st3">Phone</text>
+		<text id="_174430320_3_" transform="matrix(1 0 0 1 290.3501 83.6987)" class="st1 st4 st3">Street</text>
+		<text id="_174430320_4_" transform="matrix(1 0 0 1 290.3501 94.8701)" class="st1 st4 st3">City</text>
+		<text id="_174430320_5_" transform="matrix(1 0 0 1 290.3501 106.042)" class="st1 st4 st3">State_ID</text>
+		<text id="_174430320_6_" transform="matrix(1 0 0 1 290.3501 117.2124)" class="st1 st4 st3">ZipCode</text>
+		<rect id="_174430808" x="278.3" y="26.2" class="st5" width="72" height="96"/>
+		<line id="_174416904" class="st5" x1="278.3" y1="40.3" x2="350.3" y2="40.3"/>
+		<text id="_174352232" transform="matrix(1 0 0 1 283.3545 52.1719)" class="st1 st4 st3">*</text>
+	</g>
+	<g id="_174146664">
+		<text id="_174339688" transform="matrix(1 0 0 1 57.4443 168.4268)" class="st1 st2 st3">ItemType</text>
+		<text id="_174254760" transform="matrix(1 0 0 1 57.4443 181.8662)" class="st1 st4 st3">ID</text>
+		<text id="_174254760_1_" transform="matrix(1 0 0 1 57.4443 193.0381)" class="st1 st4 st3">Description</text>
+		<rect id="_174212904" x="45.4" y="157.9" class="st5" width="72" height="39"/>
+		<line id="_174219248" class="st5" x1="45.4" y1="172" x2="117.4" y2="172"/>
+		<text id="_174206424" transform="matrix(1 0 0 1 50.4487 183.8535)" class="st1 st4 st3">*</text>
+	</g>
+	<g>
+		<path class="st1" d="M263.6,189l0.3-0.2h14.4v0.5h-14.4L263.6,189L263.6,189z M263.8,189.3h-0.3V189L263.8,189.3z M263.8,47.2
+			l0.2,0.3V189h-0.5V47.4L263.8,47.2L263.8,47.2z M263.6,47.4v-0.3h0.3L263.6,47.4z M273.9,47.7h-10v-0.5h10V47.7z M273.5,44.8
+			l4.8,2.6l-4.8,2.6C273.5,50.1,273.5,44.8,273.5,44.8z"/>
+	</g>
+	<g>
+		<path class="st1" d="M256.4,201l0.2-0.3h21.6v0.5h-21.6L256.4,201L256.4,201z M256.6,201.3h-0.2V201L256.6,201.3z M256.6,131.2
+			l0.2,0.3V201h-0.5v-69.6L256.6,131.2L256.6,131.2z M256.6,131.2h0.2l0,0.3L256.6,131.2L256.6,131.2z M30.8,131.4l0.3-0.3h225.6
+			v0.5H31.1L30.8,131.4L30.8,131.4z M31.1,131.7h-0.3v-0.3L31.1,131.7z M31.1,47.2l0.3,0.3v84h-0.5v-84
+			C30.8,47.4,31.1,47.2,31.1,47.2z M30.8,47.4v-0.3h0.3L30.8,47.4z M41.1,47.7h-10v-0.5h10V47.7z M40.7,44.8l4.8,2.6l-4.8,2.6
+			C40.7,50.1,40.7,44.8,40.7,44.8z"/>
+	</g>
+	<g>
+		<path class="st1" d="M138.8,189l0.3-0.2h12v0.5h-12L138.8,189L138.8,189z M139.1,189.3h-0.2l0-0.3L139.1,189.3z M139.1,47.2
+			l0.3,0.3V189h-0.5V47.4L139.1,47.2z M138.8,47.4v-0.3h0.3L138.8,47.4z M146.7,47.7h-7.6v-0.5h7.6V47.7z M146.3,44.8l4.8,2.6
+			l-4.8,2.6C146.3,50.1,146.3,44.8,146.3,44.8z"/>
+	</g>
+	<g>
+		<path class="st1" d="M131.6,201l0.3-0.3h19.2v0.5h-19.2L131.6,201L131.6,201z M131.9,201.3h-0.3V201L131.9,201.3z M131.9,138.4
+			l0.3,0.3V201h-0.5v-62.4L131.9,138.4L131.9,138.4z M131.9,138.4h0.3v0.3L131.9,138.4z M23.6,138.6l0.3-0.3h108v0.5h-108
+			L23.6,138.6z M23.9,138.9h-0.2l0-0.3L23.9,138.9z M23.9,47.2l0.3,0.3v91.2h-0.5V47.4L23.9,47.2z M23.6,47.4v-0.2l0.3,0L23.6,47.4z
+			 M41.1,47.7H23.9v-0.5h17.2V47.7z M40.7,44.8l4.8,2.6l-4.8,2.6C40.7,50.1,40.7,44.8,40.7,44.8z"/>
+	</g>
+</g>
+</svg>

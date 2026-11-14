@@ -1,0 +1,42 @@
+# Error Message Prefix Codes
+
+## Summary
+
+Error codes in the Dataphor Server consist of six digits. The first three digits are the *prefix* code identifying the source of the error, while the last three digits identify the error. The following table lists the prefix codes in use by the Dataphor Server:
+
+| Prefix | Source                  |
+|--------|-------------------------|
+| 100    | Base Dataphor Exception |
+| 101    | BOP                     |
+| 102    | Lexer                   |
+| 103    | Syntax                  |
+| 104    | Runtime                 |
+| 105    | Compiler                |
+| 106    | Server                  |
+| 107    | Language                |
+| 108    | Machine                 |
+| 109    | Parser                  |
+| 110    | Scan                    |
+| 111    | Conveyor                |
+| 112    | Streams                 |
+| 113    | Schema                  |
+| 114    | Device                  |
+| 115    | Catalog                 |
+| 116    | Storage                 |
+| 117    | Index                   |
+| 118    | Data Access Layer       |
+| 121    | Client                  |
+| 122    | Controls                |
+| 123    | Provider                |
+| 124    | Dataphoria              |
+| 125    | Application Transaction |
+| 126    | SQL Device              |
+| 127    | Connection              |
+| 128    | Designer                |
+| 129    | COM Client              |
+| 200    | Frontend Server         |
+| 201    | Frontend Client         |
+| 202    | Frontend Device         |
+| 203    | Simple Device           |
+| 204    | Web Client              |
+| 205    | Windows Client          |

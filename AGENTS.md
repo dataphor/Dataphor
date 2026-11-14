@@ -30,10 +30,10 @@ We own this codebase. The plan's [Repository layout](docs/modernization-plan.md#
 | `samples/` | The `Sample.*` libraries, same structure |
 | `tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process. `tests/libraries/` holds the D4 test libraries (`TestFramework*`); `TestFramework.Coverage.Scripts` has the coverage scripts |
 | `external/` | Third-party binaries not yet replaced by NuGet packages (text editor, docking, Ascend, Npgsql, Mono.Security, System.Data.SQLite) |
-| `docs/` | Plan, architecture, migration notes; `docs/reference/` holds `CompilerDefines.txt` and `Error Message Prefix Codes.txt` |
+| `docs/` | Plan, architecture, migration notes, and the user documentation converted from `Documentation/`: `users-guide/`, `developers-guide/`, `reference/` (D4 grammar, tags, error codes and stubs; also `CompilerDefines.txt` and `Error Message Prefix Codes.txt`), `glossary.md`, `bibliography.md`, `images/`; `README.md` is the index |
 | `tools/` | `net-spike/` (throwaway harness that builds and runs the code on modern .NET without changing repository source; build output goes to `artifacts/`), `docs-link-check/` (stdlib Python link checker for the Markdown under `docs/`), `docs-convert/` (run-by-hand converter from the AsciiDoc in `Documentation/` to Markdown under `docs/`; needs Node, pandoc and Pillow, see its README) and `editor-support/` |
 | `Setup/` | WiX installer (v3.5, being replaced) |
-| `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
+| `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | The old user documentation sources. The AsciiDoc books are converted: the Markdown under `docs/` is the copy to read and edit. Both trees remain only until `docs-remove-old-sources` (the DocBook reference material is still to be converted, by `docs-convert-legacy-reference`) |
 | `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries, the Oracle/ADO/SAS device and connection libraries and the DocBook generator library `Documentation` (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
 | `Utilities/Wix` | The copy of WiX 3.5 that `Setup/` builds with; deleted with `Setup/` when WS9 lands |
 
