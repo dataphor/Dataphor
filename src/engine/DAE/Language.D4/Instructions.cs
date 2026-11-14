@@ -133,9 +133,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string ReRaise = "iReRaise";
 		public const string ToPresentation = "iToPresentation";
 		
-        private static string[] _instructions;
+        private static readonly string[] _instructions = PopulateInstructions();
         
-        private static void PopulateInstructions()
+        private static string[] PopulateInstructions()
         {
 			FieldInfo[] fields = typeof(Instructions).GetFields();
 
@@ -144,22 +144,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 					fieldCount++;
 
-			_instructions = new string[fieldCount];
+			string[] result = new string[fieldCount];
 
 			int fieldCounter = 0;
 			foreach (FieldInfo field in fields)
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					_instructions[fieldCounter] = (string)field.GetValue(null);
+					result[fieldCounter] = (string)field.GetValue(null);
 					fieldCounter++;
 				}
+			return result;
         }
         
         public static bool Contains(string identifier)
         {
-			if (_instructions == null)
-				PopulateInstructions();
-				
 			return ((IList)_instructions).Contains(identifier);
         }
 

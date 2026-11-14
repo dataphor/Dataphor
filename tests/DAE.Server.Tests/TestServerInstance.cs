@@ -18,8 +18,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// was given (or of a template instance's), Instance\ its catalog. It opens no port, and with logging off (the default) it
 	/// writes neither a log file nor the Windows event log.
 	/// </summary>
-	// NOTE: two servers in one process share static engine state (K1, the catalog emitter race, is one known case). Before
-	// fixtures run in parallel, port-catalog-emitter-race must land and the engine's other statics need checking.
+	// NOTE: two servers in one process share the engine's static state. port-catalog-emitter-race fixed the shared catalog
+	// emitter (K1) and the lazily built keyword tables and found no other unsafe static; re-check before fixtures run in parallel.
 	public sealed class TestServerInstance : IDisposable
 	{
 		public const string LibrariesFolderName = "Libraries";

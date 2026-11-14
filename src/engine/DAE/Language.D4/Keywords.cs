@@ -214,9 +214,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string Reintroduce = "reintroduce";
         #endif
 
-        private static string[] _keywords;
+        private static readonly string[] _keywords = PopulateKeywords();
         
-        private static void PopulateKeywords()
+        private static string[] PopulateKeywords()
         {
 			FieldInfo[] fields = typeof(Keywords).GetFields();
 
@@ -225,22 +225,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 					fieldCount++;
 
-			_keywords = new string[fieldCount];
+			string[] result = new string[fieldCount];
 
 			int fieldCounter = 0;
 			foreach (FieldInfo field in fields)
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					_keywords[fieldCounter] = (string)field.GetValue(null);
+					result[fieldCounter] = (string)field.GetValue(null);
 					fieldCounter++;
 				}
+			return result;
         }
         
         public static bool Contains(string identifier)
         {
-			if (_keywords == null)
-				PopulateKeywords();
-				
 			return ((IList)_keywords).Contains(identifier);
         }
     }
@@ -345,9 +343,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Write = "write";
 		public const string Xor = "xor";                   
 
-        private static string[] _reservedWords;
+        private static readonly string[] _reservedWords = PopulateReservedWords();
         
-        private static void PopulateReservedWords()
+        private static string[] PopulateReservedWords()
         {
 			FieldInfo[] fields = typeof(ReservedWords).GetFields();
 
@@ -356,22 +354,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 					fieldCount++;
 
-			_reservedWords = new string[fieldCount];
+			string[] result = new string[fieldCount];
 
 			int fieldCounter = 0;
 			foreach (FieldInfo field in fields)
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					_reservedWords[fieldCounter] = (string)field.GetValue(null);
+					result[fieldCounter] = (string)field.GetValue(null);
 					fieldCounter++;
 				}
+			return result;
         }
         
         public static bool Contains(string identifier)
         {
-			if (_reservedWords == null)
-				PopulateReservedWords();
-				
 			return ((IList)_reservedWords).Contains(identifier);
         }
 	}

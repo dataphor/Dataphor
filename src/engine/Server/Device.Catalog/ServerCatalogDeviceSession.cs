@@ -2621,16 +2621,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Emission
 		
-		private static D4TextEmitter _emitter = new D4TextEmitter();
-		
 		public string ScriptPersistentObject(Schema.Object objectValue)
 		{
-			return _emitter.Emit(objectValue.EmitStatement(EmitMode.ForStorage));
+			return new D4TextEmitter().Emit(objectValue.EmitStatement(EmitMode.ForStorage));
 		}
 		
 		public string ScriptCatalogObject(Schema.CatalogObject objectValue)
 		{
-			return _emitter.Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { objectValue.Name }, String.Empty, true, true, false, true));
+			return new D4TextEmitter().Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { objectValue.Name }, String.Empty, true, true, false, true));
 		}
 
 		#endregion

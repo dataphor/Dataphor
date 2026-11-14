@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Compile Include="CatalogStoreTest.cs" />
+    <Compile Include="ConcurrentDDLTest.cs" />
     <Compile Include="CoverageManifest.cs" />
     <Compile Include="CoverageScripts.cs" />
     <Compile Include="CursorTest.cs" />

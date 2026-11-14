@@ -95,9 +95,9 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
         public const string Avg = "avg";
         public const string Count = "count";
         
-        private static string[] keywords;
+        private static readonly string[] keywords = PopulateKeywords();
         
-        private static void PopulateKeywords()
+        private static string[] PopulateKeywords()
         {
 			FieldInfo[] fields = typeof(Keywords).GetFields();
 
@@ -106,22 +106,20 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 					fieldCount++;
 
-			keywords = new string[fieldCount];
+			string[] result = new string[fieldCount];
 
 			int fieldCounter = 0;
 			foreach (FieldInfo field in fields)
 				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					keywords[fieldCounter] = (string)field.GetValue(null);
+					result[fieldCounter] = (string)field.GetValue(null);
 					fieldCounter++;
 				}
+			return result;
         }
         
         public static bool Contains(string identifier)
         {
-			if (keywords == null)
-				PopulateKeywords();
-				
 			return ((IList)keywords).Contains(identifier);
         }
     }
