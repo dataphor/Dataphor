@@ -1,0 +1,762 @@
+page	n	sha	lang	reviewed	first_line
+developers-guide/README.md	1	0ab065f29588	d4		create table Employee { ID : Integer, Name : String, key { I
+developers-guide/README.md	2	0480aef4e30a	text		Copyright © 2016 Alphora
+developers-guide/d4-catalog.md	1	8a9077a1c999	bnf		<ddl statement> ::=
+developers-guide/d4-catalog.md	2	0124ed364649	bnf		<metadata> ::=
+developers-guide/d4-catalog.md	3	5aefe8653164	bnf		<alter metadata> ::=
+developers-guide/d4-catalog.md	4	8b574d0cc7b6	bnf		<class definition> ::=
+developers-guide/d4-catalog.md	5	cbf62c8110de	bnf		<alter class definition> ::=
+developers-guide/d4-catalog.md	6	66982f59f02e	bnf		<grant statement> ::=
+developers-guide/d4-catalog.md	7	3554461adf80	bnf		<create scalar type statement> ::=
+developers-guide/d4-catalog.md	8	ce78f9b3f29b	bnf		<alter scalar type statement> ::=
+developers-guide/d4-catalog.md	9	875468b05064	bnf		<drop scalar type statement> ::=
+developers-guide/d4-catalog.md	10	15dfe91ac216	bnf		<representation definition> ::=
+developers-guide/d4-catalog.md	11	a34c43e3d8b1	bnf		<alter representation definition> ::=
+developers-guide/d4-catalog.md	12	cda90a053e1f	text		operator <type name>[.<representation name>]
+developers-guide/d4-catalog.md	13	0595b436c1a8	d4		Seconds(100); // returns a TimeSpan value
+developers-guide/d4-catalog.md	14	1e5a55b7ef97	bnf		<property definition> ::=
+developers-guide/d4-catalog.md	15	738f4ffdaad3	bnf		<alter property definition> ::=
+developers-guide/d4-catalog.md	16	0ffe3a271dcd	text		operator <type name>.Read<property name>
+developers-guide/d4-catalog.md	17	37a90b19ebc6	d4		// sets LInteger to the value of the DaysPart property of a 
+developers-guide/d4-catalog.md	18	79477c421b3c	text		operator <type name>.Write<property name>
+developers-guide/d4-catalog.md	19	f4e5722fdee2	d4		// sets the value of the DaysPart property of the LTimeSpan 
+developers-guide/d4-catalog.md	20	ed547753a9c2	d4		create type Money
+developers-guide/d4-catalog.md	21	7048549f6194	bnf		<default definition> ::=
+developers-guide/d4-catalog.md	22	d115dd9bcbe8	bnf		<alter default definition> ::=
+developers-guide/d4-catalog.md	23	a8e75944e9a3	bnf		<constraint definition> ::=
+developers-guide/d4-catalog.md	24	8a600ef38c6f	bnf		<alter constraint definition> ::=
+developers-guide/d4-catalog.md	25	77ae655a810b	bnf		<special definition> ::=
+developers-guide/d4-catalog.md	26	33c3cbe92f0a	bnf		<alter special definition> ::=
+developers-guide/d4-catalog.md	27	cdff6586ef49	text		operator <type name><special name>() : <type>
+developers-guide/d4-catalog.md	28	9175bf20e886	text		operator Is<special name>(const AValue : <type>) : Boolean
+developers-guide/d4-catalog.md	29	5f47fca40ce0	text		operator IsSpecial(const AValue : <type>) : Boolean
+developers-guide/d4-catalog.md	30	421fba85f31e	d4		create type ID like Integer;
+developers-guide/d4-catalog.md	31	52d051c94087	d4		alter type ID alter tags { create Frontend.Width = "10" };
+developers-guide/d4-catalog.md	32	0a816dbfbd25	d4		drop type ID;
+developers-guide/d4-catalog.md	33	c4919fd5cf93	bnf		<key definition> ::=
+developers-guide/d4-catalog.md	34	69aa55854a6a	bnf		<alter key definition> ::=
+developers-guide/d4-catalog.md	35	9950cefe95d5	bnf		<order definition> ::=
+developers-guide/d4-catalog.md	36	0ac09e34e1f2	bnf		<alter order definition> ::=
+developers-guide/d4-catalog.md	37	b3f62192f1a2	bnf		<row constraint definition> ::=
+developers-guide/d4-catalog.md	38	989a74722e01	bnf		<alter row constraint definition> ::=
+developers-guide/d4-catalog.md	39	362aaef1cf84	bnf		<reference definition> ::=
+developers-guide/d4-catalog.md	40	a6b35b29868c	bnf		<alter reference definition> ::=
+developers-guide/d4-catalog.md	41	51e6dbd14c15	bnf		<create table statement> ::=
+developers-guide/d4-catalog.md	42	7a37e5619fd0	bnf		<alter table statement> ::=
+developers-guide/d4-catalog.md	43	30acc9524cd5	bnf		<drop table statement> ::=
+developers-guide/d4-catalog.md	44	5b779ac3c413	bnf		<column definition> ::=
+developers-guide/d4-catalog.md	45	d4ef89584926	bnf		<default definition> ::=
+developers-guide/d4-catalog.md	46	a8e75944e9a3	bnf		<constraint definition> ::=
+developers-guide/d4-catalog.md	47	8a600ef38c6f	bnf		<alter constraint definition> ::=
+developers-guide/d4-catalog.md	48	95c460c304d2	d4		create table Customer
+developers-guide/d4-catalog.md	49	5d7fe300c258	d4		alter table CustomerPhone
+developers-guide/d4-catalog.md	50	81d6ca377d75	d4		drop table CustomerPhone;
+developers-guide/d4-catalog.md	51	bc25a1d40251	bnf		<create view statement> ::=
+developers-guide/d4-catalog.md	52	4a7f8cf9eba6	bnf		<alter view statement> ::=
+developers-guide/d4-catalog.md	53	9f7a572e079a	bnf		<drop view statement> ::=
+developers-guide/d4-catalog.md	54	ae517adbeb7e	d4		create view HappyDog
+developers-guide/d4-catalog.md	55	7d5863a0c431	d4		alter view HappyDog { create reference HappyDog_Rainbow { Co
+developers-guide/d4-catalog.md	56	24504cd9bcf0	d4		drop view HappyDog;
+developers-guide/d4-catalog.md	57	3d0e0fe9d076	bnf		<create constraint statement> ::=
+developers-guide/d4-catalog.md	58	67cf34b41f67	bnf		<alter constraint statement> ::=
+developers-guide/d4-catalog.md	59	00c104aa3c59	bnf		<drop constraint statement> ::=
+developers-guide/d4-catalog.md	60	7baf722f4d13	d4		create constraint LivingCats
+developers-guide/d4-catalog.md	61	f94bacf56594	d4		alter constraint LivingCats
+developers-guide/d4-catalog.md	62	cfc7d14c26fa	d4		drop constraint LivingCats;
+developers-guide/d4-catalog.md	63	e0927dd5efab	d4		// Reference constraint from Source(SourceColumn) to Target(
+developers-guide/d4-catalog.md	64	07ad95ca0103	bnf		<create reference statement> ::=
+developers-guide/d4-catalog.md	65	17b87e27b358	bnf		<alter reference statement> ::=
+developers-guide/d4-catalog.md	66	c2ebb579a8db	bnf		<drop reference statement> ::=
+developers-guide/d4-catalog.md	67	e78804455b12	d4		create reference Dog_Owner Dog { Owner_ID } references   Own
+developers-guide/d4-catalog.md	68	74749ce783e0	d4		alter reference Dog_Owner
+developers-guide/d4-catalog.md	69	836c5c3566f0	d4		// drop the constraint using the drop reference syntax
+developers-guide/d4-catalog.md	70	5e1f8fa266d7	bnf		<create operator statement> ::=
+developers-guide/d4-catalog.md	71	d18d78524f93	bnf		<alter operator statement> ::=
+developers-guide/d4-catalog.md	72	44589581a194	bnf		<drop operator statement> ::=
+developers-guide/d4-catalog.md	73	2b72e715b671	d4		create operator Add(A : Integer, B : Integer) : Integer
+developers-guide/d4-catalog.md	74	5c91a725dada	d4		alter operator Add(Integer, Integer)
+developers-guide/d4-catalog.md	75	e23e0334030c	d4		drop operator Add(Integer, Integer);
+developers-guide/d4-catalog.md	76	e9ca25145f1a	text		aggregate operator Sum(AValue : System.Integer) : System.Int
+developers-guide/d4-catalog.md	77	170c027e34e2	bnf		<create aggregate operator statement> ::=
+developers-guide/d4-catalog.md	78	ea0fc8659161	bnf		<alter aggregate operator statement> ::=
+developers-guide/d4-catalog.md	79	30509359b289	bnf		<drop aggregate operator statement> ::=
+developers-guide/d4-catalog.md	80	f53d9eeb0a6a	text		Sum(Data from Integers)
+developers-guide/d4-catalog.md	81	dc395178eca7	d4		// aggregate operators
+developers-guide/d4-catalog.md	82	21f4bde0f03f	bnf		<create device statement> ::=
+developers-guide/d4-catalog.md	83	2e47a4c6d08d	bnf		<alter device statement> ::=
+developers-guide/d4-catalog.md	84	d23e0a871a85	bnf		<drop device statement> ::=
+developers-guide/d4-catalog.md	85	fbcfd87f8136	d4		(var row { <heading> }, var Boolean)
+developers-guide/d4-catalog.md	86	6308a533475c	d4		(const row { <heading> })
+developers-guide/d4-catalog.md	87	171d65b0c6c3	d4		(const row { <heading> }, var row { <heading> }, var Boolean
+developers-guide/d4-catalog.md	88	44cb3b81a56b	d4		(const row { <heading> }, const row { <heading> })
+developers-guide/d4-catalog.md	89	ff4a3e18746e	d4		(const row { <heading> }, var Boolean)
+developers-guide/d4-catalog.md	90	6308a533475c	d4		(const row { <heading> })
+developers-guide/d4-catalog.md	91	2c1f73f046fb	d4		(var row { <heading> }, const String)
+developers-guide/d4-catalog.md	92	69b31792f2b8	d4		(const row { <heading> }, var row { <heading> }, const Strin
+developers-guide/d4-catalog.md	93	69b31792f2b8	d4		(const row { <heading> }, var row { <heading> }, const Strin
+developers-guide/d4-catalog.md	94	49d468a1f80f	d4		(var <column data type>)
+developers-guide/d4-catalog.md	95	86f06fafad5c	d4		(const row { <heading> }, var row { <heading> })
+developers-guide/d4-catalog.md	96	86f06fafad5c	d4		(const row { <heading> }, var row { <heading> })
+developers-guide/d4-catalog.md	97	1f6047195883	d4		(var <scalar type>)
+developers-guide/d4-catalog.md	98	a63b1c88c823	d4		(const <scalar type>, var <scalar type>)
+developers-guide/d4-catalog.md	99	a63b1c88c823	d4		(const <scalar type>, var <scalar type>)
+developers-guide/d4-catalog.md	100	ccf1424cef75	bnf		<attach statement> ::=
+developers-guide/d4-catalog.md	101	36a6ff8c3be2	bnf		<detach statement> ::=
+developers-guide/d4-catalog.md	102	6ed17cc60093	bnf		<invoke statement> ::=
+developers-guide/d4-catalog.md	103	257967c7c1aa	bnf		<create sort statement> ::=
+developers-guide/d4-catalog.md	104	5178c043849b	bnf		<alter sort statement> ::=
+developers-guide/d4-catalog.md	105	97fa21462a90	bnf		<drop sort statement> ::=
+developers-guide/d4-catalog.md	106	9d9bf416a0ad	bnf		<create conversion statement> ::=
+developers-guide/d4-catalog.md	107	e458856f0eb0	bnf		<drop conversion statement> ::=
+developers-guide/d4-catalog.md	108	e2b23d267a4f	d4		create type ID like String;
+developers-guide/d4-catalog.md	109	b1c75ee5c27a	d4		create type ID
+developers-guide/d4-catalog.md	110	f7235b427484	bnf		<create role statement> ::=
+developers-guide/d4-comparison-with-sql.md	1	2b84a7531668	bnf		<dml statement> ::=
+developers-guide/d4-comparison-with-sql.md	2	58e6ffbf0774	bnf		<select statement> ::=
+developers-guide/d4-comparison-with-sql.md	3	9626a0894878	bnf		<insert statement> ::=
+developers-guide/d4-comparison-with-sql.md	4	b9d7120c7616	bnf		<update statement> ::=
+developers-guide/d4-comparison-with-sql.md	5	026d6edc90c4	bnf		<delete statement> ::=
+developers-guide/d4-comparison-with-sql.md	6	ff7baec1d71b	d4		create table Employee
+developers-guide/d4-comparison-with-sql.md	7	36683fc79c4f	d4		select * from Employee
+developers-guide/d4-comparison-with-sql.md	8	d25a633987db	d4		select Employee;
+developers-guide/d4-comparison-with-sql.md	9	94394dbf3ff4	d4		select * from Employee where ID > 3;
+developers-guide/d4-comparison-with-sql.md	10	f48670274393	d4		select Employee where ID > 3;
+developers-guide/d4-comparison-with-sql.md	11	af1b4e273078	d4		select distinct Name from Employee
+developers-guide/d4-comparison-with-sql.md	12	274e72decedd	d4		select Employee over { Name };
+developers-guide/d4-comparison-with-sql.md	13	e8c8a6f2c315	d4		select Employee remove { ID };
+developers-guide/d4-comparison-with-sql.md	14	76ac131c8116	d4		select ID, Name, Length(Name) from Employee
+developers-guide/d4-comparison-with-sql.md	15	926f8ed7c20b	d4		select Employee add { Length(Name) NameLength };
+developers-guide/d4-comparison-with-sql.md	16	b62a43ff8800	d4		select ID, Name as LastName from Employee
+developers-guide/d4-comparison-with-sql.md	17	4a9040500d8a	d4		select Employee rename { Name LastName };
+developers-guide/d4-comparison-with-sql.md	18	9866c0af025b	d4		select ID, Name, Name from Employee
+developers-guide/d4-comparison-with-sql.md	19	47a9079cff44	d4		select Count(*) from Employee
+developers-guide/d4-comparison-with-sql.md	20	0c10f6fc7111	d4		select Employee group add { Count() EmployeeCount };
+developers-guide/d4-comparison-with-sql.md	21	4556f4e3dc54	d4		select Name, Count(*)
+developers-guide/d4-comparison-with-sql.md	22	9bd997bb5ae4	d4		select Employee
+developers-guide/d4-comparison-with-sql.md	23	0461dcd48aae	d4		select ID / 2, Count(*)
+developers-guide/d4-comparison-with-sql.md	24	7e81026701a3	d4		select ID / 2, Count(*)
+developers-guide/d4-comparison-with-sql.md	25	b630659b0f83	d4		select Employee
+developers-guide/d4-comparison-with-sql.md	26	40efc4e8264b	d4		select ID / 2, Count(*)
+developers-guide/d4-comparison-with-sql.md	27	8a60e7bc9cc8	d4		select Employee
+developers-guide/d4-comparison-with-sql.md	28	0f969d2e5078	d4		select *
+developers-guide/d4-comparison-with-sql.md	29	2031284cb9a7	d4		select Employee
+developers-guide/d4-comparison-with-sql.md	30	fd874da74017	d4		select *
+developers-guide/d4-comparison-with-sql.md	31	af78042df40e	d4		select *
+developers-guide/d4-comparison-with-sql.md	32	469678176a99	d4		select Employee times Employee;
+developers-guide/d4-comparison-with-sql.md	33	6d8a7a16185b	d4		select (Employee rename { ID E1.ID, Name E1.Name })
+developers-guide/d4-comparison-with-sql.md	34	d5f334c19bd1	d4		select (Employee rename E1) times (Employee rename E2);
+developers-guide/d4-comparison-with-sql.md	35	f4e50db15169	d4		select *
+developers-guide/d4-comparison-with-sql.md	36	ad4b4e65a054	d4		select Employee left join EmployeePhone by ID = Employee_ID;
+developers-guide/d4-comparison-with-sql.md	37	17c687805715	d4		select Employee join EmployeePhone by ID = Employee_ID
+developers-guide/d4-comparison-with-sql.md	38	2f5f4f76e0a5	d4		select Employee cross join EmployeePhone where ID = Employee
+developers-guide/d4-comparison-with-sql.md	39	2072ba70c64f	d4		select Employee join EmployeePhone by ID > Employee_ID
+developers-guide/d4-comparison-with-sql.md	40	22da642f308c	d4		select ID
+developers-guide/d4-comparison-with-sql.md	41	e19245128754	d4		select
+developers-guide/d4-comparison-with-sql.md	42	4c511f5c3599	d4		select ID
+developers-guide/d4-comparison-with-sql.md	43	69b01f08b531	d4		select
+developers-guide/d4-comparison-with-sql.md	44	07d53cfedb06	d4		select ID
+developers-guide/d4-comparison-with-sql.md	45	7f751186e96e	d4		select
+developers-guide/d4-comparison-with-sql.md	46	86449a62a91c	d4		select ID, Name
+developers-guide/d4-comparison-with-sql.md	47	11628f772312	d4		select Employee order by { Name };
+developers-guide/d4-comparison-with-sql.md	48	2a7edb20d1a9	d4		insert into Employee(ID, Name) values(7, "Jake")
+developers-guide/d4-comparison-with-sql.md	49	85f7dda37e9c	d4		insert into Employee(ID, Name) select ID + 6, Name from Empl
+developers-guide/d4-comparison-with-sql.md	50	0ee419bdd096	d4		insert table { row { 7 ID, "Jake" Name } } into Employee;
+developers-guide/d4-comparison-with-sql.md	51	f7778167e7fc	d4		insert Employee redefine { ID := ID + 6 } into Employee;
+developers-guide/d4-comparison-with-sql.md	52	86089e0e1c1a	d4		insert table { row { "Jake" Name, 7 ID } } into Employee
+developers-guide/d4-comparison-with-sql.md	53	61d824f5c2b6	d4		update Employee set Name = 'John' where ID = 6
+developers-guide/d4-comparison-with-sql.md	54	0b6821d15cf7	d4		update Employee set { Name := 'John' } where ID = 6;
+developers-guide/d4-comparison-with-sql.md	55	f6ae4080d1ff	d4		delete Employee where ID = 7
+developers-guide/d4-comparison-with-sql.md	56	cc4b2e227247	d4		delete Employee where ID = 7;
+developers-guide/d4-data-manipulation.md	1	2b84a7531668	bnf		<dml statement> ::=
+developers-guide/d4-data-manipulation.md	2	bf941cab9eca	d4		Employee;
+developers-guide/d4-data-manipulation.md	3	d25a633987db	d4		select Employee;
+developers-guide/d4-data-manipulation.md	4	41063c7b540e	text		ID Name
+developers-guide/d4-data-manipulation.md	5	22fce7fbac6e	bnf		<select statement> ::=
+developers-guide/d4-data-manipulation.md	6	d9c7975774fb	d4		select Employee order by { Name, ID desc };
+developers-guide/d4-data-manipulation.md	7	ab3c20b465fa	text		ID Name
+developers-guide/d4-data-manipulation.md	8	ee1030c4bead	bnf		<insert statement> ::=
+developers-guide/d4-data-manipulation.md	9	3bdeb3072c31	d4		insert A into B;
+developers-guide/d4-data-manipulation.md	10	019931c5e2e1	d4		B := B union A;
+developers-guide/d4-data-manipulation.md	11	d780a4660c48	d4		insert
+developers-guide/d4-data-manipulation.md	12	6f5f2a5f124b	bnf		<update statement> ::=
+developers-guide/d4-data-manipulation.md	13	ae8f1047f86c	d4		update Customer set { Name := "Sally Johnson" } where ID = 5
+developers-guide/d4-data-manipulation.md	14	b05cc8b9886a	bnf		<delete statement> ::=
+developers-guide/d4-data-manipulation.md	15	4a27f54c785f	d4		// deletes all employees with an ID greater than 3
+developers-guide/d4-imperative-statements.md	1	152febd39dda	bnf		<imperative statement> ::=
+developers-guide/d4-imperative-statements.md	2	5301d681ef3b	bnf		<variable declaration statement> ::=
+developers-guide/d4-imperative-statements.md	3	586ff6477d50	bnf		<assignment statement> ::=
+developers-guide/d4-imperative-statements.md	4	1ea6bbb3fd35	bnf		<block> ::=
+developers-guide/d4-imperative-statements.md	5	f5372d6bf6f0	d4		begin
+developers-guide/d4-imperative-statements.md	6	84dd27a2cc42	bnf		<exit statement> ::=
+developers-guide/d4-imperative-statements.md	7	a2f64fab851d	d4		create operator TestExit(var AValue : Integer)
+developers-guide/d4-imperative-statements.md	8	4e8fe8272f87	bnf		<if statement> ::=
+developers-guide/d4-imperative-statements.md	9	a4236fbfef50	d4		if Count(System.Objects) = 0 then
+developers-guide/d4-imperative-statements.md	10	f64db6686074	bnf		<case statement> ::=
+developers-guide/d4-imperative-statements.md	11	725cc62ace9e	d4		create operator DigitToWords(const ADigit : Integer) : Strin
+developers-guide/d4-imperative-statements.md	12	4185a44d9bb1	d4		create operator DigitToWords(const ADigit : Integer) : Strin
+developers-guide/d4-imperative-statements.md	13	aa6594cbe896	bnf		<for statement> ::=
+developers-guide/d4-imperative-statements.md	14	83e00f0f8615	d4		create table Data { ID : Integer, key { ID } };
+developers-guide/d4-imperative-statements.md	15	a7c15735b5d6	text		ID
+developers-guide/d4-imperative-statements.md	16	b0bd960b8819	bnf		<while statement> ::=
+developers-guide/d4-imperative-statements.md	17	8dc180a4d7db	d4		begin
+developers-guide/d4-imperative-statements.md	18	f95dcb767f8c	bnf		<do while statement> ::=
+developers-guide/d4-imperative-statements.md	19	383176f7f16c	d4		begin
+developers-guide/d4-imperative-statements.md	20	ca03dfb126fe	bnf		<repeat statement> ::=
+developers-guide/d4-imperative-statements.md	21	8fc8919f1394	d4		begin
+developers-guide/d4-imperative-statements.md	22	52952a01b4aa	bnf		<for statement> ::=
+developers-guide/d4-imperative-statements.md	23	743a81e681e9	bnf		#if <cursor definition> is cursor valued ::=
+developers-guide/d4-imperative-statements.md	24	163bd701cc9d	d4		begin
+developers-guide/d4-imperative-statements.md	25	408f950cc2ee	bnf		<break statement> ::=
+developers-guide/d4-imperative-statements.md	26	8f2cb8407264	d4		while true do
+developers-guide/d4-imperative-statements.md	27	09bdc3340c69	d4		begin
+developers-guide/d4-imperative-statements.md	28	68310aa4626f	bnf		<raise statement> ::=
+developers-guide/d4-imperative-statements.md	29	f393951bd5a3	d4		if Count(TableVars) = 0 then
+developers-guide/d4-imperative-statements.md	30	f570c2591642	bnf		<try except statement> ::=
+developers-guide/d4-imperative-statements.md	31	2fc7c094b480	d4		begin
+developers-guide/d4-imperative-statements.md	32	4ee68f816a10	bnf		<try finally statement> ::=
+developers-guide/d4-imperative-statements.md	33	f4375cd5db43	d4		begin
+developers-guide/d4-imperative-statements.md	34	1770855f6584	bnf		<try commit statement> ::=
+developers-guide/d4-imperative-statements.md	35	a68d3069bf4d	d4		try
+developers-guide/d4-imperative-statements.md	36	3ef057f59c1d	d4		begin
+developers-guide/d4-introduction.md	1	4429b5dadcb1	bnf		<identifier> ::=
+developers-guide/d4-introduction.md	2	9edb2169a98f	text		_Identifier
+developers-guide/d4-introduction.md	3	691ec752990f	text		12345
+developers-guide/d4-introduction.md	4	84ea1858ae6a	bnf		<XYZ list> ::= { <XYZ> }
+developers-guide/d4-introduction.md	5	42450264be61	bnf		<XYZ commalist> ::= [ <XYZ> {, <XYZ> } ]
+developers-guide/d4-introduction.md	6	cb5ae2fe837e	bnf		<XYZ semicolonlist> ::= [ <XYZ> {; <XYZ> } ]
+developers-guide/d4-introduction.md	7	61373674c6e7	bnf		<ne XYZ list> ::= <XYZ> { <XYZ> }
+developers-guide/d4-language-elements.md	1	638e319d8626	bnf		<type specifier> ::=
+developers-guide/d4-language-elements.md	2	b93819d33016	bnf		<scalar type specifier> ::=
+developers-guide/d4-language-elements.md	3	3a6c07011bbd	bnf		<row type specifier> ::=
+developers-guide/d4-language-elements.md	4	bcafa8fe5c93	bnf		<table type specifier> ::=
+developers-guide/d4-language-elements.md	5	78e117212a03	bnf		<list type specifier> ::=
+developers-guide/d4-language-elements.md	6	848b59bb06c2	bnf		<cursor type specifier> ::=
+developers-guide/d4-language-elements.md	7	8ab9d95eafd2	bnf		<selector> ::=
+developers-guide/d4-language-elements.md	8	320030fcb647	bnf		<row selector> ::=
+developers-guide/d4-language-elements.md	9	66ea726924a5	d4		select row { 53 Age, "Green" EyeColor };
+developers-guide/d4-language-elements.md	10	45f1802980fb	bnf		<table selector> ::=
+developers-guide/d4-language-elements.md	11	603a15bc3a8f	d4		select table
+developers-guide/d4-language-elements.md	12	538b742f09cf	bnf		<list selector> ::=
+developers-guide/d4-language-elements.md	13	b4e96f59c827	bnf		<cursor selector> ::=
+developers-guide/d4-language-elements.md	14	5301d681ef3b	bnf		<variable declaration statement> ::=
+developers-guide/d4-language-elements.md	15	2fa84cb1d89c	d4		var LInteger := 5;
+developers-guide/d4-language-elements.md	16	79f7299adae1	text		5 + 5
+developers-guide/d4-language-elements.md	17	fb5d697a2b8e	bnf		<statement> ::=
+developers-guide/d4-language-elements.md	18	c6f52357bcc1	text		5
+developers-guide/d4-language-elements.md	19	de90d7a5a160	text		Days(720500d) // literal
+developers-guide/d4-language-elements.md	20	d7fd8106e288	bnf		<expression> ::=
+developers-guide/d4-language-elements.md	21	62da1fe607dc	bnf		<language modifiers> ::=
+developers-guide/d4-language-elements.md	22	0825fb62bbe2	text		A between B and C
+developers-guide/d4-language-elements.md	23	63020c863db0	text		A >= B and A <= C
+developers-guide/d4-language-elements.md	24	24443846d5ef	bnf		<between clause> ::=
+developers-guide/d4-language-elements.md	25	63c8be7a7c29	d4		select Employee where Name between "Je" and "Jo";
+developers-guide/d4-language-elements.md	26	555074735d1f	text		ID Name
+developers-guide/d4-language-elements.md	27	43288a5ff8a4	bnf		<type operator clause> ::=
+developers-guide/d4-language-elements.md	28	6418eff404b1	bnf		<binary expression> ::=
+developers-guide/d4-language-elements.md	29	6784f66575e2	text		A ?= B
+developers-guide/d4-language-elements.md	30	cebcbb4bffa8	text		if A = B then 0 else if A < B then -1 else 1
+developers-guide/d4-language-elements.md	31	a4c4a9df6d2a	bnf		<arithmetic expression> ::=
+developers-guide/d4-language-elements.md	32	8e4bb3888b4c	bnf		<unary expression> ::=
+developers-guide/d4-language-elements.md	33	3de92ce2c99a	bnf		<qualified factor> ::=
+developers-guide/d4-language-elements.md	34	bc59e13b3f5e	d4		// Standard invocation
+developers-guide/d4-language-elements.md	35	25e380fdc27f	d4		select row { "Alphora" Company, "Dataphor" Product }.Company
+developers-guide/d4-language-elements.md	36	4be3082572b8	text		Alphora
+developers-guide/d4-language-elements.md	37	8bebf3845aa2	bnf		<indexer expression> ::=
+developers-guide/d4-language-elements.md	38	46e8ea601fca	d4		begin
+developers-guide/d4-language-elements.md	39	af80063483af	d4		select Sessions[SessionID()].HostName;
+developers-guide/d4-language-elements.md	40	cec86cd78e79	d4		select Sessions[SessionID() by { ID }].HostName;
+developers-guide/d4-language-elements.md	41	76b0aa9dfdb6	bnf		<factor> ::=
+developers-guide/d4-language-elements.md	42	e6d6597afefd	bnf		<operator invocation> ::=
+developers-guide/d4-language-elements.md	43	b4033691a77c	bnf		<conditional expression> ::=
+developers-guide/d4-lexical-elements.md	1	b88f805c1852	d4		X := 5 * 3;
+developers-guide/d4-lexical-elements.md	2	604457104ddf	d4		/* This is a multi
+developers-guide/d4-lexical-elements.md	3	1952b67c8bc3	text		"Welcome to the ""community"" website."
+developers-guide/d4-lexical-elements.md	4	d4a7c5413399	bnf		<boolean parser literal> ::=
+developers-guide/d4-lexical-elements.md	5	d72e8b71f21d	bnf		<integer parser literal> ::=
+developers-guide/d4-lexical-elements.md	6	7758b1cef9b5	bnf		<decimal parser literal> ::=
+developers-guide/d4-lexical-elements.md	7	2ed5ffb9c461	bnf		<money parser literal> ::=
+developers-guide/d4-lexical-elements.md	8	e1202d91f197	bnf		<string parser literal> ::=
+developers-guide/d4-lexical-elements.md	9	3fd58878798e	bnf		<identifier> ::=
+developers-guide/d4-lexical-elements.md	10	035eae60290f	text		Customers
+developers-guide/d4-lexical-elements.md	11	7584ab80e79f	bnf		<qualified identifier> ::=
+developers-guide/d4-lexical-elements.md	12	afb994e6396e	text		MyCompany.MyProduct.Customers
+developers-guide/d4-lexical-elements.md	13	dc0d6b816da0	d4		var MyCompany.MyProduct.MyVariable : Integer;
+developers-guide/d4-lexical-elements.md	14	3b9f91d8d144	d4		var .I : Integer;
+developers-guide/d4-lexical-elements.md	15	6b1c89380f7e	d4		begin
+developers-guide/d4-scripts-and-execution.md	1	f2d5e1628f0d	bnf		<script> ::=
+developers-guide/d4-table-operators.md	1	da567b797697	bnf		<table operator clause> ::=
+developers-guide/d4-table-operators.md	2	24b7d770ff66	d4		create table Employee
+developers-guide/d4-table-operators.md	3	162d5bf54ff8	bnf		<where clause> ::=
+developers-guide/d4-table-operators.md	4	6b171fea3654	d4		select Employee where ID >= 4;
+developers-guide/d4-table-operators.md	5	0e74cecd1b40	text		ID Name
+developers-guide/d4-table-operators.md	6	a7926c51d447	bnf		<over clause> ::=
+developers-guide/d4-table-operators.md	7	274e72decedd	d4		select Employee over { Name };
+developers-guide/d4-table-operators.md	8	23d4e8f8ddd6	text		Name
+developers-guide/d4-table-operators.md	9	e8c8a6f2c315	d4		select Employee remove { ID };
+developers-guide/d4-table-operators.md	10	23d4e8f8ddd6	text		Name
+developers-guide/d4-table-operators.md	11	9a95a8c54de5	d4		select Employee where Name = "Jeff";
+developers-guide/d4-table-operators.md	12	a86081821ee5	text		ID Name
+developers-guide/d4-table-operators.md	13	340076376652	d4		select Employee where Name = "Jeff" over { Name };
+developers-guide/d4-table-operators.md	14	4ccd2b2bd2ad	text		Name
+developers-guide/d4-table-operators.md	15	5b85a7253d42	bnf		<add clause> ::=
+developers-guide/d4-table-operators.md	16	544ef29e4094	d4		select Employee add { ID ID1 }
+developers-guide/d4-table-operators.md	17	ad280d2beb6b	d4		select Employee
+developers-guide/d4-table-operators.md	18	d3a8835d9e04	text		NewName
+developers-guide/d4-table-operators.md	19	760ec1a3d574	bnf		<rename clause> ::=
+developers-guide/d4-table-operators.md	20	cc9ff5796fc4	d4		select Employee
+developers-guide/d4-table-operators.md	21	2ddc6e3c9a9c	text		EmployeeID FirstName
+developers-guide/d4-table-operators.md	22	e6c747d8a567	d4		select Employee rename X;
+developers-guide/d4-table-operators.md	23	10c8afa98f29	text		X.ID X.Name
+developers-guide/d4-table-operators.md	24	807931b51942	d4		Employee group by { Name } add { Count() NameCount }
+developers-guide/d4-table-operators.md	25	bd7038147b21	d4		Employee over { Name } rename X
+developers-guide/d4-table-operators.md	26	20b1f9974e7b	bnf		<aggregate clause> ::=
+developers-guide/d4-table-operators.md	27	22754b665537	bnf		<quota clause> ::=
+developers-guide/d4-table-operators.md	28	6fcae4e6d8b8	d4		select Employee return 3 by { Name };
+developers-guide/d4-table-operators.md	29	77220408f07e	text		ID Name
+developers-guide/d4-table-operators.md	30	3e9512166c85	d4		select Employee return 3 by { Name, ID };
+developers-guide/d4-table-operators.md	31	536d71cffa99	text		ID Name
+developers-guide/d4-table-operators.md	32	c88b1ec5e03d	d4		select Employee return 3 by { Name desc };
+developers-guide/d4-table-operators.md	33	d72a5e4ec601	text		ID Name
+developers-guide/d4-table-operators.md	34	c8f9e6a9d03f	bnf		<explode clause> ::=
+developers-guide/d4-table-operators.md	35	e4d6ba50350e	d4		select Manager
+developers-guide/d4-table-operators.md	36	97465888063d	text		Manager_ID Employee_ID Manager_Name Employee_Name level sequ
+developers-guide/d4-table-operators.md	37	4f8780f27553	bnf		<adorn clause> ::=
+developers-guide/d4-table-operators.md	38	a8ca50c51b47	d4		select Employee
+developers-guide/d4-table-operators.md	39	cfbfd4644e49	text		ID Name
+developers-guide/d4-table-operators.md	40	4f9007d0f549	d4		Employee redefine { ID := ID * 2 }
+developers-guide/d4-table-operators.md	41	d26cb63af95c	d4		Employee add { ID * 2 X } remove { ID } rename { X ID }
+developers-guide/d4-table-operators.md	42	1accf0d804b9	bnf		<redefine clause> ::=
+developers-guide/d4-table-operators.md	43	2bbe3def82f9	d4		select Employee redefine { ID := ID * 2 };
+developers-guide/d4-table-operators.md	44	74dd69391849	text		ID Name
+developers-guide/d4-table-operators.md	45	22c63a527337	bnf		<specify clause> ::=
+developers-guide/d4-table-operators.md	46	7bef74b56883	d4		// Specify as projection
+developers-guide/d4-table-operators.md	47	748f6b288800	text		ID
+developers-guide/d4-table-operators.md	48	d7d6cedc2d2c	d4		// Specify as rename
+developers-guide/d4-table-operators.md	49	4b51cd0b528d	text		Employee_ID Employee_Name
+developers-guide/d4-table-operators.md	50	bbb0d5e88b85	d4		// Specify as extension
+developers-guide/d4-table-operators.md	51	efa9edeea7d1	text		ID Name NewID
+developers-guide/d4-table-operators.md	52	c032c8bc23f6	bnf		<union clause> ::=
+developers-guide/d4-table-operators.md	53	8fbacb5285c5	d4		select (Employee where ID <= 4) union (Employee where ID >= 
+developers-guide/d4-table-operators.md	54	41063c7b540e	text		ID Name
+developers-guide/d4-table-operators.md	55	970420b72982	bnf		<intersect clause> ::=
+developers-guide/d4-table-operators.md	56	bc21a80973c6	d4		select (Employee where ID <= 4) intersect (Employee where ID
+developers-guide/d4-table-operators.md	57	7ffd88414c09	text		ID Name
+developers-guide/d4-table-operators.md	58	3b7e5bafe2e9	bnf		<minus clause> ::=
+developers-guide/d4-table-operators.md	59	e8530b36a3e2	d4		select Employee minus (Employee where ID >= 3);
+developers-guide/d4-table-operators.md	60	8bf18faf3486	text		ID Name
+developers-guide/d4-table-operators.md	61	fbbecc9619cd	bnf		<times clause> ::=
+developers-guide/d4-table-operators.md	62	20db3b4f054a	d4		select Employee times (Employee rename { Name FirstName } ov
+developers-guide/d4-table-operators.md	63	b10de6dc40b4	text		ID Name FirstName
+developers-guide/d4-table-operators.md	64	c0c2799a5061	bnf		<join clause> ::=
+developers-guide/d4-table-operators.md	65	a6223ea365f7	d4		select Employee join EmployeePhone;
+developers-guide/d4-table-operators.md	66	13fbd78d09c5	text		ID Name   Phone
+developers-guide/d4-table-operators.md	67	d83e4ef951a1	d4		select (Employee rename E)
+developers-guide/d4-table-operators.md	68	d4cc95231890	text		E.ID   E.Name    EP.Phone
+developers-guide/d4-table-operators.md	69	7c8c2c0b84cc	bnf		<outer join clause> ::=
+developers-guide/d4-table-operators.md	70	72ac3dd7dce8	d4		select Employee left join EmployeePhone;
+developers-guide/d4-table-operators.md	71	d968d3f0a617	text		ID  Name Phone
+developers-guide/d4-table-operators.md	72	fdf63bbfd6d4	d4		select Employee right join EmployeePhone;
+developers-guide/d4-table-operators.md	73	7a9f274ad205	text		ID  Name       Phone
+developers-guide/d4-table-operators.md	74	1b0d44157eb6	d4		select Employee left lookup EmployeePhone include rowexists 
+developers-guide/d4-table-operators.md	75	f4febb16de63	text		ID Name Extended Phone
+developers-guide/d4-table-operators.md	76	cf044d1bb323	d4		create view EmpWithPhone
+developers-guide/d4-table-operators.md	77	e985f72d0cac	text		ID Name Phone
+developers-guide/d4-table-operators.md	78	66c037746b6b	d4		// will be ignored since phone is across lookup
+developers-guide/d4-table-operators.md	79	af7df8b68855	text		ID Name  Phone
+developers-guide/d4-table-operators.md	80	993f59731eff	d4		select Employee
+developers-guide/d4-table-operators.md	81	e18ff9002224	d4		select Employee
+developers-guide/d4-table-operators.md	82	3479b135dafb	d4		select Employee
+developers-guide/d4-table-operators.md	83	eea801d5d4d9	d4		select Employee
+developers-guide/d4-table-operators.md	84	48d4578ab2d7	bnf		<having clause> ::=
+developers-guide/d4-table-operators.md	85	22dba29d6dac	d4		select Employee
+developers-guide/d4-table-operators.md	86	5613e170d6d6	d4		select Employee
+developers-guide/d4-table-operators.md	87	2a11fbc937b7	d4		select Employee
+developers-guide/d4-table-operators.md	88	11624095de86	d4		select Employee
+developers-guide/d4-table-operators.md	89	72eb4039d10d	d4		select Employee
+developers-guide/d4-table-operators.md	90	27a7dc571441	bnf		<without clause> ::=
+developers-guide/d4-table-operators.md	91	22dba29d6dac	d4		select Employee
+developers-guide/d4-table-operators.md	92	e37d2bdb3b7b	d4		begin
+developers-guide/d4-table-operators.md	93	40a41f065fbd	d4		begin
+developers-guide/d4-table-operators.md	94	12ae099d360a	d4		begin
+developers-guide/d4-table-operators.md	95	c97f4a85877f	d4		begin
+developers-guide/d4-table-operators.md	96	32d240658673	d4		begin
+developers-guide/d4-table-operators.md	97	0b681a9d5d2d	d4		A ?= B = if A = B then 0 else if A < B then -1 else 1;
+developers-guide/database-design-techniques.md	1	f71728adb279	d4		create table LocationItem
+developers-guide/database-design-techniques.md	2	f4a0c769616d	d4		create operator InvoiceItemChangeItemTypeID(var ARow : typeo
+developers-guide/database-design-techniques.md	3	0f6e81735399	d4		create table Contact
+developers-guide/database-design-techniques.md	4	d8ae4b76a4c6	d4		create type Contact
+developers-guide/database-design-techniques.md	5	209f42a5610b	d4		create table Contact
+developers-guide/database-design-techniques.md	6	d9ce5b6b957c	d4		select Contact where Contact.ID = 1;
+developers-guide/database-design-techniques.md	7	5c396c7c57cc	d4		create view ContactDetail
+developers-guide/database-design-techniques.md	8	7418d08b6010	d4		create type Coordinate
+developers-guide/database-design-techniques.md	9	329dae6ff084	d4		create table ZipCode
+developers-guide/database-design-techniques.md	10	1f81ea7e574e	d4		create operator Distance
+developers-guide/database-design-techniques.md	11	a97bc4e6b867	d4		create operator Distance
+developers-guide/database-design-techniques.md	12	e496eb2dacf5	d4		create operator iMultiplication
+developers-guide/database-design-techniques.md	13	bbc3aff1115c	d4		select Miles(12) * DollarsPerMile(10);
+developers-guide/database-design-techniques.md	14	084e2945ce85	d4		create operator DateTime
+developers-guide/database-design-techniques.md	15	06979d45ac9d	d4		var LStrings := Split(AString, ',');
+developers-guide/database-design-techniques.md	16	fbb2e3481610	d4		var LVar1 := StringOperator1(AString, ',');
+developers-guide/database-design-techniques.md	17	81d869424084	d4		var LStrings := AString.Split(',');
+developers-guide/database-design-techniques.md	18	99bf92d94ab0	d4		var LIndex := Pos(',', AString);
+developers-guide/database-design-techniques.md	19	1eb1b0ba8401	d4		var LIndex := ','.Pos(AString);
+developers-guide/database-design-techniques.md	20	97508f390936	d4		var LIndex := AString.IndexOf(',');
+developers-guide/database-design-techniques.md	21	946158a5d200	d4		create table ContactAddress
+developers-guide/database-design-techniques.md	22	2813569ffc97	d4		create table ContactAddress
+developers-guide/database-design-techniques.md	23	03bea6f4a10f	d4		create table OrderItem
+developers-guide/database-design-techniques.md	24	7a568d6a972e	d4		select OrderItem
+developers-guide/database-design-techniques.md	25	c2ae78c8baf3	d4		create table OrderItem
+developers-guide/database-design-techniques.md	26	b850be5ac5ef	d4		select OrderItem
+developers-guide/database-design-techniques.md	27	4eafec661b49	d4		select OrderItem rename OI
+developers-guide/database-design-techniques.md	28	65aa1884be2b	d4		select OrderItem rename OI
+developers-guide/database-design-techniques.md	29	5ba8abf6bb69	d4		create table Order
+developers-guide/database-design-techniques.md	30	76dbb2cc9d72	d4		create table LocationItemType
+developers-guide/database-design-techniques.md	31	2594465f4d43	d4		create table EmployeeType
+developers-guide/database-design-techniques.md	32	45ad676f41a3	d4		create table ContactDescription
+developers-guide/database-design-techniques.md	33	1bda88499e0e	d4		create reference Contact_ContactDescription
+developers-guide/database-design-techniques.md	34	12c0e69b3649	d4		create table EmployeeType
+developers-guide/database-design-techniques.md	35	1a42f4271a39	d4		create table Contact
+developers-guide/database-design-techniques.md	36	a50899675786	d4		create table Contact
+developers-guide/database-design-techniques.md	37	81cd13adb471	d4		create table Contact
+developers-guide/database-design-techniques.md	38	7a4e9d2b08f5	d4		create table ContactDuring
+developers-guide/database-management-concepts.md	1	de97ad320080	d4		not exists Employees where Salary < $15000 or Salary > $1500
+developers-guide/database-management-concepts.md	2	04d8823bbb1f	d4		not exists ((Employees over { ID }) join (Users over { ID })
+developers-guide/database-management-concepts.md	3	50e9c4b3fa31	d4		Count(Employees) = Count(Employees over { ID })
+developers-guide/database-management-concepts.md	4	7a34bd79033a	d4		not exists ((Employees over { Dept_ID }) minus
+developers-guide/devices.md	1	52652fc1046d	d4		create device Shipping
+developers-guide/enforcing-business-rules.md	1	833085dc1740	d4		// Ensure that a generators table exists for this library.
+developers-guide/enforcing-business-rules.md	2	76512560b60f	d4		alter table ContactNameDuring
+developers-guide/enforcing-business-rules.md	3	88ab6245cae1	d4		alter table InvoiceItem
+developers-guide/enforcing-business-rules.md	4	28eb05ea8f8f	d4		create reference Invoice_Location
+developers-guide/enforcing-business-rules.md	5	0396250b793e	d4		not exists (Invoice { Location_ID ID }) minus (Location { ID
+developers-guide/enforcing-business-rules.md	6	a4f53cbf0314	d4		alter table Invoice
+developers-guide/enforcing-business-rules.md	7	123f17a541a9	d4		alter table Invoice
+developers-guide/enforcing-business-rules.md	8	0f6b5d83746f	d4		//* Constraint: InvoiceExclusive
+developers-guide/enforcing-business-rules.md	9	f1993c6b78c4	d4		//* Constraint: InvoiceValid
+developers-guide/enforcing-stimulus-response-rules.md	1	8585bbc44718	d4		//* View: EnterContactNotes
+developers-guide/enforcing-stimulus-response-rules.md	2	3894f0e0b610	d4		//* Operator: UpdateNotesRow
+developers-guide/enforcing-stimulus-response-rules.md	3	8fb8832f5ded	d4		create operator ContactBeforeUpdate
+developers-guide/enforcing-stimulus-response-rules.md	4	6fd6593329cc	d4		create operator ContactAfterUpdate
+developers-guide/enforcing-stimulus-response-rules.md	5	e6411acfd54a	d4		create operator ContactAfterDelete
+developers-guide/enforcing-stimulus-response-rules.md	6	3a856686894b	d4		//* View: ContactCategories
+developers-guide/enforcing-stimulus-response-rules.md	7	900d00cf7886	d4		//* Operator: ContactCategoriesUpdate
+developers-guide/enforcing-stimulus-response-rules.md	8	789273e51223	d4		//* Operator: LocationZipCodeChange
+developers-guide/implementing-data-types.md	1	96a5a833c083	d4		create type ContactID
+developers-guide/implementing-data-types.md	2	e146da2e503d	d4		// selector
+developers-guide/implementing-data-types.md	3	4b6d347dfaef	d4		begin
+developers-guide/implementing-data-types.md	4	e144dafa32e0	d4		var LContactID : ContactID := 1;
+developers-guide/implementing-data-types.md	5	a732f6e883fc	d4		create conversion Integer to ContactID
+developers-guide/implementing-data-types.md	6	e42461b90035	d4		create type ContactID like Integer;
+developers-guide/implementing-data-types.md	7	e5a8a7f8241b	d4		create type InvoiceID like Integer;
+developers-guide/implementing-data-types.md	8	63c61b917b7f	d4		begin
+developers-guide/implementing-data-types.md	9	af2b1958db0e	d4		create type Distance
+developers-guide/implementing-data-types.md	10	7ed7d77d5f37	d4		create type Degree
+developers-guide/implementing-data-types.md	11	5e3345588549	d4		create type Description like String
+developers-guide/implementing-data-types.md	12	e0ae9fdadab1	d4		create operator IsZipCode(const AString : String) : Boolean
+developers-guide/implementing-data-types.md	13	ce4cd5291ca5	d4		create type CreatedOnDateTime like DateTime
+developers-guide/implementing-data-types.md	14	b55f0f55b8aa	d4		create type VersionNumber
+developers-guide/implementing-data-types.md	15	000a2672e499	d4		// Special Selector
+developers-guide/implementing-data-types.md	16	bc73c5ebecb0	d4		create type Salary like Money
+developers-guide/implementing-data-types.md	17	ff83d59fb061	d4		create operator Distance
+developers-guide/implementing-data-types.md	18	c7893657ed42	d4		create type StateID like String
+developers-guide/implementing-data-types.md	19	fae9545de49a	d4		create type Coordinate
+developers-guide/implementing-data-types.md	20	c65ae106b7b2	d4		create operator iCompare
+developers-guide/modeling-process-logic.md	1	f07edde1961b	d4		begin
+developers-guide/modeling-process-logic.md	2	835b263e10ad	d4		begin
+developers-guide/modeling-process-logic.md	3	ff4a64e3ab43	d4		begin
+developers-guide/modeling-process-logic.md	4	2e9a7896f172	d4		begin
+developers-guide/modeling-process-logic.md	5	ed96ef7b1c61	d4		var LRow : row { ID : Integer } := row { 5 ID };
+developers-guide/modeling-process-logic.md	6	3be25abc4cb2	d4		var LRow := row of { ID : Integer } { };
+developers-guide/modeling-process-logic.md	7	bab1c6524a48	d4		result := row of typeof(result) { };
+developers-guide/modeling-process-logic.md	8	304160b40b99	d4		begin
+developers-guide/modeling-process-logic.md	9	93441284a74e	d4		begin
+developers-guide/modeling-process-logic.md	10	898c93dadca0	d4		begin
+developers-guide/modeling-process-logic.md	11	651fffa23270	d4		begin
+developers-guide/modeling-process-logic.md	12	47e623bb1232	d4		begin
+developers-guide/modeling-process-logic.md	13	d28fc4ba928c	d4		begin
+developers-guide/modeling-process-logic.md	14	ee5d27bf1f17	d4		begin
+developers-guide/modeling-process-logic.md	15	43e486bc6aae	d4		begin
+developers-guide/modeling-process-logic.md	16	99452b1805e4	d4		insert
+developers-guide/modeling-process-logic.md	17	c15b60249ce4	d4		var LTable := table { row { 1 ID } };
+developers-guide/modeling-process-logic.md	18	f3c92f4bf4c3	d4		// Use a cursor to build a list of names of objects in the s
+developers-guide/modeling-process-logic.md	19	4c4ec9746318	d4		// Find a specific object name in the system.
+developers-guide/modeling-process-logic.md	20	4f8e8a97e98a	d4		// Find the closest match to a given name in the system
+developers-guide/modeling-process-logic.md	21	63de51f2c4ac	d4		// Use bookmarks to reposition the cursor
+developers-guide/modeling-process-logic.md	22	2b2744e92742	text		2 + 2
+developers-guide/modeling-process-logic.md	23	80c02efffafb	d4		Distance(Coordinate(120.12, 87.6), Coordinate(110.13, 87.6))
+developers-guide/modeling-process-logic.md	24	06b4f36fd04d	d4		Coordinate(120.12, 87.6).Distance(Coordinate(110.13, 87.6));
+developers-guide/modeling-process-logic.md	25	e31c67a8342b	text		1 + 1
+developers-guide/modeling-process-logic.md	26	8a408d4c5888	d4		if exists (Location where ID = '001') then
+developers-guide/modeling-process-logic.md	27	497aec1f62e7	d4		if exists (Location where ID = '001') then
+developers-guide/modeling-process-logic.md	28	6573b80a05e6	d4		case LShape
+developers-guide/modeling-process-logic.md	29	a7e2d67bbdcf	d4		for LIndex : Integer := 1 to 100 do
+developers-guide/modeling-process-logic.md	30	7e39d0ad57af	d4		for var LIndex := 1 to 100 do
+developers-guide/modeling-process-logic.md	31	a35a7a2a98b0	d4		begin
+developers-guide/modeling-process-logic.md	32	0886e26c805b	d4		begin
+developers-guide/modeling-process-logic.md	33	62bcff239233	d4		begin
+developers-guide/modeling-process-logic.md	34	29ddb739f629	d4		begin
+developers-guide/modeling-process-logic.md	35	e7aab5771765	d4		// System.Error
+developers-guide/modeling-process-logic.md	36	55d5ed71dcac	d4		try
+developers-guide/modeling-process-logic.md	37	46f0cc3d4a7b	d4		try
+developers-guide/modeling-process-logic.md	38	dea2610e8745	d4		begin
+developers-guide/modeling-process-logic.md	39	0e82f44d6966	d4		try
+developers-guide/modeling-process-logic.md	40	d4bfb6ed8391	d4		begin
+developers-guide/modeling-process-logic.md	41	173447c51e02	d4		create operator LiteralOperator(const AInteger : Integer) : 
+developers-guide/modeling-process-logic.md	42	b6259991ac3c	d4		create operator NonLiteralOperator() : Integer
+developers-guide/modeling-process-logic.md	43	46f28021ad2e	d4		// literal
+developers-guide/modeling-process-logic.md	44	8e0428b5006d	d4		1 + 1;
+developers-guide/modeling-process-logic.md	45	500880dcb509	d4		begin
+developers-guide/modeling-process-logic.md	46	560847a63c47	d4		create operator CurrentLocationID() : LocationID
+developers-guide/modeling-process-logic.md	47	c36613e4a9b4	d4		alter table Contact
+developers-guide/modeling-process-logic.md	48	353abb135c6c	d4		create table Data { ID : Integer, key { ID } };
+developers-guide/modeling-process-logic.md	49	6edd540eadc2	d4		create session table CurrentLocation
+developers-guide/modeling-process-logic.md	50	8b43608512c1	d4		//* Operator: CurrentLocationID()
+developers-guide/modeling-process-logic.md	51	e54ea32402a1	d4		create operator UpdateInventory
+developers-guide/modeling-process-logic.md	52	2a9da6bf91eb	d4		//* Operator: UpdateInvoice
+developers-guide/modeling-process-logic.md	53	127aee1cfa10	d4		//* Operator: ProcessInvoice
+developers-guide/operator-mapping.md	1	105200d035e5	d4		alter device Shipping
+developers-guide/operator-mapping.md	2	c5f80204c512	d4		alter device Shipping
+developers-guide/operator-mapping.md	3	6de27a553b4e	d4		alter device Shipping
+developers-guide/operator-mapping.md	4	34bdf8e310c2	d4		create type Degree
+developers-guide/operator-mapping.md	5	8b36bd8d51a7	d4		alter device Shipping
+developers-guide/operator-mapping.md	6	a941b6ca93a5	d4		operator Degree(Integer, Integer, Decimal);
+developers-guide/operator-mapping.md	7	fc68606c9706	d4		create function Shipping_Degree
+developers-guide/operator-mapping.md	8	23952c856d88	d4		alter device Shipping
+developers-guide/operator-mapping.md	9	d4424621edf9	d4		alter device Shipping
+developers-guide/preliminaries.md	1	1b557b9aa3a5	text		Vendor
+developers-guide/preliminaries.md	2	31a5a57e3583	d4		var LVariable : Integer;
+developers-guide/preliminaries.md	3	b45fb65dd3fc	d4		if Length(LVariable) > 5 then
+developers-guide/preliminaries.md	4	dff200eb45ca	d4		CallOperator
+developers-guide/preliminaries.md	5	7822c5678ed1	d4		select table
+developers-guide/preliminaries.md	6	d656ce89cab8	d4		select Employee
+developers-guide/preliminaries.md	7	ea8d95c5e44d	d4		select Employee
+developers-guide/preliminaries.md	8	5aad131ba159	d4		CallOperator(LVariable1,
+developers-guide/preliminaries.md	9	f706148bb6c2	d4		create table Vendor
+developers-guide/preliminaries.md	10	4365855c651d	d4		create table EmployeeType
+developers-guide/preliminaries.md	11	eafd8d314f8c	d4		create table Contact
+developers-guide/preliminaries.md	12	23d694397c71	d4		create table Person
+developers-guide/preliminaries.md	13	19fca7a50808	d4		create type ZipCode like String
+developers-guide/preliminaries.md	14	e1d6ed4f25b1	d4		create table PhoneType
+developers-guide/preliminaries.md	15	e91c78eac4f3	d4		create table Node
+developers-guide/preliminaries.md	16	191c259aa834	d4		create operator LogContactInsert
+developers-guide/presentation-overview.md	1	6c5f793b18f3	text		"<interface/>"
+developers-guide/presentation-overview.md	2	90a46bd862dd	xml		<?xml version="1.0" encoding="utf-16"?>
+developers-guide/presentation-overview.md	3	d851831ffbdc	xml		<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+developers-guide/presentation-overview.md	4	4214a6319fa9	xml		<?xml version="1.0" encoding="utf-16"?>
+developers-guide/presentation-overview.md	5	04d1a81957d3	xml		<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+developers-guide/putting-it-all-together.md	1	32ebd4f69991	d4		alter table State alter tags
+developers-guide/putting-it-all-together.md	2	472e7429b012	d4		alter table Location
+developers-guide/putting-it-all-together.md	3	54c35baecc2f	d4		alter table Location
+developers-guide/putting-it-all-together.md	4	2d7e1a38435d	d4		alter table Location
+developers-guide/putting-it-all-together.md	5	46e87cb3e954	d4		//* Operator: LocationZipCodeChange
+developers-guide/putting-it-all-together.md	6	ab415c2fa5a9	d4		//* View: ContactNameHistory
+developers-guide/putting-it-all-together.md	7	89dafc2ce34e	d4		//* Reference: ContactNameHistory_Contact
+developers-guide/putting-it-all-together.md	8	4b9d45cdd456	d4		//* View: EnterContactNotes
+developers-guide/putting-it-all-together.md	9	39f0387c54e7	d4		create reference EnterContactNotes_Contact
+developers-guide/putting-it-all-together.md	10	41ad61250fe5	d4		//* View: ContactCategories
+developers-guide/putting-it-all-together.md	11	5ed2bc6c4360	d4		create reference ContactCategories_Contact
+developers-guide/putting-it-all-together.md	12	6d125690f5a8	d4		//* View: CustomerDetail
+developers-guide/putting-it-all-together.md	13	9b0c21984d21	d4		create reference Customer_Shipping_CustomerAddress Customer 
+developers-guide/putting-it-all-together.md	14	3e74de517326	d4		//* View: VendorDetail
+developers-guide/putting-it-all-together.md	15	79226de4b250	d4		//* View: VendorDetail
+developers-guide/putting-it-all-together.md	16	09250ebe5cb0	d4		create reference VendorItemType_Vendor
+developers-guide/putting-it-all-together.md	17	dca72660ddbb	d4		//* Operator: EnsureCurrentLocationTable
+developers-guide/putting-it-all-together.md	18	b28a1efc5c85	d4		//* Operator: CurrentLocationID()
+developers-guide/putting-it-all-together.md	19	adec44d6b549	d4		//* View: SaleOrderEntry
+developers-guide/putting-it-all-together.md	20	cc73c212dfb4	d4		//* View: SaleOrderItem
+developers-guide/putting-it-all-together.md	21	3ffa2bc6b6ba	d4		//* View: LocationItemType
+developers-guide/putting-it-all-together.md	22	a735c2018976	d4		//* Operator: InvoiceItemChangeInvoiceID(var typeof(InvoiceI
+developers-guide/putting-it-all-together.md	23	d7556a79bb66	d4		//* Operator: InvoiceItemChangeItemTypeID(var typeof(Invoice
+developers-guide/putting-it-all-together.md	24	cfdd8315e62e	d4		//* View: LocationItemsToOrder
+developers-guide/putting-it-all-together.md	25	90d8aa73e20f	d4		//* View: SupplyingVendors
+developers-guide/putting-it-all-together.md	26	8dbe7f8897f9	d4		create operator CreateBidItems(const ALocationID : LocationI
+developers-guide/putting-it-all-together.md	27	1d5c8219ccb7	d4		//* View: LocationsNeedingItems
+developers-guide/putting-it-all-together.md	28	84be940dd822	d4		CreateBidItems(Main.Location_ID);
+developers-guide/putting-it-all-together.md	29	f549c700a4ca	d4		Host.Session.ExecuteScript
+developers-guide/putting-it-all-together.md	30	14ddefe28c38	d4		//* View: SaleOrdersToProcess
+developers-guide/representing-data.md	1	898fc7b4b76e	d4		//* Table: Location
+developers-guide/representing-data.md	2	9a948b5bd7d7	d4		"One" / "Two";
+developers-guide/representing-data.md	3	11fd8080bd1a	d4		5 + 5;
+developers-guide/representing-data.md	4	49b9fc70580b	d4		select Location { ID, Name };
+developers-guide/representing-data.md	5	3dac5682dad5	text		ID    Name
+developers-guide/representing-data.md	6	198f41c86836	d4		select Location { ZipCode };
+developers-guide/representing-data.md	7	d0639ed80e7f	text		ZipCode
+developers-guide/representing-data.md	8	2a49e8fc96fc	d4		select Location { };
+developers-guide/representing-data.md	9	f1614a3d91ce	d4		select InvoiceItem { Invoice_ID, Number, Quantity, Amount, Q
+developers-guide/representing-data.md	10	902b47cae0ef	text		Invoice_ID Number Quantity    Amount LineTotal
+developers-guide/representing-data.md	11	d6602bfe82de	d4		select Contact { ID, Name }
+developers-guide/representing-data.md	12	796318052792	d4		select ContactPhone { Contact_ID ID, Phone }
+developers-guide/representing-data.md	13	63cc6466104f	d4		select InvoiceItem { Invoice_ID, Number Line_Number, Quantit
+developers-guide/representing-data.md	14	881f8b033c15	d4		select Location where ZipCode = '84058';
+developers-guide/representing-data.md	15	d4e9014044a6	text		ID    Name           Phone    Street      City State_ID ZipC
+developers-guide/representing-data.md	16	48e10b7370b7	d4		select Location where ID = '01001';
+developers-guide/representing-data.md	17	ad8330470753	text		ID    Name           Phone    Street     City State_ID ZipCo
+developers-guide/representing-data.md	18	3fb81902533f	d4		select Location[].Name
+developers-guide/representing-data.md	19	48e2e8c1ae97	d4		select Location['01001'].Name
+developers-guide/representing-data.md	20	f66e5c0578c0	d4		select Invoice return 1;
+developers-guide/representing-data.md	21	6683960694d8	text		ID Location_ID User_ID Date      Status_ID
+developers-guide/representing-data.md	22	45dda6c5743d	d4		select Invoice return 1 by { ID };
+developers-guide/representing-data.md	23	6683960694d8	text		ID Location_ID User_ID Date      Status_ID
+developers-guide/representing-data.md	24	687070a5dd5e	d4		select Invoice return 1 by { Date desc };
+developers-guide/representing-data.md	25	0fc669487ad2	text		ID Location_ID User_ID Date      Status_ID
+developers-guide/representing-data.md	26	23a612e1d42d	d4		select Invoice return 1 by { };
+developers-guide/representing-data.md	27	0fc669487ad2	text		ID Location_ID User_ID Date      Status_ID
+developers-guide/representing-data.md	28	8a29ff1bd486	d4		select (SaleOrder { ID })
+developers-guide/representing-data.md	29	a6a69a15bf02	text		ID
+developers-guide/representing-data.md	30	c971bc6c87b9	d4		select (Contact { ID })
+developers-guide/representing-data.md	31	5a457decec88	text		ID
+developers-guide/representing-data.md	32	851bae68ee62	d4		select Invoice join SaleOrder;
+developers-guide/representing-data.md	33	abcc9f4eb9d6	text		ID Location_ID User_ID Date      Status_ID Customer_ID
+developers-guide/representing-data.md	34	f5601806aa07	d4		select (Invoice rename I)
+developers-guide/representing-data.md	35	932f214c23e1	text		I.ID I.Status_ID S.ID S.Customer_ID
+developers-guide/representing-data.md	36	9081aea983b3	d4		select (Invoice rename I)
+developers-guide/representing-data.md	37	e018c0f8353f	text		I.ID I.Status_ID rowexists S.ID       S.Customer_ID
+developers-guide/representing-data.md	38	30d50ded72ef	d4		select Contact { ID, Name }
+developers-guide/representing-data.md	39	4ee5a31eb80a	text		ID Name                  Number City           State_ID ZipC
+developers-guide/representing-data.md	40	823e534e8b2d	d4		select ContactPhone { Contact_ID, PhoneType_ID, Phone }
+developers-guide/representing-data.md	41	32213737c1dc	text		Contact_ID PhoneType_ID Phone    Description
+developers-guide/representing-data.md	42	1394322b63e7	d4		select Location { ID, Name, ZipCode }
+developers-guide/representing-data.md	43	58bd92a9c856	text		ID    Name           ZipCode Contact_ID Number
+developers-guide/representing-data.md	44	c344acc2e77b	d4		select SaleOrderItem
+developers-guide/representing-data.md	45	71ec4e0302ab	text		Invoice_ID InvoiceTotal
+developers-guide/representing-data.md	46	ecbbe6c36027	d4		select Location["01001"].Name;
+developers-guide/representing-data.md	47	109e9e270b53	d4		begin
+developers-guide/representing-data.md	48	fe235c11f4e2	d4		select Invoice
+developers-guide/representing-data.md	49	6d125690f5a8	d4		//* View: CustomerDetail
+developers-guide/scalar-type-mapping.md	1	73eb7d4b7d38	d4		create table Invoice
+developers-guide/scalar-type-mapping.md	2	8b14a2f4657c	d4		alter device Shipping { create type InvoiceID };
+developers-guide/scalar-type-mapping.md	3	3ce7fdc973b1	d4		create type Phone like String
+developers-guide/scalar-type-mapping.md	4	787f6f1ac9b1	d4		alter device Shipping { create type Phone tags { Storage.Len
+developers-guide/scalar-type-mapping.md	5	04c50a395142	d4		alter device Shipping { create type Degree class "SQLDevice.
+developers-guide/scalar-type-mapping.md	6	c5431e85b693	d4		alter device Shipping { create type Coordinate class "Shippi
+developers-guide/space-between-data.md	1	1500a7561f87	d4		bool Validate(Row AOldRow, Row ANewRow, string AColumnName);
+developers-guide/space-between-data.md	2	ef4701f56e36	d4		bool Default(Row ARow, string AColumnName);
+developers-guide/space-between-data.md	3	b57abbf104d3	d4		bool Change(Row AOldRow, Row ANewRow, string AColumnName);
+developers-guide/storage-integration-architecture.md	1	3f1a4df6512c	d4		select Invoice where ID = 5;
+developers-guide/storage-integration-architecture.md	2	5d91d09be9c3	d4		select ShowPlan('select Invoice where ID = 5');
+developers-guide/storage-integration-architecture.md	3	0b0f40cfd8dc	d4		8438: RestrictNode
+developers-guide/storage-integration-architecture.md	4	d563ab61d7bb	d4		select D4ToSQL('select Invoice where ID = 5');
+developers-guide/storage-integration-architecture.md	5	1fb41f2f3cbe	d4		select
+developers-guide/storage-integration-architecture.md	6	9bbedd3cc3a8	d4		create operator UnsupportedOperator(const AID : Integer) : I
+developers-guide/storage-integration-architecture.md	7	330d21f1890a	d4		select Invoice
+developers-guide/storage-integration-architecture.md	8	b58ff2f9facb	d4		Reconcile(Name("MyDevice"));
+developers-guide/storage-integration-architecture.md	9	d8e890bb4fda	text		Name                                                   Stora
+developers-guide/working-with-libraries.md	1	0ab065f29588	d4		create table Employee { ID : Integer, Name : String, key { I
+reference/README.md	1	0480aef4e30a	text		Copyright © 2016 Alphora
+reference/d4-grammar.md	1	2fca5c461052	bnf		The following non terminals in the Lexer BNF are referenced 
+reference/d4-grammar.md	2	afeb0c38ea37	bnf		The following non terminals in the Lexer BNF are referenced 
+reference/tags.md	1	c1310936abc9	text		DAE.Enforced = "true | false"
+reference/tags.md	2	bc87fd5c5fe1	text		DAE.IsClustered = "true | false"
+reference/tags.md	3	82b97d94e34a	text		DAE.IsComputed = "true | false"
+reference/tags.md	4	163be977f331	text		DAE.IsDeferred = "true | false"
+reference/tags.md	5	7fe98272eab8	text		DAE.IsOrderDependent = "true | false"
+reference/tags.md	6	f1e3eea5cca0	text		DAE.IsOrderPreserving = "true | false"
+reference/tags.md	7	ed29e6d23445	text		DAE.IsSparse = "true | false"
+reference/tags.md	8	76220c2f182b	bnf		DAE.[<transition>.]Message = "<expression>"
+reference/tags.md	9	d57e183b887d	bnf		DAE.<native accessor name> = "<representation name>"
+reference/tags.md	10	731078015414	text		DAE.ShouldTranslate = "true | false"
+reference/tags.md	11	6a63e87c0bac	text		Storage.Deferred = "true | false"
+reference/tags.md	12	dfa01eb022a8	text		Storage.Enforced = "true | false"
+reference/tags.md	13	5210ac7a7ee5	text		Storage.IsClustered = "true | false"
+reference/tags.md	14	3fa04c9e0272	text		Storage.IsSparse = "true | false"
+reference/tags.md	15	54a37e3ebff5	text		Storage.Length = "<integer>"
+reference/tags.md	16	338c977d91e5	text		Storage.Name = "<string>"
+reference/tags.md	17	57583d9d03a8	text		Storage.Precision = "<integer>"
+reference/tags.md	18	08c727afd090	text		Storage.Scale = "<integer>"
+reference/tags.md	19	cb8f35fe8658	text		Storage.Schema = "<string>"
+reference/tags.md	20	3b9a1e156569	text		Storage.Scope = "Database | Session | Process"
+reference/tags.md	21	bd4019649c29	text		Storage.ShouldReconcile = "true | false"
+reference/tags.md	22	ed53193d1733	d4		ID : Integer tags { Frontend.Visible = "false" }
+reference/tags.md	23	d59476b162d4	d4		ID : Integer tags { Frontend.Browse.Visible = "false" }
+reference/tags.md	24	58e3fe87c24e	text		Frontend.Break = "true | false"
+reference/tags.md	25	217c93b91f22	text		Frontend.Caption = "<string>"
+reference/tags.md	26	ac97b8325f21	text		Frontend.DetailKeyNames = "<column name semicolonlist>"
+reference/tags.md	27	c45852d77252	text		Frontend.Document = "<document expression>"
+reference/tags.md	28	0fc049d8eb9f	text		Frontend.Elaborate = "true | false"
+reference/tags.md	29	6a1e97ef6450	text		Frontend.ElementType = "<identifier>"
+reference/tags.md	30	8584a4a48113	text		Frontend.Embedded = "true | false"
+reference/tags.md	31	2b20eb87a5ca	text		Frontend.Exposed = "true | false"
+reference/tags.md	32	f71f076ad746	text		Frontend.Flow = "default | vertical | horizontal"
+reference/tags.md	33	14523850757a	text		Frontend.FlowBreak = "true | false"
+reference/tags.md	34	fb4faa70551a	text		Frontend.EliminateGroup = "true | false"
+reference/tags.md	35	52ed693b51c9	text		Frontend.Group = "<qualified identifier>"
+reference/tags.md	36	835ce891568a	text		Frontend.Hint = "<string>"
+reference/tags.md	37	e104222b0e8b	text		Frontend.Include = "true | false"
+reference/tags.md	38	8ec0f906d20e	text		Frontend.IncludeGroupTitle = "true | false"
+reference/tags.md	39	bd6dacf990b1	text		Frontend.IsDefault = "true | false"
+reference/tags.md	40	7b6b8915983c	text		Frontend.MasterKeyNames = "<column name semicolonlist>"
+reference/tags.md	41	15e0d3347edf	text		Frontend.Priority = "<integer>"
+reference/tags.md	42	f9d00821475e	d4		Frontend.Query = "<table expression>"
+reference/tags.md	43	1ffe86400e0e	text		Frontend.ReadOnly = "true | false"
+reference/tags.md	44	f8adb06c5640	text		Frontend.Secure = "visible | disabled | hidden"
+reference/tags.md	45	667068d283d2	text		Frontend.ShouldEnlist = "default | true | false"
+reference/tags.md	46	decbb19e109a	text		Frontend.Title = "<string>"
+reference/tags.md	47	2e2e2c8cc992	text		Frontend.TreatAsLookup = "true | false"
+reference/tags.md	48	c13ff17e2784	text		Frontend.UseApplicationTransactions = "true | false"
+reference/tags.md	49	3939cef834fe	text		Frontend.UseBrowse = "true | false"
+reference/tags.md	50	604f83398d82	text		Frontend.UseList = "true | false"
+reference/tags.md	51	eaa039985a4e	text		Frontend.UseFullLookup = "true | false"
+reference/tags.md	52	06b12fef0f5b	text		Frontend.Visible = "true | false"
+reference/tags.md	53	09adcc05a0c1	text		Frontend.Width = "<integer>"
+users-guide/README.md	1	0ab065f29588	d4		create table Employee { ID : Integer, Name : String, key { I
+users-guide/README.md	2	0480aef4e30a	text		Copyright © 2016 Alphora
+users-guide/dataphor-service.md	1	b2c915772ed7	text		DAEService.exe -i
+users-guide/dataphor-service.md	2	ff165db45000	text		daeservice -i name "Alphora Dataphor v2.0 Instance 2"
+users-guide/dataphor-service.md	3	b5f39fc9da6c	xml		<configSections>
+users-guide/dataphor-service.md	4	92fc6e84ed7a	text		daeservice -run name "Alphora Dataphor v2.0 Instance 2"
+users-guide/dataphor-service.md	5	31dc0a3ab2f8	text		DAEService.exe -u
+users-guide/documents-and-designers.md	1	a9d32bf3a252	d4		var LInteger : Integer;
+users-guide/documents-and-designers.md	2	44b0cef01409	d4		begin
+users-guide/documents-and-designers.md	3	3fe7724c104a	d4		// semi-colon is only required if the
+users-guide/documents-and-designers.md	4	158fb3538f30	d4		select 5
+users-guide/tutorial-book-publishing.md	1	dadc8ef09873	d4		CAUTION: It is assumed that the SQL server is running on the
+users-guide/tutorial-movie-rental.md	1	e3627c352911	d4		create device RentalDevice
+users-guide/tutorial-movie-rental.md	2	ca512b8cce86	d4		insert table
+users-guide/tutorial-movie-rental.md	3	e723db1b95b5	d4		CreateDeviceUser("Admin", "RentalDevice", "sa", "");
+users-guide/tutorial-movie-rental.md	4	5d1e97fe0c2d	d4		create device RentalDevice
+users-guide/tutorial-movie-rental.md	5	39df59c5ce78	d4		create table Test in RentalDevice
+users-guide/tutorial-movie-rental.md	6	4f2e5830b3d9	d4		SetDefaultDeviceName("RentalDevice");
+users-guide/tutorial-movie-rental.md	7	0d7c4d90777f	d4		EnsureGenerators();
+users-guide/tutorial-movie-rental.md	8	022b182182cd	d4		create type Description like String
+users-guide/tutorial-movie-rental.md	9	ed53193d1733	d4		ID : Integer tags { Frontend.Visible = "false" }
+users-guide/tutorial-movie-rental.md	10	d59476b162d4	d4		ID : Integer tags { Frontend.Browse.Visible = "false" }
+users-guide/tutorial-movie-rental.md	11	4d1eb15fc618	d4		// Movie Types courtesy of IMDB (imdb.com)
+users-guide/tutorial-movie-rental.md	12	9b706f7a88af	d4		table { row { 1 X, 1 Y }, row { 2 Y, 2 X } };
+users-guide/tutorial-movie-rental.md	13	6048e88ed24f	d4		select MovieType
+users-guide/tutorial-movie-rental.md	14	1ee4cc63636d	text		ID  Genre
+users-guide/tutorial-movie-rental.md	15	cc40de571110	d4		select MovieType { Genre };
+users-guide/tutorial-movie-rental.md	16	3dd945b30c6c	text		Genre
+users-guide/tutorial-movie-rental.md	17	606a7b5d71d5	d4		select MovieType where ID < "F" and ID > "B";
+users-guide/tutorial-movie-rental.md	18	07614b3f7fd7	text		ID Genre
+users-guide/tutorial-movie-rental.md	19	32d901dc1985	d4		select (MovieType where ID < "F") where ID > "B";
+users-guide/tutorial-movie-rental.md	20	07614b3f7fd7	text		ID Genre
+users-guide/tutorial-movie-rental.md	21	496bf6818ff2	d4		create table MovieRating
+users-guide/tutorial-movie-rental.md	22	36c945114e20	d4		create table MovieRating
+users-guide/tutorial-movie-rental.md	23	a0244803e9ce	d4		select MovieRating
+users-guide/tutorial-movie-rental.md	24	904935b879a6	text		ID    Description                  Position
+users-guide/tutorial-movie-rental.md	25	53f7be7201f7	d4		select MovieRating order by { Position }
+users-guide/tutorial-movie-rental.md	26	4bda661f7943	text		ID    Description                  Position
+users-guide/tutorial-movie-rental.md	27	b29e110bc9ea	d4		create table Movie
+users-guide/tutorial-movie-rental.md	28	9c1fe1fa4da1	d4		create table Actor
+users-guide/tutorial-movie-rental.md	29	4cee77ccc54f	d4		create table MovieActor
+users-guide/tutorial-movie-rental.md	30	a1b59bdcd204	d4		create table Video
+users-guide/tutorial-movie-rental.md	31	d27ea97e9f0a	d4		create table Account
+users-guide/tutorial-movie-rental.md	32	2a7b2f6bf019	d4		create table Sale
+users-guide/tutorial-movie-rental.md	33	87ba6dc9745b	d4		create table SaleItem
+users-guide/tutorial-movie-rental.md	34	9cf3e75a0370	d4		create view VideoDetail
+users-guide/tutorial-movie-rental.md	35	d263263ee5b2	d4		create table RentedVideo
+users-guide/tutorial-movie-rental.md	36	729ee7731767	d4		create operator AddRental(ARow : typeof(RentedVideo[]))
+users-guide/tutorial-movie-rental.md	37	74f9d418beed	d4		attach operator AddRental to RentedVideo on after insert;
+users-guide/tutorial-movie-rental.md	38	99811ed8ae00	d4		create view AvailableVideo
+users-guide/tutorial-movie-rental.md	39	8c84f8a85a08	d4		ClockStaticText.Text =
+users-guide/tutorial-movie-rental.md	40	fb6ddafdc6e0	d4		select TableDee add
+users-guide/tutorial-movie-rental.md	41	cd31c619d280	d4		string LFilter = "";
+users-guide/tutorial-movie-rental.md	42	f75463a726b6	d4		FilterTrigger.Action = SetMainFilter;
+users-guide/tutorial-movie-rental.md	43	e1001b74082f	d4		create view NewRental
+users-guide/tutorial-movie-rental.md	44	2e481261c26a	text		.Frontend.Derive
+users-guide/tutorial-movie-rental.md	45	4cb0ac3f8768	d4		SaleItem
+users-guide/tutorial-movie-rental.md	46	f539bbf87ddd	d4		create operator ReturnVideo(AVideoID : Integer)
+users-guide/tutorial-movie-rental.md	47	ec7fc1db3baa	d4		create operator PayFees
+users-guide/tutorial-movie-rental.md	48	a4df6531a82d	d4		alter table Account
+users-guide/tutorial-movie-rental.md	49	d19bdfac7292	d4		if (Main.Enabled
+users-guide/tutorial-movie-rental.md	50	f0973924abb6	d4		MainColumnSample_Rental_Sale_Account_Main_Account_ID_Lookup.

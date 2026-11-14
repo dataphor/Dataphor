@@ -1,0 +1,11 @@
+{
+  "name": "dataphor-docs-convert",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Asciidoctor (DocBook 5 backend) for tools/docs-convert/convert.py; see README.md",
+  "dependencies": {
+    "@asciidoctor/cli": "4.0.0",
+    "@asciidoctor/core": "3.0.4",
+    "@asciidoctor/docbook-converter": "3.0.0"
+  }
+}

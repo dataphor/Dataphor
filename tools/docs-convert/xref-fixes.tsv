@@ -1,0 +1,10 @@
+source	ref	replacement	reason
+DevelopersGuide/D4Catalog.adoc	#Type_Conversions	D4LanguageElements.adoc#Type_Conversions	the section is in Language Elements, the only heading of that name
+DevelopersGuide/D4ImperativeStatements.adoc	D4ScriptsandExecution.adoc#Summary	D4ScriptsAndExecution.adoc#Summary	file name in the wrong case
+DevelopersGuide/D4LanguageElements.adoc	#Parser_Literals	D4LexicalElements.adoc#Parser_Literals	the section is in Lexical Elements, the only heading of that name
+DevelopersGuide/D4LexicalElements.adoc	D4LanguageGrammar.adoc#D4_Lexer_BNF	../DataphorReference/D4LanguageGrammar.adoc#D4_Lexer_BNF	the grammar is in the Dataphor Reference folder
+DevelopersGuide/Devices.adoc	../DataphorReference.adoc#DRSystemLibrary	../DataphorReference/Libraries.adoc#DRSystemLibrary	the folder is named as a file; the DRSystemLibrary anchor is in Libraries.adoc
+UsersGuide/Tutorial_MovieRental.adoc	D4ScriptsAndExecution.adoc#Summary	../DevelopersGuide/D4ScriptsAndExecution.adoc#Summary	the page is in the Developer's Guide folder
+UsersGuide/Tutorial_MovieRental.adoc	StorageIntegrationArchitecture.adoc#Reconciliation	../DevelopersGuide/StorageIntegrationArchitecture.adoc#Reconciliation	the page is in the Developer's Guide folder
+UsersGuide/Tutorials.adoc	Tutorial_FrontendComponents.adoc	Tutorial_SampleComponents.adoc	the Frontend Components tutorial's file is Tutorial_SampleComponents.adoc
+UsersGuide/UsersGuide.adoc	Tutorial_FrontendComponents.adoc	Tutorial_SampleComponents.adoc	the Frontend Components tutorial's file is Tutorial_SampleComponents.adoc
