@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// The test cases, in ordinal order of name. NUnit evaluates this at discovery and again at execution, so it reads only
-		/// the embedded manifest and the layout's folder listing, and starts no server.
+		/// the embedded manifest, the layout's folder listing and the scripts a fragment entry names in partOf, and starts no server.
 		/// </summary>
 		public static IEnumerable<TestCaseData> Cases()
 		{
