@@ -12,7 +12,7 @@ Settled direction (details in the plan): .NET 10 only, no .NET Framework build; 
 
 ## Layout
 
-**This is the layout before the reorganization.** The plan's "Repository layout" section gives the target tree (`src/`, `libraries/`, `samples/`, `tests/`, …) and an old → new table; the ticket that performs the move rewrites this table.
+We own this codebase.  **This is the layout before the reorganization.** The plan's "Repository layout" section gives the target tree (`src/`, `libraries/`, `samples/`, `tests/`, …) and an old → new table; the ticket that performs the move rewrites this table.
 
 | Path | What |
 |---|---|
@@ -89,3 +89,7 @@ Project-specific ticket rules (testing policy, compatibility, source hygiene) ar
 **What's indexed:** git-tracked project source, minus `node_modules/`, `dist/`, `build/`, `.git/`, `tickets/`, `team/`, `docs/`, few cache dirs. If query about prose-heavy material (long-form architecture docs, design notes, nested READMEs) returns nothing, file may be outside indexed set — fall back to `Read`/`Glob` for those paths. Projects can override filter via `tickets/index-config.json` (see tess README § Customize what gets indexed).
 
 This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and drops dead or vendored trees (`Legacy/`, `Utilities/`, `Documentation/`, Silverlight, vendored JavaScript, generated FHIR scripts). Use `Read`/`Glob` for those.
+
+## Mannered prose
+
+Mannered prose substitutes metaphor and flourish for direct statement. Instead of "a parameter worth varying," the mannered writer produces "a dial worth turning." Instead of "this point still matters," they write "this point earns its keep." The phrases exist to display the writer, not to convey the idea, and readers can tell. That is why mannered prose irritates: it makes the reader work harder so the writer can perform. It is also imprecise. Metaphors drag in connotations the writer did not choose and cannot control. The fix is to say what you mean. When a literal phrase is available, use it.
