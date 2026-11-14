@@ -31,6 +31,7 @@ A running list of every change that an existing application, a deployment or a c
 | done | Devices and connections for Oracle (through the Microsoft provider), ADO (COM) and SAS are parked and not shipped; their source is kept, unbuilt, under `legacy/libraries/`. | SQL Server, PostgreSQL, the in-memory device and SimpleDevice ship in 4.0 |
 | planned | The PostgreSQL device moves from Npgsql 2.0 to the current Npgsql. Type mapping (notably timestamps and time zones), connection-string keywords and error details may differ. | Test against the production PostgreSQL version; specific differences will be listed here as the port finds them |
 | planned | The SQL Server device uses `Microsoft.Data.SqlClient`. The intent is that existing device definitions connect unchanged, including to servers without a trusted certificate. | Test against the production SQL Server version; the minimum supported version will be documented |
+| done | The source text kept for an operator written on one line is exact. Before, the text stored in the catalog and returned by `Script()` for an operator whose body began and ended on the same line ran on into whatever followed it on that line, and the last section of an aggregate operator ending in a string literal (`finalization class "…"`) could lose or gain characters with its indentation; such operators could then fail to load from the catalog ("Errors occurred while attempting to deserialize catalog object"). | Nothing; the catalog is rebuilt from scripts, which stores the exact text |
 
 ## Custom C# extensions
 
@@ -47,6 +48,7 @@ A running list of every change that an existing application, a deployment or a c
 | planned | Code that reaches through a Dataphor connection to `System.Data.SqlClient` types must use `Microsoft.Data.SqlClient`. | Change the namespace |
 | done | Dataphor references Newtonsoft.Json 13 instead of 9 (the native client interface, the server and the System.Internet library). | Build extensions that use Newtonsoft.Json against version 13 |
 | done | The WCF client constructors that take an endpoint configuration name (`ServiceClient<T>(string)`, `DataphorServiceClient<T>(string)`, `NativeCLIClient(hostName, instanceName, endpointConfigurationName)`) throw `NotSupportedException`: the .NET WCF client cannot read endpoints from an application configuration file. | Construct clients with a binding and endpoint address, or with host, instance and port; check deployed configuration files for `<system.serviceModel>` sections |
+| done | The D4 parser's end position (`Statement.EndLine`, `Statement.EndLinePos`) of a statement or expression whose last token is a string literal now points just past the closing quote, and to the line where a string spanning lines ends; it used to fall short by the quotes. `LexerToken` and `Tokenizer` have new `EndLine` and `EndLinePos` members. | Nothing, unless an extension computes source spans from parser positions and corrected for the old value |
 
 ## Forms and the Windows client
 

@@ -1,0 +1,51 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Globalization
+
+	The server runs with Windows NLS globalization (System.Globalization.UseNls in each host's runtimeconfig.json), so that
+	culture-sensitive string operations give the results they gave on .NET Framework. The cases marked NLS give a different
+	result under ICU (International Components for Unicode), the .NET default. D4's comparison operators and ordering are
+	ordinal, and CompareText is ordinal ignoring case; the first cases pin that, with letters whose case mapping NLS and
+	ICU agree on.
+*/
+
+// Ordinal comparison: character codes, not culture rules ("co-op" sorts after "coop" under culture comparison)
+if not ('co-op' < 'coop') then
+	raise Error('String comparison is not ordinal');
+
+if 'Coop' = 'coop' then
+	raise Error('String equality ignored case');
+
+if CompareText('COOP', 'coop') <> 0 then
+	raise Error('CompareText did not ignore case');
+
+if CompareText('co-op', 'coop') >= 0 then
+	raise Error('CompareText is not ordinal');
+
+// Case-insensitive comparison of non-ASCII letters: e acute matches its capital; dotless i (U+0131) does not match I
+if CompareText(Unicode({ 233 }), Unicode({ 201 })) <> 0 then
+	raise Error('CompareText did not match e acute with its capital');
+
+if CompareText(Unicode({ 305 }), 'I') = 0 then
+	raise Error('CompareText matched dotless i with I');
+
+if Concat(Name from table { row { 'coop' Name }, row { 'co-op' Name }, row { 'Coop' Name } } order by { Name }) <> 'Coopco-opcoop' then
+	raise Error('Ordering of strings is not ordinal');
+
+// NLS: culture-sensitive search treats sharp s (U+00DF) as equal to "ss"; ICU does not
+if IndexOf('Strasse', Unicode({ 223 })) <> 4 then
+	raise Error('IndexOf did not match sharp s with "ss": ' + IndexOf('Strasse', Unicode({ 223 })).ToString());
+
+if Pos('ss', 'Stra' + Unicode({ 223 }) + 'e') <> 4 then
+	raise Error('Pos did not match "ss" with sharp s: ' + Pos('ss', 'Stra' + Unicode({ 223 }) + 'e').ToString());
+
+// NLS: an embedded null character is a character to search for; ICU ignores it
+if IndexOf('abc' + Unicode({ 0 }), Unicode({ 0 })) <> 3 then
+	raise Error('IndexOf did not find an embedded null character: ' + IndexOf('abc' + Unicode({ 0 }), Unicode({ 0 })).ToString());
+
+if StartsWith(Unicode({ 0 }) + 'abc', 'abc') then
+	raise Error('StartsWith ignored a leading null character');

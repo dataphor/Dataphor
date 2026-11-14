@@ -22,10 +22,12 @@ namespace Alphora.Dataphor.DAE.Debug
 			for (int index = 1; index < lineInfo.Line; index++)
 				while (script[pos++] != '\n');
 				
+			// EndLinePos is a column of EndLine: when the section ends on the line it starts on, count it from the start of that line, not from the start column
+			int lineStart = pos;
 			for (int index = 1; index < lineInfo.LinePos; index++)
 				pos++;
 				
-			int endPos = pos;
+			int endPos = lineStart;
 			for (int index = lineInfo.Line; index < lineInfo.EndLine; index++)
 				while (script[endPos++] != '\n');
 				

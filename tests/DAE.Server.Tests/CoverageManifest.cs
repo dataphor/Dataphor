@@ -69,7 +69,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// text must contain. Never the full text, and never a part that changes between runs (program identifiers, the line
 	/// positions of program locators, timings).</item>
 	/// <item><c>timeoutSeconds</c> (optional): 1 to 600, default 120.</item>
-	/// <item><c>preamble</c> (optional): D4 run on the script's process before the script.</item>
+	/// <item><c>preamble</c> (optional): D4 run on the script's process before the script; a transaction it leaves open is
+	/// committed before the script starts.</item>
 	/// <item><c>register</c> (optional): libraries registered in the script's server before it, each one of
 	/// <see cref="CoverageScripts.Libraries"/>.</item>
 	/// <item><c>note</c> (optional): free text for the next reader.</item>

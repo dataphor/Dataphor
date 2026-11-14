@@ -18,6 +18,9 @@ namespace Alphora.Dataphor.DAE.Language
 		public string Token;
 		public int Line;
 		public int LinePos;
+		/// <summary> The line and position just after the last character of the token in the input, which for a string token is past its closing quote. </summary>
+		public int EndLine;
+		public int EndLinePos;
 		public Exception Error;
 
 		/// <summary> Returns the currently active TokenType as a symbol. </summary>
@@ -170,6 +173,8 @@ namespace Alphora.Dataphor.DAE.Language
 			}
 			token.Line = _tokenizer.Line;
 			token.LinePos = _tokenizer.LinePos;
+			token.EndLine = _tokenizer.EndLine;
+			token.EndLinePos = _tokenizer.EndLinePos;
 			return (token.Type != TokenType.EOF) && (token.Type != TokenType.Error);
 		}
 
@@ -288,12 +293,20 @@ namespace Alphora.Dataphor.DAE.Language
 		private int _linePos = 1;
 		private int _tokenLine = 1;
 		private int _tokenLinePos = 1;
+		private int _tokenEndLine = 1;
+		private int _tokenEndLinePos = 1;
 
 		/// <summary> The line number (one-based) of the beginning of the last read token. </summary>
 		public int Line { get { return _tokenLine; } }
 		
 		/// <summary> The offset position (one-based) of the beginning of the last read token. </summary>
 		public int LinePos { get { return _tokenLinePos; } }
+
+		/// <summary> The line number (one-based) just after the end of the last read token. </summary>
+		public int EndLine { get { return _tokenEndLine; } }
+
+		/// <summary> The offset position (one-based) just after the end of the last read token: one past its last character, not its value, which for a string omits the quotes. </summary>
+		public int EndLinePos { get { return _tokenEndLinePos; } }
 
 		private TokenType _tokenType;
 		public TokenType TokenType { get { return _tokenType; } }
@@ -684,6 +697,10 @@ namespace Alphora.Dataphor.DAE.Language
 			}
 			else
 				_tokenType = TokenType.EOF;
+
+			// _line and _linePos are now those of the first character after the token
+			_tokenEndLine = _line;
+			_tokenEndLinePos = _linePos;
 
 			return _tokenType;
 		}

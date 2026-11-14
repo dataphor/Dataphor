@@ -161,21 +161,17 @@ namespace Alphora.Dataphor.Windows
 			);
 		}
 
+		/// <summary> The folder that holds the host's own assemblies. </summary>
+		/// <remarks> On .NET Framework an ASP.NET host's assemblies were in a private bin path below the application base, found through AppDomain.RelativeSearchPath; on .NET 10 there is no such path and the application base is that folder. </remarks>
 		public static string GetBinDirectory()
 		{
-			if (AppDomain.CurrentDomain.RelativeSearchPath != null)
-			{
-				string[] paths = AppDomain.CurrentDomain.RelativeSearchPath.Split(';');
-				if (paths.Length > 0)
-					return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, paths[0]);
-			}
-			return AppDomain.CurrentDomain.BaseDirectory;
+			return AppContext.BaseDirectory;
 		}
 
 		public static string GetInstallationDirectory()
 		{
 			// Start with the base directory
-			string result = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+			string result = Path.GetDirectoryName(AppContext.BaseDirectory);
 			
 			// if this directory is named "bin", we are in a development environment, pop out one more to get the actual Dataphor directory
 			if (Path.GetFileName(result).ToLower() == "bin")

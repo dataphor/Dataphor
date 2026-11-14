@@ -1,0 +1,53 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Asynchronous Execution
+
+	ExecuteMultiple runs one statement on a number of new sessions at the same time and returns when every one of them
+	has finished; an error raised in those sessions is not returned to the caller. ExecuteAsync without a process ID runs
+	its script on a new process of the caller's session and returns at once; the process is stopped when the script ends.
+	DebugLibrary, TestProcessExecutes and Transaction.Isolation.Run cover the forms that take a process ID.
+*/
+
+create table AsyncMultiple0 { ID : Guid, key { ID } };
+create table AsyncMultiple1 { ID : Guid, key { ID } };
+create table AsyncMultiple2 { ID : Guid, key { ID } };
+
+// Each session inserts into a table of its own: the memory device does not support writes to one table from several
+// sessions at the same time. The sessions are connected one after another, so their IDs are consecutive.
+ExecuteMultiple('Execute("insert row { NewGuid() ID } into AsyncMultiple" + (SessionID() mod 3).ToString())', 3);
+
+if (Count(AsyncMultiple0) <> 1) or (Count(AsyncMultiple1) <> 1) or (Count(AsyncMultiple2) <> 1) then
+	raise Error('ExecuteMultiple returned before every session had finished, or a session did not run');
+
+ExecuteMultiple('raise Error("ExecuteMultiple session error")', 2);
+
+drop table AsyncMultiple2;
+drop table AsyncMultiple1;
+drop table AsyncMultiple0;
+
+create table AsyncExecuted { ID : Guid, key { ID } };
+
+begin
+	var LBeginCount := Count(Processes);
+	ExecuteAsync('insert row { NewGuid() ID } into AsyncExecuted;');
+	// Reads nothing the script changes until it has had time to finish: neither the memory device's tables nor the
+	// server's list of processes may be read while another thread changes them.
+	Sleep(1000);
+	var LWaited := 0;
+	while (Count(Processes) <> LBeginCount) and (LWaited < 10000) do
+	begin
+		Sleep(50);
+		LWaited := LWaited + 50;
+	end;
+	if Count(Processes) <> LBeginCount then
+		raise Error('ExecuteAsync did not stop the process it started');
+end;
+
+if Count(AsyncExecuted) <> 1 then
+	raise Error('ExecuteAsync did not run its script');
+
+drop table AsyncExecuted;

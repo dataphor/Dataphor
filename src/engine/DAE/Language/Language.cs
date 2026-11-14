@@ -132,9 +132,10 @@ namespace Alphora.Dataphor.DAE.Language
 		
 		public void SetEndPosition(Lexer lexer)
 		{
-			EndLine = lexer[0, false].Line;
+			// The token's extent in the input, not the length of its value: a string's value omits its quotes
 			LexerToken token = lexer[0, false];
-			EndLinePos = token.LinePos + (token.Token == null ? 0 : token.Token.Length);
+			EndLine = token.EndLine;
+			EndLinePos = token.EndLinePos;
 		}
 		
 		public void SetLineInfo(LineInfo lineInfo)

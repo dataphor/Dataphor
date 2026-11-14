@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -1400,19 +1401,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
+	/// <summary>
+	/// Starts the work of ExecuteAsync, ExecuteWithTimeout and ExecuteMultiple on a thread of its own: a script may sleep, or
+	/// sit paused in the debugger, for as long as it likes, which would starve the thread pool. The work calls the target
+	/// process's own Execute, so the engine's handling of an error raised there (a debugger attached with break-on-exception
+	/// pauses on it) applies as for any other call, and stopping the process ends it cooperatively.
+	/// </summary>
+	internal static class AsyncExecution
+	{
+		public static Task Start(Action execute)
+		{
+			return
+				Task.Factory.StartNew
+				(
+					() =>
+					{
+						try
+						{
+							execute();
+						}
+						catch
+						{
+							// NOTE: an error raised by the work is deliberately not returned to the caller of the D4 operator, as on
+							// .NET Framework, where these operators never read the result of the asynchronous call. Returning it would
+							// change D4 semantics and needs a ticket of its own.
+						}
+					},
+					System.Threading.CancellationToken.None,
+					TaskCreationOptions.LongRunning,
+					TaskScheduler.Default
+				);
+		}
+	}
+
 	// operator ExecuteAsync(const AScript : String);
 	// operator ExecuteAsync(const AScript : String; const AInParams : row);
 	// operator ExecuteAsync(const AProcessID : Integer, const AScript : String);
 	// operator ExecuteAsync(const AProcessID : Integer, const AScript : String; const AInParams : row);
 	public class SystemExecuteAsyncNode : InstructionNode
 	{
-		private delegate void ExecuteDelegate(DataParams AParams);
-		
-		private void ExecuteResults(IAsyncResult result)
+		private static void ExecuteResults(IServerScript script)
 		{
 			try
 			{
-				IServerScript script = (IServerScript)result.AsyncState;
 				IServerProcess process = script.Process;
 				if (process != null)
 				{
@@ -1439,7 +1470,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IServerScript localScript = process.PrepareScript(script);
 			((ServerScript)localScript).ShouldCleanupProcess = shouldCleanup;
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inParams, null);
-			new ExecuteDelegate(localScript.Execute).BeginInvoke(paramsValue, new AsyncCallback(ExecuteResults), localScript);
+			// NOTE: an error raised by the script is deliberately not returned (see AsyncExecution); the cleanup runs on the worker either way.
+			AsyncExecution.Start
+			(
+				() =>
+				{
+					try
+					{
+						localScript.Execute(paramsValue);
+					}
+					finally
+					{
+						ExecuteResults(localScript);
+					}
+				}
+			);
 		}
 		
 		public override object InternalExecute(Program program, object[] arguments)
@@ -1474,33 +1519,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator ExecuteWithTimeout(const AProcessID : Integer, const AScript : String, const ATimeout : Integer; const AInParams : row; var AOutParams : row);
 	public class SystemExecuteWithTimeoutNode : InstructionNode
 	{
-		private delegate void ExecuteDelegate(DataParams AParams);
-		
-		private bool _done;
-		private IServerScript _script;
-		
-		private void ExecuteResults(IAsyncResult result)
-		{
-			_done = true;
-		}
-		
 		private void ExecuteWithTimeout(IServerProcess process, Program program, string script, int timeout, IRow inParams, IRow outParams)
 		{
-			_done = false;
 			DataParams paramsValue = SystemEvaluateNode.ParamsFromRows(program, inParams, outParams);
-			_script = process.PrepareScript(script);
+			IServerScript localScript = process.PrepareScript(script);
 			try
 			{
-				new ExecuteDelegate(_script.Execute).BeginInvoke(paramsValue, new AsyncCallback(ExecuteResults), null);
+				// NOTE: a script that raises an error counts as finished, and the operator returns normally without the error (see AsyncExecution).
+				Task execution = AsyncExecution.Start(() => localScript.Execute(paramsValue));
+
+				// NOTE: waits the whole timeout even when the script finishes sooner, as on .NET Framework, and scripts such as
+				// Transaction.Isolation.Run are timed around that. Returning as soon as the script finishes is the obvious
+				// improvement, and a timing change.
 				System.Threading.Thread.Sleep(timeout);
-				if (!_done)	
+				if (!execution.IsCompleted)
 					throw new ServerException(ServerException.Codes.ExecutionTimeout);
 					
 				SystemEvaluateNode.UpdateRowFromParams(outParams, paramsValue);
 			}
 			finally
 			{
-				process.UnprepareScript(_script);
+				// NOTE: after a timeout the script is still running when it is unprepared here, as on .NET Framework. Unpreparing waits
+				// for the statement in progress (the process is held for one statement at a time); the script's later statements
+				// then run against a disposed script, and their errors are swallowed.
+				process.UnprepareScript(localScript);
 			}
 		}
 		
@@ -1517,6 +1559,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					arguments.Length >= 5 ? (IRow)arguments[4] : null
 				);
 			else
+				// NOTE: the process started here is never stopped, so it lasts until the session ends, as on .NET Framework. Stopping
+				// it would be the obvious fix, but after a timeout it would also end the script, which keeps running today.
 				ExecuteWithTimeout
 				(
 					((IServerSession)program.ServerProcess.ServerSession).StartProcess(new ProcessInfo(program.ServerProcess.ServerSession.SessionInfo)),
@@ -1534,23 +1578,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.ExecuteMultiple(const AStatement : String, const ANumber : Integer, const AUserID : String, const APassword : String);
 	public class SystemExecuteMultipleNode : InstructionNode
 	{
-		bool[] _doneList;
-		bool _done;
-		
-		private delegate void ExecuteDelegate(DataParams AParams);
-		
-		private void ExecuteResults(IAsyncResult result)
-		{
-			lock (_doneList)
-			{
-				_doneList[(int)result.AsyncState] = true;
-				for (int index = 0; index < _doneList.Length; index++)
-					if (!_doneList[index])
-						return;
-				_done = true;
-			}
-		}
-		
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			string statement = (string)arguments[0];
@@ -1561,24 +1588,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IServerSession[] sessions = new IServerSession[number];
 			IServerProcess[] processes = new IServerProcess[number];
 			IServerStatementPlan[] plans = new IServerStatementPlan[number];
-			ExecuteDelegate[] delegates = new ExecuteDelegate[number];
-			_doneList = new bool[number];
 			try
 			{
-				_done = false;
 				for (int index = 0; index < number; index++)
 				{
 					sessions[index] = server.Connect(new SessionInfo(userID, password));
 					processes[index] = sessions[index].StartProcess(new ProcessInfo(sessions[index].SessionInfo));
 					plans[index] = processes[index].PrepareStatement(statement, null);
-					delegates[index] = new ExecuteDelegate(plans[index].Execute);
-					_doneList[index] = false;
 				}
-				
+
+				Task[] executions = new Task[number];
 				for (int index = 0; index < number; index++)
-					delegates[index].BeginInvoke(null, new AsyncCallback(ExecuteResults), index);
-					
-				while (!_done);
+				{
+					IServerStatementPlan plan = plans[index];
+					executions[index] = AsyncExecution.Start(() => plan.Execute(null));
+				}
+
+				// NOTE: errors raised in the sessions are deliberately not returned (see AsyncExecution), so this never throws.
+				Task.WaitAll(executions);
 
 				return null;
 			}

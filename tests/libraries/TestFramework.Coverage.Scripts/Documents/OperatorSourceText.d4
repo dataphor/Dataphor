@@ -1,0 +1,84 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Operator Source Text
+
+	The compiler keeps the source text of each operator it compiles, copied out of the script by line and column, and
+	Script() returns that text. Execute compiles its argument as a script of its own, so the cases below that use it
+	control where the operator sits in its script: at the very end, or followed by more text on the same line. Each
+	operator is indented, so that its text does not start in the first column.
+*/
+
+// One line, at the end of its script
+Execute(Unicode({ 9 }) + 'create operator K2End() : Integer begin result := 1; end;');
+
+if K2End() <> 1 then
+	raise Error('One-line operator at the end of its script returned the wrong value');
+
+begin
+	var LScript := Script('K2End()');
+	if Pos('result := 1', LScript) < 0 then
+		raise Error('Script of a one-line operator at the end of its script lost its body: ' + LScript);
+end;
+
+// One line, followed by another statement on the same line
+Execute(Unicode({ 9 }) + 'create operator K2Mid() : Integer begin result := 2; end; create table K2After { ID : Integer, key { ID } };');
+
+begin
+	var LScript := Script('K2Mid()');
+	if Pos('K2After', LScript) >= 0 then
+		raise Error('Script of a one-line operator includes the statement that follows it: ' + LScript);
+	if Pos('result := 2', LScript) < 0 then
+		raise Error('Script of a one-line operator lost its body: ' + LScript);
+	drop operator K2Mid();
+	Execute(LScript);
+end;
+
+if K2Mid() <> 2 then
+	raise Error('One-line operator recreated from its script returned the wrong value');
+
+// One-line aggregate operator, followed by another statement on the same line; its last section ends in a string literal
+Execute(Unicode({ 9 }) + 'create aggregate operator K2Sum(AValue : Integer) : Integer initialization begin result := 0; end aggregation begin result := result + AValue; end finalization class "System.EmptyFinalizationNode"; create table K2AfterAggregate { ID : Integer, key { ID } };');
+
+begin
+	var LScript := Script('K2Sum(Integer)');
+	if Pos('K2AfterAggregate', LScript) >= 0 then
+		raise Error('Script of a one-line aggregate operator includes the statement that follows it: ' + LScript);
+	if Pos('class "System.EmptyFinalizationNode"', LScript) < 0 then
+		raise Error('Script of a one-line aggregate operator cut its last section short: ' + LScript);
+	drop operator K2Sum(Integer);
+	Execute(LScript);
+end;
+
+if K2Sum(ID from table { row { 1 ID }, row { 2 ID } }) <> 3 then
+	raise Error('One-line aggregate operator recreated from its script returned the wrong value');
+
+// Several lines, indented, followed by another statement on the last line
+	create operator K2Multi() : Integer
+	begin
+		result := 3;
+	end; create table K2AfterMulti { ID : Integer, key { ID } };
+
+begin
+	var LScript := Script('K2Multi()');
+	if Pos('K2AfterMulti', LScript) >= 0 then
+		raise Error('Script of a multi-line operator includes the statement that follows it: ' + LScript);
+	if Pos('result := 3', LScript) < 0 then
+		raise Error('Script of a multi-line operator lost its body: ' + LScript);
+	drop operator K2Multi();
+	Execute(LScript);
+end;
+
+if K2Multi() <> 3 then
+	raise Error('Multi-line operator recreated from its script returned the wrong value');
+
+drop table K2AfterMulti;
+drop operator K2Multi();
+drop table K2AfterAggregate;
+drop operator K2Sum(Integer);
+drop table K2After;
+drop operator K2Mid();
+drop operator K2End();

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Compile Include="FixedSizeCacheTest.cs" />
+    <Compile Include="PathUtilityTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\engine\Base\Base.csproj" />
+    <ProjectReference Include="..\..\src\engine\Base.Windows\Base.Windows.csproj" />
   </ItemGroup>
 
 </Project>

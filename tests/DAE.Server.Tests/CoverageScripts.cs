@@ -331,7 +331,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				}
 
 				if (entry.Preamble != null)
+				{
 					process.ExecuteScript(entry.Preamble);
+
+					// A preamble of SetUseImplicitTransactions(false) runs inside the implicit transaction of its own call, which the
+					// engine then leaves open (it ends implicit transactions only while they are on), so the script would run inside it
+					// and the objects it creates would be invisible to the other sessions and processes it starts.
+					while (process.InTransaction)
+						process.CommitTransaction();
+				}
 
 				process.ExecuteScript(String.Format("ExecuteScript('Coverage.Scripts', '{0}');", entry.Script));
 			}
