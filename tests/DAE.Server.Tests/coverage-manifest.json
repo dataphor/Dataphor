@@ -130,6 +130,7 @@
 { "script": "TransitionConstraintWithNamedRowVariables", "status": "pass" },
 { "script": "TransitionConstraints", "status": "pass" },
 { "script": "Types", "status": "pass" },
+{ "script": "Types.CompoundEquality", "status": "pass" },
 { "script": "Types.Coordinate", "status": "pass" },
 { "script": "Types.Length", "status": "pass" },
 { "script": "VersionNumber", "status": "pass" },
