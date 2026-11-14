@@ -40,7 +40,7 @@ An application is written as a **D4 library**: scripts that declare types, table
 | `AlphoraDataphorClient` | `Dataphor/Client` | `ClientServer` (WCF proxy) wrapped by `LocalServer` (client-side catalog cache, local plans/cursors/streams) |
 | `Alphora.Dataphor.DAE.NativeCLI` | `Dataphor/DAE.NativeCLI` | Simplified, JSON-friendly call interface and its WCF client |
 | `Alphora.Dataphor.DAE.Client` | `Dataphor/DAE.Client` | `DataSession`, `DataView`/`TableDataSet`, `DataSource`/`DataLink`, aliases (`AliasManager`) |
-| store assemblies | `Dataphor/DAE.SQLCE`, `DAE.SQLite`, `DAE.MSSQL`, `DAE.PGSQL` | `SQLStore` implementations |
+| store assemblies | `Dataphor/DAE.SQLite`, `DAE.MSSQL`, `DAE.PGSQL` | `SQLStore` implementations |
 | library assemblies | `Libraries/*/Source` | Devices, connections, Frontend server, System.* operators |
 
 The engine can run without the server layer (`Engine` alone has an in-memory catalog); everything a real deployment uses goes through `Server`.
@@ -112,4 +112,4 @@ The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronou
 
 ## Third-party code in the tree
 
-ICSharpCode.TextEditor (binary, `External/`), DockPanel Suite and Ascend controls (binaries in `Dataphor/Dataphoria/`), System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security, SQL CE 4.0 managed and native DLLs, ADODB interop, Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet), plus complete copies of WiX 3.5 and NUnit 2.5 under `Utilities/`.
+ICSharpCode.TextEditor (binary, `External/`), DockPanel Suite and Ascend controls (binaries in `Dataphor/Dataphoria/`), System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security, ADODB interop, Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet), plus a complete copy of WiX 3.5 under `Utilities/`.

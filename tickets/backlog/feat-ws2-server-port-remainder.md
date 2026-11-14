@@ -13,7 +13,7 @@ An umbrella for the WS2 work items left after Phase 1. When promoted to `plan/`,
 Scope and difficulty per the plan's WS2 table and design note "Assembly loading".
 
 - `port-library-loading` — resolver that probes registered library directories for managed and native dependencies, everything in the default load context, no unloading; test with a library whose assembly has a private NuGet dependency and a native dependency.
-- `port-concurrent-ddl-investigation` — K3 ("collection was modified" under concurrent DDL, site unknown): stress harness with stack capture until the site is found; fix or file.
+- `port-concurrent-ddl-investigation` — K3 ("collection was modified" under concurrent DDL, site unknown): stress harness with stack capture until the site is found; fix or file. Seen again on 2026-11-14 by the `repo-delete-dead-trees` review: 1 error in the spike's 8×15 concurrency step, with store writes already serialized (the plan's K3 row says it was seen only before serialization); the implementer's two runs on the same tree had 0. The spike prints only the message, not the stack.
 
 Moved elsewhere: Phase 1 owns `port-catalog-emitter-race` and `port-engine-runtime-fixes`; K4 was fixed in `build-server-project`; `port-abandoned-session-cleanup` and `port-server-on-net10` are in `feat-ws5-protocol-and-hosting`, because both need the CoreWCF host.
 
