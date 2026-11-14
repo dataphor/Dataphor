@@ -9,7 +9,6 @@
     "Dataphor/Frontend.Client.Silverlight/",
     "Dataphor/Frontend.Client.Silverlight.Web/",
     "Dataphor/SilverlightDAE/",
-    "Dataphor/Dataphoria/Dataphoria.Web.API/",
     "Libraries/TestFramework.Coverage.Devices/Documents/",
     "Tests/Frontend.Client.Silverlight.Tests/"
   ],

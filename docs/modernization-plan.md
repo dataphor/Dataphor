@@ -566,7 +566,7 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 What is known already, from a read-only look at one deployed application (kept generic on purpose):
 
 - It runs a 3.1 build from late 2019, so there is no version gap in Dataphor itself.
-- It needs the libraries `System`, `Frontend`, `Security`, `System.Internet`, `System.Platform`, `Connection`, `SQLDevice`, `MSSQLDevice` and `SimpleDevice`, and references four class names from the FHIR core library (see WS7).
+- It needs the libraries `System`, `Frontend`, `Security`, `System.Internet`, `System.Platform`, `Connection`, `SQLDevice`, `MSSQLDevice` and `SimpleDevice`, and references four class names thought to come from the FHIR core library, which no code in this repository registers (see Q7).
 - About thirty D4 libraries, 350 scripts and 200 form documents, three quarters of them customizations (`.dfdx`); script actions in about half the forms.
 - Custom assemblies exist only as binaries in the deployment; several wrap third-party .NET Framework UI and reporting suites, and one Dataphor reporting integration library is not in this repository. These are the hard part of the application's move.
 - The Windows client is deployed with ClickOnce; a WebForms portal sits beside it.
