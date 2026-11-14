@@ -594,8 +594,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		private LoadedLibraries _requiredByLibraries = new LoadedLibraries();		
 		public LoadedLibraries RequiredByLibraries { get { return _requiredByLibraries; } }
 		
-		private NameResolutionPath _nameResolutionPath;
-		
+		// Shared by every session whose current library this is: built under _nameResolutionPathLock and published only
+		// once complete, so a reader never sees (or adds to) a path another session is still building.
+		private volatile NameResolutionPath _nameResolutionPath;
+		private readonly object _nameResolutionPathLock = new object();
+
 		protected void GetNameResolutionPath(NameResolutionPath path, int level, Schema.LoadedLibrary library)
 		{
 			while (path.Count <= level)
@@ -610,31 +613,42 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public NameResolutionPath GetNameResolutionPath(LoadedLibrary systemLibrary)
 		{
-			if (_nameResolutionPath == null)
-			{
-				/* Depth first traversal, tracking level, add every unique required library at the level corresponding to the depth of the library in the dependency graph */
-				_nameResolutionPath = new NameResolutionPath();
-				GetNameResolutionPath(_nameResolutionPath, 0, this);
+			NameResolutionPath result = _nameResolutionPath;
+			if (result != null)
+				return result;
 
-				/* Remove all levels with no libraries */
-				for (int index = _nameResolutionPath.Count - 1; index >= 0; index--)
-					if (_nameResolutionPath[index].Count == 0)
-						_nameResolutionPath.RemoveAt(index);
-						
-				/* Ensure that system is in the path */
-				if (!_nameResolutionPath.Contains(systemLibrary))
+			lock (_nameResolutionPathLock)
+			{
+				result = _nameResolutionPath;
+				if (result == null)
 				{
-					_nameResolutionPath.Add(new Schema.LoadedLibraries());
-					_nameResolutionPath[_nameResolutionPath.Count - 1].Add(systemLibrary);
+					/* Depth first traversal, tracking level, add every unique required library at the level corresponding to the depth of the library in the dependency graph */
+					result = new NameResolutionPath();
+					GetNameResolutionPath(result, 0, this);
+
+					/* Remove all levels with no libraries */
+					for (int index = result.Count - 1; index >= 0; index--)
+						if (result[index].Count == 0)
+							result.RemoveAt(index);
+
+					/* Ensure that system is in the path */
+					if (!result.Contains(systemLibrary))
+					{
+						result.Add(new Schema.LoadedLibraries());
+						result[result.Count - 1].Add(systemLibrary);
+					}
+
+					_nameResolutionPath = result;
 				}
 			}
-								
-			return _nameResolutionPath;
+
+			return result;
 		}
-		
+
 		public void ClearNameResolutionPath()
 		{
-			_nameResolutionPath = null;
+			lock (_nameResolutionPathLock)
+				_nameResolutionPath = null;
 		}
 		
 		/// <summary>Returns true if ALibrary is the same as this library, or is required by this library.</summary>

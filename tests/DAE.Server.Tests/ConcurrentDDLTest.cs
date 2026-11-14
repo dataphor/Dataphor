@@ -154,6 +154,65 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(errors, Is.Empty);
 		}
 
+		/// <summary>
+		/// A library caches its name resolution path, and every session whose current library it is reads that cache. Two
+		/// sessions that found it empty at the same moment once built into the same object, and the second insert of a library
+		/// failed with "Duplicate object name" (seen in ConcurrentSessionsStoreTheirOwnScripts as the default device of General
+		/// failing to resolve).
+		/// </summary>
+		[Test]
+		public void NameResolutionPathAllowsConcurrentFirstUse()
+		{
+			const int ThreadCount = 8;
+			// A wide graph, so that building the path takes long enough for the threads to overlap.
+			Schema.LoadedLibrary system = new Schema.LoadedLibrary("System");
+			Schema.LoadedLibrary library = new Schema.LoadedLibrary("General");
+			for (int index = 0; index < 40; index++)
+			{
+				Schema.LoadedLibrary required = new Schema.LoadedLibrary("Required" + index);
+				required.RequiredLibraries.Add(system);
+				library.RequiredLibraries.Add(required);
+			}
+			int expectedCount = library.GetNameResolutionPath(system).Cast<Schema.LoadedLibraries>().Sum(level => level.Count);
+
+			ConcurrentBag<Exception> errors = new ConcurrentBag<Exception>();
+			ConcurrentBag<int> wrongCounts = new ConcurrentBag<int>();
+			DateTime stop = DateTime.UtcNow.AddMilliseconds(1000);
+			using Barrier start = new Barrier(ThreadCount, barrier => library.ClearNameResolutionPath());
+			List<Thread> threads = new List<Thread>();
+			for (int threadNumber = 0; threadNumber < ThreadCount; threadNumber++)
+			{
+				Thread thread =
+					new Thread(() =>
+					{
+						// Every thread runs the same number of rounds: each round's barrier clears the cache, then all of them use it.
+						for (int round = 0; round < 2000; round++)
+						{
+							start.SignalAndWait();
+							if (DateTime.UtcNow >= stop)
+								continue;
+							try
+							{
+								int count = library.GetNameResolutionPath(system).Cast<Schema.LoadedLibraries>().Sum(level => level.Count);
+								if (count != expectedCount)
+									wrongCounts.Add(count);
+							}
+							catch (Exception exception)
+							{
+								errors.Add(exception);
+							}
+						}
+					});
+				threads.Add(thread);
+				thread.Start();
+			}
+			foreach (Thread thread in threads)
+				thread.Join();
+
+			Assert.That(errors.Select(error => error.Message).Distinct(), Is.Empty);
+			Assert.That(wrongCounts.Distinct(), Is.Empty, String.Format("Paths whose library count was not {0}.", expectedCount));
+		}
+
 		// Returns the number of cycles that stopped on a store lock.
 		private static int RunConcurrently(TestServerInstance instance, ConcurrentBag<string> created, ConcurrentBag<string> failures)
 		{
