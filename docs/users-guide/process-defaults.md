@@ -46,11 +46,11 @@ The default value for this property is 32767.
 
 ## DefaultUseDTC
 
-The DefaultUseDTC property determines the default UseDTC setting for processes started on this session. This setting in turn determines whether or not the Microsoft Distributed Transaction Coordinator (DTC) will be used to coordinate distributed transactions on the process.
+The DefaultUseDTC property determines the default UseDTC setting for processes started on this session. UseDTC once selected the Microsoft Distributed Transaction Coordinator (DTC) to coordinate distributed transactions on the process; that is no longer supported.
 
-Because of the Dataphor Server’s open-ended storage architecture, transactions must be coordinated with each system involved in a given operation. This type of transaction is known as a *distributed transaction*. The Dataphor Server can function as a distributed transaction coordinator, or it can employ the services of the Microsoft Distributed Transaction Coordinator (MSDTC), based on the value of this setting.
+Because of the Dataphor Server’s open-ended storage architecture, transactions must be coordinated with each system involved in a given operation. This type of transaction is known as a *distributed transaction*. The Dataphor Server coordinates distributed transactions itself.
 
-The default value for this property is false. It is an error to attempt to use the Distributed Transaction Coordinator if the platform is not Microsoft Windows 2000 or later.
+The setting exists for compatibility and must be false, which is its default value. Setting it to true, by updating the Sessions system table or through the CLI, raises error 106119 (distributed transactions are not supported).
 
 For more information on transaction management in the Dataphor Server, refer to the [Transaction Management](../developers-guide/modeling-process-logic.md#transaction-management) section of the Modeling Process Logic chapter of the Logical Application Design part of the Dataphor Developer’s Guide.
 

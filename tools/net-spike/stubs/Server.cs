@@ -1,22 +1,4 @@
 // SPIKE stubs: just enough surface to let the compiler reach real usage sites.
-namespace System.Runtime.Remoting.Messaging { }
-namespace System.Runtime.Remoting.Services {
-	public interface ITrackingHandler { }
-	public static class TrackingServices { public static void RegisterTrackingHandler(ITrackingHandler h) {} public static void UnregisterTrackingHandler(ITrackingHandler h) {} }
-}
-namespace System.Runtime.Remoting {
-	public class ObjRef { } public static class RemotingServices { public static bool Disconnect(MarshalByRefObject o) { return true; } }
-}
-namespace System.Runtime.Remoting.Lifetime {
-	public enum LeaseState { Null, Initial, Active } public static class LifetimeServices { public static TimeSpan LeaseManagerPollTime { get; set; } public static TimeSpan LeaseTime { get; set; } } public interface ILease { LeaseState CurrentState { get; } TimeSpan InitialLeaseTime { get; set; } TimeSpan RenewOnCallTime { get; set; } TimeSpan SponsorshipTimeout { get; set; } void Register(ISponsor s); void Unregister(ISponsor s); }
-	public interface ISponsor { TimeSpan Renewal(ILease lease); }
-}
-namespace System.EnterpriseServices {
-	public class ServicedComponent : MarshalByRefObject { protected virtual void Dispose(bool disposing) {} }
-	public enum TransactionOption { Required, RequiresNew }
-	public class TransactionAttribute : Attribute { public TransactionAttribute(TransactionOption o) {} }
-	public static class ContextUtil { public static void SetComplete() {} public static void SetAbort() {} public static void DisableCommit() {} public static void EnableCommit() {} }
-}
 namespace System.ServiceModel.Web { }
 namespace System.ServiceModel {
 	public enum InstanceContextMode { Single, PerCall, PerSession }

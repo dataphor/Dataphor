@@ -48,12 +48,8 @@ using System.Threading;
 
 	DAE Server Transaction Management ->
 	
-		The DAE is capable of using the MS DTC through .NET Enterprise Services, if it is running on Windows 2000 or higher.  The UseDTC
-		flag on the ServerProcess controls whether to use the DTC to control distributed transactions.  If the DTC is used, the DAE will simulate
-		nested transactions by allowing multiple transactions to be started, however, once a rollback is initiated, all transactions will
-		rollback because the nested transactions are only simulated within the DTC transaction.  If the DTC is not used, the DAE functions as
-		an optimistic two phase commit coordinator.  Each device is responsible for ensuring the transactional integrity of its own data.
-		Note that if the DTC is not used, the SQL devices will function as manual transaction processors.  When running under a DAE
+		The DAE functions as an optimistic two phase commit coordinator.  Each device is responsible for ensuring the transactional
+		integrity of its own data.  The SQL devices function as manual transaction processors.  When running under a DAE
 		transaction, they will always vote to commit.
 	
 		All work in the DAE must be done within a transaction.

@@ -8,7 +8,6 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Lifetime;
 using System.Diagnostics;
 using Alphora.Dataphor.DAE.Contracts;
 
@@ -132,27 +131,6 @@ namespace Alphora.Dataphor.DAE.Server
         
 		#region Lifetime Management
 
-		/*
-			Strategy: The client has a ping thread that will execute every couple minutes, so long as
-			 the server's initial and renewal time is longer than the client's ping time, no sponsorhip
-			 mechanism is necessary; the client ensures that the server recognizes that it is responsive.
-		*/
-
-		public const int InitialLeaseTimeSeconds = 300;	// 5 Minutes... must be longer than the client side ping
-		public const int RenewOnCallTimeSeconds = 300;
-
-		public override object InitializeLifetimeService()
-		{
-			ILease lease = (ILease)base.InitializeLifetimeService();
-			if (lease.CurrentState == LeaseState.Initial)
-			{
-				lease.InitialLeaseTime = TimeSpan.FromSeconds(InitialLeaseTimeSeconds);
-				lease.SponsorshipTimeout = TimeSpan.Zero;
-				lease.RenewOnCallTime = TimeSpan.FromSeconds(RenewOnCallTimeSeconds);
-			}
-			return lease;
-		}
-		
 		private DateTime _lastActivityTime;
 		public DateTime LastActivityTime { get { return _lastActivityTime; } }
 

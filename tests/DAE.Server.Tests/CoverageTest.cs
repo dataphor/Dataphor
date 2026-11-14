@@ -82,6 +82,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecuteSystemCatalog() { ExecuteScript("Coverage.Scripts", "SystemCatalog"); } // TODO: TestNavigable fails after reset with a cursor on TableVars, also, the ObjectDependencies explosion runs, but I didn't wait for it to complete
 		[Test, Ignore("This coverage fails because the ScriptLibrary operator needs to be revisited")] public void ExecuteSerialization() { ExecuteScript("Coverage.Scripts", "Serialization"); }
 		[Test, Ignore("Doesn't work through ExecuteScript")] public void ExecuteApplicationTransactions() { ExecuteScript("Coverage.Scripts", "ApplicationTransactions"); }
+		[Test] public void ExecuteDistributedTransactions() { ExecuteScript("Coverage.Scripts", "DistributedTransactions"); }
 		[Test] public void ExecuteCreateTableFrom() { ExecuteScript("Coverage.Scripts", "CreateTableFrom"); }
 		[Test] public void ExecuteConversions() { ExecuteScript("Coverage.Scripts", "Conversions"); }
 		[Test] public void ExecuteVersionNumber() { ExecuteScript("Coverage.Scripts", "VersionNumber"); }

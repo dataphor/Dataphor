@@ -1,0 +1,54 @@
+/*
+	Distributed Transactions
+
+	Distributed (DTC) transactions are not supported. Setting UseDTC on a process or DefaultUseDTC on a
+	session to true raises error 106119 (DTCNotSupported) and leaves the setting false; setting false works.
+
+	The error reaches D4 wrapped: the plan node running the update re-raises the server's error as runtime
+	error 104229 with the statement location, so 106119 is the code of E.InnerError. Any other inner code
+	fails, in particular 106116 (TransactionActive), which the setter used to raise inside a transaction.
+*/
+
+// Process: UseDTC := true raises 106119 and leaves UseDTC false
+begin
+	var LCode : Integer := 0;
+	try
+		update System.Processes set { UseDTC := true } where ID = ProcessID();
+	except
+		on E : Error do
+			if not IsNil(E.InnerError) then
+				LCode := E.InnerError.Code;
+	end;
+	if LCode <> 106119 then
+		raise Error('Setting UseDTC to true did not raise error 106119 (inner error code ' + LCode.ToString() + ')');
+	if (System.Processes where ID = ProcessID())[].UseDTC then
+		raise Error('UseDTC is true after the rejected update');
+end;
+
+// Process: UseDTC := false succeeds (also a whole-row update of System.Processes, which failed with
+// "Column MaxCallDepth not found" while the catalog device read a column the table does not have)
+begin
+	update System.Processes set { UseDTC := false } where ID = ProcessID();
+	if (System.Processes where ID = ProcessID())[].UseDTC then
+		raise Error('UseDTC is not false');
+end;
+
+// Session: DefaultUseDTC := true raises 106119 and leaves DefaultUseDTC false; false succeeds
+begin
+	var LCode : Integer := 0;
+	try
+		update System.Sessions set { DefaultUseDTC := true } where ID = SessionID();
+	except
+		on E : Error do
+			if not IsNil(E.InnerError) then
+				LCode := E.InnerError.Code;
+	end;
+	if LCode <> 106119 then
+		raise Error('Setting DefaultUseDTC to true did not raise error 106119 (inner error code ' + LCode.ToString() + ')');
+	if (System.Sessions where ID = SessionID())[].DefaultUseDTC then
+		raise Error('DefaultUseDTC is true after the rejected update');
+
+	update System.Sessions set { DefaultUseDTC := false } where ID = SessionID();
+	if (System.Sessions where ID = SessionID())[].DefaultUseDTC then
+		raise Error('DefaultUseDTC is not false');
+end;

@@ -323,14 +323,13 @@ namespace Alphora.Dataphor.DAE
 		}
 
 		private bool _useDTC = false;
-		/// <summary> Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this process. </summary>
+		/// <summary> Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this process. Not supported; setting it to true raises an error. </summary>
 		/// <remarks>
-		/// The Microsoft Distributed Transaction Coordinator (DTC) may only be used when the Dataphor Server is running on Microsoft Windows 2000 or higher.  
-		/// This value may not be set while there are active transactions on the process (an exception will be thrown).  Refer to the Dataphor Developer's Guide 
-		/// for a complete discussion of distributed transaction support in the Dataphor Server.  The default value for this setting is false.
+		/// Kept for compatibility and must be false: a process whose UseDTC is true raises error 106119 when it begins a transaction.
+		/// The Dataphor Server coordinates distributed transactions itself.  The default value for this setting is false.
 		/// </remarks>
 		[System.ComponentModel.DefaultValue(false)]
-		[System.ComponentModel.Description("Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this process.")]
+		[System.ComponentModel.Description("Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this process. Not supported; setting it to true raises an error.")]
 		[DataMember]
 		public bool UseDTC
 		{

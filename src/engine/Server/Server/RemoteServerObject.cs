@@ -8,42 +8,17 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
 
 namespace Alphora.Dataphor.DAE.Server
 {
 	public class RemoteServerObject : MarshalByRefObject, IDisposableNotify
 	{
-		public const int LeaseManagerPollTimeSeconds = 60;
-
-		static RemoteServerObject()
-		{
-			LifetimeServices.LeaseManagerPollTime = TimeSpan.FromSeconds(LeaseManagerPollTimeSeconds);
-			LifetimeServices.LeaseTime = TimeSpan.Zero; // default lease to infinity (overridden for session)
-		}
-
 		protected virtual void Dispose(bool disposing)
 		{
 			#if USEFINALIZER
 			GC.SuppressFinalize(this);
 			#endif
-			try
-			{
-				DoDispose();
-			}
-			finally
-			{
-				ILease lease = (ILease)GetLifetimeService();
-				if (lease != null)
-				{
-					// Calling cancel on the lease will invoke disconnect on the lease and the server object
-					lease.GetType().GetMethod("Cancel", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(lease, null);
-				}
-				else
-					RemotingServices.Disconnect(this);
-			}
+			DoDispose();
 		}
 
 		#if USEFINALIZER
@@ -80,17 +55,7 @@ namespace Alphora.Dataphor.DAE.Server
         
 		protected virtual void Dispose(bool disposing)
 		{
-			try
-			{
-				DoDispose();
-			}
-			finally
-			{
-				ILease lease = (ILease)GetLifetimeService();
-				if (lease != null)
-					lease.GetType().GetMethod("Remove", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(lease, null);
-				RemotingServices.Disconnect(this);
-			}
+			DoDispose();
 		}
 		
 		public void Dispose()

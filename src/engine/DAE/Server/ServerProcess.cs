@@ -1109,7 +1109,6 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Transaction		
-		private IServerDTCTransaction _dTCTransaction;
 		private ServerTransactions _transactions = new ServerTransactions();
 		public ServerTransactions Transactions { get { return _transactions; } }
 
@@ -1169,11 +1168,14 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				lock (this)
 				{
+					// Checked before InTransaction: every D4 statement runs inside an implicit transaction,
+					// so a D4 update of System.Processes would otherwise always report TransactionActive.
+					if (value)
+						throw new ServerException(ServerException.Codes.DTCNotSupported);
+
 					if (InTransaction)
 						throw new ServerException(ServerException.Codes.TransactionActive);
 
-					if (value && (Environment.OSVersion.Version.Major < 5))
-						throw new ServerException(ServerException.Codes.DTCNotSupported);
 					_processInfo.UseDTC = value;
 				}
 			}
@@ -1260,15 +1262,13 @@ namespace Alphora.Dataphor.DAE.Server
     
 		protected internal void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
+			// UseDTC can arrive true through ProcessInfo or a session's DefaultUseDTC without passing the
+			// setter's check; raise before any transaction state changes so the process stays usable.
+			if (UseDTC)
+				throw new ServerException(ServerException.Codes.DTCNotSupported);
+
 			_transactions.BeginTransaction(this, isolationLevel);
 
-			if (UseDTC && (_dTCTransaction == null))
-			{
-				CloseDeviceSessions();
-				_dTCTransaction = (IServerDTCTransaction)Activator.CreateInstance(Type.GetType("Alphora.Dataphor.DAE.Server.ServerDTCTransaction,Alphora.Dataphor.DAE.Server"));
-				_dTCTransaction.IsolationLevel = isolationLevel;
-			}
-			
 			// Begin a transaction on all remote sessions
 			foreach (RemoteSession remoteSession in RemoteSessions)
 				remoteSession.BeginTransaction(isolationLevel);
@@ -1321,28 +1321,6 @@ namespace Alphora.Dataphor.DAE.Server
 			// Prepare Commit Phase
 			InternalPrepareTransaction();
 
-			try
-			{
-				// Commit the DTC if this is the Top Level Transaction
-				if (UseDTC && (_transactions.Count == 1))
-				{
-					try
-					{
-						_dTCTransaction.Commit();
-					}
-					finally
-					{
-						_dTCTransaction.Dispose();
-						_dTCTransaction = null;
-					}
-				}
-			}
-			catch
-			{
-				RollbackTransaction();
-				throw;
-			}
-			
 			// Commit
 			foreach (RemoteSession remoteSession in RemoteSessions)
 				remoteSession.CommitTransaction();
@@ -1373,19 +1351,6 @@ namespace Alphora.Dataphor.DAE.Server
 				_transactions.CurrentTransaction().InRollback = true;
 				try
 				{
-					if (UseDTC && (_transactions.Count == 1))
-					{
-						try
-						{
-							_dTCTransaction.Rollback();
-						}
-						finally
-						{
-							_dTCTransaction.Dispose();
-							_dTCTransaction = null;
-						}
-					}
-
 					Exception exception = null;
 					
 					foreach (RemoteSession remoteSession in RemoteSessions)

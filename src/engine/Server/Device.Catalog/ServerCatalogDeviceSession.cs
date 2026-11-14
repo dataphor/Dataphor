@@ -2522,7 +2522,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				session.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)newRow["DefaultIsolationLevel"], true);
 
 			if ((bool)oldRow["DefaultUseDTC"] ^ (bool)newRow["DefaultUseDTC"])
-				session.SessionInfo.DefaultUseDTC = (bool)newRow["DefaultUseDTC"];
+			{
+				// Rejected here rather than at every later process's first transaction.
+				if ((bool)newRow["DefaultUseDTC"])
+					throw new ServerException(ServerException.Codes.DTCNotSupported);
+				session.SessionInfo.DefaultUseDTC = false;
+			}
 
 			if ((bool)oldRow["DefaultUseImplicitTransactions"] ^ (bool)newRow["DefaultUseImplicitTransactions"])
 				session.SessionInfo.DefaultUseImplicitTransactions = (bool)newRow["DefaultUseImplicitTransactions"];
@@ -2570,8 +2575,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((int)oldRow["MaxStackDepth"] != (int)newRow["MaxStackDepth"])
 				process.MaxStackDepth = (int)newRow["MaxStackDepth"];
 
-			if ((int)oldRow["MaxCallDepth"] != (int)newRow["MaxCallDepth"])
-				process.MaxCallDepth = (int)newRow["MaxCallDepth"];
+			// System.Processes exposes the process's MaxCallDepth as the column MaxNestingLevel
+			if ((int)oldRow["MaxNestingLevel"] != (int)newRow["MaxNestingLevel"])
+				process.MaxCallDepth = (int)newRow["MaxNestingLevel"];
 		}
 
 		#endregion

@@ -8,11 +8,10 @@ namespace Alphora.Dataphor.DAE.Streams
 	using System;
 	using System.Collections;
 	using System.IO;
-	using System.Runtime.Remoting.Lifetime;
 	using System.Collections.Generic;
 	using Alphora.Dataphor.Windows;
 	
-	public class FileStreamHeader : Disposable, ISponsor
+	public class FileStreamHeader : Disposable
 	{
 		public FileStreamHeader(StreamID streamID, string fileName)
 		{
@@ -36,12 +35,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 
 			base.Dispose(disposing);
-		}
-		
-		// ISponsor
-		TimeSpan ISponsor.Renewal(ILease lease)
-		{
-			return TimeSpan.FromMinutes(5);
 		}
 		
 		public StreamID StreamID;

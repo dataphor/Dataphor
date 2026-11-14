@@ -122,7 +122,6 @@
     <Compile Include="Server\RemoteSessionImplementation.cs" />
     <Compile Include="Server\Server.cs" />
     <Compile Include="Server\ServerConfiguration.cs" />
-    <Compile Include="Server\ServerDTCTransaction.cs" />
     <Compile Include="Service\ConnectionManager.cs" />
     <Compile Include="Service\DataphorService.cs" />
     <Compile Include="Service\DataphorServiceHost.cs" />

@@ -12,13 +12,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.EnterpriseServices;
 using System.Threading;
 using System.Reflection;
 using System.Resources;
-using Remoting = System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
-using System.Runtime.Remoting.Services;
 using System.Security.Principal;
 
 using Alphora.Dataphor;
@@ -39,7 +35,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class RemoteServer : RemoteServerObject, IDisposable, IRemoteServer, ITrackingHandler
+	public class RemoteServer : RemoteServerObject, IDisposable, IRemoteServer
 	{
 		// constructor		
 		internal RemoteServer(Server server) : base()
@@ -47,7 +43,6 @@ namespace Alphora.Dataphor.DAE.Server
 			_server = server;
 			_connections = new RemoteServerConnections(false);
 			InitializeCatalogCaches();
-			TrackingServices.RegisterTrackingHandler(this);
 		}
         
 		public void Dispose()
@@ -91,7 +86,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				TrackingServices.UnregisterTrackingHandler(this);
 				base.Dispose(disposing);
 			}
 		}
@@ -232,58 +226,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				EndCall();
 			}
-		}
-
-		public void DisconnectedObject(object objectValue)
-		{
-			// Check if this object is a connection that needs to be disposed and dispose it if so
-			// This should not recurse because the RemotingServices.Disconnect call in the connection dispose
-			//  should not notify TrackingHandlers if the object has already been disconnected, and if the 
-			//  connection has already been disposed than it should no longer be associated with this server
-			// BTR 5/12/2005 -> Use a thread pool to perform this call so that there is no chance of blocking
-			// the lease manager.
-			RemoteServerConnection connection = objectValue as RemoteServerConnection;
-			if ((connection != null) && (connection.Server == this))
-				ThreadPool.QueueUserWorkItem(new WaitCallback(DisposeConnection), connection);
-		}
-		
-		private void DisposeConnection(Object stateInfo)
-		{
-			try
-			{
-				RemoteServerConnection connection = stateInfo as RemoteServerConnection;
-				
-				if (connection != null)
-				{
-					connection.CloseSessions();
-					
-					BeginCall();	// sync here; we may be coming in on a remoting thread
-					try
-					{
-						_connections.SafeDisown(connection);
-					}
-					finally
-					{
-						EndCall();
-					}
-					
-					connection.Dispose();
-				}
-			}
-			catch
-			{
-				// Don't allow exceptions to go unhandled... the framework will abort the application
-			}
-		}
-
-		public void UnmarshaledObject(object objectValue, System.Runtime.Remoting.ObjRef refValue)
-		{
-			// nothing (part of ITrackingHandler)
-		}
-
-		public void MarshaledObject(object objectValue, System.Runtime.Remoting.ObjRef refValue)
-		{
-			// nothing (part of ITrackingHandler)
 		}
 
 		public IRemoteServerConnection Establish(string connectionName, string hostName)

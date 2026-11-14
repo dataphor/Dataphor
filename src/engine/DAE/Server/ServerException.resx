@@ -175,7 +175,7 @@
     <value>Transaction cannot be started with active device sessions on this process.</value>
   </data>
   <data name="106119" xml:space="preserve">
-    <value>Microsoft Distributed Transaction Coordinator support is only available on Windows 2000 or later.</value>
+    <value>Distributed transactions (UseDTC) are not supported.</value>
   </data>
   <data name="106120" xml:space="preserve">
     <value>No remote session open for server link "{0}".</value>
