@@ -21,6 +21,11 @@ Found while cutting Phase 1 (static, not run): the default instances directory, 
 
 Q8 (is `UseServiceConfiguration` or secured transport used in production?) is answered "not known": proceed as if neither is used. `UseServiceConfiguration` is removed with a migration-notes entry telling the application move to check deployed configuration files for it and for `<system.serviceModel>` sections; `protocol-transport-security` still makes secured connections work on CoreWCF or documents why not. Nothing here needs `blocked/` for Q8.
 
+Found in `build-server-project` (static, not run):
+
+- The server now references Newtonsoft.Json 13 (3.1 used 9). Version 13 changed defaults, for example a default `MaxDepth` of 64 when reading JSON. Nothing that runs today exercises the server's JSON paths (`src/engine/Server/REST/RESTMarshal.cs` and the native interface's serialization), so `test-client-server` should include a deeply nested native-interface call or REST payload.
+- `protocol-corewcf-host` brings back the six WCF files left out of `src/engine/Server/Server.csproj` (each marked by an XML comment in the compile list) and replaces the interim migration-notes entry ("The server assembly … does not contain the WCF service and host classes …") with its final wording.
+
 ## Cutting rules
 
 - Re-read the WS5 section and the current code first; the tree will have changed since the plan was written.

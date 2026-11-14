@@ -18,6 +18,8 @@ Scope, prerequisites and difficulty per the plan's WS6 issue table and work-item
 
 Rules that matter here: `WFDEV006` stays a visible warning until a project's legacy controls are replaced, then becomes an error in that project; never suppress it. Form node base classes and interfaces stay source-compatible for custom extensions, and every change to them goes into `docs/migration-notes.md` (D16). Start in the same DPI mode as today.
 
+Found in `build-server-project` (verified by compiling it in the spike): `DAE.Client` does not compile against the converted server, because `src/client/DAE.Client/ServerConnection.cs` creates a `DataphorServiceHost` for a non-embedded in-process alias, and that class is out of the server's compile list until `protocol-corewcf-host`. The embedded in-process alias (which creates a `Server` directly) does not need it. Every project that compiles `DAE.Client` (the provider, the controls, the Frontend client, the Windows client and Dataphoria) stops at this one error, so `ui-client-layering` meets it first: it either waits for `protocol-corewcf-host` or keeps the non-embedded path out of compilation the same way.
+
 ## Cutting rules
 
 Re-read the WS6 section and the current code; one ticket per work item; *hard* items to `plan/`; `prereq:` only on slugs present on the board or in `tickets/.pruned-tickets.jsonl`; items waiting on an uncut umbrella are parked as a new backlog ticket `feat-ws6-windows-client-and-ide-later`.

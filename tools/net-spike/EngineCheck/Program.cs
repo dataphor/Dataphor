@@ -47,6 +47,18 @@ static class Program
 		["AlphoraDataphorCommon"] = new string[0],
 		["Alphora.Dataphor.DAE.NativeCLI"] = new string[0],
 		["AlphoraDataphorClient"] = new string[0],
+		["AlphoraDataphorServer"] = new string[0],
+		["Alphora.Dataphor.DAE.SQLite"] = new[] { "Alphora.Dataphor.DAE.SystemStoreCatalog.sql" },
+		["Alphora.Dataphor.DAE.Connection"] = new string[0],
+		// Empty root namespace: MSSQLDevice.cs loads both scripts by these bare names.
+		["AlphoraMSSQLDevice"] = new[] { "SystemCatalog.d4", "SystemCatalog.sql" },
+		["Alphora.Dataphor.DAE.Device.Simple"] = new[] { "Alphora.Dataphor.DAE.Device.Simple.SimpleDeviceException.resources" },
+		["Alphora.Dataphor.Frontend.Server"] = new[]
+		{
+			"Alphora.Dataphor.Frontend.Server.Device.FrontendDeviceException.resources",
+			"Alphora.Dataphor.Frontend.Server.ServerException.resources",
+			"Alphora.Dataphor.Frontend.Server.Strings.resources",
+		},
 		["Alphora.Dataphor.DAE.Device.SQL"] = new[] { "Alphora.Dataphor.DAE.Device.SQL.SQLException.resources" },
 		["System.Platform"] = new[] { "Alphora.Dataphor.Libraries.System.Platform.Strings.resources" },
 		["System.Internet"] = new string[0],
@@ -198,8 +210,9 @@ static class Program
 
 	// On its own the engine is the client-side catalog cache (IsEngine is true), which never registers the System
 	// library: Server does that (Engine.RegisterCatalog), and its scripts name classes that only the Server assembly
-	// registers. Until Server is converted, run the two scripts batch by batch, loaded by their resource names, and
-	// skip the batches that need those classes; any other error is a failure.
+	// registers. This check stays on the bare engine (the spike's smoke program starts the full Server), so run the two
+	// scripts batch by batch, loaded by their resource names, and skip the batches that need those classes; any other
+	// error is a failure.
 	static void RegisterSystemLibrary(IServerProcess process)
 	{
 		foreach (string resourceName in new[] { "Alphora.Dataphor.DAE.Schema.SystemCatalog.d4", "Alphora.Dataphor.DAE.Debug.Debug.d4" })

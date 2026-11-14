@@ -35,7 +35,7 @@ Out of scope:
 
 ## The fix
 
-Make the emitter local to each call: `return new D4TextEmitter().Emit(...)` in both `ScriptPersistentObject` and `ScriptCatalogObject`, and delete the static field. This is exactly the spike's patch (`tools/net-spike/run.py`, `PATCHES`, entry for `ServerCatalogDeviceSession.cs`: `return _emitter.Emit(` → `return new D4TextEmitter().Emit(`, applied to both methods). `D4TextEmitter`'s default constructor sets `EmitMode.ForCopy`, the same as the static instance had, so output is unchanged. The emitter is cheap to construct (a mode field; the builder is created in `Emit`). Do not add a lock instead: emission of a large operator holds it for the whole emit, and the per-call object is simpler. Do not use `[ThreadStatic]`: a per-call object is just as cheap and has no reentrancy question.
+Make the emitter local to each call: `return new D4TextEmitter().Emit(...)` in both `ScriptPersistentObject` and `ScriptCatalogObject`, and delete the static field. This is exactly the spike's patch (`tools/net-spike/run.py`, `PATCHES`, entry for `ServerCatalogDeviceSession.cs`: `return _emitter.Emit(` → `return new D4TextEmitter().Emit(`, applied to both methods; `build-server-project` removed that entry when it converted the server, so the spike no longer applies it). `D4TextEmitter`'s default constructor sets `EmitMode.ForCopy`, the same as the static instance had, so output is unchanged. The emitter is cheap to construct (a mode field; the builder is created in `Emit`). Do not add a lock instead: emission of a large operator holds it for the whole emit, and the per-call object is simpler. Do not use `[ThreadStatic]`: a per-call object is just as cheap and has no reentrancy question.
 
 ## Reproduction test (L2, concurrent sessions)
 

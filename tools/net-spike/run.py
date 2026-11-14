@@ -4,11 +4,10 @@
 
 Everything is generated under <work-dir> (keep it OUTSIDE the repository). No
 repository source is modified: each legacy csproj is wrapped by an SDK-style
-project that compiles the same source list by absolute path, a handful of
-source files are replaced by patched copies (see PATCHES), and API surface
-that no longer exists is stubbed (see stubs/) so the compiler reaches the real
-usage sites. Projects already converted to SDK style are built in place, into
-the repository's git-ignored artifacts/ folder, and wrappers reference them.
+project that compiles the same source list by absolute path, and source files
+can be replaced by patched copies (see PATCHES). Projects already converted to
+SDK style are built in place, into the repository's git-ignored artifacts/
+folder, and wrappers reference them.
 """
 import argparse
 import os
@@ -23,27 +22,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 # (repo-relative file, [(old, new), ...]) -- every patch here is a change the
-# real port must make. docs/modernization-plan.md, Appendix A explains each.
-PATCHES = [
-    # System.Data.SQLite API drift, and take the write lock up front (BEGIN IMMEDIATE) -- see plan, catalog store.
-    (r"src\engine\Store.SQLite\SQLiteConnection.cs",
-     [("localException.ErrorCode", "localException.ResultCode"),
-      ("base.InternalBeginTransaction(isolationLevel);",
-       "base.InternalBeginTransaction(SQLIsolationLevel.Serializable); /* SPIKE: BEGIN IMMEDIATE */")]),
-    # A static, non-thread-safe emitter shared by every catalog session: concurrent DDL garbles stored object scripts.
-    (r"src\engine\Server\Device.Catalog\ServerCatalogDeviceSession.cs",
-     [("return _emitter.Emit(", "return new D4TextEmitter().Emit(")]),
-    # System.Xml.IStreamProvider now collides with Dataphor's.
-    (r"libraries\Frontend\Source\Device\FrontendDevice.cs",
-     [("public class FrontendDeviceSession : MemoryDeviceSession, IStreamProvider",
-       "public class FrontendDeviceSession : MemoryDeviceSession, Alphora.Dataphor.DAE.Streams.IStreamProvider")]),
-    # The base Connection library registers the SQL CE connection class; SQL CE does not exist on modern .NET.
-    (r"libraries\Connection\Source\Register.cs",
-     [('classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "SQLCEConnection"), typeof(SQLCEConnection).AssemblyQualifiedName));',
-       "/* SPIKE: SQLCE removed */")]),
-]
-
-STUBS = {"Server": "Server.cs"}
+# real port must make; docs/modernization-plan.md, Appendix A records them. Empty since
+# build-server-project: the patches it carried either landed in the repository with the
+# conversion of the project that compiles the file, or were dropped for the ticket that owns
+# the change (K1 emitter: port-catalog-emitter-race; BEGIN IMMEDIATE: store-sqlite-concurrency).
+PATCHES = []
 
 # D4 library folder (repo-relative) -> (project, assembly file) needed to run the coverage
 # scripts. Each is copied to covlibs/<folder name>: the server finds libraries as immediate subfolders.
@@ -64,11 +47,8 @@ CONVERTED = {}
 
 
 def check_overrides():
-    """A converted project compiles the repository's files, so a patch or stub aimed at it would be ignored."""
+    """A converted project compiles the repository's files, so a patch aimed at it would be ignored."""
     for name, proj in CONVERTED.items():
-        if name in STUBS:
-            sys.exit(f"STUBS has an entry for {name}, which is SDK-style and builds in place without it: "
-                     "remove the API use from the repository and the entry from STUBS")
         files = compiled_files(proj)
         for rel, _ in PATCHES:
             if os.path.normcase(os.path.abspath(os.path.join(REPO, rel))) in files:
@@ -88,6 +68,14 @@ def apply_patches(out):
                 sys.exit(f"patch no longer applies (already fixed in the repo?): {rel}: {old[:60]}")
             text = text.replace(old, new)
         open(dst, "w", encoding="utf-8", newline="").write(text)
+
+
+def map_converted(template):
+    r"""Point each ..\<Name>\<Name>.csproj reference at the real project file when <Name> is converted."""
+    sep = chr(92)  # the templates use Windows separators
+    for name, path in CONVERTED.items():
+        template = template.replace(f"..{sep}{name}{sep}{name}.csproj", path)
+    return template
 
 
 def run(cmd, **kw):
@@ -141,14 +129,14 @@ def main():
     apply_patches(out)
     r = run([sys.executable, os.path.join(HERE, "convert.py"), REPO, out, a.tfm] + projects)
     print(r.stdout + r.stderr)
-    for project, stub in STUBS.items():
-        shutil.copy(os.path.join(HERE, "stubs", stub), os.path.join(out, project, "Stubs.cs"))
     for tool in ("Smoke", "Cov"):
         shutil.copytree(os.path.join(HERE, tool), os.path.join(out, tool), dirs_exist_ok=True)
         # Stored as .csproj.txt so IDEs and `dotnet build` at the repo root do not pick them up.
         os.remove(os.path.join(out, tool, tool + ".csproj.txt"))
         template = open(os.path.join(HERE, tool, tool + ".csproj.txt"), encoding="utf-8").read()
-        open(os.path.join(out, tool, tool + ".csproj"), "w", encoding="utf-8").write(template.replace("net8.0", a.tfm))
+        # Templates name projects as ..\<Name>\<Name>.csproj, the wrappers' layout; converted ones build in place.
+        template = map_converted(template).replace("net8.0", a.tfm)
+        open(os.path.join(out, tool, tool + ".csproj"), "w", encoding="utf-8").write(template)
 
     names = [os.path.splitext(os.path.basename(p))[0] for p in projects]
     if a.only:

@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="System.Data.OleDb" Version="10.0.15" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
+    <PackageVersion Include="System.Data.SQLite.Core" Version="1.0.119" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.15" />
     <PackageVersion Include="System.ServiceModel.Http" Version="10.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.1.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.1.0" />

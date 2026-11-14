@@ -38,9 +38,13 @@ def central_versions(repo):
         return {}
     return {e.get("Include"): e.get("Version") for e in ET.parse(props).getroot().iter("PackageVersion")}
 
+# NOTE: System.Data.OleDb 10 (its version comes from Directory.Packages.props) depends on ConfigurationManager of at
+# least its own version; a lower version here fails every wrapper's restore with NU1605. Keep the two in step.
+CONFIGURATION_MANAGER = ("System.Configuration.ConfigurationManager", "10.0.15")
+
 # Framework assembly reference -> NuGet package(s) on modern .NET
 PACKAGE_MAP = {
-    "system.configuration": [("System.Configuration.ConfigurationManager", "8.0.1")],
+    "system.configuration": [CONFIGURATION_MANAGER],
     "system.servicemodel": [
         ("System.ServiceModel.Primitives", "8.1.2"),
         ("System.ServiceModel.NetTcp", "8.1.2"),
@@ -59,7 +63,7 @@ PACKAGE_MAP = {
     "npgsql": [("Npgsql", "8.0.6")],
 }
 ALWAYS = [("System.Data.SqlClient", "4.9.0"), ("System.Data.Odbc", "8.0.1"), ("System.Data.OleDb", "8.0.1"),
-          ("System.Configuration.ConfigurationManager", "8.0.1")]
+          CONFIGURATION_MANAGER]
 
 
 def main():
@@ -163,7 +167,6 @@ def main():
             lines.append("    <UseWPF>true</UseWPF>")
         lines.append("  </PropertyGroup>")
         lines.append("  <ItemGroup>")
-        lines.append("    <Compile Include=\"Stubs.cs\" Condition=\"Exists('Stubs.cs')\" />")
         n_compile = 0
         for c in root.findall(".//m:Compile", NS):
             inc = c.get("Include")

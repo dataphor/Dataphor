@@ -8,6 +8,8 @@
     <Project Path="src/engine/Base/Base.csproj" />
     <Project Path="src/engine/Base.Windows/Base.Windows.csproj" />
     <Project Path="src/engine/DAE/DAE.csproj" />
+    <Project Path="src/engine/Server/Server.csproj" />
+    <Project Path="src/engine/Store.SQLite/DAE.SQLite.csproj" />
   </Folder>
   <Folder Name="/protocol/">
     <Project Path="src/protocol/Common/Common.csproj" />
@@ -15,6 +17,10 @@
     <Project Path="src/protocol/Client/Client.csproj" />
   </Folder>
   <Folder Name="/libraries/">
+    <Project Path="libraries/Connection/Source/DAE.Connection.csproj" />
+    <Project Path="libraries/Frontend/Source/Frontend.Server.csproj" />
+    <Project Path="libraries/MSSQLDevice/Source/DAEDeviceMSSQL.csproj" />
+    <Project Path="libraries/SimpleDevice/Source/DAE.Device.Simple.csproj" />
     <Project Path="libraries/SQLDevice/Source/DAE.Device.SQL.csproj" />
     <Project Path="libraries/System.Platform/Source/System.Platform.csproj" />
     <Project Path="libraries/System.Internet/Source/System.Internet.csproj" />

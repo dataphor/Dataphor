@@ -21,7 +21,6 @@ namespace Alphora.Dataphor.DAE.Connection
 			
 			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "MSSQLConnection"), typeof(MSSQLConnection).AssemblyQualifiedName));
 			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "OLEDBConnection"), typeof(OLEDBConnection).AssemblyQualifiedName));
-			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "SQLCEConnection"), typeof(SQLCEConnection).AssemblyQualifiedName));
 			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "ClearAllPoolsNode"), typeof(ClearAllPoolsNode).AssemblyQualifiedName));
 			
 			return classes;

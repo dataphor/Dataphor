@@ -9,9 +9,15 @@
     <ProjectReference Include="..\..\..\src\engine\Base\Base.csproj" />
     <ProjectReference Include="..\..\..\src\engine\Base.Windows\Base.Windows.csproj" />
     <ProjectReference Include="..\..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" />
     <ProjectReference Include="..\..\..\src\protocol\Common\Common.csproj" />
     <ProjectReference Include="..\..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" />
     <ProjectReference Include="..\..\..\src\protocol\Client\Client.csproj" />
+    <ProjectReference Include="..\..\..\libraries\Connection\Source\DAE.Connection.csproj" />
+    <ProjectReference Include="..\..\..\libraries\Frontend\Source\Frontend.Server.csproj" />
+    <ProjectReference Include="..\..\..\libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj" />
+    <ProjectReference Include="..\..\..\libraries\SimpleDevice\Source\DAE.Device.Simple.csproj" />
     <ProjectReference Include="..\..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" />
     <ProjectReference Include="..\..\..\libraries\System.Platform\Source\System.Platform.csproj" />
     <ProjectReference Include="..\..\..\libraries\System.Internet\Source\System.Internet.csproj" />
