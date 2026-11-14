@@ -454,6 +454,7 @@ docs/
   architecture.md, modernization-plan.md
   users-guide/              from Documentation/UsersGuide
   developers-guide/         from Documentation/DevelopersGuide
+  glossary.md, bibliography.md   from Documentation/GLOSSARY.adoc, BIBLIOGRAPHY.adoc
   reference/
     d4-grammar.md, tags.md, error-codes.md, compiler-defines.md
     system-library/         from Legacy DocBook operator, type and table references
