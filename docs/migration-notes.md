@@ -51,4 +51,5 @@ A running list of every change that an existing application, a deployment or a c
 
 | Status | Change | What to do |
 |---|---|---|
-| planned | The repository is reorganized (`src/`, `libraries/`, `samples/`, `tests/`, …) and builds with `dotnet build`; the old solutions and batch files are gone. | See `AGENTS.md` and the repository layout section of the plan |
+| done | The repository is reorganized: the product code is under `src/`, shipped D4 libraries under `libraries/`, sample libraries under `samples/`, test projects and test libraries under `tests/`, checked-in third-party binaries under `external/`, and the legacy solution is at the root as `Dataphor.sln`. The engine project file `Engine.csproj` is now `DAE.csproj`. Assembly names and namespaces are unchanged. | A custom extension whose project references Dataphor projects, or binaries in `Dataphor/bin`, by relative path must update those paths; see `AGENTS.md` and the repository layout section of the plan for where each folder went |
+| planned | The repository builds with `dotnet build`; the old solutions and batch files are gone. | See `AGENTS.md` |

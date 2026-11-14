@@ -4,9 +4,9 @@ VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		CompilerDefines.txt = CompilerDefines.txt
-		Error Message Prefix Codes.txt = Error Message Prefix Codes.txt
+		src\.editorconfig = src\.editorconfig
+		docs\reference\CompilerDefines.txt = docs\reference\CompilerDefines.txt
+		docs\reference\Error Message Prefix Codes.txt = docs\reference\Error Message Prefix Codes.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{EAE8CA62-D88A-4125-AEA9-E3F7D90F2558}"
@@ -18,87 +18,82 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0A17AB0B-3994-4D39-86B3-D34EDA7893F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0C5BCC79-C673-4FA3-96BA-89A30215A6F5}"
-	ProjectSection(SolutionItems) = preProject
-		..\Tests\Dataphor.Tests.nunit = ..\Tests\Dataphor.Tests.nunit
-	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base", "Base\Base.csproj", "{6EC1F378-510B-48D0-8D00-E36BEF214766}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base", "src\engine\Base\Base.csproj", "{6EC1F378-510B-48D0-8D00-E36BEF214766}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "DAE\Engine.csproj", "{8FA5FA37-DC03-4E24-900B-AA863CA9650F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "src\engine\DAE\DAE.csproj", "{8FA5FA37-DC03-4E24-900B-AA863CA9650F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client", "DAE.Client\DAE.Client.csproj", "{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client", "src\client\DAE.Client\DAE.Client.csproj", "{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client", "Frontend.Client\Frontend.Client.csproj", "{D054B27F-366C-4C4E-BA32-472BD14DC86D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client", "src\client\Frontend.Client\Frontend.Client.csproj", "{D054B27F-366C-4C4E-BA32-472BD14DC86D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Windows", "Frontend.Client.Windows\Frontend.Client.Windows.csproj", "{E7152100-FDC7-4BF1-957C-75051BF7D8E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Windows", "src\windows\Frontend.Client.Windows\Frontend.Client.Windows.csproj", "{E7152100-FDC7-4BF1-957C-75051BF7D8E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Controls", "DAE.Client.Controls\DAE.Client.Controls.csproj", "{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Controls", "src\windows\DAE.Client.Controls\DAE.Client.Controls.csproj", "{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Provider", "DAE.Client.Provider\DAE.Client.Provider.csproj", "{2A36CE97-A296-462A-8C3F-C194F1A2D758}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Provider", "src\client\DAE.Client.Provider\DAE.Client.Provider.csproj", "{2A36CE97-A296-462A-8C3F-C194F1A2D758}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria", "Dataphoria\Dataphoria.csproj", "{AF54209E-0687-4C10-9784-487B1006E0BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria", "src\windows\Dataphoria\Dataphoria.csproj", "{AF54209E-0687-4C10-9784-487B1006E0BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.SQLite", "DAE.SQLite\DAE.SQLite.csproj", "{6D005BA9-2F0B-4EAA-B82F-039AFA11C425}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.SQLite", "src\engine\Store.SQLite\DAE.SQLite.csproj", "{6D005BA9-2F0B-4EAA-B82F-039AFA11C425}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Service", "DAE.Service\DAE.Service.csproj", "{B7466206-120E-45BD-9FB0-F30A0C7971A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Service", "src\hosts\DAEService\DAE.Service.csproj", "{B7466206-120E-45BD-9FB0-F30A0C7971A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Service.ConfigurationUtility", "DAE.Service.ConfigurationUtility\DAE.Service.ConfigurationUtility.csproj", "{BC0647DF-60D0-4F62-81B8-AFAA673A3198}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Service.ConfigurationUtility", "src\windows\ConfigurationUtility\DAE.Service.ConfigurationUtility.csproj", "{BC0647DF-60D0-4F62-81B8-AFAA673A3198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Windows.Executable", "Frontend.Client.Windows.Executable\Frontend.Client.Windows.Executable.csproj", "{DB513978-ACD1-4962-AFFF-BEB881907C0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Windows.Executable", "src\windows\WindowsClient\Frontend.Client.Windows.Executable.csproj", "{DB513978-ACD1-4962-AFFF-BEB881907C0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D4Runner", "D4Runner\D4Runner.csproj", "{2F3DAD3F-69A0-43A0-91AA-C2DA75BBE435}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D4Runner", "src\hosts\D4Runner\D4Runner.csproj", "{2F3DAD3F-69A0-43A0-91AA-C2DA75BBE435}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection", "..\Libraries\Connection\Source\DAE.Connection.csproj", "{8CBB779F-64D4-455F-9E4F-70719408A7CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection", "libraries\Connection\Source\DAE.Connection.csproj", "{8CBB779F-64D4-455F-9E4F-70719408A7CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.ODBC", "..\Libraries\ODBCConnection\Source\DAE.Connection.ODBC.csproj", "{95D60D68-CDDB-45FD-BE63-92D84293D651}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.ODBC", "libraries\ODBCConnection\Source\DAE.Connection.ODBC.csproj", "{95D60D68-CDDB-45FD-BE63-92D84293D651}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.Simple", "..\Libraries\SimpleDevice\Source\DAE.Device.Simple.csproj", "{C6F705E1-DEDA-4106-A8E3-B3BFC8A91A3D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.Simple", "libraries\SimpleDevice\Source\DAE.Device.Simple.csproj", "{C6F705E1-DEDA-4106-A8E3-B3BFC8A91A3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.SQL", "..\Libraries\SQLDevice\Source\DAE.Device.SQL.csproj", "{13A5D21C-63C4-4C56-97F4-6D921C4BA373}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Device.SQL", "libraries\SQLDevice\Source\DAE.Device.SQL.csproj", "{13A5D21C-63C4-4C56-97F4-6D921C4BA373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Diagnostics", "..\Libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj", "{9D8EF75D-1434-412F-825F-3889877321F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Diagnostics", "tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj", "{9D8EF75D-1434-412F-825F-3889877321F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceMSSQL", "..\Libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj", "{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDeviceMSSQL", "libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj", "{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocSamples", "..\Libraries\Documentation\Source\DocSamples.csproj", "{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Server", "libraries\Frontend\Source\Frontend.Server.csproj", "{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Server", "..\Libraries\Frontend\Source\Frontend.Server.csproj", "{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping", "samples\Sample.Shipping\Source\Shipping.csproj", "{4F32414B-6689-4AEE-8D53-DA9C5A18AF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping", "..\Libraries\Sample.Shipping\Source\Shipping.csproj", "{4F32414B-6689-4AEE-8D53-DA9C5A18AF8F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Integration", "libraries\System.Integration\Source\System.Integration.csproj", "{575B3F5A-1A24-46C4-B3C0-504BD492CEB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Integration", "..\Libraries\System.Integration\Source\System.Integration.csproj", "{575B3F5A-1A24-46C4-B3C0-504BD492CEB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Internet", "libraries\System.Internet\Source\System.Internet.csproj", "{5E6A5ACD-9148-4403-BA1A-6FCEC3F88C4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Internet", "..\Libraries\System.Internet\Source\System.Internet.csproj", "{5E6A5ACD-9148-4403-BA1A-6FCEC3F88C4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Platform", "libraries\System.Platform\Source\System.Platform.csproj", "{6554AF3D-E9B6-4CF3-A60D-DCEFE10CDD56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Platform", "..\Libraries\System.Platform\Source\System.Platform.csproj", "{6554AF3D-E9B6-4CF3-A60D-DCEFE10CDD56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.NativeCLI", "src\protocol\NativeCLI\DAE.NativeCLI.csproj", "{7CCBA92D-BB78-49E3-8C11-4CC29B173296}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.NativeCLI", "DAE.NativeCLI\DAE.NativeCLI.csproj", "{7CCBA92D-BB78-49E3-8C11-4CC29B173296}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.MSSQL", "src\engine\Store.MSSQL\DAE.MSSQL.csproj", "{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.MSSQL", "DAE.MSSQL\DAE.MSSQL.csproj", "{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.PGSQL", "libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.PGSQL", "..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.PGSQL", "src\engine\Store.PGSQL\DAE.PGSQL.csproj", "{DC264B9D-33EE-4827-B1D7-739FC321BE6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.PGSQL", "DAE.PGSQL\DAE.PGSQL.csproj", "{DC264B9D-33EE-4827-B1D7-739FC321BE6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base.Windows", "src\engine\Base.Windows\Base.Windows.csproj", "{24D70A7F-F43A-45A3-8C54-EA31764841C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base.Windows", "Base.Windows\Base.Windows.csproj", "{24D70A7F-F43A-45A3-8C54-EA31764841C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.WPF", "src\windows\Frontend.Client.WPF\Frontend.Client.WPF.csproj", "{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.WPF", "Frontend.Client.WPF\Frontend.Client.WPF.csproj", "{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEServer", "src\hosts\DAEServer\DAEServer.csproj", "{82137023-B50A-4E59-A10E-1CF51CA68268}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEServer", "DAEServer\DAEServer.csproj", "{82137023-B50A-4E59-A10E-1CF51CA68268}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Server.Tests", "tests\DAE.Server.Tests\DAE.Server.Tests.csproj", "{C9B535D4-E7D3-4009-857C-82CC8CC2013C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Server.Tests", "..\Tests\DAE.Server.Tests\DAE.Server.Tests.csproj", "{C9B535D4-E7D3-4009-857C-82CC8CC2013C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Tests", "tests\DAE.Client.Tests\DAE.Client.Tests.csproj", "{A0EC803A-8DF9-45A2-B793-C4E76E892419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Tests", "..\Tests\DAE.Client.Tests\DAE.Client.Tests.csproj", "{A0EC803A-8DF9-45A2-B793-C4E76E892419}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "tests\Common.Tests\Common.Tests.csproj", "{F4661CAF-EE1D-46E1-9E80-F4CDA5E25EC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "..\Tests\Common.Tests\Common.Tests.csproj", "{F4661CAF-EE1D-46E1-9E80-F4CDA5E25EC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "src\engine\Server\Server.csproj", "{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\protocol\Common\Common.csproj", "{B488ECA3-95AD-4814-BC9B-69D062B7B333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{B488ECA3-95AD-4814-BC9B-69D062B7B333}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{F342F781-894F-4A6F-A59A-86080E1AC737}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "src\protocol\Client\Client.csproj", "{F342F781-894F-4A6F-A59A-86080E1AC737}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -333,18 +328,6 @@ Global
 		{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.BaseDebug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
 		{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F}.BaseDebug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -597,7 +580,6 @@ Global
 		{13A5D21C-63C4-4C56-97F4-6D921C4BA373} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{9D8EF75D-1434-412F-825F-3889877321F2} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
-		{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{9C07C001-8C2D-4E8E-B7AC-A45D3CFB789F} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{4F32414B-6689-4AEE-8D53-DA9C5A18AF8F} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}
 		{575B3F5A-1A24-46C4-B3C0-504BD492CEB3} = {0A17AB0B-3994-4D39-86B3-D34EDA7893F9}

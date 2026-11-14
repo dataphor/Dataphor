@@ -22,7 +22,6 @@ TestResults/
 
 # Package caches
 node_modules/
-Dataphor/packages
 packages/
 
 # Docs build

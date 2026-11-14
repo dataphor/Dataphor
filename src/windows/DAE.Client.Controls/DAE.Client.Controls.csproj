@@ -115,24 +115,24 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
+    <ProjectReference Include="..\..\engine\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Base\Base.csproj">
+    <ProjectReference Include="..\..\engine\Base\Base.csproj">
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
+    <ProjectReference Include="..\..\client\DAE.Client\DAE.Client.csproj">
       <Name>DAE.Client</Name>
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE\Engine.csproj">
+    <ProjectReference Include="..\..\engine\DAE\DAE.csproj">
       <Name>Engine</Name>
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>

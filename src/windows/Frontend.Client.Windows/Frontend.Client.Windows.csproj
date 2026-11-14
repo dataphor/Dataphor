@@ -96,7 +96,7 @@
   <ItemGroup>
     <Reference Include="ICSharpCode.TextEditor, Version=3.0.0.3800, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\External\ICSharpCode.TextEditor.dll</HintPath>
+      <HintPath>..\..\..\external\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -138,23 +138,23 @@
     <Reference Include="WindowsFormsIntegration">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
-    <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
+    <ProjectReference Include="..\..\engine\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Base\Base.csproj">
+    <ProjectReference Include="..\..\engine\Base\Base.csproj">
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Client\Client.csproj">
+    <ProjectReference Include="..\..\protocol\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
       <Name>Client %28Client\Client%29</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Common\Common.csproj">
+    <ProjectReference Include="..\..\protocol\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
       <Name>Common %28Common\Common%29</Name>
       <Private>False</Private>
@@ -165,18 +165,18 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
+    <ProjectReference Include="..\..\client\DAE.Client\DAE.Client.csproj">
       <Name>DAE.Client</Name>
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
+    <ProjectReference Include="..\..\protocol\NativeCLI\DAE.NativeCLI.csproj">
       <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
       <Name>DAE.NativeCLI</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE\Engine.csproj">
+    <ProjectReference Include="..\..\engine\DAE\DAE.csproj">
       <Name>Engine</Name>
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
@@ -187,13 +187,13 @@
       <Name>Frontend.Client.WPF</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
+    <ProjectReference Include="..\..\client\Frontend.Client\Frontend.Client.csproj">
       <Name>Frontend.Client</Name>
       <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Server\Server.csproj">
+    <ProjectReference Include="..\..\engine\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
       <Private>False</Private>

@@ -129,7 +129,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dataphor\Frontend.Client.WPF\Frontend.Client.WPF.csproj">
+    <ProjectReference Include="..\..\src\windows\Frontend.Client.WPF\Frontend.Client.WPF.csproj">
       <Project>{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A}</Project>
       <Name>Frontend.Client.WPF</Name>
     </ProjectReference>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\Dataphor\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\..\Dataphor\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" />
-  <Import Project="..\..\Dataphor\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\..\Dataphor\packages\NUnit.3.12.0\build\NUnit.props')" />
+  <Import Project="..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" />
+  <Import Project="..\..\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\..\packages\NUnit.3.12.0\build\NUnit.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -58,7 +58,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\..\Dataphor\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.mocks, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -84,23 +84,23 @@
     <Compile Include="Provider\ConnectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dataphor\Base.Windows\Base.Windows.csproj">
+    <ProjectReference Include="..\..\src\engine\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
+    <ProjectReference Include="..\..\src\engine\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE.Client.Controls\DAE.Client.Controls.csproj">
+    <ProjectReference Include="..\..\src\windows\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Project>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</Project>
       <Name>DAE.Client.Controls</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE.Client.Provider\DAE.Client.Provider.csproj">
+    <ProjectReference Include="..\..\src\client\DAE.Client.Provider\DAE.Client.Provider.csproj">
       <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>
       <Name>DAE.Client.Provider</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE.Client\DAE.Client.csproj">
+    <ProjectReference Include="..\..\src\client\DAE.Client\DAE.Client.csproj">
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Name>DAE.Client</Name>
     </ProjectReference>
@@ -108,11 +108,11 @@
       <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
       <Name>DAE.SQLCE</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE\Engine.csproj">
+    <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\Server\Server.csproj">
+    <ProjectReference Include="..\..\src\engine\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
     </ProjectReference>
@@ -184,8 +184,8 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\Dataphor\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\Dataphor\packages\NUnit.3.12.0\build\NUnit.props'))" />
-    <Error Condition="!Exists('..\..\Dataphor\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\Dataphor\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props'))" />
+    <Error Condition="!Exists('..\..\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit.3.12.0\build\NUnit.props'))" />
+    <Error Condition="!Exists('..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit3TestAdapter.3.15.1\build\net35\NUnit3TestAdapter.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

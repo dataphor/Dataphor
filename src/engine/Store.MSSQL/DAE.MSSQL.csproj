@@ -75,7 +75,7 @@
       <Name>Base</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DAE\Engine.csproj">
+    <ProjectReference Include="..\DAE\DAE.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
       <Private>False</Private>

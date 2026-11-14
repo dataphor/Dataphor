@@ -8,7 +8,7 @@ Needs Python 3 and the .NET 10 SDK (the repository's `global.json` pins it). The
 
 ```
 python tools/net-spike/run.py C:\temp\dataphor-spike --smoke --coverage
-python tools/net-spike/run.py C:\temp\dataphor-spike --only Base,Engine        # just compile some projects
+python tools/net-spike/run.py C:\temp\dataphor-spike --only Base,DAE           # just compile some projects
 python tools/net-spike/run.py C:\temp\dataphor-spike --tfm net8.0 --smoke      # other target framework
 ```
 
@@ -19,13 +19,13 @@ python tools/net-spike/run.py C:\temp\dataphor-spike --tfm net8.0 --smoke      #
 3. `stubs/` supplies empty stand-ins for API that no longer exists (.NET Remoting lifetime services, WCF `ServiceHost`, COM+ `ServicedComponent`) so the compiler gets past the missing types and reports what else is wrong. Code behind a stub compiles but **must not be taken to work**.
 4. `summ.py` reduces each build log to distinct errors by code.
 5. `--smoke` builds `Smoke/`: starts a `Server` in-process on a SQLite catalog store in a temp instance directory, evaluates D4 expressions, runs DDL, then hammers it from 8 threads with create/query/drop cycles.
-6. `--coverage` builds `Cov/`: copies the needed D4 libraries to a scratch directory together with their freshly built assemblies, registers `Frontend`, and runs every script that `Tests/DAE.Server.Tests/CoverageTest.cs` runs.
+6. `--coverage` builds `Cov/`: copies the needed D4 libraries to a scratch directory together with their freshly built assemblies, registers `Frontend`, and runs every script that `tests/DAE.Server.Tests/CoverageTest.cs` runs.
 
 ## Results at the time of writing (identical on .NET 8.0.17 and .NET 10.0.15 unless noted; Windows 11)
 
 | Step | Result |
 |---|---|
-| Base, Engine (164k lines), Common, NativeCLI, Client, DAE.Client, DAE.Client.Provider, SQLite store | compile with 0 errors (three one-line patches) |
+| Base, DAE (the engine, 164k lines), Common, NativeCLI, Client, DAE.Client, DAE.Client.Provider, SQLite store | compile with 0 errors (three one-line patches) |
 | Server | 0 errors **with stubs**; real work is 4 WCF host files, remoting leases in 3 files, one COM+ class |
 | SQLDevice, MSSQLDevice, SimpleDevice, Connection, Frontend server, System.Platform/Internet/Integration, Diagnostics | 0 errors (two one-line patches) |
 | DAE.Client.Controls, Frontend.Client, Frontend.Client.WPF, Frontend.Client.Windows | **0 errors on .NET 10** (with the checked-in third-party binaries referenced). On .NET 8 they stop at the removed WinForms types `ContextMenu`, `MenuItem`, `ToolBar`, `StatusBar`. **.NET 10 brought those types back only as shells that throw `PlatformNotSupportedException` when constructed** (obsolete, diagnostic `WFDEV006`) — compiling is not working |

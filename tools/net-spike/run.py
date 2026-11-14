@@ -22,44 +22,45 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 # real port must make. docs/modernization-plan.md, Appendix A explains each.
 PATCHES = [
     # WCF client package has no ChannelFactory(string endpointConfigurationName) ctor.
-    (r"Dataphor\Common\WCF\ServiceClient.cs",
+    (r"src\protocol\Common\WCF\ServiceClient.cs",
      [("new ChannelFactory<T>(endpointConfigurationName))", "null /* SPIKE: config-name ctor n/a */)")]),
-    (r"Dataphor\Client\Client\ClientServer.cs",
+    (r"src\protocol\Client\Client\ClientServer.cs",
      [("new ChannelFactory<IClientDataphorService>(_clientConfigurationName);", "null; /* SPIKE */")]),
     # Reflection on the private field Thread.m_Name; the field does not exist on modern .NET (DEBUG builds only).
-    (r"Dataphor\Base\ThreadUtility.cs",
+    (r"src\engine\Base\ThreadUtility.cs",
      [("GetThreadNameFieldInfo().SetValue(thread, name);",
        "var fi = GetThreadNameFieldInfo(); if (fi != null) fi.SetValue(thread, name); /* SPIKE */")]),
     # System.Data.SQLite API drift, and take the write lock up front (BEGIN IMMEDIATE) -- see plan, catalog store.
-    (r"Dataphor\DAE.SQLite\SQLiteConnection.cs",
+    (r"src\engine\Store.SQLite\SQLiteConnection.cs",
      [("localException.ErrorCode", "localException.ResultCode"),
       ("base.InternalBeginTransaction(isolationLevel);",
        "base.InternalBeginTransaction(SQLIsolationLevel.Serializable); /* SPIKE: BEGIN IMMEDIATE */")]),
     # A static, non-thread-safe emitter shared by every catalog session: concurrent DDL garbles stored object scripts.
-    (r"Dataphor\Server\Device.Catalog\ServerCatalogDeviceSession.cs",
+    (r"src\engine\Server\Device.Catalog\ServerCatalogDeviceSession.cs",
      [("return _emitter.Emit(", "return new D4TextEmitter().Emit(")]),
     # System.Xml.IStreamProvider now collides with Dataphor's.
-    (r"Libraries\Frontend\Source\Device\FrontendDevice.cs",
+    (r"libraries\Frontend\Source\Device\FrontendDevice.cs",
      [("public class FrontendDeviceSession : MemoryDeviceSession, IStreamProvider",
        "public class FrontendDeviceSession : MemoryDeviceSession, Alphora.Dataphor.DAE.Streams.IStreamProvider")]),
     # The base Connection library registers the SQL CE connection class; SQL CE does not exist on modern .NET.
-    (r"Libraries\Connection\Source\Register.cs",
+    (r"libraries\Connection\Source\Register.cs",
      [('classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "SQLCEConnection"), typeof(SQLCEConnection).AssemblyQualifiedName));',
        "/* SPIKE: SQLCE removed */")]),
 ]
 
-STUBS = {"Engine": "Engine.cs", "Server": "Server.cs"}
+STUBS = {"DAE": "Engine.cs", "Server": "Server.cs"}
 
-# D4 library -> (wrapper project, assembly file) needed to run the coverage scripts.
+# D4 library folder (repo-relative) -> (wrapper project, assembly file) needed to run the coverage
+# scripts. Each is copied to covlibs/<folder name>: the server finds libraries as immediate subfolders.
 COVERAGE_LIBS = {
-    "Frontend": ("Frontend.Server", "Alphora.Dataphor.Frontend.Server.dll"),
-    "SimpleDevice": ("DAE.Device.Simple", "Alphora.Dataphor.DAE.Device.Simple.dll"),
-    "TestFramework.Coverage.Base": ("DAE.Diagnostics", "Alphora.Dataphor.DAE.Diagnostics.dll"),
-    "SQLDevice": ("DAE.Device.SQL", "Alphora.Dataphor.DAE.Device.SQL.dll"),
-    "MSSQLDevice": ("DAEDeviceMSSQL", "AlphoraMSSQLDevice.dll"),
-    "Connection": ("DAE.Connection", "Alphora.Dataphor.DAE.Connection.dll"),
-    "TestFramework": None,
-    "TestFramework.Coverage.Scripts": None,
+    "libraries/Frontend": ("Frontend.Server", "Alphora.Dataphor.Frontend.Server.dll"),
+    "libraries/SimpleDevice": ("DAE.Device.Simple", "Alphora.Dataphor.DAE.Device.Simple.dll"),
+    "tests/libraries/TestFramework.Coverage.Base": ("DAE.Diagnostics", "Alphora.Dataphor.DAE.Diagnostics.dll"),
+    "libraries/SQLDevice": ("DAE.Device.SQL", "Alphora.Dataphor.DAE.Device.SQL.dll"),
+    "libraries/MSSQLDevice": ("DAEDeviceMSSQL", "AlphoraMSSQLDevice.dll"),
+    "libraries/Connection": ("DAE.Connection", "Alphora.Dataphor.DAE.Connection.dll"),
+    "tests/libraries/TestFramework": None,
+    "tests/libraries/TestFramework.Coverage.Scripts": None,
 }
 
 
@@ -102,7 +103,7 @@ def main():
     ap.add_argument("work")
     ap.add_argument("--tfm", default="net10.0")
     ap.add_argument("--smoke", action="store_true", help="boot the engine in-process and run D4, incl. concurrent DDL")
-    ap.add_argument("--coverage", action="store_true", help="run the D4 coverage scripts listed in Tests/DAE.Server.Tests/CoverageTest.cs")
+    ap.add_argument("--coverage", action="store_true", help="run the D4 coverage scripts listed in tests/DAE.Server.Tests/CoverageTest.cs")
     ap.add_argument("--only", help="comma list of wrapper projects to build (default: all in projects.txt)")
     a = ap.parse_args()
     work = os.path.abspath(a.work)
@@ -139,15 +140,16 @@ def main():
     if a.coverage:
         libs = os.path.join(rundir, "covlibs")
         shutil.rmtree(libs, ignore_errors=True)
-        for lib, built in COVERAGE_LIBS.items():
-            shutil.copytree(os.path.join(REPO, "Libraries", lib), os.path.join(libs, lib),
+        for folder, built in COVERAGE_LIBS.items():
+            lib = os.path.join(libs, os.path.basename(folder))
+            shutil.copytree(os.path.join(REPO, *folder.split("/")), lib,
                             ignore=shutil.ignore_patterns("Source", "*.dll", "bin", "obj"))
             if built:
                 build(out, built[0])
-                shutil.copy(find_dll(out, built[0], built[1]), os.path.join(libs, lib))
+                shutil.copy(find_dll(out, built[0], built[1]), lib)
         if build(out, "Cov"):
             subprocess.run(["dotnet", find_dll(out, "Cov", "Cov.dll"), rundir,
-                            os.path.join(REPO, "Tests", "DAE.Server.Tests", "CoverageTest.cs"), "base"])
+                            os.path.join(REPO, "tests", "DAE.Server.Tests", "CoverageTest.cs"), "base"])
 
 
 if __name__ == "__main__":

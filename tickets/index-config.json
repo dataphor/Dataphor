@@ -3,14 +3,9 @@
     "legacy/",
     "Utilities/",
     "Images/",
-    "External/",
+    "external/",
     "Documentation/",
-    "Dataphor/Frontend.Client.Browser/",
-    "Dataphor/Frontend.Client.Silverlight/",
-    "Dataphor/Frontend.Client.Silverlight.Web/",
-    "Dataphor/SilverlightDAE/",
-    "Libraries/TestFramework.Coverage.Devices/Documents/",
-    "Tests/Frontend.Client.Silverlight.Tests/"
+    "tests/libraries/TestFramework.Coverage.Devices/Documents/"
   ],
   "include": [],
   "extensions": [".d4", ".d4l", ".wxs", ".props", ".targets"]
