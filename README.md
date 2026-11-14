@@ -88,7 +88,7 @@ Where that stands, honestly:
 
 - The engine, compiler, server libraries and SQL Server device compile on .NET 10 essentially unchanged, and the engine boots and runs D4 there on a SQLite catalog. 62 of 76 existing D4 regression scripts pass untouched.
 - The Windows client and Dataphoria compile on .NET 10 but have not yet been run there; that is the largest remaining piece of work.
-- There is no one-command build yet. Until it lands, the old solution (`Dataphor.sln` at the repository root) needs Visual Studio and .NET Framework 4.5.2 targeting packs.
+- `dotnet build Dataphor.slnx` builds the engine, the client protocol libraries and four system libraries. Everything else is still being converted; until it is, the old solution (`Dataphor.sln` at the repository root) needs Visual Studio and .NET Framework 4.5.2 targeting packs.
 
 The full plan, with evidence and sequencing, is in [docs/modernization-plan.md](docs/modernization-plan.md). How the system fits together is in [docs/architecture.md](docs/architecture.md). Changes that existing applications will notice are tracked in [docs/migration-notes.md](docs/migration-notes.md).
 

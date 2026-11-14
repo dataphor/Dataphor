@@ -112,4 +112,4 @@ The server interfaces (`src/engine/Server/Contracts`) and the client's asynchron
 
 ## Third-party code in the tree
 
-ICSharpCode.TextEditor, DockPanel Suite (WeifenLuo) and Ascend controls, System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security (all binaries in `external/`), ADODB interop (used only by parked code under `legacy/`), Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet; used only by parked code under `legacy/`), plus a complete copy of WiX 3.5 under `Utilities/`.
+ICSharpCode.TextEditor, DockPanel Suite (WeifenLuo) and Ascend controls, System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security (all binaries in `external/`), ADODB interop (used only by parked code under `legacy/`), Newtonsoft.Json (NuGet; 13.0.4 in the converted projects, versions in `Directory.Packages.props`; the unconverted server project still references 9.0.1), Hl7.Fhir 0.9x (NuGet; used only by parked code under `legacy/`), plus a complete copy of WiX 3.5 under `Utilities/`.
