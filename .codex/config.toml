@@ -1,0 +1,3 @@
+[mcp_servers.code-search]
+command = "node"
+args = ["tess/scripts/mcp-search.mjs"]

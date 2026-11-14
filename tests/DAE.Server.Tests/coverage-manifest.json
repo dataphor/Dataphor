@@ -1,7 +1,7 @@
 [
 { "script": "AggregateOperators", "status": "pass" },
 { "script": "Aggregates", "status": "pass" },
-{ "script": "ApplicationTransactions", "status": "known-failure", "ticket": "engine-at-cursor-no-device", "error": "does not support retrieval for the table variable \"General.Test\"" },
+{ "script": "ApplicationTransactions", "status": "known-failure", "ticket": "engine-at-leave-rolls-back-open-work", "error": "Application Transaction read is not repeatable" },
 { "script": "AsyncExecution", "status": "pass", "preamble": "SetUseImplicitTransactions(false);", "note": "implicit transactions off, as the legacy test ran scripts: the tables it creates must be committed for the sessions and process it starts to see them" },
 { "script": "BooleanLibrary", "status": "pass" },
 { "script": "Browse", "status": "pass" },

@@ -1816,7 +1816,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void DeterminePotentialDevice(Plan plan)
+		protected override void InternalDeterminePotentialDevice(Plan plan)
 		{
 			if (_tableVar is Schema.BaseTableVar)
 				_potentialDevice = ((Schema.BaseTableVar)_tableVar).Device;
@@ -2512,7 +2512,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_tableVar.IsRemotable = false;
 		}
 		
-		public override void DeterminePotentialDevice(Plan plan)
+		protected override void InternalDeterminePotentialDevice(Plan plan)
 		{
 			NoDevice = true;
 		}

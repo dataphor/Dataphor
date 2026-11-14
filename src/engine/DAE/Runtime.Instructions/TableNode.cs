@@ -671,14 +671,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void DeterminePotentialDevice(Plan plan)
+		// Sealed so that a subclass cannot skip the populate node: without a potential device it is
+		// flagged NoDevice and fails with "does not support retrieval" when a joined application transaction runs it.
+		public sealed override void DeterminePotentialDevice(Plan plan)
 		{
-			base.DeterminePotentialDevice(plan);
+			InternalDeterminePotentialDevice(plan);
 
 			if (_populateNode != null)
 			{
 				_populateNode.DeterminePotentialDevice(plan);
 			}
+		}
+
+		protected virtual void InternalDeterminePotentialDevice(Plan plan)
+		{
+			base.DeterminePotentialDevice(plan);
 		}
 		
 		public override void DetermineAccessPath(Plan plan)
