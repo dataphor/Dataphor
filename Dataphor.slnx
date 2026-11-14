@@ -28,6 +28,7 @@
     <Project Path="libraries/System.Integration/Source/System.Integration.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Common.Tests/Common.Tests.csproj" />
     <Project Path="tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj" />
   </Folder>
   <Folder Name="/tools/">

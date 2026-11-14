@@ -15,6 +15,7 @@ using System.Security.Permissions;
 using System.Threading;
 
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 using Alphora.Dataphor;
 
@@ -37,18 +38,18 @@ namespace Alphora.Dataphor.Common.Tests
 			for (int i = 1; i <= FTestCache.Size; i++)
 			{
 				FTestCache.Add(GetKey(i), GetValue(i));
-				Assert.AreEqual(i, FTestCache.Count);
-				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
-				Assert.True(FTestCache.ContainsKey(GetKey(i)));
+				ClassicAssert.AreEqual(i, FTestCache.Count);
+				ClassicAssert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
+				ClassicAssert.True(FTestCache.ContainsKey(GetKey(i)));
 
-				Assert.True(ValidateCutoff());
+				ClassicAssert.True(ValidateCutoff());
 			}
-			Assert.AreEqual(5, FTestCache.Count);
+			ClassicAssert.AreEqual(5, FTestCache.Count);
 
 			FTestCache.Add(GetKey(FTestCache.Size + 1), GetValue(FTestCache.Size + 1));
-			Assert.AreEqual(LCacheSize, FTestCache.Count);
-			Assert.True(ValidateCutoff());
-			Assert.True(ValidateList());
+			ClassicAssert.AreEqual(LCacheSize, FTestCache.Count);
+			ClassicAssert.True(ValidateCutoff());
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
@@ -59,13 +60,13 @@ namespace Alphora.Dataphor.Common.Tests
 			for (int i = 1; i <= FTestCache.Size; i++)
 			{
 				FTestCache.Add(GetKey(i), GetValue(i));
-				Assert.AreEqual(i, FTestCache.Count);
+				ClassicAssert.AreEqual(i, FTestCache.Count);
 			}
-			Assert.AreEqual(LCacheSize, FTestCache.Count);
+			ClassicAssert.AreEqual(LCacheSize, FTestCache.Count);
 
 			FTestCache.Clear();
-			Assert.AreEqual(0, FTestCache.Count);
-			Assert.True(ValidateList());
+			ClassicAssert.AreEqual(0, FTestCache.Count);
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
@@ -75,16 +76,16 @@ namespace Alphora.Dataphor.Common.Tests
 			int LTestCacheItem = 3;
 			FTestCache = new FixedSizeCache<string, string>(LCacheSize);
 
-			Assert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
+			ClassicAssert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
 
 			for (int i = 1; i <= FTestCache.Size; i++)
 				FTestCache.Add(GetKey(i), GetValue(i));
 
-			Assert.True(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
+			ClassicAssert.True(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
 
 			FTestCache.Clear();
-			Assert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
-			Assert.True(ValidateList());
+			ClassicAssert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
@@ -96,16 +97,16 @@ namespace Alphora.Dataphor.Common.Tests
 			for (int i = 1; i <= FTestCache.Size; i++)
 			{
 				LReference = FTestCache.Reference(GetKey(i), GetValue(i));
-				Assert.AreEqual(i, FTestCache.Count);
-				Assert.True(FTestCache.ContainsKey(GetKey(i)));
-				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
-				Assert.IsNull(LReference);
+				ClassicAssert.AreEqual(i, FTestCache.Count);
+				ClassicAssert.True(FTestCache.ContainsKey(GetKey(i)));
+				ClassicAssert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
+				ClassicAssert.IsNull(LReference);
 			}
-			Assert.AreEqual(LCacheSize, FTestCache.Count);
+			ClassicAssert.AreEqual(LCacheSize, FTestCache.Count);
 
 			LReference = FTestCache.Reference(GetKey(1), GetValue(1));
 
-			Assert.IsNull(LReference);
+			ClassicAssert.IsNull(LReference);
 
 			LReference = null;
 			LCacheSize = 5;
@@ -113,17 +114,17 @@ namespace Alphora.Dataphor.Common.Tests
 			for (int i = 1; i <= FTestCache.Size; i++)
 			{
 				LReference = FTestCache.Reference(GetKey(i), GetValue(i));
-				Assert.AreEqual(i, FTestCache.Count);
-				Assert.True(FTestCache.ContainsKey(GetKey(i)));
-				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
-				Assert.IsNull(LReference);
+				ClassicAssert.AreEqual(i, FTestCache.Count);
+				ClassicAssert.True(FTestCache.ContainsKey(GetKey(i)));
+				ClassicAssert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
+				ClassicAssert.IsNull(LReference);
 			}
-			Assert.AreEqual(LCacheSize, FTestCache.Count);
+			ClassicAssert.AreEqual(LCacheSize, FTestCache.Count);
 
 			LReference = FTestCache.Reference(GetKey(FTestCache.Size + 1), GetValue(FTestCache.Size + 1));
-			Assert.AreEqual(LCacheSize, FTestCache.Count);
-			Assert.IsNotNull(LReference);
-			Assert.True(ValidateList());
+			ClassicAssert.AreEqual(LCacheSize, FTestCache.Count);
+			ClassicAssert.IsNotNull(LReference);
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
@@ -136,27 +137,27 @@ namespace Alphora.Dataphor.Common.Tests
 
 			int LTestKey = 3;
 			FTestCache.Remove(GetKey(LTestKey));
-			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
-			Assert.AreEqual(LCacheSize - 1, FTestCache.Count);
+			ClassicAssert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
+			ClassicAssert.AreEqual(LCacheSize - 1, FTestCache.Count);
 
 			LTestKey = 1;
 			FTestCache.Remove(GetKey(LTestKey));
-			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
-			Assert.AreEqual(LCacheSize - 2, FTestCache.Count);
+			ClassicAssert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
+			ClassicAssert.AreEqual(LCacheSize - 2, FTestCache.Count);
 
 			LTestKey = 5;
 			FTestCache.Remove(GetKey(LTestKey));
-			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
-			Assert.AreEqual(LCacheSize - 3, FTestCache.Count);
-			Assert.True(ValidateList());
+			ClassicAssert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
+			ClassicAssert.AreEqual(LCacheSize - 3, FTestCache.Count);
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
 		public void Size()
 		{
 			FTestCache = new FixedSizeCache<string, string>(5);
-			Assert.AreEqual(5, FTestCache.Size);
-			Assert.True(ValidateList());
+			ClassicAssert.AreEqual(5, FTestCache.Size);
+			ClassicAssert.True(ValidateList());
 		}
 
 		[Test]
@@ -171,19 +172,19 @@ namespace Alphora.Dataphor.Common.Tests
 			foreach (string LValue in (IEnumerable<string>)FTestCache)
 			{
 				LValueIndex++;
-				Assert.AreEqual(GetValue(LValueIndex), LValue);
+				ClassicAssert.AreEqual(GetValue(LValueIndex), LValue);
 			}
 
-			Assert.AreEqual(FTestCache.Size, LValueIndex);
+			ClassicAssert.AreEqual(FTestCache.Size, LValueIndex);
 
 			LValueIndex = 0;
 			foreach (FixedSizeCache<string, string>.Entry LEntry in (IEnumerable)FTestCache)
 			{
 				LValueIndex++;
-				Assert.AreEqual(GetValue(LValueIndex), LEntry.Value);
+				ClassicAssert.AreEqual(GetValue(LValueIndex), LEntry.Value);
 			}
 
-			Assert.AreEqual(FTestCache.Size, LValueIndex);
+			ClassicAssert.AreEqual(FTestCache.Size, LValueIndex);
 		}
 
 		[Test]
@@ -192,24 +193,21 @@ namespace Alphora.Dataphor.Common.Tests
 			int LCacheSize = 5;
 			FTestCache = new FixedSizeCache<string, string>(LCacheSize);
 
-			Assert.IsNull(FTestCache[GetKey(0)]);
+			ClassicAssert.IsNull(FTestCache[GetKey(0)]);
 
 			for (int i = 1; i <= FTestCache.Size; i++)
 				FTestCache.Add(GetKey(i), GetValue(i));
 
 			for (int j = 1; j <= FTestCache.Size; j++)
-				Assert.AreEqual(GetValue(j), FTestCache[GetKey(j)]);
+				ClassicAssert.AreEqual(GetValue(j), FTestCache[GetKey(j)]);
 
-			Assert.IsNull(FTestCache[GetKey(FTestCache.Size + 1)]);
+			ClassicAssert.IsNull(FTestCache[GetKey(FTestCache.Size + 1)]);
 		}
 
 		[Test]
 		public void InternalAdd()
 		{
-			try
 			{
-				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();
 
 				int LPreCutoffCount;
 				FixedSizeCache<string, string>.Entry LHead;
@@ -221,11 +219,11 @@ namespace Alphora.Dataphor.Common.Tests
 				LHead = GetHead();
 				LCutoff = GetCutoff();
 				LTail = GetTail();
-				Assert.AreEqual(0, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
-				Assert.IsNull(LHead);
-				Assert.IsNull(LCutoff);
-				Assert.IsNull(LTail);
+				ClassicAssert.AreEqual(0, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.IsNull(LHead);
+				ClassicAssert.IsNull(LCutoff);
+				ClassicAssert.IsNull(LTail);
 
 				IncrementTestEntry();
 
@@ -235,17 +233,17 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry1 = LHead;
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LKey, LHead.Key);
-				Assert.AreEqual(LKey, LCutoff.Key);
-				Assert.AreEqual(LKey, LTail.Key);
+				ClassicAssert.AreEqual(LKey, LHead.Key);
+				ClassicAssert.AreEqual(LKey, LCutoff.Key);
+				ClassicAssert.AreEqual(LKey, LTail.Key);
 
-				Assert.IsNull(GetPrior(LHead));
-				Assert.IsNull(GetNext(LHead));
+				ClassicAssert.IsNull(GetPrior(LHead));
+				ClassicAssert.IsNull(GetNext(LHead));
 
-				Assert.False(GetPreCutoff(LHead));
+				ClassicAssert.False(GetPreCutoff(LHead));
 
 				IncrementTestEntry();
 
@@ -255,19 +253,19 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry2 = GetEntry(2);
 
-				Assert.AreEqual(2, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(2, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry2);
-				Assert.AreEqual(LCutoff, LEntry2);
-				Assert.IsNull(GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LHead, LEntry2);
+				ClassicAssert.AreEqual(LCutoff, LEntry2);
+				ClassicAssert.IsNull(GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
 
-				Assert.AreEqual(LTail, LEntry1);
-				Assert.AreEqual(LEntry2, GetNext(LEntry1));
-				Assert.IsNull(GetPrior(LEntry1));
-				Assert.False(GetPreCutoff(LEntry1));
+				ClassicAssert.AreEqual(LTail, LEntry1);
+				ClassicAssert.AreEqual(LEntry2, GetNext(LEntry1));
+				ClassicAssert.IsNull(GetPrior(LEntry1));
+				ClassicAssert.False(GetPreCutoff(LEntry1));
 
 				IncrementTestEntry();
 
@@ -277,23 +275,23 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry3 = GetEntry(3);
 
-				Assert.AreEqual(3, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(3, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry3);
-				Assert.AreEqual(LCutoff, LEntry3);
-				Assert.IsNull(GetNext(LEntry3));
-				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
-				Assert.False(GetPreCutoff(LEntry3));
+				ClassicAssert.AreEqual(LHead, LEntry3);
+				ClassicAssert.AreEqual(LCutoff, LEntry3);
+				ClassicAssert.IsNull(GetNext(LEntry3));
+				ClassicAssert.AreEqual(LEntry2, GetPrior(LEntry3));
+				ClassicAssert.False(GetPreCutoff(LEntry3));
 
-				Assert.AreEqual(LEntry3, GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LEntry3, GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
 
-				Assert.AreEqual(LTail, LEntry1);
-				Assert.AreEqual(LEntry2, GetNext(LEntry1));
-				Assert.IsNull(GetPrior(LEntry1));
-				Assert.False(GetPreCutoff(LEntry1));
+				ClassicAssert.AreEqual(LTail, LEntry1);
+				ClassicAssert.AreEqual(LEntry2, GetNext(LEntry1));
+				ClassicAssert.IsNull(GetPrior(LEntry1));
+				ClassicAssert.False(GetPreCutoff(LEntry1));
 
 				IncrementTestEntry();
 
@@ -303,27 +301,27 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry4 = GetEntry(4);
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry4);
-				Assert.IsNull(GetNext(LEntry4));
-				Assert.AreEqual(LEntry3, GetPrior(LEntry4));
-				Assert.True(GetPreCutoff(LEntry4));
+				ClassicAssert.AreEqual(LHead, LEntry4);
+				ClassicAssert.IsNull(GetNext(LEntry4));
+				ClassicAssert.AreEqual(LEntry3, GetPrior(LEntry4));
+				ClassicAssert.True(GetPreCutoff(LEntry4));
 
-				Assert.AreEqual(LCutoff, LEntry3);
-				Assert.AreEqual(LEntry4, GetNext(LEntry3));
-				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
-				Assert.False(GetPreCutoff(LEntry3));
+				ClassicAssert.AreEqual(LCutoff, LEntry3);
+				ClassicAssert.AreEqual(LEntry4, GetNext(LEntry3));
+				ClassicAssert.AreEqual(LEntry2, GetPrior(LEntry3));
+				ClassicAssert.False(GetPreCutoff(LEntry3));
 
-				Assert.AreEqual(LEntry3, GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LEntry3, GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
 
-				Assert.AreEqual(LTail, LEntry1);
-				Assert.AreEqual(LEntry2, GetNext(LEntry1));
-				Assert.IsNull(GetPrior(LEntry1));
-				Assert.False(GetPreCutoff(LEntry1));
+				ClassicAssert.AreEqual(LTail, LEntry1);
+				ClassicAssert.AreEqual(LEntry2, GetNext(LEntry1));
+				ClassicAssert.IsNull(GetPrior(LEntry1));
+				ClassicAssert.False(GetPreCutoff(LEntry1));
 
 				IncrementTestEntry();
 
@@ -333,31 +331,31 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry5 = GetEntry(5);
 
-				Assert.AreEqual(5, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(5, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry4);
-				Assert.IsNull(GetNext(LEntry4));
-				Assert.AreEqual(LEntry5, GetPrior(LEntry4));
-				Assert.True(GetPreCutoff(LEntry4));
+				ClassicAssert.AreEqual(LHead, LEntry4);
+				ClassicAssert.IsNull(GetNext(LEntry4));
+				ClassicAssert.AreEqual(LEntry5, GetPrior(LEntry4));
+				ClassicAssert.True(GetPreCutoff(LEntry4));
 
-				Assert.AreEqual(LCutoff, LEntry5);
-				Assert.AreEqual(LEntry4, GetNext(LEntry5));
-				Assert.AreEqual(LEntry3, GetPrior(LEntry5));
-				Assert.False(GetPreCutoff(LEntry5));
+				ClassicAssert.AreEqual(LCutoff, LEntry5);
+				ClassicAssert.AreEqual(LEntry4, GetNext(LEntry5));
+				ClassicAssert.AreEqual(LEntry3, GetPrior(LEntry5));
+				ClassicAssert.False(GetPreCutoff(LEntry5));
 
-				Assert.AreEqual(LEntry5, GetNext(LEntry3));
-				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
-				Assert.False(GetPreCutoff(LEntry3));
+				ClassicAssert.AreEqual(LEntry5, GetNext(LEntry3));
+				ClassicAssert.AreEqual(LEntry2, GetPrior(LEntry3));
+				ClassicAssert.False(GetPreCutoff(LEntry3));
 
-				Assert.AreEqual(LEntry3, GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LEntry3, GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
 
-				Assert.AreEqual(LTail, LEntry1);
-				Assert.AreEqual(LEntry2, GetNext(LEntry1));
-				Assert.IsNull(GetPrior(LEntry1));
-				Assert.False(GetPreCutoff(LEntry1));
+				ClassicAssert.AreEqual(LTail, LEntry1);
+				ClassicAssert.AreEqual(LEntry2, GetNext(LEntry1));
+				ClassicAssert.IsNull(GetPrior(LEntry1));
+				ClassicAssert.False(GetPreCutoff(LEntry1));
 
 				IncrementTestEntry();
 
@@ -367,30 +365,30 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry6 = GetEntry(6);
 
-				Assert.AreEqual(6, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(6, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry4);
-				Assert.IsNull(GetNext(LEntry4));
-				Assert.AreEqual(LEntry6, GetPrior(LEntry4));
-				Assert.True(GetPreCutoff(LEntry4));
+				ClassicAssert.AreEqual(LHead, LEntry4);
+				ClassicAssert.IsNull(GetNext(LEntry4));
+				ClassicAssert.AreEqual(LEntry6, GetPrior(LEntry4));
+				ClassicAssert.True(GetPreCutoff(LEntry4));
 
-				Assert.AreEqual(LCutoff, LEntry6);
-				Assert.AreEqual(LEntry4, GetNext(LEntry6));
-				Assert.AreEqual(LEntry5, GetPrior(LEntry6));
-				Assert.False(GetPreCutoff(LEntry6));
+				ClassicAssert.AreEqual(LCutoff, LEntry6);
+				ClassicAssert.AreEqual(LEntry4, GetNext(LEntry6));
+				ClassicAssert.AreEqual(LEntry5, GetPrior(LEntry6));
+				ClassicAssert.False(GetPreCutoff(LEntry6));
 
-				Assert.AreEqual(LEntry6, GetNext(LEntry5));
-				Assert.AreEqual(LEntry3, GetPrior(LEntry5));
-				Assert.False(GetPreCutoff(LEntry5));
+				ClassicAssert.AreEqual(LEntry6, GetNext(LEntry5));
+				ClassicAssert.AreEqual(LEntry3, GetPrior(LEntry5));
+				ClassicAssert.False(GetPreCutoff(LEntry5));
 
-				Assert.AreEqual(LEntry5, GetNext(LEntry3));
-				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
-				Assert.False(GetPreCutoff(LEntry3));
+				ClassicAssert.AreEqual(LEntry5, GetNext(LEntry3));
+				ClassicAssert.AreEqual(LEntry2, GetPrior(LEntry3));
+				ClassicAssert.False(GetPreCutoff(LEntry3));
 
-				Assert.AreEqual(LEntry3, GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LEntry3, GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
 
 				IncrementTestEntry();
 
@@ -400,38 +398,38 @@ namespace Alphora.Dataphor.Common.Tests
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry7 = GetEntry(7);
 
-				Assert.AreEqual(7, FTestCache.Count);
-				Assert.AreEqual(2, PreCutoffCount());
+				ClassicAssert.AreEqual(7, FTestCache.Count);
+				ClassicAssert.AreEqual(2, PreCutoffCount());
 
-				Assert.AreEqual(LHead, LEntry4);
-				Assert.IsNull(GetNext(LEntry4));
-				Assert.AreEqual(LEntry7, GetPrior(LEntry4));
-				Assert.True(GetPreCutoff(LEntry4));
+				ClassicAssert.AreEqual(LHead, LEntry4);
+				ClassicAssert.IsNull(GetNext(LEntry4));
+				ClassicAssert.AreEqual(LEntry7, GetPrior(LEntry4));
+				ClassicAssert.True(GetPreCutoff(LEntry4));
 
-				Assert.AreEqual(LEntry4, GetNext(LEntry7));
-				Assert.AreEqual(LEntry6, GetPrior(LEntry7));
-				Assert.True(GetPreCutoff(LEntry7));
+				ClassicAssert.AreEqual(LEntry4, GetNext(LEntry7));
+				ClassicAssert.AreEqual(LEntry6, GetPrior(LEntry7));
+				ClassicAssert.True(GetPreCutoff(LEntry7));
 
-				Assert.AreEqual(LCutoff, LEntry6);
-				Assert.AreEqual(LEntry7, GetNext(LEntry6));
-				Assert.AreEqual(LEntry5, GetPrior(LEntry6));
-				Assert.False(GetPreCutoff(LEntry6));
+				ClassicAssert.AreEqual(LCutoff, LEntry6);
+				ClassicAssert.AreEqual(LEntry7, GetNext(LEntry6));
+				ClassicAssert.AreEqual(LEntry5, GetPrior(LEntry6));
+				ClassicAssert.False(GetPreCutoff(LEntry6));
 
-				Assert.AreEqual(LEntry6, GetNext(LEntry5));
-				Assert.AreEqual(LEntry3, GetPrior(LEntry5));
-				Assert.False(GetPreCutoff(LEntry5));
+				ClassicAssert.AreEqual(LEntry6, GetNext(LEntry5));
+				ClassicAssert.AreEqual(LEntry3, GetPrior(LEntry5));
+				ClassicAssert.False(GetPreCutoff(LEntry5));
 
-				Assert.AreEqual(LEntry5, GetNext(LEntry3));
-				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
-				Assert.False(GetPreCutoff(LEntry3));
+				ClassicAssert.AreEqual(LEntry5, GetNext(LEntry3));
+				ClassicAssert.AreEqual(LEntry2, GetPrior(LEntry3));
+				ClassicAssert.False(GetPreCutoff(LEntry3));
 
-				Assert.AreEqual(LEntry3, GetNext(LEntry2));
-				Assert.AreEqual(LEntry1, GetPrior(LEntry2));
-				Assert.False(GetPreCutoff(LEntry2));
-				Assert.AreEqual(LTail, LEntry1);
-				Assert.AreEqual(LEntry2, GetNext(LEntry1));
-				Assert.IsNull(GetPrior(LEntry1));
-				Assert.False(GetPreCutoff(LEntry1));
+				ClassicAssert.AreEqual(LEntry3, GetNext(LEntry2));
+				ClassicAssert.AreEqual(LEntry1, GetPrior(LEntry2));
+				ClassicAssert.False(GetPreCutoff(LEntry2));
+				ClassicAssert.AreEqual(LTail, LEntry1);
+				ClassicAssert.AreEqual(LEntry2, GetNext(LEntry1));
+				ClassicAssert.IsNull(GetPrior(LEntry1));
+				ClassicAssert.False(GetPreCutoff(LEntry1));
 
 				TestSetUp();
 				FTestCache = new FixedSizeCache<string, string>(25);
@@ -441,7 +439,7 @@ namespace Alphora.Dataphor.Common.Tests
 				{
 					IncrementTestEntry();
 					LPreCutoffCount = (int)(TestEntry * FixedSizeCache<string, string>.DefaultCutoff);
-					Assert.AreEqual(LPreCutoffCount, PreCutoffCount());
+					ClassicAssert.AreEqual(LPreCutoffCount, PreCutoffCount());
 
 					LHead = GetHead();
 					LCutoff = GetCutoff();
@@ -451,71 +449,64 @@ namespace Alphora.Dataphor.Common.Tests
 					{
 						if (TestEntry == 1)
 						{
-							Assert.True(CompareEntry(TestEntry, LHead));
-							Assert.True(CompareEntry(TestEntry, LCutoff));
-							Assert.True(CompareEntry(TestEntry, LTail));
-							Assert.False(GetPreCutoff(TestEntry));
+							ClassicAssert.True(CompareEntry(TestEntry, LHead));
+							ClassicAssert.True(CompareEntry(TestEntry, LCutoff));
+							ClassicAssert.True(CompareEntry(TestEntry, LTail));
+							ClassicAssert.False(GetPreCutoff(TestEntry));
 						}
 						else
 						{
-							Assert.True(CompareEntry(TestEntry, LHead));
-							Assert.True(CompareEntry(TestEntry, LCutoff));
-							Assert.False(CompareEntry(TestEntry, LTail));
-							Assert.False(GetPreCutoff(TestEntry));
+							ClassicAssert.True(CompareEntry(TestEntry, LHead));
+							ClassicAssert.True(CompareEntry(TestEntry, LCutoff));
+							ClassicAssert.False(CompareEntry(TestEntry, LTail));
+							ClassicAssert.False(GetPreCutoff(TestEntry));
 						}
 					}
 					else if (((TestEntry - 1) % 3) == 0)
 					{
 						if (LPreCutoffCount == 1)
-							Assert.True(CompareEntry(TestEntry, LHead));
+							ClassicAssert.True(CompareEntry(TestEntry, LHead));
 						else
-							Assert.False(CompareEntry(TestEntry, LHead));
-						Assert.False(CompareEntry(TestEntry, LCutoff));
-						Assert.False(CompareEntry(TestEntry, LTail));
-						Assert.True(GetPreCutoff(TestEntry));
+							ClassicAssert.False(CompareEntry(TestEntry, LHead));
+						ClassicAssert.False(CompareEntry(TestEntry, LCutoff));
+						ClassicAssert.False(CompareEntry(TestEntry, LTail));
+						ClassicAssert.True(GetPreCutoff(TestEntry));
 					}
 					else
 					{
-						Assert.False(CompareEntry(TestEntry, LHead));
-						Assert.True(CompareEntry(TestEntry, LCutoff));
-						Assert.False(CompareEntry(TestEntry, LTail));
-						Assert.False(GetPreCutoff(TestEntry));
+						ClassicAssert.False(CompareEntry(TestEntry, LHead));
+						ClassicAssert.True(CompareEntry(TestEntry, LCutoff));
+						ClassicAssert.False(CompareEntry(TestEntry, LTail));
+						ClassicAssert.False(GetPreCutoff(TestEntry));
 					}
 				}
 
-				Assert.True(ValidateList());
-			}
-			finally
-			{
-				CodeAccessPermission.RevertAssert();
+				ClassicAssert.True(ValidateList());
 			}
 		}
 
 		[Test]
 		public void InternalReference()
 		{
-			try
 			{
-				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();
 
 				// Entries don't get promoted until Correlated Period is exceeded and when they do they are promoted to Head
 				FTestCache = new FixedSizeCache<string, string>(25);
 				while (TestEntry < FTestCache.Size)
 					IncrementTestEntry();
 				FixedSizeCache<string, string>.Entry LEntry = GetPrior(GetHead());
-				Assert.AreNotEqual(GetHead(), LEntry);
+				ClassicAssert.AreNotEqual(GetHead(), LEntry);
 				int LLocation = GetLocation(LEntry);
 				for (int i = (FTestCache.Size - GetLastAccess(LEntry)); i < FixedSizeCache<string, string>.DefaultCorrelatedReferencePeriod; i++)
 				{
 					FTestCache.Reference(LEntry.Key, LEntry.Value);
-					Assert.AreEqual(LLocation, GetLocation(LEntry));
+					ClassicAssert.AreEqual(LLocation, GetLocation(LEntry));
 				}
 
 				FTestCache.Reference(LEntry.Key, LEntry.Value);
-				Assert.AreNotEqual(LLocation, GetLocation(LEntry));
-				Assert.AreEqual(GetHead(), LEntry);
-				Assert.True(ValidateList());
+				ClassicAssert.AreNotEqual(LLocation, GetLocation(LEntry));
+				ClassicAssert.AreEqual(GetHead(), LEntry);
+				ClassicAssert.True(ValidateList());
 
 				// Entries PreCutoff get demoted to not PreCutoff 
 				TestSetUp();
@@ -523,14 +514,14 @@ namespace Alphora.Dataphor.Common.Tests
 				while (TestEntry < FTestCache.Size)
 				{
 					IncrementTestEntry();
-					Assert.True(ValidateCutoff());
+					ClassicAssert.True(ValidateCutoff());
 				}
 
 				LEntry = GetHead();
 				FixedSizeCache<string, string>.Entry LReferenced;
 				FixedSizeCache<string, string>.Entry LTail;
 
-				Assert.True(GetPreCutoff(LEntry));
+				ClassicAssert.True(GetPreCutoff(LEntry));
 				int LPreCutoffCount = PreCutoffCount();
 				int LMoveCount = 0;
 				while (LMoveCount < LPreCutoffCount)
@@ -540,32 +531,25 @@ namespace Alphora.Dataphor.Common.Tests
 						LReferenced = LTail.GetType().GetField(CNextName, CFieldFlags).GetValue(LTail) as FixedSizeCache<string, string>.Entry;
 					else
 						LReferenced = LTail;
-					Assert.True(ValidateCutoff());
-					Assert.False(GetPreCutoff(LReferenced));
+					ClassicAssert.True(ValidateCutoff());
+					ClassicAssert.False(GetPreCutoff(LReferenced));
 					FTestCache.Reference(LReferenced.Key, LReferenced.Value);
 					if (GetPreCutoff(LReferenced))
 						LMoveCount++;
 				}
-				Assert.False(GetPreCutoff(LEntry));
-				Assert.True(ValidateList());
-			}
-			finally
-			{
-				CodeAccessPermission.RevertAssert();
+				ClassicAssert.False(GetPreCutoff(LEntry));
+				ClassicAssert.True(ValidateList());
 			}
 		}
 
 		[Test]
 		public void InternalRemove()
 		{
-			try
 			{
 
 				//add four remove middle
 				//add four remove tail
 
-				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();
 
 				FixedSizeCache<string, string>.Entry LHead;
 				FixedSizeCache<string, string>.Entry LCutoff;
@@ -581,12 +565,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(0, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(0, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.IsNull(LHead);
-				Assert.IsNull(LCutoff);
-				Assert.IsNull(LTail);
+				ClassicAssert.IsNull(LHead);
+				ClassicAssert.IsNull(LCutoff);
+				ClassicAssert.IsNull(LTail);
 
 				//add two remove head								   
 				TestSetUp();
@@ -602,16 +586,16 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(1));
-				Assert.AreEqual(LCutoff.Key, GetKey(1));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(1));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(1));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
-				Assert.IsNull(GetNext(LHead));
-				Assert.IsNull(GetPrior(LHead));
-				Assert.False(GetPreCutoff(LHead));
+				ClassicAssert.IsNull(GetNext(LHead));
+				ClassicAssert.IsNull(GetPrior(LHead));
+				ClassicAssert.False(GetPreCutoff(LHead));
 
 				//add two remove tail
 				TestSetUp();
@@ -627,12 +611,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(2));
-				Assert.AreEqual(LCutoff.Key, GetKey(2));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(2));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(2));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				//add three remove head, head
 				TestSetUp();
@@ -648,19 +632,19 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(2, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(2, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(2));
-				Assert.AreEqual(LCutoff.Key, GetKey(2));
-				Assert.IsNull(GetNext(LHead));
-				Assert.AreEqual(LTail, GetPrior(LHead));
-				Assert.False(GetPreCutoff(LHead));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(2));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(2));
+				ClassicAssert.IsNull(GetNext(LHead));
+				ClassicAssert.AreEqual(LTail, GetPrior(LHead));
+				ClassicAssert.False(GetPreCutoff(LHead));
 
-				Assert.AreEqual(LTail.Key, GetKey(1));
-				Assert.AreEqual(LHead, GetNext(LTail));
-				Assert.IsNull(GetPrior(LTail));
-				Assert.False(GetPreCutoff(LTail));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead, GetNext(LTail));
+				ClassicAssert.IsNull(GetPrior(LTail));
+				ClassicAssert.False(GetPreCutoff(LTail));
 
 				FTestCache.Remove(GetKey(2));
 
@@ -668,12 +652,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(1));
-				Assert.AreEqual(LCutoff.Key, GetKey(1));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(1));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(1));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add three remove head, tail
 				TestSetUp();
@@ -689,12 +673,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(2, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(2, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(2));
-				Assert.AreEqual(LCutoff.Key, GetKey(2));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(2));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(2));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				FTestCache.Remove(GetKey(1));
 
@@ -702,12 +686,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(2));
-				Assert.AreEqual(LCutoff.Key, GetKey(2));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(2));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(2));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				//add three remove tail, middle
 				TestSetUp();
@@ -723,19 +707,19 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(2, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(2, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(3));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.IsNull(GetNext(LHead));
-				Assert.AreEqual(LTail, GetPrior(LHead));
-				Assert.False(GetPreCutoff(LHead));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(3));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.IsNull(GetNext(LHead));
+				ClassicAssert.AreEqual(LTail, GetPrior(LHead));
+				ClassicAssert.False(GetPreCutoff(LHead));
 
-				Assert.AreEqual(LTail.Key, GetKey(2));
-				Assert.AreEqual(LHead, GetNext(LTail));
-				Assert.IsNull(GetPrior(LTail));
-				Assert.False(GetPreCutoff(LTail));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead, GetNext(LTail));
+				ClassicAssert.IsNull(GetPrior(LTail));
+				ClassicAssert.False(GetPreCutoff(LTail));
 
 				FTestCache.Remove(GetKey(2));
 
@@ -743,12 +727,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(3));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.AreEqual(LTail.Key, GetKey(3));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(3));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(3));
 
 				//add three remove tail, head
 				TestSetUp();
@@ -764,12 +748,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(2, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(2, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(3));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(3));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				FTestCache.Remove(GetKey(3));
 
@@ -777,12 +761,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(1, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(2));
-				Assert.AreEqual(LCutoff.Key, GetKey(2));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(2));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(2));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				//add four remove head
 				TestSetUp();
@@ -796,20 +780,20 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(3, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(3, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
 
-				Assert.AreEqual(LHead.Key, GetKey(3));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.IsNull(GetNext(LHead));
-				//Assert.AreEqual(LTail, GetPrior(LHead));
-				//Assert.False(GetPreCutoff(LHead));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(3));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.IsNull(GetNext(LHead));
+				//ClassicAssert.AreEqual(LTail, GetPrior(LHead));
+				//ClassicAssert.False(GetPreCutoff(LHead));
 
-				//Assert.AreEqual(LTail.Key, GetKey(2));
-				//Assert.AreEqual(LHead, GetNext(LTail));
-				//Assert.IsNull(GetPrior(LTail));
-				//Assert.False(GetPreCutoff(LTail));
+				//ClassicAssert.AreEqual(LTail.Key, GetKey(2));
+				//ClassicAssert.AreEqual(LHead, GetNext(LTail));
+				//ClassicAssert.IsNull(GetPrior(LTail));
+				//ClassicAssert.False(GetPreCutoff(LTail));
 
 
 				//add four remove tail
@@ -824,12 +808,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(3, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(3, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(4));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(4));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				//add four remove cutoff
 				TestSetUp();
@@ -843,12 +827,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(3, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(3, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(4));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(4));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add four remove middle
 				TestSetUp();
@@ -862,12 +846,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(3, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount());
+				ClassicAssert.AreEqual(3, FTestCache.Count);
+				ClassicAssert.AreEqual(0, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(4));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(4));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add five remove head
 				TestSetUp();
@@ -881,12 +865,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(5));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(5));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add five remove tail
 				TestSetUp();
@@ -900,12 +884,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(5));
-				Assert.AreEqual(LTail.Key, GetKey(2));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(5));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(2));
 
 				//add five remove cutoff
 				TestSetUp();
@@ -919,12 +903,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(3));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(3));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add five remove middle, next to cutoff
 				TestSetUp();
@@ -938,12 +922,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(5));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(5));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//add five remove middle, next to tail
 				TestSetUp();
@@ -957,12 +941,12 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
-				Assert.AreEqual(4, FTestCache.Count);
-				Assert.AreEqual(1, PreCutoffCount());
+				ClassicAssert.AreEqual(4, FTestCache.Count);
+				ClassicAssert.AreEqual(1, PreCutoffCount());
 
-				Assert.AreEqual(LHead.Key, GetKey(4));
-				Assert.AreEqual(LCutoff.Key, GetKey(5));
-				Assert.AreEqual(LTail.Key, GetKey(1));
+				ClassicAssert.AreEqual(LHead.Key, GetKey(4));
+				ClassicAssert.AreEqual(LCutoff.Key, GetKey(5));
+				ClassicAssert.AreEqual(LTail.Key, GetKey(1));
 
 				//FTestCache = new FixedSizeCache<string, string>(2);
 				//while (TestEntry < FTestCache.Size)
@@ -974,40 +958,29 @@ namespace Alphora.Dataphor.Common.Tests
 				//    IncrementTestEntry();
 
 				//FTestCache.Remove(GetHead().Key);
-				//Assert.True(ValidateList());
+				//ClassicAssert.True(ValidateList());
 
 				//FTestCache.Remove(GetCutoff().Key);
-				//Assert.True(ValidateList());
+				//ClassicAssert.True(ValidateList());
 
 				//FTestCache.Remove(GetTail().Key);
-				//Assert.True(ValidateList());	 
+				//ClassicAssert.True(ValidateList());	 
 
 				//while (FTestCache.Count > 0)
 				//{
 				//    FTestCache.Remove(GetCutoff().Key);
-				//    Assert.True(ValidateList());
+				//    ClassicAssert.True(ValidateList());
 				//}
-			}
-			finally
-			{
-				CodeAccessPermission.RevertAssert();
 			}
 		}
 
 		[Test]
 		public void RandomAccess()
 		{
-			try
 			{
-				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();
 
 				new RandomFixedSizeCacheAccess(new FixedSizeCache<string, string>(50), 50, 100000, 100).Run();
-				Assert.True(ValidateList());
-			}
-			finally
-			{
-				CodeAccessPermission.RevertAssert();
+				ClassicAssert.True(ValidateList());
 			}
 		}
 
@@ -1200,9 +1173,9 @@ namespace Alphora.Dataphor.Common.Tests
 			{
 				if (LPrior == null)
 					return false;
-				Assert.AreEqual(LEntry.Key.Replace("Key", "Value"), LEntry.Value);
-				Assert.AreEqual(FTestCache[LEntry.Key], LEntry.Value);
-				Assert.AreEqual(LEntry.Key.Replace("Key", "Value"), FTestCache[LEntry.Key]);
+				ClassicAssert.AreEqual(LEntry.Key.Replace("Key", "Value"), LEntry.Value);
+				ClassicAssert.AreEqual(FTestCache[LEntry.Key], LEntry.Value);
+				ClassicAssert.AreEqual(LEntry.Key.Replace("Key", "Value"), FTestCache[LEntry.Key]);
 
 				LNext = LEntry;
 				LEntry = LPrior;
