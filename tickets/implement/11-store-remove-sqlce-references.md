@@ -27,7 +27,7 @@ Out of scope, with owners:
 - Write-ahead logging, busy timeout and transaction behaviour of the SQLite store, including any options added to the default connection string: `store-sqlite-concurrency`.
 - The old WiX installer (`Setup/Files.wxs`, `Setup/Files.wxs.bak` list SQL CE binaries): deleted by the installer work in `feat-ws9-installer-and-release`. Leave it.
 - The parked top-level web prototypes (four project files under `legacy/` that reference the SQL CE project): parked by `library-park-side-projects`, excluded from the build. Leave them.
-- `Documentation/` and `Legacy/Documentation/`: converted and deleted by WS8 (`docs-convert-asciidoc`, `feat-ws8-documentation-remainder`). Leave them.
+- `Documentation/` and `legacy/Documentation/`: converted and deleted by WS8 (`docs-convert-asciidoc`, `feat-ws8-documentation-remainder`). Leave them.
 - `tools/net-spike/` (its K19 patch): owned by the build tickets; the spike is deleted once the real build exists.
 - `docs/modernization-plan.md`: it records the decision; leave its SQL CE mentions.
 - Rewriting the legacy test projects onto the new harness: `test-harness-inprocess`. This ticket only removes SQL CE from them.

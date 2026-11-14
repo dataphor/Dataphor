@@ -424,7 +424,7 @@ Cross-cutting requirements:
 
 **Objective.** All user, developer and reference documentation in Markdown under `docs/`, complete, with working links.
 
-**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — assembled only by `SUMMARY.adoc` files and `book.json` (GitBook style; no master files or includes). It has 107 image files plus 9 CorelDraw sources (the BMPs are 28 MB), 649 explicit anchors, about 525 cross-references (about 500 of which target heading text rather than an anchor, and about 22 of which are already broken), 757 literal blocks holding every code sample with no language tag (about 150 of them are grammar productions that begin with `&lt;` and are not XML), 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `Legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `Libraries/Documentation` contains a D4 operator that generates DocBook reference pages from a live catalog.
+**Current state.** `Documentation/`: 75 AsciiDoc files, about 190,000 words — User's Guide (35k), Developer's Guide (142k), and a Reference that is mostly stubs — assembled only by `SUMMARY.adoc` files and `book.json` (GitBook style; no master files or includes). It has 107 image files plus 9 CorelDraw sources (the BMPs are 28 MB), 649 explicit anchors, about 525 cross-references (about 500 of which target heading text rather than an anchor, and about 22 of which are already broken), 757 literal blocks holding every code sample with no language tag (about 150 of them are grammar productions that begin with `&lt;` and are not XML), 62 tables, 33 footnotes, and 206 links to legacy `.html` pages that do not exist. `legacy/Documentation/` is the DocBook 4.3 original, and the *only* source for: the system library reference (341 operator sections, plus 275 per-operator files), types and tables reference, device and connection library references, the Frontend and form-node (DIL) reference, keyboard shortcuts and several topic chapters. `Libraries/Documentation` contains a D4 operator that generates DocBook reference pages from a live catalog.
 
 **Target tree.**
 
@@ -451,7 +451,7 @@ docs/
 |---|---|---|---|
 | `docs-convert-asciidoc` | Conversion tooling and the three books; images to PNG; anchors and cross-references resolved; link check clean within the converted set. | — | hard |
 | `docs-convert-legacy-reference` | DocBook reference material into `docs/reference/`; repair the 206 links. | `docs-convert-asciidoc` | hard |
-| `docs-remove-old-sources` | Delete `Documentation/`, `Legacy/Documentation/` and `book.json`; repoint the links in the root `README.md` to the converted pages. | `docs-convert-legacy-reference` | easy |
+| `docs-remove-old-sources` | Delete `Documentation/`, `legacy/Documentation/` and `book.json`; repoint the links in the root `README.md` to the converted pages. | `docs-convert-legacy-reference` | easy |
 | `docs-admin-guide` | New: installation, instance configuration, running as a service, ports and firewall, backup, rebuilding a catalog from scripts, moving an application from 3.x. | `store-rebuild-workflow`, `installer-msi` | medium |
 | `docs-contributing` | Build, test, layout, release checklist; fold `CompilerDefines.txt` and the error prefix list into `reference/`. | `build-core-sdk-projects` | easy |
 | `docs-reference-generator` | Markdown emitter for the catalog documentation operator; regenerate and diff. | `docs-convert-legacy-reference`, `test-harness-inprocess` | medium |
@@ -542,7 +542,7 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 | Item | Size | Action |
 |---|---|---|
 | `Utilities/Wix` (WiX 3.5) | 60 MB | Delete with the old `Setup/` when WS9 lands |
-| `Legacy/Documentation` build tools, PDFs, CHMs, jars | most of 79 MB | Delete after WS8 |
+| `legacy/Documentation` build tools, PDFs, CHMs, jars | most of 79 MB | Delete after WS8 |
 | 46 `#if SILVERLIGHT` blocks | 26 files | Remove the dead branches once the build exists to prove nothing changed |
 | Tracked third-party DLLs and executables | ~45 MB | Replace with packages as each consumer is converted (D11); `external/` ends empty |
 | `Images/` source art (`.psd`, `.cdr`) | 11 MB | Keep the PNG/ICO actually referenced (`assets/`); delete the rest |
@@ -615,7 +615,7 @@ When the work starts, the corpus is located by an environment variable (never co
 | K12 | The service reads configuration section `instance`; the shipped `app.config` declares section `dataphor`. | `Dataphor/Server/Service/DataphorService.cs`, `Dataphor/DAE.Service/app.config` | static, unconfirmed | WS5 |
 | K13 | Password encryption key and IV are compiled into the product, in two places. | `Dataphor/DAE/Schema/Security.cs`, `Dataphor/DAE.NativeCLI/SecurityUtility.cs` | static | WS11 |
 | K14 | The coverage helper library cannot register without a SQL Server on `localhost`. | `Libraries/TestFramework/Documents`, `Libraries/TestFramework.Coverage.Base/*.d4l` | verified | WS3 |
-| K15 | Six library projects write Release output where the server does not look. | CQF.Model, FHIR.API, FHIR.Server, PHINVADS.Core, PHINVADS.Device, TestFramework.Coverage.Base | static | WS1 |
+| K15 | Six library projects write Release output where the server does not look. | CQF.Model, FHIR.API, FHIR.Server, PHINVADS.Core, PHINVADS.Device, TestFramework.Coverage.Base (the first five are now parked under `legacy/libraries/` and not built, leaving TestFramework.Coverage.Base) | static | WS1 |
 | K16 | Installer: no upgrade logic, regenerated component GUIDs, missing licence file, placeholder registry keys, undefined shortcut directory, no service registration. | `Setup/` | static | WS9 |
 | K17 | 206 documentation links point at pages that do not exist. | `Documentation/` | verified | WS8 |
 | K18 | Tests contain a developer's drive paths and server names and depend on machine-wide state. | `Tests/DAE.Server.Tests/SQLStoreTest.cs`, `Tests/DAE.Client.Tests` | static | WS3 |

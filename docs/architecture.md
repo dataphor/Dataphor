@@ -28,7 +28,7 @@ An application is written as a **D4 library**: scripts that declare types, table
  └──────┬──────────────────────┬────────────────────────┬───────────┘
    catalog store          devices (D4 objects)      D4 libraries
    SQLCE│SQLite│MSSQL│PG   Memory, Simple, MSSQL,    Libraries/<Name>/
-   (27 DAE* tables)       Oracle, PGSQL, …          .d4l + Documents/ + dll
+   (27 DAE* tables)       PGSQL, …                  .d4l + Documents/ + dll
 ```
 
 | Assembly | Project | Role |
@@ -67,7 +67,7 @@ Everything D4 binds to C# goes through that name map (`ClassLoader.CreateObject`
 
 ## Devices
 
-A device translates plan nodes it claims to support into a native command and leaves the rest to the engine (`Compiling/Visitors/DetermineDeviceVisitor`). `System.MemoryDevice` (in the engine) and `SimpleDevice` (memory plus file persistence) need nothing external. `SQLDevice` is the base for SQL translation (10k lines); `MSSQLDevice`, `OracleDevice`, `PGSQLDevice` and others specialize it and call into a `SQLConnection` implementation. The connection base classes are in `Dataphor/DAE/Connection` and `Dataphor/Server/Connection` (the `.cs` files of the same names under `Libraries/Connection/Source` are uncompiled leftovers).
+A device translates plan nodes it claims to support into a native command and leaves the rest to the engine (`Compiling/Visitors/DetermineDeviceVisitor`). `System.MemoryDevice` (in the engine) and `SimpleDevice` (memory plus file persistence) need nothing external. `SQLDevice` is the base for SQL translation (10k lines); `MSSQLDevice` and `PGSQLDevice` specialize it and call into a `SQLConnection` implementation (the Oracle, ADO and SAS device and connection libraries that did the same are parked under `legacy/libraries/` and not built). The connection base classes are in `Dataphor/DAE/Connection` and `Dataphor/Server/Connection` (the `.cs` files of the same names under `Libraries/Connection/Source` are uncompiled leftovers).
 
 ## Frontend: from schema to screen
 
@@ -105,10 +105,10 @@ The server interfaces (`Dataphor/Server/Contracts`) and the client's asynchronou
 | State | Projects |
 |---|---|
 | Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows(.Executable), Dataphoria, DAEServer, DAE.Service(.ConfigurationUtility), D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
-| Working, lightly used | DAE.Client.Provider, DAE.NativeCLI, Frontend.Client.WPF (one scheduler control), Oracle/PGSQL devices and connections, DAE.MSSQL/DAE.PGSQL stores, samples |
-| Side projects (2015–2019) | FHIR*, CQF*, PHINVADS* libraries; top-level `Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes) |
+| Working, lightly used | DAE.Client.Provider, DAE.NativeCLI, Frontend.Client.WPF (one scheduler control), PGSQL device and connection, DAE.MSSQL/DAE.PGSQL stores, samples |
+| Parked under `legacy/`, not built | Side projects (2015–2019): FHIR*, CQF*, PHINVADS* libraries (`legacy/libraries/`); `legacy/Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes), with the cloud prototype's sample library `legacy/Processor/` and design documents `legacy/Design/`. Also the Oracle (Microsoft provider), ADO and SAS device and connection libraries (`legacy/libraries/`) |
 | Cannot survive .NET 10 as written | SQL CE store, WCF self-hosting, COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
 
-ICSharpCode.TextEditor (binary, `External/`), DockPanel Suite and Ascend controls (binaries in `Dataphor/Dataphoria/`), System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security, ADODB interop, Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet), plus a complete copy of WiX 3.5 under `Utilities/`.
+ICSharpCode.TextEditor (binary, `External/`), DockPanel Suite and Ascend controls (binaries in `Dataphor/Dataphoria/`), System.Data.SQLite 1.0.60, Npgsql 2.0.4 with Mono.Security, ADODB interop (used only by parked code under `legacy/`), Newtonsoft.Json 9.0.1 (NuGet), Hl7.Fhir 0.9x (NuGet; used only by parked code under `legacy/`), plus a complete copy of WiX 3.5 under `Utilities/`.

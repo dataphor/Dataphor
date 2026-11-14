@@ -28,8 +28,9 @@ We own this codebase.  **This is the layout before the reorganization.** The pla
 | `Libraries/<Name>/` | D4 libraries: `<Name>.d4l` descriptor, `Documents/` (D4 scripts, forms), optional C# in `Source/`. Devices (`MSSQLDevice`, `SQLDevice`, …), `Frontend` (server side of the UI), `System.*`, samples, and the D4 test scripts (`TestFramework.Coverage.Scripts`) |
 | `Tests/` | NUnit projects; `DAE.Server.Tests` runs the D4 coverage scripts in-process |
 | `Setup/` | WiX installer (v3.5, being replaced) |
-| `Documentation/` (AsciiDoc), `Legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
-| `Dataphoria/` (top level), `Utilities/` | Dead or parked — see the plan before touching |
+| `Documentation/` (AsciiDoc), `legacy/Documentation/` (DocBook) | User docs, being converted to Markdown under `docs/` |
+| `legacy/` | Parked code, excluded from the build and not to be fixed: FHIR/CQF/PHINVADS libraries and the Oracle/ADO/SAS device and connection libraries (`legacy/libraries/`), the web and cloud prototypes (`legacy/Dataphoria/`, `legacy/Processor/`, `legacy/Design/`), the DocBook sources (`legacy/Documentation/`) |
+| `Utilities/` | Dead or parked — see the plan before touching |
 | `tools/net-spike/` | Throwaway harness that builds and runs the code on modern .NET without modifying the repo |
 
 ## Build and test
@@ -88,7 +89,7 @@ Project-specific ticket rules (testing policy, compatibility, source hygiene) ar
 
 **What's indexed:** git-tracked project source, minus `node_modules/`, `dist/`, `build/`, `.git/`, `tickets/`, `team/`, `docs/`, few cache dirs. If query about prose-heavy material (long-form architecture docs, design notes, nested READMEs) returns nothing, file may be outside indexed set — fall back to `Read`/`Glob` for those paths. Projects can override filter via `tickets/index-config.json` (see tess README § Customize what gets indexed).
 
-This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and drops dead or vendored trees (`Legacy/`, `Utilities/`, `Documentation/`, Silverlight, vendored JavaScript, generated FHIR scripts). Use `Read`/`Glob` for those.
+This project's `tickets/index-config.json` adds D4 sources (`.d4`, `.d4l`) and drops dead or vendored trees (`legacy/`, `Utilities/`, `Documentation/`, Silverlight, vendored JavaScript, generated FHIR scripts). Use `Read`/`Glob` for those.
 
 ## Mannered prose
 

@@ -39,7 +39,7 @@ Measured with `git ls-files --eol` (index line endings) and a script reading eac
 
 Two corrections to what the repository says about itself, which this ticket must also fix: `AGENTS.md` says C# files are "UTF-8 with BOM in most `.cs` files" — measured, 41 % have one (602 of 1,241 across the whole tree). And `src/.editorconfig` sets `charset = utf-8-bom` and `insert_final_newline = true` for C#, which would change 496 and 207 files respectively the next time each is saved in an editor that honours it.
 
-Types Git already treats as binary (`i/-text` in `git ls-files --eol` over the whole tree): `png`, `bmp`, `gif`, `jpg`, `ico`, `psd`, `cdr`, `ai`, `clk`, `emf`, `dll`, `exe`, `pdb`, `lib`, `wixlib`, `zip`, `jar`, `chm`, `pdf`, `doc`, `docx`, `pptx`, `vsdx`, `woff`, `woff2`, `ttf`, `eot`, `cub`, `dat`, `sdf`, `snk`. Three types have a single binary file among text ones (`.txt`, `.xsl`, `.xslt`, all under `Legacy/` or `Documentation/`); do **not** declare those types binary.
+Types Git already treats as binary (`i/-text` in `git ls-files --eol` over the whole tree): `png`, `bmp`, `gif`, `jpg`, `ico`, `psd`, `cdr`, `ai`, `clk`, `emf`, `dll`, `exe`, `pdb`, `lib`, `wixlib`, `zip`, `jar`, `chm`, `pdf`, `doc`, `docx`, `pptx`, `vsdx`, `woff`, `woff2`, `ttf`, `eot`, `cub`, `dat`, `sdf`, `snk`. Three types have a single binary file among text ones (`.txt`, `.xsl`, `.xslt`, all under `legacy/` or `Documentation/`); do **not** declare those types binary.
 
 Types that did not exist before the modernization: `.slnx`, `.props`, `.yml`/`.yaml`, `.sh`, `.ps1`. By the time this ticket runs, `build-core-sdk-projects` may have added `.slnx` and `.props` files (and `build-ci` `.yml`); check what is tracked.
 

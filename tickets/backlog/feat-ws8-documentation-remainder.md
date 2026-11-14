@@ -13,8 +13,8 @@ An umbrella for the WS8 work items after `docs-convert-asciidoc`. When promoted 
 
 Scope per the plan's WS8 section and work-item table.
 
-- `docs-convert-legacy-reference` — the DocBook reference material in `Legacy/Documentation/` into `docs/reference/`; repair the 206 dead links (K17), using the list the asciidoc conversion tooling produced.
-- `docs-remove-old-sources` — delete `Documentation/`, `Legacy/Documentation/` and `book.json`; repoint the root `README.md`.
+- `docs-convert-legacy-reference` — the DocBook reference material in `legacy/Documentation/` into `docs/reference/`; repair the 206 dead links (K17), using the list the asciidoc conversion tooling produced.
+- `docs-remove-old-sources` — delete `Documentation/`, `legacy/Documentation/` and `book.json`; repoint the root `README.md`.
 - `docs-contributing` — build, test, layout, release checklist; fold `CompilerDefines.txt` and the error prefix list into `docs/reference/`.
 - `docs-link-check-ci` — link checker in CI (needs `build-ci`).
 - `docs-reference-generator` — Markdown emitter for the catalog documentation operator; regenerate and diff.
