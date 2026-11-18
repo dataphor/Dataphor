@@ -151,6 +151,7 @@ namespace Alphora.Dataphor.DAE.Server
 			CachedPlans bumped = null;
 			CachedPlanHeader header = GetPlanHeader(process, statement, contextHashCode);
 			plan.Header = header;
+			// NOTE: stamps the plan when it is added, not when its compilation began, so a plan compiled against the catalog just before a drop or a rollback's undo of DDL, and added just after that bumped the timestamp, survives with the new stamp; if stale plans are ever seen under concurrent DDL, take the stamp before compiling.
 			plan.PlanCacheTimeStamp = process.Catalog.PlanCacheTimeStamp;
 
 			lock (this)

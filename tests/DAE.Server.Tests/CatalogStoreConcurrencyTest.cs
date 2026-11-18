@@ -330,7 +330,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// A transaction reads its own uncommitted store writes: the dependents check of a drop reads DAEObjectDependencies from
 		/// the store (CatalogDeviceSession.SelectObjectDependents), and must see the dependency of a view created earlier in the
-		/// same transaction. After the rollback nothing of it remains, in memory or in the store.
+		/// same transaction. After the rollback nothing of it remains, in memory or in the store, nor in the server's caches: the
+		/// texts compiled in the transaction, and new calls of its operator and conversion, fail. Before the rollback invalidated
+		/// the plan, operator resolution and conversion path caches, Count(RWT), RWO(1), RWO(3) + 0 and 2 + true still evaluated.
 		/// </summary>
 		[Test]
 		public void TransactionReadsItsOwnStoreWrites()
@@ -355,15 +357,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 						process.ExecuteScript("create operator RWO(const A : Integer) : Integer\r\nbegin\r\n\tresult := A + Count(RWV);\r\nend;");
 						Assert.That(Evaluate(process, "RWO(1)"), Is.EqualTo(2));
+
+						process.ExecuteScript("create operator RWC(const A : Boolean) : Integer\r\nbegin\r\n\tresult := if A then 1 else 0;\r\nend;\r\ncreate conversion Boolean to Integer using RWC widening;");
+						Assert.That(Evaluate(process, "1 + true"), Is.EqualTo(2));
 						process.RollbackTransaction();
 
-						// Expressions not compiled before, and the operator only after the restart below: a rollback leaves the
-						// plans and operator resolutions cached in the transaction valid (bug-ddl-rollback-keeps-cached-plans), so
-						// Count(RWT) and RWO(1) themselves would still evaluate here.
-						foreach (string expression in new[] { "Count(RWT where ID = 1)", "Count(RWV where ID = 1)" })
+						foreach (string expression in new[] { "Count(RWT)", "Count(RWT where ID = 1)", "Count(RWV where ID = 1)" })
 						{
 							Exception unknown = Assert.Catch(() => Evaluate(process, expression), expression);
 							Assert.That(FindError(unknown, (int)CompilerException.Codes.UnknownIdentifier), Is.Not.Null, unknown.ToString());
+						}
+
+						// RWO(3) + 0 and 2 + true are new texts, so only the operator resolution and conversion path caches could
+						// answer them.
+						foreach (string expression in new[] { "RWO(1)", "RWO(3) + 0", "2 + true" })
+						{
+							Exception notFound = Assert.Catch(() => Evaluate(process, expression), expression);
+							Assert.That(FindError(notFound, (int)CompilerException.Codes.OperatorNotFound), Is.Not.Null, notFound.ToString());
 						}
 					}
 					finally

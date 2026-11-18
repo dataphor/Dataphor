@@ -1451,6 +1451,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			base.InternalRollbackTransaction();
 			
+			bool undidDDL = false;
 			try
 			{
 				#if LOGDDLINSTRUCTIONS
@@ -1462,6 +1463,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						break;
 					else
 					{
+						undidDDL = true;
 						try
 						{
 							instruction.Undo(this);
@@ -1478,10 +1480,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
+				if (undidDDL)
+					InvalidateCachesAfterUndo();
+
 				InternalAfterRollbackTransaction();
 					
 				ClearDeferredDeviceStops();
 			}
+		}
+
+		/// <summary>Invalidates what the server cached from the catalog as it stood before the rollback undid its DDL.</summary>
+		/// <remarks>
+		/// Mirrors what the forward drop nodes invalidate (plan cache, client cache and derivation timestamps), plus the
+		/// operator resolution and conversion path caches, which the compiler clears when it compiles a create or drop.
+		/// Both caches are cleared whole: an undo can restore a dropped operator, conversion or type as well as remove a
+		/// created one, which changes resolutions the per-object Clear overloads would not find.
+		/// </remarks>
+		private void InvalidateCachesAfterUndo()
+		{
+			Catalog.UpdatePlanCacheTimeStamp();
+			Catalog.UpdateCacheTimeStamp();
+			Catalog.UpdateDerivationTimeStamp();
+			Catalog.OperatorResolutionCache.Clear();
+			// The compiler reads and fills this cache under its lock (Compiler.FindScalarConversionPath).
+			lock (Catalog.ConversionPathCache)
+				Catalog.ConversionPathCache.Clear();
 		}
 
 		protected virtual void InternalAfterRollbackTransaction()
