@@ -79,5 +79,64 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			Assert.That(Evaluate(String.Format("{0}(6)", op)), Is.EqualTo("Integer"));
 		}
+
+		// The plan cache keys compiled plans by statement text, so these evaluate the identical text before and after the DDL.
+
+		[Test]
+		public void DropConversionInvalidatesCachedPlans()
+		{
+			string a = Unique("PCA"), b = Unique("PCB"), takes = Unique("PCTakes");
+			ExecuteScript(String.Format(@"
+				create type {0} {{ representation {0} {{ V : Integer }} }};
+				create type {1} {{ representation {1} {{ V : Integer }} }};
+				create operator {0}To{1}(const X : {0}) : {1} begin result := {1}(X.V); end;
+				create conversion {0} to {1} using {0}To{1} widening;
+				create operator {2}(const X : {1}) : Integer begin result := X.V; end;
+			", a, b, takes));
+
+			string call = String.Format("{0}({1}(5))", takes, a);
+			Assert.That(Evaluate(call), Is.EqualTo(5));
+			ExecuteScript(String.Format("drop conversion {0} to {1};", a, b));
+
+			CompilerException exception = Assert.Throws<CompilerException>(() => Evaluate(call), "a cached plan still applies the dropped conversion");
+			Assert.That(exception.Code, Is.EqualTo((int)CompilerException.Codes.OperatorNotFound), exception.ToString());
+		}
+
+		[Test]
+		public void CreateConversionInvalidatesCachedPlans()
+		{
+			// A to C through B adds 1100; the direct conversion created afterwards adds nothing.
+			string a = Unique("PCA"), b = Unique("PCB"), c = Unique("PCC"), takes = Unique("PCTakes");
+			ExecuteScript(String.Format(@"
+				create type {0} {{ representation {0} {{ V : Integer }} }};
+				create type {1} {{ representation {1} {{ V : Integer }} }};
+				create type {2} {{ representation {2} {{ V : Integer }} }};
+				create operator {0}To{1}(const X : {0}) : {1} begin result := {1}(X.V + 100); end;
+				create conversion {0} to {1} using {0}To{1} widening;
+				create operator {1}To{2}(const X : {1}) : {2} begin result := {2}(X.V + 1000); end;
+				create conversion {1} to {2} using {1}To{2} widening;
+				create operator {0}To{2}(const X : {0}) : {2} begin result := {2}(X.V); end;
+				create operator {3}(const X : {2}) : Integer begin result := X.V; end;
+			", a, b, c, takes));
+
+			string call = String.Format("{0}({1}(5))", takes, a);
+			Assert.That(Evaluate(call), Is.EqualTo(1105));
+			ExecuteScript(String.Format("create conversion {0} to {1} using {0}To{1} widening;", a, c));
+
+			Assert.That(Evaluate(call), Is.EqualTo(5), "a cached plan still converts through the longer path");
+		}
+
+		[Test]
+		public void CreateOperatorInvalidatesCachedPlans()
+		{
+			string op = Unique("PCOp");
+			ExecuteScript(String.Format("create operator {0}(const X : Decimal) : String begin result := 'Decimal'; end;", op));
+
+			string call = String.Format("{0}(5)", op);
+			Assert.That(Evaluate(call), Is.EqualTo("Decimal"));
+			ExecuteScript(String.Format("create operator {0}(const X : Integer) : String begin result := 'Integer'; end;", op));
+
+			Assert.That(Evaluate(call), Is.EqualTo("Integer"), "a cached plan still calls the worse overload");
+		}
 	}
 }

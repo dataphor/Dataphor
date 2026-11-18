@@ -1,9 +1,20 @@
-description: A statement that changes data in an application transaction and then leaves it, all in one statement (for example one operator call or one begin…end block), still silently loses those changes; decide whether leaving in that case should also fail with an error.
+description: A statement that changes data in an application transaction and then leaves it, all in one statement (for example one operator call or one begin…end block), still silently loses those changes; make leaving in that case fail with the same error as a leave inside an open transaction.
 architecture: docs/modernization-plan.md#ws3-test-suite
 files: src/engine/DAE/Device.ApplicationTransaction/ApplicationTransaction.cs, src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Device.Memory/MemoryDevice.cs, tests/DAE.Server.Tests/ApplicationTransactionTest.cs, docs/migration-notes.md
 repro: static
 ----
-**Blocked: the specification is silent.** The owner decision recorded in `engine-at-leave-discards-transaction-work` ("refuse whenever the application transaction's session has an open transaction") cannot apply to a statement's own implicit transaction, and that case still loses work. Unblock by accepting or editing the proposed rule below.
+
+## Decision (owner, 2026-11-18): refuse (the proposed rule)
+
+The owner's rule: if the case is contrived, make it fail; if real code does it, look at that use first. No D4 in the repository changes data and leaves in the same statement: every `LeaveApplicationTransaction()` call (the `ApplicationTransactions` coverage script, `Sample.Shipping`'s `RunTest.dfd`) is a statement of its own, and the Frontend client leaves through the call interface. So the case is contrived, and the **Proposed rule** below is adopted.
+
+What to do:
+
+- `LeaveApplicationTransaction` also raises 125111 (reuse the existing code and message; no new code) when the leaving statement's own implicit transaction has already changed anything in the application transaction: a recorded operation (including nested transactions committed into it) or a row written to one of the application transaction's tables (including rows copied in when a table joined it). A leave in a statement that changed nothing goes ahead as now. Check before anything is disconnected, so the process stays joined and its work is intact, as the existing check does.
+- Both leave paths (D4 operator and `IServerProcess` call), as for `engine-at-leave-discards-transaction-work`.
+- Tests in `ApplicationTransactionTest.cs`: the `begin … end` block under *The remaining loss* now raises 125111, after which the process is still joined and the inserted row is still visible; a statement that joins, reads and leaves in one block still succeeds; the existing batch-by-batch leave still succeeds.
+- Full `dotnet test Dataphor.slnx` green. If a `pass` coverage script fails because of the refusal, that is a real use: don't edit the script; route this ticket to `blocked/`, naming the script and the statement, so the owner can look at it.
+- `docs/migration-notes.md`: extend the 125111 entry to cover this case. Update the `NOTE:` at the leave site to state the rule.
 
 ## Background
 
