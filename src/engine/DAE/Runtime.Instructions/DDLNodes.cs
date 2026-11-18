@@ -3244,14 +3244,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (program.Catalog)
 			{
-				program.CatalogDeviceSession.StopDevice(_dropDevice);
-				
 				CheckNotSystem(program, _dropDevice);
 				CheckNoBaseTableVarDependents(program, _dropDevice);
 
 				DropDeviceMaps(program, _dropDevice);				
 				CheckNoDependents(program, _dropDevice);
 				
+				// After the checks: a failed drop leaves no pending stop behind in the open transaction (a failed statement does not roll it back)
+				program.CatalogDeviceSession.StopDevice(_dropDevice);
 				program.CatalogDeviceSession.DropDevice(_dropDevice);
 
 				return null;

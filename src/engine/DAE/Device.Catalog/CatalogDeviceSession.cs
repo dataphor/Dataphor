@@ -1456,7 +1456,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			InternalAfterCommitTransaction();
 				
-			ExecuteDeferredDeviceStops();
+			CommitDeferredDeviceStops();
 		}
 
 		protected virtual void InternalAfterCommitTransaction()
@@ -1502,7 +1502,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 				InternalAfterRollbackTransaction();
 					
-				ClearDeferredDeviceStops();
+				RollbackDeferredDeviceStops();
 			}
 		}
 
@@ -3137,21 +3137,47 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			StopDevice(device, false);
 		}
 		
-		private List<Schema.Device> _deferredDeviceStops;
+		/// <summary>A device dropped in an open transaction, waiting for the outermost commit to stop it.</summary>
+		private class DeferredDeviceStop
+		{
+			public DeferredDeviceStop(Schema.Device device, int level)
+			{
+				Device = device;
+				Level = level;
+			}
+			
+			public readonly Schema.Device Device;
+			
+			/// <summary>The transaction level the stop belongs to: the level of the drop, then each enclosing level a nested commit hands it to.</summary>
+			public int Level;
+		}
+		
+		// Inside InternalCommitTransaction and InternalRollbackTransaction, Transactions.Count is the level being ended: the base class ends it after calling them
+		private List<DeferredDeviceStop> _deferredDeviceStops;
 		private void AddDeferredDeviceStop(Schema.Device device)
 		{
 			if (_deferredDeviceStops == null)
-				_deferredDeviceStops = new List<Schema.Device>();
-			_deferredDeviceStops.Add(device);
+				_deferredDeviceStops = new List<DeferredDeviceStop>();
+			_deferredDeviceStops.Add(new DeferredDeviceStop(device, Transactions.Count));
 		}
 		
-		private void ExecuteDeferredDeviceStops()
+		/// <summary>Runs the pending stops when the outermost level commits; a nested commit hands its stops to the enclosing level.</summary>
+		private void CommitDeferredDeviceStops()
 		{
-			if (_deferredDeviceStops != null)
+			if (_deferredDeviceStops == null)
+				return;
+			
+			if (Transactions.Count > 1)
+			{
+				foreach (DeferredDeviceStop stop in _deferredDeviceStops)
+					if (stop.Level >= Transactions.Count)
+						stop.Level = Transactions.Count - 1;
+			}
+			else
 			{
 				while (_deferredDeviceStops.Count > 0)
 				{
-					InternalStopDevice(_deferredDeviceStops[0]);
+					InternalStopDevice(_deferredDeviceStops[0].Device);
 					_deferredDeviceStops.RemoveAt(0);
 				}
 				
@@ -3159,9 +3185,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void ClearDeferredDeviceStops()
+		/// <summary>Discards the stops that belong to the level being rolled back; the undo of their drops restores devices that never stopped.</summary>
+		private void RollbackDeferredDeviceStops()
 		{
-			if (_deferredDeviceStops != null)
+			if (_deferredDeviceStops == null)
+				return;
+			
+			_deferredDeviceStops.RemoveAll(stop => stop.Level >= Transactions.Count);
+			if (_deferredDeviceStops.Count == 0)
 				_deferredDeviceStops = null;
 		}
 		
