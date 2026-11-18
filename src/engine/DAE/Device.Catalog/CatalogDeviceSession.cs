@@ -1385,7 +1385,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				session.AttachEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex, _beforeOperatorNames);
 			}
 		}
-		
+
+		protected class SetCatalogObjectOwnerInstruction : DDLInstruction
+		{
+			public SetCatalogObjectOwnerInstruction(Schema.CatalogObject catalogObject, Schema.User originalOwner)
+			{
+				_catalogObject = catalogObject;
+				_originalOwner = originalOwner;
+			}
+
+			private Schema.CatalogObject _catalogObject;
+			private Schema.User _originalOwner;
+
+			public override void Undo(CatalogDeviceSession session)
+			{
+				session.CacheCatalogObjectOwner(_catalogObject, _originalOwner);
+			}
+		}
+
 		protected DDLInstructionLog _instructions = new DDLInstructionLog();
 		
 		#endif
@@ -1793,6 +1810,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			foreach (Schema.User user in Device.UsersCache.Values)
 				user.ClearCachedRightAssignments(rightNames);
+		}
+
+		/// <summary>Sets the owner of the given object in the catalog cache.</summary>
+		/// <remarks>
+		/// The object's rights belong to its owner, so every user's cached answer for them is dropped: the previous owner's
+		/// cached grants would otherwise outlive the change, and an answer cached while the change was uncommitted would outlive
+		/// its undo.
+		/// </remarks>
+		protected void CacheCatalogObjectOwner(Schema.CatalogObject objectValue, Schema.User owner)
+		{
+			lock (Catalog)
+			{
+				objectValue.Owner = owner;
+				ClearCachedRightAssignments(objectValue.GetRights());
+			}
 		}
 
 		#endregion

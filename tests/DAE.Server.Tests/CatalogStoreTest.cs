@@ -136,37 +136,92 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				RunWithin
 				(
 					instance,
-					() =>
-					{
-						IServerSession session = instance.Connect();
-						try
+					() => RunAs
+					(
+						instance,
+						"Admin",
+						process =>
 						{
-							IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
-							try
-							{
-								process.BeginTransaction(IsolationLevel.CursorStability);
-								process.ExecuteScript("SetObjectOwner('NestedOwnedT', 'Admin');");
-								process.BeginTransaction(IsolationLevel.CursorStability);
-								process.ExecuteScript("SetObjectOwner('NestedOwnedT', 'OwnerUser');");
-								process.RollbackTransaction();
-								process.CommitTransaction();
-							}
-							finally
-							{
-								session.StopProcess(process);
-							}
+							process.BeginTransaction(IsolationLevel.CursorStability);
+							process.ExecuteScript("SetObjectOwner('NestedOwnedT', 'Admin');");
+							process.BeginTransaction(IsolationLevel.CursorStability);
+							process.ExecuteScript("SetObjectOwner('NestedOwnedT', 'OwnerUser');");
+							process.RollbackTransaction();
+							process.CommitTransaction();
 						}
-						finally
-						{
-							instance.Server.Disconnect(session);
-						}
-					}
+					)
 				);
 
 				List<string[]> rights = StoredRights(instance, "NestedOwnedT");
 				Assert.That(rights, Has.Count.EqualTo(6));
 				Assert.That(rights.ConvertAll(right => right[1]), Is.All.EqualTo("Admin"));
 				Assert.That(StoredOwner(instance, "NestedOwnedT"), Is.EqualTo("Admin"));
+			}
+		}
+
+		/// <summary>
+		/// A rollback of SetObjectOwner, outermost or nested, restores the owner the server holds in memory, of the table, the
+		/// scalar type and the operators generated for the type. Operator bodies, views and table handlers are compiled and run
+		/// under that owner's rights, and SetObjectOwner lets that owner reassign the object.
+		/// </summary>
+		[TestCase(false)]
+		[TestCase(true)]
+		public void RollbackRestoresCachedOwner(bool nested)
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(RollbackRestoresCachedOwner)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('OwnerUser', 'Owner User', ''); create type OwnedType { representation OwnedType { V : Integer } }; create table RolledBackT { ID : Integer, key { ID } };");
+				Schema.CatalogObject table = (Schema.CatalogObject)instance.Server.Catalog["RolledBackT"];
+				Schema.ScalarType type = (Schema.ScalarType)instance.Server.Catalog["OwnedType"];
+				Schema.CatalogObject[] owned = { table, type, type.Representations["OwnedType"].Selector, type.EqualityOperator };
+				string[] ownersInTransaction = null;
+
+				RunWithin
+				(
+					instance,
+					() => RunAs
+					(
+						instance,
+						"Admin",
+						process =>
+						{
+							if (nested)
+								process.BeginTransaction(IsolationLevel.CursorStability);
+							process.BeginTransaction(IsolationLevel.CursorStability);
+							process.ExecuteScript("SetObjectOwner('RolledBackT', 'OwnerUser'); SetObjectOwner('OwnedType', 'OwnerUser');");
+							ownersInTransaction = Array.ConvertAll(owned, objectValue => objectValue.Owner.ID);
+							process.RollbackTransaction();
+							if (nested)
+								process.CommitTransaction();
+						}
+					)
+				);
+
+				Assert.That(ownersInTransaction, Is.All.EqualTo("OwnerUser"));
+				Assert.That(Array.ConvertAll(owned, objectValue => objectValue.Owner.ID), Is.All.EqualTo("Admin"));
+			}
+		}
+
+		/// <summary>
+		/// Once SetObjectOwner gives a table back to Admin, the previous owner is refused the rights it held as owner: its cached
+		/// answers are dropped along with the new owner's. Both inserts are the same statement, so the refusal comes from the
+		/// plan cached for the first one re-checking the right as it is bound to the second.
+		/// </summary>
+		[Test]
+		public void PreviousOwnerLosesObjectRights()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(PreviousOwnerLosesObjectRights)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('OwnerUser', 'Owner User', ''); create table FormerOwnedT { ID : Integer, key { ID } }; SetObjectOwner('FormerOwnedT', 'OwnerUser');");
+				const string insert = "insert row { 1 ID } into FormerOwnedT;";
+				RunAs(instance, "OwnerUser", process => process.Execute(insert, null));
+
+				instance.ExecuteScript("SetObjectOwner('FormerOwnedT', 'Admin');");
+
+				Exception exception = Assert.Catch(() => RunAs(instance, "OwnerUser", process => process.Execute(insert, null)));
+				Assert.That(FindError(exception, (int)ServerException.Codes.UnauthorizedRight), Is.Not.Null, exception.ToString());
 			}
 		}
 
@@ -283,6 +338,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Assert.Fail(String.Format("SetObjectOwner did not return within {0} s.", ScriptLimit.TotalSeconds));
 			}
 			task.GetAwaiter().GetResult();
+		}
+
+		// Runs the action on a process of its own, in a session of the given user (whose password is empty).
+		private static void RunAs(TestServerInstance instance, string userID, Action<IServerProcess> action)
+		{
+			IServerSession session = instance.Server.Connect(new SessionInfo(userID, ""));
+			try
+			{
+				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+				try
+				{
+					action(process);
+				}
+				finally
+				{
+					session.StopProcess(process);
+				}
+			}
+			finally
+			{
+				instance.Server.Disconnect(session);
+			}
 		}
 
 		// The stored rights of the named catalog object as { Name, Owner_User_ID }, ordered by name.

@@ -467,8 +467,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (objectValue != null)
 			{
-				objectValue.Owner = user;
-				((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCatalogObjectOwner(objectValue.ID, user.ID);
+				((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCatalogObjectOwner(objectValue, user);
 
 				if (objectValue is Schema.ScalarType)
 				{

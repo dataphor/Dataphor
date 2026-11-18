@@ -2270,37 +2270,42 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				MarkUserOperatorsForRecompile(userID);
 		}
 
-		public void SetCatalogObjectOwner(int catalogObjectID, string userID)
+		/// <summary>Makes the given user the owner of the given object and of its rights, in the store and in the catalog cache.</summary>
+		/// <remarks>
+		/// The store is written first, so a failed write leaves the cached owner as it was. Within a transaction the cached
+		/// change is logged, so that a rollback restores the previous owner.
+		/// </remarks>
+		public void SetCatalogObjectOwner(Schema.CatalogObject objectValue, Schema.User user)
 		{
-			lock (Catalog)
-			{
-				Schema.User user;
-				if (Device.UsersCache.TryGetValue(userID, out user))
-					user.ClearCachedRightAssignments();
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				CatalogStoreConnection.SetCatalogObjectOwner(catalogObjectID, userID);
+				CatalogStoreConnection.SetCatalogObjectOwner(objectValue.ID, user.ID);
 			}
 			finally
 			{
 				ReleaseCatalogStoreConnection();
 			}
 
+			lock (Catalog)
+			{
+				#if LOGDDLINSTRUCTIONS
+				if (ServerProcess.InTransaction && !ServerProcess.InLoadingContext())
+					_instructions.Add(new SetCatalogObjectOwnerInstruction(objectValue, objectValue.Owner));
+				#endif
+				CacheCatalogObjectOwner(objectValue, user);
+			}
+
+			// No plan cache time stamp bump: a cached plan re-checks its rights as it is bound to a process, against the cleared answers.
 			// TODO: If the object is an operator, and we are not loading, and the object is not generated, and the object is in the cache, mark it for recompile
 			// TODO: If we are not loading, for each immediate dependent of this object that is a non-generated operator currently in the cache, mark it for recompile
 		}
 
 		public void SetRightOwner(string rightName, string userID)
 		{
+			// The right belongs to its owner, so the previous owner's cached answer is as stale as the new owner's.
 			lock (Catalog)
-			{
-				Schema.User user;
-				if (Device.UsersCache.TryGetValue(userID, out user))
-					user.ClearCachedRightAssignments();
-			}
+				ClearCachedRightAssignments(new string[] { rightName });
 
 			AcquireCatalogStoreConnection(true);
 			try
