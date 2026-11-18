@@ -2200,6 +2200,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 				// Here, at the change and under the catalog lock the compiler traces paths under, so that no session keeps an answer from
 				// before it. Whole, because a new conversion can shorten a cached path between types it does not touch.
+				// NOTE: this also runs for every conversion the server lazily loads, where it is overhead only (a type's conversions load
+				// with it, so a load cannot change a path between types already loaded); if catalog warm-up shows churn here, skip both
+				// clears when ServerProcess.InLoadingContext().
 				Catalog.ConversionPathCache.Clear();
 				Catalog.OperatorResolutionCache.Clear();
 			}
