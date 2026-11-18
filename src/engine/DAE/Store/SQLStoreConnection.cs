@@ -374,6 +374,9 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 
+		// NOTE: anything but bool, string and null is written with ToString(), which is exact for the integer and text columns the
+		// catalog tables have today; if a catalog table gains a double or date column, format it invariantly, or statements and the
+		// rows a nested rollback re-inserts become culture-dependent.
 		public virtual object NativeToLiteralValue(object tempValue)
 		{
 			if (tempValue is bool)
@@ -412,10 +415,17 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (index > 0)
 					statement.Append(", ");
-				statement.Append(NativeToLiteralValue(index >= row.Length ? null : row[index]));
+				statement.Append(NativeToLiteralValue(ValueAt(row, index)));
 			}
 			statement.Append(")");
 			return statement.ToString();
+		}
+
+		// A row may be shorter than the table, from a caller that leaves the trailing columns out; the insert stores those as null,
+		// so the key condition of the logged inverse delete must read them as null too.
+		private static object ValueAt(object[] row, int index)
+		{
+			return index < row.Length ? row[index] : null;
 		}
 
 		internal void PerformUpdate(string tableName, List<string> columns, List<string> key, object[] oldRow, object[] newRow)
@@ -458,7 +468,7 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (index > 0)
 					statement.Append(" and");
-				object value = row[columns.IndexOf(key[index])];
+				object value = ValueAt(row, columns.IndexOf(key[index]));
 				if (value == null)
 					statement.AppendFormat(" {0} is null", key[index]);
 				else

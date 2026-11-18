@@ -883,21 +883,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				_connection.PerformInsert(tableName, header.Columns, indexHeader.Columns, rowValues);
 				// A nested level is no database transaction: its rollback runs the inverse statements logged in it, as a store cursor logs its writes.
 				if (_connection.TransactionCount > 1)
-					_connection.LogInsert(tableName, header.Columns, indexHeader.Columns, PadRow(rowValues, header.Columns.Count));
+					_connection.LogInsert(tableName, header.Columns, indexHeader.Columns, rowValues);
 			}
 		}
-		
-		// A caller may pass fewer values than the table has columns, and the insert statement stores the missing ones as null; the
-		// inverse delete reads each key column at its position in the row.
-		private static object[] PadRow(object[] rowValues, int columnCount)
-		{
-			if (rowValues.Length >= columnCount)
-				return rowValues;
-			object[] row = new object[columnCount];
-			Array.Copy(rowValues, row, rowValues.Length);
-			return row;
-		}
-		
+
 		public void DeleteRows(string indexName, params object[] keyValues)
 		{
 			if (_store.DeleteThroughCursor)
