@@ -1531,7 +1531,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Invalidates what the server cached from the catalog as it stood before the rollback undid its DDL.</summary>
 		/// <remarks>
 		/// Mirrors what the forward drop nodes invalidate (plan cache, client cache and derivation timestamps), plus the
-		/// operator resolution and conversion path caches, which the compiler clears when it compiles a create or drop.
+		/// operator resolution and conversion path caches, which this session clears when it makes a forward change
+		/// (AddImplicitConversion, CreateOperator and their inverses).
 		/// Both caches are cleared whole: an undo can restore a dropped operator, conversion or type as well as remove a
 		/// created one, which changes resolutions the per-object Clear overloads would not find.
 		/// </remarks>
@@ -2196,6 +2197,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				conversion.SourceScalarType.ImplicitConversions.Add(conversion);
+
+				// Here, at the change and under the catalog lock the compiler traces paths under, so that no session keeps an answer from
+				// before it. Whole, because a new conversion can shorten a cached path between types it does not touch.
+				Catalog.ConversionPathCache.Clear();
+				Catalog.OperatorResolutionCache.Clear();
 			}
 		}
 		
@@ -2204,6 +2210,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				conversion.SourceScalarType.ImplicitConversions.SafeRemove(conversion);
+
+				// As in AddImplicitConversion; every answer a removal changes uses the conversion.
+				Catalog.ConversionPathCache.Clear(conversion);
+				Catalog.OperatorResolutionCache.Clear(conversion);
 			}
 		}
 		
@@ -2322,6 +2332,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{	
 			InsertCatalogObject(operatorValue);
 			
+			// The compiler cleared this when it compiled the statement, before this change: another session may have cached a
+			// resolution since. Outside the catalog lock is enough, because the compiler looks up, resolves and caches under it.
+			Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
+			
 			if (operatorValue.SessionObjectName != null)
 			{
 				CreateSessionOperator(operatorValue);
@@ -2369,6 +2383,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void DropOperator(Schema.Operator operatorValue)
 		{
 			DeleteCatalogObject(operatorValue);
+			
+			// As in CreateOperator.
+			Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
 			
 			if (operatorValue.SessionObjectName != null)
 			{

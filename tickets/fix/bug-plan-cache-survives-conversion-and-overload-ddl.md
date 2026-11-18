@@ -7,6 +7,9 @@ severity: wrong-result
 likelihood: unusual
 tradeoffs: Flushing every cached plan on each created operator or conversion makes library registration and long rebuild scripts recompile everything repeatedly, and 3.1 behaved this way without known complaints, so a maintainer may prefer to document it or invalidate only plans that depend on the changed name.
 ----
+
+**Tending agent, 2026-11-18:** promoted to `fix/`. The expected behaviour below is settled; the choice between options is a performance one, to decide by measurement, not an owner decision. Start with the simple fix (bump `PlanCacheTimeStamp` in the three nodes) and measure library registration and the coverage run before and after. If registration gets measurably slower, invalidate only when the change can affect a cached plan (the operator name already has cached resolutions, or the conversion's types do). Do not skip the bump during library loading unless no plan cached before the load can survive it. Record the numbers in the ticket.
+
 ## What is wrong
 
 The server keeps a plan cache (`src/engine/DAE/Server/PlanCache.cs`): compiled plans keyed by statement text, reused while `Catalog.PlanCacheTimeStamp` is not newer than the plan's. Some DDL bumps that timestamp (`DropOperatorNode`, `DropScalarTypeNode`, table/view drops, several alter nodes in `DDLNodes.cs`); these do not:

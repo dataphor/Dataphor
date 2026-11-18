@@ -25,6 +25,7 @@
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchemaCacheInvalidationTest.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="TestServerInstance.cs" />
     <Compile Include="TransactionBeginTest.cs" />

@@ -5781,8 +5781,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 							narrowingConversion.AddDependency(node.ScalarType.LikeType);
 							narrowingConversion.AddDependency(node.ScalarType);
 							narrowingConversion.AddDependency(representation.Selector);
-							if (!node.ScalarType.LikeType.ImplicitConversions.Contains(narrowingConversion))
-								node.ScalarType.LikeType.ImplicitConversions.Add(narrowingConversion);
+							// The like type is shared: other sessions trace conversion paths through its list under the catalog lock (FindScalarConversionPath).
+							lock (plan.Catalog)
+							{
+								if (!node.ScalarType.LikeType.ImplicitConversions.Contains(narrowingConversion))
+									node.ScalarType.LikeType.ImplicitConversions.Add(narrowingConversion);
+							}
 
 							conversionName = Schema.Object.Qualify(Schema.Object.MangleQualifiers(String.Format("Conversion_{0}_{1}", node.ScalarType.Name, node.ScalarType.LikeType.Name)), plan.CurrentLibrary.Name);
 							CheckValidCatalogObjectName(plan, statement, conversionName);							
@@ -5862,8 +5866,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							if (narrowingConversion != null) 
 							{
-								if ((node.ScalarType.LikeType != null) && (node.ScalarType.LikeType.ImplicitConversions.Contains(narrowingConversion)))
-									node.ScalarType.LikeType.ImplicitConversions.Remove(narrowingConversion);
+								if (node.ScalarType.LikeType != null)
+									lock (plan.Catalog)
+									{
+										if (node.ScalarType.LikeType.ImplicitConversions.Contains(narrowingConversion))
+											node.ScalarType.LikeType.ImplicitConversions.Remove(narrowingConversion);
+									}
 								if (plan.PlanCatalog.Contains(narrowingConversion.Name))
 									plan.PlanCatalog.Remove(narrowingConversion);
 							}
@@ -9783,11 +9791,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				plan.PopCreationObject();
 			}
 
-			// Clear conversion path and operator resolution caches
-			plan.Catalog.ConversionPathCache.Clear(conversion.SourceScalarType);
-			plan.Catalog.ConversionPathCache.Clear(conversion.TargetScalarType);
-			plan.Catalog.OperatorResolutionCache.Clear(conversion.SourceScalarType, conversion.TargetScalarType);
-			
+			// No conversion path or operator resolution cache clear here: path tracing reads only the scalar types' implicit conversions,
+			// which change when the plan executes, and the catalog device session clears both caches then (AddImplicitConversion).
 			plan.PlanCatalog.Add(conversion);
 
 			return new CreateConversionNode(conversion);
@@ -9805,14 +9810,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			node.TargetScalarType = (Schema.ScalarType)CompileScalarTypeSpecifier(plan, localStatement.TargetScalarTypeName);
 			//AcquireDependentLocks(APlan, LNode.TargetScalarType, LockMode.Shared);
 
-			// Clear the conversion path and operator resolution caches
-			foreach (Schema.Conversion conversion in node.SourceScalarType.ImplicitConversions)
-				if (conversion.TargetScalarType.Equals(node.TargetScalarType))
-				{
-					plan.Catalog.ConversionPathCache.Clear(conversion);
-					plan.Catalog.OperatorResolutionCache.Clear(conversion);
-					break;
-				}
+			// No cache clear here, as in CompileCreateConversionStatement: the catalog device session clears when the drop executes (RemoveImplicitConversion).
 			return node;
 		}
 		
@@ -11609,22 +11607,27 @@ namespace Alphora.Dataphor.DAE.Compiling
 			
 			if (!context.CanConvert)
 			{
-				#if USECONVERSIONPATHCACHE
-				lock (plan.Catalog.ConversionPathCache)
+				// The catalog lock keeps the trace from reading conversions a create or drop conversion is changing, and from caching a
+				// path read before that change after the change cleared the cache (CatalogDeviceSession.AddImplicitConversion).
+				lock (plan.Catalog)
 				{
-					Schema.ScalarConversionPath path = plan.Catalog.ConversionPathCache[sourceType, targetType];
-					if (path != null)
-						context.Paths.Add(path);
-					else
+					#if USECONVERSIONPATHCACHE
+					lock (plan.Catalog.ConversionPathCache)
 					{
-				#endif
-						TraceScalarConversionPath(plan, context, sourceType);
-				#if USECONVERSIONPATHCACHE
-						if (context.CanConvert)
-							plan.Catalog.ConversionPathCache.Add(sourceType, targetType, context.BestPath);
+						Schema.ScalarConversionPath path = plan.Catalog.ConversionPathCache[sourceType, targetType];
+						if (path != null)
+							context.Paths.Add(path);
+						else
+						{
+					#endif
+							TraceScalarConversionPath(plan, context, sourceType);
+					#if USECONVERSIONPATHCACHE
+							if (context.CanConvert)
+								plan.Catalog.ConversionPathCache.Add(sourceType, targetType, context.BestPath);
+						}
 					}
+					#endif
 				}
-				#endif
 			
 				#if USETYPEINHERITANCE
 				if (!context.CanConvert)

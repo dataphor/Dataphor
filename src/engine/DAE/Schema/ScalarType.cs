@@ -906,12 +906,13 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	/// <summary>Caches the conversion paths the compiler finds between scalar types. Shared by every session of a catalog; safe for concurrent use.</summary>
 	/// <remarks>
-	/// Every member takes the private <c>_syncRoot</c> lock. The compiler also locks the cache instance itself
-	/// around lookup, trace and add (Compiler.FindScalarConversionPath), so two sessions do not both trace the
-	/// same pair; that outer lock is separate, so the Clear overloads (called while compiling create/drop
-	/// conversion and create type, and from the admin operator, without that lock) never wait on a trace in
-	/// progress. <c>_syncRoot</c> is held only inside these members, which call nothing that takes another lock,
-	/// so it cannot take part in a deadlock.
+	/// Every member takes the private <c>_syncRoot</c> lock. The compiler also takes the catalog's lock and then the
+	/// cache instance's around lookup, trace and add (Compiler.FindScalarConversionPath), so two sessions do not both
+	/// trace the same pair, and the catalog device session clears the cache under the catalog's lock when it adds or
+	/// removes a conversion, so a path traced before that change is not cached after the clear. The instance lock is
+	/// separate from <c>_syncRoot</c>, so the Clear calls made without the catalog's lock (compiling create type, the
+	/// admin operator) never wait on a trace in progress. <c>_syncRoot</c> is held only inside these members, which
+	/// call nothing that takes another lock, so it cannot take part in a deadlock.
 	/// </remarks>
 	public class ScalarConversionPathCache : System.Object
 	{

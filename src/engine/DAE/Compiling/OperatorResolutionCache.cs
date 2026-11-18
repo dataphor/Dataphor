@@ -17,9 +17,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 	/// <remarks>
 	/// Every member takes the private <c>_syncRoot</c> lock. The compiler also locks the cache instance itself
 	/// around a whole resolution; that outer lock is separate, so the Clear overloads (called while compiling
-	/// create/drop operator, and from DDL and library nodes, often without any catalog lock held) never wait on
-	/// a resolution in progress. <c>_syncRoot</c> is held only inside these members, which call nothing that
-	/// takes another lock, so it cannot take part in a deadlock.
+	/// create/drop operator, from DDL and library nodes, and from the catalog device session when it changes an
+	/// operator or conversion, often without any catalog lock held) never wait on a resolution in progress.
+	/// <c>_syncRoot</c> is held only inside these members, which call nothing that takes another lock, so it
+	/// cannot take part in a deadlock.
 	/// </remarks>
 	public class OperatorResolutionCache : System.Object
 	{
