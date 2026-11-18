@@ -1454,7 +1454,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				_instructions.Clear();
 			#endif
 
-			InternalAfterCommitTransaction();
+			bool committed = false;
+			try
+			{
+				InternalAfterCommitTransaction();
+				committed = true;
+			}
+			finally
+			{
+				// After the store commit, which InternalAfterCommitTransaction makes. A failed commit keeps the record for the
+				// rollback that follows it.
+				if (Transactions.Count == 1)
+					ClearChangedRights(committed);
+			}
 				
 			CommitDeferredDeviceStops();
 		}
@@ -1500,7 +1512,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				if (undidDDL)
 					InvalidateCachesAfterUndo();
 
-				InternalAfterRollbackTransaction();
+				try
+				{
+					InternalAfterRollbackTransaction();
+				}
+				finally
+				{
+					// After the store rollback, at every level: this session cached answers from the level's uncommitted writes.
+					ClearChangedRights(Transactions.Count == 1);
+				}
 					
 				RollbackDeferredDeviceStops();
 			}
@@ -1800,7 +1820,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				// Clear the operator name resolution cache
 				Device.OperatorNameCache.Clear(objectValue.Name);
 
-				ClearCachedRightAssignments(objectValue.GetRights());
+				RightsChanged(objectValue.GetRights());
 			}
 		}
 		
@@ -1812,16 +1832,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		/// <summary>Sets the owner of the given object in the catalog cache.</summary>
 		/// <remarks>
-		/// The object's rights belong to its owner, so every user's cached answer for them is dropped: the previous owner's
-		/// cached grants would otherwise outlive the change, and an answer cached while the change was uncommitted would outlive
-		/// its undo.
+		/// The object's rights belong to its owner, so every user's cached answer for them is dropped (see RightsChanged): the
+		/// previous owner's cached grants would otherwise outlive the change.
 		/// </remarks>
 		protected void CacheCatalogObjectOwner(Schema.CatalogObject objectValue, Schema.User owner)
 		{
 			lock (Catalog)
 			{
 				objectValue.Owner = owner;
-				ClearCachedRightAssignments(objectValue.GetRights());
+				RightsChanged(objectValue.GetRights());
 			}
 		}
 
@@ -3491,12 +3510,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public virtual void DeleteRight(string rightName)
 		{
-			lock (Catalog)
-			{
-				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
-				foreach (Schema.User user in Device.UsersCache.Values)
-					user.ClearCachedRightAssignment(rightName);
-			}
+			RightsChanged(rightName);
 		}
 
 		public virtual bool UserHasRight(string userID, string rightName)
@@ -3512,9 +3526,116 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		protected void ClearUserCachedRightAssignments(string userID)
 		{
-			Schema.User user;
-			if (Device.UsersCache.TryGetValue(userID, out user))
+			lock (Catalog)
+			{
+				Schema.User user;
+				if (Device.UsersCache.TryGetValue(userID, out user))
+					user.ClearCachedRightAssignments();
+			}
+		}
+
+		// What this session's open transaction changed about who has which right: the rights whose answers every user drops
+		// when it ends, the users who drop all of theirs, or every user all of theirs. One record covers the whole stack of
+		// levels, so a level's end may clear more than that level changed, which costs only cache misses.
+		// NOTE: every object a transaction creates or drops adds its rights here, and the end walks every cached user for each;
+		// if registering a large library on a server with many signed-in users shows up in profiles, record AllRightsChanged
+		// past a size limit instead.
+		private HashSet<string> _changedRightNames;
+		private HashSet<string> _changedRightsUserIDs;
+		private bool _allRightsChanged;
+
+		/// <summary>Drops every user's cached answer for the given rights, now and again when the open transaction ends.</summary>
+		/// <remarks>
+		/// <para>
+		/// A method that changes who has a right calls this, UserRightsChanged or AllRightsChanged after its store write. The
+		/// answers are cached on the users, which every session shares, but each session reads the store through its own
+		/// connection: while the transaction is open, another session's check caches the committed answer and this session's
+		/// check the uncommitted one, and the end of the transaction makes one of them wrong. So the answers are cleared again
+		/// once the store has committed or rolled back (ClearChangedRights).
+		/// </para>
+		/// <para>
+		/// UserHasRight reads the store and caches its answer inside the catalog's lock, which this clear takes, so after the
+		/// write a check either finished before the clear or reads the written store.
+		/// </para>
+		/// </remarks>
+		protected void RightsChanged(params string[] rightNames)
+		{
+			lock (Catalog)
+			{
+				ClearCachedRightAssignments(rightNames);
+				if (InTransaction)
+				{
+					if (_changedRightNames == null)
+						_changedRightNames = new HashSet<string>();
+					_changedRightNames.UnionWith(rightNames);
+				}
+			}
+		}
+
+		/// <summary>Drops all of the given user's cached answers, now and again when the open transaction ends.</summary>
+		/// <remarks>For a change to the user's roles; see RightsChanged.</remarks>
+		protected void UserRightsChanged(string userID)
+		{
+			lock (Catalog)
+			{
+				ClearUserCachedRightAssignments(userID);
+				if (InTransaction)
+				{
+					if (_changedRightsUserIDs == null)
+						_changedRightsUserIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+					_changedRightsUserIDs.Add(userID);
+				}
+			}
+		}
+
+		/// <summary>Drops every user's cached answers, now and again when the open transaction ends.</summary>
+		/// <remarks>For a role drop, which changes the rights of each of the role's members; see RightsChanged.</remarks>
+		protected void AllRightsChanged()
+		{
+			lock (Catalog)
+			{
+				ClearAllCachedRightAssignments();
+				if (InTransaction)
+					_allRightsChanged = true;
+			}
+		}
+
+		private void ClearAllCachedRightAssignments()
+		{
+			foreach (Schema.User user in Device.UsersCache.Values)
 				user.ClearCachedRightAssignments();
+		}
+
+		// Called once the store has committed or rolled back a level. Only the outermost level's end forgets the record: after
+		// a nested level ends, the outer levels' changes are still uncommitted.
+		private void ClearChangedRights(bool forget)
+		{
+			if ((_changedRightNames != null) || (_changedRightsUserIDs != null) || _allRightsChanged)
+			{
+				lock (Catalog)
+				{
+					if (_allRightsChanged)
+						ClearAllCachedRightAssignments();
+					else
+					{
+						if (_changedRightNames != null)
+							foreach (Schema.User user in Device.UsersCache.Values)
+								foreach (string rightName in _changedRightNames)
+									user.ClearCachedRightAssignment(rightName);
+
+						if (_changedRightsUserIDs != null)
+							foreach (string userID in _changedRightsUserIDs)
+								ClearUserCachedRightAssignments(userID);
+					}
+				}
+			}
+
+			if (forget)
+			{
+				_changedRightNames = null;
+				_changedRightsUserIDs = null;
+				_allRightsChanged = false;
+			}
 		}
 
 		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>

@@ -415,6 +415,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			// Until its rights have rows, the store grants them to every user (CatalogStore.UserHasRight).
+			Schema.CatalogObject catalogObject = objectValue as Schema.CatalogObject;
+			if (catalogObject != null)
+				RightsChanged(catalogObject.GetRights());
 		}
 
 		private void UpdatePersistentObject(Schema.Object objectValue)
@@ -461,6 +466,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			// DeleteCatalogObject cleared the answers before this write; outside a transaction a check in between kept the old one.
+			Schema.CatalogObject catalogObject = objectValue as Schema.CatalogObject;
+			if (catalogObject != null)
+				RightsChanged(catalogObject.GetRights());
 		}
 
 		private void ComputeLoadOrderForHandlers(Schema.FullObjectHeaders loadOrder, int objectID)
@@ -1825,12 +1835,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			RightsChanged(rightName);
 		}
 
 		public override void DeleteRight(string rightName)
 		{
-			base.DeleteRight(rightName);
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -1840,6 +1850,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			base.DeleteRight(rightName);
 		}
 
 		protected override void InternalInsertRole(Schema.Role role)
@@ -1853,6 +1865,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			RightsChanged(role.GetRights());
 		}
 
 		protected override void InternalDeleteRole(Schema.Role role)
@@ -1866,6 +1880,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			// The delete takes the role's grants from each of its members.
+			AllRightsChanged();
 		}
 
 		public bool RoleHasRight(Schema.Role role, string rightName)
@@ -2080,7 +2097,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
-			ClearUserCachedRightAssignments(userID);
+			UserRightsChanged(userID);
 		}
 
 		public void DeleteUserRole(string userID, int roleID)
@@ -2095,7 +2112,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
-			ClearUserCachedRightAssignments(userID);
+			UserRightsChanged(userID);
 
 			if (!ServerProcess.IsLoading())
 				MarkUserOperatorsForRecompile(userID);
@@ -2135,12 +2152,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public void GrantRightToRole(string rightName, int roleID)
 		{
-			lock (Catalog)
-			{
-				foreach (Schema.User user in Device.UsersCache.Values)
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2151,6 +2162,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
+			RightsChanged(rightName);
+
 			// Mark operators for each user that is a member of this role to be recompiled on next execution
 			if (!ServerProcess.IsLoading())
 				MarkRoleOperatorsForRecompile(roleID);
@@ -2158,13 +2171,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public void GrantRightToUser(string rightName, string userID)
 		{
-			lock (Catalog)
-			{
-				Schema.User user;
-				if (Device.UsersCache.TryGetValue(userID, out user))
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2175,6 +2181,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
+			RightsChanged(rightName);
+
 			// Mark operators for this user to be recompiled on next execution
 			if (!ServerProcess.IsLoading())
 				MarkUserOperatorsForRecompile(userID);
@@ -2182,12 +2190,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public void RevokeRightFromRole(string rightName, int roleID)
 		{
-			lock (Catalog)
-			{
-				foreach (Schema.User user in Device.UsersCache.Values)
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2198,19 +2200,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
+			RightsChanged(rightName);
+
 			if (!ServerProcess.IsLoading())
 				MarkRoleOperatorsForRecompile(roleID);
 		}
 
 		public void RevokeRightFromUser(string rightName, string userID)
 		{
-			lock (Catalog)
-			{
-				Schema.User user;
-				if (Device.UsersCache.TryGetValue(userID, out user))
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2221,18 +2218,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
+			RightsChanged(rightName);
+
 			if (!ServerProcess.IsLoading())
 				MarkUserOperatorsForRecompile(userID);
 		}
 
 		public void RevertRightForRole(string rightName, int roleID)
 		{
-			lock (Catalog)
-			{
-				foreach (Schema.User user in Device.UsersCache.Values)
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2243,19 +2236,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
+			RightsChanged(rightName);
+
 			if (!ServerProcess.IsLoading())
 				MarkRoleOperatorsForRecompile(roleID);
 		}
 
 		public void RevertRightForUser(string rightName, string userID)
 		{
-			lock (Catalog)
-			{
-				Schema.User user;
-				if (Device.UsersCache.TryGetValue(userID, out user))
-					user.ClearCachedRightAssignment(rightName);
-			}
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2265,6 +2253,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			RightsChanged(rightName);
 
 			if (!ServerProcess.IsLoading())
 				MarkUserOperatorsForRecompile(userID);
@@ -2303,10 +2293,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public void SetRightOwner(string rightName, string userID)
 		{
-			// The right belongs to its owner, so the previous owner's cached answer is as stale as the new owner's.
-			lock (Catalog)
-				ClearCachedRightAssignments(new string[] { rightName });
-
 			AcquireCatalogStoreConnection(true);
 			try
 			{
@@ -2316,6 +2302,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
+
+			// The right belongs to its owner, so the previous owner's cached answer is as stale as the new owner's.
+			RightsChanged(rightName);
 		}
 
 		#endregion		

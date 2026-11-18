@@ -333,6 +333,56 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// A table created in a transaction is refused to a user without rights on it once that transaction commits, even when the
+		/// user's right was checked by name in another session while the transaction was open: the committed store has no row
+		/// for the right yet, and a right with no row is granted.
+		/// </summary>
+		[Test]
+		public void CreatedTableRefusedAfterCommitDespiteCheckDuringTransaction()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(CreatedTableRefusedAfterCommitDespiteCheckDuringTransaction)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', '');");
+				object inTransaction = null;
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("create table CreatedT { ID : Integer, key { ID } };");
+						RunAs(instance, "Admin", otherProcess => inTransaction = ((ServerProcess)otherProcess).Evaluate("UserHasRight('RightsUser', 'General.CreatedTInsert')", null).AsNative);
+						process.CommitTransaction();
+					}
+				);
+
+				Assert.That(inTransaction, Is.True);
+				Exception exception = Assert.Catch(() => RunAs(instance, "RightsUser", process => process.Execute("insert row { 1 ID } into CreatedT;", null)));
+				Assert.That(FindError(exception, (int)ServerException.Codes.UnauthorizedRight), Is.Not.Null, exception.ToString());
+			}
+		}
+
+		/// <summary>Dropping a role takes the rights it granted from its members, who had used them before the drop.</summary>
+		[Test]
+		public void DroppedRoleRightRefusedToFormerMember()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(DroppedRoleRightRefusedToFormerMember)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table RoleT { ID : Integer, key { ID } }; create role RightsRole; GrantRightToRole('General.RoleTInsert', 'RightsRole'); AddUserToRole('RightsUser', 'RightsRole');");
+				RunAs(instance, "RightsUser", process => process.Execute("insert row { 1 ID } into RoleT;", null));
+
+				instance.ExecuteScript("drop role RightsRole;");
+
+				Exception exception = Assert.Catch(() => RunAs(instance, "RightsUser", process => process.Execute("insert row { 2 ID } into RoleT;", null)));
+				Assert.That(FindError(exception, (int)ServerException.Codes.UnauthorizedRight), Is.Not.Null, exception.ToString());
+			}
+		}
+
 		/// <summary>SetObjectOwner on a name that resolves to no catalog object reports CatalogObjectExpected, not a null reference.</summary>
 		[Test]
 		public void SetObjectOwnerOfUnknownObjectReportsCatalogObjectExpected()
