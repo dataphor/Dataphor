@@ -74,9 +74,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(RowCount("MemoryTable"), Is.EqualTo(0));
 		}
 
-		// A commit runs deferred handlers in a nested transaction. When that begin failed, the commit's error handling rolled back a level
-		// on every session: the half-begun level on the sessions it reached, and the client's own level on the memory device's session,
-		// discarding the client's work in a transaction that stayed open.
+		// A commit runs deferred handlers in a nested transaction. A failure to begin it must leave the client's transaction as it was,
+		// one level deep with its work in it; the half-begun nested level used to stay open. The begin sits outside the handlers' try in
+		// InvokeDeferredHandlers: inside it, the catch's rollback would end the client's level and this test would see no transaction.
 		[Test]
 		public void TestDeferredHandlerBeginFails()
 		{
