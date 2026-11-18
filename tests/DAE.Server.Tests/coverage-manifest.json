@@ -1,7 +1,7 @@
 [
 { "script": "AggregateOperators", "status": "pass" },
 { "script": "Aggregates", "status": "pass" },
-{ "script": "ApplicationTransactions", "status": "pass", "batches": true, "note": "the script leaves and rejoins an application transaction it changed; run nested in one statement, that statement's open transaction discards the transaction's work at each leave (engine-at-leave-discards-transaction-work)" },
+{ "script": "ApplicationTransactions", "status": "pass", "batches": true, "note": "the script leaves and rejoins an application transaction it changed; run nested in one statement, each leave would fall inside that statement's open transaction and raise 125111" },
 { "script": "AsyncExecution", "status": "pass", "preamble": "SetUseImplicitTransactions(false);", "note": "implicit transactions off, as the legacy test ran scripts: the tables it creates must be committed for the sessions and process it starts to see them" },
 { "script": "BooleanLibrary", "status": "pass" },
 { "script": "Browse", "status": "pass" },

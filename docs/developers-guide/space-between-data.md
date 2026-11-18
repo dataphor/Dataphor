@@ -57,7 +57,7 @@ Calling `BeginApplicationTransaction` starts a new application transaction in th
 
 Calling `JoinApplicationTransaction` joins the current process to the specified application transaction. A process may only participate in one application transaction at any given time. The process can join the application transaction in *insert* mode, which controls whether or not data from referenced table variables is copied into the application transaction.
 
-Calling `LeaveApplicationTransaction` causes the current process to leave the application transaction in which it is participating. Leaving an application transaction does not end the application transaction.
+Calling `LeaveApplicationTransaction` causes the current process to leave the application transaction in which it is participating. Leaving an application transaction does not end the application transaction. A process cannot leave while it has a transaction open that the statement calling `LeaveApplicationTransaction` did not begin itself (an explicit transaction, or the transaction of an enclosing statement): leaving would discard the work done in the application transaction during that transaction, so the call raises error 125111 and the process stays joined. End the transaction first.
 
 Calling `PrepareApplicationTransaction` posts the effects of the application transaction to the actual database, but does not commit the application transaction. This call is exposed to allow the application transaction to participate in a two-phase commit protocol with a standard database transaction.
 

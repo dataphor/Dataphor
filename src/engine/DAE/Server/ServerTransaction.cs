@@ -90,6 +90,14 @@ namespace Alphora.Dataphor.DAE.Server
 			set { _prepared = value; } 
 		}
 		
+		private int _implicitCallDepth;
+		/// <summary>The depth of the transactional call that began this transaction implicitly and will end it, counting the outermost call as 1; 0 for a transaction begun explicitly, or begun implicitly by a call that ended without ending it.</summary>
+		public int ImplicitCallDepth
+		{
+			get { return _implicitCallDepth; }
+			set { _implicitCallDepth = value; }
+		}
+		
 		private bool _inRollback;
 		public bool InRollback
 		{

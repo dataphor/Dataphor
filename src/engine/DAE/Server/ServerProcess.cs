@@ -107,7 +107,7 @@ namespace Alphora.Dataphor.DAE.Server
 														_debuggedBy.Detach(this);
 														
 													if (_applicationTransactionID != Guid.Empty)
-														LeaveApplicationTransaction();
+														InternalLeaveApplicationTransaction();
 												}
 												finally
 												{
@@ -1572,7 +1572,31 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		/// <summary>Leaves the application transaction the process has joined. Raises ApplicationTransactionException 125111, and stays joined, when that would discard work: see ApplicationTransactionUtility.CheckCanLeaveApplicationTransaction.</summary>
 		public void LeaveApplicationTransaction()
+		{
+			// The check runs before this call's own transactional call begins, so that the implicit transaction the enclosing statement began (or none, for a call from a client) is the one it may ignore
+			BeginCall();
+			try
+			{
+				try
+				{
+					ApplicationTransactionUtility.CheckCanLeaveApplicationTransaction(this);
+				}
+				catch (Exception E)
+				{
+					throw WrapException(E);
+				}
+				InternalLeaveApplicationTransaction();
+			}
+			finally
+			{
+				EndCall();
+			}
+		}
+		
+		/// <summary>Leaves the application transaction without the check LeaveApplicationTransaction makes, rolling back the process's transactions on the application transaction's device session. For the engine's own leaves: disposing the process, ending the application transaction, and the temporary join that prepares it.</summary>
+		internal void InternalLeaveApplicationTransaction()
 		{
 			Exception exception = null;
 			int nestingLevel = BeginTransactionalCall();
@@ -1783,6 +1807,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		// The number of transactional calls (statements, expressions, cursor calls and process calls such as LeaveApplicationTransaction) running on the process
+		private int _transactionalCallDepth;
+		
 		internal int BeginTransactionalCall()
 		{
 			BeginCall();
@@ -1791,9 +1818,13 @@ namespace Alphora.Dataphor.DAE.Server
 				_stopError = false;
 				int nestingLevel = _transactions.Count;
 				if ((_transactions.Count == 0) && UseImplicitTransactions)
+				{
 					InternalBeginTransaction(DefaultIsolationLevel);
+					_transactions.CurrentTransaction().ImplicitCallDepth = _transactionalCallDepth + 1;
+				}
 				if (_transactions.Count > 0)
 					_transactions.CurrentTransaction().Prepared = false;
+				_transactionalCallDepth++;
 				return nestingLevel;
 			}
 			catch
@@ -1852,7 +1883,26 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
+				// An implicit transaction outlives its call when implicit transactions were switched off during the call; from here on it is an ordinary open transaction
+				if ((nestingLevel == 0) && (_transactions.Count > 0) && (_transactions[0].ImplicitCallDepth == _transactionalCallDepth))
+					_transactions[0].ImplicitCallDepth = 0;
+				_transactionalCallDepth--;
 				EndCall();
+			}
+		}
+		
+		/// <summary>Whether a transaction is open on the process other than the implicit transaction of the transactional call now running (for a call from a client, no call is running, so any open transaction counts).</summary>
+		internal bool InTransactionBeyondCurrentCall
+		{
+			get
+			{
+				for (int index = 0; index < _transactions.Count; index++)
+				{
+					int implicitCallDepth = _transactions[index].ImplicitCallDepth;
+					if ((implicitCallDepth == 0) || (implicitCallDepth != _transactionalCallDepth))
+						return true;
+				}
+				return false;
 			}
 		}
 		

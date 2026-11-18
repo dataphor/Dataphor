@@ -11,6 +11,12 @@ tradeoffs: Applications usually keep shared data on a SQL Server or PostgreSQL d
 1. **Should the memory device provide transaction isolation** (the third arm: an uncommitted transaction's changes block other transactions, or are hidden from them)? **Recommended: no.** `docs/developers-guide/devices.md` promises the memory device only "minimal concurrency protection", and applications keep shared data on SQL Server or PostgreSQL. Record that in a `NOTE:` in `MemoryDevice.cs`, and move the `Transaction.Isolation.Run` manifest entry to `feat-ws7-devices-and-libraries`, to run against a device that locks. The alternative, row locks held for the life of a transaction and honouring the isolation levels, is a feature-sized change.
 2. **How much locking for the first two arms** (concurrent statements must not corrupt a table's index; reading `System.Sessions`/`System.Processes` must not fail while sessions come and go)? **Recommended:** one reader-writer lock per `NativeTable`, held for the length of each device-level read or write, so readers share and writers exclude. Also lock the server's session and process lists, or take a snapshot of them under a lock, while the catalog device fills those tables. Cost: an uncontended lock on every memory-device row operation. Rejected: a lock per tree node (much harder to get right), and one lock for the whole device (serializes unrelated tables).
 
+NTA decisions:
+1. no, but put it as a low priority debt- ticket in the backlog.  Can draw inspiration from ../quereus, another database engine I own if it helps
+2. yes to reader-writer lock per NativeTable
+
+(Tending agent, 2026-11-18: the low-priority ticket is `tickets/backlog/debt-memory-device-transaction-isolation.md`. Point the `Transaction.Isolation.Run` manifest entry at `debt-memory-device-transaction-isolation`, not `feat-ws7-devices-and-libraries`, and keep the `NOTE:` in `MemoryDevice.cs` that records the memory device gives no transaction isolation.)
+
 If question 1 is answered "no", the first two arms become an ordinary fix with the reproduction below.
 
 ## What happens

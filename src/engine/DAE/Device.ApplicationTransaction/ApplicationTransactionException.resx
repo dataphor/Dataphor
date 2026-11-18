@@ -62,4 +62,5 @@
 	<data name="125108"><value>Table variable "{0}" is already an application transaction table variable for table variable "{1}".</value></data>
 	<data name="125109"><value>Table variable "{0}" is participating in at least one application transaction and cannot be altered or dropped.</value></data>
 	<data name="125110"><value>Operator "{0}" is participating in at least one application transaction and cannot be altered or dropped.</value></data>
+	<data name="125111"><value>Cannot leave application transaction while a transaction is open on the process.</value></data>
 </root>

@@ -46,7 +46,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			TableVariableParticipating = 125109,
 			
 			/// <summary>Error Code 125110: "Operator "{0}" is participating in at least one application transaction and cannot be altered or dropped."</summary>
-			OperatorParticipating = 125110
+			OperatorParticipating = 125110,
+
+			/// <summary>Error Code 125111: "Cannot leave application transaction while a transaction is open on the process."</summary>
+			LeaveInTransaction = 125111
 		}
 
 		// Resource manager for this exception class

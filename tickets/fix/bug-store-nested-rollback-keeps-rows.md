@@ -17,6 +17,8 @@ Rejected as the default: **SQLite savepoints**. Savepoints undo every statement 
 
 If nothing is decided, the defect stays as it is: rare, and caught by the store contract tests once they exist. Either fix is internal and reversible, with no compatibility surface.
 
+NTA decision: take recommendation
+
 ## What happens
 
 The catalog store emulates nested transactions: only the outermost level is a real SQL transaction, and each nested level keeps an in-memory log of inverse statements that a nested rollback replays (`SQLStoreConnection`, `BeginTransactionOperation` / `ModifyOperation`). Only writes made through a store cursor are logged (`SQLStoreCursor.Insert`/`Update`/`Delete`, when `TransactionCount > 1`).

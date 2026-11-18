@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			for (int index = 0; index < processes.Length; index++)
 				try
 				{
-					processes[index].LeaveApplicationTransaction();
+					processes[index].InternalLeaveApplicationTransaction();
 				}
 				catch (Exception E)
 				{
@@ -151,6 +151,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
+		/// <summary>Raises 125111 when leaving would discard work done in the application transaction: when the process's session on the application transaction device has a transaction open other than the implicit transaction of the statement doing the leave.</summary>
+		/// <remarks>Every statement runs in an implicit transaction while implicit transactions are on, so that one is excepted; refusing it would make leaving impossible. Work done earlier in the same statement is in that transaction and is still discarded; whether to refuse that too is engine-at-leave-same-statement-work.</remarks>
+		public static void CheckCanLeaveApplicationTransaction(ServerProcess process)
+		{
+			if ((process.ApplicationTransactionID != Guid.Empty) && process.InTransactionBeyondCurrentCall)
+			{
+				int index = process.DeviceSessions.IndexOf(process.ServerSession.Server.ATDevice);
+				if ((index >= 0) && process.DeviceSessions[index].InTransaction)
+					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.LeaveInTransaction);
+			}
+		}
+		
 		public static void LeaveApplicationTransaction(ServerProcess process)
 		{
 			if (process.ApplicationTransactionID != Guid.Empty)
@@ -159,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				try
 				{
 					transaction.Processes.Remove(process.ProcessID);
-					// NOTE: disconnecting disposes the AT device session, which rolls back any transaction still open on it, so leaving inside an open process transaction discards the AT work done in that transaction (legacy 3.1 behaviour); whether to keep it is engine-at-leave-discards-transaction-work.
+					// NOTE: disconnecting disposes the AT device session, which rolls back every transaction still open on it and so discards the AT work done in them. ServerProcess.LeaveApplicationTransaction therefore refuses to leave while a transaction other than the leaving statement's own implicit one is open (CheckCanLeaveApplicationTransaction, error 125111); the engine's own leaves (process dispose, AT commit/rollback cleanup, the temporary join in prepare) come here unchecked.
 					process.DeviceDisconnect(transaction.Device); // Disconnect the session to ensure that the saved pointer to this AT is cleared
 				}
 				finally
@@ -299,7 +311,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								{
 									operation = transaction.Operations[index];
 									operation.Apply(program);
-									deviceTransaction.AppliedOperations.Add(operation);
+									// Recorded so that a rollback of the process transaction resets the operation; outside a transaction there is no rollback to prepare for
+									if (deviceTransaction != null)
+										deviceTransaction.AppliedOperations.Add(operation);
 								}
 								transaction.Prepared = true;
 							}
@@ -322,7 +336,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			finally
 			{
 				if (program.ServerProcess.ApplicationTransactionID != saveATID)
-					program.ServerProcess.LeaveApplicationTransaction();
+					program.ServerProcess.InternalLeaveApplicationTransaction();
 			}
 		}
 		
