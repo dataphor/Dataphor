@@ -1124,11 +1124,17 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 		}
 		
-		// NOTE: The D4 System library's version was the engine assembly version (3.1.<build>.<revision>). The assembly is now 4.0.0.0 (decision D7),
-		// but library references may pin System's major version: the LibraryCoverage script references System 3, and an application library may do the same.
-		// It stays 3.1 until a decision moves it (blocked ticket system-library-version); a fixed value also makes it the same on every build.
-		// The catalog store records this value, not the assembly version, for System in DAELibraryVersions and DAEServerInfo, as it did when the two were equal.
-		private static readonly VersionNumber SystemLibraryVersion = new VersionNumber(3, 1, 0, 0);
+		// NOTE: The D4 System library's version follows the engine assembly version, which is a fixed 4.0.0.0 (Directory.Build.props), so it is the same on every build.
+		// Its major version is a compatibility surface: a library reference can pin System's major version (VersionNumber(3) matches only 3.x),
+		// so changing the assembly's major version makes every library that pins the old one fail to register. Change it only with a migration note.
+		// The catalog store records this value for System in DAELibraryVersions and DAEServerInfo.
+		private static readonly VersionNumber SystemLibraryVersion = GetSystemLibraryVersion();
+
+		private static VersionNumber GetSystemLibraryVersion()
+		{
+			Version version = typeof(Engine).Assembly.GetName().Version;
+			return new VersionNumber(version.Major, version.Minor, version.Build, version.Revision);
+		}
 
 		public virtual void LoadAvailableLibraries()
 		{
