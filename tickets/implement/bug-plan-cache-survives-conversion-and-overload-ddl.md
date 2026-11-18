@@ -3,6 +3,13 @@ architecture: docs/modernization-plan.md#known-defects
 files: src/engine/DAE/Runtime.Instructions/DDLNodes.cs, tests/DAE.Server.Tests/SchemaCacheInvalidationTest.cs, docs/modernization-plan.md
 repro: verified
 ----
+<!-- resume-note -->
+RESUME: A prior agent run on this ticket did not complete.
+  Prior run: 2026-11-18T23:48:34.377Z (agent: claude)
+  Log file: c:\Projects\DataphorModernized\modernization\tickets\.logs\bug-plan-cache-survives-conversion-and-overload-ddl.implement.2026-11-18T23-48-34-377Z.log
+Read the log to see what was done. Resume where it left off.
+If the prior run hit a timeout or repeated error, be cautious not to rush into the same situation.
+<!-- /resume-note -->
 ## What is wrong
 
 The server keeps a plan cache (`src/engine/DAE/Server/PlanCache.cs`): compiled plans keyed by statement text (plus current library, context and application-transaction flag), shared by every session. `PlanCache.Get` discards a cached plan when `Catalog.PlanCacheTimeStamp` is newer than the stamp the plan was cached with. DDL that can change how an already-compiled statement binds bumps that timestamp (`Catalog.UpdatePlanCacheTimeStamp()`): `DropOperatorNode`, `DropScalarTypeNode`, table and view drops, several alter nodes in `DDLNodes.cs`, `CreateReferenceNode`, and the rollback path (`CatalogDeviceSession.InvalidateCachesAfterUndo`). Three nodes that change operator resolution or conversion paths do not:

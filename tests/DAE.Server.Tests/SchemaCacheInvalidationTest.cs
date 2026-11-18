@@ -17,8 +17,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// them) and before it executed (which changes the catalog). PrepareStatement holds the statement between the two.
 	/// </summary>
 	/// <remarks>
-	/// Each test's last expression differs in text from the one compiled between compile and execute, because the server's plan
-	/// cache, keyed by statement text, also keeps the old answer after these statements (bug-plan-cache-survives-conversion-and-overload-ddl).
+	/// The first two tests use different expression text after the DDL so they measure the compile-to-execute window, not the
+	/// plan cache; the three ...InvalidatesCachedPlans tests below cover the plan cache case by evaluating the identical text.
 	/// </remarks>
 	[TestFixture]
 	public class SchemaCacheInvalidationTest : InProcessTestFixture

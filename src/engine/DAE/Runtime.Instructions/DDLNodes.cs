@@ -305,6 +305,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			program.CatalogDeviceSession.CreateConversion(Conversion);
+			// NOTE: flushes every cached plan, measured as no slower for library registration; if a workload creating operators while serving repeated statements shows plan-cache churn, invalidate only plans that resolved this operator name or traced a path through these types.
+			program.Catalog.UpdatePlanCacheTimeStamp();
 			return null;
 		}
     }
@@ -326,6 +328,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						CheckNoDependents(program, conversion);
 						
 						program.CatalogDeviceSession.DropConversion(conversion);
+						program.Catalog.UpdatePlanCacheTimeStamp();
 						break;
 					}
 				
@@ -632,6 +635,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			program.CatalogDeviceSession.CreateOperator(_createOperator);
+			program.Catalog.UpdatePlanCacheTimeStamp();
 			return null;
 		}
     }
