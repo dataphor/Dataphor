@@ -7,6 +7,16 @@ severity: corruption
 likelihood: unusual
 tradeoffs: Needs an explicit nested transaction that changes the schema and is rolled back while its outer transaction commits, which few applications do; a maintainer may wait for the store contract tests to pin it before choosing between the two fixes.
 ----
+**Blocked: design choice between two fixes.** Unblocks when the owner picks one of the two fixes under *Fix options* (or edits the recommendation below). The defect and its reproduction are settled.
+
+## Recommendation
+
+> **Log statement writes** (the generic option). `CatalogStoreConnection.InsertRow` and `DeleteRows` log their inverse statements at nested levels, the way store cursors already do, reading the row first where only key values are at hand. It fixes the SQLite, SQL Server and PostgreSQL stores at once, keeps a single undo mechanism, and doesn't interact with the lazy write transactions of `store-sqlite-concurrency`.
+
+Rejected as the default: **SQLite savepoints**. Savepoints undo every statement the same way, including future write paths nobody remembers to log. But they fix only SQLite, need the cursor undo log switched off for that store, and need a savepoint created for each nested level the lazy write transaction catches up. Choose it if covering write paths that aren't logged yet matters more than one mechanism for every store.
+
+If nothing is decided, the defect stays as it is: rare, and caught by the store contract tests once they exist. Either fix is internal and reversible, with no compatibility surface.
+
 ## What happens
 
 The catalog store emulates nested transactions: only the outermost level is a real SQL transaction, and each nested level keeps an in-memory log of inverse statements that a nested rollback replays (`SQLStoreConnection`, `BeginTransactionOperation` / `ModifyOperation`). Only writes made through a store cursor are logged (`SQLStoreCursor.Insert`/`Update`/`Delete`, when `TransactionCount > 1`).

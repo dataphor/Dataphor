@@ -6,6 +6,13 @@ severity: corruption
 likelihood: unusual
 tradeoffs: Applications usually keep shared data on a SQL Server or PostgreSQL device and use the memory device for scratch tables, so a maintainer may defer this until a real application writes a shared memory table from several sessions; any locking added costs every memory-device read and write.
 ----
+**Blocked: two design choices.** Unblocks when the owner answers both questions below (or edits the recommendations).
+
+1. **Should the memory device provide transaction isolation** (the third arm: an uncommitted transaction's changes block other transactions, or are hidden from them)? **Recommended: no.** `docs/developers-guide/devices.md` promises the memory device only "minimal concurrency protection", and applications keep shared data on SQL Server or PostgreSQL. Record that in a `NOTE:` in `MemoryDevice.cs`, and move the `Transaction.Isolation.Run` manifest entry to `feat-ws7-devices-and-libraries`, to run against a device that locks. The alternative, row locks held for the life of a transaction and honouring the isolation levels, is a feature-sized change.
+2. **How much locking for the first two arms** (concurrent statements must not corrupt a table's index; reading `System.Sessions`/`System.Processes` must not fail while sessions come and go)? **Recommended:** one reader-writer lock per `NativeTable`, held for the length of each device-level read or write, so readers share and writers exclude. Also lock the server's session and process lists, or take a snapshot of them under a lock, while the catalog device fills those tables. Cost: an uncontended lock on every memory-device row operation. Rejected: a lock per tree node (much harder to get right), and one lock for the whole device (serializes unrelated tables).
+
+If question 1 is answered "no", the first two arms become an ordinary fix with the reproduction below.
+
 ## What happens
 
 The memory device (`System.Temp`: the `System` library's default device, where a table goes when its library names no default device, as `General` does; also the base class of SimpleDevice) keeps each database-scoped table as one `NativeTable` with a B-tree index per key (`NativeRowTree`), shared by every session. Nothing serializes access to it: `MemoryDevice.EnsureNativeTable` locks only the list of tables, and inserts, updates, deletes and scans walk and rearrange the tree's nodes with no lock. A locking path exists (`#if LOCKROWTREE` in `RowTreeNode`'s constructor) but nothing defines the symbol and its code refers to a parameter that no longer exists, so it has not compiled for years. The engine's process and transaction locking does not cover the tree either.

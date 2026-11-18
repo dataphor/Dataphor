@@ -1,9 +1,17 @@
-description: Decide what to do with sixteen engine test scripts that could not have passed on Dataphor 3.1 either (written for an older form of the language, testing features that were removed, scratch notes, or broken text), since the rules today only allow "must pass" or "known failure" and forbid editing a test script.
+description: Sixteen engine test scripts fail because they could not have passed on Dataphor 3.1 either (an older form of the language, features that were removed, scratch notes, or broken text); they stay recorded as known failures, and this ticket owns making each of them pass.
 architecture: docs/modernization-plan.md#ws3-test-suite
-files: tests/DAE.Server.Tests/coverage-manifest.json, tests/DAE.Server.Tests/CoverageManifest.cs, tests/DAE.Server.Tests/CoverageScripts.cs, tests/libraries/TestFramework.Coverage.Scripts/Documents, AGENTS.md, tickets/rules/10-dataphor.md, docs/modernization-plan.md
+files: tests/DAE.Server.Tests/coverage-manifest.json, tests/libraries/TestFramework.Coverage.Scripts/Documents
 difficulty: medium
 ----
-**Blocked: the specification is silent and the rules contradict each other.** Unblocks when the owner accepts or edits the proposed text below. Until then the sixteen scripts stay `known-failure` against this slug, and the test run is green.
+## Decision (owner, 2026-11-18): keep them as known failures; this ticket fixes them
+
+The owner decided against a new `retired` status and against deleting the scripts. The sixteen scripts stay `known-failure` in the manifest, pointing at this slug, and this ticket owns fixing them. The slug is kept so the manifest entries stay valid. The *Proposed text* and *Alternatives* sections below were the blocked proposal and are **not** adopted. The evidence tables are the starting point for the work.
+
+When this is promoted, the plan stage splits it by the categories below. The slug stays on the ticket that fixes the last script, and each piece flips its scripts' manifest entries to `pass` in its own commit:
+
+- **Live intent, broken text** (`Serialization`, `SerializationReferences`, `StreamAllocation`): the most useful work and the first to promote. Each needs some statements in the script itself changed. "Never edit an expected value" still holds. Whether statements may be repaired, and which, is still the owner's call: the plan ticket lists each proposed statement change with its evidence and asks for approval in `blocked/` before editing.
+- **Earlier copies whose successors pass** (`Domains`, `SerializationDomains`, `LibraryDomains`) and **features 3.1 did not have** (`EntryLibrary`, `PresentationLibrary`, `IStringLibrary`, `DerivationMaps`, `MaximumRowCount`, `DAE`, `Exceptions`): making these pass means either rewriting the script or restoring an engine feature. Both are decisions for the owner, so the plan stage proposes one per script.
+- **Not tests** (`ForeignSuperKeysAndConstantReferences`, `ViewDependencies`, `DebugTest`): same as the previous bullet.
 
 ## The question
 

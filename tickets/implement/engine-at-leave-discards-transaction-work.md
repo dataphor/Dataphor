@@ -1,9 +1,21 @@
-description: When a process leaves an application transaction while one of its ordinary transactions is still open, the engine silently throws away the changes it made in the application transaction during that open transaction, even if the open transaction later commits. Decide what leaving should do in that case: keep the work, refuse to leave, or stay as it is.
+description: Leaving an application transaction while an ordinary transaction is still open silently throws away the work done in the application transaction; make leaving in that case fail with a clear error instead, so no work is lost.
 architecture: docs/modernization-plan.md#ws3-test-suite
-files: src/engine/DAE/Device.ApplicationTransaction/ApplicationTransaction.cs, src/engine/DAE/Device.ApplicationTransaction/ApplicationTransactionException.cs, src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Schema/Device.cs
+files: src/engine/DAE/Device.ApplicationTransaction/ApplicationTransaction.cs, src/engine/DAE/Device.ApplicationTransaction/ApplicationTransactionException.cs, src/engine/DAE/Device.ApplicationTransaction/ApplicationTransactionException.resx, src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Schema/Device.cs, docs/migration-notes.md
 repro: verified
 ----
-**Blocked: silent specification (D4 semantics).** Unblocks when a human picks one of the behaviours below (or edits the proposed wording); the choice changes D4 behaviour that applications could notice, so the project rules route it here rather than into a fix.
+## Decision (owner, 2026-11-18): refuse to leave
+
+The owner chose the **"Refuse to leave"** alternative below. That makes this a deliberate change to D4 behaviour and adds an error code, and the owner has authorized both. This was blocked; the analysis below is kept for context.
+
+What to do:
+
+- `LeaveApplicationTransaction()` raises a new `ApplicationTransactionException` when the process's application transaction device session has an open transaction. Check this before anything is disconnected or rolled back. The process then stays joined, and its transaction and the AT's work are untouched. Use the next free code in the 125xxx range, 125111 at the time of writing (verify against `ApplicationTransactionException.cs` and `docs/reference/Error Message Prefix Codes.txt`). Message: `Cannot leave application transaction while a transaction is open on the process.` Add it to the `.resx` with the same encoding and line endings as the file.
+- Refuse whenever the AT session has an open transaction, not only when that transaction recorded AT operations. That rule is simple to state, and it does not depend on what the transaction happened to do.
+- The same check applies to every path that leaves: the D4 operator and the `IServerProcess`/API call, if they are separate code paths. Disposing or disconnecting a process while it is joined is not a leave; leave that behaviour as it is.
+- Reproduction test, at the lowest layer: the sequence under *What happens*, run batch by batch on one process. The leave now raises the new error. After the error the process is still joined, the inserted row is still visible, and committing the process transaction and then the AT puts the row in the real table.
+- Run the full suite. If a coverage script that is `pass` today starts failing because of the refusal, don't edit the script: route this ticket to `blocked/` and name the script. `StreamAllocation` is already a known failure (`test-pre-3-1-scripts-policy`); if its recorded error text changes, update its manifest `error` substring and say so.
+- `docs/migration-notes.md`: an entry saying that leaving an application transaction while a process transaction is open now raises error 125111 instead of silently discarding the AT work done in that transaction; end the transaction before leaving. If the D4 reference documents `LeaveApplicationTransaction`, update it.
+- Replace the `NOTE:` at the leave site, if there is one, with one that states the rule and why (leaving disconnects the AT session, which would roll back its open transaction).
 
 ## What happens
 
