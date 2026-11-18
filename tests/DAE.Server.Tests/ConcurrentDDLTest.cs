@@ -146,6 +146,66 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The scalar conversion path cache is shared by every session of a catalog, like the operator resolution cache (K3). The
+		/// compiler adds to it under a lock on the cache, but compiling create conversion, drop conversion and create type clears
+		/// entries from it without that lock; unsynchronized, the clear's enumeration fails with "Collection was modified".
+		/// </summary>
+		[Test]
+		public void ConversionPathCacheAllowsConcurrentAddAndClear()
+		{
+			Schema.ScalarConversionPathCache cache = new Schema.ScalarConversionPathCache();
+			Schema.ScalarType target = new Schema.ScalarType(1, "System.CacheTarget");
+			// Entries that every Clear enumerates, so that its enumeration overlaps the adds.
+			for (int index = 0; index < 200; index++)
+				cache.Add(new Schema.ScalarType(1000 + index, "System.Seed" + index), target, new Schema.ScalarConversionPath());
+
+			ConcurrentBag<Exception> errors = new ConcurrentBag<Exception>();
+			DateTime stop = DateTime.UtcNow.AddMilliseconds(500);
+			List<Thread> threads = new List<Thread>();
+			for (int threadNumber = 0; threadNumber < 8; threadNumber++)
+			{
+				int id = threadNumber;
+				Thread thread =
+					new Thread(() =>
+					{
+						for (int index = 0; DateTime.UtcNow < stop && errors.IsEmpty; index++)
+						{
+							Schema.ScalarType source = new Schema.ScalarType(-1, String.Format("System.T{0}_{1}", id, index));
+							try
+							{
+								switch (id % 4)
+								{
+									case 0:
+									case 1:
+										// The compiler's discipline: lookup and add under a lock on the cache.
+										lock (cache)
+											if (cache[source, target] == null)
+												cache.Add(source, target, new Schema.ScalarConversionPath());
+										break;
+									case 2:
+										cache.Clear(source);
+										break;
+									default:
+										cache.Clear(new Schema.Conversion(-1, source.Name + "Conversion", source, target, null, false));
+										break;
+								}
+							}
+							catch (Exception exception)
+							{
+								errors.Add(exception);
+							}
+						}
+					});
+				threads.Add(thread);
+				thread.Start();
+			}
+			foreach (Thread thread in threads)
+				thread.Join();
+
+			Assert.That(errors.Select(error => error.Message).Distinct(), Is.Empty);
+		}
+
+		/// <summary>
 		/// A library caches its name resolution path, and every session whose current library it is reads that cache. Two
 		/// sessions that found it empty at the same moment once built into the same object, and the second insert of a library
 		/// failed with "Duplicate object name" (seen in ConcurrentSessionsStoreTheirOwnScripts as the default device of General
