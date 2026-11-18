@@ -160,6 +160,46 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// A nested transaction's rollback undoes the catalog rows that a create or a drop wrote in it, and the outer transaction's
+		/// commit then leaves the stored catalog exactly as it was. Most catalog rows are written by statement rather than through a
+		/// store cursor, and those writes were not logged for a nested rollback: the rolled-back table's rows stayed in the store,
+		/// and a rolled-back drop lost them, while the server's catalog in memory was restored.
+		/// </summary>
+		[TestCase(false)]
+		[TestCase(true)]
+		public void NestedRollbackUndoesStatementWrites(bool drop)
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(NestedRollbackUndoesStatementWrites)))
+			{
+				instance.Server.Start();
+				if (drop)
+					instance.ExecuteScript("create table NestedT { ID : Integer, key { ID } };");
+				List<string> storedBefore = StoredCatalog(instance);
+
+				RunWithin
+				(
+					instance,
+					() => RunAs
+					(
+						instance,
+						"Admin",
+						process =>
+						{
+							process.BeginTransaction(IsolationLevel.CursorStability);
+							process.BeginTransaction(IsolationLevel.CursorStability);
+							process.ExecuteScript(drop ? "drop table NestedT;" : "create table NestedT { ID : Integer, key { ID } };");
+							process.RollbackTransaction();
+							process.CommitTransaction();
+						}
+					)
+				);
+
+				Assert.That(instance.Server.Catalog.Contains("NestedT"), Is.EqualTo(drop));
+				Assert.That(StoredCatalog(instance), Is.EqualTo(storedBefore));
+			}
+		}
+
+		/// <summary>
 		/// A rollback of SetObjectOwner, outermost or nested, restores the owner the server holds in memory, of the table, the
 		/// scalar type and the operators generated for the type. Operator bodies, views and table handlers are compiled and run
 		/// under that owner's rights, and SetObjectOwner lets that owner reassign the object.
@@ -383,6 +423,33 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						rights.Add(new string[] { reader.GetString(0), reader.GetString(1) });
 			}
 			return rights;
+		}
+
+		// Every row of every table in the catalog store, as "Table: value | value | ...", sorted.
+		private static List<string> StoredCatalog(TestServerInstance instance)
+		{
+			List<string> rows = new List<string>();
+			using (SQLiteConnection connection = instance.OpenCatalogStoreFile())
+			{
+				List<string> tableNames = new List<string>();
+				using (SQLiteCommand command = new SQLiteCommand("select name from sqlite_master where type = 'table'", connection))
+				using (SQLiteDataReader reader = command.ExecuteReader())
+					while (reader.Read())
+						tableNames.Add(reader.GetString(0));
+
+				foreach (string tableName in tableNames)
+					using (SQLiteCommand command = new SQLiteCommand(String.Format("select * from \"{0}\"", tableName), connection))
+					using (SQLiteDataReader reader = command.ExecuteReader())
+						while (reader.Read())
+						{
+							string[] values = new string[reader.FieldCount];
+							for (int index = 0; index < values.Length; index++)
+								values[index] = reader.IsDBNull(index) ? "null" : Convert.ToString(reader.GetValue(index), System.Globalization.CultureInfo.InvariantCulture);
+							rows.Add(tableName + ": " + String.Join(" | ", values));
+						}
+			}
+			rows.Sort(StringComparer.Ordinal);
+			return rows;
 		}
 
 		private static string StoredOwner(TestServerInstance instance, string objectName)

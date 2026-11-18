@@ -881,7 +881,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				StoreTableHeader header = Store.GetTableHeader(tableName);
 				StoreIndexHeader indexHeader = Store.GetIndexHeader(header.PrimaryKeyName);
 				_connection.PerformInsert(tableName, header.Columns, indexHeader.Columns, rowValues);
+				// A nested level is no database transaction: its rollback runs the inverse statements logged in it, as a store cursor logs its writes.
+				if (_connection.TransactionCount > 1)
+					_connection.LogInsert(tableName, header.Columns, indexHeader.Columns, PadRow(rowValues, header.Columns.Count));
 			}
+		}
+		
+		// A caller may pass fewer values than the table has columns, and the insert statement stores the missing ones as null; the
+		// inverse delete reads each key column at its position in the row.
+		private static object[] PadRow(object[] rowValues, int columnCount)
+		{
+			if (rowValues.Length >= columnCount)
+				return rowValues;
+			object[] row = new object[columnCount];
+			Array.Copy(rowValues, row, rowValues.Length);
+			return row;
 		}
 		
 		public void DeleteRows(string indexName, params object[] keyValues)
@@ -905,7 +919,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				StoreTableHeader tableHeader = Store.GetTableHeader(indexHeader.TableName);
 				// Each statement names one row by its primary key, as a cursor delete does
 				List<string> primaryKey = Store.GetIndexHeader(tableHeader.PrimaryKeyName).Columns;
-				if ((indexName == tableHeader.PrimaryKeyName) && (keyValues.Length >= indexHeader.Columns.Count))
+				// A nested level's rollback re-inserts each row deleted in it, so there every row is read whole before it is deleted.
+				bool logDeletes = _connection.TransactionCount > 1;
+				if ((indexName == tableHeader.PrimaryKeyName) && (keyValues.Length >= indexHeader.Columns.Count) && !logDeletes)
 				{
 					object[] row = new object[tableHeader.Columns.Count];
 					for (int index = 0; index < keyValues.Length; index++)
@@ -927,7 +943,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 					
 					for (int index = 0; index < rows.Count; index++)
+					{
 						_connection.PerformDelete(indexHeader.TableName, tableHeader.Columns, primaryKey, rows[index]);
+						if (logDeletes)
+							_connection.LogDelete(indexHeader.TableName, tableHeader.Columns, primaryKey, rows[index]);
+					}
 				}
 			}
 		}

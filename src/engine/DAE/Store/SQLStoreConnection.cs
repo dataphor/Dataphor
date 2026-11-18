@@ -313,6 +313,10 @@ namespace Alphora.Dataphor.DAE.Store
 			_transactionCount--;
 			if (_transactionCount <= 0)
 			{
+				// Emptied before the commit, which may fail: the entries that nested levels committed into the outermost level are
+				// never replayed, and would otherwise stay for the life of the connection.
+				_operationLog.Clear();
+				
 				#if SQLSTORETIMING
 				long startTicks = TimingUtility.CurrentTicks;
 				#endif
@@ -324,31 +328,27 @@ namespace Alphora.Dataphor.DAE.Store
 				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 			}
-
-			for (int index = _operationLog.Count - 1; index >= 0; index--)
-				if (_operationLog[index] is BeginTransactionOperation)
-				{
-					_operationLog.RemoveAt(index);
-					break;
-				}
+			else
+			{
+				for (int index = _operationLog.Count - 1; index >= 0; index--)
+					if (_operationLog[index] is BeginTransactionOperation)
+					{
+						_operationLog.RemoveAt(index);
+						break;
+					}
+			}
 		}
 		
 		public virtual void RollbackTransaction()
 		{
 			_transactionCount--;
 
-			for (int index = _operationLog.Count - 1; index >= 0; index--)
-			{
-				SQLStoreOperation operation = _operationLog[index];
-				_operationLog.RemoveAt(index);
-				if (operation is BeginTransactionOperation)
-					break;
-				else
-					operation.Undo(this);
-			}
-
 			if (_transactionCount <= 0)
 			{
+				// The database rollback undoes the writes of every level, so the log is emptied, not replayed: an undo statement that
+				// failed here would leave the database transaction open.
+				_operationLog.Clear();
+				
 				#if SQLSTORETIMING
 				long startTicks = TimingUtility.CurrentTicks;
 				#endif
@@ -359,6 +359,18 @@ namespace Alphora.Dataphor.DAE.Store
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
+			}
+			else
+			{
+				for (int index = _operationLog.Count - 1; index >= 0; index--)
+				{
+					SQLStoreOperation operation = _operationLog[index];
+					_operationLog.RemoveAt(index);
+					if (operation is BeginTransactionOperation)
+						break;
+					else
+						operation.Undo(this);
+				}
 			}
 		}
 
