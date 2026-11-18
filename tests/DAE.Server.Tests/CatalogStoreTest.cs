@@ -265,6 +265,74 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// A right revoked in a transaction is refused once that transaction commits, even when the user used it in another
+		/// session while the transaction was open: that session reads the committed store and caches the answer it finds.
+		/// </summary>
+		[Test]
+		public void RevokeRefusedAfterCommitDespiteCheckDuringTransaction()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(RevokeRefusedAfterCommitDespiteCheckDuringTransaction)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table RevokedT { ID : Integer, key { ID } }; GrantRightToUser('General.RevokedTInsert', 'RightsUser');");
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("RevokeRightFromUser('General.RevokedTInsert', 'RightsUser');");
+						RunAs(instance, "RightsUser", userProcess => userProcess.Execute("insert row { 1 ID } into RevokedT;", null));
+						process.CommitTransaction();
+					}
+				);
+
+				Exception exception = Assert.Catch(() => RunAs(instance, "RightsUser", process => process.Execute("insert row { 2 ID } into RevokedT;", null)));
+				Assert.That(FindError(exception, (int)ServerException.Codes.UnauthorizedRight), Is.Not.Null, exception.ToString());
+			}
+		}
+
+		/// <summary>
+		/// A right granted in a transaction that rolls back is not granted afterwards, even when it was checked inside the
+		/// transaction, where the changing session's store connection sees the uncommitted grant.
+		/// </summary>
+		[TestCase(false)]
+		[TestCase(true)]
+		public void GrantNotKeptAfterRollbackDespiteCheckDuringTransaction(bool nested)
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(GrantNotKeptAfterRollbackDespiteCheckDuringTransaction)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table GrantedT { ID : Integer, key { ID } };");
+				object inTransaction = null;
+				object afterRollback = null;
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						if (nested)
+							process.BeginTransaction(IsolationLevel.CursorStability);
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("GrantRightToUser('General.GrantedTInsert', 'RightsUser');");
+						inTransaction = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.GrantedTInsert')", null).AsNative;
+						process.RollbackTransaction();
+						afterRollback = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.GrantedTInsert')", null).AsNative;
+						if (nested)
+							process.CommitTransaction();
+					}
+				);
+
+				Assert.That(inTransaction, Is.True);
+				Assert.That(afterRollback, Is.False);
+			}
+		}
+
 		/// <summary>SetObjectOwner on a name that resolves to no catalog object reports CatalogObjectExpected, not a null reference.</summary>
 		[Test]
 		public void SetObjectOwnerOfUnknownObjectReportsCatalogObjectExpected()
