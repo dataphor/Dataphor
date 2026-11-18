@@ -904,8 +904,18 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
+	/// <summary>Caches the conversion paths the compiler finds between scalar types. Shared by every session of a catalog; safe for concurrent use.</summary>
+	/// <remarks>
+	/// Every member takes the private <c>_syncRoot</c> lock. The compiler also locks the cache instance itself
+	/// around lookup, trace and add (Compiler.FindScalarConversionPath), so two sessions do not both trace the
+	/// same pair; that outer lock is separate, so the Clear overloads (called while compiling create/drop
+	/// conversion and create type, and from the admin operator, without that lock) never wait on a trace in
+	/// progress. <c>_syncRoot</c> is held only inside these members, which call nothing that takes another lock,
+	/// so it cannot take part in a deadlock.
+	/// </remarks>
 	public class ScalarConversionPathCache : System.Object
 	{
+		private readonly object _syncRoot = new object();
 		private Dictionary<EndPoints, ScalarConversionPath> _paths = new Dictionary<EndPoints, ScalarConversionPath>();
 		
 		private class EndPoints : System.Object
@@ -937,47 +947,58 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get 
 			{
-				ScalarConversionPath result;
-				if (_paths.TryGetValue(new EndPoints(sourceType, targetType), out result))
-					return result;
-				else
-					return null;
+				lock (_syncRoot)
+				{
+					ScalarConversionPath result;
+					if (_paths.TryGetValue(new EndPoints(sourceType, targetType), out result))
+						return result;
+					else
+						return null;
+				}
 			}
 		}
 		
 		public void Add(Schema.ScalarType sourceType, Schema.ScalarType targetType, Schema.ScalarConversionPath path)
 		{
-			_paths.Add(new EndPoints(sourceType, targetType), path);
+			lock (_syncRoot)
+				_paths[new EndPoints(sourceType, targetType)] = path;
 		}
 		
 		/// <summary>Clears the entire conversion path cache.</summary>
 		public void Clear()
 		{
-			_paths.Clear();
+			lock (_syncRoot)
+				_paths.Clear();
 		}
 		
 		/// <summary>Removes any cache entries for conversion paths which reference the specified scalar type.</summary>
 		public void Clear(Schema.ScalarType scalarType)
 		{
-			List<EndPoints> removeList = new List<EndPoints>();
-			foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
-				if (entry.Value.Contains(scalarType))
-					removeList.Add(entry.Key);
-					
-			foreach (EndPoints endPoints in removeList)
-				_paths.Remove(endPoints);
+			lock (_syncRoot)
+			{
+				List<EndPoints> removeList = new List<EndPoints>();
+				foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
+					if (entry.Value.Contains(scalarType))
+						removeList.Add(entry.Key);
+						
+				foreach (EndPoints endPoints in removeList)
+					_paths.Remove(endPoints);
+			}
 		}
 
 		/// <summary>Removes any cache entries for conversion paths which reference the specified conversion.</summary>		
 		public void Clear(Schema.Conversion conversion)
 		{
-			List<EndPoints> removeList = new List<EndPoints>();
-			foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
-				if (entry.Value.Contains(conversion))
-					removeList.Add(entry.Key);
-					
-			foreach (EndPoints endPoints in removeList)
-				_paths.Remove(endPoints);
+			lock (_syncRoot)
+			{
+				List<EndPoints> removeList = new List<EndPoints>();
+				foreach (KeyValuePair<EndPoints, ScalarConversionPath> entry in _paths)
+					if (entry.Value.Contains(conversion))
+						removeList.Add(entry.Key);
+						
+				foreach (EndPoints endPoints in removeList)
+					_paths.Remove(endPoints);
+			}
 		}
 	}
 	

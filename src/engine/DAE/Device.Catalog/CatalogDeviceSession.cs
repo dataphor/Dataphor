@@ -1520,9 +1520,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			Catalog.UpdateCacheTimeStamp();
 			Catalog.UpdateDerivationTimeStamp();
 			Catalog.OperatorResolutionCache.Clear();
-			// The compiler reads and fills this cache under its lock (Compiler.FindScalarConversionPath).
-			lock (Catalog.ConversionPathCache)
-				Catalog.ConversionPathCache.Clear();
+			Catalog.ConversionPathCache.Clear();
 		}
 
 		protected virtual void InternalAfterRollbackTransaction()

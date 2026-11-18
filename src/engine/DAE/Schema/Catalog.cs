@@ -232,9 +232,8 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			get 
 			{
-				if (_conversionPathCache == null)
-					_conversionPathCache = new ScalarConversionPathCache();
-				return _conversionPathCache; 
+				// One instance per catalog: the compiler locks the instance it reads, so two must never exist.
+				return System.Threading.LazyInitializer.EnsureInitialized(ref _conversionPathCache); 
 			} 
 		}
 		
@@ -244,9 +243,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get
 			{
-				if (_operatorResolutionCache == null)
-					_operatorResolutionCache = new OperatorResolutionCache();
-				return _operatorResolutionCache;
+				return System.Threading.LazyInitializer.EnsureInitialized(ref _operatorResolutionCache);
 			}
 		}
 		
