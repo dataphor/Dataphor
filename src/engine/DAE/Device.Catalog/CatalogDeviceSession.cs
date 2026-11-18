@@ -1498,6 +1498,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// </remarks>
 		private void InvalidateCachesAfterUndo()
 		{
+			// NOTE: flushes these caches for every session whenever anything was undone, including objects a transaction creates without DDL (a device started on first use, a device operator map the compiler generates for a like type); if a workload that repeatedly rolls back such transactions shows plan-cache churn, invalidate per undone object instead.
 			Catalog.UpdatePlanCacheTimeStamp();
 			Catalog.UpdateCacheTimeStamp();
 			Catalog.UpdateDerivationTimeStamp();
