@@ -17,3 +17,7 @@ The owner decided that the memory device does not provide transaction isolation 
 - The owner's own database engine `quereus` (a sibling checkout, `../quereus`) may be a source of design ideas for the isolation scheme.
 - Deadlock detection or a lock timeout is part of the design.
 - Done means `Transaction.Isolation.Run` flips to `pass` and the docs say what the memory device guarantees.
+
+## The script's own defects (found while diagnosing, not yet decided)
+
+Whoever runs `Transaction.Isolation.Run` against a device that isolates transactions will meet defects in the script itself, which only show once its first two blocks pass. In the "Non Repeatable Read" block `LShouldThrow := LI = 3` is never true (the indices run 0 to 2) and contradicts the block's comment, and both the asynchronous select and the timed update run on the same process (`LTransaction1`); each block also stops only one of its two processes. Coverage scripts are not edited to make them pass, so these need their own decision (for example a corrected copy of the script under a new name, with the original kept as the record).
