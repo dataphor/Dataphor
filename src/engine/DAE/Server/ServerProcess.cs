@@ -1267,15 +1267,79 @@ namespace Alphora.Dataphor.DAE.Server
 			if (UseDTC)
 				throw new ServerException(ServerException.Codes.DTCNotSupported);
 
-			_transactions.BeginTransaction(this, isolationLevel);
+			ServerTransaction transaction = _transactions.BeginTransaction(this, isolationLevel);
+			int remoteSessionsBegun = 0;
+			int deviceSessionsBegun = 0;
+			try
+			{
+				// Begin a transaction on all remote sessions
+				foreach (RemoteSession remoteSession in RemoteSessions)
+				{
+					remoteSession.BeginTransaction(isolationLevel);
+					remoteSessionsBegun++;
+				}
 
-			// Begin a transaction on all remote sessions
-			foreach (RemoteSession remoteSession in RemoteSessions)
-				remoteSession.BeginTransaction(isolationLevel);
+				// Begin a transaction on all device sessions
+				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
+				{
+					deviceSession.BeginTransaction(isolationLevel);
+					deviceSessionsBegun++;
+				}
+			}
+			catch
+			{
+				// The begin is all or nothing: the failing participant has begun nothing, so undo this level on those that began it.
+				// NOTE: a device's WrapException sets StopError on a connection or transaction failure, which during a statement makes
+				// EndTransactionalCall roll back every level. A begin that fails that way unwinds only its own level here, and the next
+				// BeginTransactionalCall clears StopError, so the outer levels are kept; rolling them back too would be a separate decision.
+				transaction.InRollback = true;
+				try
+				{
+					RollbackBegunParticipants(remoteSessionsBegun, deviceSessionsBegun);
+				}
+				finally
+				{
+					transaction.InRollback = false;
+					_transactions.EndTransaction(false);
+				}
+				throw;
+			}
+		}
 
-			// Begin a transaction on all device sessions
-			foreach (Schema.DeviceSession deviceSession in DeviceSessions)
-				deviceSession.BeginTransaction(isolationLevel);
+		/// <summary>
+		/// Rolls back the level a failed InternalBeginTransaction began on its first remote and device sessions: the device sessions
+		/// in reverse with the catalog device session last, as InternalRollbackTransaction orders it, then the remote sessions in reverse.
+		/// Rollback errors are logged and not thrown, so that the begin's own error reaches the caller.
+		/// </summary>
+		private void RollbackBegunParticipants(int remoteSessionCount, int deviceSessionCount)
+		{
+			Schema.DeviceSession catalogDeviceSession = null;
+			for (int index = deviceSessionCount - 1; index >= 0; index--)
+			{
+				Schema.DeviceSession deviceSession = DeviceSessions[index];
+				if (deviceSession is CatalogDeviceSession)
+					catalogDeviceSession = deviceSession;
+				else
+					RollbackBegunParticipant(deviceSession.RollbackTransaction);
+			}
+
+			if (catalogDeviceSession != null)
+				RollbackBegunParticipant(catalogDeviceSession.RollbackTransaction);
+
+			for (int index = remoteSessionCount - 1; index >= 0; index--)
+				RollbackBegunParticipant(RemoteSessions[index].RollbackTransaction);
+		}
+
+		private void RollbackBegunParticipant(Action rollback)
+		{
+			try
+			{
+				rollback();
+			}
+			catch (Exception exception)
+			{
+				ServerSession.Server.LogError(exception);
+			}
 		}
 		
 		protected internal void InternalPrepareTransaction()

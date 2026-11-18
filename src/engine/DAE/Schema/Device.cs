@@ -1655,14 +1655,25 @@ namespace Alphora.Dataphor.DAE.Schema
 		public DeviceTransactions Transactions { get { return _transactions; } }
 		
         // BeginTransaction
+        /// <summary>Begins the device's work for the level that BeginTransaction has just added to Transactions.</summary>
+        /// <remarks>An override that throws must leave nothing begun: BeginTransaction then removes the level, and nothing rolls it back.</remarks>
         protected abstract void InternalBeginTransaction(IsolationLevel isolationLevel);
         public void BeginTransaction(IsolationLevel isolationLevel)
         {
 			try
 			{
 				_transactions.BeginTransaction(isolationLevel);
-				InternalBeginTransaction(isolationLevel);
-			} 
+				try
+				{
+					InternalBeginTransaction(isolationLevel);
+				}
+				catch
+				{
+					// The level holds no operations yet
+					_transactions.EndTransaction(false);
+					throw;
+				}
+			}
 			catch (Exception exception)
 			{
 				throw WrapException(exception);

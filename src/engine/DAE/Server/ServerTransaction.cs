@@ -112,6 +112,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (_handlers.Count > 0)
 			{
+				// Outside the try: a failed begin leaves no level behind, so the catch's rollback would end the enclosing transaction
 				program.ServerProcess.InternalBeginTransaction(IsolationLevel.Isolated);
 				try
 				{
