@@ -469,10 +469,11 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
+				// NOTE: the leave raises 125111 and the process stays joined if the caller has a transaction open on this process; that error then replaces any from Evaluate (same in EvaluateScalarWith). If callers ever do this, end or check the transaction before leaving.
 				process.LeaveApplicationTransaction();
 			}
 		}
-		
+
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
 		public DAE.Runtime.Data.IDataValue EvaluateWith(Guid iD, string expression, params object[] paramsValue)
 		{

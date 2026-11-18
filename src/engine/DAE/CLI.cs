@@ -399,6 +399,8 @@ namespace Alphora.Dataphor.DAE
         /// <remarks>
         /// Once the process is no longer a participant in the application transaction, all table references will once again
         /// reference the table variables in the actual database.
+        /// Raises ApplicationTransactionException 125111, and the process stays joined, when a transaction is open on the
+        /// process: leaving would discard the work done in the application transaction during it. End the transaction first.
         /// </remarks>
 		void LeaveApplicationTransaction();
 
