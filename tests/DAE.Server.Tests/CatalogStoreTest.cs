@@ -366,6 +366,39 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// A role membership added in a transaction that rolls back grants nothing afterwards, even when the member's right was
+		/// checked inside the transaction, where the changing session's store connection sees the uncommitted membership.
+		/// </summary>
+		[Test]
+		public void RoleMembershipNotKeptAfterRollbackDespiteCheckDuringTransaction()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(RoleMembershipNotKeptAfterRollbackDespiteCheckDuringTransaction)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table MemberT { ID : Integer, key { ID } }; create role MemberRole; GrantRightToRole('General.MemberTInsert', 'MemberRole');");
+				object inTransaction = null;
+				object afterRollback = null;
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("AddUserToRole('RightsUser', 'MemberRole');");
+						inTransaction = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.MemberTInsert')", null).AsNative;
+						process.RollbackTransaction();
+						afterRollback = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.MemberTInsert')", null).AsNative;
+					}
+				);
+
+				Assert.That(inTransaction, Is.True);
+				Assert.That(afterRollback, Is.False);
+			}
+		}
+
 		/// <summary>Dropping a role takes the rights it granted from its members, who had used them before the drop.</summary>
 		[Test]
 		public void DroppedRoleRightRefusedToFormerMember()

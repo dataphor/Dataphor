@@ -34,6 +34,7 @@ Each failed before the fix (verified) and passes after:
 - `GrantNotKeptAfterRollbackDespiteCheckDuringTransaction(False/True)` (fix stage): a grant checked inside an outermost or nested transaction that rolls back is not granted afterwards.
 - `CreatedTableRefusedAfterCommitDespiteCheckDuringTransaction` (new): a table created in a transaction, whose insert right was checked for `RightsUser` by another session while it was open (answer true), is refused to `RightsUser` after the commit.
 - `DroppedRoleRightRefusedToFormerMember` (new): a user who used a right through a role is refused it after `drop role`.
+- `RoleMembershipNotKeptAfterRollbackDespiteCheckDuringTransaction` (added in review): a role membership added in a transaction and checked inside it grants nothing after the rollback.
 
 ## Validation
 
@@ -52,3 +53,30 @@ Each failed before the fix (verified) and passes after:
 ## Docs
 
 `docs/migration-notes.md`: removed the "that gap is not fixed yet" sentence from the `SetObjectOwner`/`SetRightOwner` entry; new *D4, catalog and libraries* entry (rights changes take effect for every session at transaction end, rolled-back changes leave no trace, role drop, remaining in-transaction sharing); new *Custom C# extensions* entry for the three protected helpers and the locked `ClearUserCachedRightAssignments`.
+
+## Review findings
+
+Read the diff of `ticket(implement): bug-right-cache-stale-across-transactions` before the handoff, then the surrounding transaction code in `CatalogDeviceSession`, `ServerCatalogDeviceSession` (store connection, `BeginStoreTransactions`, `InternalAfterCommitTransaction`/`InternalAfterRollbackTransaction`, `UserHasRight`), `DeviceSession` in `src/engine/DAE/Schema/Device.cs`, `ServerProcess` (how the catalog device session joins open levels), `CatalogStore.UserHasRight` and `Schema.User`'s answer cache.
+
+**Correctness: checked, nothing wrong found.**
+
+- Timing of the replay against the store: the store's write transactions follow the device session's transaction stack (`OpenTransactionLevels`), and the catalog device session joins every open process level when it is first used (`ServerProcess.DeviceConnect`), so `InTransaction` in the helpers is true exactly when the store write belongs to a transaction. Commit replays after `InternalAfterCommitTransaction` (store commit) at the outermost level only; nested commits change nothing other sessions can see. Rollback replays after the store rollback at every level, in a `finally`, so a failing store rollback still clears.
+- Race with a concurrent check: `UserHasRight` reads the store and caches inside `lock (Catalog)`, and the clears take the same lock after the write or after the commit/rollback, so a concurrent check either finished first (and is cleared) or reads the new state.
+- Lock order: the helpers run after `ReleaseCatalogStoreConnection` and never begin a store transaction inside the catalog's lock; the old code already took the catalog's lock while holding the store's write lock, so no new ordering.
+- Undo during rollback: undo instructions (`CacheCatalogObjectOwner`, `ClearCatalogObject`) run while the level is still on the stack, so their clears are recorded and replayed after the store rollback.
+- Case of right names: the answer cache is case-sensitive and so is the SQLite store's `DAERights` key (default binary collation), so a clear by name matches what the store treats as the same right. (Only the unconverted SQL Server store could differ; not in scope.)
+- Every store write that changes the store's answer (right rows, right owners, user and role right assignments, role membership, object owner, object and role create/drop) now calls a helper after the write; `DeleteUser` removes the user from the users cache instead and is noted in the known gaps.
+
+**Tests: one added.** The replay's per-user branch (role membership changes, `_changedRightsUserIDs`) had no test. Added `RoleMembershipNotKeptAfterRollbackDespiteCheckDuringTransaction` to `tests/DAE.Server.Tests/CatalogStoreTest.cs`; with the per-user record disabled it fails (`Expected: False, But was: True`), with the code as committed it passes. The implementer's four tests and the two fix-stage tests each reproduce a distinct arm (revoke after commit, grant after outermost and nested rollback, object created in a transaction, role drop); none restates the implementation or tests a mock, so none was cut.
+
+**Tripwires: one added.** The handoff mentioned only in the ticket that a right change made by a deferred device stop at the outermost commit is cleared at once but replayed only at the session's next transaction end (cost: cache misses only). Parked as a `NOTE:` above `CommitDeferredDeviceStops()` in `CatalogDeviceSession.InternalCommitTransaction`. The implementer's `NOTE:` on the replay cost for large library registrations stands.
+
+**Source hygiene: checked, nothing to fix.** Comments state why (store commit order, lock reasoning), not what. `CatalogDeviceSession.cs` was already large before this change; the change adds one coherent block to its Security region. CRLF, tabs and byte-order marks preserved in the edited files.
+
+**Simplification considered and declined:** the replay's per-right loop in `ClearChangedRights` repeats `ClearCachedRightAssignments(string[])` over a `HashSet`; unifying them would mean changing `Schema.User.ClearCachedRightAssignments` to take `IEnumerable<string>`, a public member that extensions may call, for no behaviour change.
+
+**Docs: checked.** `docs/migration-notes.md` entries are accurate (the removed "not fixed yet" sentence, the new D4 entry including the remaining in-transaction sharing, the new protected helpers). The defect is not listed in `docs/modernization-plan.md` or `docs/architecture.md`, so neither needed a change.
+
+**Follow-up tickets:** none new. The implementer's `tickets/backlog/bug-right-cache-shared-during-open-transaction.md` (sharing while the transaction is open) carries severity, likelihood, tradeoffs and a `static` repro with a stated confirmation; left as filed.
+
+**Validation (review):** `dotnet test tests/DAE.Server.Tests --filter "FullyQualifiedName~CatalogStoreTest|Name=Security|Name=SecurityLibrary"`: 23 passed before the new test. `dotnet test tests/DAE.Server.Tests`: 190 total, 165 passed, 25 skipped (the coverage manifest's known-failure and fragment entries), 0 failed.

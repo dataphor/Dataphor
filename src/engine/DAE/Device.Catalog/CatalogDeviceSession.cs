@@ -1468,6 +1468,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ClearChangedRights(committed);
 			}
 				
+			// NOTE: a right change made by a deferred device stop at the outermost level autocommits and is cleared at once, but stays
+			// in the record until the session's next transaction ends; none is known, if one appears, replay again after the stops.
 			CommitDeferredDeviceStops();
 		}
 
