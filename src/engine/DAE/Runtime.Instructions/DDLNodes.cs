@@ -3247,7 +3247,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				CheckNotSystem(program, _dropDevice);
 				CheckNoBaseTableVarDependents(program, _dropDevice);
 
-				DropDeviceMaps(program, _dropDevice);				
+				// NOTE: the maps go before CheckNoDependents because they are dependents it would report; so a drop that fails that check inside an explicit transaction leaves the maps dropped until the transaction rolls back. A failed statement keeps its earlier steps in every multi-step DDL node; revisit if statement-level atomicity is ever decided.
+				DropDeviceMaps(program, _dropDevice);
 				CheckNoDependents(program, _dropDevice);
 				
 				// After the checks: a failed drop leaves no pending stop behind in the open transaction (a failed statement does not roll it back)
