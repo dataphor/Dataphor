@@ -571,6 +571,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			else
 			{
+				// NOTE: after another session's Truncate, a scan that has only moved with Next or Prior is still on the dropped
+				// tree (see FollowTruncate) but looks its row up here in the new clustered tree, so a row the repopulate left out
+				// raises ClusteredRowNotFound. Today only catalog tables read in a non-clustered order with a cursor held open
+				// meet it; if it is ever reported, make Next and Prior follow the truncate by seeking the current key.
 				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
 				{
 					int entryNumber;

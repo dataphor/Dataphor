@@ -967,10 +967,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		protected override void InternalOpen()
 		{
-			if (_key.Equivalent(_nativeTable.ClusteredIndex.Key))
-				_scan = new Scan(Manager, _nativeTable, _nativeTable.ClusteredIndex, _direction, _firstKey, _lastKey);
-			else
-				_scan = new Scan(Manager, _nativeTable, _nativeTable.NonClusteredIndexes[_key], _direction, _firstKey, _lastKey);
+			_scan = new Scan(Manager, _nativeTable, _nativeTable.IndexFor(_key), _direction, _firstKey, _lastKey);
 			_scan.Open();
 		}
 		

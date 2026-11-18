@@ -621,6 +621,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
+		/// <summary>The tree that keeps this table in the given order, chosen under the read lock because a Truncate rebuilds the list of trees.</summary>
+		internal NativeRowTree IndexFor(Schema.Order key)
+		{
+			_lock.EnterReadLock();
+			try
+			{
+				return key.Equivalent(ClusteredIndex.Key) ? ClusteredIndex : NonClusteredIndexes[key];
+			}
+			finally
+			{
+				_lock.ExitReadLock();
+			}
+		}
+
 		/// <summary>
 		/// The tree of this table that has the order of the given one. A Truncate replaces every tree, and a scan's tree can be
 		/// one it replaced: the scan read it from the table before taking the lock, or kept it from an earlier call. Call with

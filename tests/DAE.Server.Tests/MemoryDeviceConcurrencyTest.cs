@@ -152,6 +152,34 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// An ordered read of a catalog table opens a scan on the tree of the requested order, while another session's read of
+		/// the same table truncates it, which rebuilds the table's list of trees. Choosing the tree from that list without the
+		/// table's lock failed with an ArgumentOutOfRangeException. System.ServerLinks is rebuilt on every read and has a second
+		/// key, { Name }, kept in its own tree.
+		/// </summary>
+		[Test]
+		public void OrderedReadsOfCatalogTableWhileOthersRereadIt()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(MemoryDeviceConcurrencyTest)))
+			{
+				instance.Server.Start();
+
+				ConcurrentBag<string> failures = new ConcurrentBag<string>();
+				RunWithReaders
+				(
+					instance,
+					1,
+					writer => "for var LIndex := 0 to 2000 do var LCount := Count(System.ServerLinks);",
+					process => process.CloseCursor(process.OpenCursor("select System.ServerLinks order by { Name }", null)),
+					2,
+					failures
+				);
+
+				Assert.That(failures, Is.Empty, "Ordered reads of System.ServerLinks failed:\r\n" + String.Join("\r\n", failures));
+			}
+		}
+
+		/// <summary>
 		/// Runs <paramref name="writerCount"/> sessions at once, each executing its script, while <paramref name="readerCount"/>
 		/// further sessions repeat <paramref name="read"/> until every writer has finished. A null script means the writer
 		/// instead connects, starts a process and disconnects in a loop for a second. Failures are gathered, not thrown.
