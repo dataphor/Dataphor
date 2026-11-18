@@ -7,6 +7,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE.Server;
@@ -53,8 +54,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public int Capacity { get { return _capacity; } }
 		
 		private int _rowCount = 0;
+		/// <remarks>Read without the table's lock: a caller that checks it before an insert (the memory device's MaxRowCount) gets an advisory answer.</remarks>
 		public int RowCount { get { return _rowCount; } }
 		
+		/// <summary>
+		/// Serializes access to this table's trees, which every session of a database-scoped memory table (and every process of
+		/// a session-scoped one) shares. Insert, Update, Delete, Truncate and Drop hold it for writing; HasRow and every call on a
+		/// <see cref="Scan"/> of this table hold it for reading. It is held for one call only, never between calls, so a cursor
+		/// left open never blocks a writer. A scan keeps its position valid through the trees' row-moved and row-deleted events,
+		/// which run on the writer's thread inside the write lock.
+		/// </summary>
+		/// <remarks>
+		/// Every table has one, including the private buffers that sorts, unions and explodes create, which are never shared and
+		/// whose lock is therefore never contended. It locks statements, not transactions: see MemoryDeviceSession.
+		/// </remarks>
+		// NOTE: a key's sort operator can run D4 inside a tree operation. If that D4 reads this same table, the read throws
+		// LockRecursionException (NoRecursion); if it reads another memory table, it takes that table's lock inside this one,
+		// and two such sorts reading each other's tables could deadlock. Both are contrived; if a library ever needs either,
+		// move the sort evaluation out of the lock rather than allowing recursion.
+		// NOTE: measured when added, a scan of a 50,000-row table read about 16% slower (about 95 ns more per row, a few
+		// uncontended lock calls per row); inserts, keyed lookups and sorts showed no difference beyond noise. If memory-table
+		// scans show up in profiles, let the private buffers, which are never shared, skip the lock.
+		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+
+		internal void EnterReadLock()
+		{
+			_lock.EnterReadLock();
+		}
+
+		internal void ExitReadLock()
+		{
+			_lock.ExitReadLock();
+		}
+
 		#if USEINTERNALID
 		public const string InternalIDColumnName = @"__InternalID";
 
@@ -191,6 +223,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void Drop(IValueManager manager)
 		{
+			_lock.EnterWriteLock();
+			try
+			{
+				InternalDrop(manager);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
+		}
+
+		private void InternalDrop(IValueManager manager)
+		{
 			for (int index = NonClusteredIndexes.Count - 1; index >= 0; index--)
 			{
 				NonClusteredIndexes[index].Drop(manager);
@@ -267,6 +312,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <param name="row">The given row must conform to the structure of the table value.</param>
 		public void Insert(IValueManager manager, IRow row)
 		{
+			_lock.EnterWriteLock();
+			try
+			{
+				InternalInsert(manager, row);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
+		}
+
+		private void InternalInsert(IValueManager manager, IRow row)
+		{
 			// Insert the row into all indexes
 			#if USEINTERNALID
 			Guid internalID = Guid.NewGuid();
@@ -329,6 +387,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool HasRow(IValueManager manager, IRow row)
 		{
+			_lock.EnterReadLock();
+			try
+			{
+				return InternalHasRow(manager, row);
+			}
+			finally
+			{
+				_lock.ExitReadLock();
+			}
+		}
+
+		private bool InternalHasRow(IValueManager manager, IRow row)
+		{
 			IRow key = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{row});
 			try
 			{
@@ -345,6 +416,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		public void Update(IValueManager manager, IRow oldRow, IRow newRow)
+		{
+			_lock.EnterWriteLock();
+			try
+			{
+				InternalUpdate(manager, oldRow, newRow);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
+		}
+
+		private void InternalUpdate(IValueManager manager, IRow oldRow, IRow newRow)
 		{
 			// AOldRow must have at least the columns of the clustered index key
 			Row oldClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{oldRow});
@@ -467,6 +551,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public void Delete(IValueManager manager, IRow row)
 		{
+			_lock.EnterWriteLock();
+			try
+			{
+				InternalDelete(manager, row);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
+		}
+
+		private void InternalDelete(IValueManager manager, IRow row)
+		{
 			// Delete the row from all indexes
 			Row clusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new IRow[]{row});
 			try
@@ -512,8 +609,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void Truncate(IValueManager manager)
 		{
-			Drop(manager);
-			Create(manager);
+			_lock.EnterWriteLock();
+			try
+			{
+				InternalDrop(manager);
+				Create(manager);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
+		}
+
+		/// <summary>
+		/// The tree of this table that has the order of the given one. A Truncate replaces every tree, and a scan's tree can be
+		/// one it replaced: the scan read it from the table before taking the lock, or kept it from an earlier call. Call with
+		/// the read lock held.
+		/// </summary>
+		internal NativeRowTree CurrentIndex(NativeRowTree index)
+		{
+			if ((index == ClusteredIndex) || NonClusteredIndexes.Contains(index))
+				return index;
+			return index.IsClustered ? ClusteredIndex : NonClusteredIndexes[index.Key];
 		}
 	}
 

@@ -390,24 +390,33 @@ namespace Alphora.Dataphor.DAE.Server
 			return GetEnumerator();
 		}
 		
+		/// <summary>
+		/// Enumerates a copy of the list taken under its lock: other threads add and remove sessions, processes, plans and
+		/// scripts while the server and the catalog device walk these lists. An item removed after the copy is still returned,
+		/// possibly while it is being disposed.
+		/// </summary>
 		public class ServerChildObjectEnumerator : IEnumerator
 		{
 			public ServerChildObjectEnumerator(ServerChildObjects objects) : base()
 			{
-				_objects = objects;
+				lock (objects)
+				{
+					_objects = new ServerChildObject[objects._count];
+					Array.Copy(objects._items, _objects, objects._count);
+				}
 			}
-			
-			private ServerChildObjects _objects;
+
+			private ServerChildObject[] _objects;
 			private int _current =  -1;
 
 			public ServerChildObject Current { get { return _objects[_current]; } }
-			
+
 			object IEnumerator.Current { get { return Current; } }
-			
+
 			public bool MoveNext()
 			{
 				_current++;
-				return (_current < _objects.Count);
+				return (_current < _objects.Length);
 			}
 			
 			public void Reset()

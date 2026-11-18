@@ -95,43 +95,72 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 */
 		}
 		
+		// The populate methods below read sessions and processes that other threads connect, disconnect, start and stop. The
+		// server's lists hand out a copy, but a session or process stays in its list until its Dispose has finished, and Dispose
+		// first clears members read here (a session's ID, User, SessionInfo, Processes and SessionObjects; a process's ID,
+		// Plans, Scripts, DeviceSessions and the state behind its stack limits). So each such member is read once into a
+		// local, and an entry whose member is already cleared is skipped.
+		
 		private void PopulateSessions(Program program, NativeTable nativeTable, Row row)
 		{
 			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
 			{
-				row[0] = session.SessionID;
-				row[1] = session.User.ID;
-				row[2] = session.SessionInfo.HostName;
-				row[3] = session.SessionInfo.CatalogCacheName;
-				row[4] = session.SessionInfo.Environment;
+				int sessionID = session.SessionID;
+				Schema.User user = session.User;
+				SessionInfo sessionInfo = session.SessionInfo;
+				if ((sessionID < 0) || (user == null) || (sessionInfo == null))
+					continue;
+				row[0] = sessionID;
+				row[1] = user.ID;
+				row[2] = sessionInfo.HostName;
+				row[3] = sessionInfo.CatalogCacheName;
+				row[4] = sessionInfo.Environment;
 				row[5] = session.CurrentLibrary.Name;
-				row[6] = session.SessionInfo.DefaultIsolationLevel.ToString();
-				row[7] = session.SessionInfo.DefaultUseDTC;
-				row[8] = session.SessionInfo.DefaultUseImplicitTransactions;
-				row[9] = session.SessionInfo.Language.ToString();
-				row[10] = session.SessionInfo.FetchCount;
-				row[11] = session.SessionInfo.DefaultMaxStackDepth;
-				row[12] = session.SessionInfo.DefaultMaxCallDepth;
-				row[13] = session.SessionInfo.UsePlanCache;
-				row[14] = session.SessionInfo.ShouldEmitIL;
-				row[15] = session.SessionInfo.ShouldElaborate;
+				row[6] = sessionInfo.DefaultIsolationLevel.ToString();
+				row[7] = sessionInfo.DefaultUseDTC;
+				row[8] = sessionInfo.DefaultUseImplicitTransactions;
+				row[9] = sessionInfo.Language.ToString();
+				row[10] = sessionInfo.FetchCount;
+				row[11] = sessionInfo.DefaultMaxStackDepth;
+				row[12] = sessionInfo.DefaultMaxCallDepth;
+				row[13] = sessionInfo.UsePlanCache;
+				row[14] = sessionInfo.ShouldEmitIL;
+				row[15] = sessionInfo.ShouldElaborate;
 				nativeTable.Insert(program.ValueManager, row);
+			}
+		}
+		
+		/// <summary>The sessions that are not disconnecting, each as its ID and its process list, both read once.</summary>
+		private static IEnumerable<KeyValuePair<int, ServerProcesses>> ConnectedSessions(Program program)
+		{
+			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
+			{
+				int sessionID = session.SessionID;
+				ServerProcesses processes = session.Processes;
+				if ((sessionID >= 0) && (processes != null))
+					yield return new KeyValuePair<int, ServerProcesses>(sessionID, processes);
 			}
 		}
 		
 		private void PopulateProcesses(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (ServerProcess process in session.Processes)
+			foreach (KeyValuePair<int, ServerProcesses> session in ConnectedSessions(program))
+				foreach (ServerProcess process in session.Value)
 				{
-					row[0] = process.ProcessID;
-					row[1] = session.SessionID;
+					// Two disposing processes would both report ID -1, a duplicate key.
+					int processID = process.ProcessID;
+					int maxStackDepth;
+					int maxCallDepth;
+					if ((processID < 0) || !process.TryGetStackLimits(out maxStackDepth, out maxCallDepth))
+						continue;
+					row[0] = processID;
+					row[1] = session.Key;
 					row[2] = process.DefaultIsolationLevel.ToString();
 					row[3] = process.UseDTC;
 					row[4] = process.UseImplicitTransactions;
 					row[5] = process.ProcessInfo.Language.ToString();
-					row[6] = process.MaxStackDepth;
-					row[7] = process.MaxCallDepth;
+					row[6] = maxStackDepth;
+					row[7] = maxCallDepth;
 					row[8] = process.ExecutingThread != null;
 					nativeTable.Insert(program.ValueManager, row);
 				}
@@ -139,26 +168,34 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void PopulateScripts(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (ServerProcess process in session.Processes)
-					foreach (ServerScript script in process.Scripts)
-					{
-						row[0] = script.GetHashCode();
-						row[1] = process.ProcessID;
-						nativeTable.Insert(program.ValueManager, row);
-					}
+			foreach (KeyValuePair<int, ServerProcesses> session in ConnectedSessions(program))
+				foreach (ServerProcess process in session.Value)
+				{
+					ServerScripts scripts = process.Scripts;
+					if (scripts != null)
+						foreach (ServerScript script in scripts)
+						{
+							row[0] = script.GetHashCode();
+							row[1] = process.ProcessID;
+							nativeTable.Insert(program.ValueManager, row);
+						}
+				}
 		}
 
 		private void PopulatePlans(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (ServerProcess process in session.Processes)
-					foreach (ServerPlan plan in process.Plans)
-					{
-						row[0] = plan.ID;
-						row[1] = process.ProcessID;
-						nativeTable.Insert(program.ValueManager, row);
-					}
+			foreach (KeyValuePair<int, ServerProcesses> session in ConnectedSessions(program))
+				foreach (ServerProcess process in session.Value)
+				{
+					ServerPlans plans = process.Plans;
+					if (plans != null)
+						foreach (ServerPlan plan in plans)
+						{
+							row[0] = plan.ID;
+							row[1] = process.ProcessID;
+							nativeTable.Insert(program.ValueManager, row);
+						}
+				}
 		}
 
 		private void PopulateLibraries(Program program, NativeTable nativeTable, Row row)
@@ -261,13 +298,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void PopulateSessionCatalogObjects(Program program, NativeTable nativeTable, Row row)
 		{
 			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (Schema.SessionObject objectValue in session.SessionObjects)
-				{
-					row[0] = session.SessionID;
-					row[1] = objectValue.Name;
-					row[2] = objectValue.GlobalName;
-					nativeTable.Insert(program.ValueManager, row);
-				}
+			{
+				int sessionID = session.SessionID;
+				Schema.Objects sessionObjects = session.SessionObjects;
+				if ((sessionID >= 0) && (sessionObjects != null))
+					foreach (Schema.SessionObject objectValue in sessionObjects)
+					{
+						row[0] = sessionID;
+						row[1] = objectValue.Name;
+						row[2] = objectValue.GlobalName;
+						nativeTable.Insert(program.ValueManager, row);
+					}
+			}
 		}
 
 		private void PopulateScalarTypeParentScalarTypes(Program program, NativeTable nativeTable, Row row)
@@ -340,10 +382,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		// NOTE: enumerates another process's RemoteSessions, a plain list that process changes without a lock; if
+		// System.RemoteSessions reads ever fail under load, lock the list's writers and copy it here.
 		private void PopulateRemoteSessions(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (ServerProcess process in session.Processes)
+			foreach (KeyValuePair<int, ServerProcesses> session in ConnectedSessions(program))
+				foreach (ServerProcess process in session.Value)
 					foreach (RemoteSession remoteSession in process.RemoteSessions)
 					{
 						row[0] = remoteSession.ServerLink.Name;
@@ -352,16 +396,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 		
+		// NOTE: enumerates another process's DeviceSessions, a plain list that process changes without a lock; if
+		// System.DeviceSessions reads ever fail under load, lock the list's writers and copy it here.
 		private void PopulateDeviceSessions(Program program, NativeTable nativeTable, Row row)
 		{
-			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
-				foreach (ServerProcess process in session.Processes)
-					foreach (DeviceSession deviceSession in process.DeviceSessions)
-					{
-						row[0] = deviceSession.Device.Name;
-						row[1] = process.ProcessID;
-						nativeTable.Insert(program.ValueManager, row);
-					}
+			foreach (KeyValuePair<int, ServerProcesses> session in ConnectedSessions(program))
+				foreach (ServerProcess process in session.Value)
+				{
+					Schema.DeviceSessions deviceSessions = process.DeviceSessions;
+					if (deviceSessions != null)
+						foreach (DeviceSession deviceSession in deviceSessions)
+						{
+							row[0] = deviceSession.Device.Name;
+							row[1] = process.ProcessID;
+							nativeTable.Insert(program.ValueManager, row);
+						}
+				}
 		}
 		
 		private void PopulateApplicationTransactions(Program program, NativeTable nativeTable, Row row)

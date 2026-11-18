@@ -1735,16 +1735,55 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		// Locked against TryGetStackLimits, which reads the top of this list from another thread.
 		internal void PushExecutingProgram(Program program)
 		{
-			_executingPrograms.Add(program);
+			lock (_executingPrograms)
+			{
+				_executingPrograms.Add(program);
+			}
 		}
-		
+
 		internal void PopExecutingProgram(Program program)
 		{
-			if (ExecutingProgram.ID != program.ID)
-				throw new ServerException(ServerException.Codes.ProgramNotExecuting, program.ID.ToString());
-			_executingPrograms.RemoveAt(_executingPrograms.Count - 1);
+			lock (_executingPrograms)
+			{
+				if (ExecutingProgram.ID != program.ID)
+					throw new ServerException(ServerException.Codes.ProgramNotExecuting, program.ID.ToString());
+				_executingPrograms.RemoveAt(_executingPrograms.Count - 1);
+			}
+		}
+
+		/// <summary>
+		/// MaxStackDepth and MaxCallDepth as another thread reads them (the catalog device's System.Processes), while this
+		/// process's own thread pushes and pops executing programs and its Dispose, or its session's, clears the fields read
+		/// here. False if the process or its session is being disposed.
+		/// </summary>
+		internal bool TryGetStackLimits(out int maxStackDepth, out int maxCallDepth)
+		{
+			maxStackDepth = 0;
+			maxCallDepth = 0;
+			Programs programs = _executingPrograms;
+			ServerSession session = _serverSession;
+			SessionInfo sessionInfo = session == null ? null : session.SessionInfo;
+			if ((programs == null) || (sessionInfo == null))
+				return false;
+
+			lock (programs)
+			{
+				if (programs.Count == 0)
+				{
+					maxStackDepth = sessionInfo.DefaultMaxStackDepth;
+					maxCallDepth = sessionInfo.DefaultMaxCallDepth;
+				}
+				else
+				{
+					Program program = programs[programs.Count - 1];
+					maxStackDepth = program.Stack.MaxStackDepth;
+					maxCallDepth = program.Stack.MaxCallDepth;
+				}
+			}
+			return true;
 		}
 		
 		// Execution

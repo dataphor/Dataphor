@@ -36,7 +36,7 @@ For more information on building custom devices, refer to the Dataphor Device De
 
 ### Memory Device
 
-The memory device provides a mechanism for storing data in-memory. Storage is not persistent (meaning that it will not survive a restart of the Dataphor Server), but the device does provide full transactional support, and minimal concurrency protection.
+The memory device provides a mechanism for storing data in-memory. Storage is not persistent (meaning that it will not survive a restart of the Dataphor Server), but the device does provide full transactional support. Statements that read or change the same table at the same time are serialized, so concurrent statements on a shared table each see the table before or after another statement's change, never partway through it. Transactions are not isolated from each other: the device takes no locks for a transaction, so at every isolation level an uncommitted transaction's changes are visible to other transactions, and other transactions can change the same rows before it commits.
 
 The Temp system device is a memory device used by the internal query processor to materialize intermediate results, and store process- and session-scoped table variables. The Storage.Scope tag can be used to specify the scope for the storage of a table variable.
 

@@ -330,6 +330,10 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 		public MemoryDeviceTransactions Transactions { get { return FTransactions; } }
 		#endif
 		
+		// NOTE: accepted tradeoff (owner decision 2026-11-18) — the memory device serializes statements per table (see
+		// NativeTable) but locks nothing for a transaction, so at every isolation level an uncommitted transaction's changes
+		// are visible to other transactions and can be overwritten by them; rollback is the engine's undo log. Tracked by
+		// debt-memory-device-transaction-isolation; revisit when that ticket is taken up.
 		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
 			#if USEMEMORYDEVICETRANSACTIONS

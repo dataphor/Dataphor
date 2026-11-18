@@ -22,6 +22,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// A scan implements the Navigable, BackwardsNavigable, and Searchable CursorCapabilities in
 	/// the same way as a Table value is expected to. A scan is an active window onto the given
 	/// table value, changes made to the underlying data are immediately reflected in the scan.
+	/// Every public method that reads the tree or the scan's position holds the table's read lock for the length of the call
+	/// (see NativeTable). The tree's row-moved and row-deleted handlers run on a writer's thread inside the table's write lock,
+	/// so they, and the methods' bodies when they call each other, use the unlocked Internal methods.
 	/// </remarks>
 	public class Scan : Disposable
 	{
@@ -71,15 +74,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			get { return _active; }
 			set
 			{
-				if (value && !_active)
+				// Locked: opening subscribes to the tree and positions the scan, closing clears the position, and a writer's
+				// handler must not run on this scan in between.
+				_table.EnterReadLock();
+				try
 				{
-					_active = true;
-					InternalOpen();
+					if (value && !_active)
+					{
+						_active = true;
+						InternalOpen();
+					}
+					else if (!value && _active)
+					{
+						InternalClose();
+						_active = false;
+					}
 				}
-				else if (!value && _active)
+				finally
 				{
-					InternalClose();
-					_active = false;
+					_table.ExitReadLock();
 				}
 			}
 		}
@@ -98,25 +111,52 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private void InternalOpen()
 		{
+			// The access path was read from the table before this call took the table's lock.
+			_accessPath = _table.CurrentIndex(_accessPath);
 			_accessPath.OnRowsMoved += new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
 			_accessPath.OnRowDeleted += new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
-			First();
+			InternalFirst();
 		}
-		
+
 		private void InternalClose()
 		{
 			_accessPath.OnRowDeleted -= new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
 			_accessPath.OnRowsMoved -= new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
 			SetIndexNode(null);
 		}
+
+		/// <summary>
+		/// Moves the scan to the table's current tree before it positions from scratch. A Truncate (the catalog device
+		/// repopulates its tables with one on every read) drops the scan's tree and builds new ones; until the scan repositions,
+		/// it keeps reading the dropped tree's rows.
+		/// </summary>
+		private void FollowTruncate()
+		{
+			NativeRowTree current = _table.CurrentIndex(_accessPath);
+			if (current != _accessPath)
+			{
+				InternalClose();
+				_accessPath = current;
+				_accessPath.OnRowsMoved += new NativeRowTreeRowsMovedHandler(RowTreeRowsMoved);
+				_accessPath.OnRowDeleted += new NativeRowTreeRowDeletedHandler(RowTreeRowDeleted);
+			}
+		}
 		
 		public void Reset()
 		{
-			#if SAFETABLES
-			CheckActive();
-			#endif
-			SetIndexNode(null);
-			First();
+			_table.EnterReadLock();
+			try
+			{
+				#if SAFETABLES
+				CheckActive();
+				#endif
+				SetIndexNode(null);
+				InternalFirst();
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
 		}
 		
 		protected override void Dispose(bool disposing)
@@ -128,7 +168,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private void UpdateScanPointer()
 		{
 			_entryNumber += _direction == ScanDirection.Forward ? -1 : 1;
-			Next();
+			InternalNext();
 		}
 		
 		private void RowTreeRowsMoved(NativeRowTree rowTree, NativeRowTreeNode oldNode, int oldEntryNumberMin, int oldEntryNumberMax, NativeRowTreeNode newNode, int entryNumberDelta)
@@ -202,10 +242,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void First()
 		{
+			_table.EnterReadLock();
+			try
+			{
+				InternalFirst();
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private void InternalFirst()
+		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
 
+			FollowTruncate();
 			_bOF = true;
 			_eOF = false;
 			bool result = false;
@@ -234,7 +288,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				// Determine FEOF
 				RowTreeNode saveIndexNode = new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node, LockMode.Shared);
 				int saveEntryNumber = _entryNumber;
-				Next();
+				InternalNext();
 				_bOF = true;
 				SetIndexNode(saveIndexNode);
 				_entryNumber = saveEntryNumber;
@@ -242,6 +296,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}		
 		
 		public bool Prior()
+		{
+			_table.EnterReadLock();
+			try
+			{
+				return InternalPrior();
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private bool InternalPrior()
 		{
 			#if SAFETABLES
 			CheckActive();
@@ -264,7 +331,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 				// Make sure that the entry is >= FFirstKey
 				if (!_bOF && (_firstKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _firstKey.DataType, (NativeRow)_firstKey.AsNative) < 0))
-					First();
+					InternalFirst();
 			}
 			else
 			{
@@ -282,7 +349,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					
 				// Make sure that the entry is <= FFirstKey
 				if (!_bOF && (_firstKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _firstKey.DataType, (NativeRow)_firstKey.AsNative) > 0))
-					First();
+					InternalFirst();
 			}
 			
 			// Make sure that if the scan is empty, the EOF flag is still true
@@ -294,10 +361,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool Next()
 		{
+			_table.EnterReadLock();
+			try
+			{
+				return InternalNext();
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private bool InternalNext()
+		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			
+
 			bool bOF = _bOF;
 
 			if (_direction == ScanDirection.Forward)
@@ -316,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					
 				// Make sure that the entry is <= LLastKey
 				if (!_eOF && (_lastKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _lastKey.DataType, (NativeRow)_lastKey.AsNative) > 0))
-					Last();
+					InternalLast();
 			}
 			else
 			{
@@ -333,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 				// Make sure that the entry is >= LLastKey
 				if (!_eOF && (_lastKey != null) && (_accessPath.Compare(_manager, _indexNode.Tree.KeyRowType, _indexNode.Node.Keys[_entryNumber], _lastKey.DataType, (NativeRow)_lastKey.AsNative) < 0))
-					Last();
+					InternalLast();
 			}
 				
 			// Make sure that if the scan is empty, the BOF flag is still true
@@ -345,10 +425,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void Last()
 		{
+			_table.EnterReadLock();
+			try
+			{
+				InternalLast();
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private void InternalLast()
+		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
-			
+
+			FollowTruncate();
 			_eOF = true;
 			_bOF = false;
 			bool result = false;
@@ -377,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				// Determine FBOF
 				RowTreeNode saveIndexNode = new RowTreeNode(_manager, _indexNode.Tree, _indexNode.Node, LockMode.Shared);
 				int saveEntryNumber = _entryNumber;
-				Prior();
+				InternalPrior();
 				_eOF = true;
 				if (_indexNode != null)
 					_indexNode.Dispose();
@@ -388,18 +482,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool BOF()
 		{
-			#if SAFETABLES
-			CheckActive();
-			#endif
-			return _bOF;
+			_table.EnterReadLock();
+			try
+			{
+				#if SAFETABLES
+				CheckActive();
+				#endif
+				return _bOF;
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
 		}
-		
+
 		public bool EOF()
 		{
-			#if SAFETABLES
-			CheckActive();
-			#endif
-			return _eOF;
+			_table.EnterReadLock();
+			try
+			{
+				#if SAFETABLES
+				CheckActive();
+				#endif
+				return _eOF;
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
 		}
 		
 		public IRow GetRow()
@@ -418,6 +528,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		public void GetRow(IRow row)
+		{
+			_table.EnterReadLock();
+			try
+			{
+				InternalGetRow(row);
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private void InternalGetRow(IRow row)
 		{
 			#if SAFETABLES
 			CheckActive();
@@ -482,20 +605,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public IRow GetKey()
 		{
-			#if SAFETABLES
-			CheckActive();
-			#endif
-			CheckNotCrack();
-			return new Row(_manager, _accessPath.KeyRowType, _indexNode.Node.Keys[_entryNumber]);
+			_table.EnterReadLock();
+			try
+			{
+				#if SAFETABLES
+				CheckActive();
+				#endif
+				CheckNotCrack();
+				return new Row(_manager, _accessPath.KeyRowType, _indexNode.Node.Keys[_entryNumber]);
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
 		}
-		
+
 		public IRow GetData()
 		{
-			#if SAFETABLES
-			CheckActive();
-			#endif
-			CheckNotCrack();
-			return new Row(_manager, _accessPath.DataRowType, _indexNode.Node.Keys[_entryNumber]);
+			_table.EnterReadLock();
+			try
+			{
+				#if SAFETABLES
+				CheckActive();
+				#endif
+				CheckNotCrack();
+				return new Row(_manager, _accessPath.DataRowType, _indexNode.Node.Keys[_entryNumber]);
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
 		}
 		
 		private IRow EnsureKeyRow(IRow key)
@@ -527,9 +666,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool FindKey(IRow key)
 		{
+			_table.EnterReadLock();
+			try
+			{
+				return InternalFindKey(key);
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private bool InternalFindKey(IRow key)
+		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
+			FollowTruncate();
 			int entryNumber;
 			RowTreeNode indexNode;
 			IRow localKey = EnsureKeyRow(key);
@@ -570,9 +723,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool FindNearest(IRow key)
 		{
+			_table.EnterReadLock();
+			try
+			{
+				return InternalFindNearest(key);
+			}
+			finally
+			{
+				_table.ExitReadLock();
+			}
+		}
+
+		private bool InternalFindNearest(IRow key)
+		{
 			#if SAFETABLES
 			CheckActive();
 			#endif
+			FollowTruncate();
 			int entryNumber;
 			RowTreeNode indexNode;
 			IRow localKey = EnsureKeyRow(key);
@@ -583,34 +750,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					int compareResult = _accessPath.Compare(_manager, _firstKey.DataType, (NativeRow)_firstKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
 					if (((_direction == ScanDirection.Forward) && (compareResult > 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 					{
-						First();
-						Next();
+						InternalFirst();
+						InternalNext();
 						return false;
 					}
 				}
-				
+
 				if (_lastKey != null)
 				{
 					int compareResult = _accessPath.Compare(_manager, _lastKey.DataType, (NativeRow)_lastKey.AsNative, localKey.DataType, (NativeRow)localKey.AsNative);
 					if (((_direction == ScanDirection.Forward) && (compareResult < 0)) || ((_direction == ScanDirection.Backward) && (compareResult < 0)))
 					{
-						Last();
-						Prior();
+						InternalLast();
+						InternalPrior();
 						return false;
 					}
 				}
-					
+
 				bool result = FindIndexKey(localKey.DataType, (NativeRow)localKey.AsNative, out indexNode, out entryNumber);
 				SetIndexNode(indexNode);
 				_entryNumber = entryNumber;
-				
+
 				if (_entryNumber >= _indexNode.Node.EntryCount)
 				{
-					Next();
+					InternalNext();
 					if (_eOF)
 					{
-						Last();
-						Prior();
+						InternalLast();
+						InternalPrior();
 					}
 				}
 				else
@@ -628,7 +795,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		/// <remarks>The keys passed to this function must be of the same row type as the key for the accesspath for the scan</remarks>		
+		/// <remarks>The keys passed to this function must be of the same row type as the key for the accesspath for the scan</remarks>
+		// Not locked: it compares the given rows by the access path's order, which never changes, and reads no node.
 		public int CompareKeys(IRow key1, IRow key2)
 		{
 			#if SAFETABLES
