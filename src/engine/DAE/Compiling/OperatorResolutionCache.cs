@@ -21,6 +21,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 	/// operator or conversion, often without any catalog lock held) never wait on a resolution in progress.
 	/// <c>_syncRoot</c> is held only inside these members, which call nothing that takes another lock, so it
 	/// cannot take part in a deadlock.
+	/// The cache holds only answers computed from the shared catalog as every session sees it.
+	/// <see cref="Compiler.ResolveOperator"/> therefore neither reads nor writes the cache in a loading context,
+	/// and only writes a resolution to an operator in <c>plan.Catalog</c> — a resolution to an operator added
+	/// only to <c>plan.PlanCatalog</c> by a still-compiling <c>create operator</c> is not shared.
 	/// </remarks>
 	public class OperatorResolutionCache : System.Object
 	{

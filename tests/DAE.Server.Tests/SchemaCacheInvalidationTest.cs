@@ -138,5 +138,73 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			Assert.That(Evaluate(call), Is.EqualTo("Integer"), "a cached plan still calls the worse overload");
 		}
+
+		// Loading a stored operator from the catalog compiles its body in a loading context, where only the
+		// overloads the catalog has brought in so far are visible. A resolution computed against that narrower
+		// view must not be written to the shared cache, or one session's loading-time choice becomes every
+		// session's answer and the better overload created later is never picked.
+		[Test]
+		public void LoadingContextOperatorResolutionDoesNotPoisonSharedCache()
+		{
+			string foo = Unique("LCFoo"), bar = Unique("LCBar");
+			// Bar is created when only Foo(Decimal) exists, so its stored dependency is Foo(Decimal). The newer
+			// Foo(Integer) overload, created afterwards, is the exact match a direct call to Foo(5) must find.
+			string create = String.Format(
+				@"create operator {0}(const X : Decimal) : String begin result := 'Decimal'; end;
+				  create operator {1}() : String begin result := {0}(5); end;
+				  create operator {0}(const X : Integer) : String begin result := 'Integer'; end;",
+				foo, bar);
+
+			using (TestServerInstance template = new TestServerInstance("LoadingContextTemplate"))
+			{
+				template.Server.Start();
+				template.ExecuteScript(create);
+				template.Server.Stop();
+
+				using (TestServerInstance fresh = new TestServerInstance("LoadingContextFresh", template))
+				{
+					fresh.Server.Start();
+					// Evaluating Bar lazily loads it. Its loading-context compile resolves Foo(5) against the catalog
+					// as the load has it so far — Foo(Decimal) only — and returns 'Decimal'. Before this fix that
+					// resolution was written to the shared cache, so another session asking for Foo(5) got the
+					// cached Foo(Decimal) instead of the newer, exact-match Foo(Integer).
+					Assert.That(fresh.Evaluate(String.Format("{0}()", bar)), Is.EqualTo("Decimal"));
+					Assert.That(
+						fresh.Evaluate(String.Format("{0}(5)", foo)),
+						Is.EqualTo("Integer"),
+						"a loading-context resolution leaked into the shared operator resolution cache");
+				}
+			}
+		}
+
+		// A create operator whose body references its own new signature puts the new operator in plan.PlanCatalog
+		// while compiling. If the compile reports errors (or the statement is prepared and never executed), the
+		// operator never reaches plan.Catalog and the compile-time by-name clear of the shared resolution cache
+		// never re-fires on commit; the recursive call's resolution must therefore not be cached, or the entry is
+		// the only record of a phantom overload any session can call.
+		[Test]
+		public void FailedCreateOperatorDoesNotCachePhantomResolution()
+		{
+			string op = Unique("SCPhantom"), noSuch = "NoSuchOperatorAtAll_" + op;
+			string create = String.Format(
+				"create operator {0}(const X : Integer) : Integer begin if X <= 0 then result := 0 else result := {0}(X - 1) + 1; result := {1}(); end;",
+				op, noSuch);
+
+			IServerStatementPlan prepared = Process.PrepareStatement(create, null);
+			try
+			{
+				// The second body statement fails to resolve, so CompileStatement replaces it with a NoOpNode and
+				// records the error on plan.Messages. The create reports errors from Execute (never called) but the
+				// recursive first statement compiled cleanly and populated the shared cache before the error.
+				CompilerException exception = Assert.Throws<CompilerException>(
+					() => Evaluate(String.Format("{0}(5)", op)),
+					"the recursive call left a phantom entry in the shared operator resolution cache");
+				Assert.That(exception.Code, Is.EqualTo((int)CompilerException.Codes.OperatorNotFound), exception.ToString());
+			}
+			finally
+			{
+				Process.UnprepareStatement(prepared);
+			}
+		}
 	}
 }

@@ -913,6 +913,11 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// separate from <c>_syncRoot</c>, so the Clear calls made without the catalog's lock (compiling create type, the
 	/// admin operator) never wait on a trace in progress. <c>_syncRoot</c> is held only inside these members, which
 	/// call nothing that takes another lock, so it cannot take part in a deadlock.
+	/// The cache holds only paths whose conversions are all in the shared catalog.
+	/// <see cref="Compiler.FindScalarConversionPath"/> therefore skips the add when the chosen path contains any
+	/// conversion in <c>plan.PlanCatalog</c> — <c>create type ... like</c> adds a narrowing conversion to a shared
+	/// scalar type's <c>ImplicitConversions</c> list and to <c>plan.PlanCatalog</c> while compiling, so a path
+	/// traced through it before the statement executes is not shared.
 	/// </remarks>
 	public class ScalarConversionPathCache : System.Object
 	{

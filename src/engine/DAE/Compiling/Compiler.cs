@@ -9569,38 +9569,61 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if ((context.Operator == null) || context.Matches.IsPartial)
 			{
 				#if USEOPERATORRESOLUTIONCACHE
-				lock (plan.Catalog)
+				// The shared operator resolution cache holds only answers computed from the shared catalog as every session sees it.
+				// In a loading context the stored dependency being loaded has already brought in the overload its compile saw, and
+				// the by-name compile-time clear does not reach an entry created here; neither read nor write the shared cache in
+				// that case or a loading-time choice becomes everyone's answer.
+				if (plan.InLoadingContext())
 				{
-					lock (plan.Catalog.OperatorResolutionCache)
+					ResolveCall(plan, plan.PlanCatalog, context);
+					if ((context.Operator == null) || context.Matches.IsPartial)
 					{
-						OperatorBindingContext localContext = plan.Catalog.OperatorResolutionCache[context];
-						if (localContext != null)
+						// NOTE: In a loading context the required operator is already in the catalog cache by the dependency loading mechanism; do not force the resolve of arbitrary matches.
+						ResolveCall(plan, plan.Catalog, context);
+					}
+				}
+				else
+				{
+					lock (plan.Catalog)
+					{
+						lock (plan.Catalog.OperatorResolutionCache)
 						{
-							context.MergeBindingDataFromContext(localContext);
-							if (context.Operator != null)
+							OperatorBindingContext localContext = plan.Catalog.OperatorResolutionCache[context];
+							if (localContext != null)
 							{
-								//APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
-								plan.AttachDependency(context.Operator);
+								context.MergeBindingDataFromContext(localContext);
+								if (context.Operator != null)
+								{
+									//APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
+									plan.AttachDependency(context.Operator);
+								}
 							}
-						}
-						else
-						{
+							else
+							{
 				#endif
-							ResolveCall(plan, plan.PlanCatalog, context);
-							if ((context.Operator == null) || context.Matches.IsPartial)
-							{
-								// NOTE: If this is a repository, or we are currently loading, there is no need to force the resolve of arbitrary matches, the required operator will be in the cache because of the dependency loading mechanism in the catalog device
-								if (!plan.IsEngine && (!plan.InLoadingContext()))
-									plan.CatalogDeviceSession.ResolveOperatorName(context.OperatorName);
-								ResolveCall(plan, plan.Catalog, context);
-							}
+								ResolveCall(plan, plan.PlanCatalog, context);
+								if ((context.Operator == null) || context.Matches.IsPartial)
+								{
+									// NOTE: If this is a repository, or we are currently loading, there is no need to force the resolve of arbitrary matches, the required operator will be in the cache because of the dependency loading mechanism in the catalog device
+									if (!plan.IsEngine && (!plan.InLoadingContext()))
+										plan.CatalogDeviceSession.ResolveOperatorName(context.OperatorName);
+									ResolveCall(plan, plan.Catalog, context);
+								}
 				#if USEOPERATORRESOLUTIONCACHE
-							if ((context.Operator == null) || !(context.Operator.IsSessionObject || context.Operator.IsATObject || context.Operator.Signature.HasNonScalarElements()))
-							{
-								// Only cache the resolution if this is not a session or A/T operator, and it is a pure-scalar operator
-								localContext = new OperatorBindingContext(null, context.OperatorName, context.ResolutionPath, context.CallSignature, context.IsExact);
-								localContext.SetBindingDataFromContext(context);
-								plan.Catalog.OperatorResolutionCache.Add(localContext);
+								if ((context.Operator == null) || !(context.Operator.IsSessionObject || context.Operator.IsATObject || context.Operator.Signature.HasNonScalarElements()))
+								{
+									// Only cache a resolution to an operator in the shared catalog, and only when not a session or A/T operator
+									// and the signature is pure-scalar. An operator that this plan's still-compiling create operator added only
+									// to plan.PlanCatalog must not become everyone's answer: the compile-time by-name clear only fires when the
+									// statement executes, so a failed or never-executed compile would otherwise leave that entry as the only
+									// record of a phantom overload.
+									if ((context.Operator == null) || plan.Catalog.Contains(context.Operator))
+									{
+										localContext = new OperatorBindingContext(null, context.OperatorName, context.ResolutionPath, context.CallSignature, context.IsExact);
+										localContext.SetBindingDataFromContext(context);
+										plan.Catalog.OperatorResolutionCache.Add(localContext);
+									}
+								}
 							}
 						}
 					}
@@ -11623,7 +11646,24 @@ namespace Alphora.Dataphor.DAE.Compiling
 							TraceScalarConversionPath(plan, context, sourceType);
 					#if USECONVERSIONPATHCACHE
 							if (context.CanConvert)
-								plan.Catalog.ConversionPathCache.Add(sourceType, targetType, context.BestPath);
+							{
+								// Cache only a path whose conversions are all in the shared catalog. create type ... like adds a
+								// narrowing conversion to the shared like type's ImplicitConversions list while compiling and puts
+								// that conversion in plan.PlanCatalog; a path traced through it before the statement executes (or
+								// if it fails to compile or is never executed) would survive in the shared cache as the only
+								// record of a target type nobody else can see.
+								bool allConversionsShared = true;
+								foreach (Schema.Conversion conversion in context.BestPath)
+								{
+									if (plan.PlanCatalog.Contains(conversion))
+									{
+										allConversionsShared = false;
+										break;
+									}
+								}
+								if (allConversionsShared)
+									plan.Catalog.ConversionPathCache.Add(sourceType, targetType, context.BestPath);
+							}
 						}
 					}
 					#endif
