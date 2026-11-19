@@ -1,0 +1,7 @@
+// LibraryLoadingProbe
+// This library exists to exercise LibraryAssemblyResolver (see port-library-loading): a private managed
+// package (Newtonsoft.Json.Bson) and a private native file (Microsoft.Data.SqlClient.SNI.dll) are both
+// flattened into this library's folder by the layout, and the resolver finds them from this assembly.
+
+create operator ProbeManagedResolver() : String class "Alphora.Dataphor.Diagnostics.LibraryLoadingProbe.ProbeManagedNode,Alphora.Dataphor.Diagnostics.LibraryLoadingProbe";
+create operator ProbeNativeResolver() : String class "Alphora.Dataphor.Diagnostics.LibraryLoadingProbe.ProbeNativeNode,Alphora.Dataphor.Diagnostics.LibraryLoadingProbe";

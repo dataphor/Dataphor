@@ -7,6 +7,7 @@
 #define LOADFROMLIBRARIES
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -384,7 +385,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					string sourceFile = Path.IsPathRooted(file.FileName) ? file.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), file.FileName);
 					string targetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(file.FileName));
-					
+
 					if (!File.Exists(sourceFile))
 						throw new System.IO.IOException(String.Format("File \"{0}\" not found.", sourceFile));
 					try
@@ -404,7 +405,12 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 			}
 			#endif
-			
+
+			// The probe folders the resolver uses for an assembly loaded from this library: this library's folder first, then
+			// each required library's folder transitively, deduplicated. Built once per register call so the resolver's lookup
+			// is a single table read.
+			IReadOnlyList<string> probeFolders = BuildLibraryProbeFolders(program, library, loadedLibrary);
+
 			// Load assemblies after all files are copied in so that multi-file assemblies and other dependencies are certain to be present
 			foreach (Schema.FileReference file in library.Files)
 			{
@@ -422,16 +428,45 @@ namespace Alphora.Dataphor.DAE.Schema
 	                    Assembly assembly = Assembly.LoadFrom(targetFile);
                     #endif
 						if (file.IsAssembly)
-		                    program.CatalogDeviceSession.RegisterAssembly(loadedLibrary, assembly);
+						{
+							LibraryAssemblyResolver.Register(assembly, probeFolders);
+							program.CatalogDeviceSession.RegisterAssembly(loadedLibrary, assembly);
+						}
 					}
 				}
 			}
 		}
-		
+
 		public static void UnregisterLibraryAssemblies(Program program, Schema.LoadedLibrary loadedLibrary)
 		{
 			while (loadedLibrary.Assemblies.Count > 0)
-				program.CatalogDeviceSession.UnregisterAssembly(loadedLibrary, loadedLibrary.Assemblies[loadedLibrary.Assemblies.Count - 1] as Assembly);
+			{
+				Assembly assembly = loadedLibrary.Assemblies[loadedLibrary.Assemblies.Count - 1] as Assembly;
+				LibraryAssemblyResolver.Unregister(assembly);
+				program.CatalogDeviceSession.UnregisterAssembly(loadedLibrary, assembly);
+			}
+		}
+
+		private static IReadOnlyList<string> BuildLibraryProbeFolders(Program program, Schema.Library library, Schema.LoadedLibrary loadedLibrary)
+		{
+			string serverLibraryDirectory = ((Server.Server)program.ServerProcess.ServerSession.Server).LibraryDirectory;
+			List<string> result = new List<string>();
+			HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			result.Add(library.GetLibraryDirectory(serverLibraryDirectory));
+			seen.Add(library.Name);
+			foreach (Schema.LoadedLibrary required in loadedLibrary.RequiredLibraries)
+				AddRequiredLibraryFolders(program, required, serverLibraryDirectory, result, seen);
+			return result;
+		}
+
+		private static void AddRequiredLibraryFolders(Program program, Schema.LoadedLibrary current, string serverLibraryDirectory, List<string> result, HashSet<string> seen)
+		{
+			if (!seen.Add(current.Name))
+				return;
+			Schema.Library required = program.Catalog.Libraries[current.Name];
+			result.Add(required.GetLibraryDirectory(serverLibraryDirectory));
+			foreach (Schema.LoadedLibrary nested in current.RequiredLibraries)
+				AddRequiredLibraryFolders(program, nested, serverLibraryDirectory, result, seen);
 		}
 		
 		public static void CheckCircularLibraryReference(Program program, Schema.Library library, string requiredLibraryName)

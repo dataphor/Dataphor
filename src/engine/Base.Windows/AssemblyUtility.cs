@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.Windows
 		static AssemblyUtility()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
+			LibraryAssemblyResolver.Install();
 		}
 
 		public static Assembly ResolveAssembly(object objectValue, ResolveEventArgs args)

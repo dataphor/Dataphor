@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Alphora.Dataphor.Diagnostics.LibraryLoadingProbe</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.Diagnostics.LibraryLoadingProbe</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\engine\Base\Base.csproj" />
+    <ProjectReference Include="..\..\..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\..\..\src\engine\Server\Server.csproj" />
+  </ItemGroup>
+
+  <!--
+    Private test dependencies. Neither is in the host's bin: Newtonsoft.Json.Bson exercises the managed resolver (its
+    private dll lands flat in this library's folder and the probe node loads a type from it); Microsoft.Data.SqlClient.SNI
+    is a real native dll for the unmanaged resolver (the Windows RID file is flattened into the folder by the layout).
+  -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json.Bson" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProbeNodes.cs" />
+    <Compile Include="Register.cs" />
+  </ItemGroup>
+
+</Project>

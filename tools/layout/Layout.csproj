@@ -60,6 +60,7 @@
     <ProjectReference Include="..\..\libraries\System.Internet\Source\System.Internet.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\System.Integration\Source\System.Integration.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\tests\libraries\LibraryLoadingProbe\Source\LibraryLoadingProbe.csproj" DataphorLayoutRole="Library" />
   </ItemGroup>
 
   <!-- The D4 libraries in the layout, one item per library: its .d4l file. -->
@@ -158,8 +159,6 @@
            Text="%(_DataphorLibraryItem.MSBuildSourceProjectFile) is in the Library list but is not in a library's Source folder (&lt;Name&gt;\Source\, next to &lt;Name&gt;.d4l). Move it to the Bin list if it is not a library." />
     <Error Condition="'@(_DataphorLibraryProjectOutsideLayout)' != ''"
            Text="%(_DataphorLibraryProjectOutsideLayout.MSBuildSourceProjectFile) builds library %(_DataphorLibraryProjectOutsideLayout.Identity), which the DataphorD4Library list leaves out; remove its exclusion in this file." />
-    <Error Condition="'%(_DataphorLibraryPackage.AssetType)' == 'native'"
-           Text="Library %(_DataphorLibraryPackage.DataphorLibrary) has a private native dependency, %(_DataphorLibraryPackage.DestinationSubPath) from package %(_DataphorLibraryPackage.NuGetPackageId). The server does not probe library folders for native files yet; port-library-loading adds that and lifts this error." />
 
     <ItemGroup>
       <_DataphorLayoutFile Include="@(_DataphorLibraryOutput)">
