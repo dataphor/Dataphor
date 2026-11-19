@@ -3,6 +3,13 @@ architecture: docs/modernization-plan.md#ws3-test-suite
 files: tests/DAE.Server.Tests/CatalogStoreTest.cs, tests/DAE.Server.Tests/InProcessTestFixture.cs, tests/DAE.Server.Tests/TestServerInstance.cs, src/engine/DAE/Store/SQLStoreConnection.cs, src/engine/DAE/Store/SQLStoreCursor.cs, src/engine/Store.SQLite/SQLiteStore.cs, src/engine/DAE/Device.Catalog/CatalogStore.cs
 difficulty: medium
 ----
+<!-- resume-note -->
+RESUME: A prior agent run on this ticket did not complete.
+  Prior run: 2026-11-19T07:29:25.198Z (agent: claude)
+  Log file: c:\Projects\DataphorModernized\modernization\tickets\.logs\test-store-contract.implement.2026-11-19T07-29-25-198Z.log
+Read the log to see what was done. Resume where it left off.
+If the prior run hit a timeout or repeated error, be cautious not to rush into the same situation.
+<!-- /resume-note -->
 ## What this is
 
 Replace the deleted `SQLStoreTest.cs` with an L2 store contract. The contract runs against every store built at head time (today: SQLite; later: SQL Server if `store-mssql-port` keeps it) and exercises the SQL-store surface the catalog depends on — cursors, ranges, nested-transaction undo, and the full-catalog persistence across a server restart. It gives every later store ticket (`store-mssql-port`, `store-parameterized-statements`) a single place to prove the change still obeys the contract.
