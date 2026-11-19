@@ -305,7 +305,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			program.CatalogDeviceSession.CreateConversion(Conversion);
-			// NOTE: flushes every cached plan, measured as no slower for library registration; if a workload creating operators while serving repeated statements shows plan-cache churn, invalidate only plans that resolved this operator name or traced a path through these types.
+			// NOTE: flushes every cached plan (also for the sibling bumps in DropConversionNode and CreateOperatorNode), measured as no slower for library registration; if a workload mixing these DDL statements with repeated statements shows plan-cache churn, invalidate only plans that traced a path through these types or resolved the affected operator name.
 			program.Catalog.UpdatePlanCacheTimeStamp();
 			return null;
 		}
