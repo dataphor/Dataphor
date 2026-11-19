@@ -151,16 +151,33 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		/// <summary>Raises 125111 when leaving would discard work done in the application transaction: when the process's session on the application transaction device has a transaction open other than the implicit transaction of the statement doing the leave.</summary>
-		/// <remarks>Every statement runs in an implicit transaction while implicit transactions are on, so that one is excepted; refusing it would make leaving impossible. Work done earlier in the same statement is in that transaction and is still discarded; whether to refuse that too is engine-at-leave-same-statement-work.</remarks>
+		/// <summary>Raises 125111 when leaving would discard work done in the application transaction: when the process's session on the application transaction device has a transaction open other than the implicit transaction of the statement doing the leave, or when the implicit transaction of the leaving statement has itself already changed something in the application transaction.</summary>
+		/// <remarks>Every statement runs in an implicit transaction while implicit transactions are on. That transaction is excepted from the first check (refusing it unconditionally would make leaving impossible), but still has to have changed nothing: if the leaving statement first inserts, updates or deletes in the application transaction (directly or inside a nested transaction it has already committed) and then leaves, the disconnect that follows the leave would discard that work.</remarks>
 		public static void CheckCanLeaveApplicationTransaction(ServerProcess process)
 		{
-			if ((process.ApplicationTransactionID != Guid.Empty) && process.InTransactionBeyondCurrentCall)
+			if (process.ApplicationTransactionID != Guid.Empty)
 			{
 				int index = process.DeviceSessions.IndexOf(process.ServerSession.Server.ATDevice);
 				if ((index >= 0) && process.DeviceSessions[index].InTransaction)
-					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.LeaveInTransaction);
+				{
+					if (process.InTransactionBeyondCurrentCall)
+						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.LeaveInTransaction);
+
+					ApplicationTransactionDeviceSession session = (ApplicationTransactionDeviceSession)process.DeviceSessions[index];
+					if ((session.Transactions.Count > 0) && HasRecordedWork(session.Transactions.CurrentTransaction()))
+						throw new ApplicationTransactionException(ApplicationTransactionException.Codes.LeaveInTransaction);
+				}
 			}
+		}
+
+		private static bool HasRecordedWork(ApplicationTransactionDeviceTransaction transaction)
+		{
+			if (transaction.Operations.Count > 0)
+				return true;
+			foreach (ApplicationTransactionDeviceTransaction nested in transaction.Transactions)
+				if (HasRecordedWork(nested))
+					return true;
+			return false;
 		}
 		
 		public static void LeaveApplicationTransaction(ServerProcess process)
@@ -171,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				try
 				{
 					transaction.Processes.Remove(process.ProcessID);
-					// NOTE: disconnecting disposes the AT device session, which rolls back every transaction still open on it and so discards the AT work done in them. ServerProcess.LeaveApplicationTransaction therefore refuses to leave while a transaction other than the leaving statement's own implicit one is open (CheckCanLeaveApplicationTransaction, error 125111); the engine's own leaves (process dispose, AT commit/rollback cleanup, the temporary join in prepare) come here unchecked.
+					// NOTE: disconnecting disposes the AT device session, which rolls back every transaction still open on it and so discards the AT work done in them. ServerProcess.LeaveApplicationTransaction therefore refuses to leave (CheckCanLeaveApplicationTransaction, error 125111) when a transaction other than the leaving statement's own implicit one is open, and also when that implicit transaction has itself already changed something in the application transaction (a recorded operation on the AT session's current device transaction, including one committed into it from a nested transaction). The engine's own leaves (process dispose, AT commit/rollback cleanup, the temporary join in prepare) come here unchecked.
 					process.DeviceDisconnect(transaction.Device); // Disconnect the session to ensure that the saved pointer to this AT is cleared
 				}
 				finally

@@ -3,6 +3,13 @@ architecture: docs/modernization-plan.md#ws3-test-suite
 files: src/engine/DAE/Device.ApplicationTransaction/ApplicationTransaction.cs, src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Device.Memory/MemoryDevice.cs, tests/DAE.Server.Tests/ApplicationTransactionTest.cs, docs/migration-notes.md
 repro: static
 ----
+<!-- resume-note -->
+RESUME: A prior agent run on this ticket did not complete.
+  Prior run: 2026-11-19T00:20:33.549Z (agent: claude)
+  Log file: c:\Projects\DataphorModernized\modernization\tickets\.logs\engine-at-leave-same-statement-work.implement.2026-11-19T00-20-33-549Z.log
+Read the log to see what was done. Resume where it left off.
+If the prior run hit a timeout or repeated error, be cautious not to rush into the same situation.
+<!-- /resume-note -->
 
 ## Decision (owner, 2026-11-18): refuse (the proposed rule)
 

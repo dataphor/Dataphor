@@ -60,6 +60,76 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			ExecuteScript("if not exists (ATLeaveInTransaction) then raise Error('The application transaction commit lost the insert.');");
 		}
 
+		// A statement that changes the application transaction and then leaves in the same statement loses the change silently
+		// on 3.1: the leaving statement's own implicit transaction holds the change, and the leave disconnects the application
+		// transaction's session, whose rollback discards everything open on it. The leave now raises 125111 for this case too,
+		// stays joined, and leaves the change in the implicit transaction intact; a try/except around the leave lets the implicit
+		// transaction commit the insert into the application transaction, which then reaches the base table at commit.
+		[Test]
+		public void TestLeaveAfterSameStatementChangeRefused()
+		{
+			ExecuteScript("create table ATSameStatementChange { ID : Integer, key { ID } };");
+			ExecuteScript("create table ATSameStatementChangeID { ID : Guid, key { } };");
+			ExecuteScript("ATSameStatementChangeID := table { row { BeginApplicationTransaction() ID } };");
+			ExecuteScript("JoinApplicationTransaction(ATSameStatementChangeID[].ID, false);");
+
+			// One statement inserts into the application transaction's copy of the table and then tries to leave. The insert and
+			// the leave share one implicit transaction; the leave raises 125111. The except block swallows that one code so the
+			// implicit transaction commits normally, carrying the insert into the application transaction.
+			ExecuteScript(@"
+				begin
+					insert row { 1 ID } into ATSameStatementChange;
+					var LCaughtCode : Integer := 0;
+					try
+						LeaveApplicationTransaction();
+					except
+						on E : Error do
+						begin
+							LCaughtCode := E.Code;
+							if LCaughtCode <> 125111 and not IsNil(E.InnerError) then
+								LCaughtCode := E.InnerError.Code;
+							if LCaughtCode <> 125111 then
+								raise;
+						end;
+					end;
+					if LCaughtCode <> 125111 then
+						raise Error('The same-statement leave did not raise 125111.');
+					if not exists (ATSameStatementChange where ID = 1) then
+						raise Error('The refused leave discarded the insert made earlier in the same statement.');
+				end;
+			");
+
+			// The refused leave did not disconnect; a separate-statement leave now succeeds and the insert reaches the base table at commit.
+			Assert.That(Process.ApplicationTransactionID, Is.Not.EqualTo(Guid.Empty));
+			ExecuteScript("LeaveApplicationTransaction();");
+			ExecuteScript("if exists (ATSameStatementChange) then raise Error('The insert reached the base table before the application transaction committed.');");
+			ExecuteScript("CommitApplicationTransaction(ATSameStatementChangeID[].ID);");
+			ExecuteScript("if not exists (ATSameStatementChange where ID = 1) then raise Error('The application transaction commit lost the insert.');");
+		}
+
+		// A statement that joins and then leaves in one block, without changing anything in the application transaction, still
+		// succeeds: only the leaving statement's own implicit transaction is open, and it has recorded no work.
+		[Test]
+		public void TestLeaveAfterSameStatementReadSucceeds()
+		{
+			ExecuteScript("create table ATSameStatementRead { ID : Integer, key { ID } };");
+			ExecuteScript("create table ATSameStatementReadID { ID : Guid, key { } };");
+			ExecuteScript("ATSameStatementReadID := table { row { BeginApplicationTransaction() ID } };");
+
+			// One statement joins the application transaction, reads from one of its tables (empty, so no rows are copied in) and leaves.
+			ExecuteScript(@"
+				begin
+					JoinApplicationTransaction(ATSameStatementReadID[].ID, false);
+					if exists (ATSameStatementRead) then
+						raise Error('The empty table reported a row.');
+					LeaveApplicationTransaction();
+				end;
+			");
+			Assert.That(Process.ApplicationTransactionID, Is.EqualTo(Guid.Empty));
+
+			ExecuteScript("RollbackApplicationTransaction(ATSameStatementReadID[].ID);");
+		}
+
 		// With implicit transactions off and no transaction open, committing an application transaction replays its operations
 		// outside any transaction. It used to fail with a NullReferenceException, recording each operation for a rollback that
 		// cannot happen.
