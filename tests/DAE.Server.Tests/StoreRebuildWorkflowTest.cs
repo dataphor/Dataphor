@@ -105,9 +105,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Assert.That(instance.Evaluate("exists (RoleRightAssignments where (Role_Name = 'RebuildWriter' or Role_Name like '%.RebuildWriter') and Right_Name = 'System.CreateRole' and IsGranted)"), Is.True, "RebuildWriter's System.CreateRole grant missing after restart");
 				Assert.That(instance.Evaluate("exists (DeviceUsers where User_ID = 'RebuildUser' and (Device_Name = 'SampleDevice' or Device_Name like '%.SampleDevice'))"), Is.True, "RebuildUser's device user on SampleDevice missing after restart");
 
-				// Devices and tables from the libraries' Register.d4 and from phase 3. The Register.d4-created tables live
-				// under their library's namespace (e.g. Sample.DetailAdd.Master); Catalog.Contains resolves the unqualified
-				// names for the two we create ourselves because they live in General.
+				// Devices and tables from the libraries' Register.d4 and from phase 3. The Register.d4-created objects live
+				// under their library's namespace (e.g. Sample.DetailAdd.Master, Sample.Common.SampleDevice); RebuildWidget
+				// and RebuildWidgetView come back bare because they were created in General. The queries accept either form.
 				Assert.That(instance.Evaluate("exists (Devices where Name = 'SampleDevice' or Name like '%.SampleDevice')"), Is.True, "SampleDevice missing after restart");
 				Assert.That(instance.Evaluate("Count(BaseTableVars where Library_Name = 'Sample.DetailAdd')"), Is.EqualTo(3), "Sample.DetailAdd's three tables missing after restart");
 				Assert.That(instance.Evaluate("exists (BaseTableVars where Name = 'RebuildWidget' or Name like '%.RebuildWidget')"), Is.True, "RebuildWidget table missing after restart");
