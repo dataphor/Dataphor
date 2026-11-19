@@ -399,6 +399,74 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// A grant made in a transaction is not usable from another session until the transaction commits: the other session's
+		/// right check reads through its own store connection, which sees only committed writes, and refuses the uncommitted
+		/// grant even when the changing session is still inside the transaction.
+		/// </summary>
+		[Test]
+		public void UncommittedGrantNotUsableInOtherSession()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(UncommittedGrantNotUsableInOtherSession)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table UncommittedGrantT { ID : Integer, key { ID } };");
+				object inTransaction = null;
+				Exception otherSessionException = null;
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("GrantRightToUser('General.UncommittedGrantTInsert', 'RightsUser');");
+						inTransaction = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.UncommittedGrantTInsert')", null).AsNative;
+						otherSessionException = Assert.Catch(() => RunAs(instance, "RightsUser", userProcess => userProcess.Execute("insert row { 1 ID } into UncommittedGrantT;", null)));
+						process.RollbackTransaction();
+					}
+				);
+
+				Assert.That(inTransaction, Is.True);
+				Assert.That(FindError(otherSessionException, (int)ServerException.Codes.UnauthorizedRight), Is.Not.Null, otherSessionException.ToString());
+			}
+		}
+
+		/// <summary>
+		/// The session that revoked a right inside its own open transaction sees its own revoke, even when another session's
+		/// in-transaction check has already read the committed (still-granted) store answer: the changing session bypasses
+		/// the cache that other session's read would otherwise have filled with the stale answer.
+		/// </summary>
+		[Test]
+		public void ChangingSessionSeesOwnRevokeDespiteOtherSessionCheck()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(ChangingSessionSeesOwnRevokeDespiteOtherSessionCheck)))
+			{
+				instance.Server.Start();
+				instance.ExecuteScript("CreateUser('RightsUser', 'Rights User', ''); create table RevokedInTransactionT { ID : Integer, key { ID } }; GrantRightToUser('General.RevokedInTransactionTInsert', 'RightsUser');");
+				object otherSessionInTransaction = null;
+				object changingSessionInTransaction = null;
+
+				RunAs
+				(
+					instance,
+					"Admin",
+					process =>
+					{
+						process.BeginTransaction(IsolationLevel.CursorStability);
+						process.ExecuteScript("RevokeRightFromUser('General.RevokedInTransactionTInsert', 'RightsUser');");
+						RunAs(instance, "Admin", otherProcess => otherSessionInTransaction = ((ServerProcess)otherProcess).Evaluate("UserHasRight('RightsUser', 'General.RevokedInTransactionTInsert')", null).AsNative);
+						changingSessionInTransaction = ((ServerProcess)process).Evaluate("UserHasRight('RightsUser', 'General.RevokedInTransactionTInsert')", null).AsNative;
+						process.CommitTransaction();
+					}
+				);
+
+				Assert.That(otherSessionInTransaction, Is.True);
+				Assert.That(changingSessionInTransaction, Is.False);
+			}
+		}
+
 		/// <summary>Dropping a role takes the rights it granted from its members, who had used them before the drop.</summary>
 		[Test]
 		public void DroppedRoleRightRefusedToFormerMember()

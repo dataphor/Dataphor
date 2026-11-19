@@ -3589,7 +3589,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					if (_changedRightNames == null)
 						_changedRightNames = new HashSet<string>();
-					_changedRightNames.UnionWith(rightNames);
+					foreach (string rightName in rightNames)
+						if (_changedRightNames.Add(rightName))
+							Device.BeginPendingRight(rightName);
 				}
 			}
 		}
@@ -3605,7 +3607,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					if (_changedRightsUserIDs == null)
 						_changedRightsUserIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-					_changedRightsUserIDs.Add(userID);
+					if (_changedRightsUserIDs.Add(userID))
+						Device.BeginPendingUser(userID);
 				}
 			}
 		}
@@ -3617,8 +3620,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				ClearAllCachedRightAssignments();
-				if (InTransaction)
+				if (InTransaction && !_allRightsChanged)
+				{
 					_allRightsChanged = true;
+					Device.BeginPendingAllRights();
+				}
 			}
 		}
 
@@ -3628,8 +3634,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				user.ClearCachedRightAssignments();
 		}
 
-		// Called once the store has committed or rolled back a level. Only the outermost level's end forgets the record: after
-		// a nested level ends, the outer levels' changes are still uncommitted.
+		// Called once the store has committed or rolled back a level. Only the outermost level's end forgets the record and
+		// drops this record's contribution to the device's pending counts: after a nested level ends, the outer levels'
+		// changes are still uncommitted, so the device must still see them as pending for any other session's right check.
 		private void ClearChangedRights(bool forget)
 		{
 			if ((_changedRightNames != null) || (_changedRightsUserIDs != null) || _allRightsChanged)
@@ -3648,6 +3655,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						if (_changedRightsUserIDs != null)
 							foreach (string userID in _changedRightsUserIDs)
 								ClearUserCachedRightAssignments(userID);
+					}
+
+					if (forget)
+					{
+						if (_changedRightNames != null)
+							foreach (string rightName in _changedRightNames)
+								Device.EndPendingRight(rightName);
+						if (_changedRightsUserIDs != null)
+							foreach (string userID in _changedRightsUserIDs)
+								Device.EndPendingUser(userID);
+						if (_allRightsChanged)
+							Device.EndPendingAllRights();
 					}
 				}
 			}

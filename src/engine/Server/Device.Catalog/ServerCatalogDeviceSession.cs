@@ -2066,7 +2066,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				Schema.User user = ResolveUser(userID);
 
-				Schema.RightAssignment rightAssignment = user.FindCachedRightAssignment(rightName);
+				// While a session has an open transaction that has changed this right, the "every user", or the checked user's
+				// roles, the shared cached answer on the user is per-session: whichever session filled it first wrote its own
+				// view (committed or uncommitted) where every session reads. In that window, read the store through this
+				// session's own connection — it sees this session's uncommitted writes and only committed writes from others —
+				// and do not fill the cache, so the answer never leaks into a session with a different view. See
+				// bug-right-cache-shared-during-open-transaction.
+				bool hasPendingChange =
+					Device.HasPendingAllRights
+					|| Device.HasPendingRight(rightName)
+					|| Device.HasPendingUser(userID);
+
+				Schema.RightAssignment rightAssignment = hasPendingChange ? null : user.FindCachedRightAssignment(rightName);
 
 				if (rightAssignment == null)
 				{
@@ -2074,7 +2085,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					try
 					{
 						rightAssignment = new Schema.RightAssignment(rightName, CatalogStoreConnection.UserHasRight(userID, rightName));
-						user.CacheRightAssignment(rightAssignment);
+						if (!hasPendingChange)
+							user.CacheRightAssignment(rightAssignment);
 					}
 					finally
 					{

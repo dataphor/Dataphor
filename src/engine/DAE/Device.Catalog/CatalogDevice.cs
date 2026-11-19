@@ -41,9 +41,73 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private CatalogHeaders _headers = new CatalogHeaders();
 		public CatalogHeaders Headers { get { return _headers; } }
 		
-		// Users cache, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession		
+		// Users cache, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession
 		private Users _usersCache = new Users();
 		protected internal Users UsersCache { get { return _usersCache; } }
+
+		// Rights, user IDs and the "every user" flag for which some open per-session record has registered a pending change.
+		// The counter is the number of per-session records that have the entry — a right or a user whose record ends decrements,
+		// and the zero case drops the entry so the fast path in UserHasRight stays one empty-dictionary check per call. Read
+		// and written only inside lock (Catalog); the right helpers and UserHasRight take the same lock, so a registration and
+		// a right check never race. Case rules match the per-session record: DAERights names are case-sensitive, user IDs are
+		// not.
+		private Dictionary<string, int> _pendingRightNameCounts = new Dictionary<string, int>();
+		private Dictionary<string, int> _pendingUserIDCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+		private int _pendingAllRightsCount;
+
+		public void BeginPendingRight(string rightName)
+		{
+			int count;
+			_pendingRightNameCounts.TryGetValue(rightName, out count);
+			_pendingRightNameCounts[rightName] = count + 1;
+		}
+
+		public void EndPendingRight(string rightName)
+		{
+			int count = _pendingRightNameCounts[rightName];
+			if (count == 1)
+				_pendingRightNameCounts.Remove(rightName);
+			else
+				_pendingRightNameCounts[rightName] = count - 1;
+		}
+
+		public void BeginPendingUser(string userID)
+		{
+			int count;
+			_pendingUserIDCounts.TryGetValue(userID, out count);
+			_pendingUserIDCounts[userID] = count + 1;
+		}
+
+		public void EndPendingUser(string userID)
+		{
+			int count = _pendingUserIDCounts[userID];
+			if (count == 1)
+				_pendingUserIDCounts.Remove(userID);
+			else
+				_pendingUserIDCounts[userID] = count - 1;
+		}
+
+		public void BeginPendingAllRights()
+		{
+			_pendingAllRightsCount++;
+		}
+
+		public void EndPendingAllRights()
+		{
+			_pendingAllRightsCount--;
+		}
+
+		public bool HasPendingRight(string rightName)
+		{
+			return _pendingRightNameCounts.Count > 0 && _pendingRightNameCounts.ContainsKey(rightName);
+		}
+
+		public bool HasPendingUser(string userID)
+		{
+			return _pendingUserIDCounts.Count > 0 && _pendingUserIDCounts.ContainsKey(userID);
+		}
+
+		public bool HasPendingAllRights { get { return _pendingAllRightsCount > 0; } }
 		
 		// Catalog index, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession
 		// The catalog index stores the name of each object in the catalog cache by it's object ID
