@@ -55,14 +55,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private Dictionary<string, int> _pendingUserIDCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 		private int _pendingAllRightsCount;
 
-		public void BeginPendingRight(string rightName)
+		internal void BeginPendingRight(string rightName)
 		{
 			int count;
 			_pendingRightNameCounts.TryGetValue(rightName, out count);
 			_pendingRightNameCounts[rightName] = count + 1;
 		}
 
-		public void EndPendingRight(string rightName)
+		internal void EndPendingRight(string rightName)
 		{
 			int count = _pendingRightNameCounts[rightName];
 			if (count == 1)
@@ -71,14 +71,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				_pendingRightNameCounts[rightName] = count - 1;
 		}
 
-		public void BeginPendingUser(string userID)
+		internal void BeginPendingUser(string userID)
 		{
 			int count;
 			_pendingUserIDCounts.TryGetValue(userID, out count);
 			_pendingUserIDCounts[userID] = count + 1;
 		}
 
-		public void EndPendingUser(string userID)
+		internal void EndPendingUser(string userID)
 		{
 			int count = _pendingUserIDCounts[userID];
 			if (count == 1)
@@ -87,12 +87,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				_pendingUserIDCounts[userID] = count - 1;
 		}
 
-		public void BeginPendingAllRights()
+		internal void BeginPendingAllRights()
 		{
 			_pendingAllRightsCount++;
 		}
 
-		public void EndPendingAllRights()
+		internal void EndPendingAllRights()
 		{
 			_pendingAllRightsCount--;
 		}
