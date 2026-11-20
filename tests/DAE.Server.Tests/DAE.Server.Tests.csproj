@@ -28,6 +28,7 @@
     <Compile Include="ParserRoundTripCorpusTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
+    <Compile Include="StoreContractTests.cs" />
     <Compile Include="StoreRebuildWorkflowTest.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="TestServerInstance.cs" />
