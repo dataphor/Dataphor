@@ -27,6 +27,7 @@
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
     <Compile Include="InProcessTestFixture.cs" />
+    <Compile Include="InstanceConfigurationTest.cs" />
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />

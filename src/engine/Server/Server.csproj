@@ -40,11 +40,14 @@
   </ItemGroup>
 
   <!--
-    The four remaining WCF host classes are left out: they use hosting types (ServiceHost, and CustomServiceHost's
-    reading of <system.serviceModel>) that .NET 10 does not have. CoreWCF hosting brings them back
-    (protocol-corewcf-host). The two service classes DataphorService and ListenerService are compiled, against
-    CoreWCF's behaviour and fault types; protocol-corewcf-proof ran the existing client against them over the wire.
-    Nothing compiled here references the host classes; an in-process Server does not need any of this.
+    One WCF file is left out, NativeCLI\NativeCLIService.cs: its eleven FaultException<NativeCLIFault> throws are
+    System.ServiceModel's, and CoreWCF recognises only its own, so the one-line change the other two service classes
+    already had belongs with the hosting that exercises it (protocol-corewcf-host). The two service classes
+    DataphorService and ListenerService are compiled, against CoreWCF's behaviour and fault types;
+    protocol-corewcf-proof ran the existing client against them over the wire. The host classes are not in this
+    assembly at all: protocol-corewcf-host-prepare moved them to src/engine/Server.Hosting, where nothing compiles
+    them yet, because hosting needs CoreWCF.NetTcp and every project that referenced this one would inherit it.
+    Nothing compiled here references them; an in-process Server does not need any of this.
   -->
   <ItemGroup>
     <Compile Include="Contracts\IDataphorService.cs" />
@@ -71,7 +74,6 @@
     <Compile Include="Schema\LibraryUtility.cs" />
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
-    <!-- Service\CustomServiceHost.cs: WCF hosting, until protocol-corewcf-host -->
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />
@@ -92,9 +94,7 @@
     <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Service\ConnectionManager.cs" />
     <Compile Include="Service\DataphorService.cs" />
-    <!-- Service\DataphorServiceHost.cs: WCF hosting, until protocol-corewcf-host -->
     <Compile Include="Service\HandleManager.cs" />
-    <!-- Service\ListenerServiceHost.cs: WCF hosting, until protocol-corewcf-host -->
     <Compile Include="Streams\FileStreamProvider.cs" />
   </ItemGroup>
 

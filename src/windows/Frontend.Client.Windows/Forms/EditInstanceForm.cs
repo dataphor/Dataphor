@@ -75,10 +75,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FPortNumberTextBox.Text = configuration.PortNumber.ToString();
 			FRequireSecureConnectionComboBox.Checked = configuration.RequireSecureConnection;
 			FShouldListenComboBox.Checked = configuration.ShouldListen;
-			FUseServiceConfigurationCheckBox.Checked = configuration.UseServiceConfiguration;
 			FOverrideListenerPortNumberTextBox.Text = configuration.OverrideListenerPortNumber.ToString();
 			FRequireSecureListenerConnectionComboBox.Checked = configuration.RequireSecureListenerConnection;
-			FAllowSilverlightClientsComboBox.Checked = configuration.AllowSilverlightClients;
 			FInstanceDirectoryTextBox.Text = configuration.InstanceDirectory;
 			FLibraryDirectoriesListBox.Items.Clear();
             if (configuration.LibraryDirectories != null)
@@ -101,10 +99,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			result.PortNumber = Int32.Parse(FPortNumberTextBox.Text);
 			result.RequireSecureConnection = FRequireSecureConnectionComboBox.Checked;
 			result.ShouldListen = FShouldListenComboBox.Checked;
-			result.UseServiceConfiguration = FUseServiceConfigurationCheckBox.Checked;
 			result.OverrideListenerPortNumber = Int32.Parse(FOverrideListenerPortNumberTextBox.Text);
 			result.RequireSecureListenerConnection = FRequireSecureListenerConnectionComboBox.Checked;
-			result.AllowSilverlightClients = FAllowSilverlightClientsComboBox.Checked;
 			result.InstanceDirectory = FInstanceDirectoryTextBox.Text;
 			StringBuilder libraryDirectories = new StringBuilder();
 			for (int index = 0; index < FLibraryDirectoriesListBox.Items.Count; index++)

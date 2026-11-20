@@ -33,8 +33,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// be moved there rather than rewritten.
 	/// </para>
 	/// <para>
-	/// It takes no secure-connection settings: RequireSecureConnection, RequireSecureListenerConnection and
-	/// AllowSilverlightClients belong to protocol-transport-security.
+	/// It takes no secure-connection settings: RequireSecureConnection and RequireSecureListenerConnection belong to
+	/// protocol-transport-security. (AllowSilverlightClients was never one of them, and protocol-corewcf-host-prepare
+	/// removed it: it switched on the cross-domain access-policy service the removed Silverlight client needed.)
 	/// </para>
 	/// </remarks>
 	public sealed class CoreWcfProofHost : IDisposable
