@@ -27,8 +27,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <para>
 	/// What is compared is what the wire carries. An operation's action URI comes from the contract's Name and Namespace and
 	/// from the operation name, and its message body from the parameter and return types, so those are compared; so are the
-	/// declared fault detail types, which decide whether the other side sees a typed fault or a bare one. Parameter names are
-	/// not on the wire and are not compared.
+	/// declared fault detail types, which decide whether the other side sees a typed fault or a bare one. An operation can
+	/// also name its action outright instead of letting WCF derive it, and can declare itself one-way, so those are compared
+	/// too. Parameter names are not on the wire and are not compared.
 	/// </para>
 	/// <para>
 	/// A client operation is an [OperationContract(AsyncPattern = true)] method named Begin&lt;Name&gt; paired with an
@@ -38,6 +39,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <para>
 	/// No server and no socket: these tests read interface declarations only, so they hold whatever the transport turns out
 	/// to be.
+	/// </para>
+	/// <para>
+	/// NOTE: the comparison below has no test of its own. Its branches - the Begin/End pairing, the malformed-client
+	/// reports, the overload detection, the known-difference matching - were each confirmed against purpose-built broken
+	/// interface pairs that were deliberately not committed, so a later edit to them is unguarded except by the check that
+	/// the server side yielded at least one operation. Build the synthetic pairs again before reworking the reading.
 	/// </para>
 	/// </remarks>
 	[TestFixture]
@@ -121,6 +128,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			/// <summary>The FaultContract detail types declared on the operation, in declaration order.</summary>
 			public Type[] FaultDetailTypes;
+
+			/// <summary>The [OperationContract] the operation was declared with, for the properties on it that change the wire.</summary>
+			public OperationContractAttribute Contract;
 		}
 
 		/// <summary>Compares the two declarations of one contract and fails with every difference found, not just the first.</summary>
@@ -191,7 +201,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						Method = method,
 						ParameterTypes = method.GetParameters().Select(parameter => parameter.ParameterType).ToArray(),
 						ReturnType = method.ReturnType,
-						FaultDetailTypes = ReadFaultDetailTypes(method)
+						FaultDetailTypes = ReadFaultDetailTypes(method),
+						Contract = attribute
 					};
 				AddOperation(operations, serverInterface, attribute.Name ?? method.Name, operation, differences);
 			}
@@ -262,7 +273,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						Method = method,
 						ParameterTypes = beginParameters.Take(beginParameters.Length - 2).Select(parameter => parameter.ParameterType).ToArray(),
 						ReturnType = endMethod.ReturnType,
-						FaultDetailTypes = ReadFaultDetailTypes(method)
+						FaultDetailTypes = ReadFaultDetailTypes(method),
+						Contract = attribute
 					};
 				AddOperation(operations, clientInterface, attribute.Name ?? baseName, operation, differences);
 			}
@@ -300,9 +312,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>Compares the two operation sets: which operations exist, then each shared operation's signature and faults.</summary>
 		/// <remarks>
-		/// NOTE: what is compared is the operation set, the signatures and the declared faults. [ServiceKnownType] and base
-		/// contract interfaces are not read, because none of these six interfaces uses either; a contract that starts to
-		/// would need this comparison widened, and would pass here meanwhile.
+		/// NOTE: what is compared is the operation set, the signatures, the action and one-way properties and the declared
+		/// faults. Four things are not: [ServiceKnownType], base contract interfaces (GetMethods on an interface returns only
+		/// the interface's own methods), and the ProtectionLevel settings on [ServiceContract] and [OperationContract] -
+		/// none of the six interfaces uses any of them. A contract that starts to would pass here while differing on the
+		/// wire, so widen this comparison with it; protocol-transport-security, which owns the secured-connection options,
+		/// is the work item most likely to need the protection levels compared.
 		/// </remarks>
 		private static void CompareOperations(Type serverInterface, Dictionary<string, Operation> serverOperations, Dictionary<string, Operation> clientOperations, List<string> differences)
 		{
@@ -322,6 +337,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Operation client = clientOperations[name];
 
 				CompareSignature(serverInterface, name, server, client, differences);
+				CompareMessageExchange(serverInterface, name, server, client, differences);
 				CompareFaults(serverInterface, name, server, client, unmatchedKnownDifferences, differences);
 			}
 
@@ -343,6 +359,31 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			if (server.ReturnType != client.ReturnType)
 				differences.Add(String.Format("{0}.{1}: the return type differs - server {2}, client {3}.", serverInterface.Name, name, FormatTypeWithAssembly(server.ReturnType), FormatTypeWithAssembly(client.ReturnType)));
+		}
+
+		/// <summary>Compares the [OperationContract] properties that decide the operation's action URIs and whether it carries a reply.</summary>
+		/// <remarks>
+		/// None of the six interfaces sets any of these, so each comparison here is between two unset values. They are
+		/// compared because setting one on a single copy compiles on both sides and then mismatches on the wire, which is
+		/// what this test exists to catch. An unset Action is compared as null rather than resolved to the URI WCF derives
+		/// from it, because that URI is built from the contract identity and the operation name, both already compared.
+		/// </remarks>
+		private static void CompareMessageExchange(Type serverInterface, string name, Operation server, Operation client, List<string> differences)
+		{
+			if (server.Contract.Action != client.Contract.Action)
+				differences.Add(String.Format("{0}.{1}: the request Action differs - server {2}, client {3}.", serverInterface.Name, name, FormatAction(server.Contract.Action), FormatAction(client.Contract.Action)));
+
+			if (server.Contract.ReplyAction != client.Contract.ReplyAction)
+				differences.Add(String.Format("{0}.{1}: the ReplyAction differs - server {2}, client {3}.", serverInterface.Name, name, FormatAction(server.Contract.ReplyAction), FormatAction(client.Contract.ReplyAction)));
+
+			if (server.Contract.IsOneWay != client.Contract.IsOneWay)
+				differences.Add(String.Format("{0}.{1}: IsOneWay differs - server {2}, client {3}; a one-way operation has no reply message, so one side would wait for a reply the other never sends.", serverInterface.Name, name, server.Contract.IsOneWay, client.Contract.IsOneWay));
+		}
+
+		/// <summary>An action URI as declared, or a note that it is the one WCF derives.</summary>
+		private static string FormatAction(string action)
+		{
+			return action == null ? "derived from the contract and operation name" : "\"" + action + "\"";
 		}
 
 		/// <summary>Compares the set of declared fault detail types, allowing only the differences recorded in <see cref="KnownFaultDifferences"/>.</summary>

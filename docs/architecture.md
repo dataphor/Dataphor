@@ -97,7 +97,7 @@ Client side: `Frontend.Client.Session.SetApplication` asks the server which node
 | Native CLI | `…/<instance>/service/native` | `INativeCLIService`, 11 operations |
 | Listener | `net.tcp://<host>:8060/listener/service` | `IListenerService`: instance name → URI |
 
-The server interfaces (`src/engine/Server/Contracts`) and the client's asynchronous copies (`src/protocol/Client/Contracts`, `src/protocol/NativeCLI`) are separate declarations of the same contracts. `RemoteServerObject` still derives from `MarshalByRefObject` and manipulates .NET Remoting leases — a leftover from the pre-WCF protocol. A client alias (`Aliases.config`) is either a connection alias (host, instance, port) or an in-process alias that starts a server inside the client process.
+The server interfaces (`src/engine/Server/Contracts`) and the client's asynchronous copies (`src/protocol/Client/Contracts` for the main service, `src/protocol/Common/Contracts` for the listener, `src/protocol/NativeCLI` for the native CLI) are separate declarations of the same contracts; `ContractParityTest` holds them in step by comparing the two declarations of each contract by reflection. `RemoteServerObject` still derives from `MarshalByRefObject` and manipulates .NET Remoting leases — a leftover from the pre-WCF protocol. A client alias (`Aliases.config`) is either a connection alias (host, instance, port) or an in-process alias that starts a server inside the client process.
 
 ## On disk
 

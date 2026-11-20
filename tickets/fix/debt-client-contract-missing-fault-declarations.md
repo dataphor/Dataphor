@@ -4,6 +4,7 @@ files: src/protocol/Client/Contracts/IClientDataphorService.cs, src/protocol/Cli
 repro: static
 severity: wrong-result
 likelihood: unusual
+prereq: protocol-corewcf-host
 tradeoffs: Only three of the 88 operations are affected, and they are administrative ones a normal application never calls, so a maintainer could reasonably leave the asymmetry alone rather than touch a declared compatibility surface for it.
 
 ## What is wrong
