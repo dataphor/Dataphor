@@ -106,6 +106,42 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				);
 		}
 
+		// An updatable cursor on T's non-unique index on G, naming rows by V: the shape of a catalog table whose primary key is
+		// text (DAEUsers.ID, DAELoadedLibraries.Library_Name), so that a generated write's key condition carries a string.
+		private static SQLStoreCursor OpenCursorKeyedOnValue(SQLStoreConnection connection)
+		{
+			return
+				connection.OpenCursor
+				(
+					TableName,
+					new List<string> { "K", "G", "V" },
+					new SQLIndex("IDX_T_G", new SQLIndexColumn[] { new SQLIndexColumn("G", true) }),
+					new List<string> { "V" },
+					true
+				);
+		}
+		
+		// B { K primary key, F }, where F holds a boolean: the shape of every catalog table that stores one (DAEObjects.IsSystem,
+		// DAERoleRightAssignments.IsGranted). F is declared tinyint, as the catalog declares them, and the key is a named primary
+		// key constraint, which is where the catalog's index names come from.
+		private static void CreateBooleanTable(SQLStoreConnection connection)
+		{
+			connection.ExecuteStatement("create table B (K int not null, F tinyint not null, constraint PK_B primary key (K))");
+		}
+
+		private static SQLStoreCursor OpenBooleanCursor(SQLStoreConnection connection)
+		{
+			return
+				connection.OpenCursor
+				(
+					"B",
+					new List<string> { "K", "F" },
+					new SQLIndex("PK_B", new SQLIndexColumn[] { new SQLIndexColumn("K", true) }),
+					new List<string> { "K" },
+					true
+				);
+		}
+		
 		// Runs the store's own seed script, as CatalogStore.Initialize does on a database with no DAEServerInfo table.
 		private void SeedCatalogSchema(SQLStoreConnection connection)
 		{
@@ -352,6 +388,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// An update that moves the cursor's row out of the range it is scanning ends the scan. The cursor seeks from the row's
+		/// new key, which is past the range's end, so the row it finds there does not become current.
+		/// </summary>
+		[Test]
+		public void CursorEndsScanWhenUpdateMovesRowOutOfRange()
+		{
+			using (SQLStoreConnection connection = Store.Connect())
+			{
+				CreateGroupedTable(connection);
+				// A row in a later group, so that the seek from the moved row has something to find and the range check is what
+				// ends the scan rather than the table running out.
+				connection.ExecuteStatement("insert into T values (5, 3, 'e')");
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+				{
+					// Group 2 holds row 4 alone, so the range admits the current row and nothing else.
+					cursor.SetRange(new object[] { 2 }, new object[] { 2 });
+					Assert.That(cursor.Next() ? cursor[0] : null, Is.EqualTo(4));
+
+					cursor[1] = 3;
+					cursor.Update();
+
+					Assert.That(cursor.Next(), Is.False, "the cursor served a row from beyond its range after its own row moved out of it");
+				}
+
+				Assert.That(Count(connection, "select count(*) from T where G = 3"), Is.EqualTo(2), "the update did not move the row");
+			}
+		}
+
+		/// <summary>
 		/// After a delete a cursor on a non-unique index is between the deleted row's neighbours, so a loop of Next and Delete
 		/// removes exactly the range.
 		/// </summary>
@@ -380,6 +446,96 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				}
 				Assert.That(Count(connection, "select count(*) from T"), Is.EqualTo(1));
 				Assert.That(Values(connection, 4), Is.EqualTo("d"));
+			}
+		}
+
+		/// <summary>
+		/// A string whose characters would end a quoted literal early - single quotes, a quote beside a statement separator, a
+		/// closing parenthesis and an embedded NUL - survives an insert, an update, a key condition that names the row by it and
+		/// a delete. The generated writes pass values as parameters; the quote-doubled literals they replaced cannot carry a NUL,
+		/// because the provider prepares the statement from text that the NUL ends.
+		/// </summary>
+		[Test]
+		public void AwkwardStringRoundTripsThroughWrites()
+		{
+			const string inserted = "a';'b');'c\0d";
+			const string updated = "x'';'y\0z";
+
+			using (SQLStoreConnection connection = Store.Connect())
+			{
+				CreateGroupedTable(connection);
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+					cursor.Insert(new object[] { 5, 3, inserted });
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the inserted row was not found");
+					Assert.That(cursor[2], Is.EqualTo(inserted), "the value did not survive the insert");
+					cursor[2] = updated;
+					cursor.Update();
+				}
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the updated row was not found");
+					Assert.That(cursor[2], Is.EqualTo(updated), "the value did not survive the update");
+				}
+
+				// This cursor names rows by V, so the delete's key condition carries the string rather than the integer key.
+				using (SQLStoreCursor cursor = OpenCursorKeyedOnValue(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the row was not found by the cursor that names it by V");
+					cursor.Delete();
+				}
+
+				Assert.That(Count(connection, "select count(*) from T where G = 3"), Is.EqualTo(0), "the row named by its string key was not deleted");
+			}
+		}
+
+		/// <summary>
+		/// A boolean written through a store cursor comes back as a boolean, through both the values of an insert and the set list
+		/// of an update. The catalog declares its boolean columns tinyint, so a generated write passes 1 or 0 rather than a .NET
+		/// bool (SQLStoreConnection.NativeToParameter); a store whose catalog declares them with a boolean type, or whose provider
+		/// binds a parameter's declared type strictly, has to map them and fails here if it does not.
+		/// </summary>
+		[Test]
+		public void BooleanRoundTripsThroughWrites()
+		{
+			using (SQLStoreConnection connection = Store.Connect())
+			{
+				CreateBooleanTable(connection);
+
+				using (SQLStoreCursor cursor = OpenBooleanCursor(connection))
+				{
+					cursor.Insert(new object[] { 1, true });
+					cursor.Insert(new object[] { 2, false });
+				}
+
+				using (SQLStoreCursor cursor = OpenBooleanCursor(connection))
+				{
+					cursor.SetRange(null, null);
+					Assert.That(cursor.Next() ? cursor[1] : null, Is.EqualTo(true), "the true row did not survive the insert");
+					Assert.That(cursor.Next() ? cursor[1] : null, Is.EqualTo(false), "the false row did not survive the insert");
+					Assert.That(cursor.Next(), Is.False);
+				}
+
+				using (SQLStoreCursor cursor = OpenBooleanCursor(connection))
+				{
+					cursor.SetRange(new object[] { 2 }, new object[] { 2 });
+					Assert.That(cursor.Next(), Is.True);
+					cursor[1] = true;
+					cursor.Update();
+				}
+
+				using (SQLStoreCursor cursor = OpenBooleanCursor(connection))
+				{
+					cursor.SetRange(new object[] { 2 }, new object[] { 2 });
+					Assert.That(cursor.Next() ? cursor[1] : null, Is.EqualTo(true), "the updated row did not come back true");
+				}
 			}
 		}
 

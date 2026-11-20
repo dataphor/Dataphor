@@ -52,5 +52,14 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 				return ((bool)tempValue ? "'true'" : "'false'");			
 			return base.NativeToLiteralValue(tempValue);
 		}
+
+		// This store's catalog declares its boolean columns boolean, not tinyint, so a parameter carries the bool itself; the base
+		// class sends 1 or 0, which is what the integer columns the other stores declare need.
+		public override SQLParameter NativeToParameter(string name, object tempValue)
+		{
+			if (tempValue is bool)
+				return new SQLParameter(name, new SQLBooleanType(), tempValue);
+			return base.NativeToParameter(name, tempValue);
+		}
     }
 }

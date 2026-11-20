@@ -258,6 +258,10 @@ namespace Alphora.Dataphor.DAE.Store
 						[and] current order column is not null
 		*/
 		
+		// NOTE: the origin values are rendered as literals here, the last generated statements in the store that are - the insert,
+		// update and delete a write executes carry theirs as parameters. Harmless today because every origin value is an integer or
+		// a string this same store read back; if a ranged read ever misbehaves on a value a literal cannot carry, the parameter form
+		// is SQLStoreConnection.NativeToParameter and a reader command takes parameters the way the execute command does.
 		// NOTE: a null in the origin compares as unknown, so a seek from a row with a null key value finds no row past it. Every
 		// catalog store cursor is ranged on non-null values, which excludes such rows; if a cursor ever moves after an update,
 		// a delete or a change of direction from a row with a null key value, generate "is null" terms here (and mind that the
