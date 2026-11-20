@@ -7,11 +7,8 @@
 using System;
 using System.Runtime.ExceptionServices;
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 using CoreWCF.Configuration;
 
@@ -28,27 +25,20 @@ namespace Alphora.Dataphor.DAE.Service
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// The two services of the instance share one .NET Generic Host, built here. The listener has a second host of its
-	/// own inside <see cref="ListenerServiceHost"/>, because its port is shared with every other instance on the
-	/// machine and a failure to take it must not stop this server; see the remarks on that class.
+	/// The two services of the instance share one .NET Generic Host, of the shape in <see cref="NetTcpServiceHost"/>.
+	/// The listener has a second host of its own inside <see cref="ListenerServiceHost"/>, because its port is shared
+	/// with every other instance on the machine and a failure to take it must not stop this server; see the remarks on
+	/// that class.
 	/// </para>
 	/// <para>
 	/// The host is kept inside this class rather than handed in, so that the console host, the Windows service and
 	/// DAE.Client's non-embedded in-process alias keep working unchanged. host-generic-host reshapes those next, and
-	/// owns routing this server's log and the Windows event log through Microsoft.Extensions.Logging; the logging
-	/// providers are cleared here.
+	/// owns routing this server's log and the Windows event log through Microsoft.Extensions.Logging, which both
+	/// hosts here discard.
 	/// </para>
 	/// </remarks>
 	public class DataphorServiceHost
 	{
-		/// <summary>How long Kestrel is given to close open connections before it aborts them.</summary>
-		/// <remarks>
-		/// Kestrel's graceful shutdown waits for open connections, and a client channel may still be open, so stopping
-		/// is a bounded wait and then an abort rather than an indefinite one. Before CoreWCF, Stop closed the WCF hosts
-		/// asynchronously and did not wait at all.
-		/// </remarks>
-		internal static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(10);
-
 		private Server _server;
 		/// <summary>
 		/// Provides in-process access to the hosted server
@@ -197,6 +187,10 @@ namespace Alphora.Dataphor.DAE.Service
 						throw;
 					}
 				}
+				// NOTE: Stop runs here with this failure in flight, and Stop rethrows a failure of its own from either
+				// host, which would replace it and hide why the server did not start. No stage of Stop is known to fail
+				// on this path (the instance port being taken is a test case); if one ever does, capture it instead of
+				// letting it win.
 				catch
 				{
 					Stop();
@@ -215,58 +209,27 @@ namespace Alphora.Dataphor.DAE.Service
 			DataphorService service = _service;
 			NativeCLIService nativeService = _nativeService;
 
-			// The .NET Generic Host, not WebHostBuilder: .NET 10 marks WebHostBuilder and IWebHost obsolete
-			// (ASPDEPR004, ASPDEPR008). CoreWCF's NetTcp listener is a Kestrel connection handler and configures the
-			// same way under either, and this is the host host-generic-host builds on.
 			return
-				new HostBuilder()
-					.ConfigureLogging(logging => logging.ClearProviders())
-					.ConfigureWebHost
-					(
-						webHostBuilder =>
-							webHostBuilder
-								.UseKestrel()
-								.UseContentRoot(AppContext.BaseDirectory)
-								// Without this Kestrel also opens its own default HTTP endpoint; this process listens on nothing but net.tcp.
-								.UseSetting(WebHostDefaults.ServerUrlsKey, String.Empty)
-								.UseSetting(WebHostDefaults.SuppressStatusMessagesKey, "true")
-								// One Listen call for the one port both endpoints are on; CoreWCF dispatches between them by path.
-								.UseNetTcp(options => options.Listen(ListenAddress(_hostName, instance.PortNumber)))
-								.ConfigureServices
-								(
-									services =>
-									{
-										services.AddServiceModelServices();
-
-										// How "new ServiceHost(_service)" is spelled on CoreWCF: with InstanceContextMode.Single on
-										// the service class, CoreWCF resolves the service type from dependency injection and makes
-										// that object the well-known singleton, so every call reaches the instances built above.
-										services.AddSingleton(service);
-										services.AddSingleton(nativeService);
-									}
-								)
-								.Configure
-								(
-									application =>
-										application.UseServiceModel
-										(
-											builder =>
-											{
-												builder.AddService<DataphorService>();
-												builder.AddServiceEndpoint<DataphorService, IDataphorService>(binding, new Uri(DataphorServiceUtility.BuildInstanceURI(_hostName, instance.PortNumber, instance.Name)));
-												builder.AddService<NativeCLIService>();
-												builder.AddServiceEndpoint<NativeCLIService, INativeCLIService>(binding, new Uri(DataphorServiceUtility.BuildNativeInstanceURI(_hostName, instance.PortNumber, instance.Name)));
-											}
-										)
-								)
-					)
-					.Build();
-		}
-
-		/// <summary>The address CoreWCF listens on, which carries no path: the endpoint addresses supply those.</summary>
-		internal static Uri ListenAddress(string hostName, int portNumber)
-		{
-			return new Uri(String.Format("{0}://{1}:{2}/", Uri.UriSchemeNetTcp, hostName, portNumber));
+				NetTcpServiceHost.Build
+				(
+					_hostName,
+					instance.PortNumber,
+					// How "new ServiceHost(_service)" is spelled on CoreWCF: with InstanceContextMode.Single on the service
+					// class, CoreWCF resolves the service type from dependency injection and makes that object the well-known
+					// singleton, so every call reaches the instances built above.
+					services =>
+					{
+						services.AddSingleton(service);
+						services.AddSingleton(nativeService);
+					},
+					builder =>
+					{
+						builder.AddService<DataphorService>();
+						builder.AddServiceEndpoint<DataphorService, IDataphorService>(binding, new Uri(DataphorServiceUtility.BuildInstanceURI(_hostName, instance.PortNumber, instance.Name)));
+						builder.AddService<NativeCLIService>();
+						builder.AddServiceEndpoint<NativeCLIService, INativeCLIService>(binding, new Uri(DataphorServiceUtility.BuildNativeInstanceURI(_hostName, instance.PortNumber, instance.Name)));
+					}
+				);
 		}
 
 		/// <summary>
@@ -302,16 +265,12 @@ namespace Alphora.Dataphor.DAE.Service
 				{
 					// The host is stopped before the service is disposed: the other order leaves an in-flight call
 					// reaching a disposed server.
-					host.StopAsync(StopTimeout).GetAwaiter().GetResult();
+					NetTcpServiceHost.Stop(host);
 				}
 				catch (Exception exception)
 				{
 					if (hostError == null)
 						hostError = exception;
-				}
-				finally
-				{
-					host.Dispose();
 				}
 			}
 

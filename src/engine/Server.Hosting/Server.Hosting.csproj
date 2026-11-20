@@ -38,6 +38,7 @@
     <Compile Include="DataphorServiceHost.cs" />
     <Compile Include="DataphorServiceHostBinding.cs" />
     <Compile Include="ListenerServiceHost.cs" />
+    <Compile Include="NetTcpServiceHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 

@@ -119,25 +119,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					// library directory, which the server requires.
 					TestEnvironment.CopyLibraries(Path.Combine(_directory, TestServerInstance.LibrariesFolderName), new string[0]);
 
-					ServerConfiguration configuration =
-						new ServerConfiguration
-						{
-							Name = instanceName,
-							PortNumber = _portNumber,
-							ShouldListen = shouldListen,
-							OverrideListenerPortNumber = _listenerPortNumber,
-							LibraryDirectories = Path.Combine(_directory, TestServerInstance.LibrariesFolderName),
-							InstanceDirectory = Path.Combine(_directory, TestServerInstance.InstanceFolderName),
-							CatalogStoreClassName = TestServerInstance.CatalogStoreClassName,
-							CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString
-						};
-
-					_host = new DataphorServiceHost();
-					_host.HostName = LoopbackAddress;
-					// Off, as everywhere in this suite: a logging server in an elevated process also creates and writes
-					// the Windows event-log source.
-					_host.LoggingEnabled = TestEnvironment.LoggingEnabled;
-					_host.Start(configuration);
+					_host = NewHost();
+					_host.Start(Configuration(instanceName, _directory, _portNumber, shouldListen, _listenerPortNumber));
 				}
 				catch
 				{
@@ -177,6 +160,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					TestEnvironment.TryDeleteDirectory(_directory);
 				}
 			}
+		}
+
+		/// <summary>A configuration for a server of this suite's own, with its catalog, libraries and instance directory under <paramref name="directory"/>.</summary>
+		private static ServerConfiguration Configuration(string instanceName, string directory, int portNumber, bool shouldListen, int listenerPortNumber)
+		{
+			return
+				new ServerConfiguration
+				{
+					Name = instanceName,
+					PortNumber = portNumber,
+					ShouldListen = shouldListen,
+					OverrideListenerPortNumber = listenerPortNumber,
+					LibraryDirectories = Path.Combine(directory, TestServerInstance.LibrariesFolderName),
+					InstanceDirectory = Path.Combine(directory, TestServerInstance.InstanceFolderName),
+					CatalogStoreClassName = TestServerInstance.CatalogStoreClassName,
+					CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString
+				};
+		}
+
+		/// <summary>A host listening on loopback, with logging off.</summary>
+		/// <remarks>
+		/// Logging is off as everywhere in this suite: a logging server in an elevated process also creates and writes the
+		/// Windows event-log source.
+		/// </remarks>
+		private static DataphorServiceHost NewHost()
+		{
+			DataphorServiceHost host = new DataphorServiceHost();
+			host.HostName = LoopbackAddress;
+			host.LoggingEnabled = TestEnvironment.LoggingEnabled;
+			return host;
 		}
 
 		/// <summary>Reserves the given number of distinct free loopback ports by binding them all and then releasing them.</summary>
@@ -668,18 +681,82 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// Runs <paramref name="body"/> against a second hosted instance and hands the fixture's own server its object-id
-		/// counter back afterwards: starting a server sets the process-wide counter from its own catalog
-		/// (bug-object-id-counter-is-process-wide), which would otherwise leave the fixture's server allocating ids its
-		/// catalog already holds.
+		/// A host whose instance port is already held by another socket does not start, reports the failure to bind as
+		/// itself, and leaves nothing running: Start's own failure path calls Stop, which has to stop an engine server
+		/// that did start and a Kestrel host that was built and never did. Stopping a second time afterwards does
+		/// nothing, which is the other half of the half-built states Stop has to tolerate.
 		/// </summary>
+		/// <remarks>
+		/// Unlike the listener port, the instance's own port not being available has to fail the start: a server nobody
+		/// can reach is not a server. The engine server starts before the port is opened, so the object-id counter moves
+		/// here even though no host results.
+		/// </remarks>
+		[Test]
+		public void TestTheInstancePortBeingTakenStopsTheServer()
+		{
+			TcpListener conflict = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
+			conflict.Start();
+			try
+			{
+				int portNumber = ((IPEndPoint)conflict.LocalEndpoint).Port;
+				string instanceName = "CoreWcfInstancePortTaken";
+				string directory = TestEnvironment.NewDirectory(instanceName);
+				try
+				{
+					TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
+
+					DataphorServiceHost host = NewHost();
+					WithTheObjectIDCounterRestored
+					(
+						() =>
+						{
+							// ShouldListen false: this case is about the instance's own port, and no listener port is to be taken.
+							Exception error = Assert.Catch(() => host.Start(Configuration(instanceName, directory, portNumber, false, 0)));
+
+							Assert.That(error, Is.InstanceOf<IOException>(), "The failure to bind did not arrive as itself; a failure from Stop on the way out would mask it. Actual: " + error.GetType().FullName + ": " + error.Message);
+							Assert.That(error.Message, Does.Contain(portNumber.ToString()));
+							Assert.That(host.IsActive, Is.False, "The engine server was left running by a host that could not open its port.");
+							Assert.DoesNotThrow(() => host.Stop(), "Stopping an already stopped host did something.");
+						}
+					);
+				}
+				finally
+				{
+					TestEnvironment.TryDeleteDirectory(directory);
+				}
+			}
+			finally
+			{
+				conflict.Stop();
+			}
+		}
+
+		/// <summary>Runs <paramref name="body"/> against a second hosted instance, with the object-id counter handed back afterwards.</summary>
 		private static void WithASecondHost(string instanceName, bool shouldListen, int listenerPortNumber, Action<HostedInstance> body)
+		{
+			WithTheObjectIDCounterRestored
+			(
+				() =>
+				{
+					using (HostedInstance host = new HostedInstance(instanceName, shouldListen, listenerPortNumber))
+						body(host);
+				}
+			);
+		}
+
+		/// <summary>
+		/// Runs <paramref name="body"/> and hands the fixture's own server its object-id counter back afterwards: starting
+		/// a second server in the process sets the process-wide counter from that server's own catalog
+		/// (bug-object-id-counter-is-process-wide), which would otherwise leave the fixture's server allocating ids its
+		/// catalog already holds. An engine server that started and was then stopped has moved the counter just as much as
+		/// one that stayed up.
+		/// </summary>
+		private static void WithTheObjectIDCounterRestored(Action body)
 		{
 			int nextObjectID = Schema.Object.GetNextObjectID();
 			try
 			{
-				using (HostedInstance host = new HostedInstance(instanceName, shouldListen, listenerPortNumber))
-					body(host);
+				body();
 			}
 			finally
 			{

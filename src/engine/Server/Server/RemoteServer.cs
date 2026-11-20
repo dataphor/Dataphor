@@ -41,8 +41,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Wraps a server in the remote (network-optimized) CLI the service contract is written against.</summary>
 		/// <remarks>
 		/// Public, not internal: DataphorService's only constructor takes a RemoteServer, so a host outside this assembly
-		/// could not build one. protocol-corewcf-proof needs it from the test project, and protocol-corewcf-host needs it if
-		/// hosting moves to an assembly of its own.
+		/// could not build one - and since protocol-corewcf-host the host is outside it, in
+		/// Alphora.Dataphor.DAE.Server.Hosting, as is the protocol test.
 		/// </remarks>
 		public RemoteServer(Server server) : base()
 		{

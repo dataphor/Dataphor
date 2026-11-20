@@ -6,11 +6,7 @@
 
 using System;
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 using CoreWCF.Configuration;
 
@@ -58,36 +54,20 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			CoreWCF.Channels.Binding binding = DataphorServiceHostBinding.Build();
 
-			// The same host shape as DataphorServiceHost's; the comments there apply here too.
 			return
-				new HostBuilder()
-					.ConfigureLogging(logging => logging.ClearProviders())
-					.ConfigureWebHost
-					(
-						webHostBuilder =>
-							webHostBuilder
-								.UseKestrel()
-								.UseContentRoot(AppContext.BaseDirectory)
-								.UseSetting(WebHostDefaults.ServerUrlsKey, String.Empty)
-								.UseSetting(WebHostDefaults.SuppressStatusMessagesKey, "true")
-								.UseNetTcp(options => options.Listen(DataphorServiceHost.ListenAddress(hostName, listenerPort)))
-								.ConfigureServices(services => services.AddServiceModelServices())
-								.Configure
-								(
-									application =>
-										application.UseServiceModel
-										(
-											builder =>
-											{
-												// ListenerService is registered by type and not as an instance, which leaves CoreWCF to
-												// construct it per session exactly as "new ServiceHost(typeof(ListenerService))" did.
-												builder.AddService<ListenerService>();
-												builder.AddServiceEndpoint<ListenerService, IListenerService>(binding, new Uri(DataphorServiceUtility.BuildListenerURI(hostName, listenerPort)));
-											}
-										)
-								)
-					)
-					.Build();
+				NetTcpServiceHost.Build
+				(
+					hostName,
+					listenerPort,
+					null,
+					builder =>
+					{
+						// ListenerService is registered by type and not as an instance, which leaves CoreWCF to construct it
+						// per session exactly as "new ServiceHost(typeof(ListenerService))" did.
+						builder.AddService<ListenerService>();
+						builder.AddServiceEndpoint<ListenerService, IListenerService>(binding, new Uri(DataphorServiceUtility.BuildListenerURI(hostName, listenerPort)));
+					}
+				);
 		}
 
 		private bool _isStarted;
@@ -106,18 +86,7 @@ namespace Alphora.Dataphor.DAE.Service
 			IHost listenerHost = _listenerHost;
 			_listenerHost = null;
 			if (listenerHost != null)
-			{
-				try
-				{
-					// A host that never started stops without doing anything; one that did gets the same bounded wait as
-					// the instance's host (see DataphorServiceHost.Stop).
-					listenerHost.StopAsync(DataphorServiceHost.StopTimeout).GetAwaiter().GetResult();
-				}
-				finally
-				{
-					listenerHost.Dispose();
-				}
-			}
+				NetTcpServiceHost.Stop(listenerHost);
 		}
 
 		#endregion
