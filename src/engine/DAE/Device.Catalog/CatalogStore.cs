@@ -149,6 +149,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						connection.ExecuteScript(new StreamReader(stream).ReadToEnd());
 					}
 					
+					// NOTE: these four seed inserts are the store's last writes that render their values into the statement text; a
+					// generated insert, update or delete carries them as parameters (SQLStoreConnection.NativeToParameter). They run once
+					// on an empty catalog and every value is a constant but the configured instance name, which is quote-doubled above.
+					// If one of them ever carries a value from a catalog row, pass it through ExecuteStatement's parameters overload.
 					connection.ExecuteStatement
 					(
 						String.Format

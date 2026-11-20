@@ -284,6 +284,11 @@ namespace Alphora.Dataphor.DAE.Store
 		// generated write keeps its values as literals rather than parameters: it is built once per write inside a nested level,
 		// replayed at most once on one connection against one back end, so carrying a parameter list through the rollback path
 		// would buy nothing.
+		// NOTE: the cost is that a value a quoted literal cannot carry - an embedded NUL, which ends the text the provider
+		// prepares (StoreContractTests.AwkwardStringRoundTripsThroughWrites) - breaks the replay here even though the write
+		// itself now survives it. No catalog column can hold one today: every one is an int, a tinyint or text that the engine
+		// generates from a D4 name, script or tag. If one ever can, carry the parameters through the log instead of widening
+		// the quoting.
 		internal class ModifyOperation : SQLStoreOperation
 		{
 			public ModifyOperation(string undoStatement) : base()
@@ -427,6 +432,10 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			if (tempValue is bool)
 				return new SQLParameter(name, new SQLIntegerType(1), (bool)tempValue ? 1 : 0);
+			// NOTE: a string's declared size is that value's own length, so a back end that keys its plan cache on parameter type
+			// sees a separate entry per distinct length. Harmless on SQLite, which ignores the size. A fixed size would also work -
+			// DotNetCommand.SetParameters grows a declared size that is too small for the value - so if a server-backed store's plan
+			// cache ever matters, declare the column's width here rather than the value's.
 			if (tempValue is string)
 				return new SQLParameter(name, new SQLStringType(((string)tempValue).Length), tempValue);
 			if (tempValue is int)
@@ -455,15 +464,12 @@ namespace Alphora.Dataphor.DAE.Store
 				// Named by position in the order the values appear in the statement: a provider that binds by position (SQLite's does)
 				// needs that order, and one that binds by name needs the names distinct.
 				// NOTE: a parameterized write allocates a parameter and a type per value here, and the provider then builds its own
-				// parameter object per value on every execute (DotNetCommand.PrepareParameters), where a literal write only appended to
-				// a string. Measured when this landed and no change was detectable either way: StoreRebuildWorkflowTest's window read
-				// 975 / 1461 / 1441 / 1466 ms before and 916 / 1420 / 1361 / 1328 ms after, and suite part 1, which is mostly servers
-				// starting and populating their catalogs, 2 m 54 s / 3 m 01 s before and 2 m 59 s / 3 m 14 s / 3 m 24 s / 3 m 25 s /
-				// 3 m 35 s after - overlapping bands on a machine whose spread is wider than any effect. So this is not known to cost
-				// anything; if catalog write throughput ever matters, measure on a quiet machine before changing anything here, and
-				// check first whether the provider re-prepares the statement on every execute: DotNetCommand.PrepareCommand assigns
-				// IDbCommand.CommandText on every execute even when the text has not changed, which would throw away the reuse of one
-				// prepared statement across rows that parameters were expected to bring.
+				// parameter object per value on every execute (DotNetCommand.PrepareParameters), where a literal write only appended
+				// to a string. Measured when this landed and no change was detectable either way; the runs are in the plan's WS4 row
+				// for store-parameterized-statements. If catalog write throughput ever matters, measure on a quiet machine before
+				// changing anything here, and check first whether the provider re-prepares the statement on every execute:
+				// DotNetCommand.PrepareCommand assigns IDbCommand.CommandText on every execute even when the text has not changed,
+				// which would throw away the reuse of one prepared statement across rows that parameters were expected to bring.
 				SQLParameter parameter = NativeToParameter("P" + parameters.Count.ToString(CultureInfo.InvariantCulture), value);
 				parameters.Add(parameter);
 				statement.Append('@').Append(parameter.Name);
@@ -475,6 +481,8 @@ namespace Alphora.Dataphor.DAE.Store
 		/// The command carries parameter markers, so a provider error would otherwise report "insert into DAEUsers values (@P0,
 		/// @P1)" without saying which row failed. Only the connection's generic SQL wrap is re-raised: a store lock and a
 		/// constraint violation come back as other exception types, carry no statement, and must reach the caller unchanged.
+		/// The wrap is kept as the inner exception rather than unwrapped to the provider's own, so that a store which overrides
+		/// InternalWrapException to return more than the base ConnectionException does not lose it to this re-raise.
 		/// </remarks>
 		private void ExecuteWriteStatement(string statement, SQLParameters parameters, Func<string> literalStatement)
 		{

@@ -499,8 +499,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// A boolean written through a store cursor comes back as a boolean, through both the values of an insert and the set list
 		/// of an update. The catalog declares its boolean columns tinyint, so a generated write passes 1 or 0 rather than a .NET
-		/// bool (SQLStoreConnection.NativeToParameter); a store whose catalog declares them with a boolean type, or whose provider
-		/// binds a parameter's declared type strictly, has to map them and fails here if it does not.
+		/// bool (SQLStoreConnection.NativeToParameter). On SQLite either mapping passes, because the provider stores a bool as an
+		/// integer anyway; this pins the round trip for every store the contract is run against, and it is the store whose catalog
+		/// declares the column with a boolean type, or whose provider binds a declared type strictly, that fails here unmapped.
 		/// </summary>
 		[Test]
 		public void BooleanRoundTripsThroughWrites()
