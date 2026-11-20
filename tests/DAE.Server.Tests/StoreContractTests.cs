@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 
 using NUnit.Framework;
@@ -137,11 +136,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		// A CatalogStore over the same database as Store, for the catalog's own write-by-statement paths (InsertRow, DeleteRows).
-		// NOTE: built with CreateStore() alone, because CatalogStore.Initialize needs a started engine. That leaves the inner
-		// store's SupportsMARS and SupportsUpdatableCursor at false, so InsertRow and DeleteRows take their statement path here.
-		// Every store we build reports SupportsUpdatableCursor false, so that is the path a server takes too; a store that
-		// reported updatable cursors would take the cursor path under a server and the statement path here, and the two nested
-		// rollback tests below would then have to drive it through a server instead.
+		// Built with CreateStore() alone, because CatalogStore.Initialize needs a started engine. The inner store's
+		// InternalInitialize therefore never runs, which leaves three differences from a server's store, all checked harmless:
+		// SupportsUpdatableCursor false sends InsertRow and DeleteRows down their statement path, which is the path a server
+		// takes too since every store we build reports false anyway; SupportsMARS false where an initialized SQLiteStore sets it
+		// true, which gates only the cursor cache that the statement path never opens a cursor through; and an un-normalized
+		// connection string (no forced WAL journal, no BusyTimeout), on a file the fixture's own initialized Store has already
+		// put into WAL, in single-threaded tests where nothing waits on a write lock.
+		// NOTE: a store that reported updatable cursors would take the cursor path under a server and the statement path here,
+		// so the two nested rollback tests below would then have to drive it through a server to test what a server does.
 		private CatalogStore ConnectCatalogStore()
 		{
 			CatalogStore catalogStore = new CatalogStore();
@@ -474,11 +477,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// The outermost level's rollback undoes every write in the transaction, a committed nested level's included, and leaves
-		/// nothing for a later connection to see: the undo log is cleared at the outermost end and the database's own rollback
-		/// does the work. A store whose outermost begin is not a real database transaction fails here.
+		/// nothing for a later connection to see. A store whose outermost begin is not a real database transaction fails here,
+		/// as does one whose nested commit commits to the database.
 		/// </summary>
+		// NOTE: this does not pin the other half of the outermost rollback, that the undo log is cleared rather than replayed,
+		// and no test through the store's surface can: the database rollback that follows erases whatever a replay did, so the
+		// final state is the same either way (measured by mutation during review - replaying the log here leaves all 11 green).
+		// SQLStoreConnection.RollbackTransaction clears the log for a reason that is not observable state: a failing undo
+		// statement would leave the database transaction open. Read that method, do not try to test it from here.
 		[Test]
-		public void OuterRollbackDoesNotReplayUndoLog()
+		public void OuterRollbackUndoesCommittedNestedLevel()
 		{
 			using (SQLStoreConnection connection = Store.Connect())
 			{
@@ -520,144 +528,4 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Directory.Delete(directory, true);
 		}
 	}
-
-#if HAVE_MSSQL_STORE
-	/// <summary>The contract against the SQL Server catalog store, on a database the fixture creates and drops.</summary>
-	/// <remarks>
-	/// <para>
-	/// Not compiled and never run as written. DAE.MSSQL.csproj is still the legacy VS2003 project and is not in Dataphor.slnx,
-	/// so this test project cannot reference the SQL Server store. The plan ticket store-mssql-port decides whether that store
-	/// is kept at all; if it is, it converts the project, adds it to the solution, adds the project reference to
-	/// DAE.Server.Tests.csproj and defines HAVE_MSSQL_STORE. This class is the shape it switches on, not verified code.
-	/// </para>
-	/// <para>
-	/// One database per fixture, cleared by CreateStore between tests: a CREATE DATABASE and DROP DATABASE per test would
-	/// dominate the run.
-	/// </para>
-	/// </remarks>
-	[TestFixture]
-	[Category("mssql")]
-	public class MSSQLStoreContractTests : StoreContractTests
-	{
-		/// <summary>The environment variable holding a connection string to a SQL Server the fixture may create a database on.</summary>
-		public const string ConnectionVariable = "DAE_MSSQL_CONNECTION";
-
-		/// <summary>The database the fixture creates. Named after the fixture so that a run which crashed leaves one to drop, not many.</summary>
-		private const string DatabaseName = "DataphorStoreContract";
-
-		private string _serverConnectionString;
-
-		[OneTimeSetUp]
-		public void CreateDatabase()
-		{
-			_serverConnectionString = Environment.GetEnvironmentVariable(ConnectionVariable);
-
-			// Ignored rather than failed: a developer without a SQL Server still runs the rest of the suite. NUnit reports the
-			// case as skipped with this reason, which says what to set to run it.
-			if (String.IsNullOrEmpty(_serverConnectionString))
-				Assert.Ignore(String.Format("Set {0} to a SQL Server connection string to run the store contract against the SQL Server store.", ConnectionVariable));
-
-			DropDatabaseIfPresent();
-			ExecuteOnServer(String.Format("create database {0}", DatabaseName));
-		}
-
-		[OneTimeTearDown]
-		public void DropDatabase()
-		{
-			if (!String.IsNullOrEmpty(_serverConnectionString))
-				DropDatabaseIfPresent();
-		}
-
-		protected override SQLStore CreateStore(string directory)
-		{
-			Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore store = new Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore();
-			store.ShouldEnsureDatabase = false; // OneTimeSetUp created it
-			store.ConnectionString = ConnectionStringFor(DatabaseName);
-			store.Initialize();
-			ClearDatabase(store);
-			return store;
-		}
-
-		// Nothing per test: the fixture's database is dropped in OneTimeTearDown and emptied by CreateStore.
-		protected override void DisposeStore(SQLStore store, string directory)
-		{
-		}
-
-		// Drops every table the tests created, so that the next test starts on an empty database.
-		private static void ClearDatabase(SQLStore store)
-		{
-			using (SQLStoreConnection connection = store.Connect())
-			{
-				List<string> tableNames = new List<string>();
-				SQLConnection sqlConnection = store.GetSQLConnection();
-				try
-				{
-					using (SQLCommand command = sqlConnection.CreateCommand(false))
-					{
-						command.CommandType = SQLCommandType.Statement;
-						command.Statement = "select name from sys.tables";
-						using (SQLCursor cursor = command.Open(SQLCursorType.Dynamic, SQLIsolationLevel.ReadCommitted))
-							while (cursor.Next())
-								tableNames.Add((string)cursor[0]);
-					}
-				}
-				finally
-				{
-					sqlConnection.Dispose();
-				}
-
-				// Foreign keys first would matter on a schema with references; the contract's tables have none.
-				foreach (string tableName in tableNames)
-					connection.ExecuteStatement(String.Format("drop table [{0}]", tableName));
-			}
-		}
-
-		private void DropDatabaseIfPresent()
-		{
-			// Single user first: another connection, this run's or a pooled one from an earlier run, blocks the drop.
-			ExecuteOnServer
-			(
-				String.Format
-				(
-					"if db_id('{0}') is not null begin alter database [{0}] set single_user with rollback immediate; drop database [{0}]; end",
-					DatabaseName
-				)
-			);
-		}
-
-		// Runs one statement on the configured server, connected to master rather than to the fixture's database.
-		private void ExecuteOnServer(string statement)
-		{
-			Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore store = new Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore();
-			store.ShouldEnsureDatabase = false;
-			store.ConnectionString = ConnectionStringFor("master");
-			store.Initialize();
-
-			SQLConnection connection = store.GetSQLConnection();
-			try
-			{
-				using (SQLCommand command = connection.CreateCommand(false))
-				{
-					command.CommandType = SQLCommandType.Statement;
-					command.Statement = statement;
-					command.Execute();
-				}
-			}
-			finally
-			{
-				connection.Dispose();
-			}
-		}
-
-		// The configured connection string with its database replaced; the variable names the server, not a database.
-		private string ConnectionStringFor(string databaseName)
-		{
-			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-			builder.ConnectionString = _serverConnectionString;
-			builder.Remove("Database");
-			builder["Initial Catalog"] = databaseName;
-			return builder.ConnectionString;
-		}
-	}
-#endif
 }
