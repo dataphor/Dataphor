@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					TableName,
 					new List<string> { "K", "G", "V" },
 					new SQLIndex("IDX_T_G", new SQLIndexColumn[] { new SQLIndexColumn("G", true) }),
-					new List<string> { "G" },
+					new List<string> { "K" },
 					true
 				);
 		}

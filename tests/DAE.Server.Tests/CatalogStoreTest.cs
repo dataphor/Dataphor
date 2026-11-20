@@ -13,10 +13,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 
 using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Store;
-using Alphora.Dataphor.DAE.Store.SQLite;
-using SQLIndex = Alphora.Dataphor.DAE.Connection.SQLIndex;
-using SQLIndexColumn = Alphora.Dataphor.DAE.Connection.SQLIndexColumn;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
@@ -495,96 +491,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Exception exception = Assert.Catch(() => instance.ExecuteScript("SetObjectOwner('NoSuchObject', 'Admin');"));
 				Assert.That(FindError(exception, (int)Schema.SchemaException.Codes.CatalogObjectExpected), Is.Not.Null, exception.ToString());
 			}
-		}
-
-		/// <summary>
-		/// After an update a store cursor on a non-unique index stays on the updated row, and Prior and Next continue from it.
-		/// No catalog code calls Prior after an update; this pins the cursor's contract below the catalog.
-		/// </summary>
-		[Test]
-		public void StoreCursorMovesFromUpdatedRow()
-		{
-			using (SQLStoreConnection connection = ConnectGroupedStore())
-			{
-				SQLStoreCursor cursor = OpenGroupedCursor(connection);
-				try
-				{
-					cursor.SetRange(new object[] { 1L }, new object[] { 1L });
-					Assert.That(cursor.Next() && cursor.Next(), Is.True);
-					cursor[2] = "x";
-					cursor.Update();
-					Assert.That(new object[] { cursor[0], cursor[2] }, Is.EqualTo(new object[] { 2L, "x" }));
-					Assert.That(cursor.Prior() ? cursor[0] : null, Is.EqualTo(1L));
-					Assert.That(cursor.Next() ? cursor[0] : null, Is.EqualTo(2L));
-					Assert.That(cursor.Next() ? cursor[0] : null, Is.EqualTo(3L));
-					Assert.That(cursor.Next(), Is.False);
-				}
-				finally
-				{
-					cursor.Dispose();
-				}
-				Assert.That(connection.ExecuteScalar("select group_concat(V, '') from (select V from T order by K)"), Is.EqualTo("axcd"));
-			}
-		}
-
-		/// <summary>
-		/// After a delete a store cursor on a non-unique index is between the deleted row's neighbours, so a loop of Next and
-		/// Delete removes exactly the range. No store deletes through a cursor today (none supports updatable cursors).
-		/// </summary>
-		[Test]
-		public void StoreCursorMovesFromDeletedRow()
-		{
-			using (SQLStoreConnection connection = ConnectGroupedStore())
-			{
-				SQLStoreCursor cursor = OpenGroupedCursor(connection);
-				try
-				{
-					cursor.SetRange(null, null);
-					Assert.That(cursor.Next() && cursor.Next(), Is.True);
-					cursor.Delete();
-					Assert.That(cursor.Prior() ? cursor[0] : null, Is.EqualTo(1L));
-					cursor.Delete();
-					Assert.That(cursor.Next() ? cursor[0] : null, Is.EqualTo(3L));
-
-					cursor.SetRange(new object[] { 1L }, new object[] { 1L });
-					int deleted = 0;
-					for (; cursor.Next(); deleted++)
-						cursor.Delete();
-					Assert.That(deleted, Is.EqualTo(1));
-				}
-				finally
-				{
-					cursor.Dispose();
-				}
-				Assert.That(connection.ExecuteScalar("select group_concat(K, '') from T"), Is.EqualTo("4"));
-			}
-		}
-
-		// A SQLite store with table T { K primary key, G, V } holding rows 1, 2 and 3 in group 1 and row 4 in group 2.
-		private static SQLStoreConnection ConnectGroupedStore()
-		{
-			SQLiteStore store = new SQLiteStore();
-			store.ConnectionString = "Data Source=" + Path.Combine(TestEnvironment.NewDirectory("StoreCursor"), "Store.sqlite");
-			store.Initialize();
-			SQLStoreConnection connection = store.Connect();
-			connection.ExecuteStatement("create table T (K integer not null primary key, G integer not null, V text)");
-			connection.ExecuteStatement("create index IDX_T_G on T (G)");
-			connection.ExecuteStatement("insert into T values (1, 1, 'a'), (2, 1, 'b'), (3, 1, 'c'), (4, 2, 'd')");
-			return connection;
-		}
-
-		// An updatable cursor on T's non-unique index on G, naming rows by K.
-		private static SQLStoreCursor OpenGroupedCursor(SQLStoreConnection connection)
-		{
-			return
-				connection.OpenCursor
-				(
-					"T",
-					new List<string> { "K", "G", "V" },
-					new SQLIndex("IDX_T_G", new SQLIndexColumn[] { new SQLIndexColumn("G", true) }),
-					new List<string> { "K" },
-					true
-				);
 		}
 
 		// Runs on a task, so that a store cursor that never leaves its range fails the test instead of hanging the run.
