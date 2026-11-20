@@ -5456,10 +5456,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				[generic] scalar | <scalar type name>
 		*/
 		// NOTE: docs/reference/d4-grammar.md gives the production as "[generic] scalar", but this parser accepts only the
-		// bare keyword: TypeSpecifier above has no Keywords.Scalar branch under "generic" (which also makes its
-		// "case Keywords.Type" branch unreachable), and the isGeneric parameter here is never read. Nothing in the
-		// repository writes "generic scalar", and D4TextEmitter.EmitScalarTypeSpecifier emits the bare keyword to agree
-		// with this code rather than with the document. Reconciling the two belongs to bug-d4-parser-rejects-active-sources.
+		// bare keyword: TypeSpecifier above has no Keywords.Scalar branch under "generic", so "generic scalar" takes the
+		// "any type" branch and leaves "scalar" unconsumed. The isGeneric parameter here is never read - its only caller,
+		// TypeSpecifier's "case Keywords.Type", is reached only for the word "type", which this method then reads as a
+		// scalar type name, so "generic type" parses to a non-generic specifier named "type" and drops the "generic".
+		// Nothing in the repository writes either form, and D4TextEmitter.EmitScalarTypeSpecifier emits the bare keyword to
+		// agree with this code rather than with the document - as bare "list" and "row" are already generic here too.
+		// Reconciling the parser with the document belongs to bug-d4-parser-rejects-active-sources.
 		protected ScalarTypeSpecifier ScalarTypeSpecifier(bool isGeneric)
 		{
 			ScalarTypeSpecifier specifier = new ScalarTypeSpecifier();

@@ -188,10 +188,12 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 		
 		// The sign goes before the "$": the lexer reads "$" as the start of a number and rejects the "-" that follows it.
+		// The sign is read off the formatted text rather than from "value < 0" because negating would overflow
+		// decimal.MinValue, and a negative zero formats with a sign while comparing equal to zero.
 		private static string FormatMoney(decimal value)
 		{
 			string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", value);
-			return text.StartsWith("-") ? "-$" + text.Substring(1) : "$" + text;
+			return text.StartsWith('-') ? "-$" + text.Substring(1) : "$" + text;
 		}
 		
 		protected virtual void EmitIdentifierExpression(IdentifierExpression expression)

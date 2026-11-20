@@ -32,6 +32,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestCase("grant all on T to user 'U';", TestName = "UserGrantee_WasCaseInsensitiveStringLiteral")]
 		[TestCase("revoke all on T from group 'G' inherited;", TestName = "GroupGrantee_WasCaseInsensitiveStringLiteral")]
 		[TestCase("var x := (C.Name from row from (V where C.ID = '1'));", TestName = "QualifiedColumnExtractor_WasQualifierOutsideParentheses")]
+		// Two qualifiers before the extractor: the only arm of the fix that walks the qualifier chain rather than
+		// handling a single dot, and no .d4 file in the repository has the shape.
+		[TestCase("var x := (A.B.Name from Y);", TestName = "DoublyQualifiedColumnExtractor_WasQualifiersOutsideParentheses")]
 		[TestCase("var x := (1).Max(50);", TestName = "NumericLiteralLeftOfQualifier_WasUnparenthesized")]
 		public void EmittedTextReParsesToTheSameTree(string source)
 		{
