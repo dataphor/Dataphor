@@ -9,8 +9,12 @@ using System.IO;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
-using System.ServiceModel;
+
+// CoreWCF, not System.ServiceModel: CoreWCF recognises only its own ServiceBehaviorAttribute and only its own
+// FaultException<T>, so a System.ServiceModel fault thrown here would reach the client as an untyped unhandled-error
+// fault and every engine error would degrade into a communication failure. The contract interface in the
+// Contracts folder stays on System.ServiceModel, which CoreWCF converts for itself; the wire is unchanged either way.
+using CoreWCF;
 
 namespace Alphora.Dataphor.DAE.Service
 {
@@ -23,25 +27,10 @@ namespace Alphora.Dataphor.DAE.Service
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
 	public class DataphorService : IDataphorService, IDisposable
 	{
-		public DataphorService()
-		{
-			string instanceName = ServerConfiguration.DefaultLocalInstanceName;
-
-			IDictionary settings = (IDictionary)ConfigurationManager.GetSection("instance");
-			if ((settings != null) && settings.Contains("name"))
-				instanceName = (string)settings["name"];
-				
-			ServerConfiguration configuration = InstanceManager.GetInstance(instanceName);
-				
-			_server = new Server();
-			configuration.ApplyTo(_server);
-
-			_server.Start();
-			_remoteServer = new RemoteServer(_server);
-			
-			_connectionManager = new ConnectionManager(_remoteServer);
-		}
-		
+		// The parameterless constructor is gone. It started a server of its own from the configuration section named
+		// "instance" (the shipped app.config declares "dataphor" instead: known defect K12), and was reachable only by
+		// hosting this type by name from an application configuration file, which WS5 removes. Host it with a started
+		// RemoteServer instead.
 		public DataphorService(RemoteServer remoteServer)
 		{
 			_server = remoteServer.Server;

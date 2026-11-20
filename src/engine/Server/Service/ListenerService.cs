@@ -8,9 +8,9 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
+
+// CoreWCF, not System.ServiceModel: see the note in DataphorService.cs.
+using CoreWCF;
 
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Server;

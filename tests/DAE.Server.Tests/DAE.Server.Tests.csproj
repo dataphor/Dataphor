@@ -18,6 +18,9 @@
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
     <Compile Include="ConcurrentDDLTest.cs" />
     <Compile Include="ContractParityTest.cs" />
+    <!-- The CoreWCF proof (protocol-corewcf-proof): a host for the server's two service classes, and the test that drives it with the shipped client code. They are here, not in src/engine/Server, so that CoreWCF.NetTcp and ASP.NET Core stay out of the server assembly's dependency closure until protocol-corewcf-host settles where hosting belongs. -->
+    <Compile Include="CoreWcfProofHost.cs" />
+    <Compile Include="CoreWcfProtocolTest.cs" />
     <Compile Include="CoverageManifest.cs" />
     <Compile Include="CoverageScripts.cs" />
     <Compile Include="CursorTest.cs" />
@@ -42,10 +45,19 @@
     <EmbeddedResource Include="coverage-manifest.json" LogicalName="coverage-manifest.json" />
   </ItemGroup>
 
+  <!--
+    CoreWCF.NetTcp: the NetTcp listener CoreWcfProofHost opens; it brings CoreWCF.Primitives, which the server
+    assembly also references, with it. The framework reference substitutes the in-box ASP.NET Core 10 assemblies for
+    the Microsoft.AspNetCore.* 2.3.10 packages CoreWCF.NetTcp depends on, through NuGet's package-override
+    mechanism; running this suite therefore needs the ASP.NET Core shared runtime as well as the .NET one, which
+    every .NET SDK install provides.
+  -->
   <ItemGroup>
+    <PackageReference Include="CoreWCF.NetTcp" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

@@ -225,8 +225,15 @@ namespace Alphora.Dataphor.DAE.Server
 		public void Execute(string statement, ref RemoteParamData paramsValue, ProcessCallInfo callInfo, RemoteProcessCleanupInfo cleanupInfo)
 		{
 			ProcessCallInfo(callInfo);
-			DataParams localParamsValue = RemoteParamsToDataParams(paramsValue.Params);
+			// RemoteParamDataToDataParams, not RemoteParamsToDataParams: the latter reads only the parameter descriptors and
+			// leaves every value null, so a parameterized statement run through IServerProcess.Execute over the network
+			// behaved as though each parameter were nil. The prepare calls above are handed a RemoteParam[] and are right to
+			// use the descriptor-only overload; this one is handed the parameter data as well, like RemoteServerPlan.Execute.
+			DataParams localParamsValue = RemoteParamDataToDataParams(paramsValue);
 			_serverProcess.Execute(statement, localParamsValue);
+			// NOTE: the write-back re-encodes every parameter, not just the var and out ones the caller reads, so a large
+			// input parameter is now echoed back and discarded. RemoteServerPlan.Execute has always done the same; if large
+			// input parameters ever show up as slow, make both write back only the parameters whose modifier is not In.
 			DataParamsToRemoteParamData(localParamsValue, ref paramsValue);
 		}
         

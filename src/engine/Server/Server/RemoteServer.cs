@@ -38,7 +38,13 @@ namespace Alphora.Dataphor.DAE.Server
 	public class RemoteServer : RemoteServerObject, IDisposable, IRemoteServer
 	{
 		// constructor		
-		internal RemoteServer(Server server) : base()
+		/// <summary>Wraps a server in the remote (network-optimized) CLI the service contract is written against.</summary>
+		/// <remarks>
+		/// Public, not internal: DataphorService's only constructor takes a RemoteServer, so a host outside this assembly
+		/// could not build one. protocol-corewcf-proof needs it from the test project, and protocol-corewcf-host needs it if
+		/// hosting moves to an assembly of its own.
+		/// </remarks>
+		public RemoteServer(Server server) : base()
 		{
 			_server = server;
 			_connections = new RemoteServerConnections(false);
