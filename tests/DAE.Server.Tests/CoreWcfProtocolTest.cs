@@ -360,9 +360,56 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			Assert.That(_host.ServiceEndPoint, Is.Not.Null);
 			Assert.That(_host.ServiceEndPoint.Port, Is.EqualTo(_host.PortNumber));
+			Assert.That(_host.ListenerEndPoint, Is.Not.Null);
 			Assert.That(_host.ListenerEndPoint.Port, Is.EqualTo(_host.ListenerPortNumber));
-			Assert.That(_host.PortNumber, Is.Not.EqualTo(DataphorServiceUtility.DefaultListenerPortNumber));
-			Assert.That(_host.ListenerPortNumber, Is.Not.EqualTo(DataphorServiceUtility.DefaultListenerPortNumber));
+			foreach (int portNumber in new[] { _host.PortNumber, _host.ListenerPortNumber })
+			{
+				Assert.That(portNumber, Is.Not.EqualTo(DataphorServiceUtility.DefaultListenerPortNumber));
+				Assert.That(portNumber, Is.Not.EqualTo(ServerConfiguration.DefaultPortNumber));
+			}
+		}
+
+		/// <summary>
+		/// The host's binding and the client's say the same thing. They are written twice, against the unrelated Binding
+		/// hierarchies of CoreWCF.Channels and System.ServiceModel.Channels, so nothing but this comparison stops an edit
+		/// to one of them from silently changing the protocol on one side only - which the whole proof rests on not
+		/// happening. Compared: the element list and its order, the four size limits, the two timeouts, the transfer mode
+		/// and the message version. Settings neither declaration names are left out, because the two stacks are entitled
+		/// to default them differently.
+		/// </summary>
+		[Test]
+		public void TestHostBindingMatchesTheClientBinding()
+		{
+			System.ServiceModel.Channels.Binding clientBinding = DataphorServiceUtility.GetBinding();
+			CoreWCF.Channels.Binding hostBinding = CoreWcfProofHost.BuildBinding();
+
+			System.ServiceModel.Channels.BindingElementCollection clientElements = clientBinding.CreateBindingElements();
+			CoreWCF.Channels.BindingElementCollection hostElements = hostBinding.CreateBindingElements();
+			Assert.That(ElementTypeNames(hostElements), Is.EqualTo(ElementTypeNames(clientElements)), "The two binding declarations list different elements, or list them in a different order.");
+
+			System.ServiceModel.Channels.BinaryMessageEncodingBindingElement clientEncoding = clientElements.Find<System.ServiceModel.Channels.BinaryMessageEncodingBindingElement>();
+			CoreWCF.Channels.BinaryMessageEncodingBindingElement hostEncoding = hostElements.Find<CoreWCF.Channels.BinaryMessageEncodingBindingElement>();
+			Assert.That(hostEncoding.MessageVersion.ToString(), Is.EqualTo(clientEncoding.MessageVersion.ToString()));
+			Assert.That(hostEncoding.ReaderQuotas.MaxArrayLength, Is.EqualTo(clientEncoding.ReaderQuotas.MaxArrayLength));
+			Assert.That(hostEncoding.ReaderQuotas.MaxStringContentLength, Is.EqualTo(clientEncoding.ReaderQuotas.MaxStringContentLength));
+
+			System.ServiceModel.Channels.TcpTransportBindingElement clientTransport = clientElements.Find<System.ServiceModel.Channels.TcpTransportBindingElement>();
+			CoreWCF.Channels.TcpTransportBindingElement hostTransport = hostElements.Find<CoreWCF.Channels.TcpTransportBindingElement>();
+			Assert.That(hostTransport.MaxBufferSize, Is.EqualTo(clientTransport.MaxBufferSize));
+			Assert.That(hostTransport.MaxReceivedMessageSize, Is.EqualTo(clientTransport.MaxReceivedMessageSize));
+			Assert.That(hostTransport.TransferMode.ToString(), Is.EqualTo(clientTransport.TransferMode.ToString()));
+
+			Assert.That(hostBinding.SendTimeout, Is.EqualTo(clientBinding.SendTimeout));
+			Assert.That(hostBinding.ReceiveTimeout, Is.EqualTo(clientBinding.ReceiveTimeout));
+		}
+
+		/// <summary>The binding elements' simple type names in order, which is all the two element collections have in common.</summary>
+		private static List<string> ElementTypeNames(System.Collections.IEnumerable elements)
+		{
+			List<string> result = new List<string>();
+			foreach (object element in elements)
+				result.Add(element.GetType().Name);
+			return result;
 		}
 	}
 }

@@ -133,8 +133,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		private readonly string _instanceName;
-		/// <summary>The instance name in the service address, which the client must be given to build the same address.</summary>
-		public string InstanceName => _instanceName;
 
 		private readonly int _portNumber;
 		/// <summary>The port the main service listens on; never 8061, and never a port a real instance could own.</summary>
@@ -147,8 +145,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private readonly RemoteServer _remoteServer;
 
 		private readonly DataphorService _service;
-		/// <summary>The hosted singleton, so that a test can assert that the object answering calls is this one.</summary>
-		public DataphorService Service => _service;
 
 		private readonly IHost _host;
 
@@ -170,9 +166,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// The host's half of the one binding the protocol is specified by. The client's half, which is the original, is
 		/// DataphorServiceUtility.DefaultBuildBinding; the two stacks have unrelated Binding types, so the settings are
 		/// necessarily written twice and this copy has to be changed with that one. Every number here is read from
-		/// DataphorServiceUtility so that at least the limits cannot drift.
+		/// DataphorServiceUtility, and CoreWcfProtocolTest.TestHostBindingMatchesTheClientBinding compares the rest.
 		/// </summary>
-		private static CoreWCF.Channels.Binding BuildBinding()
+		internal static CoreWCF.Channels.Binding BuildBinding()
 		{
 			CoreWCF.Channels.BinaryMessageEncodingBindingElement messageEncodingElement = new CoreWCF.Channels.BinaryMessageEncodingBindingElement();
 			messageEncodingElement.ReaderQuotas.MaxArrayLength = DataphorServiceUtility.MaxMessageLength;
