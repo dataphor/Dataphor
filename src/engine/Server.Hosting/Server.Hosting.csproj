@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Alphora.Dataphor.DAE.Server.Hosting</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Server\Server.csproj" />
+    <ProjectReference Include="..\..\protocol\Common\Common.csproj" />
+  </ItemGroup>
+
+  <!--
+    Hosting is its own assembly rather than part of the server assembly because of this package pair.
+    CoreWCF.NetTcp is the NetTcp listener the two hosts here open; it depends on Microsoft.AspNetCore.WebUtilities
+    2.3.10, which NuGet's package audit reports as having a known moderate-severity vulnerability (NU1902). The
+    FrameworkReference substitutes the in-box ASP.NET Core 10 assemblies for those 2.3.10 packages through NuGet's
+    package-override mechanism, which clears the warning - but only for a project that declares the package
+    *directly*. Measured (protocol-corewcf-host): direct package plus framework reference, clean; the package
+    arriving through a project reference, with or without a framework reference of its own, warns. So putting
+    CoreWCF.NetTcp in Server.csproj would make Store.SQLite, Connection, MSSQLDevice, SimpleDevice and Frontend
+    report NU1902, and AGENTS.md forbids suppressing NU1900-NU1904. Referencing this assembly therefore needs the
+    ASP.NET Core shared runtime at run time, which every .NET SDK install provides.
+  -->
+  <ItemGroup>
+    <PackageReference Include="CoreWCF.NetTcp" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DataphorServiceHost.cs" />
+    <Compile Include="DataphorServiceHostBinding.cs" />
+    <Compile Include="ListenerServiceHost.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>

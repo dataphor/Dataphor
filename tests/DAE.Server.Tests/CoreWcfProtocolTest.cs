@@ -6,6 +6,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 
 using NUnit.Framework;
@@ -14,42 +17,60 @@ using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Listener;
+using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Service;
 using Alphora.Dataphor.DAE.Streams;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
-	/// The WS5 CoreWCF proof: the client code the product ships completes real work against a .NET 10 server hosted by
-	/// CoreWCF on the existing binding, with the wire unchanged. Each case is named for the property it establishes.
+	/// The WS5 protocol and hosting tests: the client code the product ships completes real work against a .NET 10
+	/// server hosted by the real <see cref="DataphorServiceHost"/>, with the wire unchanged. Each case is named for the
+	/// property it establishes.
 	/// </summary>
 	/// <remarks>
-	/// Nothing here asserts anything about the machine: the ports are ephemeral (never 8060 or 8061) and the listener
-	/// case asserts only that its contract answers, because ListenerService reads the machine-wide instance
-	/// configuration.
+	/// The host is driven through Start(ServerConfiguration), so no case reads or writes this machine's instance list.
+	/// The ports are free loopback ports (never 8060 or 8061), and the listener case asserts only that its contract
+	/// answers, because ListenerService reads the machine-wide instance configuration.
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
 	public class CoreWcfProtocolTest
 	{
 		/// <summary>The instance name, which is the first path segment of the service address on both sides.</summary>
-		private const string InstanceName = "CoreWcfProof";
+		private const string InstanceName = "CoreWcfHost";
+
+		/// <summary>
+		/// The host name the hosted instances listen on and the clients connect to.
+		/// </summary>
+		/// <remarks>
+		/// Loopback by literal, so a test never opens a port another machine can reach. The product default is
+		/// Environment.MachineName, which is what makes CoreWCF bind both address families; that is established by
+		/// measurement and recorded under "CoreWCF hosting" in docs/modernization-plan.md, not re-measured here.
+		/// </remarks>
+		private const string LoopbackAddress = "127.0.0.1";
 
 		/// <summary>Clears the 64 KB message limit, the 8 KB string-content quota and the 16 KB array quota at once.</summary>
 		private const int LargeValueLength = 3 * 1024 * 1024;
 
-		private TestServerInstance _instance;
-		private CoreWcfProofHost _host;
+		private HostedInstance _host;
+
+		/// <summary>The ports that started listening on this machine while the fixture's host was started.</summary>
+		// NOTE: another process opening a listening socket in that window would be counted here and fail
+		// TestListensOnlyOnTheReservedPorts. Nothing on a build machine normally does in those few milliseconds; if it
+		// ever flakes, narrow the assertion to Kestrel's own default HTTP ports.
+		private List<int> _portsOpenedByTheHost;
 
 		[OneTimeSetUp]
 		public void SetUpFixture()
 		{
-			_instance = new TestServerInstance(InstanceName);
+			List<int> before = ListeningPorts();
 			try
 			{
-				_instance.Server.Start();
-				_host = new CoreWcfProofHost(_instance.Server, InstanceName);
+				_host = new HostedInstance(InstanceName, true, 0);
+				_portsOpenedByTheHost = Except(ListeningPorts(), before);
 			}
 			catch
 			{
@@ -58,26 +79,158 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>Stops the host before the instance, and runs on the failure path too, or the instance directory stays locked.</summary>
+		/// <summary>Stops the host, and runs on the failure path too, or the instance directory stays locked.</summary>
 		[OneTimeTearDown]
 		public void TearDownFixture()
 		{
+			if (_host != null)
+			{
+				_host.Dispose();
+				_host = null;
+			}
+		}
+
+		/// <summary>
+		/// A temporary instance directory, free loopback ports, and a <see cref="DataphorServiceHost"/> started over a
+		/// configuration of its own: what a test needs to reach a hosted server without touching this machine's state.
+		/// </summary>
+		private sealed class HostedInstance : IDisposable
+		{
+			/// <param name="listenerPortNumber">0 to reserve a free port; otherwise the port the listener must use, so that a test can hold it first.</param>
+			public HostedInstance(string instanceName, bool shouldListen, int listenerPortNumber)
+			{
+				_instanceName = instanceName;
+				_directory = TestEnvironment.NewDirectory(instanceName);
+				try
+				{
+					if (listenerPortNumber == 0)
+					{
+						int[] ports = ReserveLoopbackPorts(2);
+						_portNumber = ports[0];
+						_listenerPortNumber = ports[1];
+					}
+					else
+					{
+						_portNumber = ReserveLoopbackPorts(1)[0];
+						_listenerPortNumber = listenerPortNumber;
+					}
+
+					// No libraries: System is built in, and the server creates General. This is also what makes the
+					// library directory, which the server requires.
+					TestEnvironment.CopyLibraries(Path.Combine(_directory, TestServerInstance.LibrariesFolderName), new string[0]);
+
+					ServerConfiguration configuration =
+						new ServerConfiguration
+						{
+							Name = instanceName,
+							PortNumber = _portNumber,
+							ShouldListen = shouldListen,
+							OverrideListenerPortNumber = _listenerPortNumber,
+							LibraryDirectories = Path.Combine(_directory, TestServerInstance.LibrariesFolderName),
+							InstanceDirectory = Path.Combine(_directory, TestServerInstance.InstanceFolderName),
+							CatalogStoreClassName = TestServerInstance.CatalogStoreClassName,
+							CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString
+						};
+
+					_host = new DataphorServiceHost();
+					_host.HostName = LoopbackAddress;
+					// Off, as everywhere in this suite: a logging server in an elevated process also creates and writes
+					// the Windows event-log source.
+					_host.LoggingEnabled = TestEnvironment.LoggingEnabled;
+					_host.Start(configuration);
+				}
+				catch
+				{
+					Dispose();
+					throw;
+				}
+			}
+
+			private readonly string _directory;
+
+			private readonly string _instanceName;
+			public string InstanceName => _instanceName;
+
+			private readonly int _portNumber;
+			/// <summary>The instance's port; never 8061, and never a port a real instance could own.</summary>
+			public int PortNumber => _portNumber;
+
+			private readonly int _listenerPortNumber;
+			/// <summary>The port this instance's listener was configured for; never the default 8060.</summary>
+			public int ListenerPortNumber => _listenerPortNumber;
+
+			private DataphorServiceHost _host;
+			public DataphorServiceHost Host => _host;
+
+			public void Dispose()
+			{
+				try
+				{
+					if (_host != null)
+					{
+						_host.Stop();
+						_host = null;
+					}
+				}
+				finally
+				{
+					TestEnvironment.TryDeleteDirectory(_directory);
+				}
+			}
+		}
+
+		/// <summary>Reserves the given number of distinct free loopback ports by binding them all and then releasing them.</summary>
+		/// <remarks>
+		/// A configured port of 0 cannot be used instead: the endpoint address is what CoreWCF builds its address table
+		/// from, and that happens before Kestrel binds the socket, so the real port is not known in time. The port is
+		/// also part of the address the client is given.
+		/// </remarks>
+		// NOTE: another process could take one of these ports between the release here and CoreWCF's bind. Nothing on a
+		// test machine hands out ephemeral ports in that window, and the alternative - a fixed port - would collide with a
+		// real instance on the build machine.
+		private static int[] ReserveLoopbackPorts(int count)
+		{
+			TcpListener[] probes = new TcpListener[count];
+			int[] result = new int[count];
 			try
 			{
-				if (_host != null)
+				for (int index = 0; index < count; index++)
 				{
-					_host.Dispose();
-					_host = null;
+					probes[index] = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
+					probes[index].Start();
+					result[index] = ((IPEndPoint)probes[index].LocalEndpoint).Port;
 				}
 			}
 			finally
 			{
-				if (_instance != null)
-				{
-					_instance.Dispose();
-					_instance = null;
-				}
+				foreach (TcpListener probe in probes)
+					if (probe != null)
+						probe.Stop();
 			}
+			return result;
+		}
+
+		/// <summary>Every port this machine has a listening TCP socket on, one entry per socket.</summary>
+		private static List<int> ListeningPorts()
+		{
+			List<int> result = new List<int>();
+			foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
+				result.Add(endPoint.Port);
+			return result;
+		}
+
+		private static List<int> Except(List<int> ports, List<int> exclude)
+		{
+			List<int> result = new List<int>();
+			foreach (int port in ports)
+				if (!exclude.Contains(port) && !result.Contains(port))
+					result.Add(port);
+			return result;
+		}
+
+		private static bool IsListeningOn(int portNumber)
+		{
+			return ListeningPorts().Contains(portNumber);
 		}
 
 		/// <summary>
@@ -87,13 +240,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		private sealed class ProtocolClient : IDisposable
 		{
-			public ProtocolClient(int portNumber)
+			public ProtocolClient(string instanceName, int portNumber)
 			{
-				// The loopback literal, not "localhost": this host listens on IPv4 only, and on Windows "localhost"
-				// resolves to ::1 first, where a connect costs about two seconds before the stack falls back to
-				// 127.0.0.1 (measured). That is why a host serving real clients has to listen on both families, which is
-				// handed to protocol-corewcf-host; here the literal is also what keeps the fixture at about a second.
-				_clientServer = new ClientServer(CoreWcfProofHost.LoopbackAddress, InstanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+				// The same host name the host listens on; see LoopbackAddress.
+				_clientServer = new ClientServer(LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
 				try
 				{
 					// LocalServer starts an Engine of its own to hold the client-side catalog cache, and Engine.InitializeCatalog
@@ -144,7 +294,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Runs <paramref name="body"/> on a session and process over the wire, cleaning both up on either path.</summary>
 		private void OnWire(Action<IServerProcess> body)
 		{
-			using (ProtocolClient client = new ProtocolClient(_host.PortNumber))
+			OnWire(_host, body);
+		}
+
+		private static void OnWire(HostedInstance host, Action<IServerProcess> body)
+		{
+			using (ProtocolClient client = new ProtocolClient(host.InstanceName, host.PortNumber))
 			{
 				IServerSession session = client.Server.Connect(new SessionInfo("Admin", ""));
 				try
@@ -209,8 +364,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 					// The stream handles are the process's: Allocate, the length probe the first write makes, the close and
 					// Deallocate are all calls on the wire. The bytes themselves are held by the client-side deferred-write
-					// cache, which is what the shipped client does; nothing here forces a flush, because no public client API
-					// does.
+					// cache, which is what the shipped client does; TestStreamContentCrossesTheWire covers the production
+					// path that flushes them.
 					byte[] written = Encoding.UTF8.GetBytes("a stream over the wire");
 					StreamID streamID = process.Allocate();
 					try
@@ -310,6 +465,134 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The native CLI answers at its own address, which is a path *below* the main service's on the same port
+		/// (.../&lt;instance&gt;/service/native under .../&lt;instance&gt;/service), and the main service still answers on
+		/// that port afterwards. Two endpoints on one port, one nested inside the other, is what the CoreWCF proof could
+		/// not test and named as the first thing to check; the addresses themselves are the compatibility surface.
+		/// </summary>
+		[Test]
+		public void TestNativeCliAnswersOnItsNestedAddress()
+		{
+			using (NativeSessionCLIClient client = new NativeSessionCLIClient(LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
+			{
+				NativeSessionHandle session = client.StartSession(new NativeSessionInfo());
+				try
+				{
+					NativeResult result = client.Execute(session, "select 6 * 7", null, NativeExecutionOptions.Default);
+					Assert.That(result.Value, Is.InstanceOf<NativeScalarValue>());
+					Assert.That(((NativeScalarValue)result.Value).Value, Is.EqualTo(42));
+				}
+				finally
+				{
+					client.StopSession(session);
+				}
+			}
+
+			OnWire(process => Assert.That((long)(int)process.Evaluate("1 + 1", null).AsNative, Is.EqualTo(2L)));
+		}
+
+		/// <summary>
+		/// A native CLI call that fails in the engine reaches the client as a NativeCLIException carrying the engine's own
+		/// error code, not as a communication failure. This is the one behaviour the CoreWCF using-directive in
+		/// NativeCLIService.cs exists for: a System.ServiceModel FaultException&lt;NativeCLIFault&gt; thrown from a
+		/// CoreWCF service arrives untyped, NativeSessionCLIClient's catch misses it, and every native CLI error becomes a
+		/// dropped connection.
+		/// </summary>
+		[Test]
+		public void TestNativeCliErrorArrivesAsTheTypedException()
+		{
+			using (NativeSessionCLIClient client = new NativeSessionCLIClient(LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
+			{
+				NativeSessionHandle session = client.StartSession(new NativeSessionInfo());
+				try
+				{
+					Exception error = Assert.Catch(() => client.Execute(session, "select NoSuchTableAnywhereInTheCatalog", null, NativeExecutionOptions.Default));
+
+					Assert.That(error, Is.InstanceOf<NativeCLIException>(), "Actual: " + error.GetType().FullName + ": " + error.Message);
+					Assert.That(((NativeCLIException)error).Code, Is.EqualTo((int)CompilerException.Codes.UnknownIdentifier));
+					Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.FaultException>(), "An untyped fault escaped to the caller.");
+					Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.CommunicationException>(), "A bare communication error escaped to the caller.");
+				}
+				finally
+				{
+					client.StopSession(session);
+				}
+			}
+		}
+
+		/// <summary>
+		/// The content of a stream crosses the wire, which the CoreWCF proof's stream case could not show: it exercised
+		/// the handle protocol, but the bytes stayed in the client's deferred-write cache, because nothing in the shipped
+		/// client's public surface forces a flush. The production path that does is a cursor insert carrying an overflow
+		/// value: LocalCursor.Insert calls LocalProcess.EnsureOverflowReleased, which calls LocalStreamManager.Release,
+		/// which flushes the cached stream to the server and closes it.
+		/// </summary>
+		[Test]
+		public void TestStreamContentCrossesTheWire()
+		{
+			// Longer than any single transport buffer, and not a round number of them.
+			byte[] written = new byte[(64 * 1024) + 7];
+			new Random(20261120).NextBytes(written);
+
+			OnWire
+			(
+				process =>
+				{
+					process.Execute("create table StreamContent { ID : Integer, Content : Binary, key { ID } };", null);
+
+					// An updatable cursor is asked for the way the shipped DataView asks: a cursor definition naming the
+					// capabilities, which is what DAEDataSet emits around its expression.
+					IServerCursor cursor = process.OpenCursor("cursor(StreamContent capabilities { navigable, updateable })", null);
+					try
+					{
+						using (IRow row = cursor.Plan.RequestRow())
+						{
+							row["ID"] = 1;
+
+							// How the shipped WinForms controls load a file into a Binary column: a non-native scalar
+							// allocated on the process's stream manager, written through, and handed to the row.
+							using (Scalar content = new Scalar(process.ValueManager, process.DataTypes.SystemBinary))
+							{
+								using (Stream stream = content.OpenStream())
+									stream.Write(written, 0, written.Length);
+								row["Content"] = content;
+							}
+
+							cursor.Insert(row);
+						}
+					}
+					finally
+					{
+						process.CloseCursor(cursor);
+					}
+
+					byte[] read;
+					IServerCursor reader = process.OpenCursor("select StreamContent", null);
+					try
+					{
+						Assert.That(reader.Next(), Is.True);
+						using (IRow row = reader.Select())
+						{
+							Assert.That(row.HasValue("Content"), Is.True);
+							using (Stream stream = row.GetValue("Content").OpenStream())
+							{
+								MemoryStream buffer = new MemoryStream();
+								StreamUtility.CopyStream(stream, buffer);
+								read = buffer.ToArray();
+							}
+						}
+					}
+					finally
+					{
+						process.CloseCursor(reader);
+					}
+
+					Assert.That(read, Is.EqualTo(written));
+				}
+			);
+		}
+
+		/// <summary>
 		/// The listener contract answers on its own port, through the shipped ListenerFactory, and its typed ListenerFault
 		/// comes back as the exception the client builds from it. Nothing is asserted about which instances are listed:
 		/// ListenerService reads the machine-wide ServerConfigurations.config, so that list is whatever is installed here.
@@ -317,12 +600,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestListenerAnswersOnItsOwnPort()
 		{
-			Assert.That(ListenerFactory.EnumerateInstances(CoreWcfProofHost.LoopbackAddress, _host.ListenerPortNumber), Is.Not.Null);
+			Assert.That(_host.Host.IsListening, Is.True);
+			Assert.That(ListenerFactory.EnumerateInstances(LoopbackAddress, _host.ListenerPortNumber), Is.Not.Null);
 
 			// An instance name that is certainly not configured: the service turns the lookup failure into a
 			// FaultException<ListenerFault>, and ListenerClient turns that back into a DataphorException.
 			string unconfigured = "NoSuchInstance" + Guid.NewGuid().ToString("N");
-			Exception error = Assert.Catch(() => ListenerFactory.GetInstanceURI(CoreWcfProofHost.LoopbackAddress, _host.ListenerPortNumber, unconfigured));
+			Exception error = Assert.Catch(() => ListenerFactory.GetInstanceURI(LoopbackAddress, _host.ListenerPortNumber, unconfigured));
 
 			// A plain Exception carrying the service's message is what ListenerFaultUtility.FaultToException builds - the
 			// listener fault has no exception-class name to rebuild from, unlike DataphorFault. What matters is that it is
@@ -330,6 +614,77 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.FaultException>(), "An untyped fault escaped to the caller: " + error.GetType().FullName + ": " + error.Message);
 			Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.CommunicationException>(), "A bare communication error escaped to the caller: " + error.Message);
 			Assert.That(error.Message, Does.Contain(unconfigured));
+		}
+
+		/// <summary>
+		/// A server whose listener port is already held by another socket still starts and still serves its own endpoint,
+		/// and says so: one listener per machine serves every instance on it, so the second server process on a machine
+		/// normally finds the port taken. The failure is swallowed deliberately, and reported through IsListening and one
+		/// line in the server's log.
+		/// </summary>
+		[Test]
+		public void TestTheListenerPortBeingTakenDoesNotStopTheServer()
+		{
+			TcpListener conflict = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
+			conflict.Start();
+			try
+			{
+				int listenerPortNumber = ((IPEndPoint)conflict.LocalEndpoint).Port;
+				WithASecondHost
+				(
+					"CoreWcfListenerTaken",
+					true,
+					listenerPortNumber,
+					host =>
+					{
+						Assert.That(host.Host.IsActive, Is.True, "The server did not start because its listener port was taken.");
+						Assert.That(host.Host.IsListening, Is.False, "The listener claims to be running on a port another socket holds.");
+						OnWire(host, process => Assert.That((long)(int)process.Evaluate("1 + 1", null).AsNative, Is.EqualTo(2L)));
+					}
+				);
+			}
+			finally
+			{
+				conflict.Stop();
+			}
+		}
+
+		/// <summary>An instance configured not to listen serves its own endpoint and opens no listener port.</summary>
+		[Test]
+		public void TestShouldListenFalseHostsNoListener()
+		{
+			WithASecondHost
+			(
+				"CoreWcfNoListener",
+				false,
+				0,
+				host =>
+				{
+					Assert.That(host.Host.IsListening, Is.False);
+					Assert.That(IsListeningOn(host.ListenerPortNumber), Is.False, "Something is listening on the listener port of an instance that should not listen.");
+					OnWire(host, process => Assert.That((long)(int)process.Evaluate("1 + 1", null).AsNative, Is.EqualTo(2L)));
+				}
+			);
+		}
+
+		/// <summary>
+		/// Runs <paramref name="body"/> against a second hosted instance and hands the fixture's own server its object-id
+		/// counter back afterwards: starting a server sets the process-wide counter from its own catalog
+		/// (bug-object-id-counter-is-process-wide), which would otherwise leave the fixture's server allocating ids its
+		/// catalog already holds.
+		/// </summary>
+		private static void WithASecondHost(string instanceName, bool shouldListen, int listenerPortNumber, Action<HostedInstance> body)
+		{
+			int nextObjectID = Schema.Object.GetNextObjectID();
+			try
+			{
+				using (HostedInstance host = new HostedInstance(instanceName, shouldListen, listenerPortNumber))
+					body(host);
+			}
+			finally
+			{
+				Schema.Object.SetNextObjectID(nextObjectID);
+			}
 		}
 
 		/// <summary>
@@ -341,27 +696,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestOneServiceInstanceServesEveryConnection()
 		{
-			using (ProtocolClient first = new ProtocolClient(_host.PortNumber))
-			using (ProtocolClient second = new ProtocolClient(_host.PortNumber))
+			using (ProtocolClient first = new ProtocolClient(_host.InstanceName, _host.PortNumber))
+			using (ProtocolClient second = new ProtocolClient(_host.InstanceName, _host.PortNumber))
 			{
 				Assert.That(second.ConnectionHandle, Is.Not.EqualTo(first.ConnectionHandle), "Two connections were given the same handle, so each was served by a HandleManager of its own.");
 
-				// And the object answering is the one the host built over this fixture's engine server: the name can come
-				// from nowhere else, and a DataphorService CoreWCF constructed for itself could not be built at all, the
+				// And the object answering is the one the host built over its own engine server: the name can come from
+				// nowhere else, and a DataphorService CoreWCF constructed for itself could not be built at all, the
 				// configuration-reading constructor having been removed.
 				Assert.That(first.Server.Name, Is.EqualTo(InstanceName));
 				Assert.That(second.Server.Name, Is.EqualTo(InstanceName));
 			}
 		}
 
-		/// <summary>CoreWCF bound the ports the host asked for, so neither service is reachable on 8060 or 8061.</summary>
+		/// <summary>
+		/// The host opened the instance port and the listener port, and nothing else - in particular no HTTP port of
+		/// Kestrel's own, which the empty server-URLs setting suppresses. Neither port is 8060 or 8061, so no case here
+		/// can reach a real instance on the build machine.
+		/// </summary>
 		[Test]
 		public void TestListensOnlyOnTheReservedPorts()
 		{
-			Assert.That(_host.ServiceEndPoint, Is.Not.Null);
-			Assert.That(_host.ServiceEndPoint.Port, Is.EqualTo(_host.PortNumber));
-			Assert.That(_host.ListenerEndPoint, Is.Not.Null);
-			Assert.That(_host.ListenerEndPoint.Port, Is.EqualTo(_host.ListenerPortNumber));
+			Assert.That(_portsOpenedByTheHost, Is.EquivalentTo(new[] { _host.PortNumber, _host.ListenerPortNumber }));
 			foreach (int portNumber in new[] { _host.PortNumber, _host.ListenerPortNumber })
 			{
 				Assert.That(portNumber, Is.Not.EqualTo(DataphorServiceUtility.DefaultListenerPortNumber));
@@ -372,16 +728,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// The host's binding and the client's say the same thing. They are written twice, against the unrelated Binding
 		/// hierarchies of CoreWCF.Channels and System.ServiceModel.Channels, so nothing but this comparison stops an edit
-		/// to one of them from silently changing the protocol on one side only - which the whole proof rests on not
-		/// happening. Compared: the element list and its order, the four size limits, the two timeouts, the transfer mode
-		/// and the message version. Settings neither declaration names are left out, because the two stacks are entitled
-		/// to default them differently.
+		/// to one of them from silently changing the protocol on one side only. Compared: the element list and its order,
+		/// the four size limits, the two timeouts, the transfer mode and the message version. Settings neither declaration
+		/// names are left out, because the two stacks are entitled to default them differently.
 		/// </summary>
 		[Test]
 		public void TestHostBindingMatchesTheClientBinding()
 		{
 			System.ServiceModel.Channels.Binding clientBinding = DataphorServiceUtility.GetBinding();
-			CoreWCF.Channels.Binding hostBinding = CoreWcfProofHost.BuildBinding();
+			CoreWCF.Channels.Binding hostBinding = DataphorServiceHostBinding.Build();
 
 			System.ServiceModel.Channels.BindingElementCollection clientElements = clientBinding.CreateBindingElements();
 			CoreWCF.Channels.BindingElementCollection hostElements = hostBinding.CreateBindingElements();

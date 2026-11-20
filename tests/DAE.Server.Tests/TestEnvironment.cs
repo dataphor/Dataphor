@@ -146,6 +146,26 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return result;
 		}
 
+		/// <summary>Deletes a test directory, best effort, unless <see cref="KeepFiles"/>.</summary>
+		/// <remarks>
+		/// A folder it cannot delete - typically because the process loaded a library assembly from it, which stays mapped
+		/// until the process exits - is reported to the test output and left for the next run's sweep.
+		/// </remarks>
+		public static void TryDeleteDirectory(string directory)
+		{
+			if (KeepFiles)
+				return;
+
+			try
+			{
+				Directory.Delete(directory, true);
+			}
+			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+			{
+				TestContext.Progress.WriteLine("Could not delete {0}; the next test run deletes it. {1}", directory, exception.Message);
+			}
+		}
+
 		/// <summary>Copies each named library folder of the runtime layout, recursively, into <paramref name="targetDirectory"/>.</summary>
 		public static void CopyLibraries(string targetDirectory, IEnumerable<string> names)
 		{

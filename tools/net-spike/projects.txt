@@ -4,6 +4,7 @@ src/protocol/NativeCLI/DAE.NativeCLI.csproj
 src/protocol/Common/Common.csproj
 src/engine/Base.Windows/Base.Windows.csproj
 src/engine/Server/Server.csproj
+src/engine/Server.Hosting/Server.Hosting.csproj
 src/protocol/Client/Client.csproj
 src/client/DAE.Client/DAE.Client.csproj
 src/client/Frontend.Client/Frontend.Client.csproj

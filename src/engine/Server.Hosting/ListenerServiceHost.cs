@@ -4,66 +4,124 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-// NOTE: nothing compiles this folder: there is no project file here yet, and this constructor still takes
-// the two parameters of settings that no longer exist (useCrossDomainService, useServiceConfiguration).
-// protocol-corewcf-host-prepare moved the file here unchanged; protocol-corewcf-host creates
-// Server.Hosting.csproj and rewrites the class onto CoreWCF, and deletes this note.
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ServiceModel;
-using System.Collections;
-using System.Configuration;
-using System.ServiceModel.Web;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using CoreWCF.Configuration;
 
 using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Service
 {
+	/// <summary>
+	/// Hosts the listener service, which answers "where is instance X" for every instance on this machine.
+	/// </summary>
+	/// <remarks>
+	/// It has a host of its own rather than sharing the instance's, because one listener per machine serves every
+	/// instance on it (which is why its port is fixed at 8060): a server whose listener port is already held by another
+	/// instance's process must still start and still serve its own endpoint, and on one host a failed listener would
+	/// fail the whole host. So the constructor swallows the error from starting it, as it always has, and reports it
+	/// through <see cref="IsStarted"/> for the caller to log.
+	/// </remarks>
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost(int overridePortNumber, bool requireSecureConnection, bool useCrossDomainService, bool useServiceConfiguration)
+		/// <param name="hostName">The host name of both the listening address and the endpoint address; see DataphorServiceHost.HostName.</param>
+		/// <param name="overridePortNumber">0 for the default listener port, 8060.</param>
+		/// <param name="requireSecureConnection">
+		/// Read from the instance configuration and not acted on, here or in 3.1. protocol-transport-security owns the
+		/// question of what a secured listener connection should mean on CoreWCF; the setting is kept wired through to
+		/// this parameter so that the evidence of what was configured, and never honoured, stays intact.
+		/// </param>
+		public ListenerServiceHost(string hostName, int overridePortNumber, bool requireSecureConnection)
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
-				
-			_listenerHost = useServiceConfiguration ? new CustomServiceHost(typeof(ListenerService)) : new ServiceHost(typeof(ListenerService));
 
-			if (!useServiceConfiguration)
-			{
-				_listenerHost.AddServiceEndpoint
-				(
-					typeof(IListenerService), 
-					DataphorServiceUtility.GetBinding(), 
-					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort)
-				);	 
-			}
-
+			_listenerHost = BuildHost(hostName, listenerPort);
 			try
 			{
-				_listenerHost.Open();
+				_listenerHost.Start();
+				_isStarted = true;
 			}
-			catch
+			catch (Exception exception)
 			{
-				// An error indicates the service could not be started because there is already a listener running in another process.
-			}	 			
+				// Normally means a listener is already running in another process, which is the supported arrangement.
+				_startFailureMessage = exception.Message;
+			}
 		}
+
+		private static IHost BuildHost(string hostName, int listenerPort)
+		{
+			CoreWCF.Channels.Binding binding = DataphorServiceHostBinding.Build();
+
+			// The same host shape as DataphorServiceHost's; the comments there apply here too.
+			return
+				new HostBuilder()
+					.ConfigureLogging(logging => logging.ClearProviders())
+					.ConfigureWebHost
+					(
+						webHostBuilder =>
+							webHostBuilder
+								.UseKestrel()
+								.UseContentRoot(AppContext.BaseDirectory)
+								.UseSetting(WebHostDefaults.ServerUrlsKey, String.Empty)
+								.UseSetting(WebHostDefaults.SuppressStatusMessagesKey, "true")
+								.UseNetTcp(options => options.Listen(DataphorServiceHost.ListenAddress(hostName, listenerPort)))
+								.ConfigureServices(services => services.AddServiceModelServices())
+								.Configure
+								(
+									application =>
+										application.UseServiceModel
+										(
+											builder =>
+											{
+												// ListenerService is registered by type and not as an instance, which leaves CoreWCF to
+												// construct it per session exactly as "new ServiceHost(typeof(ListenerService))" did.
+												builder.AddService<ListenerService>();
+												builder.AddServiceEndpoint<ListenerService, IListenerService>(binding, new Uri(DataphorServiceUtility.BuildListenerURI(hostName, listenerPort)));
+											}
+										)
+								)
+					)
+					.Build();
+		}
+
+		private bool _isStarted;
+		/// <summary>Whether the listener is actually serving; false when its port was already taken.</summary>
+		public bool IsStarted { get { return _isStarted; } }
+
+		private string _startFailureMessage;
+		/// <summary>What starting the listener reported when it did not start; null when it did.</summary>
+		public string StartFailureMessage { get { return _startFailureMessage; } }
 
 		#region IDisposable Members
 
+		/// <summary>Stops and disposes the host; safe after a failed start, and safe to call twice.</summary>
 		public void Dispose()
-		{				
-			if (_listenerHost != null)
+		{
+			IHost listenerHost = _listenerHost;
+			_listenerHost = null;
+			if (listenerHost != null)
 			{
-				if (_listenerHost.State == CommunicationState.Opened)
-					_listenerHost.Close();
-				_listenerHost = null;
+				try
+				{
+					// A host that never started stops without doing anything; one that did gets the same bounded wait as
+					// the instance's host (see DataphorServiceHost.Stop).
+					listenerHost.StopAsync(DataphorServiceHost.StopTimeout).GetAwaiter().GetResult();
+				}
+				finally
+				{
+					listenerHost.Dispose();
+				}
 			}
 		}
 
 		#endregion
 
-		private ServiceHost _listenerHost;	   		
+		private IHost _listenerHost;
 	}
 }

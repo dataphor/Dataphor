@@ -9,7 +9,12 @@ using System.Text;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Contracts;
-using System.ServiceModel;
+
+// CoreWCF, not System.ServiceModel: CoreWCF recognises only its own ServiceBehaviorAttribute and only its own
+// FaultException<T>, so a System.ServiceModel fault thrown here would reach the client as an untyped unhandled-error
+// fault and every native CLI error would degrade into a communication failure. The contract interface in the
+// Contracts folder stays on System.ServiceModel, which CoreWCF converts for itself; the wire is unchanged either way.
+using CoreWCF;
 
 namespace Alphora.Dataphor.DAE.NativeCLI
 {

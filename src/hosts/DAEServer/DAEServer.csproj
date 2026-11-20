@@ -80,6 +80,10 @@
       <Name>Server %28Server\Server%29</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\engine\Server.Hosting\Server.Hosting.csproj">
+      <Name>Server.Hosting</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

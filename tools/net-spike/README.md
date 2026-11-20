@@ -29,13 +29,13 @@ dotnet run --project tools/net-spike/EngineCheck -c Debug                       
 
 | Step | Result |
 |---|---|
-| Base, Base.Windows, DAE (the engine, 164k lines), Server, SQLite store, Common, NativeCLI, Client, Connection, SQLDevice, MSSQLDevice, SimpleDevice, Frontend server, System.Platform/Internet/Integration | converted; built in place with 0 errors. The server leaves out its six WCF service and host files until CoreWCF hosting (`protocol-corewcf-host`) |
+| Base, Base.Windows, DAE (the engine, 164k lines), Server, Server.Hosting, SQLite store, Common, NativeCLI, Client, Connection, SQLDevice, MSSQLDevice, SimpleDevice, Frontend server, System.Platform/Internet/Integration | converted; built in place with 0 errors. Since `protocol-corewcf-host` every WCF file is compiled: the three service classes in Server, the two hosts in Server.Hosting |
 | Diagnostics (TestFramework.Coverage.Base) | converted (`build-runtime-layout`); built in place with 0 errors. Before that, its wrapper also had 0 errors |
-| DAE.Client, DAE.Client.Provider | 1 error since `build-server-project`: `DataphorServiceHost` (used by `DAE.Client`'s in-process connection) is no longer in the server assembly. Before that, 0 errors |
-| DAE.Client.Controls, Frontend.Client, Frontend.Client.WPF, Frontend.Client.Windows | Since `build-server-project`, the wrappers that compile `DAE.Client` stop at the same `DataphorServiceHost` error (Frontend.Client.WPF, which does not, still has 0). Before that: **0 errors on .NET 10** (with the checked-in third-party binaries referenced). On .NET 8 they stopped at the removed WinForms types `ContextMenu`, `MenuItem`, `ToolBar`, `StatusBar`. **.NET 10 brought those types back only as shells that throw `PlatformNotSupportedException` when constructed** (obsolete, diagnostic `WFDEV006`) — compiling is not working |
-| Dataphoria | 1 error on .NET 10 (`TreeNode.ContextMenu` no longer exists to override); since `build-server-project` it stops first at the `DataphorServiceHost` error in `DAE.Client` |
-| DAEServer | 0 errors with C# 12; 4 with C# 14, where `field` became a keyword inside property accessors (vendored `CommandLineArguments.cs`); plus `DataphorServiceHost` since `build-server-project` |
-| DAE.Service | needs `System.Configuration.Install` replacement; plus `DataphorServiceHost` since `build-server-project` |
+| DAE.Client, DAE.Client.Provider | 0 errors. Between `build-server-project` and `protocol-corewcf-host` each had 1: `DataphorServiceHost`, used by `DAE.Client`'s in-process connection, was in no compiled assembly |
+| DAE.Client.Controls, Frontend.Client, Frontend.Client.WPF, Frontend.Client.Windows | **0 errors on .NET 10** (with the checked-in third-party binaries referenced); between `build-server-project` and `protocol-corewcf-host`, the three that compile `DAE.Client` stopped at the same `DataphorServiceHost` error. On .NET 8 they stopped at the removed WinForms types `ContextMenu`, `MenuItem`, `ToolBar`, `StatusBar`. **.NET 10 brought those types back only as shells that throw `PlatformNotSupportedException` when constructed** (obsolete, diagnostic `WFDEV006`) — compiling is not working |
+| Dataphoria | 1 error on .NET 10 (`TreeNode.ContextMenu` no longer exists to override) |
+| DAEServer | 0 errors with C# 12; 4 with C# 14, where `field` became a keyword inside property accessors (vendored `CommandLineArguments.cs`) |
+| DAE.Service | 7 errors: needs a `System.Configuration.Install` replacement |
 | Common.Tests | converted (`test-common-tests-sdk`); built in place with 0 errors |
 | DAE.Server.Tests | converted (`test-server-fixture`); built in place with 0 errors. Since `test-harness-inprocess` it runs the D4 coverage scripts, replacing the spike's `--coverage` mode (whose last result, 63 pass and 14 fail, is in plan Appendix A) |
 | D4Runner, DAE.Client.Tests | blocked by `DAE.Client` requiring a Windows target (`NU1201`) and by the missing NUnit package reference |

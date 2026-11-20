@@ -21,8 +21,9 @@ An application is written as a **D4 library**: scripts that declare types, table
         WCF, net.tcp, binary encoding: IDataphorService (88 operations)
  ┌───────────────────────────────┴──────────────────────────────────┐
  │ hosts: DAEServer (console) · DAE.Service (Windows service)       │
- │ Server — DataphorServiceHost, RemoteServer*, persistent catalog, │
- │          library loading, NativeCLI service, listener            │
+ │ Server.Hosting — DataphorServiceHost, ListenerServiceHost        │
+ │ Server — RemoteServer*, persistent catalog, WCF services,        │
+ │          library loading, NativeCLI service                      │
  │ DAE (Engine) — D4 compiler, plan nodes, schema, memory device,   │
  │          catalog device, application transactions, debugger      │
  │ Base — utilities, BOP serializer                                 │
@@ -37,6 +38,7 @@ An application is written as a **D4 library**: scripts that declare types, table
 | `Alphora.Dataphor` | `src/engine/Base` | Collections, exceptions, streams, reflection helpers; **BOP** (`Base/BOP`) |
 | `Alphora.Dataphor.DAE` | `src/engine/DAE/DAE.csproj` | Engine: `Language*/` (lexer, parser, emitters for D4, SQL, RealSQL), `Compiling/` (`Compiler.cs` is 13k lines), `Runtime.Instructions/` (one class per operator, ~1,080 registered), `Schema/`, `Device.Memory/`, `Device.Catalog/`, `Store/`, `Server/` (`Engine`, `ServerSession`, `ServerProcess`, plans, cursors), `Debug/` |
 | `AlphoraDataphorServer` | `src/engine/Server` | `Server : Engine` adds the persistent catalog (`ServerCatalogDevice*`), libraries (`Schema/LibraryUtility.cs`), instances (`InstanceManager`, `ServerConfiguration`), the remote object layer (`RemoteServer*`), WCF services (`Service/`), `NativeCLI/`, .NET connections (`Connection/`) |
+| `Alphora.Dataphor.DAE.Server.Hosting` | `src/engine/Server.Hosting` | The two CoreWCF hosts (`DataphorServiceHost`, `ListenerServiceHost`) and the host side of the binding; needs the ASP.NET Core shared runtime |
 | `AlphoraDataphorCommon` | `src/protocol/Common` | WCF binding and URI helpers (`DataphorServiceUtility`), channel factory cache, listener client |
 | `AlphoraDataphorClient` | `src/protocol/Client` | `ClientServer` (WCF proxy) wrapped by `LocalServer` (client-side catalog cache, local plans/cursors/streams) |
 | `Alphora.Dataphor.DAE.NativeCLI` | `src/protocol/NativeCLI` | Simplified, JSON-friendly call interface and its WCF client |
@@ -89,13 +91,15 @@ Client side: `Frontend.Client.Session.SetApplication` asks the server which node
 
 ## Hosting, protocol, discovery
 
-`DataphorServiceHost.Start()` loads the instance from `%ProgramData%\Alphora\Dataphor\Instances\ServerConfigurations.config`, starts the `Server`, and opens three self-hosted WCF services, all on one custom binding (binary message encoding over TCP, no security by default, 2 GB limits, infinite timeouts):
+`DataphorServiceHost.Start()` (assembly `Alphora.Dataphor.DAE.Server.Hosting`) loads the instance from `%ProgramData%\Alphora\Dataphor\Instances\ServerConfigurations.config`, starts the `Server`, and serves three WCF services, all on one custom binding (binary message encoding over TCP, no security by default, 2 GB limits, infinite timeouts):
 
 | Service | Address | Contract |
 |---|---|---|
 | Main | `net.tcp://<host>:<port>/<instance>/service` (default port 8061) | `IDataphorService`, 88 operations, handle-based |
 | Native CLI | `…/<instance>/service/native` | `INativeCLIService`, 11 operations |
 | Listener | `net.tcp://<host>:8060/listener/service` | `IListenerService`: instance name → URI |
+
+The services themselves (`src/engine/Server/Service/`, `src/engine/Server/NativeCLI/NativeCLIService.cs`) are hosted on **CoreWCF**, by two .NET Generic Hosts in the process. One, inside `DataphorServiceHost`, carries the instance's own two endpoints on the instance's port. The second, inside `ListenerServiceHost`, carries the listener on the shared listener port, and is separate because one listener per machine serves every instance on it: a server that cannot take the listener port must still start and still serve its own endpoint, which on a single host a failed bind would prevent. Both hosts listen on `net.tcp://<HostName>:<port>/` with no path — for a host name CoreWCF opens two sockets on that port, `0.0.0.0` and `[::]`, so both address families are served — and register absolute endpoint addresses; the host name defaults to the machine name, and the paths are what calls are dispatched on. Kestrel opens no HTTP endpoint of its own.
 
 The server interfaces (`src/engine/Server/Contracts`) and the client's asynchronous copies (`src/protocol/Client/Contracts` for the main service, `src/protocol/Common/Contracts` for the listener, `src/protocol/NativeCLI` for the native CLI) are separate declarations of the same contracts; `ContractParityTest` holds them in step by comparing the two declarations of each contract by reflection. `RemoteServerObject` still derives from `MarshalByRefObject` and manipulates .NET Remoting leases — a leftover from the pre-WCF protocol. A client alias (`Aliases.config`) is either a connection alias (host, instance, port) or an in-process alias that starts a server inside the client process.
 
@@ -117,7 +121,7 @@ The server interfaces (`src/engine/Server/Contracts`) and the client's asynchron
 | Core, in use | Base, DAE, Server, Common, Client, DAE.Client, DAE.Client.Controls, Frontend.Client, Frontend.Client.Windows, WindowsClient, Dataphoria, DAEServer, DAEService, ConfigurationUtility, D4Runner; libraries Frontend, SQLDevice, MSSQLDevice, SimpleDevice, Connection, System.Platform/Internet/Integration, Security, General |
 | Working, lightly used | DAE.Client.Provider, NativeCLI, Frontend.Client.WPF (one scheduler control), PGSQL device and connection, Store.MSSQL/Store.PGSQL stores, samples |
 | Parked under `legacy/`, not built | Side projects (2015–2019): FHIR*, CQF*, PHINVADS* libraries (`legacy/libraries/`); `legacy/Dataphoria/` (MVC 5 / Web API 2 REST and "cloud" prototypes), with the cloud prototype's sample library `legacy/Processor/` and design documents `legacy/Design/`. Also the Oracle (Microsoft provider), ADO and SAS device and connection libraries, and the DocBook reference generator library `Documentation` (`legacy/libraries/`) |
-| Cannot survive .NET 10 as written | WCF self-hosting, COM+ transaction class, Windows service installer class |
+| Cannot survive .NET 10 as written | COM+ transaction class, Windows service installer class |
 
 ## Third-party code in the tree
 

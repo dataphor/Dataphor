@@ -226,18 +226,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private void DeleteDirectory()
 		{
-			if (TestEnvironment.KeepFiles)
-				return;
-
-			try
-			{
-				System.IO.Directory.Delete(_directory, true);
-			}
-			catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
-			{
-				// Typically a library assembly the process loaded from this copy: it stays mapped until the process exits.
-				TestContext.Progress.WriteLine("Could not delete {0}; the next test run deletes it. {1}", _directory, exception.Message);
-			}
+			TestEnvironment.TryDeleteDirectory(_directory);
 		}
 	}
 }

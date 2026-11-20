@@ -40,14 +40,11 @@
   </ItemGroup>
 
   <!--
-    One WCF file is left out, NativeCLI\NativeCLIService.cs: its eleven FaultException<NativeCLIFault> throws are
-    System.ServiceModel's, and CoreWCF recognises only its own, so the one-line change the other two service classes
-    already had belongs with the hosting that exercises it (protocol-corewcf-host). The two service classes
-    DataphorService and ListenerService are compiled, against CoreWCF's behaviour and fault types;
-    protocol-corewcf-proof ran the existing client against them over the wire. The host classes are not in this
-    assembly at all: protocol-corewcf-host-prepare moved them to src/engine/Server.Hosting, where nothing compiles
-    them yet, because hosting needs CoreWCF.NetTcp and every project that referenced this one would inherit it.
-    Nothing compiled here references them; an in-process Server does not need any of this.
+    The three WCF service classes - DataphorService, ListenerService and NativeCLIService - are compiled here,
+    against CoreWCF's behaviour and fault types. The host classes are not in this assembly: they are in
+    src/engine/Server.Hosting (assembly Alphora.Dataphor.DAE.Server.Hosting), because hosting needs CoreWCF.NetTcp
+    and every project that references this one would inherit its package-audit warning; that project file records the
+    measurement. Nothing compiled here references them; an in-process Server does not need any of this.
   -->
   <ItemGroup>
     <Compile Include="Contracts\IDataphorService.cs" />
@@ -77,8 +74,8 @@
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />
+    <Compile Include="NativeCLI\NativeCLIService.cs" />
     <Compile Include="NativeCLI\NativeServer.cs" />
-    <!-- NativeCLI\NativeCLIService.cs: WCF hosting, until protocol-corewcf-host -->
     <Compile Include="NativeCLI\NativeSession.cs" />
     <Compile Include="Server\RemoteServer.cs" />
     <Compile Include="Server\RemoteServerBatch.cs" />
