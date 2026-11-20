@@ -328,9 +328,71 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		protected virtual void EmitQualifierExpression(QualifierExpression expression)
 		{
-			EmitExpression(expression.LeftExpression);
+			// The parser builds "C.Name from X" as a qualifier whose right side is the column extractor, so the qualifier
+			// has to be emitted as part of the extractor's column name: "(C.Name from X)". Emitting it outside the
+			// extractor's parentheses - "C.(Name from X)" - puts a "(" where the parser wants an identifier.
+			ColumnExtractorExpression extractor = TrailingColumnExtractor(expression);
+			if (extractor != null)
+			{
+				Append(Keywords.BeginGroup);
+				EmitQualifierPrefix(expression);
+				EmitColumnExtractorBody(extractor);
+				Append(Keywords.EndGroup);
+				return;
+			}
+			
+			EmitQualifierOperand(expression.LeftExpression);
 			Append(Keywords.Qualifier);
 			EmitExpression(expression.RightExpression);
+		}
+		
+		/// <summary>Returns the single-column extractor at the end of a qualifier's right spine, or null if there is none.</summary>
+		/// <remarks>
+		/// A qualifier's right side is itself a qualifier for each extra dot. Returns null when any node on that spine
+		/// carries language modifiers, since the prefix form above bypasses EmitExpression, which is what emits them.
+		/// A multi-column extractor also returns null: the grammar cannot put one to the right of a ".", so there is no
+		/// spelling for it to round-trip to, and the caller falls back to the unqualified form.
+		/// </remarks>
+		private static ColumnExtractorExpression TrailingColumnExtractor(QualifierExpression expression)
+		{
+			Expression right = expression.RightExpression;
+			while (right is QualifierExpression)
+			{
+				if (HasModifiers(right))
+					return null;
+				right = ((QualifierExpression)right).RightExpression;
+			}
+			ColumnExtractorExpression extractor = right as ColumnExtractorExpression;
+			return (extractor != null) && (extractor.Columns.Count == 1) && !HasModifiers(extractor) ? extractor : null;
+		}
+		
+		private static bool HasModifiers(Expression expression)
+		{
+			return (expression.Modifiers != null) && (expression.Modifiers.Count > 0);
+		}
+		
+		/// <summary>Emits the dotted qualifiers of a qualifier chain, up to but not including its trailing expression.</summary>
+		private void EmitQualifierPrefix(QualifierExpression expression)
+		{
+			EmitQualifierOperand(expression.LeftExpression);
+			Append(Keywords.Qualifier);
+			if (expression.RightExpression is QualifierExpression)
+				EmitQualifierPrefix((QualifierExpression)expression.RightExpression);
+		}
+		
+		private void EmitQualifierOperand(Expression expression)
+		{
+			// A numeric literal left of a "." has to be parenthesized: "1." lexes as a malformed number.
+			ValueExpression value = expression as ValueExpression;
+			bool needsGroup =
+				(value != null)
+					&& ((value.Token == TokenType.Integer) || (value.Token == TokenType.Hex) || (value.Token == TokenType.Float)
+						|| (value.Token == TokenType.Decimal) || (value.Token == TokenType.Money));
+			if (needsGroup)
+				Append(Keywords.BeginGroup);
+			EmitExpression(expression);
+			if (needsGroup)
+				Append(Keywords.EndGroup);
 		}
 		
 		protected virtual void EmitParameterExpression(ParameterExpression expression)
@@ -788,6 +850,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected virtual void EmitColumnExtractorExpression(ColumnExtractorExpression expression)
 		{
 			Append(Keywords.BeginGroup);
+			EmitColumnExtractorBody(expression);
+			Append(Keywords.EndGroup);
+		}
+		
+		/// <summary>Emits a column extractor without its surrounding parentheses, so that a qualified one can be
+		/// emitted with the qualifier inside them (see EmitQualifierExpression).</summary>
+		private void EmitColumnExtractorBody(ColumnExtractorExpression expression)
+		{
 			if (expression.Columns.Count == 1)
 				AppendFormat("{0} {1} ", expression.Columns[0].ColumnName, Keywords.From);
 			else
@@ -814,8 +884,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
-			
-			Append(Keywords.EndGroup);
 		}
 		
 		protected virtual void EmitListSelectorExpression(ListSelectorExpression expression)
@@ -1797,7 +1865,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			AppendFormat("{0} ", Keywords.In);
 			EmitCursorDefinition(expression.Expression);
-			AppendFormat(" {0}", Keywords.Do);
+			// The trailing space matters: unlike the statement form, the body follows on the same line, so without it
+			// the keyword runs into the body ("do" followed by "row { ... }" reads as the identifier "dorow").
+			AppendFormat(" {0} ", Keywords.Do);
 			IncreaseIndent();
 			EmitExpression(expression.Return);
 			DecreaseIndent();
@@ -4492,8 +4562,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			switch (statement.GranteeType)
 			{
+				// A plain string literal: the "..."i form is case-insensitive-string syntax from the USEISTRING build,
+				// which is off and whose lexer support does not exist, so the parser reads a plain string here.
 				case GranteeType.User :
-					AppendFormat(@"{0} ""{1}""i", Keywords.User, statement.Grantee.Replace(@"""", @""""""));
+					AppendFormat("{0} '{1}'", Keywords.User, statement.Grantee.Replace("'", "''"));
 				break;
 				
 				case GranteeType.Role :
@@ -4503,7 +4575,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				break;
 				
 				case GranteeType.Group :
-					AppendFormat(@"{0} ""{1}""i", Keywords.Group, statement.Grantee.Replace(@"""", @""""""));
+					AppendFormat("{0} '{1}'", Keywords.Group, statement.Grantee.Replace("'", "''"));
 					if (statement.IsInherited)
 						AppendFormat(" {0}", Keywords.Inherited);
 					if (statement.ApplyRecursively)
@@ -4784,8 +4856,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		protected virtual void EmitScalarTypeSpecifier(ScalarTypeSpecifier statement)
 		{
+			// The bare keyword, with no "generic" before it: that is all ScalarTypeSpecifier in the parser accepts, and
+			// on reading "generic" it takes the "any type" branch and leaves "scalar" unconsumed. See the NOTE there.
 			if (statement.IsGeneric)
-				AppendFormat("{0} {1}", Keywords.Generic, Keywords.Scalar);
+				Append(Keywords.Scalar);
 			else
 				Append(statement.ScalarTypeName);
 		}

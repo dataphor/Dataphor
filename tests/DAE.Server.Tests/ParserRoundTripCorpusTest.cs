@@ -40,15 +40,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		};
 
 		// Files the corpus pass excludes, each with a one-line reason. The test ticket expects this to be empty;
-		// this working set exists only because the first run surfaced two classes of defect and one class of file,
-		// all of which are tracked for follow-up in the review handoff (see ticket test-parser-roundtrip-corpus):
+		// this working set exists only because the first run surfaced one class of defect and one class of file,
+		// both of which are tracked for follow-up in the review handoff (see ticket test-parser-roundtrip-corpus):
 		//   (parse)        - the parser emits recovery messages on the first read; file is effectively not
 		//                     parseable through today's parser (most of legacy/libraries/FHIR.Server/, device
 		//                     SystemCatalog variants, and some Coverage.Scripts documents that use grammar the
 		//                     parser does not yet accept).
-		//   (emitter-malformed) - re-parse of the emitted text produces syntax errors; the emitter is a harness bug.
 		//   (emitter-reshape)   - both parses succeed but the emitter reshapes the tree (multi-var splitting,
 		//                     try/commit desugaring, metadata tag ordering, missing "by" clause, etc.).
+		// The third category, (emitter-malformed) - re-parse of the emitted text produced syntax errors - is gone:
+		// bug-d4-emitter-malformed-output fixed those emitter sites, and D4EmitterRoundTripTest holds them fixed.
 		// NOTE: see ticket review/test-parser-roundtrip-corpus handoff for the follow-up tickets that drain this
 		// list. New entries added here outside that workflow must carry a one-line reason, same shape as these.
 		private static readonly Dictionary<string, string> AllowList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -94,15 +95,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", "parse" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "parse" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "parse" },
-			// (emitter-malformed) - re-parse of the emitter's output fails
-			{ "legacy/libraries/FHIR.Server/Documents/FHIR.LoadConformanceCache.d4", "emitter-malformed" },
-			{ "legacy/libraries/FHIR.Server/Documents/ModelInfo.Operators.d4", "emitter-malformed" },
-			{ "libraries/System.Internet/Documents/Dynamic.d4", "emitter-malformed" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IntegerLibrary.d4", "emitter-malformed" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Lexer.d4", "emitter-malformed" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SecurityLibrary.d4", "emitter-malformed" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationOperators.d4", "emitter-malformed" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ViewUpdatability.d4", "emitter-malformed" },
 			// (emitter-reshape) - parses twice, but the emitter changes the tree shape
 			{ "legacy/libraries/FHIR.Core/Documents/Structure.Definition.d4", "emitter-reshape" },
 			{ "legacy/libraries/FHIR.Server/Documents/FHIR.TestData.d4", "emitter-reshape" },
@@ -139,12 +131,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DeferredConstraintsWithKeys.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EventHandlers.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/GuidLibrary.d4", "emitter-reshape" },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IntegerLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/KeyAffectingUpdate.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LanguageConstructs.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LongAggregates.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LongLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/MaximumRowCount.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PlanCache.d4", "emitter-reshape" },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationOperators.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationTypes.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ShortLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/StringLibrary.d4", "emitter-reshape" },

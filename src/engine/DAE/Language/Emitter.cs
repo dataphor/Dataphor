@@ -180,11 +180,18 @@ namespace Alphora.Dataphor.DAE.Language
 				case TokenType.Nil : Append(D4.Keywords.Nil); break;
 				case TokenType.String : Append("'" + ((string)expression.Value).Replace("'", "''") + "'"); break;
 				case TokenType.Decimal: Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}d", expression.Value)); break;
-				case TokenType.Money : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "${0}", expression.Value)); break;
+				case TokenType.Money : Append(FormatMoney((decimal)expression.Value)); break;
 				case TokenType.Boolean : Append(((bool)expression.Value ? "true" : "false")); break;
-				case TokenType.Hex: ((long)expression.Value).ToString("X"); break;
+				case TokenType.Hex: Append("0x" + ((long)expression.Value).ToString("X")); break;
 				default : Append(String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", expression.Value)); break;
 			}
+		}
+		
+		// The sign goes before the "$": the lexer reads "$" as the start of a number and rejects the "-" that follows it.
+		private static string FormatMoney(decimal value)
+		{
+			string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", value);
+			return text.StartsWith("-") ? "-$" + text.Substring(1) : "$" + text;
 		}
 		
 		protected virtual void EmitIdentifierExpression(IdentifierExpression expression)

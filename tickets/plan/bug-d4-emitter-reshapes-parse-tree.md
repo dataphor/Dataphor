@@ -1,4 +1,4 @@
-description: The D4 text emitter produces text that re-parses to a different tree shape for fifty-one documents in the repository, so a round trip is not a fixed point of emit/parse.
+description: The D4 text emitter produces text that re-parses to a different tree shape for fifty-three documents in the repository, so a round trip is not a fixed point of emit/parse.
 architecture: docs/modernization-plan.md#ws3-test-suite
 files: src/engine/DAE/Language.D4/D4Emitter.cs, src/engine/DAE/Language.D4/Parser.cs, tests/DAE.Server.Tests/ParserRoundTripCorpusTest.cs
 repro: verified
@@ -8,9 +8,9 @@ tradeoffs: The reshaped text still compiles and runs — the observed difference
 ----
 ## What this is
 
-`ParserRoundTripCorpusTest` in `tests/DAE.Server.Tests/ParserRoundTripCorpusTest.cs` quarantines fifty-one `.d4` files under category `emitter-reshape`: both parses succeed, but `TreesEqual` reports a structural difference. Four sub-patterns observed on first read:
+`ParserRoundTripCorpusTest` in `tests/DAE.Server.Tests/ParserRoundTripCorpusTest.cs` quarantines fifty-three `.d4` files under category `emitter-reshape`: both parses succeed, but `TreesEqual` reports a structural difference. Four sub-patterns observed on first read:
 
-- **Multi-variable statement flattening.** `var a : X, b : Y` parses as a `Block { VariableStatement, VariableStatement }`; the emitter emits each child on its own with its own `;`, so the re-parse produces two separate `VariableStatement` siblings in the enclosing block instead of one nested `Block`. Hits every `TestFramework.Coverage.Scripts` library script with multi-var declarations.
+- **Multi-variable statement flattening.** `var a : X, b : Y` parses as a `Block { VariableStatement, VariableStatement }`; the emitter emits each child on its own with its own `;`, so the re-parse produces two separate `VariableStatement` siblings in the enclosing block instead of one nested `Block`. Hits every `TestFramework.Coverage.Scripts` library script with multi-var declarations, including `IntegerLibrary.d4` and `SerializationOperators.d4`, which moved into this category when `bug-d4-emitter-malformed-output` cleared their malformed output.
 - **`try … commit` desugaring.** The emitter rewrites `try X; commit;` into `begin BeginTransaction(); try X; CommitTransaction(); except begin RollbackTransaction(); raise end end`. The output is a different tree even though its semantics match. Hits `PlanCache`, `EventHandlers`, `TransitionConstraints`, both `DeferredConstraint*` scripts, and the `Sample.Shipping` schema and coverage documents.
 - **`hasByClause` toggled.** `root.…expression.hasByClause: value differs (False vs True)` — the emitter adds a `by` clause the source did not carry. Hits `libraries/System.Integration/Documents/Register.d4` and `tests/libraries/TestFramework.Coverage.Scripts/Documents/SystemCatalog.d4`.
 - **Metadata tag ordering.** `metaData.tags[0]: Tag differs (…=… static=True vs …=… static=False)` — the emitter reorders static and non-static tags, so the first-tag mismatch is an index shift. Hits `src/engine/DAE/Schema/{DataTypes,SystemCatalog}.d4`, `samples/Sample.IssueTracker/Documents/Register.d4`, `samples/Sample.Shipping/Documents/Schema.DataTypes.d4`, `tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationTypes.d4`.

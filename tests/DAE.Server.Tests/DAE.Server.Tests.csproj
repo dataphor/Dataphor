@@ -20,6 +20,7 @@
     <Compile Include="CoverageManifest.cs" />
     <Compile Include="CoverageScripts.cs" />
     <Compile Include="CursorTest.cs" />
+    <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
     <Compile Include="InProcessTestFixture.cs" />
     <Compile Include="InternalCoverageTests.cs" />
