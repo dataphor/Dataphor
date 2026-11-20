@@ -4,6 +4,11 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+// NOTE: nothing compiles this folder: there is no project file here yet, and this file still reads
+// instance.UseServiceConfiguration and instance.AllowSilverlightClients, which no longer exist on
+// ServerConfiguration. protocol-corewcf-host-prepare moved the file here unchanged; protocol-corewcf-host
+// creates Server.Hosting.csproj and rewrites the class onto CoreWCF, and deletes this note.
+
 using System;
 using System.IO;
 using System.Text;

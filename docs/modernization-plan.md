@@ -125,7 +125,8 @@ The reorganization goes first because it touches every path and is cheapest whil
 /                      AGENTS.md, README.md, LICENSE, CHANGELOG.md, Dataphor.slnx, global.json,
                        Directory.Build.props, Directory.Packages.props, .editorconfig, .gitattributes
 src/
-  engine/              Base, Base.Windows, DAE, Server, Store.SQLite, Store.MSSQL, Store.PGSQL
+  engine/              Base, Base.Windows, DAE, Server, Server.Hosting, Store.SQLite, Store.MSSQL,
+                       Store.PGSQL
   protocol/            Common, Client, NativeCLI
   client/              DAE.Client, DAE.Client.Provider, Frontend.Client
   windows/             DAE.Client.Controls, Frontend.Client.Windows, Frontend.Client.WPF,

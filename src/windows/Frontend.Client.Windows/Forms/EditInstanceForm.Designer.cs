@@ -58,6 +58,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         private Button FSelectLibraryDirectoryButton;
         private System.Windows.Forms.TextBox FLibraryDirectoriesTextBox;
         private System.Windows.Forms.CheckBox FRequireSecureConnectionComboBox;
+		// NOTE: FGroupBox5 still has the size it had when it also held "Use Service Configuration?" and "Allow
+		// Silverlight Clients?", so there is an empty band where those two checkboxes were; both settings were
+		// removed by protocol-corewcf-host-prepare. WS6 owns this form's layout and should close the gap.
 		private GroupBox FGroupBox5;
         private System.Windows.Forms.CheckBox FShouldListenComboBox;
 		private Label FLabel10;

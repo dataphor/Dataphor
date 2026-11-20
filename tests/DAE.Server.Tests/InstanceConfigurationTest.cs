@@ -35,8 +35,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void LoadReadsAFileCarryingSettingsThatNoLongerExist()
 		{
-			string directory = Path.Combine(TestEnvironment.RunDirectory, nameof(LoadReadsAFileCarryingSettingsThatNoLongerExist));
-			Directory.CreateDirectory(directory);
+			string directory = TestEnvironment.NewDirectory(nameof(LoadReadsAFileCarryingSettingsThatNoLongerExist));
 			try
 			{
 				string fileName = Path.Combine(directory, InstanceManager.InstanceConfigurationFileName);
@@ -59,7 +58,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 			finally
 			{
-				Directory.Delete(directory, true);
+				if (!TestEnvironment.KeepFiles)
+					Directory.Delete(directory, true);
 			}
 		}
 	}
