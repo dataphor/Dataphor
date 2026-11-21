@@ -15,7 +15,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <summary>
 	/// Where <see cref="InstanceManager"/> looks for this machine's instance list (ServerConfigurations.config): that the
 	/// folder carries the major version, so that a 4.0 installation does not read and write a 3.1 installation's list
-	/// (known defect K27, and the reason the two can be installed side by side), and that a process can point it
+	/// (known defect K27, and the reason the two can be installed side by side), that an instance's own data folder -
+	/// catalog, logs and library data - defaults under the same folder, and that a process can point the whole thing
 	/// elsewhere. The redirection is what lets a test or an operator start a server without touching machine state:
 	/// DataphorServiceHost.Start() loads the list it resolves and, when the named instance is not in it, adds a default
 	/// entry and saves the file.
@@ -117,6 +118,46 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				InstanceManager.Load();
 				Assert.That(InstanceManager.Instances.HasInstance(InstanceName), Is.True, "the instance saved into the overridden folder was not read back from it");
 				Assert.That(InstanceManager.Instances.GetInstance(InstanceName).PortNumber, Is.EqualTo(ServerConfiguration.DefaultPortNumber));
+			}
+			finally
+			{
+				TestEnvironment.TryDeleteDirectory(directory);
+			}
+		}
+
+		[Test]
+		public void AnInstanceWithNoDirectoryOfItsOwnLandsUnderTheResolvedInstanceDirectory()
+		{
+			string directory = TestEnvironment.NewDirectory(nameof(AnInstanceWithNoDirectoryOfItsOwnLandsUnderTheResolvedInstanceDirectory));
+			try
+			{
+				Environment.SetEnvironmentVariable(InstanceManager.InstanceDirectoryVariableName, null);
+				InstanceManager.InstanceDirectory = directory;
+
+				// InstanceDirectory left unset, which is what ServerConfiguration.DefaultInstance leaves it as, so the server
+				// defaults it. This is the second half of K27 and the consequential one: the default is what pointed a 4.0
+				// server's catalog, logs and library data at a 3.1 installation's folders, and redirecting the list alone would
+				// be worth little if an instance's own data did not follow it.
+				ServerConfiguration configuration =
+					new ServerConfiguration
+					{
+						Name = InstanceName,
+						LibraryDirectories = Directory.CreateDirectory(Path.Combine(directory, TestServerInstance.LibrariesFolderName)).FullName
+					};
+
+				Server server = new Server();
+				configuration.ApplyTo(server);
+				server.LoggingEnabled = TestEnvironment.LoggingEnabled;
+				server.Start();
+				try
+				{
+					Assert.That(server.InstanceDirectory, Is.EqualTo(Path.Combine(directory, InstanceName)));
+					Assert.That(File.Exists(server.GetCatalogStoreDatabaseFileName()), Is.True, "the catalog store file is not under the instance's folder in the resolved instance directory");
+				}
+				finally
+				{
+					server.Stop();
+				}
 			}
 			finally
 			{

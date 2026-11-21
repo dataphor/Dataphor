@@ -63,12 +63,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private HostedInstance _host;
 
 		/// <summary>The ports that started listening on this machine while the fixture's host was started.</summary>
-		// NOTE: another process opening a listening socket in that window would be counted here and fail
-		// TestListensOnlyOnTheReservedPorts. Nothing on a build machine normally does in those few milliseconds; if it
-		// ever flakes, narrow the assertion to Kestrel's own default HTTP ports. It has flaked once: on 2026-11-20
-		// (host-instance-directory) one full run counted a third port, numbered just above the two the fixture reserved,
-		// and the same run passed on three immediate repeats, so the window really is open to an unrelated process.
+		/// <remarks>
+		/// A diff of the machine's listening sockets, so a port an unrelated process opened in that window is in here too.
+		/// TestListensOnlyOnTheReservedPorts therefore asserts what is and is not in the set, never that the set is exactly
+		/// the two ports: it flaked that way once, on 2026-11-20 (host-instance-directory), counting a third port numbered
+		/// just above the two the fixture had reserved, and passing on three immediate repeats.
+		/// </remarks>
 		private List<int> _portsOpenedByTheHost;
+
+		/// <summary>The ports Kestrel opens for itself when nothing clears its server-URLs setting.</summary>
+		private static readonly int[] KestrelDefaultHttpPortNumbers = new[] { 5000, 5001 };
 
 		/// <summary>The instance folder this fixture points InstanceManager at, so that no case resolves the machine's own.</summary>
 		private string _instanceDirectory;
@@ -762,7 +766,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// The listener contract answers on its own port, through the shipped ListenerFactory, and its typed ListenerFault
 		/// comes back as the exception the client builds from it. Nothing is asserted about which instances are listed:
-		/// ListenerService reads the machine-wide ServerConfigurations.config, so that list is whatever is installed here.
+		/// ListenerService serves the list its own process resolves, which this fixture has pointed at an empty folder of
+		/// its own (see the remarks on the fixture).
 		/// </summary>
 		[Test]
 		public void TestListenerAnswersOnItsOwnPort()
@@ -941,14 +946,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// The host opened the instance port and the listener port, and nothing else - in particular no HTTP port of
-		/// Kestrel's own, which the empty server-URLs setting suppresses. Neither port is 8060 or 8061, so no case here
-		/// can reach a real instance on the build machine.
+		/// The host opened the instance port and the listener port, and no HTTP port of Kestrel's own - the thing the empty
+		/// server-URLs setting in NetTcpServiceHost.Build suppresses, and the regression this case exists to catch. Neither
+		/// port is 8060 or 8061, so no case here can reach a real instance on the build machine.
 		/// </summary>
 		[Test]
 		public void TestListensOnlyOnTheReservedPorts()
 		{
-			Assert.That(_portsOpenedByTheHost, Is.EquivalentTo(new[] { _host.PortNumber, _host.ListenerPortNumber }));
+			Assert.That(_portsOpenedByTheHost, Is.SupersetOf(new[] { _host.PortNumber, _host.ListenerPortNumber }));
+			foreach (int portNumber in KestrelDefaultHttpPortNumbers)
+				Assert.That(_portsOpenedByTheHost, Does.Not.Contain(portNumber), "The host opened a Kestrel default HTTP port; nothing should clear the empty server-URLs setting.");
+
 			foreach (int portNumber in new[] { _host.PortNumber, _host.ListenerPortNumber })
 			{
 				Assert.That(portNumber, Is.Not.EqualTo(DataphorServiceUtility.DefaultListenerPortNumber));
