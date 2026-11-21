@@ -203,6 +203,11 @@ namespace Alphora.Dataphor.DAE.Service
 		/// The instance's own two endpoints on one host: the main service, and the native CLI service at a path below
 		/// it. Both addresses are the ones DataphorServiceUtility builds, which is the compatibility surface.
 		/// </summary>
+		// NOTE: the instance's port number reaches Kestrel unchecked. An instance list written by hand, or carried over
+		// from 3.x, can hold portnumber="0"; what Kestrel then does with it has not been established, and a server on an
+		// ephemeral port would still register and be advertised as port 0, so clients could not reach it. If an upgraded
+		// instance ever shows up as started but unreachable, check the port here and refuse a configuration that cannot
+		// be served rather than starting on it.
 		private IHost BuildHost(ServerConfiguration instance)
 		{
 			CoreWCF.Channels.Binding binding = DataphorServiceHostBinding.Build();

@@ -56,13 +56,15 @@ The file lives in the `Alphora\Dataphor\4\Instances` folder under the all-users 
 
 There is one such file per computer, shared by every instance on it. The folder name carries the major version, so an installation of an earlier major version on the same computer keeps its own list and the two do not interfere. The folder is created the first time a Dataphor program looks for the list; the file itself appears the first time something saves it.
 
-A single process can be pointed at a different folder by setting the environment variable `DATAPHOR_INSTANCE_DIRECTORY` before it starts. The variable names the folder that holds both the instance list and — unless the instance overrides it — each instance's own data, so a process started with it set reads a list of its own and writes its catalog, logs and device data below that folder, leaving the computer's own list and data untouched. That is how a server is run for testing, or a configuration tried out, without changing machine state. The variable affects only the processes that have it set: a server, the Service Configuration Utility and any client that is to see the same list must all be started with the same value.
+A single process can be pointed at a different folder by setting the environment variable `DATAPHOR_INSTANCE_DIRECTORY` before it starts. The variable names the folder that holds both the instance list and — unless the instance overrides it — each instance's own data, so a process started with it set reads a list of its own and writes its catalog, logs and device data below that folder, leaving the computer's own list and data untouched. That is how a server is run for testing, or a configuration tried out. The variable affects only the processes that have it set: a server, the Service Configuration Utility and any client that is to see the same list must all be started with the same value.
+
+Two things the variable does not move. The first is the library directory: an entry the server creates in a redirected list is still pointed at the installation's `Libraries` folder, and a running server writes into whichever library directory it is given, so a server meant to leave the installation alone has to be given a library directory of its own as well. The second is the listener: a redirected server that hosts the listener answers out of the list it read itself, so if it takes the computer's listener port it offers its own private instances to every client on the computer. Give such a server `shouldlisten` of `False`, or start it only while the computer's own listener is already running.
 
 ### When the file is read and written
 
 An instance's settings are read when that instance starts, and not again. A change to the file takes effect the next time the instance is restarted.
 
-Three things write the file: the Service Configuration Utility, when a configuration is accepted; the instance editor reached from a client's connection-alias dialog; and the Dataphor Server itself. A server started for an instance that has no entry in the list **adds one with default settings and saves the file**. That is what makes a first start produce a working instance with no configuration at all. It is also why a mistyped instance name leaves behind an unwanted entry: the server does not report an unknown instance, it creates one.
+Four things write the file: the Service Configuration Utility, when a configuration is accepted; the instance editor reached from a client's connection-alias dialog; the Dataphoria IDE, when it creates a local instance to work against; and the Dataphor Server itself. A server started for an instance that has no entry in the list **adds one with default settings and saves the file**. That is what makes a first start produce a working instance with no configuration at all. It is also why a mistyped instance name leaves behind an unwanted entry: the server does not report an unknown instance, it creates one.
 
 The listener service — the service that tells a client which port a named instance is on — answers out of this file and not out of the set of running servers. An entry is therefore visible to a client browsing the computer's instances whether or not a server for it is running, and the port the client is given is the port recorded in the entry.
 
@@ -73,7 +75,7 @@ Attribute names in the file are all lower case. The defaults below are what the 
 | Setting | Default | What it sets |
 |----|----|----|
 | `name` | none; required | The instance's name |
-| `portnumber` | 8061 in an entry a Dataphor program creates; 0 when absent | The TCP port the instance serves clients on |
+| `portnumber` | 8061 in an entry the server or the Service Configuration Utility creates; 0 when absent | The TCP port the instance serves clients on |
 | `shouldlisten` | `True` | Whether this server also hosts the computer's listener |
 | `overridelistenerportnumber` | `0`, meaning the standard listener port 8060 | The port the listener is hosted on |
 | `librarydirectories` | the installation's `Libraries` folder in an entry a Dataphor program creates; the `Libraries` folder beside the binaries when empty | Where the instance looks for libraries |
@@ -99,7 +101,7 @@ Attribute names in the file are all lower case. The defaults below are what the 
 
 **Catalog store connection string** (`catalogstoreconnectionstring`). How the catalog store connects. Empty, the default, means the catalog is kept in a file named `DAECatalog.sqlite` in the `Catalog` folder of the instance directory. In a value given here, the token `%CatalogPath%` is replaced with that `Catalog` folder, which is the way to vary this setting without writing an absolute path into it: `Data Source=%CatalogPath%\DAECatalog.sqlite` is the default spelled out. Leave it empty unless the catalog file has to live somewhere other than its default place, or a store other than SQLite is in use.
 
-**Require secure connection**, **require secure listener connection** (`requiresecureconnection`, `requiresecurelistenerconnection`). `False` unless set otherwise. These two settings are stored, read, and offered by the Service Configuration Utility and the instance editor, but **nothing in the server acts on them**: a connection is not secured any differently when they are `True`. They are described here so that an operator who finds them set in a file knows they are having no effect.
+**Require secure connection**, **require secure listener connection** (`requiresecureconnection`, `requiresecurelistenerconnection`). `False` unless set otherwise. These two settings are stored, read, and offered by the instance editor, but **nothing in the server acts on them**: a connection is not secured any differently when they are `True`. They are described here so that an operator who finds them set in a file knows they are having no effect.
 
 ### Device settings
 
