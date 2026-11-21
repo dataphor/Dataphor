@@ -34,6 +34,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[JsonPropertyName("timeoutSeconds")] public int? TimeoutSeconds { get; set; }
 		[JsonPropertyName("preamble")] public string Preamble { get; set; }
 		[JsonPropertyName("batches")] public bool? Batches { get; set; }
+		[JsonPropertyName("linkedServer")] public bool? LinkedServer { get; set; }
 		[JsonPropertyName("register")] public string[] Register { get; set; }
 		[JsonPropertyName("partOf")] public string[] PartOf { get; set; }
 		[JsonPropertyName("note")] public string Note { get; set; }
@@ -86,6 +87,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// transaction stays open for the whole script. The text is read from the script server's own copy of the scripts library.
 	/// Use it only for a script that depends on batch boundaries (one that leaves an application transaction it changed, or
 	/// that must see a batch's work committed), and say why in <c>note</c>.</item>
+	/// <item><c>linkedServer</c> (optional, <c>true</c> only): a second Dataphor server, in a child process, named
+	/// <c>Dataphor</c> and hosting a listener on a dynamically chosen port, started before the script and stopped after it;
+	/// while it runs, this process's client-side listener port
+	/// (<see cref="Alphora.Dataphor.DAE.Contracts.DataphorServiceUtility.ListenerPortNumber"/>) points at it. Use it only for
+	/// a script that creates a server link with no port override - such a link resolves to the instance named
+	/// <c>Dataphor</c> on <c>localhost</c> through a listener - and say why in <c>note</c>.</item>
 	/// <item><c>register</c> (optional): libraries registered in the script's server before it, each one of
 	/// <see cref="CoverageScripts.Libraries"/>.</item>
 	/// <item><c>note</c> (optional): free text for the next reader.</item>
@@ -225,6 +232,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (entry.Batches == false)
 					Problem("\"batches\" is false; leave the field off for the default (the script runs nested in one statement).");
 
+				if (entry.LinkedServer == false)
+					Problem("\"linkedServer\" is false; leave the field off for the default (no second server is started).");
+
 				if (entry.Register != null)
 					foreach (string library in entry.Register)
 						if (library == null || !libraries.Contains(library))
@@ -245,6 +255,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				problem("\"preamble\" is not allowed on a fragment entry; it is not run.");
 			if (entry.Batches.HasValue)
 				problem("\"batches\" is not allowed on a fragment entry; it is not run.");
+			if (entry.LinkedServer.HasValue)
+				problem("\"linkedServer\" is not allowed on a fragment entry; it is not run.");
 			if (entry.Register != null)
 				problem("\"register\" is not allowed on a fragment entry; it is not run.");
 

@@ -13,6 +13,8 @@ using System.Threading;
 
 using NUnit.Framework;
 
+using Alphora.Dataphor.DAE.Contracts;
+
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
@@ -21,6 +23,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <see cref="CoverageManifest"/>. Every server is a copy of one template instance, built once per run, so that a script's
 	/// result does not depend on which scripts ran before it or on whether it runs alone.
 	/// </summary>
+	// Not [Parallelizable]: each case starts a server, and two engines in one process share the engine's static state (see
+	// the note on TestServerInstance). A linkedServer case also sets DataphorServiceUtility.ListenerPortNumber, which is
+	// process-wide, for the length of its own script - which is safe only because one case runs at a time.
 	[TestFixture]
 	public class CoverageScripts
 	{
@@ -43,6 +48,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		public const string ScriptsLibrary = "TestFramework.Coverage.Scripts";
 		public const string ScriptExtension = ".d4";
+
+		/// <summary>
+		/// The instance name a linkedServer entry's child server is started on: <see cref="Engine.DefaultServerName"/>, not
+		/// a name of this suite's choosing, because that is what a server link with no InstanceName tag resolves to.
+		/// </summary>
+		private const string LinkedServerInstanceName = Engine.DefaultServerName;
 
 		// The spike's size. A stack overflow kills the whole test host, and whether 1 MB suffices for every script is unmeasured.
 		private const int WorkerStackSize = 16 * 1024 * 1024;
@@ -261,8 +272,38 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Evaluate(coverageCase.Entry, Execute(coverageCase.Entry));
 		}
 
-		/// <summary>Runs the script on a server copied from the template; returns null if it succeeded, else its error text.</summary>
+		/// <summary>Runs the script, with the second Dataphor server its entry asks for; returns null if it succeeded, else its error text.</summary>
 		private string Execute(CoverageEntry entry)
+		{
+			if (entry.LinkedServer != true)
+				return RunScript(entry);
+
+			// A child process, not a second server in this one: two engines in one process share the object-id counter,
+			// and each script's own server resets it as it starts (bug-object-id-counter-is-process-wide), so an
+			// in-process linked server would be stomped by every later script. The cost falls on this one case.
+			using (OutOfProcessInstance linkedServer = new OutOfProcessInstance(LinkedServerInstanceName, OutOfProcessInstance.ServerDefaultConnectionIdleTime, true))
+			{
+				// Process-wide, which is why it is restored below rather than left for the next case to find: nothing else
+				// in the suite resolves through a listener without naming its port, so a leak would break the first case
+				// that ever did, far from here. One case at a time: this fixture is not Parallelizable and Execute runs
+				// one script per call.
+				int listenerPortNumber = DataphorServiceUtility.ListenerPortNumber;
+				DataphorServiceUtility.ListenerPortNumber = linkedServer.ListenerPortNumber;
+				try
+				{
+					return RunScript(entry);
+				}
+				finally
+				{
+					// Before the using disposes the child, and on every path out of the script - including the one where
+					// the script timed out and its server was abandoned, whose worker thread may still be running.
+					DataphorServiceUtility.ListenerPortNumber = listenerPortNumber;
+				}
+			}
+		}
+
+		/// <summary>Runs the script on a server copied from the template; returns null if it succeeded, else its error text.</summary>
+		private string RunScript(CoverageEntry entry)
 		{
 			TestServerInstance instance = new TestServerInstance(entry.Script, _template);
 			bool abandoned = false;

@@ -19,6 +19,33 @@ namespace Alphora.Dataphor.DAE.Contracts
 	{
 		public const int DefaultListenerPortNumber = 8060;
 
+		/// <summary>The listener port a client looks on when it is given no override; <see cref="DefaultListenerPortNumber"/> unless a host application sets it.</summary>
+		/// <remarks>
+		/// <para>
+		/// Process-wide and read at every connection, not a per-connection setting: a caller that wants one connection to
+		/// look elsewhere passes an override port instead (ClientServer's overrideListenerPortNumber, the server link tag
+		/// OverrideListenerPortNumber). Set it from the host application's own start-up code before anything connects, as
+		/// with the hooks on this class.
+		/// </para>
+		/// <para>
+		/// The client half of the protocol only, deliberately. A server's own listener port is already settable per
+		/// instance through ServerConfiguration.OverrideListenerPortNumber, which is the configured route and the one a
+		/// host takes, and ListenerServiceHost resolves a concrete port from it before it calls
+		/// <see cref="BuildListenerURI"/> - so this member reaches no host and there is nothing to keep in step.
+		/// </para>
+		/// <para>
+		/// Not put back by <see cref="RevertHooksToDefault"/>, which exists to restore the binding and endpoint hooks and
+		/// clears the binding they built: a port is not a hook, and folding it in would make a call about bindings change
+		/// where clients look for a listener. A caller that sets this restores it itself.
+		/// </para>
+		/// <para>
+		/// The default is unchanged, so a deployment that sets nothing behaves exactly as before. tests/DAE.Server.Tests
+		/// sets it for the one case that needs a client to find a listener on a dynamically chosen port - the second
+		/// Dataphor server the ServerLink coverage script links to.
+		/// </para>
+		/// </remarks>
+		public static int ListenerPortNumber { get; set; } = DefaultListenerPortNumber;
+
 		private static object _syncHandle = new Object();
 
 		private static Binding _binding;
@@ -55,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			#if USENAMEDPIPES
 			return String.Format("{0}://{1}/listener/service", GetScheme(), hostName);
 			#else
-			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(), hostName, overridePortNumber == 0 ? DefaultListenerPortNumber : overridePortNumber); 
+			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(), hostName, overridePortNumber == 0 ? ListenerPortNumber : overridePortNumber);
 			#endif
 		} 		
 	

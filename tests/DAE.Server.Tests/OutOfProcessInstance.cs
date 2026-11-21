@@ -29,6 +29,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// can fail: a crashed test run never reaches <see cref="Stop"/>, and a child wedged before it reads its input
 	/// would not notice the pipe close.
 	/// </para>
+	/// <para>
+	/// A child may also serve a listener - the service that answers "where is instance X" - on a second reserved port,
+	/// which is what a case needs when the client cannot be given a port and has to discover one. The only such client
+	/// is a Dataphor server following a server link, and the only such case is the ServerLink coverage script; see
+	/// <see cref="CoverageScripts"/>. A listening child's host name is the machine's, not the loopback literal, for the
+	/// reason given on <see cref="HostName"/>.
+	/// </para>
 	/// </remarks>
 	internal sealed class OutOfProcessInstance : IDisposable
 	{
@@ -70,8 +77,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Passed as the idle threshold to leave the child server's own default - the product's five minutes - in place.</summary>
 		public const int ServerDefaultConnectionIdleTime = 0;
 
-		/// <summary>A child server reclaiming unpinged connections after the product's five minutes.</summary>
+		/// <summary>A child server reclaiming unpinged connections after the product's five minutes, serving no listener.</summary>
 		public OutOfProcessInstance(string instanceName) : this(instanceName, ServerDefaultConnectionIdleTime) { }
+
+		/// <summary>A child server with a connection idle threshold of its own, serving no listener.</summary>
+		public OutOfProcessInstance(string instanceName, int connectionIdleTimeInSeconds) : this(instanceName, connectionIdleTimeInSeconds, false) { }
 
 		/// <param name="connectionIdleTimeInSeconds">
 		/// How long the child server lets a connection go unpinged before it reclaims it, or
@@ -80,16 +90,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// against this server: the threshold has to exceed the clients' ping interval by enough to survive a ping that is
 		/// late or lost, or a live client is reclaimed between two of its pings.
 		/// </param>
-		public OutOfProcessInstance(string instanceName, int connectionIdleTimeInSeconds)
+		/// <param name="shouldListen">
+		/// Whether the child also serves a listener, on a second reserved port that <see cref="ListenerPortNumber"/>
+		/// gives. Only for a case whose client cannot be told a port and must discover one; it also changes the host name
+		/// the child listens on, for the reason given on <see cref="HostName"/>.
+		/// </param>
+		public OutOfProcessInstance(string instanceName, int connectionIdleTimeInSeconds, bool shouldListen)
 		{
 			_connectionIdleTimeInSeconds = connectionIdleTimeInSeconds;
 			_instanceName = instanceName;
+			_shouldListen = shouldListen;
 			_directory = TestEnvironment.NewDirectory(instanceName);
 			try
 			{
-				// ShouldListen false: one listener per machine serves every instance on it, so a test instance has no
-				// business taking that port. The child therefore opens exactly one port, the one reserved here.
-				_portNumber = HostedInstance.ReserveLoopbackPorts(1)[0];
+				// One listener per machine serves every instance on it, so a test instance normally has no business
+				// taking that port and opens exactly one port, the one reserved here. A listening child opens a second,
+				// also reserved, so it never takes the product's own 8060 either.
+				// NOTE: the ports are probed on the loopback literal while a listening child binds the wildcard, so a
+				// port held by a socket bound to one specific non-loopback address would probe free and then fail the
+				// child's bind. Improbable in the ephemeral range, and loud when it happens - the child fails to start
+				// and its standard error is in the diagnostic - so the probe is left as the rest of the suite's.
+				int[] ports = HostedInstance.ReserveLoopbackPorts(shouldListen ? 2 : 1);
+				_portNumber = ports[0];
+				_listenerPortNumber = shouldListen ? ports[1] : 0;
 
 				// No libraries named: System is built in, and the server creates General - in this copy, never in the
 				// runtime layout or the repository. This is also what makes the library directory the server requires.
@@ -97,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				_instanceDirectory = Path.Combine(_directory, InstancesFolderName);
 				Directory.CreateDirectory(_instanceDirectory);
-				WriteInstanceList(HostedInstance.Configuration(_instanceName, _directory, _portNumber, false, 0));
+				WriteInstanceList(HostedInstance.Configuration(_instanceName, _directory, _portNumber, shouldListen, _listenerPortNumber));
 
 				Start();
 			}
@@ -118,12 +141,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private readonly string _instanceName;
 		public string InstanceName => _instanceName;
 
-		/// <summary>The host name the child listens on and a client connects to; the loopback literal, so no other machine can reach it.</summary>
-		public string HostName => HostedInstance.LoopbackAddress;
+		private readonly bool _shouldListen;
+
+		/// <summary>The host name the child listens on and a client connects to.</summary>
+		/// <remarks>
+		/// The loopback literal, so that no port this suite opens is reachable from another machine - except for a
+		/// listening child, which listens on the machine's own name. That is the suite's one deliberate exception to the
+		/// convention, and it is forced: a client that finds this server through its listener connects by whatever name
+		/// it was configured with, which for the ServerLink coverage script is "localhost" and is not ours to change. A
+		/// name makes CoreWCF open both 0.0.0.0 and [::], while a literal binds that one address and leaves a client
+		/// whose name resolves to the other family paying about two seconds per channel open before the stack falls back
+		/// (measured; recorded under "CoreWCF hosting" in docs/modernization-plan.md). That script opens on the order of
+		/// thirty remote sessions, so two seconds each would take it past its harness timeout. The ports are two
+		/// dynamically chosen high ones, held for the few seconds the case runs.
+		/// </remarks>
+		public string HostName => _shouldListen ? Environment.MachineName : HostedInstance.LoopbackAddress;
 
 		private readonly int _portNumber;
 		/// <summary>The child's port; never 8060 or 8061, and never a port a real instance could own.</summary>
 		public int PortNumber => _portNumber;
+
+		private readonly int _listenerPortNumber;
+		/// <summary>The port the child's listener serves on, or 0 when it serves none; never the product's own 8060.</summary>
+		public int ListenerPortNumber => _listenerPortNumber;
 
 		private Process _process;
 
@@ -230,9 +270,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>Checks that the child is serving the configuration this class wrote, which is what its ready line says.</summary>
+		/// <remarks>
+		/// The listener setting is part of that check, and for a listening child it is the whole point of it: a server
+		/// whose listener port was already held starts anyway and reports it through IsListening, by design, so a case
+		/// that needs the listener has to fail here rather than later on a client that cannot find the instance.
+		/// </remarks>
 		private void CheckReadyLine()
 		{
-			string expected = String.Format("{0} {1} {2} listening=false", ReadyPrefix, _instanceName, _portNumber);
+			string expected = String.Format("{0} {1} {2} listening={3}", ReadyPrefix, _instanceName, _portNumber, _shouldListen ? "true" : "false");
 			if (_readyLine != expected)
 				throw new InvalidOperationException
 				(
