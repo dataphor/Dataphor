@@ -1724,7 +1724,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!(objectValue is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
-			serverLink.Users.Add(new Schema.ServerLinkUser(userID, serverLink, (string)arguments[2], Schema.SecurityUtility.EncryptPassword((string)arguments[3])));
+			program.CatalogDeviceSession.CreateServerLinkUser(serverLink, new Schema.ServerLinkUser(userID, serverLink, (string)arguments[2], Schema.SecurityUtility.EncryptPassword((string)arguments[3])));
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}
@@ -1741,7 +1741,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!(objectValue is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
-			serverLink.Users.Add(new Schema.ServerLinkUser(userID, serverLink, (string)arguments[2], (string)arguments[3]));
+			program.CatalogDeviceSession.CreateServerLinkUser(serverLink, new Schema.ServerLinkUser(userID, serverLink, (string)arguments[2], (string)arguments[3]));
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}
@@ -1758,7 +1758,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!(objectValue is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
-			serverLink.Users[userID].ServerLinkUserID = (string)arguments[2];
+			program.CatalogDeviceSession.SetServerLinkUserID(serverLink, userID, (string)arguments[2]);
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}
@@ -1775,7 +1775,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!(objectValue is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
-			serverLink.Users[userID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword((string)arguments[2]);
+			program.CatalogDeviceSession.SetServerLinkUserPassword(serverLink, userID, Schema.SecurityUtility.EncryptPassword((string)arguments[2]));
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}
@@ -1791,9 +1791,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
 			Schema.User user = program.ServerProcess.ServerSession.User;
-			if (!String.Equals((string)arguments[1], Schema.SecurityUtility.DecryptPassword(serverLink.Users[user.ID].ServerLinkPassword), StringComparison.OrdinalIgnoreCase))
+			Schema.ServerLinkUser serverLinkUser = program.CatalogDeviceSession.ResolveServerLinkUser(serverLink, user.ID);
+			if (!String.Equals((string)arguments[1], Schema.SecurityUtility.DecryptPassword(serverLinkUser.ServerLinkPassword), StringComparison.OrdinalIgnoreCase))
 				throw new ServerException(ServerException.Codes.InvalidPassword);
-			serverLink.Users[user.ID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword((string)arguments[2]);
+			program.CatalogDeviceSession.SetServerLinkUserPassword(serverLink, user.ID, Schema.SecurityUtility.EncryptPassword((string)arguments[2]));
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}
@@ -1819,10 +1820,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// than this process's list, so an idle session holding a connection could block a password rotation outright. Revisit if a
 			// deployment ever needs a link user to be undroppable while a connection made with it is held.
 
-			if (!serverLink.Users.ContainsKey(userID))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.ServerLinkUserNotFound, userID);
-
-			serverLink.Users.Remove(userID);
+			// DropServerLinkUser raises ServerLinkUserNotFound (113151) for a user id with no mapping, as this node did itself before.
+			program.CatalogDeviceSession.DropServerLinkUser(serverLink, userID);
 			program.CatalogDeviceSession.UpdateCatalogObject(serverLink);
 			return null;
 		}

@@ -1403,6 +1403,116 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
+		protected class CreateServerLinkUserInstruction : DDLInstruction
+		{
+			public CreateServerLinkUserInstruction(Schema.ServerLink serverLink, Schema.ServerLinkUser serverLinkUser)
+			{
+				_serverLink = serverLink;
+				_serverLinkUser = serverLinkUser;
+			}
+
+			private Schema.ServerLink _serverLink;
+			private Schema.ServerLinkUser _serverLinkUser;
+
+			public override void Undo(CatalogDeviceSession session)
+			{
+				_serverLink.Users.Remove(_serverLinkUser.UserID);
+			}
+		}
+
+		protected class DropServerLinkUserInstruction : DDLInstruction
+		{
+			public DropServerLinkUserInstruction(Schema.ServerLink serverLink, Schema.ServerLinkUser serverLinkUser)
+			{
+				_serverLink = serverLink;
+				_serverLinkUser = serverLinkUser;
+			}
+
+			private Schema.ServerLink _serverLink;
+			private Schema.ServerLinkUser _serverLinkUser;
+
+			/// <remarks>The instance that was removed goes back, not a copy of it: it keeps its user id and its back-reference to the link, and instructions recorded earlier for the same mapping undo onto that same object.</remarks>
+			public override void Undo(CatalogDeviceSession session)
+			{
+				_serverLink.Users.Add(_serverLinkUser);
+			}
+		}
+
+		protected class SetServerLinkUserIDInstruction : DDLInstruction
+		{
+			public SetServerLinkUserIDInstruction(Schema.ServerLinkUser serverLinkUser, string originalServerLinkUserID)
+			{
+				_serverLinkUser = serverLinkUser;
+				_originalServerLinkUserID = originalServerLinkUserID;
+			}
+
+			private Schema.ServerLinkUser _serverLinkUser;
+			private string _originalServerLinkUserID;
+
+			public override void Undo(CatalogDeviceSession session)
+			{
+				_serverLinkUser.ServerLinkUserID = _originalServerLinkUserID;
+			}
+		}
+
+		protected class SetServerLinkUserPasswordInstruction : DDLInstruction
+		{
+			public SetServerLinkUserPasswordInstruction(Schema.ServerLinkUser serverLinkUser, string originalServerLinkPassword)
+			{
+				_serverLinkUser = serverLinkUser;
+				_originalServerLinkPassword = originalServerLinkPassword;
+			}
+
+			private Schema.ServerLinkUser _serverLinkUser;
+			private string _originalServerLinkPassword;
+
+			public override void Undo(CatalogDeviceSession session)
+			{
+				_serverLinkUser.ServerLinkPassword = _originalServerLinkPassword;
+			}
+		}
+
+		protected class ApplyServerLinkMetaDataInstruction : DDLInstruction
+		{
+			/// <summary>Takes the link's connection settings as they stand, so construct it before the change it is to undo.</summary>
+			public ApplyServerLinkMetaDataInstruction(Schema.ServerLink serverLink)
+			{
+				_serverLink = serverLink;
+				_originalHostName = serverLink.HostName;
+				_originalInstanceName = serverLink.InstanceName;
+				_originalOverridePortNumber = serverLink.OverridePortNumber;
+				_originalUseSecureConnection = serverLink.UseSecureConnection;
+				_originalOverrideListenerPortNumber = serverLink.OverrideListenerPortNumber;
+				_originalUseSecureListenerConnection = serverLink.UseSecureListenerConnection;
+				_originalUseSessionInfo = serverLink.UseSessionInfo;
+			}
+
+			private Schema.ServerLink _serverLink;
+			private string _originalHostName;
+			private string _originalInstanceName;
+			private int _originalOverridePortNumber;
+			private bool _originalUseSecureConnection;
+			private int _originalOverrideListenerPortNumber;
+			private bool _originalUseSecureListenerConnection;
+			private bool _originalUseSessionInfo;
+
+			/// <remarks>
+			/// Puts the recorded values back rather than recomputing them from the link's metadata. Instructions are undone in
+			/// reverse order of recording, so this runs before the AlterMetaDataInstruction that the same statement recorded
+			/// restores the metadata: a recomputation here would read the metadata the rolled-back statement left in place.
+			/// </remarks>
+			public override void Undo(CatalogDeviceSession session)
+			{
+				_serverLink.HostName = _originalHostName;
+				_serverLink.InstanceName = _originalInstanceName;
+				_serverLink.OverridePortNumber = _originalOverridePortNumber;
+				_serverLink.UseSecureConnection = _originalUseSecureConnection;
+				_serverLink.OverrideListenerPortNumber = _originalOverrideListenerPortNumber;
+				_serverLink.UseSecureListenerConnection = _originalUseSecureListenerConnection;
+				_serverLink.UseSessionInfo = _originalUseSessionInfo;
+			}
+		}
+
 		protected DDLInstructionLog _instructions = new DDLInstructionLog();
 		
 		#endif
@@ -3380,7 +3490,102 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		#endregion
-		
+
+		#region Server link
+
+		/// <summary>Returns the mapping that gives a local user its account on the linked server; raises ServerLinkUserNotFound if the user has none.</summary>
+		/// <remarks>ServerLinkUsers derives from Dictionary, so indexing it for an unmapped user id raises a bare KeyNotFoundException out of whichever D4 operator did so.</remarks>
+		public Schema.ServerLinkUser ResolveServerLinkUser(Schema.ServerLink serverLink, string userID)
+		{
+			Schema.ServerLinkUser serverLinkUser;
+			if (!serverLink.Users.TryGetValue(userID, out serverLinkUser))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ServerLinkUserNotFound, userID);
+
+			return serverLinkUser;
+		}
+
+		/// <summary>Adds a link user to a server link in the catalog cache, recording the addition so that a rollback removes it again.</summary>
+		/// <remarks>
+		/// <para>
+		/// The caller persists the link afterwards, with UpdateCatalogObject. That order is forced: the store holds the link's
+		/// own create script, which carries its link users, so the cache has to hold the new mapping before the store can be
+		/// given the text for it. A store write that then fails leaves the cache changed, which inside a transaction is exactly
+		/// what the instruction recorded here undoes; outside one, nothing records anything for any of these changes.
+		/// </para>
+		/// <para>
+		/// The catalog's lock is not taken, here or in the rest of this region: UpdateCatalogObject makes a network call to the
+		/// other server (see the remarks there and on CloseRemoteSession), and a caller must not be holding that lock across it.
+		/// </para>
+		/// </remarks>
+		public void CreateServerLinkUser(Schema.ServerLink serverLink, Schema.ServerLinkUser serverLinkUser)
+		{
+			serverLink.Users.Add(serverLinkUser);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				_instructions.Add(new CreateServerLinkUserInstruction(serverLink, serverLinkUser));
+			#endif
+		}
+
+		/// <summary>Removes a local user's mapping from a server link in the catalog cache, recording the removal so that a rollback puts it back.</summary>
+		public void DropServerLinkUser(Schema.ServerLink serverLink, string userID)
+		{
+			Schema.ServerLinkUser serverLinkUser = ResolveServerLinkUser(serverLink, userID);
+			serverLink.Users.Remove(userID);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				_instructions.Add(new DropServerLinkUserInstruction(serverLink, serverLinkUser));
+			#endif
+		}
+
+		/// <summary>Changes the account a local user connects to the linked server with, recording the account it replaces so that a rollback restores it.</summary>
+		public void SetServerLinkUserID(Schema.ServerLink serverLink, string userID, string serverLinkUserID)
+		{
+			Schema.ServerLinkUser serverLinkUser = ResolveServerLinkUser(serverLink, userID);
+			string originalServerLinkUserID = serverLinkUser.ServerLinkUserID;
+			serverLinkUser.ServerLinkUserID = serverLinkUserID;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				_instructions.Add(new SetServerLinkUserIDInstruction(serverLinkUser, originalServerLinkUserID));
+			#endif
+		}
+
+		/// <summary>Changes the encrypted password a local user connects to the linked server with, recording the password it replaces so that a rollback restores it.</summary>
+		public void SetServerLinkUserPassword(Schema.ServerLink serverLink, string userID, string serverLinkPassword)
+		{
+			Schema.ServerLinkUser serverLinkUser = ResolveServerLinkUser(serverLink, userID);
+			string originalServerLinkPassword = serverLinkUser.ServerLinkPassword;
+			serverLinkUser.ServerLinkPassword = serverLinkPassword;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				_instructions.Add(new SetServerLinkUserPasswordInstruction(serverLinkUser, originalServerLinkPassword));
+			#endif
+		}
+
+		/// <summary>Recomputes a server link's connection settings from its metadata, recording the settings it replaces so that a rollback restores them.</summary>
+		/// <remarks>
+		/// Recorded separately from the metadata itself, which AlterMetaData records: the settings are what a connection is made
+		/// from and what System.ServerLinks reports, and the metadata instruction's undo only puts the metadata object back.
+		/// </remarks>
+		public void ApplyServerLinkMetaData(Schema.ServerLink serverLink)
+		{
+			#if LOGDDLINSTRUCTIONS
+			// Constructed before the change, because it records the settings as they stand.
+			ApplyServerLinkMetaDataInstruction instruction = null;
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				instruction = new ApplyServerLinkMetaDataInstruction(serverLink);
+			#endif
+
+			serverLink.ResetServerLink();
+			serverLink.ApplyMetaData();
+
+			#if LOGDDLINSTRUCTIONS
+			if (instruction != null)
+				_instructions.Add(instruction);
+			#endif
+		}
+
+		#endregion
+
 		#region Device scalar type
 		
 		private void AttachDeviceScalarType(Schema.DeviceScalarType deviceScalarType)

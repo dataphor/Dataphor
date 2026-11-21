@@ -2654,8 +2654,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.ServerLink server = (Schema.ServerLink)FindObject(program.Plan, _alterServerStatement.ServerName);
 			
 			program.CatalogDeviceSession.AlterMetaData(server, _alterServerStatement.AlterMetaData);
-			server.ResetServerLink();
-			server.ApplyMetaData();
+			// Recomputes the link's connection settings from the altered metadata, and records the settings it replaces: the metadata
+			// instruction AlterMetaData logs restores only the metadata, so a rollback would otherwise leave the settings altered.
+			program.CatalogDeviceSession.ApplyServerLinkMetaData(server);
 			// Closes this process's connection to the link, so the next use of it connects with the new settings; see UpdateCatalogObject.
 			// After the metadata is applied, so a failed alter closes nothing.
 			program.CatalogDeviceSession.UpdateCatalogObject(server);

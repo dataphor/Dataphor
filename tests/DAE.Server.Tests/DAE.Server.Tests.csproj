@@ -45,6 +45,7 @@
     <Compile Include="ProtocolClient.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
     <Compile Include="ServerLinkConnectionTest.cs" />
+    <Compile Include="ServerLinkUserRollbackTest.cs" />
     <Compile Include="ServiceUtilityTest.cs" />
     <Compile Include="StoreContractTests.cs" />
     <Compile Include="StoreRebuildWorkflowTest.cs" />

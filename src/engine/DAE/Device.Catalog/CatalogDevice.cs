@@ -428,6 +428,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		// NOTE: enumerates each link's Users, which the link user operators change without a lock (CatalogDeviceSession's
+		// Server link region); if System.ServerLinkUsers reads ever fail under link-user churn, copy the dictionary here and
+		// lock its writers, as the same question for System.RemoteSessions below is parked.
 		private void PopulateServerLinkUsers(Program program, NativeTable nativeTable, Row row)
 		{
 			foreach (Schema.Object objectValue in program.Catalog)
