@@ -19,6 +19,8 @@ Q11 is answered: pin the newest WiX major version that does not carry the "Open 
 
 Instance data under `%ProgramData%\Alphora\Dataphor` is never removed by upgrade or uninstall, and a 3.x installation is left alone side by side.
 
+**Two facts from `host-service-registration` (2026-11-20), for `installer-msi` and `installer-service-and-firewall`.** The old installer wrote three files next to the binaries - `DAEService.InstallLog`, `DAEService.InstallState` and `InstallUtil.InstallLog` - and nothing writes or reads them any more; `Setup/Files.wxs` still carries a harvested row for the first of them (`id_Bin_DAEService_InstallLog445977006`), so the new installer must not carry any of the three forward. And registering the service no longer needs an installer class or `InstallUtil`: `ServiceUtility.Install(instanceName)` registers the service exactly as 3.1 did, and `ServiceUtility.Install(instanceName, imagePath)` registers a given binary and arguments, which is the overload an installer wants (`src/hosts/Host/ServiceUtility.cs`, assembly `Alphora.Dataphor.DAE.Host`). Whether the MSI calls that or declares a `ServiceInstall` element of its own is `installer-service-and-firewall`'s choice; either way the service name, display name, description, start type, account and command line are recorded there and in `docs/migration-notes.md`.
+
 ## Cutting rules
 
 Re-read the WS9 section, the runtime layout and the host as built; one ticket per work item; `prereq:` only on slugs present on the board or in `tickets/.pruned-tickets.jsonl`.
