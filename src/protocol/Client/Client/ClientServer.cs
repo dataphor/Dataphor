@@ -365,9 +365,15 @@ namespace Alphora.Dataphor.DAE.Client
 				result.AsyncWaitHandle.WaitOne();
 				channel.EndStart(result);
 			}
+			// FaultException<DataphorFault> derives from CommunicationException, so the typed catch must stay first.
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 
@@ -383,6 +389,11 @@ namespace Alphora.Dataphor.DAE.Client
 			catch (FaultException<DataphorFault> fault)
 			{
 				throw DataphorFaultUtility.FaultToException(fault.Detail);
+			}
+			catch (CommunicationException ce)
+			{
+				ReportCommunicationError();
+				throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 			}
 		}
 
@@ -400,6 +411,11 @@ namespace Alphora.Dataphor.DAE.Client
 				catch (FaultException<DataphorFault> fault)
 				{
 					throw DataphorFaultUtility.FaultToException(fault.Detail);
+				}
+				catch (CommunicationException ce)
+				{
+					ReportCommunicationError();
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, ce);
 				}
 			}
 		}

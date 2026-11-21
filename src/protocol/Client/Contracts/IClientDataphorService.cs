@@ -35,6 +35,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Starts the server.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
 		IAsyncResult BeginStart(AsyncCallback ACallback, object AState);
 		void EndStart(IAsyncResult AResult);
 
@@ -42,6 +43,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Stops the server.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
 		IAsyncResult BeginStop(AsyncCallback ACallback, object AState);
 		void EndStop(IAsyncResult AResult);
 
@@ -49,6 +51,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Gets the current state of the server.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
 		IAsyncResult BeginGetState(AsyncCallback ACallback, object AState);
 		ServerState EndGetState(IAsyncResult AResult);
 		

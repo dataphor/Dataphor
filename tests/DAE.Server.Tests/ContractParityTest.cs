@@ -77,20 +77,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			public Type[] ClientOnly { get; private set; }
 		}
 
-		// Fault declarations that differ today. The arguments are: server interface name, operation, faults only the server
-		// declares, faults only the client declares.
-		//
-		// debt-client-contract-missing-fault-declarations: the server declares [FaultContract(typeof(DataphorFault))] on
-		// Start, Stop and GetState and the client declares no fault on them, while ClientServer.Start, Stop and State each
-		// catch FaultException<DataphorFault> - a catch that cannot fire, because without the declaration WCF hands the
-		// client a bare FaultException. Fixing it means editing a compatibility surface, which that ticket owns; this test
-		// only records the difference.
-		private static readonly KnownFaultDifference[] KnownFaultDifferences =
-		{
-			new KnownFaultDifference("IDataphorService", "Start", new[] { typeof(DataphorFault) }, Type.EmptyTypes),
-			new KnownFaultDifference("IDataphorService", "Stop", new[] { typeof(DataphorFault) }, Type.EmptyTypes),
-			new KnownFaultDifference("IDataphorService", "GetState", new[] { typeof(DataphorFault) }, Type.EmptyTypes),
-		};
+		// Fault declarations that differ today: none. The six contracts declare the same faults on every operation, and
+		// an entry here is how a difference that cannot be fixed at once is recorded - server interface name, operation,
+		// faults only the server declares, faults only the client declares - so that this test stays green on what is
+		// known and fails on anything else.
+		private static readonly KnownFaultDifference[] KnownFaultDifferences = { };
 
 		// The namespace WCF gives a contract that does not name one, so that an omitted Namespace is compared as the value
 		// it would actually put in the action URI rather than as null.

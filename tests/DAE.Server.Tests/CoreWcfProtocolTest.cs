@@ -478,6 +478,106 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// An engine error inside one of the three administrative operations - Start, Stop and GetState, the ones whose client
+		/// surface is <see cref="ClientServer"/> itself rather than a session - reaches the caller as the server's own
+		/// <see cref="DataphorException"/> with its error code and its cause, as it does for the other 85 operations. That
+		/// only happens if the client contract declares DataphorFault on the operation: a WCF client deserializes a fault
+		/// into FaultException&lt;TDetail&gt; only for a declared detail type, so without the declaration ClientServer's catch
+		/// of the typed fault cannot fire, the bare FaultException falls to the communication-failure catch below it, and the
+		/// caller gets ServerException.Codes.CommunicationFailure - no engine type to branch on, no code to log, and not the
+		/// one sentence that says what is actually wrong (debt-client-contract-missing-fault-declarations).
+		/// ContractParityTest holds the two declarations in step but cannot see what the wire does with them, which is why
+		/// this case is hosted.
+		/// </summary>
+		/// <remarks>
+		/// A host of its own, because the case stops the engine; a bare ClientServer rather than a ProtocolClient, because
+		/// LocalServer would start a client-side engine as well and these operations are on ClientServer. Stop and GetState
+		/// carry no logic of their own beyond the declaration this case exercises.
+		/// </remarks>
+		[Test]
+		public void TestAnAdministrativeErrorArrivesAsTypedFault()
+		{
+			string instanceName = "CoreWcfAdministrativeFault";
+			string directory = TestEnvironment.NewDirectory(instanceName);
+			try
+			{
+				TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
+
+				int portNumber = ReserveLoopbackPorts(1)[0];
+				DataphorServiceHost host = NewHost();
+				WithTheObjectIDCounterRestored
+				(
+					() =>
+					{
+						// ShouldListen false: nothing here involves the listener.
+						host.Start(Configuration(instanceName, directory, portNumber, false, 0));
+						try
+						{
+							// The constructor opens the channel.
+							ClientServer clientServer = new ClientServer(LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+							try
+							{
+								// Stopping the engine over the wire releases the catalog store's file handles, so that the store can be
+								// ruined and the next Start fails in the store with an error of the engine's own.
+								clientServer.Stop();
+								RuinTheCatalogStore(directory);
+
+								Exception error = Assert.Catch(() => clientServer.Start());
+
+								Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.FaultException>(), "An untyped fault escaped to the caller: the operation declares no fault detail type on the client contract.");
+								Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.CommunicationException>(), "A bare communication error escaped to the caller.");
+								Assert.That(error, Is.InstanceOf<DataphorException>(), "The server's own exception did not survive. Actual: " + error.GetType().FullName + ": " + error.Message);
+								// The code and the cause, not only the type: the fault's reason text carries the server's message either
+								// way, and an undeclared fault is a bare FaultException that the catch below the typed one turns into
+								// ServerException.Codes.CommunicationFailure - a DataphorException too, so a type-only assertion would
+								// pass against exactly the defect this case is for.
+								Assert.That
+								(
+									((DataphorException)error).Code,
+									Is.EqualTo((int)Alphora.Dataphor.DAE.Connection.ConnectionException.Codes.SQLException),
+									String.Format
+									(
+										"The store's error code did not survive; {0} (CommunicationFailure) is the shape an unrecognised fault takes. Actual: {1}: {2}",
+										(int)ServerException.Codes.CommunicationFailure,
+										error.GetType().FullName,
+										error.Message
+									)
+								);
+								Assert.That(error.InnerException, Is.Not.Null, "The underlying cause was lost; it is the sentence that says what is wrong with the instance.");
+							}
+							finally
+							{
+								clientServer.Close();
+							}
+						}
+						finally
+						{
+							host.Stop();
+						}
+					}
+				);
+			}
+			finally
+			{
+				TestEnvironment.TryDeleteDirectory(directory);
+			}
+		}
+
+		/// <summary>Overwrites the instance's catalog store with text, so that opening it fails in the store.</summary>
+		/// <remarks>
+		/// Every file whose name starts with the store's own (the SQLite database and its write-ahead log and shared-memory
+		/// files), wherever under the instance directory the store put them. Deleting them instead would not do: a missing
+		/// SQLite database is created empty and the server would rebuild its catalog and start.
+		/// </remarks>
+		private static void RuinTheCatalogStore(string directory)
+		{
+			string[] files = Directory.GetFiles(directory, "DAECatalog*", SearchOption.AllDirectories);
+			Assert.That(files, Is.Not.Empty, "No catalog store files were found to ruin, so the case would prove nothing.");
+			foreach (string file in files)
+				File.WriteAllText(file, "This is not a database.");
+		}
+
+		/// <summary>
 		/// The native CLI answers at its own address, which is a path *below* the main service's on the same port
 		/// (.../&lt;instance&gt;/service/native under .../&lt;instance&gt;/service), and the main service still answers on
 		/// that port afterwards. Two endpoints on one port, one nested inside the other, is what the CoreWCF proof could
