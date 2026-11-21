@@ -81,6 +81,8 @@ When running as a Microsoft Windows Service, the Dataphor Server can be started 
 
 The Dataphor Service Configuration Utility is a .NET application for configuring and maintaining the Dataphor Service instance on a particular machine. It provides interfaces to stop and start the Dataphor service as well as change configuration options for the service.
 
+An instance's own settings — the port it serves on, where it keeps its catalog, which folders it searches for libraries — are held in the computer's list of Dataphor Server instances, and are described under [Instance Configuration](dataphor-service.md#instance-configuration).
+
 ## Deploying a Dataphor Application
 
 ecause the Dataphor Server is essentially "middleware", it can be deployed in a variety of different scenarios. Conceptually, a Dataphor deployment consists of the following roles:

@@ -35,6 +35,10 @@ namespace Alphora.Dataphor.DAE.Server
 			set { _portNumber = value; }
 		}
 		
+		// NOTE: the [DefaultValue] attributes on this property and the three below decide what a saved instance list
+		// contains - BOP omits a property whose value equals its default - and the user guide's instance-configuration
+		// section documents that. Adding or removing one changes the file an operator sees, so amend
+		// docs/users-guide/dataphor-service.md in the same change.
 		private bool _requireSecureConnection;
 		/// <summary>
 		/// Indicates whether or not the server will require all remote connections to use a secure channel.
