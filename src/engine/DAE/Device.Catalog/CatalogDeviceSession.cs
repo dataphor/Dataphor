@@ -1886,6 +1886,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Updates the given object in the catalog cache. If this is not a repository, also updates the object in the catalog store.</summary>
+		/// <remarks>A server link also loses the connection this process holds to it, so that the next use of the link connects with what the catalog now says.</remarks>
 		public void UpdateCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// If we are not deserializing
@@ -1901,6 +1902,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				// original author's "the active sessions would just continue to use the current settings" contemplated; revisit if a
 				// deployment ever needs such a change to take effect everywhere at once, which would need an operator for closing
 				// another session's remote connection (there is none).
+				// NOTE: the close makes a network call to the other server, so a caller must not be holding the catalog lock; none of
+				// the server-link callers is. That is also why a drop's close sits in DropServerNode rather than beside this one in
+				// DeleteCatalogObject: DropServerNode calls that under lock (program.Catalog). Revisit if a caller ever has to
+				// update a server link under that lock.
 				if (objectValue is Schema.ServerLink serverLink)
 					CloseRemoteSession(serverLink);
 			}
@@ -3295,7 +3300,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private readonly DeferredTeardowns<Schema.ServerLink> _deferredRemoteSessionCloses = new DeferredTeardowns<Schema.ServerLink>();
 		
-		/// <summary>Closes this process's connection to a server link that has just been dropped or altered, so the next use of that link connects afresh.</summary>
+		/// <summary>Closes this process's connection to a server link whose catalog entry has just changed - a drop, an alter, or a change to its link users - so the next use of that link connects afresh.</summary>
 		/// <remarks>
 		/// <para>
 		/// Deferred inside a transaction because this process's remote session may be a participant in it (ServerProcess
@@ -3305,7 +3310,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// </para>
 		/// <para>
 		/// This process's connection only. Another process that already holds one to the same link keeps it until that
-		/// process ends; see the entry in docs/migration-notes.md for what that means for an alter.
+		/// process ends; see the entry in docs/migration-notes.md for what that means for such a change.
 		/// </para>
 		/// </remarks>
 		public void CloseRemoteSession(Schema.ServerLink serverLink)

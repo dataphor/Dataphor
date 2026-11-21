@@ -2657,6 +2657,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			server.ResetServerLink();
 			server.ApplyMetaData();
 			// Closes this process's connection to the link, so the next use of it connects with the new settings; see UpdateCatalogObject.
+			// After the metadata is applied, so a failed alter closes nothing.
 			program.CatalogDeviceSession.UpdateCatalogObject(server);
 
 			return null;

@@ -1,4 +1,4 @@
-﻿# Migration notes: 3.1 → 4.0
+# Migration notes: 3.1 → 4.0
 
 A running list of every change that an existing application, a deployment or a custom C# extension can notice when moving from Dataphor 3.1 (.NET Framework) to 4.0 (.NET 10). It exists so that moving an application later is a checklist, not an investigation. It will be turned into a proper guide before release (`docs-migration-guide-custom-code` in the [plan](modernization-plan.md)).
 
