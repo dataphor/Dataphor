@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// AGENTS.md).
 	/// </remarks>
 	[TestFixture]
-	// Not [Parallelizable]: one case installs a client binding hook, which is a process-wide static field, so it changes
+	// Not [Parallelizable]: two cases install a client binding hook, which is a process-wide static field, so they change
 	// what every client built in this process would connect with.
 	public class ConnectionSecurityModeTest
 	{
@@ -36,6 +36,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private const string HostName = "localhost";
 		private const string InstanceName = "ConnectionSecurityMode";
+
+		/// <summary>
+		/// The hooks, and the binding memoized from them, start from the product's own whatever ran before this fixture:
+		/// they are process-wide, and another fixture's client has very likely already built the binding.
+		/// </summary>
+		[SetUp]
+		public void SetUp()
+		{
+			DataphorServiceUtility.RevertHooksToDefault();
+		}
 
 		/// <summary>
 		/// Puts the client hooks back whatever a case did with them, on the failure path too: they are process-wide, so a
@@ -62,6 +72,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				);
 			Assert.That(error, Is.InstanceOf<NotSupportedException>(), "Actual: " + error);
 			Assert.That(error.Message, Does.Contain("SecurityMode"), "The refusal does not name the setting that caused it. Actual: " + error.Message);
+			Assert.That(error.Message, Does.Not.Contain("ListenerSecurityMode"), "The refusal names the listener's setting rather than the connection's. Actual: " + error.Message);
 			Assert.That(error.Message, Does.Contain("BuildBindingCall"), "The refusal does not name the one route to a secured connection. Actual: " + error.Message);
 		}
 
@@ -103,9 +114,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestASiteSuppliedBindingSuppressesTheRefusal()
 		{
-			// The product's own binding is fetched before the hook is installed, for two reasons: it is what the hook hands
-			// back, and fetching it first leaves DataphorServiceUtility's memoized binding the product's own, so this case
-			// cannot change what a client built by a later fixture connects with.
+			// The product's own binding is what the hook hands back: this case is about where a binding came from, not about
+			// what is in it.
 			Binding productBinding = DataphorServiceUtility.GetBinding();
 			DataphorServiceUtility.BuildBindingCall = () => productBinding;
 			Assert.That(DataphorServiceUtility.HasCustomBinding, Is.True, "A replaced BuildBindingCall is still reported as the product's own binding.");
@@ -118,6 +128,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			DataphorServiceUtility.RevertHooksToDefault();
 			Assert.That(DataphorServiceUtility.HasCustomBinding, Is.False, "Reverting the hooks left the binding reported as a site's own.");
+		}
+
+		/// <summary>
+		/// Reverting the hooks has to discard the binding as well, because the client memoizes it on first use: a memo left
+		/// behind outlives the hook that built it, and every client built afterwards connects with the binding the caller
+		/// has just asked to be rid of.
+		/// </summary>
+		[Test]
+		public void TestRevertingTheHooksDiscardsTheMemoizedBinding()
+		{
+			Binding siteBinding = new CustomBinding();
+			DataphorServiceUtility.BuildBindingCall = () => siteBinding;
+			Assert.That(DataphorServiceUtility.GetBinding(), Is.SameAs(siteBinding), "A replaced BuildBindingCall did not reach the binding a client connects with.");
+
+			DataphorServiceUtility.RevertHooksToDefault();
+			Assert.That(DataphorServiceUtility.GetBinding(), Is.Not.SameAs(siteBinding), "Reverting the hooks left the site's own binding memoized, so a client built afterwards still connects with it.");
 		}
 
 		/// <summary>

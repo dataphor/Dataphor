@@ -74,9 +74,9 @@ namespace Alphora.Dataphor.DAE.Service
 
 		/// <summary>Puts both hooks back to the product's own, as DataphorServiceUtility.RevertHooksToDefault does for the client's.</summary>
 		/// <remarks>
-		/// The lock is the client's, where it also guards the memoized client binding. Nothing here reads the fields under
-		/// it, so a revert that races a host being started is as unordered as installing a hook in that window would be;
-		/// both are start-up-time operations.
+		/// The lock is this class's own, mirroring the client's, which also guards the binding the client memoizes.
+		/// Nothing here reads the fields under it, so a revert that races a host being started is as unordered as
+		/// installing a hook in that window would be; both are start-up-time operations.
 		/// </remarks>
 		public static void RevertHooksToDefault()
 		{

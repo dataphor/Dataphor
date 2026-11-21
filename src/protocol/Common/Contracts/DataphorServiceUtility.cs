@@ -89,6 +89,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 				BuildBindingCall = _defaultBuildBindingCall;
 				BuildEndpointIdentityCall = DefaultBuildEndpointIdentity;
 				ServiceEndpointHook = DefaultServiceEndpointHook;
+				// The memoized binding goes with the hook that built it. Left behind, a site's own binding outlives the
+				// revert and every client built afterwards still connects with it, which is the one thing a caller asking
+				// for the product's hooks back is asking not to happen.
+				_binding = null;
 			}
 		}
 
@@ -166,6 +170,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 			return binding;
 		}
 
+		// NOTE: the binding is memoized for the life of the process, so BuildBindingCall is read once - by the first
+		// connection built anywhere in it. A hook installed after that reaches no channel, and HasCustomBinding reports
+		// it as installed, so CheckSecurityMode stays quiet too: the connection is unsecured and says nothing. Install
+		// the hook from start-up code, as its own documentation says. The memo goes when WS11's
+		// security-transport-design makes the binding per-endpoint rather than one process-wide singleton.
 		public static Binding GetBinding()
 		{
 			if (_binding == null)
