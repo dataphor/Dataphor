@@ -87,6 +87,21 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(Evaluate("ServerLinks[LibraryName() + '.AlterRollbackLink'].HostName"), Is.EqualTo("localhost"));
 		}
 
+		/// <summary>
+		/// A statement that fails part-way leaves the link as it was. <c>ApplyMetaData</c> throws on a tag value it cannot
+		/// convert, after <c>ResetServerLink</c> has already cleared the settings, so the settings the statement replaces have
+		/// to be recorded before it runs; the implicit transaction every statement runs in then undoes the half-applied change.
+		/// </summary>
+		[Test]
+		public void TestFailedAlterKeepsTheOldSettings()
+		{
+			ExecuteScript("create server FailedAlterLink tags { HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" };");
+
+			Assert.Catch(() => ExecuteScript("alter server FailedAlterLink alter tags { alter OverridePortNumber = \"not a number\" };"));
+
+			Assert.That(Evaluate("ServerLinks[LibraryName() + '.FailedAlterLink'].OverridePortNumber"), Is.EqualTo(1));
+		}
+
 		/// <summary>A rollback undoes the changes of its own level only: the outer level's change is still there afterwards.</summary>
 		[Test]
 		public void TestNestedRollbackKeepsTheOuterChange()

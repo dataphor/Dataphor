@@ -3569,19 +3569,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void ApplyServerLinkMetaData(Schema.ServerLink serverLink)
 		{
 			#if LOGDDLINSTRUCTIONS
-			// Constructed before the change, because it records the settings as they stand.
-			ApplyServerLinkMetaDataInstruction instruction = null;
+			// Recorded before the change, as AlterMetaData records its own: the instruction takes the settings as they stand, and
+			// ApplyMetaData throws on a tag value it cannot convert (a port number that is not a number) after ResetServerLink has
+			// cleared them, so a statement that fails part-way is undone as well as one that is rolled back.
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				instruction = new ApplyServerLinkMetaDataInstruction(serverLink);
+				_instructions.Add(new ApplyServerLinkMetaDataInstruction(serverLink));
 			#endif
 
 			serverLink.ResetServerLink();
 			serverLink.ApplyMetaData();
-
-			#if LOGDDLINSTRUCTIONS
-			if (instruction != null)
-				_instructions.Add(instruction);
-			#endif
 		}
 
 		#endregion
