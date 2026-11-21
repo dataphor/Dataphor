@@ -278,27 +278,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			if (entry.LinkedServer != true)
 				return RunScript(entry);
 
-			// A child process, not a second server in this one: two engines in one process share the object-id counter,
-			// and each script's own server resets it as it starts (bug-object-id-counter-is-process-wide), so an
-			// in-process linked server would be stomped by every later script. The cost falls on this one case.
-			using (OutOfProcessInstance linkedServer = new OutOfProcessInstance(LinkedServerInstanceName, OutOfProcessInstance.ServerDefaultConnectionIdleTime, true))
+			// Process-wide, which is why it is restored at the end rather than left for the next case to find: nothing else
+			// in the suite resolves through a listener without naming its port, so a leak would break the first case that
+			// ever did, far from here. One case at a time: this fixture is not Parallelizable and Execute runs one script
+			// per call.
+			int listenerPortNumber = DataphorServiceUtility.ListenerPortNumber;
+			try
 			{
-				// Process-wide, which is why it is restored below rather than left for the next case to find: nothing else
-				// in the suite resolves through a listener without naming its port, so a leak would break the first case
-				// that ever did, far from here. One case at a time: this fixture is not Parallelizable and Execute runs
-				// one script per call.
-				int listenerPortNumber = DataphorServiceUtility.ListenerPortNumber;
-				DataphorServiceUtility.ListenerPortNumber = linkedServer.ListenerPortNumber;
-				try
+				// A child process, not a second server in this one: two engines in one process share the object-id counter,
+				// and each script's own server resets it as it starts (bug-object-id-counter-is-process-wide), so an
+				// in-process linked server would be stomped by every later script. The cost falls on this one case.
+				using (OutOfProcessInstance linkedServer = new OutOfProcessInstance(LinkedServerInstanceName, OutOfProcessInstance.ServerDefaultConnectionIdleTime, true))
 				{
+					DataphorServiceUtility.ListenerPortNumber = linkedServer.ListenerPortNumber;
 					return RunScript(entry);
 				}
-				finally
-				{
-					// Before the using disposes the child, and on every path out of the script - including the one where
-					// the script timed out and its server was abandoned, whose worker thread may still be running.
-					DataphorServiceUtility.ListenerPortNumber = listenerPortNumber;
-				}
+			}
+			finally
+			{
+				// After the child is stopped, not before. On the abandon path the script's worker thread is still running,
+				// and a link it resolves once this is back at the product's own 8060 would be answered by a real listener
+				// on a machine with a real Dataphor installation - pointing the script at a real instance, which is the
+				// one outcome this whole arrangement exists to prevent. Left at the dead child's port, that resolution
+				// fails instead.
+				DataphorServiceUtility.ListenerPortNumber = listenerPortNumber;
 			}
 		}
 

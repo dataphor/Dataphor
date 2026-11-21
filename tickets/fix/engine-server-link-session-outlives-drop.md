@@ -1,5 +1,5 @@
 description: A query that names another Dataphor server opens a connection to it and keeps it for the rest of the session; if the definition of that other server is deleted and a new one is created under the same name, the old connection is used instead of a new one, so the new definition is quietly ignored.
-architecture: docs/modernization-plan.md#ws3-test-suite
+architecture: docs/modernization-plan.md#ws2-engine-and-server-port
 files: src/engine/DAE/Server/RemoteSession.cs, src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Runtime.Instructions/DDLNodes.cs, src/engine/Server/Server/RemoteSessionImplementation.cs, tests/libraries/TestFramework.Coverage.Scripts/Documents/ServerLink.d4, tests/DAE.Server.Tests/coverage-manifest.json
 repro: verified
 ----
@@ -30,6 +30,12 @@ if (EvaluateOn('Test', 'select Processes[ProcessID()].MaxNestingLevel') as Integ
 ```
 
 The second link asks for a remote session whose maximum call depth is 128. Measured on one process against a child server (2026-11-21): the remote value is **100**, the product default, because the connection used is the first link's, which asked for no such thing. The same statement **under a link name no earlier link used returns 128**, so the tag itself is read and sent correctly — the defect is entirely the reuse. `Count(RemoteSessions where Process_ID = ProcessID())` is 1 at that point, which is the dropped link's session still being there.
+
+## How far the reuse reaches in that script (added in review)
+
+All seventeen of the script's `create server` statements use the same name, `Test`; the cache is keyed by that name and nothing removes an entry when a link is dropped. So the one remote session opened at line 10 serves every statement the script's **own** process sends, which is why `Count(RemoteSessions where Process_ID = ProcessID())` is 1 at line 34. The blocks that run through `ExecuteAs` are the exception: `SystemExecuteAsNode.ExecuteScript` connects a new session and starts a new process, whose cache is empty, so the link-user blocks do open remote sessions of their own with the credentials they are testing.
+
+Two consequences for whoever fixes this. First, the host name, instance name and session-info tags of every link after the first on the script's own process are inert today — those statements execute, but they prove nothing about the tags they carry; the `alter server` block named below is the clearest case, not the only one. Second, the moment the reuse stops, each of those blocks connects with its own configuration for the first time, so the script may fail in places it passes today: expect to work through it rather than to see it go green in one step. One block will not change, and is worth knowing about before it is suspected: the `UseSessionInfo` assertion at line 23 expects the remote maximum call depth **not** to be 128 after a local `SetMaxCallDepth(128)`, and that holds either way, because `SetMaxCallDepth` sets the running process's stack depth (`SystemSetMaxCallDepthNode`) while what `UseSessionInfo` propagates is `SessionInfo.DefaultMaxCallDepth`, which it leaves alone.
 
 `repro: verified` — run the coverage case: `dotnet test tests/DAE.Server.Tests --filter Name=ServerLink`. Its manifest entry is `known-failure` against this slug on the substring `Server link with Session Info failed`; when this is fixed the entry becomes `"status": "pass"` with `ticket`, `error` and `note` dropped, in the same commit.
 

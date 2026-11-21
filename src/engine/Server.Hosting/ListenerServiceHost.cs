@@ -30,6 +30,10 @@ namespace Alphora.Dataphor.DAE.Service
 		/// <param name="overridePortNumber">0 for the default listener port, 8060.</param>
 		public ListenerServiceHost(string hostName, int overridePortNumber)
 		{
+			// NOTE: the constant, not DataphorServiceUtility.ListenerPortNumber. That member is the port a *client* looks
+			// on, deliberately the client half of the protocol only; a server's own listener port is an instance setting
+			// (ServerConfiguration.OverrideListenerPortNumber), which is what arrives here. Reading the client's default
+			// would let a host application that only meant to reach another machine's listener move its own.
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 
 			// Built outside the try on purpose: the only way building this host fails is a DataphorServiceHostHooks

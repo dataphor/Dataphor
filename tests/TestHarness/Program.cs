@@ -114,7 +114,8 @@ namespace DAE.Test.Harness
 		{
 			string instanceName = null;
 			// The product default, which is what DataphorServiceHost defaults HostName to; the fixtures pass the loopback
-			// literal instead, so no port this suite opens is reachable from another machine.
+			// literal instead, so no port this suite opens is reachable from another machine - except for a child that
+			// serves a listener, which passes this default deliberately (see OutOfProcessInstance.HostName).
 			string hostName = Environment.MachineName;
 			// Off, which is the opposite of the shipped host's default and the whole reason this program exists.
 			bool loggingEnabled = false;
