@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Service
 	[SupportedOSPlatform("windows")]
 	public static class DataphorHost
 	{
-		/// <summary>How long the Generic Host waits for the server to stop before it stops waiting and the process exits.</summary>
+		/// <summary>The shutdown deadline the Generic Host is given; the remarks say what it does and does not bound.</summary>
 		/// <remarks>
 		/// <para>
 		/// Stopping is bounded twice before the engine is reached: the listener's host and the instance's host each get
@@ -50,10 +50,13 @@ namespace Alphora.Dataphor.DAE.Service
 		/// thirty seconds would leave that ten seconds; sixty leaves forty.
 		/// </para>
 		/// <para>
-		/// When it expires the host logs that shutdown timed out and the process exits with the engine's stop
-		/// unfinished, which is the same situation as the process being killed - something the catalog store already
-		/// has to survive. An operator who sees that message should treat the instance as having stopped abruptly
-		/// rather than cleanly. A constant rather than a setting, as the Kestrel bound already is.
+		/// What it does when it expires, measured on this version of the Generic Host: it cancels the token the host
+		/// passes to <see cref="DataphorHostedService.StopAsync"/>, and for a Windows service it is also how long
+		/// WindowsServiceLifetime waits before reporting the service stopped to the service control manager. It does
+		/// not abandon a stop in progress - that StopAsync stops the server synchronously and never reads the token, so
+		/// a slower stop simply takes longer and the process exits when it finishes. Raising the bound therefore only
+		/// buys the engine's stop more room before the service control manager is told the service has stopped. A
+		/// constant rather than a setting, as the Kestrel bound already is.
 		/// </para>
 		/// </remarks>
 		public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(60);
@@ -139,9 +142,9 @@ namespace Alphora.Dataphor.DAE.Service
 				}
 				catch (Exception)
 				{
-					// Already reported twice: the hosted service logs the failure with the instance name, and the
-					// Generic Host logs it again as "Hosting failed to start". A third copy would only be noise, and
-					// the exit code is what a caller reads.
+					// Already reported: the hosted service logs a failure to start or to stop with the instance name,
+					// and a start failure the Generic Host logs again as "Hosting failed to start". Another copy here
+					// would only be noise, and the exit code is what a caller reads.
 					return 1;
 				}
 			}
@@ -310,7 +313,20 @@ namespace Alphora.Dataphor.DAE.Service
 			if (serviceHost != null)
 			{
 				_logger.LogInformation("Dataphor Server instance {InstanceName} is stopping.", _instanceName);
-				serviceHost.Stop();
+				try
+				{
+					serviceHost.Stop();
+				}
+				catch (Exception exception)
+				{
+					// Logged here because nothing else logs it: the host passes a hosted service's failure to stop to the
+					// caller of its own StopAsync, but logs it only at Debug level (measured), which this program's
+					// minimum level does not pass - so without this the console would show "is stopping" and nothing else.
+					// Rethrown for the same reason a start failure is: a stop that failed is not a clean stop.
+					_logger.LogError(exception, "Dataphor Server instance {InstanceName} did not stop cleanly; treat it as having stopped abruptly.", _instanceName);
+					throw;
+				}
+
 				_logger.LogInformation("Dataphor Server instance {InstanceName} stopped.", _instanceName);
 			}
 

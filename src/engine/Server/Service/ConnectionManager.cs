@@ -47,10 +47,10 @@ namespace Alphora.Dataphor.DAE.Service
 				_lifetimeSignal = new ManualResetEvent(false);
 			}
 			// NOTE: a background thread so that it can never hold the process open. It is signalled by Dispose, which
-			// DataphorService.Dispose calls, which DataphorServiceHost.Stop calls; but if the host program's shutdown
-			// timeout (DataphorHost.ShutdownTimeout) ever expires before that happens, a foreground thread waiting here
-			// would turn an abrupt stop into a process that does not exit at all. Nothing is lost by letting the runtime
-			// drop it at process exit: it only waits on an event and reaps idle connections.
+			// DataphorService.Dispose calls, which DataphorServiceHost.Stop calls - but Stop can return without reaching
+			// that call (a stage of it throws), and the host program then exits on the failure; a foreground thread
+			// waiting here would keep the process alive after Main returned. Nothing is lost by letting the runtime drop
+			// it at process exit: it only waits on an event and reaps idle connections.
 			// port-abandoned-session-cleanup may rework this class.
 			Thread lifetimeWatcher = new Thread(new ThreadStart(LifetimeWatcher));
 			lifetimeWatcher.IsBackground = true;
