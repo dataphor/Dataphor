@@ -15,19 +15,21 @@
       "Alphora.Dataphor.DAE.Host",
       "Alphora.Dataphor.Frontend.Server",
       "Alphora.Dataphor.DAE.Device.SQL",
-      "Alphora.Dataphor.DAE.Device.MSSQL",
+      "AlphoraMSSQLDevice",
       "Alphora.Dataphor.DAE.Device.Simple",
       "Alphora.Dataphor.DAE.Connection",
-      "Alphora.Dataphor.DAE.Diagnostics",
-      "Alphora.Dataphor.System.Platform",
-      "Alphora.Dataphor.System.Internet",
-      "Alphora.Dataphor.System.Integration"
+      "System.Platform",
+      "System.Internet",
+      "System.Integration",
+      "DAEServer",
+      "DAEService"
     ],
     "ignored": [
       "DAE.Server.Tests",
       "Common.Tests",
       "DAE.Test.Harness",
-      "LibraryLoadingProbe",
+      "Alphora.Dataphor.Diagnostics.LibraryLoadingProbe",
+      "Alphora.Dataphor.DAE.Diagnostics",
       "Layout",
       "CoreWCF.Dispatcher"
     ]

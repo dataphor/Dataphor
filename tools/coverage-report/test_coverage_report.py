@@ -182,11 +182,39 @@ class UnassignedTest(unittest.TestCase):
         self.assertIn("unassigned: src/engine/DAE/NewFolder/Thing.cs (7 lines)", output)
         self.assertNotIn("# Test coverage report", output)
 
-    def test_allow_unassigned_prints_the_report_and_still_fails(self):
+    def test_allow_unassigned_prints_the_report_and_names_the_hole_in_it(self):
         code, output = self.tree.run("--allow-unassigned")
         self.assertEqual(code, 1)
         self.assertIn("unassigned: src/engine/DAE/NewFolder/Thing.cs (7 lines)", output)
         self.assertIn("# Test coverage report", output)
+        # The report itself has to say it is incomplete: the Markdown is what gets
+        # published, and the findings above went only to the terminal.
+        report = output[output.index("# Test coverage report"):]
+        self.assertIn("The map is incomplete", report)
+        self.assertIn("| src/engine/DAE/NewFolder/Thing.cs | 7 |", report)
+
+
+class UnlistedAssemblyTest(unittest.TestCase):
+    """An assembly on none of the three lists: the other half of an incomplete map."""
+
+    def setUp(self):
+        self.tree = Tree()
+        self.addCleanup(self.tree.close)
+        self.tree.report("run", {"Engine": {CATALOG: lines(2, 3)},
+                                 "Alphora.Dataphor.Newly.Converted": {
+                                     ("Thing", "src/newly/converted/Thing.cs"): lines(0, 9)}})
+
+    def test_an_assembly_on_no_list_suppresses_the_report(self):
+        code, output = self.tree.run()
+        self.assertEqual(code, 1)
+        self.assertIn("unlisted assembly: Alphora.Dataphor.Newly.Converted (9 lines)", output)
+        self.assertNotIn("# Test coverage report", output)
+
+    def test_allow_unassigned_prints_the_report_and_names_the_assembly_in_it(self):
+        code, output = self.tree.run("--allow-unassigned")
+        self.assertEqual(code, 1)
+        report = output[output.index("# Test coverage report"):]
+        self.assertIn("| Alphora.Dataphor.Newly.Converted | 9 |", report)
 
 
 if __name__ == "__main__":

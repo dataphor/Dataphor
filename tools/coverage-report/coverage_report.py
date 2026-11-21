@@ -143,6 +143,13 @@ def merge(reports):
     measured against different builds - and adding them up gives a number nobody can
     trust. Reports of one build agree exactly: verified over two independent runs,
     where all 76 classes in both had identical line sets.
+
+    NOTE: the guard only compares classes whose key matches, and the key carries the
+    resolved source path. Two reports collected on *different machines*, whose checkouts
+    sit at different absolute paths, would resolve the same class to two keys, and both
+    would be counted - inflating the coverable total silently instead of raising here.
+    Every report today comes from the machine that runs the suite; if reports ever have
+    to be merged across machines, key the merge on the class name alone.
     """
     merged = {}
     for packages in reports:
@@ -328,6 +335,14 @@ def analyse(merged, area_map, options):
 
     Classes whose source is under `tests/` are dropped wherever they appear: test code
     is not the subject of the report.
+
+    NOTE: that drop happens before the assembly grouping, so an assembly whose source is
+    *entirely* under `tests/` leaves nothing to group and never reaches either assembly
+    check - it is neither rolled up nor reported as unlisted. That is why the test
+    assemblies, the harness and the two test-support libraries belong on the `ignored`
+    list for documentation only, and why a `reported` entry for one of them could only
+    ever read `not in this run`. If a test-support assembly ever has to be measured,
+    group first and drop `tests/` source inside the engine rollup only.
     """
     analysis = Analysis()
     engine_lines = {}       # repository-relative path -> {line number: hits}
@@ -361,6 +376,10 @@ def analyse(merged, area_map, options):
     exclusions = [Exclusion(entry) for entry in area_map.excluded]
     for path in sorted(engine_lines):
         lines = engine_lines[path]
+        # NOTE: an exclusion is consulted before the areas, so a folder exclusion beats a
+        # longer single-file area entry inside it - unlike the longest-prefix rule between
+        # areas. No entry relies on that today; if one ever needs to, compare the two
+        # matched pattern lengths here instead of ordering the checks.
         index = area_map.exclusion_of(path)
         if index is not None:
             exclusions[index].totals.add(lines)
@@ -419,6 +438,34 @@ def _assembly_table(out, names, assemblies):
     out.append("")
 
 
+def _incomplete_map_section(out, analysis):
+    """Name the map's holes in the report, not only on standard output.
+
+    The findings are printed to the terminal, but the Markdown is what gets published,
+    so a report rendered under --allow-unassigned has to carry them too: without this a
+    published docs/coverage-report.md reads as complete while a subsystem is missing
+    from every total below.
+    """
+    if not (analysis.unassigned or analysis.unlisted):
+        return
+    out.append("## The map is incomplete - read the numbers below with that in mind")
+    out.append("")
+    out.append("Everything named here is **absent from the areas and the totals below**, so those numbers describe less than the engine. Put each one on the map (`tools/coverage-report/areas.json`) and run the report again.")
+    out.append("")
+    if analysis.unassigned:
+        out.append("| Source file no area claims | Coverable |")
+        out.append("|---|---:|")
+        for path, lines in analysis.unassigned:
+            out.append("| %s | %s |" % (path, _count(lines)))
+        out.append("")
+    if analysis.unlisted:
+        out.append("| Assembly on no list | Coverable |")
+        out.append("|---|---:|")
+        for name, lines in analysis.unlisted:
+            out.append("| %s | %s |" % (name, _count(lines)))
+        out.append("")
+
+
 def render(analysis, area_map, options):
     out = ["# Test coverage report", ""]
     out.append("Merged from %s. Rates of different runs are comparable only when the runs are of the same build: the collector's coverable-line counts move with the code." % _plural(analysis.inputs, "coverage report"))
@@ -428,6 +475,7 @@ def render(analysis, area_map, options):
     out.append("An area below %g %% line coverage is a **gap** unless it has fewer than %s coverable lines; below %g %% it is **thin**. Areas are listed worst first by uncovered line count, which is what makes the biggest holes the first ones a reader meets."
                % (options.gap_below, _count(options.min_lines), options.thin_below))
     out.append("")
+    _incomplete_map_section(out, analysis)
 
     out.append("## Line coverage per assembly")
     out.append("")
@@ -577,6 +625,10 @@ def main(argv=None):
         print("no listed assembly: none of the %d assemblies in the input is in %s"
               % (len(merged), args.areas))
 
+    # Both holes suppress the report, not just the unassigned one: an assembly on no list
+    # is missing from every table and total below exactly as an unclaimed file is, so the
+    # rollup would read as if its subsystem were fine. --allow-unassigned lifts both, and
+    # the report it then prints names the holes in its own first section.
     incomplete = bool(analysis.unassigned or analysis.unlisted)
     if analysis.assemblies and (not incomplete or args.allow_unassigned):
         report = render(analysis, area_map, options)

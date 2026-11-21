@@ -1,6 +1,6 @@
 # coverage-report — what the test suite actually exercises
 
-Turns the test run's code-coverage output into a Markdown report: line coverage per assembly, then per engine *area* (a named set of source paths), then file by file for the areas with the biggest holes. It exists so that the untested parts of the engine can be found by running a command instead of by reading a 100 MB XML file by hand. It needs nothing beyond Python 3: one module, standard library only, no network.
+Turns the test run's code-coverage output into a Markdown report: line coverage per assembly, then per engine *area* (a named set of source paths), then file by file for the areas with the biggest holes. It exists so that the untested parts of the engine can be found by running a command instead of by reading a 24 MB XML file by hand. It needs nothing beyond Python 3: one module, standard library only, no network.
 
 It reports; it never gates. No build or CI step fails on a number from here.
 
@@ -17,7 +17,7 @@ Each run writes one Cobertura XML file into a GUID-named subfolder of the result
 
 - **It coexists with the NUnit filter arguments** the suite is run in parts with (AGENTS.md, *Agents run the suite in parts*). Put the collector arguments before the `--`, which must stay last: `--collect:"…" … -- "NUnit.Where=…"`.
 - **It follows child processes**, so the out-of-process client/server cases contribute coverage too — their child's own assembly (`DAE.Test.Harness`) turns up in the report and is on the `ignored` list below.
-- **It covers assemblies the server loads at run time** from its copy of the runtime layout: the Frontend server, the Simple device and the diagnostics library all appear with non-zero rates.
+- **It covers assemblies the server loads at run time** from its copy of the runtime layout: the Frontend server and the Simple device appear with non-zero rates. (The coverage helper library does not: its source is under `tests/`, which the tool drops.)
 - **Cost is small.** Measured 2026-11-21 (Debug, slow development machine): a two-case run took 20.5 s of wall clock with collection against 20.2 s without, both reporting 7 s of test time — inside the noise at that size. An earlier first run with collection reported 15 s of test time, so expect a one-off warm-up. The sibling work item `test-coverage-gap-analysis` is the first run of the whole suite under collection and records that cost.
 - **Use one build.** Reports of different builds must not be added up; the tool refuses them (see *Merging* below).
 
@@ -44,7 +44,7 @@ Each positional argument is a Cobertura file or a folder, which is searched recu
 | `--json FILE` | — | also write the rolled-up numbers as JSON, for a later pass to diff against |
 | `--allow-unassigned` | off | print the report even when the map is incomplete (the exit code is still 1) |
 
-Exit codes: **0** all well, **1** a finding, **2** bad arguments (a path that does not exist, thresholds that are not `0 <= --gap-below <= --thin-below <= 100`, an unreadable or malformed areas file, an input that is not a Cobertura document).
+Exit codes: **0** all well, **1** a finding, **2** bad arguments (a path that does not exist, thresholds that are not `0 <= --gap-below <= --thin-below <= 100`, an unreadable or malformed areas file, an input that is not well-formed XML). A well-formed document that is not a Cobertura report has no assembly on any list, so it exits 1 by that route.
 
 ## The two boundary checks
 
@@ -53,7 +53,7 @@ Both exist so that a new source folder or a newly converted project cannot quiet
 - `unassigned: <path> (<n> lines)` — a source file under `src/` in an engine assembly that no area and no exclusion claims.
 - `unlisted assembly: <name> (<n> lines)` — an assembly in the input that none of the three assembly lists names.
 
-Either one exits 1 and **suppresses the report**, because a rollup missing a subsystem reads as if that subsystem were fine. `--allow-unassigned` prints the report anyway and still exits 1; that is the combination to use while finding out what a new run contains. Exit 1 also when no input file was found, when no assembly in the input is on any list, and when two inputs disagree (below).
+Either one exits 1 and **suppresses the report**, because a rollup missing a subsystem reads as if that subsystem were fine - an assembly on no list is as absent from the areas and the totals as an unclaimed file is. `--allow-unassigned` prints the report anyway and still exits 1; that is the combination to use while finding out what a new run contains. The report it prints opens with a section naming every hole, so a published `docs/coverage-report.md` cannot read as complete when it is not. Exit 1 also when no input file was found, when no assembly in the input is on any list, and when two inputs disagree (below).
 
 ## Merging several runs
 
@@ -67,9 +67,9 @@ Three assembly lists and the area table.
 
 - `engine` — the assemblies the area map covers: the engine proper.
 - `reported` — libraries, the client stack and the hosts. Rolled up per assembly only; they need no area and are never "unassigned".
-- `ignored` — dropped entirely: the test assemblies, the test harness, the layout tool.
+- `ignored` — dropped entirely: the test assemblies, the test harness, the two test-support libraries (`TestFramework.Coverage.Base`, `LibraryLoadingProbe`) and the layout tool. Anything whose source is under `tests/` belongs here rather than in `reported`: the tool drops `tests/` source before the assembly rollup, so a `reported` entry for it could only ever read `not in this run`.
 
-The names are **assembly names as the collector prints them**, not project file names, so the server assembly is `AlphoraDataphorServer` with no dots. Confirm a new one against a real report rather than guessing — `--allow-unassigned` plus the `unlisted assembly` findings is how you find out.
+The names are **assembly names as the collector prints them**, not project file names, so the server assembly is `AlphoraDataphorServer` with no dots and the MSSQL device library is `AlphoraMSSQLDevice`. Never guess one from its project or folder name: read it off the built output (`artifacts/bin/<project file name>/<config>/`, or the layout's `bin/` and `Libraries/`), or off the project's `<AssemblyName>`, which is where every name in these lists was checked. A name that is wrong anyway announces itself as an `unlisted assembly` finding, and `--allow-unassigned` is how you see the report while sorting it out.
 
 An **area** is a named set of repository-relative path prefixes with forward slashes. A path ending in `/` is a folder prefix; anything else is one file. A class belongs to the area whose **longest matching path** claims its source file, so a single-file entry beats the folder entry that contains it — that is how `Security` owns `src/engine/DAE/Schema/Security.cs` while `Schema` owns the rest of that folder. The last several areas are deliberately broad folder prefixes that the specific ones carve pieces out of.
 
