@@ -39,8 +39,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				// "UNIQUE constraint failed: DAEObjects.ID"; the out-of-process cases, which run two clients of this class
 				// against a server in another program, pass either way, because each of those clients allocates only into its
 				// own client-side catalog.
-				// The third argument is the client's own host name, which the server records against the connection; it is
-				// not a connection target.
 				// NOTE: this wraps the construction only, and construction is not the only place a client-side engine resets
 				// that counter: LocalServer.EnsureCacheConsistent calls Engine.ClearCatalog when the server's catalog has
 				// moved on, and that re-initializes the catalog and so resets the counter again, in the middle of a prepare,
@@ -48,6 +46,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				// before it allocates anything. If a case ever interleaves two clients so that one allocates catalog ids
 				// after the other's cache clear, the allocations collide and this wrapper will not save it; fix the cause
 				// then (bug-object-id-counter-is-process-wide), not this line.
+				// The third argument is the client's own host name, which the server records against the connection; it is
+				// not a connection target.
 				TestEnvironment.WithTheObjectIDCounterRestored(() => _localServer = new LocalServer(_clientServer, false, "localhost", keepAliveIntervalSeconds));
 			}
 			catch

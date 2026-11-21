@@ -154,13 +154,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Every name in the table, in key order, read back over the wire through a cursor.</summary>
 		private static List<string> Names(IServerProcess process)
 		{
-			List<string> result = new List<string>();
-			IServerCursor cursor = process.OpenCursor("select AcrossProcesses order by { ID }", null);
+			return ReadRows(process, "select AcrossProcesses order by { ID }", row => (string)row["Name"]);
+		}
+
+		/// <summary>Opens <paramref name="expression"/> as a cursor, projects every row it yields, and closes it on either path.</summary>
+		private static List<T> ReadRows<T>(IServerProcess process, string expression, Func<IRow, T> ofRow)
+		{
+			List<T> result = new List<T>();
+			IServerCursor cursor = process.OpenCursor(expression, null);
 			try
 			{
 				while (cursor.Next())
 					using (IRow row = cursor.Select())
-						result.Add((string)row["Name"]);
+						result.Add(ofRow(row));
 			}
 			finally
 			{
@@ -368,33 +374,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return ((long)count * (count + 1)) / 2;
 		}
 
-		/// <summary>Walks from the cursor's current position to end of file, adding up the identifiers it passes.</summary>
+		/// <summary>
+		/// Resets the cursor, walks it to end of file handing each row and its one-based position to
+		/// <paramref name="onRow"/>, and returns how many rows it passed.
+		/// </summary>
 		/// <remarks>
 		/// Selects into one row requested from the plan rather than into a row constructed per fetch, which is both how the
 		/// shipped client reads a cursor and what keeps a walk of ten blocks from allocating a row for each of them. Released
-		/// in a finally, or a failing assertion in a caller leaks it.
+		/// in a finally, or an assertion a caller makes mid-walk leaks it. The reset is here rather than at the call sites so
+		/// that no walk depends on where the walk before it left the cursor.
 		/// </remarks>
-		private static long SumIdentifiers(IServerCursor cursor)
-		{
-			long result = 0;
-			IRow row = cursor.Plan.RequestRow();
-			try
-			{
-				while (cursor.Next())
-				{
-					cursor.Select(row);
-					result += (int)row[0];
-				}
-			}
-			finally
-			{
-				cursor.Plan.ReleaseRow(row);
-			}
-			return result;
-		}
-
-		/// <summary>Resets the cursor and asserts that it then yields the identifiers 1..<paramref name="count"/> in that order.</summary>
-		private static void AssertIdentifiersInOrder(IServerCursor cursor, int count, string because)
+		private static int Walk(IServerCursor cursor, Action<IRow, int> onRow)
 		{
 			cursor.Reset();
 			int position = 0;
@@ -404,15 +394,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				while (cursor.Next())
 				{
 					cursor.Select(row);
-					position++;
-					Assert.That((int)row[0], Is.EqualTo(position), because);
+					onRow(row, ++position);
 				}
 			}
 			finally
 			{
 				cursor.Plan.ReleaseRow(row);
 			}
-			Assert.That(position, Is.EqualTo(count), because);
+			return position;
+		}
+
+		/// <summary>Walks the whole cursor, adding up the identifiers it passes.</summary>
+		private static long SumIdentifiers(IServerCursor cursor)
+		{
+			long result = 0;
+			Walk(cursor, (row, position) => result += (int)row[0]);
+			return result;
+		}
+
+		/// <summary>Asserts that the cursor yields the identifiers 1..<paramref name="count"/> in that order.</summary>
+		private static void AssertIdentifiersInOrder(IServerCursor cursor, int count, string because)
+		{
+			int walked = Walk(cursor, (row, position) => Assert.That((int)row[0], Is.EqualTo(position), because));
+			Assert.That(walked, Is.EqualTo(count), because);
 		}
 
 		/// <summary>
@@ -464,24 +468,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </remarks>
 		private static void AssertABookmarkSurvivesTheWalk(IServerCursor cursor, int position)
 		{
-			cursor.Reset();
 			Guid bookmark = Guid.Empty;
-			int walked = 0;
-			IRow row = cursor.Plan.RequestRow();
-			try
-			{
-				while (cursor.Next())
-				{
-					cursor.Select(row);
-					walked++;
-					if (walked == position)
-						bookmark = cursor.GetBookmark();
-				}
-			}
-			finally
-			{
-				cursor.Plan.ReleaseRow(row);
-			}
+			int walked = Walk(cursor, (row, at) => { if (at == position) bookmark = cursor.GetBookmark(); });
 			Assert.That(walked, Is.GreaterThanOrEqualTo(position), "The cursor has fewer rows than the bookmark position this case asked for.");
 
 			try
@@ -506,19 +494,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Every identifier in <paramref name="table"/>, in key order, read over the wire through a cursor.</summary>
 		private static List<int> Identifiers(IServerProcess process, string table)
 		{
-			List<int> result = new List<int>();
-			IServerCursor cursor = process.OpenCursor(String.Format("select {0} order by {{ ID }}", table), null);
-			try
-			{
-				while (cursor.Next())
-					using (IRow row = cursor.Select())
-						result.Add((int)row[0]);
-			}
-			finally
-			{
-				process.CloseCursor(cursor);
-			}
-			return result;
+			return ReadRows(process, String.Format("select {0} order by {{ ID }}", table), row => (int)row[0]);
 		}
 	}
 }
