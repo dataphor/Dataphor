@@ -180,6 +180,15 @@
       "paths": ["src/engine/DAE/REST/", "src/engine/Server/REST/"],
       "reason": "RESTResult and RESTMarshal are compiled but nothing in the repository calls them: their only consumer was the web prototype now parked in legacy/, and removal is an arm on the hygiene umbrella",
       "ticket": "debt-ws12-hygiene-remainder"
+    },
+    {
+      "paths": [
+        "src/engine/Base/IndexList.cs",
+        "src/engine/Base/TemporaryStream.cs",
+        "src/engine/DAE/Streams/CopyOnWriteStream.cs"
+      ],
+      "reason": "compiled public classes that nothing in the repository references: outside each file itself the only mention of IndexList, TemporaryStream or CopyOnWriteStream anywhere is its own Compile entry in Base.csproj or DAE.csproj (verified 2026-11-21 by test-coverage-gap-analysis), and removal is an arm on the hygiene umbrella",
+      "ticket": "debt-ws12-hygiene-remainder"
     }
   ]
 }

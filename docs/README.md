@@ -117,3 +117,4 @@ Dataphor Reference documents the Dataphor product, including the Call-Level Inte
 - [Architecture](architecture.md): how the parts of Dataphor fit together, what talks to what, and where things live on disk.
 - [Modernization plan](modernization-plan.md): the plan for moving Dataphor to .NET 10, with its workstreams, decisions and sequencing.
 - [Migration notes](migration-notes.md): the changes that an application, a deployment script or a custom extension will notice.
+- [Test coverage report](coverage-report.md): what the test suite reaches in the engine and what it does not, measured on one full run with the coverage collector switched on.

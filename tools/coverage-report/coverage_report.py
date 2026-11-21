@@ -4,11 +4,13 @@
 Python 3 standard library only. See README.md in this folder for the rules, the
 collect command and what the numbers do and do not mean.
 
-NOTE: CI deliberately does not collect coverage - the suite has cases that assert on
-wall-clock behaviour and a number that is reported rather than gated must never be able
-to fail the build. If a later pass shows the suite is stable under instrumentation,
-adding `--collect:"Code Coverage;Format=cobertura"` to the existing CI test step is a
-two-line change and gives a Cobertura artifact per push.
+NOTE: CI does not collect coverage yet, but the reason it did not has now been measured
+away: `test-coverage-gap-analysis` ran the whole suite under instrumentation on 2026-11-21
+with no failure of any kind, at +16 % on the longest part, and the session-reclamation case
+moved 0.3 s inside its own existing spread (docs/coverage-report.md). What is left is a
+decision, not a risk: adding `--collect:"Code Coverage;Format=cobertura"` to the existing CI
+test step is a two-line change and gives a Cobertura artifact per push. A number that is
+reported rather than gated must still never be able to fail the build.
 """
 
 import argparse
