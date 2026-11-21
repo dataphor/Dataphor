@@ -79,15 +79,57 @@ namespace Alphora.Dataphor.DAE.Server
 			);
 		}
 		
+		/// <summary>Lets the connection go, and finishes doing so even when the far server cannot be told about it.</summary>
+		/// <remarks>
+		/// A remote session is let go by a process tearing itself down and by a server link being dropped or altered.
+		/// Neither may fail because the other server is unreachable: the local half is released either way (see
+		/// NativeCLISession.Dispose) and the far session is the far server's own to reclaim when its connection goes
+		/// idle, so there is nothing left for the caller to do about it. Reported as a warning in the server log, the way
+		/// ReportUnhonouredSecuritySettings reports.
+		/// </remarks>
 		protected override void Dispose(bool disposing)
 		{
 			if (_nativeCLISession != null)
 			{
-				_nativeCLISession.Dispose();
-				_nativeCLISession = null;
+				try
+				{
+					_nativeCLISession.Dispose();
+				}
+				catch (Exception exception)
+				{
+					ReportFailedRemoteStop(exception);
+				}
+				finally
+				{
+					_nativeCLISession = null;
+				}
 			}
 			
 			base.Dispose(disposing);
+		}
+		
+		/// <summary>Writes one warning naming the link and the instance whose session could not be ended.</summary>
+		/// <remarks>Before base.Dispose, which clears ServerProcess; a logging failure of its own is not worth failing the teardown for either.</remarks>
+		private void ReportFailedRemoteStop(Exception exception)
+		{
+			try
+			{
+				ServerProcess.ServerSession.Server.LogMessage
+				(
+					LogEntryType.Warning,
+					String.Format
+					(
+						"The session the server link \"{0}\" held on instance \"{1}\" on host \"{2}\" could not be ended on that server, so it stays there until that server reclaims it; this server has released its side of the connection. The error was: {3}",
+						ServerLink.Name,
+						ServerLink.InstanceName,
+						ServerLink.HostName,
+						exception.Message
+					)
+				);
+			}
+			// A server whose log has already been closed - this disposal can be part of its shutdown - would otherwise
+			// throw out of the catch block that called this, which is the one thing the caller exists to prevent.
+			catch { }
 		}
 		
 		public NativeSessionInfo GetNativeSessionInfoFromProcess(ServerProcess process)

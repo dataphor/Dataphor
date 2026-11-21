@@ -79,10 +79,18 @@ namespace Alphora.Dataphor.DAE.Server
 	public class RemoteSessions : DisposableList<RemoteSession>
 	{
 	#endif
+		/// <summary>The index of this process's session to the given server link, or -1 if it has none.</summary>
+		/// <remarks>
+		/// Matched on the link's object id rather than with Schema.Object.Equals, which compares names: a link created
+		/// after a drop, under the name the dropped link used, would otherwise match the dropped link's session, and the
+		/// new link's host name, instance name, port, link users and session settings would be ignored for as long as
+		/// the process lived. Object ids are unique within one engine's catalog, and every link in this list came from
+		/// the catalog of the engine that owns this process.
+		/// </remarks>
 		public int IndexOf(Schema.ServerLink link)
 		{
 			for (int index = 0; index < Count; index++)
-				if (this[index].ServerLink.Equals(link))
+				if (this[index].ServerLink.ID == link.ID)
 					return index;
 			return -1;
 		}

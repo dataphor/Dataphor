@@ -2653,12 +2653,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Schema.ServerLink server = (Schema.ServerLink)FindObject(program.Plan, _alterServerStatement.ServerName);
 			
-			// TODO: Prevent altering the server link with active sessions? (May not be necessary, the active sessions would just continue to use the current settings)
 			program.CatalogDeviceSession.AlterMetaData(server, _alterServerStatement.AlterMetaData);
 			server.ResetServerLink();
 			server.ApplyMetaData();
 			program.CatalogDeviceSession.UpdateCatalogObject(server);
 
+			// After the metadata is applied, so a failed alter closes nothing: the next use of the link on this process then connects
+			// with the new settings, which a connection already open would never re-read.
+			// NOTE: accepted tradeoff - only this process's connection. A session on another process that has already connected to this
+			// link goes on using the settings it connected with until that process ends, which is what the original author's "the active
+			// sessions would just continue to use the current settings" contemplated; revisit if a deployment ever needs an alter to take
+			// effect everywhere at once, which would need an operator for closing another session's remote connection (there is none).
+			program.CatalogDeviceSession.CloseRemoteSession(server);
+			
 			return null;
 		}
     }
@@ -3216,7 +3223,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (program.Catalog)
 			{
-				// TODO: Prevent dropping when server sessions are active
 				// TODO: Drop server link users
 				
 				CheckNotSystem(program, _serverLink);
@@ -3224,6 +3230,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				program.CatalogDeviceSession.DeleteCatalogObject(_serverLink);
 			}
+			
+			// Outside the catalog lock, because the close makes a network call to the other server and the catalog lock is never held
+			// across a wait; after the checks, so a refused drop closes nothing. Inside a transaction the close waits for the outermost
+			// commit, and is discarded if the drop rolls back.
+			program.CatalogDeviceSession.CloseRemoteSession(_serverLink);
 			
 			return null;
 		}

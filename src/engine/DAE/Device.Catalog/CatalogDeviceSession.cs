@@ -1470,7 +1470,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				
 			// NOTE: a right change made by a deferred device stop at the outermost level autocommits and is cleared at once, but stays
 			// in the record until the session's next transaction ends; none is known, if one appears, replay again after the stops.
-			CommitDeferredDeviceStops();
+			_deferredDeviceStops.Commit(Transactions.Count, InternalStopDevice);
+			// Last, and so also after the store commit: closing a remote session makes a network call to the other server, which must
+			// not happen while the transaction that session took part in is still open.
+			_deferredRemoteSessionCloses.Commit(Transactions.Count, InternalCloseRemoteSession);
 		}
 
 		protected virtual void InternalAfterCommitTransaction()
@@ -1524,7 +1527,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ClearChangedRights(Transactions.Count == 1);
 				}
 					
-				RollbackDeferredDeviceStops();
+				_deferredDeviceStops.Rollback(Transactions.Count);
+				_deferredRemoteSessionCloses.Rollback(Transactions.Count);
 			}
 		}
 
@@ -3176,64 +3180,83 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			StopDevice(device, false);
 		}
 		
-		/// <summary>A device dropped in an open transaction, waiting for the outermost commit to stop it.</summary>
-		private class DeferredDeviceStop
+		/// <summary>Teardown a drop made inside an open transaction leaves for the outermost commit.</summary>
+		/// <remarks>
+		/// <para>
+		/// Two kinds of teardown are deferred this way - stopping a dropped device, and closing this process's session
+		/// to a dropped or altered server link - for the same reason: the thing being torn down is still a participant
+		/// in the transaction, so tearing it down at once would discard work the transaction has not finished with.
+		/// Both are discarded for a level that rolls back, because the rollback undoes the drop that asked for them.
+		/// The level bookkeeping lives here once rather than once per kind: it has already needed a fix of its own
+		/// (bug-catalog-deferred-device-stops-ignore-nesting), and a second copy would be the one that did not get it.
+		/// </para>
+		/// <para>
+		/// Inside InternalCommitTransaction and InternalRollbackTransaction, Transactions.Count is the level being
+		/// ended: the base class ends it after calling them. That is the level these methods are given.
+		/// </para>
+		/// </remarks>
+		private class DeferredTeardowns<T>
 		{
-			public DeferredDeviceStop(Schema.Device device, int level)
+			private class Entry
 			{
-				Device = device;
-				Level = level;
-			}
-			
-			public readonly Schema.Device Device;
-			
-			/// <summary>The transaction level the stop belongs to: the level of the drop, then each enclosing level a nested commit hands it to.</summary>
-			public int Level;
-		}
-		
-		// Inside InternalCommitTransaction and InternalRollbackTransaction, Transactions.Count is the level being ended: the base class ends it after calling them
-		private List<DeferredDeviceStop> _deferredDeviceStops;
-		private void AddDeferredDeviceStop(Schema.Device device)
-		{
-			if (_deferredDeviceStops == null)
-				_deferredDeviceStops = new List<DeferredDeviceStop>();
-			_deferredDeviceStops.Add(new DeferredDeviceStop(device, Transactions.Count));
-		}
-		
-		/// <summary>Runs the pending stops when the outermost level commits; a nested commit hands its stops to the enclosing level.</summary>
-		private void CommitDeferredDeviceStops()
-		{
-			if (_deferredDeviceStops == null)
-				return;
-			
-			if (Transactions.Count > 1)
-			{
-				foreach (DeferredDeviceStop stop in _deferredDeviceStops)
-					if (stop.Level >= Transactions.Count)
-						stop.Level = Transactions.Count - 1;
-			}
-			else
-			{
-				while (_deferredDeviceStops.Count > 0)
+				public Entry(T item, int level)
 				{
-					InternalStopDevice(_deferredDeviceStops[0].Device);
-					_deferredDeviceStops.RemoveAt(0);
+					Item = item;
+					Level = level;
 				}
 				
-				_deferredDeviceStops = null;
+				public readonly T Item;
+				
+				/// <summary>The transaction level the teardown belongs to: the level of the drop, then each enclosing level a nested commit hands it to.</summary>
+				public int Level;
+			}
+			
+			private List<Entry> _entries;
+			
+			public void Add(T item, int level)
+			{
+				if (_entries == null)
+					_entries = new List<Entry>();
+				_entries.Add(new Entry(item, level));
+			}
+			
+			/// <summary>Runs the pending teardowns when the outermost level commits; a nested commit hands its teardowns to the enclosing level.</summary>
+			public void Commit(int level, Action<T> tearDown)
+			{
+				if (_entries == null)
+					return;
+				
+				if (level > 1)
+				{
+					foreach (Entry entry in _entries)
+						if (entry.Level >= level)
+							entry.Level = level - 1;
+				}
+				else
+				{
+					while (_entries.Count > 0)
+					{
+						tearDown(_entries[0].Item);
+						_entries.RemoveAt(0);
+					}
+					
+					_entries = null;
+				}
+			}
+			
+			/// <summary>Discards the teardowns that belong to the level being rolled back; the undo of their drops restores what was never torn down.</summary>
+			public void Rollback(int level)
+			{
+				if (_entries == null)
+					return;
+				
+				_entries.RemoveAll(entry => entry.Level >= level);
+				if (_entries.Count == 0)
+					_entries = null;
 			}
 		}
 		
-		/// <summary>Discards the stops that belong to the level being rolled back; the undo of their drops restores devices that never stopped.</summary>
-		private void RollbackDeferredDeviceStops()
-		{
-			if (_deferredDeviceStops == null)
-				return;
-			
-			_deferredDeviceStops.RemoveAll(stop => stop.Level >= Transactions.Count);
-			if (_deferredDeviceStops.Count == 0)
-				_deferredDeviceStops = null;
-		}
+		private readonly DeferredTeardowns<Schema.Device> _deferredDeviceStops = new DeferredTeardowns<Schema.Device>();
 		
 		private void InternalStopDevice(Schema.Device device)
 		{
@@ -3252,9 +3275,39 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void StopDevice(Schema.Device device, bool isUndo)
 		{
 			if ((ServerProcess.InTransaction) && !isUndo)
-				AddDeferredDeviceStop(device);
+				_deferredDeviceStops.Add(device, Transactions.Count);
 			else
 				InternalStopDevice(device);
+		}
+		
+		private readonly DeferredTeardowns<Schema.ServerLink> _deferredRemoteSessionCloses = new DeferredTeardowns<Schema.ServerLink>();
+		
+		/// <summary>Closes this process's connection to a server link that has just been dropped or altered, so the next use of that link connects afresh.</summary>
+		/// <remarks>
+		/// <para>
+		/// Deferred inside a transaction because this process's remote session may be a participant in it (ServerProcess
+		/// enlists its remote sessions in its own commits and rollbacks): closing it at once would roll the remote work
+		/// back under a transaction that is still running, and the eventual commit would prepare a session that no
+		/// longer exists.
+		/// </para>
+		/// <para>
+		/// This process's connection only. Another process that already holds one to the same link keeps it until that
+		/// process ends; see the entry in docs/migration-notes.md for what that means for an alter.
+		/// </para>
+		/// </remarks>
+		public void CloseRemoteSession(Schema.ServerLink serverLink)
+		{
+			if (ServerProcess.InTransaction)
+				_deferredRemoteSessionCloses.Add(serverLink, Transactions.Count);
+			else
+				InternalCloseRemoteSession(serverLink);
+		}
+		
+		/// <remarks>Checked rather than asked for outright: RemoteDisconnect raises NoRemoteSessionForServerLink for a link this process never used, and a drop is not that caller.</remarks>
+		private void InternalCloseRemoteSession(Schema.ServerLink serverLink)
+		{
+			if (ServerProcess.RemoteSessions.Contains(serverLink))
+				ServerProcess.RemoteDisconnect(serverLink);
 		}
 		
 		public void DropDevice(Schema.Device device)

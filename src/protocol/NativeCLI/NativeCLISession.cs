@@ -41,12 +41,29 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		#region IDisposable Members
 
+		/// <summary>Ends the session on the far server and releases this side of the connection.</summary>
+		/// <remarks>
+		/// The local half is released whatever the network does. A failed StopSession - a far server that is down, a
+		/// channel already faulted - still propagates, so a caller that wants to report it can; what it must not do is
+		/// leave this object looking alive, because the handle it left set would make a second Dispose call the far
+		/// server again, and the client it left undisposed holds the WCF channel and its cached channel factory open for
+		/// the life of the process.
+		/// </remarks>
 		public void Dispose()
 		{
-			if (_sessionHandle != null)
+			try
 			{
-				_nativeCLI.StopSession(_sessionHandle);
+				if (_sessionHandle != null)
+					_nativeCLI.StopSession(_sessionHandle);
+			}
+			finally
+			{
 				_sessionHandle = null;
+				if (_nativeCLI != null)
+				{
+					_nativeCLI.Dispose();
+					_nativeCLI = null;
+				}
 			}
 		}
 

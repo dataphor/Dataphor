@@ -93,7 +93,7 @@
 { "script": "SerializationTables", "status": "pass" },
 { "script": "SerializationTypes", "status": "pass" },
 { "script": "SerializationViews", "status": "pass" },
-{ "script": "ServerLink", "status": "known-failure", "ticket": "engine-server-link-session-outlives-drop", "error": "Server link with Session Info failed", "linkedServer": true, "note": "linkedServer gives it the second server it has always needed; the one assertion it still fails is at line 34, where a link re-created under a name a dropped link used reuses the dropped link's remote session and so its session info" },
+{ "script": "ServerLink", "status": "known-failure", "ticket": "bug-right-check-fails-for-granted-right", "error": "does not have access to right \"System.Name", "linkedServer": true, "note": "the session-reuse half is fixed (a link re-created under a dropped link's name no longer reuses its remote session), so the script now runs past line 34 and stops at line 43, where an ordinary user is refused a right the catalog grants them; the blocks after that have still never run" },
 { "script": "SessionAndProcessScopedTables", "status": "pass" },
 { "script": "SessionTables", "status": "pass" },
 { "script": "ShortLibrary", "status": "pass" },
