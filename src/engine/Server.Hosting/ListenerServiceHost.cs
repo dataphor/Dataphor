@@ -28,12 +28,7 @@ namespace Alphora.Dataphor.DAE.Service
 	{
 		/// <param name="hostName">The host name of both the listening address and the endpoint address; see DataphorServiceHost.HostName.</param>
 		/// <param name="overridePortNumber">0 for the default listener port, 8060.</param>
-		/// <param name="requireSecureConnection">
-		/// Read from the instance configuration and not acted on, here or in 3.1. protocol-transport-security owns the
-		/// question of what a secured listener connection should mean on CoreWCF; the setting is kept wired through to
-		/// this parameter so that the evidence of what was configured, and never honoured, stays intact.
-		/// </param>
-		public ListenerServiceHost(string hostName, int overridePortNumber, bool requireSecureConnection)
+		public ListenerServiceHost(string hostName, int overridePortNumber)
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 

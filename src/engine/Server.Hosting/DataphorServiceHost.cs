@@ -152,6 +152,8 @@ namespace Alphora.Dataphor.DAE.Service
 					_server.Start();
 					try
 					{
+						ReportUnhonouredSecuritySettings(instance);
+
 						_server.LogMessage("Creating WCF Service...");
 						_service = new DataphorService(_remoteServer);
 
@@ -168,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Service
 						if (instance.ShouldListen)
 						{
 							_server.LogMessage("Starting Listener Service...");
-							_listenerServiceHost = new ListenerServiceHost(_hostName, instance.OverrideListenerPortNumber, instance.RequireSecureListenerConnection);
+							_listenerServiceHost = new ListenerServiceHost(_hostName, instance.OverrideListenerPortNumber);
 							if (!_listenerServiceHost.IsStarted)
 								_server.LogMessage
 								(
@@ -197,6 +199,48 @@ namespace Alphora.Dataphor.DAE.Service
 					throw;
 				}
 			}
+		}
+
+		/// <summary>Writes one warning to the server's log when the instance asks for a secured connection, which this server cannot give it.</summary>
+		/// <remarks>
+		/// <para>
+		/// Neither <see cref="ServerConfiguration.RequireSecureConnection"/> nor
+		/// <see cref="ServerConfiguration.RequireSecureListenerConnection"/> has ever reached a binding, here or in 3.1,
+		/// and the settings are kept because they are the vocabulary a later, designed transport security will want (see
+		/// decision D17 in docs/modernization-plan.md). What is new is that the server says so.
+		/// </para>
+		/// <para>
+		/// Warned rather than refused, which is the opposite of the client's response to the same request: refusing to
+		/// start would take the instance down for every client of it on upgrade, over a setting that has never worked, and
+		/// this server has no security to offer in place of what it would be demanding. The cost, plainly: an operator who
+		/// does not read the log still gets an unsecured server. Refusing becomes the right answer once an instance has a
+		/// working secured configuration to move to, which is WS11's to deliver.
+		/// </para>
+		/// <para>
+		/// Silent when a site has supplied its own binding, because that binding may well secure the transport and the
+		/// product must not report a channel it did not build as unsecured.
+		/// </para>
+		/// </remarks>
+		private void ReportUnhonouredSecuritySettings(ServerConfiguration instance)
+		{
+			if (DataphorServiceHostHooks.HasCustomBinding || !(instance.RequireSecureConnection || instance.RequireSecureListenerConnection))
+				return;
+
+			// The file's own attribute spellings, which is what an operator searches the instance list for.
+			string settings =
+				instance.RequireSecureConnection
+					? (instance.RequireSecureListenerConnection ? "requiresecureconnection and requiresecurelistenerconnection" : "requiresecureconnection")
+					: "requiresecurelistenerconnection";
+
+			_server.LogMessage
+			(
+				LogEntryType.Warning,
+				String.Format
+				(
+					"This instance is configured to require a secured connection ({0}), but nothing in this server acts on that: connections to this instance are not secured. The remedy is to remove what is set from the instance configuration, or to secure the transport by supplying a binding through DataphorServiceHostHooks.BuildBindingCall from this host application's own start-up code before the server is started.",
+					settings
+				)
+			);
 		}
 
 		/// <summary>

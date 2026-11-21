@@ -127,6 +127,14 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
+		/// <summary>The two security-mode settings as the alias editor labels them, for the message that refuses a mode this version cannot honour.</summary>
+		/// <remarks>
+		/// An alias is where almost every one of these is set, and the person reading the refusal is the person who has to
+		/// clear it, so the message names the field rather than the property.
+		/// </remarks>
+		private const string SecurityModeSettingName = "SecurityMode (\"Security Mode\" in the alias editor)";
+		private const string ListenerSecurityModeSettingName = "ListenerSecurityMode (the listener's \"Security Mode\" in the alias editor)";
+
 		private ChannelFactory<IClientDataphorService> _channelFactory;
 		
 		public bool IsActive { get { return _channelFactory != null; } }
@@ -161,8 +169,14 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				else
 				{
+					// Both checks are made before the listener is contacted below: a connection that asks for protection
+					// this version cannot give must make no unsecured call on its way to being refused.
+					DataphorServiceUtility.CheckSecurityMode(_securityMode, SecurityModeSettingName);
 					if (_overridePortNumber == 0)
 					{
+						// The listener's mode is checked only here, on the path that actually uses the listener; refusing
+						// for a setting this connection never consults would be gratuitous.
+						DataphorServiceUtility.CheckSecurityMode(_listenerSecurityMode, ListenerSecurityModeSettingName);
 						Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _instanceName));
 						_channelFactory =
 							new ChannelFactory<IClientDataphorService>

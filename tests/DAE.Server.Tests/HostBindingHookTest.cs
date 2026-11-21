@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			DataphorServiceHostHooks.BuildBindingCall = () => null;
 			int port = HostedInstance.ReserveLoopbackPorts(1)[0];
-			Exception error = Assert.Catch(() => { using (new ListenerServiceHost(HostedInstance.LoopbackAddress, port, false)) { } });
+			Exception error = Assert.Catch(() => { using (new ListenerServiceHost(HostedInstance.LoopbackAddress, port)) { } });
 			Assert.That(error.ToString(), Does.Contain("DataphorServiceHostHooks.BuildBindingCall"), "The failure does not name the hook that caused it. Actual: " + error);
 		}
 
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						}
 					);
 
-			using (ListenerServiceHost listener = new ListenerServiceHost(HostedInstance.LoopbackAddress, HostedInstance.ReserveLoopbackPorts(1)[0], false))
+			using (ListenerServiceHost listener = new ListenerServiceHost(HostedInstance.LoopbackAddress, HostedInstance.ReserveLoopbackPorts(1)[0]))
 			{
 				// IsStarted rather than an assertion inside the delegate: this class swallows what starting its host
 				// threw, so a delegate that failed there would otherwise read as a listener port already in use.

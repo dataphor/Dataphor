@@ -23,21 +23,60 @@ namespace Alphora.Dataphor.DAE.Server
     {
 		public RemoteSessionImplementation(ServerProcess process, Schema.ServerLink serverLink) : base(process, serverLink)
 		{
+			// Reported before the connection is made, so that a link which then fails to connect has still said what it
+			// was asked for and did not do.
+			ReportUnhonouredSecuritySettings(process, serverLink);
+
 			_nativeCLISession = 
 				new NativeCLISession
 				(
 					serverLink.HostName, 
 					serverLink.InstanceName, 
 					serverLink.OverridePortNumber, 
-					serverLink.UseSecureConnection
-						? ConnectionSecurityMode.Transport 
-						: ConnectionSecurityMode.None, 
+					// None rather than the link's tags: a client asking for Transport is refused outright, because the
+					// connection this version builds carries no transport security, and breaking a running application to
+					// report a setting that never worked is the wrong trade when the library is a customer artifact the
+					// person running the query cannot edit. So the connection proceeds unsecured and the warning above is
+					// how that is said. Decision D17 in docs/modernization-plan.md.
+					ConnectionSecurityMode.None, 
 					serverLink.OverrideListenerPortNumber, 
-					serverLink.UseSecureListenerConnection
-						? ConnectionSecurityMode.Transport 
-						: ConnectionSecurityMode.None, 
+					ConnectionSecurityMode.None, 
 					GetNativeSessionInfo()
 				);
+		}
+		
+		/// <summary>Writes one warning to the server's log when a server link's metadata asks for a secured connection, which this product cannot give it.</summary>
+		/// <remarks>
+		/// The tags <c>UseSecureConnection</c> and <c>UseSecureListenerConnection</c> are read into
+		/// <see cref="Schema.ServerLink"/>'s properties as they always were, so a library that sets one keeps its meaning
+		/// and the catalog and the D4 emitter keep round-tripping it; what no part of the product does is secure the
+		/// connection. Silent when a site has supplied its own client binding, which may well secure the transport.
+		/// </remarks>
+		// NOTE: one warning per remote session, and a remote session is one per server link per user session, so the
+		// volume is bounded by sessions rather than by statements. Left undeduplicated for simplicity; if a deployment
+		// ever finds it noisy, dedupe on the ServerLink.
+		private static void ReportUnhonouredSecuritySettings(ServerProcess process, Schema.ServerLink serverLink)
+		{
+			if (DataphorServiceUtility.HasCustomBinding || !(serverLink.UseSecureConnection || serverLink.UseSecureListenerConnection))
+				return;
+
+			string tags =
+				serverLink.UseSecureConnection
+					? (serverLink.UseSecureListenerConnection ? "tags UseSecureConnection and UseSecureListenerConnection" : "tag UseSecureConnection")
+					: "tag UseSecureListenerConnection";
+
+			process.ServerSession.Server.LogMessage
+			(
+				LogEntryType.Warning,
+				String.Format
+				(
+					"The server link \"{0}\" carries the metadata {1}, but nothing in this product secures a connection on its own: this link's connection to instance \"{2}\" on host \"{3}\" is not secured. The remedy is to remove what is set from the link, or to secure the transport by supplying a binding through DataphorServiceUtility.BuildBindingCall from this server's own host application start-up code.",
+					serverLink.Name,
+					tags,
+					serverLink.InstanceName,
+					serverLink.HostName
+				)
+			);
 		}
 		
 		protected override void Dispose(bool disposing)

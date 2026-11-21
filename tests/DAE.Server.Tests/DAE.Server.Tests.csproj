@@ -17,6 +17,7 @@
     <Compile Include="CatalogStoreTest.cs" />
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
     <Compile Include="ConcurrentDDLTest.cs" />
+    <Compile Include="ConnectionSecurityModeTest.cs" />
     <Compile Include="ContractParityTest.cs" />
     <Compile Include="CoreWcfProtocolTest.cs" />
     <Compile Include="CoverageManifest.cs" />

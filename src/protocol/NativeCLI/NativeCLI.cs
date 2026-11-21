@@ -20,8 +20,11 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public NativeCLIClient(string hostName) : this(hostName, DefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
 		public NativeCLIClient(string hostName, string instanceName) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, overridePortNumber, ConnectionSecurityMode.Default, 0, securityMode) { }
-		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(new Uri(GetNativeServerURI(hostName, instanceName, overridePortNumber, overrideListenerPortNumber)))
+		// securityMode is the connection's, not the listener's: this overload passed it into the listener's slot and left
+		// the connection's at Default. Invisible while no mode was honoured anywhere; visible now as the wrong setting
+		// named in a refusal.
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, overridePortNumber, securityMode, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(new Uri(GetNativeServerURI(hostName, instanceName, overridePortNumber, securityMode, overrideListenerPortNumber, listenerSecurityMode)))
 		{
 			_hostName = hostName;
 			_instanceName = instanceName;
@@ -61,6 +64,21 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				return DataphorServiceUtility.BuildNativeInstanceURI(hostName, overridePortNumber, instanceName);
 			else
 				return ListenerFactory.GetInstanceURI(hostName, overrideListenerPortNumber, instanceName, true);
+		}
+
+		/// <summary>The same URI as the overload without the security modes, having first refused a mode this version cannot honour.</summary>
+		/// <remarks>
+		/// An overload rather than a check in the constructor body, because the constructor reaches the listener from
+		/// inside its own base-constructor argument - the overload above calls ListenerFactory.GetInstanceURI - which runs
+		/// before any statement in the body. A refusal there would arrive after the discovery call it exists to prevent.
+		/// </remarks>
+		public static string GetNativeServerURI(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode)
+		{
+			DataphorServiceUtility.CheckSecurityMode(securityMode, "SecurityMode");
+			// The listener's mode only where the listener is used, as on the client's own connection path.
+			if (overridePortNumber <= 0)
+				DataphorServiceUtility.CheckSecurityMode(listenerSecurityMode, "ListenerSecurityMode");
+			return GetNativeServerURI(hostName, instanceName, overridePortNumber, overrideListenerPortNumber);
 		}
 	}
 	
