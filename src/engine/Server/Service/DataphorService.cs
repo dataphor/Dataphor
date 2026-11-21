@@ -31,11 +31,20 @@ namespace Alphora.Dataphor.DAE.Service
 		// "instance" (the shipped app.config declares "dataphor" instead: known defect K12), and was reachable only by
 		// hosting this type by name from an application configuration file, which WS5 removes. Host it with a started
 		// RemoteServer instead.
-		public DataphorService(RemoteServer remoteServer)
+		/// <summary>Serves <paramref name="remoteServer"/>, reclaiming connections idle for <see cref="ConnectionManager.IdleTimeInSeconds"/>.</summary>
+		public DataphorService(RemoteServer remoteServer) : this(remoteServer, ConnectionManager.IdleTimeInSeconds) { }
+
+		/// <summary>Serves <paramref name="remoteServer"/>, reclaiming connections idle for <paramref name="connectionIdleTimeInSeconds"/>.</summary>
+		/// <remarks>
+		/// The threshold has to stay well above the keep-alive interval of the clients that connect, or a live client is
+		/// reclaimed between two of its pings; <see cref="ConnectionManager"/> holds that rule and the floor of one second.
+		/// A host reaches this through <c>DataphorServiceHost.ConnectionIdleTimeInSeconds</c>.
+		/// </remarks>
+		public DataphorService(RemoteServer remoteServer, int connectionIdleTimeInSeconds)
 		{
 			_server = remoteServer.Server;
 			_remoteServer = remoteServer;
-			_connectionManager = new ConnectionManager(_remoteServer);
+			_connectionManager = new ConnectionManager(_remoteServer, connectionIdleTimeInSeconds);
 		}
 
 		private Server _server;

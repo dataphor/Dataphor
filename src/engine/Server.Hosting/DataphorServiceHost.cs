@@ -116,6 +116,35 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 
+		private int _connectionIdleTimeInSeconds = ConnectionManager.IdleTimeInSeconds;
+		/// <summary>How long a client connection may go unpinged before this server reclaims it; applied to the service before it is hosted.</summary>
+		/// <remarks>
+		/// <para>
+		/// Five minutes by default, which is what the product serves (<see cref="ConnectionManager.IdleTimeInSeconds"/>),
+		/// and a host-object property for the same reason <see cref="HostName"/> and <see cref="LoggingEnabled"/> are: a
+		/// <see cref="ServerConfiguration"/> is a compatibility surface read from and written to an operator's instance
+		/// list, and this is a knob a host application sets for itself, not a setting an instance carries. The note on
+		/// <see cref="ConnectionManager.IdleTimeInSeconds"/> records what it would take to make it an instance setting and
+		/// what would have to be true first.
+		/// </para>
+		/// <para>
+		/// The floor is the keep-alive interval of the clients that will connect - two minutes for the shipped client
+		/// (<c>LocalServer.DefaultKeepAliveInterval</c>) - and it has to be exceeded by enough to survive a ping that is
+		/// late or lost, or a live client is reclaimed between two of its pings. Below one second the server does not
+		/// start: the value is passed through unchecked to the <see cref="ConnectionManager"/> constructor, which refuses
+		/// it. What this exists for is a test that cannot wait five minutes to watch a reclamation happen.
+		/// </para>
+		/// </remarks>
+		public int ConnectionIdleTimeInSeconds
+		{
+			get { return _connectionIdleTimeInSeconds; }
+			set
+			{
+				CheckInactive();
+				_connectionIdleTimeInSeconds = value;
+			}
+		}
+
 		/// <summary>Hosts the instance named by <see cref="InstanceName"/> in this machine's instance list.</summary>
 		/// <remarks>Adds a default configuration to the list and saves it when the list has no such instance, as it always has.</remarks>
 		public void Start()
@@ -155,7 +184,7 @@ namespace Alphora.Dataphor.DAE.Service
 						ReportUnhonouredSecuritySettings(instance);
 
 						_server.LogMessage("Creating WCF Service...");
-						_service = new DataphorService(_remoteServer);
+						_service = new DataphorService(_remoteServer, _connectionIdleTimeInSeconds);
 
 						_server.LogMessage("Creating Native CLI Service...");
 						_nativeService = new NativeCLIService(_nativeServer);
