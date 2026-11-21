@@ -9,6 +9,8 @@ using System.Threading;
 
 using NUnit.Framework;
 
+using Alphora.Dataphor.DAE.Contracts;
+
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
@@ -66,9 +68,51 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// A ping that does not land must not end the keep-alive: the client rebuilds its channel after a communication
+		/// failure, so a blip of a few seconds leaves the server still holding the connection, and a keep-alive that had
+		/// stopped would then let the server reclaim it - the loss the ping exists to prevent. Through 3.1 the ping was per
+		/// session and the next session started a new one, so a client recovered from this by accident; with one ping per
+		/// connection there is no accident left to rely on.
+		/// </summary>
+		[Test]
+		public void AFailedPingDoesNotEndTheKeepAlive()
+		{
+			WithAServer
+			(
+				remoteServer =>
+				{
+					ServerWithAFailingPing server = new ServerWithAFailingPing(remoteServer, 1);
+					LocalServer localServer = NewClient(server);
+					try
+					{
+						RemoteServerConnection connection = (RemoteServerConnection)server.Connection.Inner;
+
+						WaitForTheClockToMovePast(connection, connection.LastActivityTime, "No ping reached the connection after one had failed.");
+
+						// Pings are sequential and only a successful one moves the clock, so the clock moving proves the first
+						// ping - the one that threw - was survived. Asserted anyway: without it the case would also pass on a
+						// connection that never failed a ping at all.
+						Assert.That(server.Connection.FailedPings, Is.EqualTo(1), "The case proved nothing: no ping failed, so the keep-alive was never asked to survive one.");
+					}
+					finally
+					{
+						localServer.Dispose();
+					}
+				}
+			);
+		}
+
+		/// <summary>
 		/// Disconnecting after the server has reclaimed the connection: the client has to be able to let go of a connection
 		/// that is already gone, which is the state this whole mechanism produces once the pings stop arriving.
 		/// </summary>
+		/// <remarks>
+		/// NOTE: this case reaches the client's own guard only while the server's half is not idempotent. Once
+		/// port-abandoned-session-cleanup makes RemoteServer.Relinquish tolerate a connection it has already released, the
+		/// in-process path here stops exercising the guard and only the wired path - where a second release comes back as
+		/// the service's unknown-object-handle fault - still needs it. Keep the case (it still asserts the client's
+		/// contract), and read a pass with that in mind.
+		/// </remarks>
 		[Test]
 		public void DisposingAfterTheServerHasReclaimedTheConnectionDoesNotThrow()
 		{
@@ -98,7 +142,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>The client half the product ships, pinging fast enough for a test to watch it.</summary>
-		private static LocalServer NewClient(RemoteServer remoteServer)
+		private static LocalServer NewClient(IRemoteServer remoteServer)
 		{
 			LocalServer result = null;
 			// The counter is handed back because LocalServer starts an engine of its own for its catalog cache. The third
@@ -119,6 +163,84 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Is.GreaterThan(previous),
 				String.Format("{0} The server's LastActivityTime was still {1:O} after {2:0.0} s, with the client pinging every {3} s.", message, previous, waited.Elapsed.TotalSeconds, KeepAliveIntervalSeconds)
 			);
+		}
+
+		/// <summary>The product's own server with one seam in it: the connection it hands out refuses its first pings.</summary>
+		/// <remarks>
+		/// A decorator, not a stand-in - every call but the ping is the product's own code - because the client offers no
+		/// hook for a failed ping, and faulting a real channel would need the WCF host this fixture deliberately does
+		/// without. The failure injected is the one a network blip produces: ClientConnection.Ping turns a
+		/// CommunicationException into exactly this.
+		/// </remarks>
+		private sealed class ServerWithAFailingPing : IRemoteServer
+		{
+			public ServerWithAFailingPing(IRemoteServer inner, int pingsToFail)
+			{
+				_inner = inner;
+				_pingsToFail = pingsToFail;
+			}
+
+			private readonly IRemoteServer _inner;
+			private readonly int _pingsToFail;
+
+			/// <summary>The connection the client established; null until it has.</summary>
+			public ConnectionWithAFailingPing Connection { get; private set; }
+
+			public IRemoteServerConnection Establish(string connectionName, string hostName)
+			{
+				Connection = new ConnectionWithAFailingPing(_inner.Establish(connectionName, hostName), _pingsToFail);
+				return Connection;
+			}
+
+			public void Relinquish(IRemoteServerConnection connection)
+			{
+				// Unwrapped: RemoteServer.Relinquish only knows its own connections.
+				_inner.Relinquish(((ConnectionWithAFailingPing)connection).Inner);
+			}
+
+			event EventHandler IDisposableNotify.Disposed { add { } remove { } }
+			public string Name { get { return _inner.Name; } }
+			public void Start() { _inner.Start(); }
+			public void Stop() { _inner.Stop(); }
+			public ServerState State { get { return _inner.State; } }
+			public long CacheTimeStamp { get { return _inner.CacheTimeStamp; } }
+			public long DerivationTimeStamp { get { return _inner.DerivationTimeStamp; } }
+		}
+
+		/// <summary>A connection that throws on its first <paramref name="pingsToFail"/> pings and then behaves.</summary>
+		private sealed class ConnectionWithAFailingPing : IRemoteServerConnection
+		{
+			public ConnectionWithAFailingPing(IRemoteServerConnection inner, int pingsToFail)
+			{
+				Inner = inner;
+				_pingsToFail = pingsToFail;
+			}
+
+			/// <summary>The product's own connection; the test reads the server's clock off it.</summary>
+			public IRemoteServerConnection Inner { get; private set; }
+
+			// Touched only by the client's keep-alive thread, and read from the test thread through Volatile.Read.
+			private int _pingsToFail;
+			private int _failedPings;
+
+			/// <summary>How many pings this connection has refused.</summary>
+			public int FailedPings { get { return Volatile.Read(ref _failedPings); } }
+
+			public void Ping()
+			{
+				if (_pingsToFail > 0)
+				{
+					_pingsToFail--;
+					Interlocked.Increment(ref _failedPings);
+					throw new ServerException(ServerException.Codes.CommunicationFailure, ErrorSeverity.Environment, new Exception("A simulated communication failure."));
+				}
+				Inner.Ping();
+			}
+
+			event EventHandler IDisposableNotify.Disposed { add { } remove { } }
+			public string ConnectionName { get { return Inner.ConnectionName; } }
+			public IRemoteServerSession Connect(SessionInfo sessionInfo) { return Inner.Connect(sessionInfo); }
+			public void Disconnect(IRemoteServerSession session) { Inner.Disconnect(session); }
 		}
 	}
 }

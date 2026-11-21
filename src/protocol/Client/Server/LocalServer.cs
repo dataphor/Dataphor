@@ -52,8 +52,10 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		public LocalServer(IRemoteServer server, bool clientSideLoggingEnabled, string hostName, int keepAliveIntervalSeconds) : base()
 		{
-			if (keepAliveIntervalSeconds < 1)
-				throw new ArgumentOutOfRangeException(nameof(keepAliveIntervalSeconds), keepAliveIntervalSeconds, "The keep-alive interval must be at least one second.");
+			// Both bounds matter: the wait is expressed in milliseconds, so an interval above MaximumKeepAliveInterval would
+			// overflow to a negative time-out and leave the connection with no keep-alive at all.
+			if ((keepAliveIntervalSeconds < 1) || (keepAliveIntervalSeconds > MaximumKeepAliveInterval))
+				throw new ArgumentOutOfRangeException(nameof(keepAliveIntervalSeconds), keepAliveIntervalSeconds, String.Format("The keep-alive interval must be between 1 and {0} seconds.", MaximumKeepAliveInterval));
 
 			_keepAliveInterval = keepAliveIntervalSeconds;
 			_server = server;
@@ -97,39 +99,39 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					finally
 					{
-						if (_server != null)
-						{
-							try
-							{
-								if (_serverConnection != null)
-								{
-									try
-									{
-										_server.Relinquish(_serverConnection);
-									}
-									catch
-									{
-										// Ignored, and only around this one call: the server may already have relinquished the
-										// connection - which is exactly what it does once the keep-alive pings stop arriving -
-										// and releasing something already released leaves nothing to release. Over the wire
-										// the second release comes back as the service's unknown-object-handle error. A client
-										// that was idle too long still has to be able to disconnect, so there is nothing here
-										// worth failing on; the precedent is LocalSession.StopProcess.
-									}
-								}
-							}
-							finally
-							{
-								_serverConnection = null;
-								_server = null;
-							}
-						}
+						RelinquishConnection();
 					}
 				}
 			}
 			finally
 			{
 				base.Dispose(disposing);
+			}
+		}
+
+		/// <summary>Releases the server connection, if one is still held, and forgets it and the server either way.</summary>
+		/// <remarks>
+		/// The release failing is ignored: the server may already have relinquished the connection - which is exactly what
+		/// it does once the keep-alive pings stop arriving - and releasing something already released leaves nothing to
+		/// release. Over the wire the second release comes back as the service's unknown-object-handle error. A client that
+		/// was idle too long still has to be able to disconnect, so there is nothing here worth failing on; the precedent is
+		/// LocalSession.StopProcess.
+		/// </remarks>
+		private void RelinquishConnection()
+		{
+			try
+			{
+				if ((_server != null) && (_serverConnection != null))
+					_server.Relinquish(_serverConnection);
+			}
+			catch
+			{
+				// See the remarks above; nothing is recoverable here and nothing is lost.
+			}
+			finally
+			{
+				_serverConnection = null;
+				_server = null;
 			}
 		}
 		
@@ -637,6 +639,9 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>The number of seconds between keep-alive pings, unless the constructor is given another.</summary>
 		public const int DefaultKeepAliveInterval = 120;	// 2 Minutes
 
+		/// <summary>The largest interval the constructor accepts: beyond it the millisecond wait would overflow.</summary>
+		private const int MaximumKeepAliveInterval = Int32.MaxValue / 1000;
+
 		private readonly int _keepAliveInterval;
 
 		/// <summary> Signal used to indicate that the keep-alive thread can terminate. </summary>
@@ -671,21 +676,56 @@ namespace Alphora.Dataphor.DAE.Server
 
 					// If WaitOne ended due to timeout, send a keep-alive message (then wait again)
 					if (!signaled)
-						_serverConnection.Ping();
-				}
-
-				// The keep alive processing is complete.  Clean up...
-				lock (_keepAliveReferenceLock)
-				{
-					((IDisposable)_keepAliveSignal).Dispose();
-					_keepAliveSignal = null;	// Free the reference
+						SendKeepAlive();
 				}
 			}
 			catch
 			{
 				// Don't allow exceptions to go unhandled... the framework will abort the application.
-				// A ping that cannot land ends the thread, which is the right answer: a client whose pings do not reach the
-				// server has no connection left to keep alive. Nothing is logged; this class has no log of its own here.
+			}
+			finally
+			{
+				// The keep alive processing is complete.  Clean up...
+				lock (_keepAliveReferenceLock)
+				{
+					if (_keepAliveSignal != null)
+					{
+						((IDisposable)_keepAliveSignal).Dispose();
+						_keepAliveSignal = null;	// Free the reference
+					}
+				}
+			}
+		}
+
+		/// <summary>Pings the server connection; a ping that does not land is ignored, and the keep-alive goes on.</summary>
+		/// <remarks>
+		/// A failed ping must not end the keep-alive. The client rebuilds its channel on the next call after a communication
+		/// failure (ClientServer.GetServiceInterface), so a blip lasting seconds leaves the server still holding the
+		/// connection - and a keep-alive that stopped at the first failed ping would then let the server reclaim it minutes
+		/// later, which is the loss this whole mechanism exists to prevent. Through 3.1 the ping was per session, so a
+		/// failure ended that session's thread and the next session started another: the client recovered by accident. With
+		/// one thread per connection there is no accident left to rely on.
+		/// NOTE: the cost is that a connection the server has genuinely dropped is pinged, fruitlessly, once per interval
+		/// until this object is disposed - one failing round trip every two minutes on a background thread. That is the
+		/// cheaper mistake than classifying each failure by exception type across the two transports this class runs over
+		/// (an in-process RemoteServer, and ClientConnection over WCF) and ending the keep-alive on a wrong guess. Nothing
+		/// is logged, deliberately: _internalServer is torn down by Dispose on another thread, and a server that has gone
+		/// away would otherwise fill the client's log at one entry per interval for as long as the process runs. If a
+		/// deployment ever needs to see why its connections died, log the first failure of a run and no others.
+		/// </remarks>
+		private void SendKeepAlive()
+		{
+			try
+			{
+				// Read once: Dispose clears the field from another thread, and it may do so between the wait ending and
+				// this call.
+				IRemoteServerConnection connection = _serverConnection;
+				if (connection != null)
+					connection.Ping();
+			}
+			catch
+			{
+				// See the remarks above.
 			}
 		}
 
