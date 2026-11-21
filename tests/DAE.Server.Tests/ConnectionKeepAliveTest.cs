@@ -107,11 +107,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// that is already gone, which is the state this whole mechanism produces once the pings stop arriving.
 		/// </summary>
 		/// <remarks>
-		/// NOTE: this case reaches the client's own guard only while the server's half is not idempotent. Once
-		/// port-abandoned-session-cleanup makes RemoteServer.Relinquish tolerate a connection it has already released, the
-		/// in-process path here stops exercising the guard and only the wired path - where a second release comes back as
-		/// the service's unknown-object-handle fault - still needs it. Keep the case (it still asserts the client's
-		/// contract), and read a pass with that in mind.
+		/// NOTE: this case reached the client's own guard only while the server's half was not idempotent, and that has
+		/// changed: since port-abandoned-session-cleanup, RemoteServer.Relinquish tolerates a connection it has already
+		/// released, so the in-process path here no longer exercises the guard and only the wired path - where a second
+		/// release comes back as the service's unknown-object-handle fault - still needs it. The case is kept because it
+		/// still asserts the client's contract; read a pass with that in mind.
 		/// </remarks>
 		[Test]
 		public void DisposingAfterTheServerHasReclaimedTheConnectionDoesNotThrow()

@@ -26,8 +26,18 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		protected bool _disposed;
+		/// <summary>Releases the connection's sessions and its catalog cache; a second call does nothing.</summary>
+		/// <remarks>
+		/// The guard is what makes relinquishing a connection twice safe, and two things do it concurrently: the server's
+		/// idle watcher (<see cref="Alphora.Dataphor.DAE.Service.ConnectionManager"/>) and the client's own CloseConnection,
+		/// and the watcher and RemoteServer.CloseConnections at shutdown. Without it the second call dereferenced the
+		/// fields the first had nulled and raised a NullReferenceException, and it re-raised <see cref="Disposed"/>.
+		/// </remarks>
 		protected override void Dispose(bool disposing)
 		{
+			if (_disposed)
+				return;
+
 			try
 			{
 				try
@@ -100,9 +110,17 @@ namespace Alphora.Dataphor.DAE.Server
 			BeginCall();
 			try
 			{
+				// Tested on the cast result, not on the parameter: the test was on session, so a session object from
+				// somewhere else passed it and then raised a NullReferenceException on localSession. Same defect, and the
+				// same typed error for it, as RemoteServer.Relinquish. A null session stays a no-op, as it was.
+				if (session == null)
+					return;
+
 				RemoteServerSession localSession = session as RemoteServerSession;
-				if (session != null)
-					localSession.Dispose();
+				if (localSession == null)
+					throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerSession");
+
+				localSession.Dispose();
 			}
 			finally
 			{
@@ -132,6 +150,15 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Lifetime Management
 
 		private DateTime _lastActivityTime;
+		/// <summary>When this connection was last pinged, or established if it never has been.</summary>
+		/// <remarks>
+		/// A last-<em>ping</em> time, not a last-call time: no ordinary operation moves it, so the client's keep-alive is
+		/// the only thing that does, and the server's idle watcher
+		/// (<see cref="Alphora.Dataphor.DAE.Service.ConnectionManager"/>) is the only thing that reads it. Nothing else
+		/// <em>can</em> move it without new plumbing - the service's handle table is flat, and a RemoteServerSession holds
+		/// a reference to the RemoteServer rather than to the connection it belongs to, so there is no path from a handle
+		/// back to the connection to stamp.
+		/// </remarks>
 		public DateTime LastActivityTime { get { return _lastActivityTime; } }
 
 		/// <remarks> Provides a way to check that the session is still available (the message will reset the server's keep alive timeout). </remarks>

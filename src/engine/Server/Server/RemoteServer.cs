@@ -262,9 +262,29 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
+		/// <summary>Closes a connection's sessions and releases it; a connection already released is left alone.</summary>
+		/// <remarks>
+		/// <para>
+		/// Idempotent, because two things relinquish a connection and they can arrive together: the server's idle watcher
+		/// (<see cref="Alphora.Dataphor.DAE.Service.ConnectionManager"/>) on one side, and the client's own CloseConnection
+		/// or <see cref="CloseConnections"/> at shutdown on the other. Each step below tolerates having been taken already -
+		/// the connection has no sessions left, the collection no longer holds it, and
+		/// RemoteServerConnection.Dispose returns at its guard - so the second call does nothing.
+		/// </para>
+		/// <para>
+		/// CloseSessions runs outside the server's lock, as it always has: closing a session can take as long as a process
+		/// termination, and must not hold up <see cref="Establish"/> for every other client.
+		/// </para>
+		/// </remarks>
         public void Relinquish(IRemoteServerConnection connection)
         {
+			// Checked rather than cast blind: the cast was with `as` and the result dereferenced unchecked, so a connection
+			// object from somewhere else - a client-side decorator, say - raised a NullReferenceException here instead of an
+			// error a caller can read. The same typed error a RemoteServerConnections container raises for the same mismatch.
 			RemoteServerConnection localConnection = connection as RemoteServerConnection;
+			if (localConnection == null)
+				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerConnection");
+
 			localConnection.CloseSessions();
 
 			BeginCall();
