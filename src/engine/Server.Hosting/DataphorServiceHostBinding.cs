@@ -14,6 +14,8 @@ namespace Alphora.Dataphor.DAE.Service
 	/// DataphorServiceUtility.DefaultBuildBinding; the two stacks have unrelated Binding types, so the settings are
 	/// necessarily written twice and this copy has to be changed with that one. Every number here is read from
 	/// DataphorServiceUtility, and CoreWcfProtocolTest.TestHostBindingMatchesTheClientBinding compares the rest.
+	/// This is the default of DataphorServiceHostHooks.BuildBindingCall, which is what the hosts actually read; a
+	/// deployment with a binding of its own replaces that hook and leaves this declaration alone.
 	/// </summary>
 	public static class DataphorServiceHostBinding
 	{

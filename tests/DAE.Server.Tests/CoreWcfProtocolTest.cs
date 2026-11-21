@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
@@ -39,23 +38,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
-	// NOTE: 979 lines (wc -l, 2026-11-20), the largest file in this test project and half again the next; the host and
-	// client plumbing - HostedInstance, ProtocolClient, the port and configuration helpers - is most of the bulk. If
-	// more hosted cases land here, move that plumbing to a file of its own and leave the cases behind.
+	// NOTE: 849 lines (wc -l, 2026-11-20), still the largest file in this test project; the host plumbing moved out to
+	// HostedInstance.cs when protocol-host-binding-hook needed a second hosted fixture, and what is left of the bulk is
+	// the cases themselves plus the client plumbing, ProtocolClient. If that grows, it is the next thing to move.
 	public class CoreWcfProtocolTest
 	{
 		/// <summary>The instance name, which is the first path segment of the service address on both sides.</summary>
 		private const string InstanceName = "CoreWcfHost";
-
-		/// <summary>
-		/// The host name the hosted instances listen on and the clients connect to.
-		/// </summary>
-		/// <remarks>
-		/// Loopback by literal, so a test never opens a port another machine can reach. The product default is
-		/// Environment.MachineName, which is what makes CoreWCF bind both address families; that is established by
-		/// measurement and recorded under "CoreWCF hosting" in docs/modernization-plan.md, not re-measured here.
-		/// </remarks>
-		private const string LoopbackAddress = "127.0.0.1";
 
 		/// <summary>Clears the 64 KB message limit, the 8 KB string-content quota and the 16 KB array quota at once.</summary>
 		private const int LargeValueLength = 3 * 1024 * 1024;
@@ -86,11 +75,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			_instanceDirectory = TestEnvironment.NewDirectory(InstanceName + "-Instances");
 			InstanceManager.InstanceDirectory = _instanceDirectory;
 
-			List<int> before = ListeningPorts();
+			List<int> before = HostedInstance.ListeningPorts();
 			try
 			{
 				_host = new HostedInstance(InstanceName, true, 0);
-				_portsOpenedByTheHost = Except(ListeningPorts(), before);
+				_portsOpenedByTheHost = Except(HostedInstance.ListeningPorts(), before);
 			}
 			catch
 			{
@@ -119,150 +108,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>
-		/// A temporary instance directory, free loopback ports, and a <see cref="DataphorServiceHost"/> started over a
-		/// configuration of its own: what a test needs to reach a hosted server without touching this machine's state.
-		/// </summary>
-		private sealed class HostedInstance : IDisposable
-		{
-			/// <param name="listenerPortNumber">0 to reserve a free port; otherwise the port the listener must use, so that a test can hold it first.</param>
-			public HostedInstance(string instanceName, bool shouldListen, int listenerPortNumber)
-			{
-				_instanceName = instanceName;
-				_directory = TestEnvironment.NewDirectory(instanceName);
-				try
-				{
-					if (listenerPortNumber == 0)
-					{
-						int[] ports = ReserveLoopbackPorts(2);
-						_portNumber = ports[0];
-						_listenerPortNumber = ports[1];
-					}
-					else
-					{
-						_portNumber = ReserveLoopbackPorts(1)[0];
-						_listenerPortNumber = listenerPortNumber;
-					}
-
-					// No libraries: System is built in, and the server creates General. This is also what makes the
-					// library directory, which the server requires.
-					TestEnvironment.CopyLibraries(Path.Combine(_directory, TestServerInstance.LibrariesFolderName), new string[0]);
-
-					_host = NewHost();
-					_host.Start(Configuration(instanceName, _directory, _portNumber, shouldListen, _listenerPortNumber));
-				}
-				catch
-				{
-					Dispose();
-					throw;
-				}
-			}
-
-			private readonly string _directory;
-			/// <summary>The instance's own temporary root: its library copy, its instance folder and so its catalog store are all under it.</summary>
-			public string RootDirectory => _directory;
-
-			private readonly string _instanceName;
-			public string InstanceName => _instanceName;
-
-			private readonly int _portNumber;
-			/// <summary>The instance's port; never 8061, and never a port a real instance could own.</summary>
-			public int PortNumber => _portNumber;
-
-			private readonly int _listenerPortNumber;
-			/// <summary>The port this instance's listener was configured for; never the default 8060.</summary>
-			public int ListenerPortNumber => _listenerPortNumber;
-
-			private DataphorServiceHost _host;
-			public DataphorServiceHost Host => _host;
-
-			public void Dispose()
-			{
-				try
-				{
-					if (_host != null)
-					{
-						_host.Stop();
-						_host = null;
-					}
-				}
-				finally
-				{
-					TestEnvironment.TryDeleteDirectory(_directory);
-				}
-			}
-		}
-
-		/// <summary>A configuration for a server of this suite's own, with its catalog, libraries and instance directory under <paramref name="directory"/>.</summary>
-		private static ServerConfiguration Configuration(string instanceName, string directory, int portNumber, bool shouldListen, int listenerPortNumber)
-		{
-			return
-				new ServerConfiguration
-				{
-					Name = instanceName,
-					PortNumber = portNumber,
-					ShouldListen = shouldListen,
-					OverrideListenerPortNumber = listenerPortNumber,
-					LibraryDirectories = Path.Combine(directory, TestServerInstance.LibrariesFolderName),
-					InstanceDirectory = Path.Combine(directory, TestServerInstance.InstanceFolderName),
-					CatalogStoreClassName = TestServerInstance.CatalogStoreClassName,
-					CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString
-				};
-		}
-
-		/// <summary>A host listening on loopback, with logging off.</summary>
-		/// <remarks>
-		/// Logging is off as everywhere in this suite: a logging server in an elevated process also creates and writes the
-		/// Windows event-log source.
-		/// </remarks>
-		private static DataphorServiceHost NewHost()
-		{
-			DataphorServiceHost host = new DataphorServiceHost();
-			host.HostName = LoopbackAddress;
-			host.LoggingEnabled = TestEnvironment.LoggingEnabled;
-			return host;
-		}
-
-		/// <summary>Reserves the given number of distinct free loopback ports by binding them all and then releasing them.</summary>
-		/// <remarks>
-		/// A configured port of 0 cannot be used instead: the endpoint address is what CoreWCF builds its address table
-		/// from, and that happens before Kestrel binds the socket, so the real port is not known in time. The port is
-		/// also part of the address the client is given.
-		/// </remarks>
-		// NOTE: another process could take one of these ports between the release here and CoreWCF's bind. Nothing on a
-		// test machine hands out ephemeral ports in that window, and the alternative - a fixed port - would collide with a
-		// real instance on the build machine.
-		private static int[] ReserveLoopbackPorts(int count)
-		{
-			TcpListener[] probes = new TcpListener[count];
-			int[] result = new int[count];
-			try
-			{
-				for (int index = 0; index < count; index++)
-				{
-					probes[index] = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
-					probes[index].Start();
-					result[index] = ((IPEndPoint)probes[index].LocalEndpoint).Port;
-				}
-			}
-			finally
-			{
-				foreach (TcpListener probe in probes)
-					if (probe != null)
-						probe.Stop();
-			}
-			return result;
-		}
-
-		/// <summary>Every port this machine has a listening TCP socket on, one entry per socket.</summary>
-		private static List<int> ListeningPorts()
-		{
-			List<int> result = new List<int>();
-			foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
-				result.Add(endPoint.Port);
-			return result;
-		}
-
 		private static List<int> Except(List<int> ports, List<int> exclude)
 		{
 			List<int> result = new List<int>();
@@ -270,11 +115,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (!exclude.Contains(port) && !result.Contains(port))
 					result.Add(port);
 			return result;
-		}
-
-		private static bool IsListeningOn(int portNumber)
-		{
-			return ListeningPorts().Contains(portNumber);
 		}
 
 		/// <summary>
@@ -286,8 +126,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			public ProtocolClient(string instanceName, int portNumber)
 			{
-				// The same host name the host listens on; see LoopbackAddress.
-				_clientServer = new ClientServer(LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+				// The same host name the host listens on; see HostedInstance.LoopbackAddress.
+				_clientServer = new ClientServer(HostedInstance.LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
 				try
 				{
 					// LocalServer starts an Engine of its own to hold the client-side catalog cache, and Engine.InitializeCatalog
@@ -537,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				host =>
 				{
 					// Constructing the client builds its channel factory; the channel itself opens on the first call below.
-					ClientServer clientServer = new ClientServer(LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+					ClientServer clientServer = new ClientServer(HostedInstance.LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
 					try
 					{
 						// Stopping the engine over the wire releases the catalog store's file handles, so that the store can be
@@ -615,7 +455,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				0,
 				host =>
 				{
-					ClientServer clientServer = new ClientServer(LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+					ClientServer clientServer = new ClientServer(HostedInstance.LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
 					try
 					{
 						// The whole host, not the engine alone: the port has to stop answering.
@@ -644,7 +484,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestNativeCliAnswersOnItsNestedAddress()
 		{
-			using (NativeSessionCLIClient client = new NativeSessionCLIClient(LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
+			using (NativeSessionCLIClient client = new NativeSessionCLIClient(HostedInstance.LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
 			{
 				NativeSessionHandle session = client.StartSession(new NativeSessionInfo());
 				try
@@ -672,7 +512,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestNativeCliErrorArrivesAsTheTypedException()
 		{
-			using (NativeSessionCLIClient client = new NativeSessionCLIClient(LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
+			using (NativeSessionCLIClient client = new NativeSessionCLIClient(HostedInstance.LoopbackAddress, _host.InstanceName, _host.PortNumber, ConnectionSecurityMode.Default))
 			{
 				NativeSessionHandle session = client.StartSession(new NativeSessionInfo());
 				try
@@ -773,12 +613,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public void TestListenerAnswersOnItsOwnPort()
 		{
 			Assert.That(_host.Host.IsListening, Is.True);
-			Assert.That(ListenerFactory.EnumerateInstances(LoopbackAddress, _host.ListenerPortNumber), Is.Not.Null);
+			Assert.That(ListenerFactory.EnumerateInstances(HostedInstance.LoopbackAddress, _host.ListenerPortNumber), Is.Not.Null);
 
 			// An instance name that is certainly not configured: the service turns the lookup failure into a
 			// FaultException<ListenerFault>, and ListenerClient turns that back into a DataphorException.
 			string unconfigured = "NoSuchInstance" + Guid.NewGuid().ToString("N");
-			Exception error = Assert.Catch(() => ListenerFactory.GetInstanceURI(LoopbackAddress, _host.ListenerPortNumber, unconfigured));
+			Exception error = Assert.Catch(() => ListenerFactory.GetInstanceURI(HostedInstance.LoopbackAddress, _host.ListenerPortNumber, unconfigured));
 
 			// A plain Exception carrying the service's message is what ListenerFaultUtility.FaultToException builds - the
 			// listener fault has no exception-class name to rebuild from, unlike DataphorFault. What matters is that it is
@@ -797,7 +637,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestTheListenerPortBeingTakenDoesNotStopTheServer()
 		{
-			TcpListener conflict = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
+			TcpListener conflict = new TcpListener(IPAddress.Parse(HostedInstance.LoopbackAddress), 0);
 			conflict.Start();
 			try
 			{
@@ -833,7 +673,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				host =>
 				{
 					Assert.That(host.Host.IsListening, Is.False);
-					Assert.That(IsListeningOn(host.ListenerPortNumber), Is.False, "Something is listening on the listener port of an instance that should not listen.");
+					Assert.That(HostedInstance.IsListeningOn(host.ListenerPortNumber), Is.False, "Something is listening on the listener port of an instance that should not listen.");
 					OnWire(host, process => Assert.That((long)(int)process.Evaluate("1 + 1", null).AsNative, Is.EqualTo(2L)));
 				}
 			);
@@ -853,7 +693,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestTheInstancePortBeingTakenStopsTheServer()
 		{
-			TcpListener conflict = new TcpListener(IPAddress.Parse(LoopbackAddress), 0);
+			TcpListener conflict = new TcpListener(IPAddress.Parse(HostedInstance.LoopbackAddress), 0);
 			conflict.Start();
 			try
 			{
@@ -864,13 +704,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				{
 					TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
 
-					DataphorServiceHost host = NewHost();
+					DataphorServiceHost host = HostedInstance.NewHost();
 					WithTheObjectIDCounterRestored
 					(
 						() =>
 						{
 							// ShouldListen false: this case is about the instance's own port, and no listener port is to be taken.
-							Exception error = Assert.Catch(() => host.Start(Configuration(instanceName, directory, portNumber, false, 0)));
+							Exception error = Assert.Catch(() => host.Start(HostedInstance.Configuration(instanceName, directory, portNumber, false, 0)));
 
 							Assert.That(error, Is.InstanceOf<IOException>(), "The failure to bind did not arrive as itself; a failure from Stop on the way out would mask it. Actual: " + error.GetType().FullName + ": " + error.Message);
 							Assert.That(error.Message, Does.Contain(portNumber.ToString()));

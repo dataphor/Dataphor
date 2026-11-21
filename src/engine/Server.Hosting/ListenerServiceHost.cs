@@ -37,6 +37,9 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
 
+			// Built outside the try on purpose: the only way building this host fails is a DataphorServiceHostHooks
+			// binding hook that throws or returns nothing, and reporting that as "the listener port is already taken"
+			// would bury a misconfiguration behind the one failure this class is written to tolerate.
 			_listenerHost = BuildHost(hostName, listenerPort);
 			try
 			{
@@ -52,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		private static IHost BuildHost(string hostName, int listenerPort)
 		{
-			CoreWCF.Channels.Binding binding = DataphorServiceHostBinding.Build();
+			CoreWCF.Channels.Binding binding = DataphorServiceHostHooks.BuildBinding();
 
 			return
 				NetTcpServiceHost.Build
@@ -66,6 +69,13 @@ namespace Alphora.Dataphor.DAE.Service
 						// per session exactly as "new ServiceHost(typeof(ListenerService))" did.
 						builder.AddService<ListenerService>();
 						builder.AddServiceEndpoint<ListenerService, IListenerService>(binding, new Uri(DataphorServiceUtility.BuildListenerURI(hostName, listenerPort)));
+						// NOTE: this runs while the host is starting, which on this class is inside the try above, so a
+						// builder hook that throws here is swallowed as a listener that did not start. Harmless as things
+						// stand - the instance's host is built and started first, so a hook that throws fails the whole
+						// server start before this host is reached - but a hook that throws only for the listener's host
+						// would lose the listener quietly. If one ever does, narrow that catch to the bind failure it is
+						// there for rather than moving this call.
+						DataphorServiceHostHooks.ServiceBuilderHook(builder);
 					}
 				);
 		}

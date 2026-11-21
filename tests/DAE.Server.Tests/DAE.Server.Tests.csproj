@@ -24,8 +24,10 @@
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
+    <Compile Include="HostBindingHookTest.cs" />
     <Compile Include="HostCommandLineTest.cs" />
     <Compile Include="HostProgramTest.cs" />
+    <Compile Include="HostedInstance.cs" />
     <Compile Include="InProcessTestFixture.cs" />
     <Compile Include="InstanceConfigurationTest.cs" />
     <Compile Include="InstanceManagerTest.cs" />

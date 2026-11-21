@@ -203,6 +203,10 @@ namespace Alphora.Dataphor.DAE.Service
 		/// The instance's own two endpoints on one host: the main service, and the native CLI service at a path below
 		/// it. Both addresses are the ones DataphorServiceUtility builds, which is the compatibility surface.
 		/// </summary>
+		/// <remarks>
+		/// The binding, and a last look at the builder once both endpoints are added, come from
+		/// <see cref="DataphorServiceHostHooks"/>, so that a deployment can replace what this server listens with.
+		/// </remarks>
 		// NOTE: the instance's port number reaches Kestrel unchecked. An instance list written by hand, or carried over
 		// from 3.x, can hold portnumber="0"; what Kestrel then does with it has not been established, and a server on an
 		// ephemeral port would still register and be advertised as port 0, so clients could not reach it. If an upgraded
@@ -210,7 +214,7 @@ namespace Alphora.Dataphor.DAE.Service
 		// be served rather than starting on it.
 		private IHost BuildHost(ServerConfiguration instance)
 		{
-			CoreWCF.Channels.Binding binding = DataphorServiceHostBinding.Build();
+			CoreWCF.Channels.Binding binding = DataphorServiceHostHooks.BuildBinding();
 			DataphorService service = _service;
 			NativeCLIService nativeService = _nativeService;
 
@@ -233,6 +237,7 @@ namespace Alphora.Dataphor.DAE.Service
 						builder.AddServiceEndpoint<DataphorService, IDataphorService>(binding, new Uri(DataphorServiceUtility.BuildInstanceURI(_hostName, instance.PortNumber, instance.Name)));
 						builder.AddService<NativeCLIService>();
 						builder.AddServiceEndpoint<NativeCLIService, INativeCLIService>(binding, new Uri(DataphorServiceUtility.BuildNativeInstanceURI(_hostName, instance.PortNumber, instance.Name)));
+						DataphorServiceHostHooks.ServiceBuilderHook(builder);
 					}
 				);
 		}
