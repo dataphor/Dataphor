@@ -28,15 +28,23 @@
     while it converts the contract attributes itself (see "CoreWCF proof" under WS5 in docs/modernization-plan.md).
     Newtonsoft.Json: REST\RESTMarshal.cs. System.Data.SqlClient: Connection\MSSQL*.cs; when the SQL Server code
     moves to Microsoft.Data.SqlClient (device-mssql-port), these files and this reference follow.
-    System.Diagnostics.EventLog: Server\Server.cs writes to the Windows event log (part of .NET Framework, a
-    package on .NET 10).
+    The framework reference substitutes the in-box ASP.NET Core 10 assemblies for the Microsoft.AspNetCore.* 2.3.10
+    packages CoreWCF.Primitives depends on, through NuGet's package-override mechanism. Without it both sets of those
+    assemblies landed in the runtime layout's bin\, where a host would ship the unused 2.3.10 ones; measured
+    (host-generic-host): with the two host executables in the layout, its bin\ holds 93 files without this
+    reference and 74 with it - the Microsoft.AspNetCore.* 2.3.10 assemblies and the Microsoft.Extensions.* package
+    copies all gone - and restore still reports no NU1xxx warning. The reference also provides
+    System.Diagnostics.EventLog, which Server\Server.cs needs to write the Windows event log and which was a package
+    reference here until the reference made NuGet report it as likely unnecessary (NU1510). This assembly therefore
+    needs the ASP.NET Core shared runtime at run time, which every .NET SDK install provides - as it already did
+    through the hosting assembly for anything that hosts a server.
   -->
   <ItemGroup>
     <PackageReference Include="CoreWCF.Primitives" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Data.SqlClient" />
-    <PackageReference Include="System.Diagnostics.EventLog" />
     <PackageReference Include="System.ServiceModel.Primitives" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <!--

@@ -20,6 +20,8 @@
   </Folder>
   <Folder Name="/hosts/">
     <Project Path="src/hosts/Host/DAE.Host.csproj" />
+    <Project Path="src/hosts/DAEServer/DAEServer.csproj" />
+    <Project Path="src/hosts/DAEService/DAE.Service.csproj" />
   </Folder>
   <Folder Name="/libraries/">
     <Project Path="libraries/Connection/Source/DAE.Connection.csproj" />

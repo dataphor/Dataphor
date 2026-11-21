@@ -22,38 +22,25 @@ Once the service is installed, it will appear in the list of items visible from 
 
 ## Installing Multiple Instances
 
-The Dataphor Server Service can be configured to allow multiple instances running side by side on the same computer. To configure this:
+One computer can run several Dataphor Server instances side by side, from one set of binaries. Each instance has its own entry in the machine instance list and needs its own port number, catalog directory and library directory. To add one:
 
-- Make a copy of the service directory; only one service may run in a single directory. For the copied instance (not the directory installed by Dataphor), do the following:
-
-- From a command prompt, navigate to the directory (copy of original) and run the following:
+- From an elevated command prompt, in the directory holding the Dataphor binaries, register a service for the new instance:
 
   ```text
-  daeservice -i name "Alphora Dataphor v2.0 Instance 2"
+  DAEService.exe -i -name "Instance 2"
   ```
 
-  This should install an additional instance of Dataphor as a Windows Service.
+  This registers an additional Windows service, named `Alphora Dataphor (Instance 2)`, whose command line names the instance.
 
-- Copy the DAEService.config file from the \Documents and Settings\All Users\Application Data\Alphora\Dataphor\2.0 directory into the new service directory.
+- Configure the instance. Use the Service Configuration Utility, or edit the instance's entry in `ServerConfigurations.config`, in the `Alphora\Dataphor\Instances` folder under the all-users application data directory. The port number must be unique on the machine, and the catalog and library directories must not be shared with another instance; the library directory of an existing instance can be copied for the new one.
 
-- Edit the new DAEService.config file appropriately. This configuration file *must* point to a different library and catalog directory than any other Dataphor Server service. If desired, the library and catalog directory from the source service can be copied for this instance. The port number must also be unique.
-
-- Edit the daeservice.exe.config file and add the following within the \<configuration\>… elements:
-
-  ``` xml
-  <configSections>
-          <section name="dataphor" type="System.Configuration.SingleTagSectionHandler" />
-      </configSections>
-      <dataphor configurationFileName="C:\...\Service2\DAEService.config" />
-  ```
-
-  The configurationFileName attribute should point to the target file just created.
-
-- Start the service. You could also test the service without starting it first, by running the following on the command line (after changing to the directory in question):
+- Start the service. The instance can also be run in a console window first, without starting the service, by running the following in the directory holding the binaries:
 
   ```text
-  daeservice -run name "Alphora Dataphor v2.0 Instance 2"
+  DAEService.exe -run -name "Instance 2"
   ```
+
+  Press Ctrl+C to stop it. `DAEServer.exe` is the same program under another name and takes the same switches.
 
 ## Uninstalling
 
@@ -63,7 +50,7 @@ The Dataphor Service can be manually uninstalled from the Windows services list 
 DAEService.exe -u
 ```
 
-If there is an error during the install or uninstall process, the error message will be displayed to the standard output.
+If there is an error during the install or uninstall process, the error message is written to the console and the program exits with a non-zero exit code. Registering and removing a service needs an elevated command prompt.
 
 ## Service Configuration Utility
 

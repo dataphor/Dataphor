@@ -43,17 +43,15 @@
 		<value>Settings file does not exist... creating a new one with defaults.</value>
 	</data>
 	<data name="InvalidCommandLine">
-		<value>Invalid command line option. Syntax is:
-			DAEService [-i | -install | -u | -uninstall | -r | -run] [-name &lt;Service Name&gt;]
-		</value>
+		<value>Invalid command line option. Syntax is: [-i | -install | -u | -uninstall | -r | -run] [-n | -name &lt;instance name&gt;]</value>
+	</data>
+	<data name="ServiceInstalled">
+		<value>The service {0} is registered.</value>
+	</data>
+	<data name="ServiceUninstalled">
+		<value>The service {0} is no longer registered.</value>
 	</data>
 	<data name="ServiceStarting">
 		<value>The Dataphor Server service is starting...</value>
-	</data>
-	<data name="ServiceRunning">
-		<value>The Dataphor Server service is running.  Press enter to stop...</value>
-	</data>
-	<data name="ServiceStopping">
-		<value>The Dataphor Server service is stopping...</value>
 	</data>
 </root>

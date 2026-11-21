@@ -38,7 +38,9 @@
 
   <!--
     GetDataphorLayoutItems returns, and copies nothing:
-      DataphorLayoutKind=Output   the assembly, its .pdb and satellite assemblies (never .deps.json);
+      DataphorLayoutKind=Output   the assembly, its .pdb and satellite assemblies, and for an executable project also its
+                                  application host, .deps.json and .runtimeconfig.json (never .runtimeconfig.dev.json: the
+                                  development runtime configuration names the building developer's NuGet cache);
       DataphorLayoutKind=Package  the package runtime files, keeping NuGetPackageId, AssetType, RuntimeIdentifier and
                                   DestinationSubPath, and DataphorPrivate=true when no project this one references has the package.
     DataphorLayoutPath is the file's path relative to the folder it goes to, in the SDK's copy-local shape. A project in a library's
@@ -81,6 +83,15 @@
       <_DataphorLayoutItem Include="$(TargetPath)" DataphorLayoutKind="Output" DataphorLayoutPath="$(TargetFileName)" />
       <_DataphorLayoutItem Include="@(DebugSymbolsProjectOutputGroupOutput->'%(FinalOutputPath)')" Condition="Exists('%(DebugSymbolsProjectOutputGroupOutput.FinalOutputPath)')" DataphorLayoutKind="Output" DataphorLayoutPath="%(DebugSymbolsProjectOutputGroupOutput.TargetPath)" />
       <_DataphorLayoutItem Include="@(SatelliteDllsProjectOutputGroupOutput->'%(FinalOutputPath)')" DataphorLayoutKind="Output" DataphorLayoutPath="%(SatelliteDllsProjectOutputGroupOutput.TargetPath)" />
+      <!--
+        An executable project also contributes the three files a host needs beside its assembly. $(ProjectDepsFilePath) and
+        $(ProjectRuntimeConfigFilePath) are the SDK's own properties for them (Microsoft.NET.Sdk.targets) and both point into
+        $(TargetDir); the application host has no such property, and .exe is spelled outright because the layout is flattened
+        for Windows x64 anyway. $(ProjectRuntimeConfigDevFilePath) is deliberately not here: see the comment above.
+      -->
+      <_DataphorLayoutItem Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'" Include="$(TargetDir)$(AssemblyName).exe" DataphorLayoutKind="Output" DataphorLayoutPath="$(AssemblyName).exe" />
+      <_DataphorLayoutItem Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'" Include="$(ProjectDepsFilePath)" DataphorLayoutKind="Output" DataphorLayoutPath="$(ProjectDepsFileName)" />
+      <_DataphorLayoutItem Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'" Include="$(ProjectRuntimeConfigFilePath)" DataphorLayoutKind="Output" DataphorLayoutPath="$(ProjectRuntimeConfigFileName)" />
       <_DataphorLayoutItem Include="@(_DataphorPrivatePackageFile)" DataphorLayoutKind="Package" DataphorPrivate="true" />
       <_DataphorLayoutItem Include="@(_DataphorSharedPackageFile)" DataphorLayoutKind="Package" DataphorPrivate="false" />
       <_DataphorLayoutItem Condition="'%(_DataphorLayoutItem.DataphorLayoutKind)' == 'Package'">

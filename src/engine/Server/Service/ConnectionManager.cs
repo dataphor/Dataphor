@@ -46,7 +46,15 @@ namespace Alphora.Dataphor.DAE.Service
 					Error.Fail("Lifetime manager started more than once.");
 				_lifetimeSignal = new ManualResetEvent(false);
 			}
-			new Thread(new ThreadStart(LifetimeWatcher)).Start();
+			// NOTE: a background thread so that it can never hold the process open. It is signalled by Dispose, which
+			// DataphorService.Dispose calls, which DataphorServiceHost.Stop calls; but if the host program's shutdown
+			// timeout (DataphorHost.ShutdownTimeout) ever expires before that happens, a foreground thread waiting here
+			// would turn an abrupt stop into a process that does not exit at all. Nothing is lost by letting the runtime
+			// drop it at process exit: it only waits on an event and reaps idle connections.
+			// port-abandoned-session-cleanup may rework this class.
+			Thread lifetimeWatcher = new Thread(new ThreadStart(LifetimeWatcher));
+			lifetimeWatcher.IsBackground = true;
+			lifetimeWatcher.Start();
 		}
 		
 		private void LifetimeWatcher()

@@ -18,12 +18,31 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
-  <!-- ServiceController, ServiceControllerStatus and ServiceStartMode, which ServiceUtility reads a service's status and start mode through. -->
+  <!-- The hosts DataphorHost runs, and through them the engine, whose DefaultServerName is the instance name the command line defaults to. -->
   <ItemGroup>
+    <ProjectReference Include="..\..\engine\Server.Hosting\Server.Hosting.csproj" />
+  </ItemGroup>
+
+  <!--
+    System.ServiceProcess.ServiceController: ServiceController, ServiceControllerStatus and ServiceStartMode, which
+    ServiceUtility reads a service's status and start mode through.
+    Microsoft.Extensions.Hosting.WindowsServices: UseWindowsService and WindowsServiceHelpers.IsWindowsService, which is
+    the whole of "the same program runs as a Windows service"; it also brings the event-log logging provider.
+    CoreWCF.NetTcp and the framework reference: this project references Server.Hosting, which carries both, and a project
+    that gets CoreWCF.NetTcp only through a project reference reports the package-audit warning NU1902 for its
+    Microsoft.AspNetCore.* 2.3.10 dependencies. Declaring the package here as well lets NuGet's package-override
+    mechanism substitute the in-box ASP.NET Core 10 assemblies; Server.Hosting.csproj records the measurement.
+  -->
+  <ItemGroup>
+    <PackageReference Include="CoreWCF.NetTcp" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="System.ServiceProcess.ServiceController" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="DataphorHost.cs" />
+    <Compile Include="HostCommandLine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceUtility.cs" />
     <Compile Include="Strings.cs" />

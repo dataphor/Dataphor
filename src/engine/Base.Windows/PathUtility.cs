@@ -168,17 +168,19 @@ namespace Alphora.Dataphor.Windows
 			return AppContext.BaseDirectory;
 		}
 
+		/// <summary> The folder that holds the host's own folder: the installation root, which has Libraries beside the binaries' folder. </summary>
+		/// <remarks>
+		/// One level above the binaries, which is right both for an installation (binaries in &lt;install&gt;\Dataphor\, libraries
+		/// in &lt;install&gt;\Libraries\) and for the build's runtime layout (binaries in &lt;layout&gt;\bin\, libraries in
+		/// &lt;layout&gt;\Libraries\). It used to pop a second level when the binaries' folder was named "bin", for the 3.1 source
+		/// tree's per-project output folders; that shape no longer exists - build output goes to
+		/// artifacts\bin\&lt;project&gt;\&lt;configuration&gt;\ and nothing runs from there - and the second pop put the
+		/// runtime layout's default library directory one level too high.
+		/// </remarks>
 		public static string GetInstallationDirectory()
 		{
-			// Start with the base directory
-			string result = Path.GetDirectoryName(AppContext.BaseDirectory);
-			
-			// if this directory is named "bin", we are in a development environment, pop out one more to get the actual Dataphor directory
-			if (Path.GetFileName(result).ToLower() == "bin")
-				result = Path.GetDirectoryName(result);
-				
-			// pop out one more to get the root installation directory
-			return Path.GetDirectoryName(result);
+			// GetDirectoryName of the base directory drops its trailing separator rather than a level, so this is the binaries' folder.
+			return Path.GetDirectoryName(Path.GetDirectoryName(AppContext.BaseDirectory));
 		}
 		
 		public static string GetFullFileName(string fileName)

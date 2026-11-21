@@ -24,6 +24,8 @@
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
+    <Compile Include="HostCommandLineTest.cs" />
+    <Compile Include="HostProgramTest.cs" />
     <Compile Include="InProcessTestFixture.cs" />
     <Compile Include="InstanceConfigurationTest.cs" />
     <Compile Include="InternalCoverageTests.cs" />

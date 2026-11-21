@@ -5,8 +5,9 @@
     has built. This is the only project that writes there:
 
       bin\                core and server assemblies and their package runtime files, in the SDK's copy-local shape
-                          (generic files at the root, runtimes\<rid>\... subtrees as they are). No host yet: no .exe,
-                          .deps.json or .runtimeconfig.json; host-generic-host adds the first one.
+                          (generic files at the root, runtimes\<rid>\... subtrees as they are), and the two host
+                          executables with their .deps.json and .runtimeconfig.json. DAEServer.exe starts a server
+                          from here (AGENTS.md "Runtime layout" says what that means for the library directory).
       Libraries\<Name>\   the library's tracked files (.d4l, Documents\, Upgrades\, ...), its assembly and .pdb, and that
                           assembly's private package files flattened into the folder for the Windows runtime.
 
@@ -49,6 +50,8 @@
     <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\Client\Client.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\hosts\Host\DAE.Host.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\hosts\DAEServer\DAEServer.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\hosts\DAEService\DAE.Service.csproj" DataphorLayoutRole="Bin" />
   </ItemGroup>
 
   <!-- Library: every converted library project (in <Name>\Source\, next to <Name>.d4l). The .d4l check below fails the build when one is missing here. -->

@@ -26,7 +26,9 @@ namespace Alphora.Dataphor.DAE.Service
 	public static class ServiceUtility
 	{
 		// Do not localize
-		// The same string as Engine.ServerSourceName; kept local so that this assembly needs no reference to the engine.
+		// The same string as Engine.ServerSourceName, kept as a copy so that the service registration code does not depend on
+		// the engine, which the assembly as a whole now does through the hosting assembly. ServiceUtilityTest holds the two
+		// in step.
 		public const string EventLogSource = "Dataphor Server";
 
 		// Do not localize: the description the service control manager shows, as 3.1 registered it.

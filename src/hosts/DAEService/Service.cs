@@ -5,154 +5,24 @@
 */
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.ServiceModel;
-using System.ServiceProcess;
-using System.Reflection;
-
-using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE.Server;
+using System.Runtime.Versioning;
 
 namespace Alphora.Dataphor.DAE.Service
 {
-	public class Service : System.ServiceProcess.ServiceBase
+	/// <summary>The Windows service name of the host program, which is <see cref="DataphorHost"/>; DAEServer.exe runs the same program.</summary>
+	/// <remarks>
+	/// The class no longer derives from ServiceBase and has no instance members: UseWindowsService gives the host a
+	/// Windows service lifetime, so one program serves both a console session and the service control manager. The type
+	/// name and the file name are unchanged because an existing service registration names this executable and the
+	/// project's StartupObject names this type.
+	/// </remarks>
+	public class Service
 	{
-		public Service() : base()
+		// The program is Windows-only: it registers a Windows service and reads the Windows event log.
+		[SupportedOSPlatform("windows")]
+		static int Main(string[] args)
 		{
-		}
-		
-		public Service(string serviceName) : base()
-		{
-			ServiceName = serviceName;
-		}
-		
-		public Service(string serviceName, string instanceName) : base()
-		{
-			ServiceName = serviceName;
-			_instanceName = instanceName;
-		}
-		
-		private string _instanceName;
-		
-		private static string GetInstanceName(string[] args)
-		{
-			for (int i = 0; i < args.Length - 1; i++)
-				if ((args[i].ToLower() == "-name") || (args[i].ToLower() == "-n"))
-					return args[i + 1];
-					
-			return null;
-		}
-		
-		// The main entry point for the process
-		static void Main(string[] args)
-		{
-			string instanceName = GetInstanceName(args);
-			if (args.Length > 0)
-			{
-				switch (args[0].ToLower())
-				{
-					// The installer class that used to default the instance name is gone: ServiceUtility registers
-					// the name it is given, so the default is applied here, as the -run case below does.
-					case "-i" :
-					case "-install" :
-						ServiceUtility.Install(instanceName ?? Server.Engine.DefaultServerName);
-						return;
-					case "-u" :
-					case "-uninstall" :
-						ServiceUtility.Uninstall(instanceName ?? Server.Engine.DefaultServerName);
-						return;
-					case "-r" :
-					case "-run" :
-						if (instanceName == null)
-							instanceName = Server.Engine.DefaultServerName;
-							
-						Service service = new Service(ServiceUtility.GetServiceName(instanceName), instanceName);
-						Console.WriteLine(Strings.Get("ServiceStarting"));
-						service.OnStart(args);
-						try
-						{
-							Console.WriteLine(Strings.Get("ServiceRunning"));
-							Console.ReadLine();
-						}
-						finally
-						{
-							Console.WriteLine(Strings.Get("ServiceStopping"));
-							service.OnStop();
-						}
-						return;
-					case "-name" :
-					case "-n" :
-						break;
-					default :
-						throw new ArgumentException(Strings.Get("InvalidCommandLine"));
-				}
-			}
-			
-			System.ServiceProcess.ServiceBase.Run
-			(
-				new System.ServiceProcess.ServiceBase[] { instanceName == null ? new Service() : new Service(ServiceUtility.GetServiceName(instanceName), instanceName) }
-			);
-		}
-
-		private DataphorServiceHost _dataphorServiceHost;
-		
-		/// <summary>
-		/// Set things in motion so your Dataphor service can do its work. Checks to see if the ServerSettings.dst file exists
-		/// in the directory containing the service before deserializing the settings from the file stream.
-		/// </summary>
-		protected override void OnStart(string[] args)
-		{
-			// The args passed here are only coming in from the arguments to the service 
-			// as a result of a manual start from the service control panel, not the
-			// arguments to the actual service. The InstanceName is pulled from
-			// those arguments in the Main static and passed to the constructor of
-			// the service.
-			try
-			{
-				if (_instanceName == null)
-					_instanceName = GetInstanceName(args);
-
-				if (_instanceName == null)
-					_instanceName = Server.Engine.DefaultServerName;
-					
-				_dataphorServiceHost = new DataphorServiceHost();
-				_dataphorServiceHost.InstanceName = _instanceName;
-				_dataphorServiceHost.Start();
-			}
-			catch (Exception exception)
-			{
-				LogException(exception);
-				throw;
-			}
-		}
- 
-		protected override void OnStop()
-		{
-			try 
-			{
-				if (_dataphorServiceHost != null)
-				{
-					if (_dataphorServiceHost.IsActive)
-						_dataphorServiceHost.Stop();
-					_dataphorServiceHost = null;
-				}
-			}
-			catch (Exception exception)
-			{
-				LogException(exception); 
-			}
-		}
-
-		/// <summary>Logs exceptions thrown by the server</summary>
-		public static void LogException(Exception exception)
-		{
-			System.Diagnostics.EventLog.WriteEntry(ServiceUtility.EventLogSource, ExceptionUtility.BriefDescription(exception), EventLogEntryType.Error); 
+			return DataphorHost.Run(args);
 		}
 	}
 }
-
