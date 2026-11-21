@@ -15,6 +15,7 @@ Findings and target per the plan's WS11 section; K13 (password key and IV compil
 - `security-password-storage-design` — `plan/` ticket ending in owner sign-off (`blocked/` with the design as the proposal). Catalog rebuild scripts create users and device users with passwords, some in the existing encrypted form, so the scripted forms are a compatibility surface. Needs `store-rebuild-workflow`.
 - `security-password-storage` — implement the signed-off design.
 - `security-admin-default`, `security-dependency-audit`, `security-operator-rights-review`, `security-threat-model-doc`.
+- `security-transport-design` and `security-transport` - transport security as a designed capability, which the product does not have: `protocol-transport-security` established that every "use a secure connection" setting the product offers has never reached a binding, decided to report the request rather than remove the settings or invent a design, and handed the design here (decision D17 in the plan). The design ticket ends in owner sign-off: which credential type, where a server's certificate comes from, whether a client's identity is checked, what an off-domain client does, and whether an instance that requires security and cannot get it should then refuse to start. Until it lands, a site that needs an encrypted channel supplies its own binding through the client and host hooks, which is the only route there has ever been.
 
 None of this is fixed inline in other tickets.
 
