@@ -37,6 +37,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
+	// NOTE: 979 lines (wc -l, 2026-11-20), the largest file in this test project and half again the next; the host and
+	// client plumbing - HostedInstance, ProtocolClient, the port and configuration helpers - is most of the bulk. If
+	// more hosted cases land here, move that plumbing to a file of its own and leave the cases behind.
 	public class CoreWcfProtocolTest
 	{
 		/// <summary>The instance name, which is the first path segment of the service address on both sides.</summary>
@@ -130,6 +133,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 
 			private readonly string _directory;
+			/// <summary>The instance's own temporary root: its library copy, its instance folder and so its catalog store are all under it.</summary>
+			public string RootDirectory => _directory;
 
 			private readonly string _instanceName;
 			public string InstanceName => _instanceName;
@@ -497,70 +502,52 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestAnAdministrativeErrorArrivesAsTypedFault()
 		{
-			string instanceName = "CoreWcfAdministrativeFault";
-			string directory = TestEnvironment.NewDirectory(instanceName);
-			try
-			{
-				TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
-
-				int portNumber = ReserveLoopbackPorts(1)[0];
-				DataphorServiceHost host = NewHost();
-				WithTheObjectIDCounterRestored
-				(
-					() =>
+			// ShouldListen false: nothing here involves the listener.
+			WithASecondHost
+			(
+				"CoreWcfAdministrativeFault",
+				false,
+				0,
+				host =>
+				{
+					// Constructing the client builds its channel factory; the channel itself opens on the first call below.
+					ClientServer clientServer = new ClientServer(LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+					try
 					{
-						// ShouldListen false: nothing here involves the listener.
-						host.Start(Configuration(instanceName, directory, portNumber, false, 0));
-						try
-						{
-							// The constructor opens the channel.
-							ClientServer clientServer = new ClientServer(LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
-							try
-							{
-								// Stopping the engine over the wire releases the catalog store's file handles, so that the store can be
-								// ruined and the next Start fails in the store with an error of the engine's own.
-								clientServer.Stop();
-								RuinTheCatalogStore(directory);
+						// Stopping the engine over the wire releases the catalog store's file handles, so that the store can be
+						// ruined and the next Start fails in the store with an error of the engine's own.
+						clientServer.Stop();
+						RuinTheCatalogStore(host.RootDirectory);
 
-								Exception error = Assert.Catch(() => clientServer.Start());
+						Exception error = Assert.Catch(() => clientServer.Start());
 
-								Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.FaultException>(), "An untyped fault escaped to the caller: the operation declares no fault detail type on the client contract.");
-								Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.CommunicationException>(), "A bare communication error escaped to the caller.");
-								Assert.That(error, Is.InstanceOf<DataphorException>(), "The server's own exception did not survive. Actual: " + error.GetType().FullName + ": " + error.Message);
-								// The code and the cause, not only the type: the fault's reason text carries the server's message either
-								// way, and an undeclared fault is a bare FaultException that the catch below the typed one turns into
-								// ServerException.Codes.CommunicationFailure - a DataphorException too, so a type-only assertion would
-								// pass against exactly the defect this case is for.
-								Assert.That
-								(
-									((DataphorException)error).Code,
-									Is.EqualTo((int)Alphora.Dataphor.DAE.Connection.ConnectionException.Codes.SQLException),
-									String.Format
-									(
-										"The store's error code did not survive; {0} (CommunicationFailure) is the shape an unrecognised fault takes. Actual: {1}: {2}",
-										(int)ServerException.Codes.CommunicationFailure,
-										error.GetType().FullName,
-										error.Message
-									)
-								);
-								Assert.That(error.InnerException, Is.Not.Null, "The underlying cause was lost; it is the sentence that says what is wrong with the instance.");
-							}
-							finally
-							{
-								clientServer.Close();
-							}
-						}
-						finally
-						{
-							host.Stop();
-						}
+						Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.FaultException>(), "An untyped fault escaped to the caller: the operation declares no fault detail type on the client contract.");
+						Assert.That(error, Is.Not.InstanceOf<System.ServiceModel.CommunicationException>(), "A bare communication error escaped to the caller.");
+						Assert.That(error, Is.InstanceOf<DataphorException>(), "The server's own exception did not survive. Actual: " + error.GetType().FullName + ": " + error.Message);
+						// The code and the cause, not only the type: the fault's reason text carries the server's message either
+						// way, and an undeclared fault is a bare FaultException that the catch below the typed one turns into
+						// ServerException.Codes.CommunicationFailure - a DataphorException too, so a type-only assertion would
+						// pass against exactly the defect this case is for.
+						Assert.That
+						(
+							((DataphorException)error).Code,
+							Is.EqualTo((int)Alphora.Dataphor.DAE.Connection.ConnectionException.Codes.SQLException),
+							String.Format
+							(
+								"The store's error code did not survive; {0} (CommunicationFailure) is the shape an unrecognised fault takes. Actual: {1}: {2}",
+								(int)ServerException.Codes.CommunicationFailure,
+								error.GetType().FullName,
+								error.Message
+							)
+						);
+						Assert.That(error.InnerException, Is.Not.Null, "The underlying cause was lost; it is the sentence that says what is wrong with the instance.");
 					}
-				);
-			}
-			finally
-			{
-				TestEnvironment.TryDeleteDirectory(directory);
-			}
+					finally
+					{
+						clientServer.Close();
+					}
+				}
+			);
 		}
 
 		/// <summary>Overwrites the instance's catalog store with text, so that opening it fails in the store.</summary>
@@ -575,6 +562,51 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(files, Is.Not.Empty, "No catalog store files were found to ruin, so the case would prove nothing.");
 			foreach (string file in files)
 				File.WriteAllText(file, "This is not a database.");
+		}
+
+		/// <summary>
+		/// A transport failure in one of the three administrative operations reaches the caller as a ServerException with
+		/// code CommunicationFailure and the transport's own exception as its cause, the way one already does from the
+		/// other five members of <see cref="ClientServer"/>. Those three caught the typed fault and nothing else, so a
+		/// transport failure in them escaped as the System.ServiceModel exception it was, while the same failure one call
+		/// later on the same object arrived translated (debt-client-contract-missing-fault-declarations).
+		/// </summary>
+		/// <remarks>
+		/// The server is stopped and the call made afterwards, so the failure is a closed port rather than a timing
+		/// window: connecting to a closed loopback port is refused at once and alike on every machine. Start stands for
+		/// all three - each carries one catch of its own, and which of the three runs is not what is in question - and
+		/// this is the one case in the suite that reaches the catch at all: every other error here is a fault, which the
+		/// typed catch above it takes first.
+		/// </remarks>
+		[Test]
+		public void TestAnAdministrativeOutageArrivesAsACommunicationFailure()
+		{
+			// ShouldListen false: nothing here involves the listener.
+			WithASecondHost
+			(
+				"CoreWcfAdministrativeOutage",
+				false,
+				0,
+				host =>
+				{
+					ClientServer clientServer = new ClientServer(LoopbackAddress, host.InstanceName, host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+					try
+					{
+						// The whole host, not the engine alone: the port has to stop answering.
+						host.Host.Stop();
+
+						Exception error = Assert.Catch(() => clientServer.Start());
+
+						Assert.That(error, Is.InstanceOf<ServerException>(), "The transport failure did not arrive as the exception the rest of this object raises for a transport failure. Actual: " + error.GetType().FullName + ": " + error.Message);
+						Assert.That(((ServerException)error).Code, Is.EqualTo((int)ServerException.Codes.CommunicationFailure));
+						Assert.That(error.InnerException, Is.InstanceOf<System.ServiceModel.CommunicationException>(), "The transport's own exception was not kept as the cause, so what failed cannot be read off the error.");
+					}
+					finally
+					{
+						clientServer.Close();
+					}
+				}
+			);
 		}
 
 		/// <summary>
