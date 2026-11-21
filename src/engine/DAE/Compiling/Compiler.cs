@@ -6037,13 +6037,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if ((exception is CompilerException) && (((CompilerException)exception).Code == (int)CompilerException.Codes.NonFatalErrors))
 				{
 					plan.Messages.Insert(messageIndex, new CompilerException(CompilerException.Codes.UnableToConstructSort, plan.CurrentStatement(), dataType.Name));
-					// NOTE: rethrowing the caught object rather than a bare `throw` resets the stack trace to this line; the analyzer reports it
-					// as CA2200 at nine sites in six files - three here, two in Language.D4/Parser.cs, and one each in
-					// Runtime.Instructions/PlanNode.cs, Server/ServerTransaction.cs, ../../Server/Schema/LibraryUtility.cs and
-					// ../../protocol/Client/Server/LocalServer.cs. Left as it is because the exception object, its error code and its message
-					// are unchanged, so no user-facing error text or error code differs; only the trace below the rethrow is lost, and
-					// LocalServer logs the exception before rethrowing, so even there the original trace survives in the log. If a diagnostic
-					// report ever needs the original throw site, change all nine together - a bare `throw` keeps it.
+					// NOTE: this and the other eight sites flagged by warning CA2200 (two more here, DAE Language.D4/Parser.cs, Runtime.Instructions/PlanNode.cs and Server/ServerTransaction.cs, Server's Schema/LibraryUtility.cs, Client's Server/LocalServer.cs) rethrow the caught object, which resets the stack trace to the rethrow line. Left as it is: the object, its error code and its message are unchanged, so no user-facing error text differs, and LocalServer logs before rethrowing, so even there the original trace survives in the log. If a diagnostic report ever needs the original throw site, change all nine together - a bare `throw` keeps it.
 					throw exception;
 				}
 				else
