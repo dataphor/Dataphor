@@ -724,8 +724,10 @@ namespace Alphora.Dataphor.DAE.Server
 					if (String.IsNullOrEmpty(_instanceDirectory))
 						_instanceDirectory = Name;
 
+					// Relative to the machine's instance folder, so that a redirected folder (InstanceManager.InstanceDirectory,
+					// DATAPHOR_INSTANCE_DIRECTORY) carries the instance's own data with it and the path is computed in one place.
 					if (!Path.IsPathRooted(_instanceDirectory))
-						_instanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), DefaultInstanceDirectory), _instanceDirectory);
+						_instanceDirectory = Path.Combine(InstanceManager.GetInstanceDirectory(), _instanceDirectory);
 
 					if (!Directory.Exists(_instanceDirectory))
 						Directory.CreateDirectory(_instanceDirectory);

@@ -31,9 +31,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// property it establishes.
 	/// </summary>
 	/// <remarks>
-	/// The host is driven through Start(ServerConfiguration), so no case reads or writes this machine's instance list.
-	/// The ports are free loopback ports (never 8060 or 8061), and the listener case asserts only that its contract
-	/// answers, because ListenerService reads the machine-wide instance configuration.
+	/// The host is driven through Start(ServerConfiguration), so no case reads or writes this machine's instance list,
+	/// and the fixture points InstanceManager at a folder of its own so that the listener case - which serves whatever
+	/// list its own process resolves - does not resolve, and so create, the machine's folder either. The ports are free
+	/// loopback ports (never 8060 or 8061), and the listener case asserts only that its contract answers, because the
+	/// list it serves is not this fixture's subject.
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
@@ -63,12 +65,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The ports that started listening on this machine while the fixture's host was started.</summary>
 		// NOTE: another process opening a listening socket in that window would be counted here and fail
 		// TestListensOnlyOnTheReservedPorts. Nothing on a build machine normally does in those few milliseconds; if it
-		// ever flakes, narrow the assertion to Kestrel's own default HTTP ports.
+		// ever flakes, narrow the assertion to Kestrel's own default HTTP ports. It has flaked once: on 2026-11-20
+		// (host-instance-directory) one full run counted a third port, numbered just above the two the fixture reserved,
+		// and the same run passed on three immediate repeats, so the window really is open to an unrelated process.
 		private List<int> _portsOpenedByTheHost;
+
+		/// <summary>The instance folder this fixture points InstanceManager at, so that no case resolves the machine's own.</summary>
+		private string _instanceDirectory;
 
 		[OneTimeSetUp]
 		public void SetUpFixture()
 		{
+			// ListenerService.LoadConfiguration serves the instance list its own process resolves, and resolving the
+			// machine's folder creates it under %ProgramData%. Redirected so that this fixture touches no machine state at
+			// all; the listener case asserts nothing about which instances are listed, so an empty list of its own will do.
+			_instanceDirectory = TestEnvironment.NewDirectory(InstanceName + "-Instances");
+			InstanceManager.InstanceDirectory = _instanceDirectory;
+
 			List<int> before = ListeningPorts();
 			try
 			{
@@ -90,6 +103,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				_host.Dispose();
 				_host = null;
+			}
+
+			// Restored whether or not the host was built: InstanceManager is static, so a redirection left set would be in
+			// force for every fixture that runs after this one.
+			InstanceManager.InstanceDirectory = null;
+			if (_instanceDirectory != null)
+			{
+				TestEnvironment.TryDeleteDirectory(_instanceDirectory);
+				_instanceDirectory = null;
 			}
 		}
 

@@ -175,6 +175,14 @@ namespace Alphora.Dataphor.DAE.Service
 		/// why this method is public: the repository has no InternalsVisibleTo convention to use instead.
 		/// </para>
 		/// </param>
+		// NOTE: accepted tradeoff - host-instance-directory added InstanceManager.InstanceDirectory and
+		// DATAPHOR_INSTANCE_DIRECTORY, so a test can now point Start() at an instance list of its own and the machine's list
+		// is no longer the reason this parameter exists; it is kept anyway and the plan paragraph that gave that as its
+		// reason was corrected instead. Two things the redirection cannot carry: DataphorServiceHost.HostName and
+		// LoggingEnabled are properties of the host object rather than settings in a ServerConfiguration, and the fixture
+		// needs both (127.0.0.1 so that no case opens a port another machine can reach, logging off so that an elevated run
+		// does not create the Windows event-log source); and one case needs a start that throws, which a real server can only
+		// be made to do more slowly and less reliably. Revisit if those two properties ever move into the configuration.
 		public static IHost BuildHost(string instanceName, Func<DataphorServiceHost> startServer)
 		{
 			// HostBuilder, not Host.CreateDefaultBuilder: nothing here reads appsettings.json, environment-variable or

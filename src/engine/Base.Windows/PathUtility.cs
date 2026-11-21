@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.Windows
 			}
 		}
 
-		private static string BuildAppPath(string root, string applicationName, VersionModifier modifier)
+		private static string BuildAppPath(string root, string applicationName, VersionModifier modifier, bool ensureExists)
 		{
 			StringBuilder result = new StringBuilder(root);
 			result.AppendFormat(@"{0}Alphora{0}Dataphor{0}", Path.DirectorySeparatorChar);
@@ -107,7 +107,8 @@ namespace Alphora.Dataphor.Windows
 				result.Append(Path.DirectorySeparatorChar);
 			}
 
-			Directory.CreateDirectory(result.ToString());
+			if (ensureExists)
+				Directory.CreateDirectory(result.ToString());
 			return result.ToString();
 		}
 
@@ -128,11 +129,23 @@ namespace Alphora.Dataphor.Windows
 		
 		public static string CommonAppDataPath(string applicationName, VersionModifier versionModifier)
 		{
+			return CommonAppDataPath(applicationName, versionModifier, true);
+		}
+
+		/// <summary> The all-users application data path for the given application and version, optionally without creating it. </summary>
+		/// <remarks>
+		/// Every other overload creates the folder, which is what a caller about to write there wants. Pass false to
+		/// resolve the path alone - reading a default path must not be what first writes to %ProgramData%, which is why
+		/// InstanceManager.InstanceDirectory's getter resolves this way and only GetInstanceDirectory creates.
+		/// </remarks>
+		public static string CommonAppDataPath(string applicationName, VersionModifier versionModifier, bool ensureExists)
+		{
 			return BuildAppPath
 			(
 				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
 				applicationName,
-				versionModifier
+				versionModifier,
+				ensureExists
 			);
 		}
 
@@ -157,7 +170,8 @@ namespace Alphora.Dataphor.Windows
 			(
 				Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 				applicationName,
-				versionModifier
+				versionModifier,
+				true
 			);
 		}
 

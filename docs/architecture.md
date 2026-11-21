@@ -92,7 +92,7 @@ Client side: `Frontend.Client.Session.SetApplication` asks the server which node
 
 ## Hosting, protocol, discovery
 
-`DataphorServiceHost.Start()` (assembly `Alphora.Dataphor.DAE.Server.Hosting`) loads the instance from `%ProgramData%\Alphora\Dataphor\Instances\ServerConfigurations.config`, starts the `Server`, and serves three WCF services, all on one custom binding (binary message encoding over TCP, no security by default, 2 GB limits, infinite timeouts):
+`DataphorServiceHost.Start()` (assembly `Alphora.Dataphor.DAE.Server.Hosting`) loads the instance from `%ProgramData%\Alphora\Dataphor\4\Instances\ServerConfigurations.config` - the folder carries the major version so that installations of different major versions do not share the list, and `InstanceManager.InstanceDirectory` or the environment variable `DATAPHOR_INSTANCE_DIRECTORY` points a process at a folder of its own, which is how a server is started without touching machine state - starts the `Server`, and serves three WCF services, all on one custom binding (binary message encoding over TCP, no security by default, 2 GB limits, infinite timeouts):
 
 | Service | Address | Contract |
 |---|---|---|
@@ -114,10 +114,10 @@ The server interfaces (`src/engine/Server/Contracts`) and the client's asynchron
 |---|---|
 | `<install>\` | Binaries, with the native SQLite interop library |
 | `<install>\Libraries\<Name>\` | Shipped libraries; library assemblies are built *into* these folders |
-| `%ProgramData%\Alphora\Dataphor\Instances\ServerConfigurations.config` | Instance list |
-| `%ProgramData%\Alphora\Dataphor\Instances\<name>\Catalog\` | Catalog store file |
-| `%ProgramData%\Alphora\Dataphor\Instances\<name>\Libraries\`, `…\Log\` | Per-instance library data (documents device, SimpleDevice tables), logs |
-| `%ProgramData%` and `%AppData%` `…\Alphora\Dataphor\Aliases.config` | Machine and user client aliases |
+| `%ProgramData%\Alphora\Dataphor\4\Instances\ServerConfigurations.config` | Instance list (the whole folder is redirected by `DATAPHOR_INSTANCE_DIRECTORY`) |
+| `%ProgramData%\Alphora\Dataphor\4\Instances\<name>\Catalog\` | Catalog store file |
+| `%ProgramData%\Alphora\Dataphor\4\Instances\<name>\Libraries\`, `…\Log\` | Per-instance library data (documents device, SimpleDevice tables), logs |
+| `%ProgramData%` and `%AppData%` `…\Alphora\Dataphor\4\Aliases.config` | Machine and user client aliases; the client has always carried the major version here, and `Instances` is a folder beside it |
 
 ## What is alive
 

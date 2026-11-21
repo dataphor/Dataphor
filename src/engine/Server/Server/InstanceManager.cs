@@ -16,14 +16,20 @@ namespace Alphora.Dataphor.DAE.Server
 	/// <summary>Provides a class for managing the set of instances available on this machine.</summary>
 	/// <remarks>
 	/// The InstanceManager provides a mechanism for managing the instance configuration for a machine.
-	/// The instance configuration is stored in the following configuration file:
-	///	<&lt;>common application data path<&gt;>\Alphora\Dataphor\Instances\ServerConfigurations.config
+	/// The instance configuration is stored in the file ServerConfigurations.config in the folder
+	/// <see cref="InstanceDirectory"/> names, by default
+	///	<&lt;>common application data path<&gt;>\Alphora\Dataphor\<&lt;>major version<&gt;>\Instances.
+	/// The folder carries the major version so that installations of different major versions do not read and write
+	/// each other's instance list, which the client's own machine-wide alias list (AliasManager) has always done.
 	/// </remarks>
 	public class InstanceManager
 	{
 		// Do not localize
 		public const string InstanceConfigurationFileName = "ServerConfigurations.config";
 		public const string DefaultInstanceName = "Dataphor";
+
+		/// <summary>The environment variable that redirects the instance directory for a process that sets it.</summary>
+		public const string InstanceDirectoryVariableName = "DATAPHOR_INSTANCE_DIRECTORY";
 
 		private static InstanceList _instances;
 		public static InstanceList Instances 
@@ -35,9 +41,55 @@ namespace Alphora.Dataphor.DAE.Server
 			} 
 		}
 		
+		private static string _instanceDirectory;
+		/// <summary>
+		/// The folder holding this machine's instance list (ServerConfigurations.config) and, by default, each instance's
+		/// own data folder.
+		/// </summary>
+		/// <remarks>
+		/// Not to be confused with ServerConfiguration.InstanceDirectory, which is one instance's own data folder and is
+		/// defaulted to a sub-folder of this one. Resolved, in order: a value set here; the environment variable
+		/// DATAPHOR_INSTANCE_DIRECTORY; %ProgramData%\Alphora\Dataphor\&lt;major version&gt;\Instances. Reading it does not
+		/// create the folder; GetInstanceDirectory does. Setting it discards the loaded list, so Load must be called again.
+		/// <para>
+		/// The variable is read on each resolution rather than cached, so a process that changes it changes where the next
+		/// resolution looks; the list already loaded is not reloaded by itself. Setting the property to null or empty
+		/// returns to resolving the variable and then the default, which is how a test restores what it changed.
+		/// </para>
+		/// </remarks>
+		public static string InstanceDirectory
+		{
+			get { return ResolveInstanceDirectory(); }
+			set
+			{
+				_instanceDirectory = value;
+
+				// The loaded list came from the folder that was in force when it was loaded; serving it from here after the
+				// folder has changed would hand out instances that are not in the new folder's file. Discarding it makes the
+				// next Instances access throw InstanceConfigurationNotLoaded rather than answer from the old folder, and
+				// GetInstance reloads as it already does for a list that was never loaded.
+				_instances = null;
+			}
+		}
+
+		/// <summary>Resolves <see cref="InstanceDirectory"/> to an absolute path without creating it.</summary>
+		private static string ResolveInstanceDirectory()
+		{
+			string result = _instanceDirectory;
+			if (String.IsNullOrEmpty(result))
+				result = Environment.GetEnvironmentVariable(InstanceDirectoryVariableName);
+			if (String.IsNullOrEmpty(result))
+				result = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.MajorSpecific, ensureExists: false), Server.DefaultInstanceDirectory);
+
+			// A relative override is relative to the process's current directory. An unusable one is left to
+			// Directory.CreateDirectory to report, which names the path in its message - the diagnosis an operator needs.
+			return Path.GetFullPath(result);
+		}
+
+		/// <summary>Resolves <see cref="InstanceDirectory"/>, creates it if it does not exist, and returns it.</summary>
 		public static string GetInstanceDirectory()
 		{
-			string result = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), Server.DefaultInstanceDirectory);
+			string result = ResolveInstanceDirectory();
 			Directory.CreateDirectory(result);
 			return result;
 		}

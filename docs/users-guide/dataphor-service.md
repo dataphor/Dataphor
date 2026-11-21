@@ -32,7 +32,7 @@ One computer can run several Dataphor Server instances side by side, from one se
 
   This registers an additional Windows service, named `Alphora Dataphor (Instance 2)`, whose command line names the instance.
 
-- Configure the instance. Use the Service Configuration Utility, or edit the instance's entry in `ServerConfigurations.config`, in the `Alphora\Dataphor\Instances` folder under the all-users application data directory. The port number must be unique on the machine, and the catalog and library directories must not be shared with another instance; the library directory of an existing instance can be copied for the new one.
+- Configure the instance. Use the Service Configuration Utility, or edit the instance's entry in `ServerConfigurations.config`, in the `Alphora\Dataphor\4\Instances` folder under the all-users application data directory (the folder carries the major version, so an installation of an earlier major version on the same machine has its own and the two do not interfere). The port number must be unique on the machine, and the catalog and library directories must not be shared with another instance; the library directory of an existing instance can be copied for the new one.
 
 - Start the service. The instance can also be run in a console window first, without starting the service, by running the following in the directory holding the binaries:
 
