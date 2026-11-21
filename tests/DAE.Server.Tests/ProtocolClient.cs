@@ -33,11 +33,21 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				// LocalServer starts an Engine of its own to hold the client-side catalog cache, and Engine.InitializeCatalog
 				// resets the process-wide Schema.Object object-id counter to zero (bug-object-id-counter-is-process-wide).
 				// The server's own counter is out of reach when the server is in another process, but the counter this reset
-				// moves is still shared with every other engine in *this* process: an in-process hosted server (which is how
-				// CoreWcfProtocolTest runs), and a second client of this class, which is what the client-side catalog cache
-				// cases need. Handing the counter back afterwards leaves each of them allocating increasing ids.
+				// moves is still shared with every other engine in *this* process. Handing it back afterwards leaves each of
+				// them allocating increasing ids. Measured, by removing this line and running the protocol fixtures:
+				// CoreWcfProtocolTest, which hosts a server in this process and then connects to it, fails three cases with
+				// "UNIQUE constraint failed: DAEObjects.ID"; the out-of-process cases, which run two clients of this class
+				// against a server in another program, pass either way, because each of those clients allocates only into its
+				// own client-side catalog.
 				// The third argument is the client's own host name, which the server records against the connection; it is
 				// not a connection target.
+				// NOTE: this wraps the construction only, and construction is not the only place a client-side engine resets
+				// that counter: LocalServer.EnsureCacheConsistent calls Engine.ClearCatalog when the server's catalog has
+				// moved on, and that re-initializes the catalog and so resets the counter again, in the middle of a prepare,
+				// where no caller can wrap it. It is harmless as the suite stands, because each client clears its cache
+				// before it allocates anything. If a case ever interleaves two clients so that one allocates catalog ids
+				// after the other's cache clear, the allocations collide and this wrapper will not save it; fix the cause
+				// then (bug-object-id-counter-is-process-wide), not this line.
 				TestEnvironment.WithTheObjectIDCounterRestored(() => _localServer = new LocalServer(_clientServer, false, "localhost", keepAliveIntervalSeconds));
 			}
 			catch

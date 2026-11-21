@@ -1,6 +1,6 @@
 description: When one program holds two Dataphor engines at once, the second one to start resets a shared counter, so the first one then reuses catalog identifiers it has already handed out and schema changes start failing or overwriting each other.
 architecture: docs/modernization-plan.md#ws2-engine-and-server-port
-files: src/engine/DAE/Schema/Schema.cs, src/engine/DAE/Server/Engine.cs, src/protocol/Client/Server/LocalServer.cs, src/engine/DAE/Compiling/Compiler.cs, src/engine/DAE/Runtime.Instructions/TableNode.cs, src/engine/DAE/Runtime.Instructions/RenameNode.cs, src/engine/DAE/Runtime.Instructions/DDLNodes.cs, src/engine/DAE/Schema/TableVar.cs, tests/DAE.Server.Tests/CoreWcfProtocolTest.cs
+files: src/engine/DAE/Schema/Schema.cs, src/engine/DAE/Server/Engine.cs, src/protocol/Client/Server/LocalServer.cs, src/engine/DAE/Compiling/Compiler.cs, src/engine/DAE/Runtime.Instructions/TableNode.cs, src/engine/DAE/Runtime.Instructions/RenameNode.cs, src/engine/DAE/Runtime.Instructions/DDLNodes.cs, src/engine/DAE/Schema/TableVar.cs, tests/DAE.Server.Tests/ProtocolClient.cs
 repro: verified
 severity: corruption
 likelihood: unusual
@@ -26,9 +26,17 @@ A client connection holds one. `LocalServer` — the client-side half of every n
 - **Reachable in a shipped configuration**: the IDE lets a user open several connections at once, and an embedded in-process server alongside a connection to a remote server is two engines in one process. A server-to-server link is *not* affected: it goes through `NativeCLISession`, which starts no engine.
 - Out of process — a client program and a server program, which is how the product normally runs — there is one engine per process and nothing goes wrong. That is why this has survived.
 
+## A second place the counter is reset, which the workaround cannot wrap (from `test-client-server-cursors`)
+
+The workaround below wraps the *construction* of a client-side server object, because that is where its engine starts. It is not the only place a client-side engine re-initializes its catalog and so resets the counter: when the server's catalog has moved on since the client last looked, the client throws its cached catalog away and rebuilds it (`LocalServer.EnsureCacheConsistent` calls `Engine.ClearCatalog`, which calls the same `InitializeCatalog`), and that happens in the middle of preparing an expression, where no caller is in a position to save and restore anything.
+
+Harmless as the tests stand, and measured: the two out-of-process cases that run two client connections against one server pass whether or not the workaround is applied, because each connection clears its own cached catalog before it allocates anything into it. Removing the workaround fails three `CoreWcfProtocolTest` cases instead, with `UNIQUE constraint failed: DAEObjects.ID` — that fixture hosts a server in the test's own process and then connects to it, which is the arrangement the workaround was written for. The arrangement that would break is a program where one client-side catalog allocates identifiers *after* another client-side engine has reset the counter; nothing does that today, so there is a `NOTE:` at the workaround saying so.
+
+Two consequences for this ticket's *done* condition: the workaround moved from `CoreWcfProtocolTest.cs` to `tests/DAE.Server.Tests/ProtocolClient.cs` (one copy, used by every protocol fixture), and removing it is not enough — the cache-rebuild path has to allocate from its own engine's counter too, or the same collision returns by a route no test wraps.
+
 ## The workaround now in the tree, which is not the fix
 
-`CoreWcfProtocolTest`'s client helper reads the counter before it builds its `LocalServer` and writes the value back afterwards, which leaves both engines allocating increasing identifiers. It is three lines with a comment pointing here. Anything else that needs an engine beside an engine will need the same three lines, which is the argument for fixing the cause: the next ticket that needs it (`test-client-server` is the obvious one) should not have to rediscover it.
+The shared client helper of the protocol tests (`tests/DAE.Server.Tests/ProtocolClient.cs`, `TestEnvironment.WithTheObjectIDCounterRestored`) reads the counter before it builds its `LocalServer` and writes the value back afterwards, which leaves both engines allocating increasing identifiers. It is three lines with a comment pointing here. Anything else that needs an engine beside an engine will need the same three lines, which is the argument for fixing the cause: the out-of-process layer inherited it rather than rediscovering it, and the section above says where it is not enough.
 
 ## Direction, when this is promoted
 

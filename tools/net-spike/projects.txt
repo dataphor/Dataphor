@@ -29,5 +29,4 @@ libraries/System.Internet/Source/System.Internet.csproj
 libraries/System.Integration/Source/System.Integration.csproj
 tests/DAE.Server.Tests/DAE.Server.Tests.csproj
 tests/Common.Tests/Common.Tests.csproj
-tests/DAE.Client.Tests/DAE.Client.Tests.csproj
 tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj

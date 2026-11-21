@@ -13,6 +13,15 @@ using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
+	/// <summary>Deleting the last or the first row of a browse cursor, and recovering from the crack it leaves.</summary>
+	/// <remarks>
+	/// The same two cases, against the same expressions and with the same assertions, were also in
+	/// tests/DAE.Client.Tests/CLI/CLITest.cs, over a connection to a server in another program. That project was deleted
+	/// (test-client-server-cursors) and these were not duplicated: what they establish is cursor-at-boundary behaviour, not
+	/// wire behaviour, and in process is the lowest layer that shows it. The one case of that project worth having over the
+	/// wire - a cursor over more rows than the client buffers at a time - is
+	/// <see cref="OutOfProcessProtocolTest.ACursorCrossesFetchBatchesAndChangesThroughItself"/>.
+	/// </remarks>
 	[TestFixture]
 	public class CursorTest : InProcessTestFixture
 	{
