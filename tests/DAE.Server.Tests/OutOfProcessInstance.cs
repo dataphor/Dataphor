@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	internal sealed class OutOfProcessInstance : IDisposable
 	{
 		/// <summary>The folder under the root holding the child's instance list, which is what DATAPHOR_INSTANCE_DIRECTORY names.</summary>
-		public const string InstancesFolderName = "Instances";
+		private const string InstancesFolderName = "Instances";
 
 		// The test server program's command line. Spelled here because this project does not compile against that
 		// program; tests/TestHarness/Program.cs declares the same strings as constants and is the one to change.
@@ -87,9 +87,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		private readonly string _directory;
 		/// <summary>The instance's own temporary root: its instance list, its library copy and its catalog are all under it.</summary>
-		public string RootDirectory => _directory;
+		private readonly string _directory;
 
 		private readonly string _instanceDirectory;
 
@@ -109,6 +108,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The child's exit code once it has stopped, or null while it is still running.</summary>
 		public int? ExitCode => _exitCode;
 
+		private bool _wasStarted;
 		private bool _wasKilled;
 
 		private readonly object _outputLock = new object();
@@ -159,6 +159,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			_process.OutputDataReceived += OnOutputDataReceived;
 			_process.ErrorDataReceived += OnErrorDataReceived;
 			_process.Start();
+			_wasStarted = true;
 
 			// Drained from the moment the process starts, and asynchronously: a child that fills a pipe buffer nobody
 			// reads stops, and reading one stream to its end while the other fills up deadlocks.
@@ -169,6 +170,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				throw new InvalidOperationException(Diagnostic(String.Format("The test server did not report itself ready within {0} seconds.", ReadyTimeoutMilliseconds / 1000)));
 
 			CheckReadyLine();
+
+			// A child that printed its ready line and then went is a ready line with no server behind it: without this
+			// every case would fail on a refused connection instead of on what actually happened.
+			if (_process.HasExited)
+				throw new InvalidOperationException(Diagnostic("The test server reported itself ready and then exited."));
 		}
 
 		/// <summary>Waits until the child reports itself ready, exits, or runs out of time; false if it is not ready.</summary>
@@ -186,7 +192,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (_process.HasExited)
 				{
 					// The overload with no timeout also waits for the asynchronous readers, so a ready line printed just
-					// before the exit is in hand, and the diagnostic has everything the child said.
+					// before the exit is in hand, and the diagnostic has everything the child said. See the NOTE in Stop
+					// for what that wait depends on.
 					_process.WaitForExit();
 					return _readyLine != null;
 				}
@@ -258,8 +265,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			if (_process == null)
 			{
-				if (_exitCode == null)
+				if (!_wasStarted)
 					return "was never started";
+				if (_exitCode == null)
+					return _wasKilled ? "was killed and was not seen to exit within the time allowed" : "was not seen to exit";
 				return String.Format("exited with code {0}{1}", _exitCode, _wasKilled ? " after being killed, because it did not stop when it was asked to" : "");
 			}
 
@@ -301,8 +310,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				if (process.HasExited)
 				{
-					// The overload with no timeout also waits for the asynchronous readers, so the captured output is
-					// complete; reached only once the process is known to be gone, so it cannot block here.
+					// The overload with no timeout also waits for the asynchronous readers, so the captured output is complete.
+					// NOTE: that wait ends when both pipes reach end of file, which is when the last handle to them closes - so
+					// it would not end if the child ever started a process of its own that outlived it and inherited them. The
+					// test server starts none; if it is ever given a mode that does, bound this wait.
 					process.WaitForExit();
 					_exitCode = process.ExitCode;
 				}
