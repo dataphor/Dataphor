@@ -85,7 +85,10 @@ namespace Alphora.Dataphor.DAE.Server
 		/// after a drop, under the name the dropped link used, would otherwise match the dropped link's session, and the
 		/// new link's host name, instance name, port, link users and session settings would be ignored for as long as
 		/// the process lived. Object ids are unique within one engine's catalog, and every link in this list came from
-		/// the catalog of the engine that owns this process.
+		/// the catalog of the engine that owns this process. bug-object-id-counter-is-process-wide does not
+		/// reach this: the ids that bug collides are the ones allocated after a second engine in the same
+		/// process reset the shared counter, and a server whose catalog persists refuses the colliding object
+		/// at its store before there is a link to connect to.
 		/// </remarks>
 		public int IndexOf(Schema.ServerLink link)
 		{
