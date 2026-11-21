@@ -38,9 +38,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
-	// NOTE: 849 lines (wc -l, 2026-11-20), still the largest file in this test project; the host plumbing moved out to
-	// HostedInstance.cs when protocol-host-binding-hook needed a second hosted fixture, and what is left of the bulk is
-	// the cases themselves plus the client plumbing, ProtocolClient. If that grows, it is the next thing to move.
+	// NOTE: 754 lines (wc -l, 2026-11-21), still the largest file in this test project; the host plumbing moved out to
+	// HostedInstance.cs when protocol-host-binding-hook needed a second hosted fixture, and the client plumbing to
+	// ProtocolClient.cs when test-client-server-fixture needed it out of process. What is left is the cases themselves,
+	// so a split from here would be by subject - the hosting and listener cases away from the wire cases.
 	public class CoreWcfProtocolTest
 	{
 		/// <summary>The instance name, which is the first path segment of the service address on both sides.</summary>
@@ -117,62 +118,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return result;
 		}
 
-		/// <summary>
-		/// The shipped client stack, assembled the way src/client/DAE.Client/ServerConnection.cs assembles it for a
-		/// connection alias: a ClientServer on the binding DataphorServiceUtility.GetBinding builds, wrapped in a
-		/// LocalServer. No channel is hand-rolled and no hook on DataphorServiceUtility is touched.
-		/// </summary>
-		private sealed class ProtocolClient : IDisposable
-		{
-			public ProtocolClient(string instanceName, int portNumber)
-			{
-				// The same host name the host listens on; see HostedInstance.LoopbackAddress.
-				_clientServer = new ClientServer(HostedInstance.LoopbackAddress, instanceName, portNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
-				try
-				{
-					// LocalServer starts an Engine of its own to hold the client-side catalog cache, and Engine.InitializeCatalog
-					// resets the process-wide Schema.Object object-id counter to zero (bug-object-id-counter-is-process-wide).
-					// With the server in this same process that hands the server ids its catalog already holds, and the next
-					// create statement fails on a unique-constraint violation in the catalog store. Handing the counter back
-					// afterwards leaves both engines allocating increasing ids. Out of process - how the product runs - the two
-					// counters are separate and none of this arises.
-					// The third argument is the client's own host name, which the server records against the connection; it
-					// is not a connection target.
-					TestEnvironment.WithTheObjectIDCounterRestored(() => _localServer = new LocalServer(_clientServer, false, "localhost"));
-				}
-				catch
-				{
-					_clientServer.Close();
-					throw;
-				}
-			}
-
-			private readonly ClientServer _clientServer;
-			private LocalServer _localServer;
-
-			/// <summary>The client-side IServer: every call on it is a call on the wire.</summary>
-			public IServer Server => _localServer;
-
-			/// <summary>The handle the service minted for this connection, which is per service instance.</summary>
-			public int ConnectionHandle => ((ClientConnection)_localServer.ServerConnection).ConnectionHandle;
-
-			public void Dispose()
-			{
-				try
-				{
-					if (_localServer != null)
-					{
-						_localServer.Dispose();
-						_localServer = null;
-					}
-				}
-				finally
-				{
-					_clientServer.Close();
-				}
-			}
-		}
-
 		/// <summary>Runs <paramref name="body"/> on a session and process over the wire, cleaning both up on either path.</summary>
 		private void OnWire(Action<IServerProcess> body)
 		{
@@ -181,26 +126,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private static void OnWire(HostedInstance host, Action<IServerProcess> body)
 		{
-			using (ProtocolClient client = new ProtocolClient(host.InstanceName, host.PortNumber))
-			{
-				IServerSession session = client.Server.Connect(new SessionInfo("Admin", ""));
-				try
-				{
-					IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
-					try
-					{
-						body(process);
-					}
-					finally
-					{
-						session.StopProcess(process);
-					}
-				}
-				finally
-				{
-					client.Server.Disconnect(session);
-				}
-			}
+			using (ProtocolClient client = new ProtocolClient(HostedInstance.LoopbackAddress, host.InstanceName, host.PortNumber))
+				client.OnProcess(body);
 		}
 
 		/// <summary>
@@ -750,8 +677,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TestOneServiceInstanceServesEveryConnection()
 		{
-			using (ProtocolClient first = new ProtocolClient(_host.InstanceName, _host.PortNumber))
-			using (ProtocolClient second = new ProtocolClient(_host.InstanceName, _host.PortNumber))
+			using (ProtocolClient first = new ProtocolClient(HostedInstance.LoopbackAddress, _host.InstanceName, _host.PortNumber))
+			using (ProtocolClient second = new ProtocolClient(HostedInstance.LoopbackAddress, _host.InstanceName, _host.PortNumber))
 			{
 				Assert.That(second.ConnectionHandle, Is.Not.EqualTo(first.ConnectionHandle), "Two connections were given the same handle, so each was served by a HandleManager of its own.");
 

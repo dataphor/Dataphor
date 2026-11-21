@@ -37,8 +37,11 @@
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
+    <Compile Include="OutOfProcessInstance.cs" />
+    <Compile Include="OutOfProcessProtocolTest.cs" />
     <Compile Include="ParserRoundTripCorpusTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtocolClient.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
     <Compile Include="ServiceUtilityTest.cs" />
     <Compile Include="StoreContractTests.cs" />
@@ -83,6 +86,8 @@
     <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" />
     <!-- Builds the runtime layout before this project, so that dotnet test and Visual Studio never run the tests against a stale or missing layout. Nothing is compiled against it or copied from it. -->
     <ProjectReference Include="..\..\tools\layout\Layout.csproj" ReferenceOutputAssembly="false" Private="false" />
+    <!-- The test server program the out-of-process fixtures start as a child process; built before this project, not compiled against and not copied here (the target below records its path instead). -->
+    <ProjectReference Include="..\TestHarness\DAE.Test.Harness.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
   <!--
@@ -93,5 +98,21 @@
   <ItemGroup>
     <AssemblyMetadata Include="DataphorLayoutDir" Value="$(DataphorLayoutDir)" />
   </ItemGroup>
+
+  <!--
+    The test server program, which OutOfProcessInstance starts as a child process and whose path code must never spell.
+    Asked of that project rather than composed from $(ArtifactsPath), so that a change to the output layout cannot
+    leave this pointing at nothing; GetTargetPath returns the assembly, and the program is the application host beside
+    it (TestEnvironment.FindTestHarnessPath changes the extension). Before GetAssemblyAttributes, which is where the
+    SDK turns AssemblyMetadata items into attributes.
+  -->
+  <Target Name="_DataphorRecordTestHarnessPath" BeforeTargets="GetAssemblyAttributes">
+    <MSBuild Projects="..\TestHarness\DAE.Test.Harness.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_DataphorTestHarnessTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <AssemblyMetadata Include="DataphorTestHarnessPath" Value="@(_DataphorTestHarnessTargetPath)" />
+    </ItemGroup>
+  </Target>
 
 </Project>

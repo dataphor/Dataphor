@@ -24,6 +24,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The AssemblyMetadata key under which the project file records $(DataphorLayoutDir) of the configuration being built.</summary>
 		public const string LayoutDirectoryMetadataKey = "DataphorLayoutDir";
 
+		/// <summary>The AssemblyMetadata key under which the project file records the test server program's build output.</summary>
+		public const string TestHarnessPathMetadataKey = "DataphorTestHarnessPath";
+
 		/// <summary>Set to 1 to turn on the engine's logging and keep every test directory; see AGENTS.md "Build and test".</summary>
 		public const string LoggingVariable = "DATAPHOR_TEST_LOGGING";
 
@@ -43,13 +46,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		public static string LibrariesDirectory => Path.Combine(LayoutDirectory, "Libraries");
 
+		/// <summary>What the project file recorded under <paramref name="key"/>, or null.</summary>
+		private static string Metadata(string key)
+		{
+			string result = null;
+			foreach (AssemblyMetadataAttribute attribute in typeof(TestEnvironment).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>())
+				if (attribute.Key == key)
+					result = attribute.Value;
+			return result;
+		}
+
 		private static string FindLayoutDirectory()
 		{
-			string layoutDirectory = null;
-			foreach (AssemblyMetadataAttribute attribute in typeof(TestEnvironment).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>())
-				if (attribute.Key == LayoutDirectoryMetadataKey)
-					layoutDirectory = attribute.Value;
-
+			string layoutDirectory = Metadata(LayoutDirectoryMetadataKey);
 			if (String.IsNullOrEmpty(layoutDirectory))
 				throw new InvalidOperationException(String.Format("The test assembly does not record the runtime layout directory (AssemblyMetadata \"{0}\"). Build it through its project file: dotnet build Dataphor.slnx", LayoutDirectoryMetadataKey));
 
@@ -58,6 +67,25 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				throw new InvalidOperationException(String.Format("The runtime layout is missing: \"{0}\" does not exist. Run dotnet build Dataphor.slnx (with the same -c configuration) before running the tests.", librariesDirectory));
 
 			return layoutDirectory;
+		}
+
+		// Lazy<T> caches a failure, so every test that needs the program fails with the same message.
+		private static readonly Lazy<string> _testHarnessPath = new Lazy<string>(FindTestHarnessPath);
+		/// <summary>The test server program (tests/TestHarness), which a fixture starts as a child process.</summary>
+		public static string TestHarnessPath => _testHarnessPath.Value;
+
+		private static string FindTestHarnessPath()
+		{
+			string assemblyPath = Metadata(TestHarnessPathMetadataKey);
+			if (String.IsNullOrEmpty(assemblyPath))
+				throw new InvalidOperationException(String.Format("The test assembly does not record the test server program (AssemblyMetadata \"{0}\"). Build it through its project file: dotnet build Dataphor.slnx", TestHarnessPathMetadataKey));
+
+			// The project file records the assembly, which is what MSBuild knows about; the program is the application host beside it.
+			string result = Path.ChangeExtension(assemblyPath, ".exe");
+			if (!File.Exists(result))
+				throw new InvalidOperationException(String.Format("The test server program is missing: \"{0}\" does not exist. Build tests/TestHarness/DAE.Test.Harness.csproj - dotnet build Dataphor.slnx, with the same -c configuration.", result));
+
+			return result;
 		}
 
 		private static readonly Lazy<string> _runDirectory = new Lazy<string>(CreateRunDirectory);

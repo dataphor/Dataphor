@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The test suite's own server program. tests/DAE.Server.Tests starts it as a child process so that a client and a
+    server can be in different programs; AGENTS.md "Build and test" records why the suite does not start the shipped
+    DAEServer.exe instead. It is a test tool: it is not in tools/layout/Layout.csproj and nothing ships it.
+  -->
+  <PropertyGroup>
+    <AssemblyName>DAE.Test.Harness</AssemblyName>
+    <RootNamespace>DAE.Test.Harness</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Constants: the same set as the test project this program serves (TRACE in both configurations, plus DEBUG in Debug). Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\src\engine\Server\Server.csproj" />
+    <!-- The production host this program starts. -->
+    <ProjectReference Include="..\..\src\engine\Server.Hosting\Server.Hosting.csproj" />
+    <!--
+      For the client mode test-client-server-abandoned adds: that mode connects to a server and is then killed, which
+      needs the shipped client stack in a program of its own. Referenced here so that the mode is one file's worth of
+      change; nothing in the serve mode compiles against it.
+    -->
+    <ProjectReference Include="..\..\src\protocol\Client\Client.csproj" />
+    <!--
+      Not compiled against, and not optional: the server resolves its catalog store from a class name with
+      Type.GetType, and on .NET 10 an assembly that sits next to the executable but is not named in the executable's
+      .deps.json cannot be loaded by simple name. Without this reference a server started here fails with error 115107.
+      src/hosts/DAEServer/DAEServer.csproj carries the same reference for the same reason.
+    -->
+    <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" />
+  </ItemGroup>
+
+  <!--
+    CoreWCF.NetTcp and the framework reference: this program gets CoreWCF.NetTcp through project references, and a
+    project that gets it only that way reports the package-audit warning NU1902 for its Microsoft.AspNetCore.* 2.3.10
+    dependencies. Declaring the package here as well lets NuGet's package-override mechanism substitute the in-box
+    ASP.NET Core 10 assemblies; Server.Hosting.csproj records the measurement. This program therefore needs the
+    ASP.NET Core shared runtime as well as the .NET one, which every .NET SDK install provides.
+  -->
+  <ItemGroup>
+    <PackageReference Include="CoreWCF.NetTcp" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>
