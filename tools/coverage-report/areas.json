@@ -1,0 +1,183 @@
+{
+  "assemblies": {
+    "engine": [
+      "Alphora.Dataphor",
+      "Alphora.Dataphor.Windows",
+      "Alphora.Dataphor.DAE",
+      "AlphoraDataphorServer",
+      "Alphora.Dataphor.DAE.Server.Hosting",
+      "Alphora.Dataphor.DAE.SQLite"
+    ],
+    "reported": [
+      "AlphoraDataphorCommon",
+      "AlphoraDataphorClient",
+      "Alphora.Dataphor.DAE.NativeCLI",
+      "Alphora.Dataphor.DAE.Host",
+      "Alphora.Dataphor.Frontend.Server",
+      "Alphora.Dataphor.DAE.Device.SQL",
+      "Alphora.Dataphor.DAE.Device.MSSQL",
+      "Alphora.Dataphor.DAE.Device.Simple",
+      "Alphora.Dataphor.DAE.Connection",
+      "Alphora.Dataphor.DAE.Diagnostics",
+      "Alphora.Dataphor.System.Platform",
+      "Alphora.Dataphor.System.Internet",
+      "Alphora.Dataphor.System.Integration"
+    ],
+    "ignored": [
+      "DAE.Server.Tests",
+      "Common.Tests",
+      "DAE.Test.Harness",
+      "LibraryLoadingProbe",
+      "Layout",
+      "CoreWCF.Dispatcher"
+    ]
+  },
+  "areas": [
+    {
+      "name": "Application transactions",
+      "paths": ["src/engine/DAE/Device.ApplicationTransaction/"]
+    },
+    {
+      "name": "Streams",
+      "paths": [
+        "src/engine/DAE/Streams/",
+        "src/engine/Server/Streams/",
+        "src/engine/Base/StreamUtility.cs",
+        "src/engine/Base/TemporaryStream.cs"
+      ]
+    },
+    {
+      "name": "Security",
+      "paths": [
+        "src/engine/DAE/Schema/Security.cs",
+        "src/engine/DAE/Runtime.Instructions/SecurityNodes.cs",
+        "src/engine/Server/Runtime.Instructions/SecurityNodes.cs"
+      ]
+    },
+    {
+      "name": "Server links",
+      "paths": [
+        "src/engine/DAE/Schema/ServerLink.cs",
+        "src/engine/DAE/Server/RemoteSession.cs",
+        "src/engine/Server/Server/RemoteSessionImplementation.cs"
+      ]
+    },
+    {
+      "name": "Libraries and upgrades",
+      "paths": [
+        "src/engine/DAE/Schema/Library.cs",
+        "src/engine/DAE/Runtime.Instructions/LibraryNodes.cs",
+        "src/engine/Server/Runtime.Instructions/LibraryNodes.cs",
+        "src/engine/Server/Schema/LibraryUtility.cs"
+      ]
+    },
+    {
+      "name": "RealSQL",
+      "paths": ["src/engine/DAE/Language.RealSQL/"]
+    },
+    {
+      "name": "Debugger",
+      "paths": ["src/engine/DAE/Debug/"]
+    },
+    {
+      "name": "Catalog device and store",
+      "paths": [
+        "src/engine/DAE/Device.Catalog/",
+        "src/engine/Server/Device.Catalog/",
+        "src/engine/DAE/Store/",
+        "src/engine/Store.SQLite/"
+      ]
+    },
+    {
+      "name": "Memory device",
+      "paths": ["src/engine/DAE/Device.Memory/"]
+    },
+    {
+      "name": "D4 language",
+      "paths": ["src/engine/DAE/Language.D4/", "src/engine/DAE/Language/"]
+    },
+    {
+      "name": "Compiler",
+      "paths": ["src/engine/DAE/Compiling/"]
+    },
+    {
+      "name": "Plan nodes",
+      "paths": [
+        "src/engine/DAE/Runtime.Instructions/",
+        "src/engine/Server/Runtime.Instructions/"
+      ]
+    },
+    {
+      "name": "Runtime values",
+      "paths": [
+        "src/engine/DAE/Runtime.Data/",
+        "src/engine/DAE/Runtime/",
+        "src/engine/DAE/Frame.cs",
+        "src/engine/DAE/Stack.cs",
+        "src/engine/DAE/StackWindow.cs"
+      ]
+    },
+    {
+      "name": "Schema",
+      "paths": ["src/engine/DAE/Schema/"]
+    },
+    {
+      "name": "Server and sessions",
+      "paths": [
+        "src/engine/DAE/Server/",
+        "src/engine/Server/Server/",
+        "src/engine/DAE/CLI.cs",
+        "src/engine/DAE/SessionInfo.cs"
+      ]
+    },
+    {
+      "name": "WCF services and contracts",
+      "paths": [
+        "src/engine/Server/Service/",
+        "src/engine/DAE/Contracts/",
+        "src/engine/Server/Contracts/",
+        "src/engine/Server.Hosting/"
+      ]
+    },
+    {
+      "name": "Native CLI (server side)",
+      "paths": ["src/engine/Server/NativeCLI/"]
+    },
+    {
+      "name": "SQL translation (engine)",
+      "paths": ["src/engine/DAE/Language.SQL/"]
+    },
+    {
+      "name": "Device connections (engine)",
+      "paths": ["src/engine/DAE/Connection/", "src/engine/Server/Connection/"]
+    },
+    {
+      "name": "Base utilities",
+      "paths": ["src/engine/Base/", "src/engine/Base.Windows/"]
+    },
+    {
+      "name": "Engine errors and registration",
+      "paths": [
+        "src/engine/DAE/DAEException.cs",
+        "src/engine/DAE/Strings.cs",
+        "src/engine/DAE/Utility.cs",
+        "src/engine/DAE/Register.cs",
+        "src/engine/DAE/Device/",
+        "src/engine/DAE/Properties/",
+        "src/engine/Server/Register.cs",
+        "src/engine/Server/Properties/"
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "paths": ["artifacts/"],
+      "reason": "generated source; the CoreWCF operation-invoker generator writes into artifacts/obj/"
+    },
+    {
+      "paths": ["src/engine/DAE/REST/", "src/engine/Server/REST/"],
+      "reason": "RESTResult and RESTMarshal are compiled but nothing in the repository calls them: their only consumer was the web prototype now parked in legacy/, and removal is an arm on the hygiene umbrella",
+      "ticket": "debt-ws12-hygiene-remainder"
+    }
+  ]
+}
