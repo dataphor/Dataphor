@@ -93,7 +93,7 @@
 { "script": "SerializationTables", "status": "pass" },
 { "script": "SerializationTypes", "status": "pass" },
 { "script": "SerializationViews", "status": "pass" },
-{ "script": "ServerLink", "status": "pass", "batches": true, "linkedServer": true, "note": "batch by batch because the script creates a user and then runs a block as that user through ExecuteAs, which opens a session of its own: nested in one statement, the new session cannot see the uncommitted user" },
+{ "script": "ServerLink", "status": "pass", "batches": true, "linkedServer": true, "note": "batch by batch because the script creates a user and then runs a block as that user through ExecuteAs, which opens a session of its own: nested in one statement, that session authenticates as the user but the User-role membership CreateUser gave it is still uncommitted, so it is refused the rights the role grants" },
 { "script": "SessionAndProcessScopedTables", "status": "pass" },
 { "script": "SessionTables", "status": "pass" },
 { "script": "ShortLibrary", "status": "pass" },

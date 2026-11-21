@@ -3764,6 +3764,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
+		// NOTE: the users cache is per engine and is filled before the creating transaction commits, so another session can
+		// authenticate as a user whose creation has not committed (a rollback removes it again, through CreateUserInstruction).
+		// It holds no rights there: the role membership CreateUser also inserts is transactional, and the pending-user
+		// machinery (CatalogDevice.HasPendingUser) keeps another session from reading an uncommitted grant. If an uncommitted
+		// user must stop being visible at all, that machinery is the model to follow here.
 		public virtual void InsertUser(Schema.User user)
 		{
 			CacheUser(user);

@@ -86,7 +86,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// implicit transaction per batch, as Dataphoria runs a script, instead of nested in one ExecuteScript statement whose
 	/// transaction stays open for the whole script. The text is read from the script server's own copy of the scripts library.
 	/// Use it only for a script that depends on batch boundaries (one that leaves an application transaction it changed, or
-	/// that must see a batch's work committed), and say why in <c>note</c>.</item>
+	/// that must see a batch's work committed - a block run as another user through <c>ExecuteAs</c>, for instance, runs in
+	/// a session of its own, which sees only committed catalog changes), and say why in <c>note</c>.</item>
 	/// <item><c>linkedServer</c> (optional, <c>true</c> only): a second Dataphor server, in a child process, named
 	/// <c>Dataphor</c> and hosting a listener on a dynamically chosen port, started before the script and stopped after it;
 	/// while it runs, this process's client-side listener port
