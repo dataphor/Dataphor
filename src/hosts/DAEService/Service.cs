@@ -13,7 +13,6 @@ using System.Data;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceProcess;
-using System.Configuration.Install;
 using System.Reflection;
 
 using Alphora.Dataphor.BOP;
@@ -57,13 +56,15 @@ namespace Alphora.Dataphor.DAE.Service
 			{
 				switch (args[0].ToLower())
 				{
+					// The installer class that used to default the instance name is gone: ServiceUtility registers
+					// the name it is given, so the default is applied here, as the -run case below does.
 					case "-i" :
 					case "-install" :
-						ServiceUtility.Install(instanceName);
+						ServiceUtility.Install(instanceName ?? Server.Engine.DefaultServerName);
 						return;
 					case "-u" :
 					case "-uninstall" :
-						ServiceUtility.Uninstall(instanceName);
+						ServiceUtility.Uninstall(instanceName ?? Server.Engine.DefaultServerName);
 						return;
 					case "-r" :
 					case "-run" :

@@ -48,6 +48,7 @@
     <ProjectReference Include="..\..\src\protocol\Common\Common.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\Client\Client.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\hosts\Host\DAE.Host.csproj" DataphorLayoutRole="Bin" />
   </ItemGroup>
 
   <!-- Library: every converted library project (in <Name>\Source\, next to <Name>.d4l). The .d4l check below fails the build when one is missing here. -->

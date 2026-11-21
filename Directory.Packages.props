@@ -23,6 +23,7 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="10.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.1.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.1.0" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.15" />
   </ItemGroup>
 
 </Project>

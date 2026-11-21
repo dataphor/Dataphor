@@ -14,7 +14,9 @@ src/windows/Frontend.Client.Windows/Frontend.Client.Windows.csproj
 src/windows/Frontend.Client.WPF/Frontend.Client.WPF.csproj
 src/windows/Dataphoria/Dataphoria.csproj
 src/hosts/DAEServer/DAEServer.csproj
+src/hosts/Host/DAE.Host.csproj
 src/hosts/DAEService/DAE.Service.csproj
+src/windows/ConfigurationUtility/DAE.Service.ConfigurationUtility.csproj
 src/hosts/D4Runner/D4Runner.csproj
 src/client/DAE.Client.Provider/DAE.Client.Provider.csproj
 libraries/SQLDevice/Source/DAE.Device.SQL.csproj

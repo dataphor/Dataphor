@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    RootNamespace is Alphora.Dataphor.DAE.Service rather than a namespace matching the folder name, for two reasons.
+    The types here keep the namespace their callers already use (the service executable and the tray configuration
+    utility today, the command-line tool later), and EmbeddedResourceUseDependentUponConvention is off repository-wide,
+    so Strings.resx takes the manifest name $(RootNamespace).Strings - the name Strings.cs looks it up by.
+  -->
+  <PropertyGroup>
+    <AssemblyName>Alphora.Dataphor.DAE.Host</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE.Service</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- ServiceController, ServiceControllerStatus and ServiceStartMode, which ServiceUtility reads a service's status and start mode through. -->
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceUtility.cs" />
+    <Compile Include="Strings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Strings.resx" />
+  </ItemGroup>
+
+</Project>

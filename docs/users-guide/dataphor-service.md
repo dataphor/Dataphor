@@ -20,14 +20,6 @@ DAEService.exe -i
 
 Once the service is installed, it will appear in the list of items visible from the Windows service configuration snap-in in Windows. The service can then be managed like any other Microsoft Windows Service, or using the Dataphor Service Configuration Utility.
 
-Installing the Dataphor service creates the files in the following table.
-
-| File | Description |
-|----|----|
-| DAEService.InstallLog | Contains the results of attempting to install or uninstall the Dataphor Service. If there are errors, this information may help in correcting problems with the Dataphor service installation. |
-| DAEService.InstallState | Contains information used by the Dataphor service. This file should not be modified. |
-| InstallUtil.InstallLog | Contains the log of actions performed during the Dataphor Service install or uninstall process. |
-
 ## Installing Multiple Instances
 
 The Dataphor Server Service can be configured to allow multiple instances running side by side on the same computer. To configure this:

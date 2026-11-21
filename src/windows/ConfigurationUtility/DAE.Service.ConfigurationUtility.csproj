@@ -169,9 +169,8 @@
       <Name>Base.Windows</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\hosts\DAEService\DAE.Service.csproj">
-      <Project>{B7466206-120E-45BD-9FB0-F30A0C7971A4}</Project>
-      <Name>DAE.Service</Name>
+    <ProjectReference Include="..\..\hosts\Host\DAE.Host.csproj">
+      <Name>DAE.Host</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client.Windows\Frontend.Client.Windows.csproj">
