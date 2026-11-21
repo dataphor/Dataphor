@@ -134,9 +134,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private bool _wasStarted;
 		private bool _wasKilled;
 
-		private readonly object _outputLock = new object();
-		private readonly StringBuilder _output = new StringBuilder();
-		private readonly StringBuilder _error = new StringBuilder();
+		private readonly ChildOutput _childOutput = new ChildOutput();
 
 		/// <summary>The child's ready line, set by the output reader on a thread of its own.</summary>
 		private volatile string _readyLine;
@@ -252,41 +250,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private void OnOutputDataReceived(object sender, DataReceivedEventArgs arguments)
 		{
-			if (arguments.Data == null)
-				return;
+			_childOutput.AppendOutput(arguments.Data);
 
-			lock (_outputLock)
-				_output.AppendLine(arguments.Data);
-
-			if ((_readyLine == null) && arguments.Data.StartsWith(ReadyPrefix + " ", StringComparison.Ordinal))
+			if ((_readyLine == null) && (arguments.Data != null) && arguments.Data.StartsWith(ReadyPrefix + " ", StringComparison.Ordinal))
 				_readyLine = arguments.Data;
 		}
 
 		private void OnErrorDataReceived(object sender, DataReceivedEventArgs arguments)
 		{
-			if (arguments.Data == null)
-				return;
-
-			lock (_outputLock)
-				_error.AppendLine(arguments.Data);
+			_childOutput.AppendError(arguments.Data);
 		}
 
 		/// <summary>Everything there is to say about the child, for the message of a failing assertion.</summary>
 		/// <remarks>Its own output included: a child that failed to start said why there, and nowhere else.</remarks>
 		public string Diagnostic(string problem)
 		{
-			string state = DescribeState();
-			lock (_outputLock)
-				return String.Format
-				(
-					"{0}{1}The test server process ({2}) {3}.{1}Its standard output:{1}{4}Its standard error:{1}{5}",
-					problem,
-					Environment.NewLine,
-					TestEnvironment.TestHarnessPath,
-					state,
-					_output,
-					_error
-				);
+			return _childOutput.Diagnostic(problem, "test server process", DescribeState());
 		}
 
 		private string DescribeState()
@@ -448,9 +427,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			/// <summary>The client's exit code once it has gone, or null while it is still running.</summary>
 			public int? ExitCode => _exitCode;
 
-			private readonly object _outputLock = new object();
-			private readonly StringBuilder _output = new StringBuilder();
-			private readonly StringBuilder _error = new StringBuilder();
+			private bool? _hadAlreadyExited;
+			/// <summary>Whether the client had already gone by the time <see cref="Kill"/> reached it; null before the kill.</summary>
+			/// <remarks>
+			/// A case that kills this client has to know it was alive to kill: a client that failed on its own after reporting
+			/// its transaction also stops pinging, so its session is reclaimed just the same and a case that only watched the
+			/// session go would pass without having shown what it is about. <see cref="Kill"/> tolerates an already-dead child so
+			/// that teardown is safe on every path; this is what keeps that tolerance from hiding the one case where it matters.
+			/// </remarks>
+			public bool? HadAlreadyExited => _hadAlreadyExited;
+
+			private readonly ChildOutput _childOutput = new ChildOutput();
 
 			/// <summary>The client's holding line, set by the output reader on a thread of its own.</summary>
 			private volatile string _holdingLine;
@@ -548,15 +535,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			private void OnOutputDataReceived(object sender, DataReceivedEventArgs arguments)
 			{
-				if (arguments.Data == null)
-					return;
-
-				lock (_outputLock)
-					_output.AppendLine(arguments.Data);
+				_childOutput.AppendOutput(arguments.Data);
 
 				// The whole line is matched rather than its prefix, so a line this class cannot read is reported as "no
 				// holding line" with the child's output attached rather than silently accepted.
-				if (_holdingLine != null)
+				if ((arguments.Data == null) || (_holdingLine != null))
 					return;
 
 				string expected = HoldingPrefix + " " + _tableName + " ";
@@ -569,28 +552,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			private void OnErrorDataReceived(object sender, DataReceivedEventArgs arguments)
 			{
-				if (arguments.Data == null)
-					return;
-
-				lock (_outputLock)
-					_error.AppendLine(arguments.Data);
+				_childOutput.AppendError(arguments.Data);
 			}
 
 			/// <summary>Everything there is to say about the client, for the message of a failing assertion.</summary>
 			public string Diagnostic(string problem)
 			{
-				string state = DescribeState();
-				lock (_outputLock)
-					return String.Format
-					(
-						"{0}{1}The client process ({2}) {3}.{1}Its standard output:{1}{4}Its standard error:{1}{5}",
-						problem,
-						Environment.NewLine,
-						TestEnvironment.TestHarnessPath,
-						state,
-						_output,
-						_error
-					);
+				return _childOutput.Diagnostic(problem, "client process", DescribeState());
 			}
 
 			private string DescribeState()
@@ -625,12 +593,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				using (process)
 				{
+					_hadAlreadyExited = process.HasExited;
 					try
 					{
 						process.Kill(entireProcessTree: true);
 					}
-					// It had already gone - which for this child means it failed before it was killed - so there is
-					// nothing left to kill and its output is already captured.
+					// It had already gone - which for this child means it failed before it was killed, reported by
+					// HadAlreadyExited - so there is nothing left to kill and its output is already captured.
 					catch (InvalidOperationException) { }
 
 					if (process.WaitForExit(KillTimeoutMilliseconds))
@@ -641,6 +610,60 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			public void Dispose()
 			{
 				Kill();
+			}
+		}
+
+		/// <summary>What a child harness process wrote to its standard output and standard error, captured as it arrived.</summary>
+		/// <remarks>
+		/// Shared by the two children this file starts, which differ in how they stop and in the one line each waits for but
+		/// not in this: both are drained from the moment they start (a child that fills a pipe buffer nobody reads stops),
+		/// both are appended to from a thread that is not the test's, and everything either said belongs in the message of a
+		/// failing assertion. A third child mode therefore costs no copy of it.
+		/// </remarks>
+		private sealed class ChildOutput
+		{
+			private readonly object _syncHandle = new object();
+			private readonly StringBuilder _output = new StringBuilder();
+			private readonly StringBuilder _error = new StringBuilder();
+
+			/// <summary>Captures one line of standard output; null, which is how the reader says the stream ended, is ignored.</summary>
+			public void AppendOutput(string line)
+			{
+				Append(_output, line);
+			}
+
+			/// <summary>Captures one line of standard error; null, which is how the reader says the stream ended, is ignored.</summary>
+			public void AppendError(string line)
+			{
+				Append(_error, line);
+			}
+
+			private void Append(StringBuilder lines, string line)
+			{
+				if (line == null)
+					return;
+
+				lock (_syncHandle)
+					lines.AppendLine(line);
+			}
+
+			/// <summary>A failing assertion's message: the problem, what the child was and what became of it, and all it said.</summary>
+			/// <param name="what">What to call the child in the message - "test server process", "client process".</param>
+			/// <param name="state">What became of it, which only the class that started it can say.</param>
+			public string Diagnostic(string problem, string what, string state)
+			{
+				lock (_syncHandle)
+					return String.Format
+					(
+						"{0}{1}The {2} ({3}) {4}.{1}Its standard output:{1}{5}Its standard error:{1}{6}",
+						problem,
+						Environment.NewLine,
+						what,
+						TestEnvironment.TestHarnessPath,
+						state,
+						_output,
+						_error
+					);
 			}
 		}
 	}

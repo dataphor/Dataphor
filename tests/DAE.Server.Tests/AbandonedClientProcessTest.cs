@@ -46,7 +46,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <remarks>
 		/// <para>
 		/// The watcher wakes every quarter of this with a floor of a second, so a connection whose pings have stopped is
-		/// relinquished between five and six and a quarter seconds after its last one.
+		/// relinquished between five and six and a quarter seconds after its last one. This case measures from the kill
+		/// rather than from the last ping, and the last ping was up to <see cref="KeepAliveIntervalSeconds"/> before it, so
+		/// what it sees is four to six and a quarter seconds: a measurement under the threshold is the expected thing.
 		/// </para>
 		/// <para>
 		/// It has to exceed <see cref="KeepAliveIntervalSeconds"/> by enough to survive a ping that is late or lost - the
@@ -100,6 +102,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 							Stopwatch sinceTheKill = Stopwatch.StartNew();
 							client.Kill();
+
+							// Without this the case would also pass for a client that had died on its own: that too
+							// stops the pings, so the session goes the same way and nothing below could tell them apart.
+							Assert.That
+							(
+								client.HadAlreadyExited,
+								Is.False,
+								client.Diagnostic("The client process had already gone by the time this case killed it, so what follows would not be about a client killed while it held its session.")
+							);
+
 							TimeSpan waited = WaitForTheSessionToGo(observing, client, sinceTheKill);
 
 							TestContext.Progress.WriteLine
