@@ -1811,8 +1811,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink serverLink = (Schema.ServerLink)objectValue;
 			
-			// TODO: Prevent drop if user has active sessions on this server?
-			
+			// NOTE: accepted tradeoff - the drop does not refuse when a session is holding a connection made with the dropped mapping.
+			// UpdateCatalogObject below ends the issuing process's connection, so that session's next use of the link falls back to the
+			// link's default credentials (Schema.ServerLink.GetUser) rather than keeping the dropped account. Refusing instead was
+			// declined: it would add a new error to an existing operator signature, which a catalog rebuild script that drops and
+			// re-creates a link user would start failing on, and what it would have to consult is the server-wide RemoteSessions rather
+			// than this process's list, so an idle session holding a connection could block a password rotation outright. Revisit if a
+			// deployment ever needs a link user to be undroppable while a connection made with it is held.
+
 			if (!serverLink.Users.ContainsKey(userID))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.ServerLinkUserNotFound, userID);
 

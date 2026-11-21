@@ -134,6 +134,27 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(RemoteCallDepth("AlteredLink"), Is.EqualTo(TaggedCallDepth));
 		}
 
+		/// <summary>Changing which credentials a link connects with ends the issuing process's connection too, so its next use of the link connects with the new ones.</summary>
+		/// <remarks>
+		/// One case for all six link user operators: each of them, like an alter, reaches the link through
+		/// CatalogDeviceSession.UpdateCatalogObject, which is where the close now lives, so a second operator would exercise the same
+		/// code. The credentials this gives the link are ones the other server refuses, which is how the case can tell a fresh
+		/// connection from a kept one. Only that it throws is asserted: a refused connection arrives wrapped, and the message is the
+		/// reflection invocation's rather than the far server's.
+		/// </remarks>
+		[Test]
+		public void TestLinkUserChangeClosesTheChangingProcessConnection()
+		{
+			ExecuteScript(CreateLink("RecredentialedLink", null));
+			Assert.That(RemoteCallDepth("RecredentialedLink"), Is.EqualTo(DefaultCallDepth));
+			Assert.That(ConnectionCount(), Is.EqualTo(1));
+
+			ExecuteScript("CreateServerLinkUser('Admin', Name('RecredentialedLink'), 'Admin', 'wrong');");
+
+			Assert.That(ConnectionCount(), Is.EqualTo(0));
+			Assert.That(() => { RemoteCallDepth("RecredentialedLink"); }, Throws.Exception);
+		}
+
 		/// <summary>A process whose connection to another server has died must still be able to stop.</summary>
 		/// <remarks>
 		/// Ending the far session is a call over the wire, and a failed one used to leave the session handle set, the WCF

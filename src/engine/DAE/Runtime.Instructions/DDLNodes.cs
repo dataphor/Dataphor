@@ -2656,16 +2656,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.CatalogDeviceSession.AlterMetaData(server, _alterServerStatement.AlterMetaData);
 			server.ResetServerLink();
 			server.ApplyMetaData();
+			// Closes this process's connection to the link, so the next use of it connects with the new settings; see UpdateCatalogObject.
 			program.CatalogDeviceSession.UpdateCatalogObject(server);
 
-			// After the metadata is applied, so a failed alter closes nothing: the next use of the link on this process then connects
-			// with the new settings, which a connection already open would never re-read.
-			// NOTE: accepted tradeoff - only this process's connection. A session on another process that has already connected to this
-			// link goes on using the settings it connected with until that process ends, which is what the original author's "the active
-			// sessions would just continue to use the current settings" contemplated; revisit if a deployment ever needs an alter to take
-			// effect everywhere at once, which would need an operator for closing another session's remote connection (there is none).
-			program.CatalogDeviceSession.CloseRemoteSession(server);
-			
 			return null;
 		}
     }

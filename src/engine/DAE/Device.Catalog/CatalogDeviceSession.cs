@@ -1890,7 +1890,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())
+			{
 				InternalUpdateCatalogObject(objectValue);
+
+				// A catalog change that affects how a server link connects ends the issuing process's connection to that link, so that
+				// its next use of the link connects with what the catalog now says: an alter, and each of the link user operators in
+				// SystemNodes.cs, reaches the link through here. After the update, so a failed change closes nothing.
+				// NOTE: accepted tradeoff - only this process's connection. A session on another process that has already connected to
+				// this link goes on using the settings and credentials it connected with until that process ends, which is what the
+				// original author's "the active sessions would just continue to use the current settings" contemplated; revisit if a
+				// deployment ever needs such a change to take effect everywhere at once, which would need an operator for closing
+				// another session's remote connection (there is none).
+				if (objectValue is Schema.ServerLink serverLink)
+					CloseRemoteSession(serverLink);
+			}
 		}
 
 		protected virtual void InternalUpdateCatalogObject(Schema.CatalogObject objectValue)
