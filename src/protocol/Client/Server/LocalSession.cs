@@ -24,31 +24,23 @@ namespace Alphora.Dataphor.DAE.Server
 			_sessionInfo = sessionInfo;
 			_sessionID = session.SessionID;
 			_internalSession = ((IServer)_server._internalServer).Connect(new SessionInfo(Engine.SystemUserID, String.Empty, Engine.SystemLibraryName, false));
-			StartKeepAlive();
 		}
 
 		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				StopKeepAlive();
+				if (_internalSession != null)
+				{
+					((IServer)_server._internalServer).Disconnect(_internalSession);
+					_internalSession = null;
+				}
 			}
 			finally
 			{
-				try
-				{
-					if (_internalSession != null)
-					{
-						((IServer)_server._internalServer).Disconnect(_internalSession);
-						_internalSession = null;
-					}
-				}
-				finally
-				{
-					_session = null;
-					_server = null;
-					base.Dispose(disposing);
-				}
+				_session = null;
+				_server = null;
+				base.Dispose(disposing);
 			}
 		}
 
@@ -89,69 +81,7 @@ namespace Alphora.Dataphor.DAE.Server
         /// <value>Returns the <see cref="SessionInfo"/> object for this session.</value>
         public SessionInfo SessionInfo {  get { return _sessionInfo; } }
 
-		#region Keep Alive
-
-		/*
-			Strategy: The client sends a keep alive message to the server connection every couple 
-			 minutes.  This allows for very simple keep alive logic on the server:  If the server 
-			 has not received a message from the client in n minutes, disconnect the client.
-			 See the comment in the server connection for more details.
-		*/
-
-		public const int LocalKeepAliveInterval = 120;	// 2 Minutes
-
-		/// <summary> Signal used to indicate that the keep-alive thread can terminate. </summary>
-		private ManualResetEvent _keepAliveSignal;
-		private Object _keepAliveReferenceLock = new Object();
-
-		private void StartKeepAlive()
-		{
-			lock (_keepAliveReferenceLock)
-			{
-				if (_keepAliveSignal != null)
-					Error.Fail("Keep alive started more than once");
-				_keepAliveSignal = new ManualResetEvent(false);
-			}
-			new Thread(new ThreadStart(KeepAlive)).Start();	// Don't use the thread pool... long running thread
-		}
-
-		private void KeepAlive()
-		{
-			try
-			{
-				bool signaled = false;
-				while (!signaled)
-				{
-					// Wait for either a signal or a time-out
-					signaled = _keepAliveSignal.WaitOne(LocalKeepAliveInterval * 1000);
-
-					// If WaitOne ended due to timeout, send a keep-alive message (then wait again)
-					if (!signaled)
-						_server.ServerConnection.Ping();
-				}
-
-				// The keep alive processing is complete.  Clean up...
-				lock (_keepAliveReferenceLock)
-				{
-					((IDisposable)_keepAliveSignal).Dispose();
-					_keepAliveSignal = null;	// Free the reference 
-				}
-			}
-			catch
-			{
-				// Don't allow exceptions to go unhandled... the framework will abort the application
-			}
-		}
-
-		private void StopKeepAlive()
-		{
-			lock (_keepAliveReferenceLock)
-			{
-				if (_keepAliveSignal != null)
-					_keepAliveSignal.Set();
-			}
-		}
-		
-		#endregion
+		// The keep-alive ping is LocalServer's: the server measures the connection, not the session. See the
+		// keep-alive region of LocalServer.
 	}
 }

@@ -180,6 +180,27 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// Runs <paramref name="body"/> and hands the process its object-id counter back afterwards: starting an engine sets
+		/// the process-wide counter from that engine's own catalog (bug-object-id-counter-is-process-wide), which would
+		/// otherwise leave a server that was already running allocating ids its catalog already holds. An engine that started
+		/// and was then stopped has moved the counter just as much as one that stayed up, and a client-side LocalServer moves
+		/// it too: it starts an engine of its own for its catalog cache. Out of process - how the product runs - the counters
+		/// are separate and none of this arises.
+		/// </summary>
+		public static void WithTheObjectIDCounterRestored(Action body)
+		{
+			int nextObjectID = Schema.Object.GetNextObjectID();
+			try
+			{
+				body();
+			}
+			finally
+			{
+				Schema.Object.SetNextObjectID(nextObjectID);
+			}
+		}
+
 		/// <summary>Copies a folder recursively; <paramref name="target"/> may exist, but must not already hold the files copied.</summary>
 		public static void CopyDirectory(string source, string target)
 		{

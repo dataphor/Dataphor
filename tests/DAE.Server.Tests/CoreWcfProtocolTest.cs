@@ -136,11 +136,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					// create statement fails on a unique-constraint violation in the catalog store. Handing the counter back
 					// afterwards leaves both engines allocating increasing ids. Out of process - how the product runs - the two
 					// counters are separate and none of this arises.
-					int nextObjectID = Schema.Object.GetNextObjectID();
 					// The third argument is the client's own host name, which the server records against the connection; it
 					// is not a connection target.
-					_localServer = new LocalServer(_clientServer, false, "localhost");
-					Schema.Object.SetNextObjectID(nextObjectID);
+					TestEnvironment.WithTheObjectIDCounterRestored(() => _localServer = new LocalServer(_clientServer, false, "localhost"));
 				}
 				catch
 				{
@@ -705,7 +703,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
 
 					DataphorServiceHost host = HostedInstance.NewHost();
-					WithTheObjectIDCounterRestored
+					TestEnvironment.WithTheObjectIDCounterRestored
 					(
 						() =>
 						{
@@ -733,7 +731,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Runs <paramref name="body"/> against a second hosted instance, with the object-id counter handed back afterwards.</summary>
 		private static void WithASecondHost(string instanceName, bool shouldListen, int listenerPortNumber, Action<HostedInstance> body)
 		{
-			WithTheObjectIDCounterRestored
+			TestEnvironment.WithTheObjectIDCounterRestored
 			(
 				() =>
 				{
@@ -741,26 +739,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						body(host);
 				}
 			);
-		}
-
-		/// <summary>
-		/// Runs <paramref name="body"/> and hands the fixture's own server its object-id counter back afterwards: starting
-		/// a second server in the process sets the process-wide counter from that server's own catalog
-		/// (bug-object-id-counter-is-process-wide), which would otherwise leave the fixture's server allocating ids its
-		/// catalog already holds. An engine server that started and was then stopped has moved the counter just as much as
-		/// one that stayed up.
-		/// </summary>
-		private static void WithTheObjectIDCounterRestored(Action body)
-		{
-			int nextObjectID = Schema.Object.GetNextObjectID();
-			try
-			{
-				body();
-			}
-			finally
-			{
-				Schema.Object.SetNextObjectID(nextObjectID);
-			}
 		}
 
 		/// <summary>

@@ -41,8 +41,21 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks>The buffer size to use when copying library files over the CLI.</remarks>
 		public const int FileCopyBufferSize = 16384;
 		
-		public LocalServer(IRemoteServer server, bool clientSideLoggingEnabled, string hostName) : base()
+		/// <summary>Establishes a connection to <paramref name="server"/>, pinged every <see cref="DefaultKeepAliveInterval"/> seconds.</summary>
+		public LocalServer(IRemoteServer server, bool clientSideLoggingEnabled, string hostName) : this(server, clientSideLoggingEnabled, hostName, DefaultKeepAliveInterval) { }
+
+		/// <summary>Establishes a connection to <paramref name="server"/>, pinged every <paramref name="keepAliveIntervalSeconds"/> seconds.</summary>
+		/// <remarks>
+		/// The interval has to stay well under the idle threshold of the server being connected to, which is five minutes
+		/// for the server this version ships; see the keep-alive region at the bottom of this class. A host embedding the
+		/// client against a server configured otherwise, and a test that cannot wait two minutes for a ping, set their own.
+		/// </remarks>
+		public LocalServer(IRemoteServer server, bool clientSideLoggingEnabled, string hostName, int keepAliveIntervalSeconds) : base()
 		{
+			if (keepAliveIntervalSeconds < 1)
+				throw new ArgumentOutOfRangeException(nameof(keepAliveIntervalSeconds), keepAliveIntervalSeconds, "The keep-alive interval must be at least one second.");
+
+			_keepAliveInterval = keepAliveIntervalSeconds;
 			_server = server;
 			_hostName = hostName;
 			_referenceCount = 1;
@@ -53,6 +66,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_serverConnection = _server.Establish(_internalServer.Name, _hostName);
 			_serverCacheTimeStamp = server.CacheTimeStamp;
 			_clientCacheTimeStamp = 1;
+			StartKeepAlive();
 		}
 		
 		public void Dispose()
@@ -66,25 +80,49 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				try
 				{
-					if (_internalServer != null)
-					{
-						_internalServer.Dispose();
-						_internalServer = null;
-					}
+					// Signalled before the connection is relinquished, so that the keep-alive thread stops pinging it. The
+					// signal is not waited on: a ping already past its wait can still land during the relinquish, and the
+					// loop swallows whatever comes back from it.
+					StopKeepAlive();
 				}
 				finally
 				{
-					if (_server != null)
+					try
 					{
-						try
+						if (_internalServer != null)
 						{
-							if (_serverConnection != null)
-								_server.Relinquish(_serverConnection);
+							_internalServer.Dispose();
+							_internalServer = null;
 						}
-						finally
+					}
+					finally
+					{
+						if (_server != null)
 						{
-							_serverConnection = null;
-							_server = null;
+							try
+							{
+								if (_serverConnection != null)
+								{
+									try
+									{
+										_server.Relinquish(_serverConnection);
+									}
+									catch
+									{
+										// Ignored, and only around this one call: the server may already have relinquished the
+										// connection - which is exactly what it does once the keep-alive pings stop arriving -
+										// and releasing something already released leaves nothing to release. Over the wire
+										// the second release comes back as the service's unknown-object-handle error. A client
+										// that was idle too long still has to be able to disconnect, so there is nothing here
+										// worth failing on; the precedent is LocalSession.StopProcess.
+									}
+								}
+							}
+							finally
+							{
+								_serverConnection = null;
+								_server = null;
+							}
 						}
 					}
 				}
@@ -581,6 +619,86 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			((LocalSession)session).Dispose();
         }
+
+		#region Keep Alive
+
+		/*
+			Strategy: the client pings its server connection every _keepAliveInterval seconds. That allows for very simple
+			liveness logic on the server: if it has had no message on a connection for longer than its own idle threshold,
+			it relinquishes the connection (ConnectionManager.IdleTimeInSeconds, five minutes for the server this version
+			ships). The two numbers are related only in that the server's threshold has to exceed the client's interval, by
+			enough to survive a ping that is late or lost.
+
+			The ping lives here, and not on LocalSession where it was through 3.1, because what the server measures is the
+			connection - and this object owns the connection for its whole life, while sessions come and go over it. A
+			connection with no session open is still a connection the server would otherwise reclaim.
+		*/
+
+		/// <summary>The number of seconds between keep-alive pings, unless the constructor is given another.</summary>
+		public const int DefaultKeepAliveInterval = 120;	// 2 Minutes
+
+		private readonly int _keepAliveInterval;
+
+		/// <summary> Signal used to indicate that the keep-alive thread can terminate. </summary>
+		private ManualResetEvent _keepAliveSignal;
+		private Object _keepAliveReferenceLock = new Object();
+
+		private void StartKeepAlive()
+		{
+			lock (_keepAliveReferenceLock)
+			{
+				if (_keepAliveSignal != null)
+					Error.Fail("Keep alive started more than once");
+				_keepAliveSignal = new ManualResetEvent(false);
+			}
+			// Don't use the thread pool... long running thread. A background thread, so that a LocalServer that is never
+			// disposed can never hold the client process open after Main returns; the server's own idle watcher is a
+			// background thread for the same reason (see ConnectionManager.StartLifetimeWatcher).
+			Thread keepAliveThread = new Thread(new ThreadStart(KeepAlive));
+			keepAliveThread.IsBackground = true;
+			keepAliveThread.Start();
+		}
+
+		private void KeepAlive()
+		{
+			try
+			{
+				bool signaled = false;
+				while (!signaled)
+				{
+					// Wait for either a signal or a time-out
+					signaled = _keepAliveSignal.WaitOne(_keepAliveInterval * 1000);
+
+					// If WaitOne ended due to timeout, send a keep-alive message (then wait again)
+					if (!signaled)
+						_serverConnection.Ping();
+				}
+
+				// The keep alive processing is complete.  Clean up...
+				lock (_keepAliveReferenceLock)
+				{
+					((IDisposable)_keepAliveSignal).Dispose();
+					_keepAliveSignal = null;	// Free the reference
+				}
+			}
+			catch
+			{
+				// Don't allow exceptions to go unhandled... the framework will abort the application.
+				// A ping that cannot land ends the thread, which is the right answer: a client whose pings do not reach the
+				// server has no connection left to keep alive. Nothing is logged; this class has no log of its own here.
+			}
+		}
+
+		private void StopKeepAlive()
+		{
+			lock (_keepAliveReferenceLock)
+			{
+				if (_keepAliveSignal != null)
+					_keepAliveSignal.Set();
+			}
+		}
+
+		#endregion
     }
 }
 
