@@ -43,10 +43,15 @@ namespace Alphora.Dataphor.DAE.Service
 
 		/// <summary>A last look at each host's service builder, after that host's endpoints have been added.</summary>
 		/// <remarks>
-		/// Where service credentials - a server certificate, for one - are installed: CoreWCF reaches them through
-		/// IServiceBuilder.ConfigureServiceHostBase&lt;TService&gt; and ConfigureAllServiceHostBase. The builder is the
-		/// unit rather than the endpoint, unlike the client's ServiceEndpointHook, because CoreWCF's AddServiceEndpoint
-		/// returns the builder and there is no endpoint object to hand out.
+		/// Where service credentials - a server certificate, for one - are installed: CoreWCF reaches them through the
+		/// ConfigureServiceHostBase&lt;TService&gt; and ConfigureAllServiceHostBase extension methods on IServiceBuilder
+		/// (declared in CoreWCF.Configuration.ServiceBuilderExtensions, so a hook that calls them needs that namespace),
+		/// which hand a delegate a CoreWCF.ServiceHostBase and its Credentials while that host is being built. That the hook is
+		/// early enough for it is established by running it, in
+		/// HostBindingHookTest.TestTheBuilderHookReachesEachHostsServiceCredentials, because this is called from inside
+		/// the application-pipeline callback, after the host's dependency-injection container is built. The builder is
+		/// the unit rather than the endpoint, unlike the client's ServiceEndpointHook, because CoreWCF's
+		/// AddServiceEndpoint returns the builder and there is no endpoint object to hand out.
 		/// </remarks>
 		public static Action<IServiceBuilder> ServiceBuilderHook = _defaultServiceBuilderHook;
 

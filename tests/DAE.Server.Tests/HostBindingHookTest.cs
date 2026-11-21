@@ -8,6 +8,8 @@ using System.IO;
 
 using NUnit.Framework;
 
+using CoreWCF.Configuration;
+
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Service;
@@ -124,12 +126,57 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// A hook that returns no binding is refused by name. CoreWCF would otherwise fail while an endpoint was being
 		/// added, with nothing in the message to say that a hook produced the null.
 		/// </summary>
+		/// <remarks>
+		/// Through the listener's host, which is a host on its own with no engine server behind it: the guard is the one
+		/// both hosts read, and reaching it this way costs a reserved port rather than a server start. Nothing ends up
+		/// listening - the refusal comes before the host is built - and the using is there for the regression where it
+		/// does not.
+		/// </remarks>
 		[Test]
 		public void TestANullBindingIsRefusedByName()
 		{
 			DataphorServiceHostHooks.BuildBindingCall = () => null;
-			Exception error = StartAndCatch("HostBindingHookNull", false);
+			int port = HostedInstance.ReserveLoopbackPorts(1)[0];
+			Exception error = Assert.Catch(() => { using (new ListenerServiceHost(HostedInstance.LoopbackAddress, port, false)) { } });
 			Assert.That(error.ToString(), Does.Contain("DataphorServiceHostHooks.BuildBindingCall"), "The failure does not name the hook that caused it. Actual: " + error);
+		}
+
+		/// <summary>
+		/// What the builder hook is for: a site reaches each host's service host through it, which is where CoreWCF
+		/// carries the service credentials a server certificate is installed into. Run rather than read off CoreWCF's
+		/// metadata, because the hook is called from inside the application-pipeline callback, after the host's
+		/// dependency-injection container is built - a configuration route that had to register a service would be too
+		/// late there, and the extension point would not do the one thing it exists for.
+		/// </summary>
+		/// <remarks>
+		/// No certificate is installed, the suite having none, and none is needed: the question is whether the delegate
+		/// reaches a service host with credentials there to be set. On the listener's host, which carries no engine
+		/// server; both hosts call the same hook, which TestBothHostsReachTheServiceBuilderHook establishes.
+		/// </remarks>
+		[Test]
+		public void TestTheBuilderHookReachesEachHostsServiceCredentials()
+		{
+			bool configured = false;
+			bool credentialsReachable = false;
+			DataphorServiceHostHooks.ServiceBuilderHook =
+				builder =>
+					builder.ConfigureAllServiceHostBase
+					(
+						serviceHost =>
+						{
+							configured = true;
+							credentialsReachable = serviceHost.Credentials != null;
+						}
+					);
+
+			using (ListenerServiceHost listener = new ListenerServiceHost(HostedInstance.LoopbackAddress, HostedInstance.ReserveLoopbackPorts(1)[0], false))
+			{
+				// IsStarted rather than an assertion inside the delegate: this class swallows what starting its host
+				// threw, so a delegate that failed there would otherwise read as a listener port already in use.
+				Assert.That(listener.IsStarted, Is.True, "The listener's host did not start. Reported: " + listener.StartFailureMessage);
+				Assert.That(configured, Is.True, "The configuration delegate the builder hook installed never reached a service host.");
+				Assert.That(credentialsReachable, Is.True, "The service host reached the delegate with no credentials to install.");
+			}
 		}
 
 		/// <summary>The host binding with the text message encoder in place of the binary one: a wire no shipped client speaks.</summary>
