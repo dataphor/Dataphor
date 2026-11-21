@@ -26,6 +26,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		protected bool _disposed;
+		/// <summary>Serializes the two things that tear this connection down: see <see cref="Dispose(bool)"/>.</summary>
+		private readonly object _teardownSyncHandle = new object();
+
 		/// <summary>Releases the connection's sessions and its catalog cache; a second call does nothing.</summary>
 		/// <remarks>
 		/// The guard is what makes relinquishing a connection twice safe, and two things do it concurrently: the server's
@@ -35,8 +38,16 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		protected override void Dispose(bool disposing)
 		{
-			if (_disposed)
-				return;
+			// Claimed under a lock, and _disposed set here rather than in the finally below: the two callers above arrive on
+			// different threads, so a guard they could both pass would let the second dereference the fields the first had
+			// nulled - the defect the guard exists to prevent, one thread later. The finally still runs on whichever thread
+			// claimed the teardown, so Disposed is raised, and the service's handle withdrawn, even if a step of it throws.
+			lock (_teardownSyncHandle)
+			{
+				if (_disposed)
+					return;
+				_disposed = true;
+			}
 
 			try
 			{
@@ -53,7 +64,6 @@ namespace Alphora.Dataphor.DAE.Server
 			finally
 			{
 				_server = null;
-				_disposed = true;
 				base.Dispose(disposing);
 			}
 		}
@@ -128,20 +138,33 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		/// <summary>Disposes every session on the connection; a connection whose sessions are already closed is left alone.</summary>
+		/// <remarks>
+		/// Under the same lock as <see cref="Dispose(bool)"/>, and for the same reason: Relinquish calls this before it
+		/// disposes, and two Relinquish calls on one connection arrive on different threads. Unserialized, both read a
+		/// count of one and both took session nought, and the loser of that race removed an item the list no longer held.
+		/// The fields are read into locals because the thread that disposes nulls them.
+		/// </remarks>
 		internal void CloseSessions()
 		{
-			if (_sessions != null)
+			lock (_teardownSyncHandle)
 			{
-				while (_sessions.Count > 0)
+				RemoteServerSessions sessions = _sessions;
+				RemoteServer server = _server;
+				if (sessions != null)
 				{
-					RemoteServerSession session = (RemoteServerSession)_sessions.DisownAt(0);
-					try
+					while (sessions.Count > 0)
 					{
-						session.Dispose();
-					}
-					catch (Exception E)
-					{
-						_server.Server.LogError(E);
+						RemoteServerSession session = (RemoteServerSession)sessions.DisownAt(0);
+						try
+						{
+							session.Dispose();
+						}
+						catch (Exception E)
+						{
+							if ((server != null) && (server.Server != null))
+								server.Server.LogError(E);
+						}
 					}
 				}
 			}

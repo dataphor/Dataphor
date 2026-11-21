@@ -172,7 +172,19 @@ namespace Alphora.Dataphor.DAE.Service
 					}
 					catch (Exception exception)
 					{
-						server.LogError(exception);
+						try
+						{
+							server.LogError(exception);
+						}
+						catch
+						{
+							// Guarded because the sweep's own error reporting is the one thing here that must not end the
+							// watcher: logging writes to the engine's log file, which the server closes when it stops, so a
+							// sweep overlapping a stop can fail here - and an exception out of this catch reaches the one in
+							// LifetimeWatcher, which ends the thread for the life of the process. Dropping one log line is
+							// the cheaper loss. Reading Server once above covers the RemoteServer's teardown; this covers
+							// the engine's.
+						}
 					}
 				}
 		}

@@ -56,6 +56,13 @@ namespace Alphora.Dataphor.DAE.Server
 			Dispose(true);
 		}
 		
+		// NOTE: nothing calls AttachServer, so FServerDisposed never runs and a RemoteServer does not learn that its engine
+		// has been disposed - it finds out only by being disposed itself, which DataphorServiceHost.Stop does in that order.
+		// Kept rather than deleted because the hookup is the intent and DetachServer (called from Dispose) is written against
+		// it; unsubscribing a handler that was never added is a no-op. Nothing reads Server expecting it to be nulled on the
+		// engine's disposal: the one reader outside this class, the idle watcher's sweep, is guarded for null either way.
+		// Revisit if a second thing starts depending on Server being null once the engine is gone - then wire the hookup in
+		// RemoteServer's constructor rather than dropping the guards.
 		private void AttachServer()
 		{
 			_server.Disposed += new EventHandler(FServerDisposed);

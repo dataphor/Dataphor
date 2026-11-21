@@ -92,6 +92,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					// it. In process that is whatever the dead CLI object raises; over the wire the service's handle table
 					// has withdrawn the handle from the process's Disposed event and the call comes back as error 106205,
 					// unknown object handle.
+					//
+					// NOTE: the type is not asserted because in process it is a NullReferenceException, not a Dataphor
+					// error: every Remote* object nulls its inner reference when it is disposed and no member checks for
+					// it. Class-wide and older than the reclamation mechanism, and unreachable in the product (over the
+					// wire the handle goes first, and the only in-process client of the remote CLI is LocalServer, which
+					// pings its connection and so is never reaped), which is why it is recorded here rather than filed. If
+					// it ever becomes reachable the fix is a representation change across the Remote* family - a disposed
+					// object that still answers with its own error - not a check at one site.
 					Exception onADeadProcess = Assert.Catch(() => process.ExecuteScript("create table TooLateT { ID : Integer, key { ID } };", ProcessCallInfo.Empty), "A call on the reclaimed client's process succeeded.");
 					TestContext.Progress.WriteLine("A call on the reclaimed process raised {0}: {1}", onADeadProcess.GetType().Name, onADeadProcess.Message);
 				}
