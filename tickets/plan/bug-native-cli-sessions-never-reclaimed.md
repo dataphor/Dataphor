@@ -25,6 +25,12 @@ The most likely route is not a hand-written client. A **server link** — one Da
 
 This has always been so. The interface has never been .NET Remoting and so was never covered by the leases that used to reclaim the main interface's objects, and the watcher that reclaims connections has never known about native sessions. Finding it is a by-product of establishing what reclaims an abandoned session; it is not a regression introduced by moving to .NET 10.
 
+## One thing has changed since this was filed, on the clock question
+
+`test-client-server-abandoned` adds `DataphorServiceHost.ConnectionIdleTimeInSeconds` — a property on the host object, defaulting to `ConnectionManager.IdleTimeInSeconds` (300 seconds), threaded through a new `DataphorService(RemoteServer, int)` overload to the two-argument `ConnectionManager` constructor that `port-abandoned-session-cleanup` already added. It exists so that a test which starts a server in a child process can shorten the reclamation clock enough to watch a reclamation happen; it joins `HostName` and `LoggingEnabled`, the other two things a host needs that an instance configuration cannot carry.
+
+Read it before designing this, but do not read it as an answer to anything here. It answers neither of the two questions in the last bullet below: it is not an operator setting (nothing in the instance list or the command line changes, deliberately, so that this ticket stays free to decide whether either clock should become one), and it says nothing about where a clock for the native interface should live. What it does mean is that the existing connection clock is now reachable by whatever owns the host, which may or may not be a useful shape for the native side too.
+
 ## What a fix has to settle
 
 Stated as the shape of the problem, not as a design — that is the planning stage's work:
