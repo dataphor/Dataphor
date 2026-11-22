@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 
 using NUnit.Framework;
@@ -13,6 +14,7 @@ using NUnit.Framework;
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Store;
+using Alphora.Dataphor.DAE.Store.MSSQL;
 using Alphora.Dataphor.DAE.Store.SQLite;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
@@ -683,6 +685,118 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			if (!TestEnvironment.KeepFiles)
 				Directory.Delete(directory, true);
+		}
+	}
+
+	/// <summary>
+	/// The contract against the SQL Server catalog store, on the server named by the environment variable
+	/// DATAPHOR_TEST_MSSQL; the whole fixture is ignored where that is not set.
+	/// </summary>
+	/// <remarks>
+	/// One database, with a fixed name, serves the whole fixture: creating and dropping one per test cost between 1.5 and 45
+	/// seconds on top of a 4.9 second fixture when it was measured, and a fixed name means a crashed run leaves one database
+	/// behind rather than one per run. DisposeStore empties it after each test instead, which is also why it cannot be emptied
+	/// in CreateStore: the base calls CreateStore a second time on the same directory for SeedSchemaReopens, which asserts the
+	/// reopened store still has what the first one wrote.
+	/// </remarks>
+	[TestFixture]
+	public class MSSQLStoreContractTests : StoreContractTests
+	{
+		/// <summary>Names a SQL Server, not a database: the fixture puts its own database into whatever is set here.</summary>
+		/// <remarks>"Data Source=(localdb)\MSSQLLocalDB;Integrated Security=SSPI" is what this was proved against.</remarks>
+		private const string ServerVariableName = "DATAPHOR_TEST_MSSQL";
+
+		private const string DatabaseName = "DataphorStoreContract";
+
+		private static string _serverConnectionString;
+
+		[OneTimeSetUp]
+		public void CreateDatabase()
+		{
+			_serverConnectionString = Environment.GetEnvironmentVariable(ServerVariableName);
+			if (String.IsNullOrEmpty(_serverConnectionString))
+				Assert.Ignore(String.Format("Set {0} to a SQL Server connection string to run the store contract against SQL Server, for example \"Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=SSPI\".", ServerVariableName));
+
+			// A run that crashed before its teardown leaves the database behind; the first CreateStore makes it again.
+			DropDatabase();
+		}
+
+		[OneTimeTearDown]
+		public void DropDatabaseAfterFixture()
+		{
+			if (!String.IsNullOrEmpty(_serverConnectionString) && !TestEnvironment.KeepFiles)
+				DropDatabase();
+		}
+
+		/// <summary>The store creates the database itself, through the <c>create database</c> probe in its own InternalInitialize.</summary>
+		protected override SQLStore CreateStore(string directory)
+		{
+			MSSQLStore store = new MSSQLStore();
+			store.ConnectionString = DatabaseConnectionString();
+			store.Initialize();
+			return store;
+		}
+
+		/// <summary>Leaves the fixture's database empty for the next test, rather than dropping and creating it per test.</summary>
+		protected override void DisposeStore(SQLStore store, string directory)
+		{
+			if (!TestEnvironment.KeepFiles)
+			{
+				DropTables();
+				Directory.Delete(directory, true);
+			}
+		}
+
+		// The supplied string with the fixture's database named in it. Either spelling of the keyword may be in what the
+		// developer set, so Database is removed and Initial Catalog set.
+		private static string DatabaseConnectionString()
+		{
+			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = _serverConnectionString;
+			builder.Remove("Database");
+			builder["Initial Catalog"] = DatabaseName;
+			return builder.ConnectionString;
+		}
+
+		private static string MasterConnectionString()
+		{
+			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = _serverConnectionString;
+			builder.Remove("Database");
+			builder["Initial Catalog"] = "master";
+			return builder.ConnectionString;
+		}
+
+		// Single user first: a pooled connection left over from an earlier run blocks DROP DATABASE otherwise.
+		private static void DropDatabase()
+		{
+			Execute
+			(
+				MasterConnectionString(),
+				String.Format
+				(
+					"if db_id('{0}') is not null begin alter database [{0}] set single_user with rollback immediate; drop database [{0}]; end",
+					DatabaseName
+				)
+			);
+		}
+
+		// Everything the finished test left behind, so that the next one starts on an empty database. The contract's tables and
+		// the catalog seed have no foreign keys between them, so the order they are dropped in does not matter.
+		private static void DropTables()
+		{
+			Execute
+			(
+				DatabaseConnectionString(),
+				"declare @statements nvarchar(max) = N''; select @statements = @statements + N'drop table [' + name + N'];' from sys.tables; exec sp_executesql @statements;"
+			);
+		}
+
+		// Through the store's own connection class rather than SqlConnection directly, which is obsolete on this client package.
+		private static void Execute(string connectionString, string statement)
+		{
+			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
+				connection.Execute(statement);
 		}
 	}
 }

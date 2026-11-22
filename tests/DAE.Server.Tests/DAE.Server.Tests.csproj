@@ -94,7 +94,8 @@
     <!-- The client's copies of the three service contracts, which ContractParityTest compares with the server's. Both are named explicitly, although the server reference already brings the NativeCLI one in, because this project compiles against them. -->
     <ProjectReference Include="..\..\src\protocol\Client\Client.csproj" />
     <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" />
-    <!-- Not compiled against: the server loads the catalog store by class name, so the assembly only has to be in the test's output. -->
+    <!-- The catalog stores the store contract is run against (StoreContractTests), one fixture per store. -->
+    <ProjectReference Include="..\..\src\engine\Store.MSSQL\DAE.MSSQL.csproj" />
     <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" />
     <!-- Builds the runtime layout before this project, so that dotnet test and Visual Studio never run the tests against a stale or missing layout. Nothing is compiled against it or copied from it. -->
     <ProjectReference Include="..\..\tools\layout\Layout.csproj" ReferenceOutputAssembly="false" Private="false" />

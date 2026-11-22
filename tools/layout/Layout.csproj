@@ -45,6 +45,7 @@
     <ProjectReference Include="..\..\src\engine\DAE\DAE.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Server\Server.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Server.Hosting\Server.Hosting.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\Store.MSSQL\DAE.MSSQL.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\Common\Common.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" DataphorLayoutRole="Bin" />

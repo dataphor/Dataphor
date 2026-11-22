@@ -27,12 +27,18 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
 			builder.ConnectionString = ConnectionString;
 
-			if (builder.ContainsKey("MultipleActiveResultSets"))
-			{
-				_supportsMARS = "True" == ((string)builder["MultipleActiveResultSets"]);
-			}
+			// The catalog opens a second store cursor while a first one is still open (CatalogStore reads PK_DAECatalogObjects
+			// and opens PK_DAEBaseCatalogObjects inside the loop, and does the same around the two name tables), and SQL Server
+			// refuses a second reader on one connection unless the connection asked for multiple active result sets. The error
+			// it gives then - "There is already an open DataReader associated with this Command which must be closed first." -
+			// names nothing a deployment could act on, so the option is forced rather than defaulted, and a configured False is
+			// ignored: the store cannot work under it. Same reasoning as SQLiteStore.NormalizeConnectionString forcing WAL.
+			// The base's ConnectionString setter allows this because InternalInitialize runs before the store is initialized,
+			// and every store connection, the catalog device's own included, is built from ConnectionString.
+			builder["MultipleActiveResultSets"] = "True";
+			ConnectionString = builder.ConnectionString;
+			_supportsMARS = true;
 
-			
             _supportsUpdatableCursor = false;
             
             if (_shouldEnsureDatabase)
