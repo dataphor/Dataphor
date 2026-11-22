@@ -31,11 +31,14 @@
   <ItemGroup>
     <ProjectReference Include="..\Host\DAE.Host.csproj" />
     <!--
-      Not compiled against, and not optional: the server resolves its catalog store from a class name
-      (Server.DefaultCatalogStoreClassName names this assembly) with Type.GetType, and on .NET 10 an assembly that sits
-      next to the executable but is not named in the executable's .deps.json cannot be loaded by simple name - there is
-      no app-local probing to fall back on. Without this reference the server fails to start with error 115107.
+      Not compiled against, and not optional: the server resolves its catalog store from a class name with Type.GetType
+      (Server.DefaultCatalogStoreClassName, or the instance's catalogstoreclassname setting), and on .NET 10 an assembly
+      that sits next to the executable but is not named in the executable's .deps.json cannot be loaded by simple name -
+      there is no app-local probing to fall back on. So every store the runtime layout ships is referenced here, not only
+      the default: without the reference the server fails to start on that store with error 115107, and the assembly
+      being in the folder does not help. HostProgramTest keeps the two lists together.
     -->
+    <ProjectReference Include="..\..\engine\Store.MSSQL\DAE.MSSQL.csproj" />
     <ProjectReference Include="..\..\engine\Store.SQLite\DAE.SQLite.csproj" />
   </ItemGroup>
 

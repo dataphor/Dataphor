@@ -80,7 +80,7 @@ Attribute names in the file are all lower case. The defaults below are what the 
 | `overridelistenerportnumber` | `0`, meaning the standard listener port 8060 | The port the listener is hosted on |
 | `librarydirectories` | the installation's `Libraries` folder in an entry a Dataphor program creates; the `Libraries` folder beside the binaries when empty | Where the instance looks for libraries |
 | `instancedirectory` | empty, meaning a folder named after the instance beside the instance list | Where the instance writes its own data |
-| `catalogstoreclassname` | empty, meaning the SQLite store | Which store holds the instance's catalog |
+| `catalogstoreclassname` | empty, meaning the SQLite store | Which store holds the instance's catalog; the SQL Server store is the one alternative that ships |
 | `catalogstoreconnectionstring` | empty, meaning `DAECatalog.sqlite` in the instance's `Catalog` folder | How the catalog store connects |
 | `devicesettings` | none | Per-instance device properties; see below |
 | `requiresecureconnection`, `requiresecurelistenerconnection` | `False` | Nothing; stored but not acted on, and reported in the instance's log when set |
@@ -98,6 +98,16 @@ Attribute names in the file are all lower case. The defaults below are what the 
 **Instance directory** (`instancedirectory`). The folder the instance writes everything of its own into: `Catalog\` for the catalog store file, `Log\` for its logs, and `Data\` and `LibraryData\` for the data its devices persist. Empty, the default, means a folder named after the instance inside the folder that holds the instance list — normally `%ProgramData%\Alphora\Dataphor\4\Instances\<instance name>`. A value that is not a full path is taken as relative to that same folder. Give a full path to put an instance's data somewhere else, for example on another volume.
 
 **Catalog store class name** (`catalogstoreclassname`). Which store keeps the instance's own catalog. Empty, the default, means the SQLite store that ships with Dataphor, and that is what almost every instance should have. A value here is an assembly-qualified .NET class name; a name the server cannot load stops the instance from starting, with error 115107 naming the class. A name belonging to the SQL Server Compact store of earlier releases stops the start with error 115108: that store is no longer supported. The remedy is to clear this setting and the connection string, so that the instance uses the SQLite store, and rebuild the catalog from the application's own scripts.
+
+One store other than SQLite ships, for a deployment that must keep its catalog in a SQL Server database rather than in a file:
+
+```xml
+<serverconfiguration name="Reporting" portnumber="8071"
+	catalogstoreclassname="Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore,Alphora.Dataphor.DAE.MSSQL"
+	catalogstoreconnectionstring="Data Source=SQLHOST;Initial Catalog=DataphorReporting;Integrated Security=SSPI" />
+```
+
+The database named in the connection string is created by the server if it is not there, so the account the server runs as needs the right to create it, or the database should be created in advance. Two things to know about this store. It always sets `MultipleActiveResultSets=True` on its connections, whatever the connection string says, because the catalog reads one of its tables while a read of another is still open and SQL Server refuses that otherwise; leave the keyword out of the connection string. And its text columns are written through `varchar` parameters, so a character outside the database's code page is stored as a question mark: do not use non-ASCII characters in catalog object, library or user names on this store. SQLite remains the recommendation for every deployment that does not specifically need the catalog in SQL Server.
 
 **Catalog store connection string** (`catalogstoreconnectionstring`). How the catalog store connects. Empty, the default, means the catalog is kept in a file named `DAECatalog.sqlite` in the `Catalog` folder of the instance directory. In a value given here, the token `%CatalogPath%` is replaced with that `Catalog` folder, which is the way to vary this setting without writing an absolute path into it: `Data Source=%CatalogPath%\DAECatalog.sqlite` is the default spelled out. Leave it empty unless the catalog file has to live somewhere other than its default place, or a store other than SQLite is in use.
 

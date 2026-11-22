@@ -30,20 +30,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// against one description of it. The tests that drive the store through a running server stay in CatalogStoreTest.
 	/// </para>
 	/// <para>
-	/// Each test gets its own database and creates the schema it needs, so nothing carries between tests.
+	/// Each test creates the schema it needs on an empty database. A store whose database is a file gets a fresh one per
+	/// test, in that test's own directory; a store whose database lives on a server may share one, and then it is the store's
+	/// fixture that empties it (see <see cref="CreateStore"/>).
 	/// </para>
 	/// </remarks>
 	public abstract class StoreContractTests
 	{
-		/// <summary>Returns an initialized store on the database under <paramref name="directory"/>, created if it is not there.</summary>
+		/// <summary>Returns an initialized store on an empty database for the test <paramref name="directory"/> belongs to.</summary>
 		/// <remarks>
+		/// <para>
+		/// The directory is this test's own, newly made and empty, and is where a store that keeps its database in a file puts
+		/// it. A store that shares one database across the fixture empties it here, at the start of a test, rather than at the
+		/// end of the one before: the test directories are what the base deletes, and emptying at the start is also what leaves
+		/// the last test's rows in place for a run kept with DATAPHOR_TEST_LOGGING=1.
+		/// </para>
+		/// <para>
 		/// <see cref="SeedSchemaReopens"/> calls this a second time with the same directory to reopen the database a store has
-		/// already written, so an implementation must open an existing database rather than replace it.
+		/// already written, so an implementation must open an existing database rather than replace or empty it; the directory,
+		/// fresh per test, is what tells a new test from a reopen.
+		/// </para>
 		/// </remarks>
 		protected abstract SQLStore CreateStore(string directory);
-
-		/// <summary>Releases what <see cref="CreateStore"/> made: a file to delete, a database to drop, or nothing.</summary>
-		protected abstract void DisposeStore(SQLStore store, string directory);
 
 		private string _directory;
 		private SQLStore _store;
@@ -61,10 +69,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TearDown]
 		public void TearDownStore()
 		{
-			SQLStore store = _store;
+			string directory = _directory;
 			_store = null;
-			if (store != null)
-				DisposeStore(store, _directory);
+			_directory = null;
+
+			// The whole directory, because SQLite's write-ahead logging leaves -wal and -shm files beside the database file.
+			// SQLStore holds no disposable state of its own, so this is everything a store leaves inside its directory.
+			if ((directory != null) && !TestEnvironment.KeepFiles)
+				Directory.Delete(directory, true);
 		}
 
 		/// <summary>Opens this test's database again, as a server restarting on an existing instance does, and makes that the test's store.</summary>
@@ -679,13 +691,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			store.Initialize();
 			return store;
 		}
-
-		// The whole directory, because write-ahead logging leaves -wal and -shm files beside the database file.
-		protected override void DisposeStore(SQLStore store, string directory)
-		{
-			if (!TestEnvironment.KeepFiles)
-				Directory.Delete(directory, true);
-		}
 	}
 
 	/// <summary>
@@ -695,10 +700,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// One database, with a fixed name, serves the whole fixture: creating and dropping one per test cost between 1.5 and 45
 	/// seconds on top of a 4.9 second fixture when it was measured, and a fixed name means a crashed run leaves one database
-	/// behind rather than one per run. DisposeStore empties it after each test instead, which is also why it cannot be emptied
-	/// in CreateStore: the base calls CreateStore a second time on the same directory for SeedSchemaReopens, which asserts the
-	/// reopened store still has what the first one wrote.
+	/// behind rather than one per run. <see cref="CreateStore"/> empties it at the start of each test.
 	/// </remarks>
+	// NOTE: that fixed name is the fixture's one shared resource. Two runs of this fixture against the same server at the
+	// same time - two developers, or a developer and a CI agent, with DATAPHOR_TEST_MSSQL pointed at one shared instance -
+	// would empty each other's database mid-test. If that day comes, name the database after the run, as TestEnvironment's
+	// run directory is named after the process, and accept that a crashed run then leaves one database behind per run.
 	[TestFixture]
 	public class MSSQLStoreContractTests : StoreContractTests
 	{
@@ -710,14 +717,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private static string _serverConnectionString;
 
+		/// <summary>The test directory the fixture's one database was last emptied for; see <see cref="CreateStore"/>.</summary>
+		private static string _emptiedForDirectory;
+
 		[OneTimeSetUp]
-		public void CreateDatabase()
+		public void RequireServer()
 		{
 			_serverConnectionString = Environment.GetEnvironmentVariable(ServerVariableName);
 			if (String.IsNullOrEmpty(_serverConnectionString))
 				Assert.Ignore(String.Format("Set {0} to a SQL Server connection string to run the store contract against SQL Server, for example \"Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=SSPI\".", ServerVariableName));
 
-			// A run that crashed before its teardown leaves the database behind; the first CreateStore makes it again.
+			// A run that crashed before its teardown, or one kept with DATAPHOR_TEST_LOGGING=1, leaves the database behind;
+			// dropping it outright here starts this run on a database with nothing of another run's in it. The first
+			// CreateStore makes it again, through the store's own create-database probe.
+			_emptiedForDirectory = null;
 			DropDatabase();
 		}
 
@@ -732,38 +745,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		protected override SQLStore CreateStore(string directory)
 		{
 			MSSQLStore store = new MSSQLStore();
-			store.ConnectionString = DatabaseConnectionString();
+			store.ConnectionString = ConnectionStringFor(DatabaseName);
 			store.Initialize();
+			EmptyDatabaseForNewTest(directory);
 			return store;
 		}
 
-		/// <summary>Leaves the fixture's database empty for the next test, rather than dropping and creating it per test.</summary>
-		protected override void DisposeStore(SQLStore store, string directory)
+		// After the store, so that its probe has made the database on the first test of the run. A second call on the same
+		// directory is SeedSchemaReopens reopening the database it just wrote, and must leave what is in it alone.
+		private static void EmptyDatabaseForNewTest(string directory)
 		{
-			if (!TestEnvironment.KeepFiles)
-			{
-				DropTables();
-				Directory.Delete(directory, true);
-			}
+			if (directory == _emptiedForDirectory)
+				return;
+			DropTables();
+			_emptiedForDirectory = directory;
 		}
 
-		// The supplied string with the fixture's database named in it. Either spelling of the keyword may be in what the
-		// developer set, so Database is removed and Initial Catalog set.
-		private static string DatabaseConnectionString()
+		// The supplied string with <paramref name="databaseName"/> named in it. Either spelling of the keyword may be in what
+		// the developer set, so Database is removed and Initial Catalog set.
+		private static string ConnectionStringFor(string databaseName)
 		{
 			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
 			builder.ConnectionString = _serverConnectionString;
 			builder.Remove("Database");
-			builder["Initial Catalog"] = DatabaseName;
-			return builder.ConnectionString;
-		}
-
-		private static string MasterConnectionString()
-		{
-			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-			builder.ConnectionString = _serverConnectionString;
-			builder.Remove("Database");
-			builder["Initial Catalog"] = "master";
+			builder["Initial Catalog"] = databaseName;
 			return builder.ConnectionString;
 		}
 
@@ -772,7 +777,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			Execute
 			(
-				MasterConnectionString(),
+				ConnectionStringFor("master"),
 				String.Format
 				(
 					"if db_id('{0}') is not null begin alter database [{0}] set single_user with rollback immediate; drop database [{0}]; end",
@@ -781,13 +786,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			);
 		}
 
-		// Everything the finished test left behind, so that the next one starts on an empty database. The contract's tables and
-		// the catalog seed have no foreign keys between them, so the order they are dropped in does not matter.
+		// Everything an earlier test left behind, so that this one starts on an empty database.
+		// NOTE: one batch in no particular order, because nothing this fixture's tests create - the contract's own tables and
+		// the catalog seed script's - has a foreign key to anything else. A contract test that added one would break this
+		// teardown rather than itself: drop the constraints first, or order the drops, if that day comes.
 		private static void DropTables()
 		{
 			Execute
 			(
-				DatabaseConnectionString(),
+				ConnectionStringFor(DatabaseName),
 				"declare @statements nvarchar(max) = N''; select @statements = @statements + N'drop table [' + name + N'];' from sys.tables; exec sp_executesql @statements;"
 			);
 		}

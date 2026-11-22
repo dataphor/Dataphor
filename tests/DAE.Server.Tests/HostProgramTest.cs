@@ -14,13 +14,15 @@ using NUnit.Framework;
 
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Service;
+using Alphora.Dataphor.DAE.Store.MSSQL;
+using Alphora.Dataphor.DAE.Store.SQLite;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
 	/// The host program (<see cref="DataphorHost"/>), which both host executables are one line over: that the .NET
 	/// Generic Host it builds brings a server up when it is started and takes it down when it is stopped, that a
-	/// failure to start is not swallowed, and that each executable's dependency file names the one assembly the server
+	/// failure to start is not swallowed, and that each executable's dependency file names every assembly the server
 	/// loads by simple name.
 	/// </summary>
 	/// <remarks>
@@ -111,30 +113,43 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		// Every catalog store the runtime layout ships, as types rather than names so that the compiler keeps the list
+		// honest. A store added under src\engine\Store.* belongs here and in both host projects.
+		private static readonly Type[] _shippedCatalogStoreTypes = new Type[] { typeof(SQLiteStore), typeof(MSSQLStore) };
+
 		[Test]
 		public void TheHostsDependencyFilesNameTheAssembliesTheServerLoadsByName()
 		{
 			// On .NET 10 an assembly that sits next to the executable but is not named in the executable's .deps.json
 			// cannot be loaded by simple name, however it got into the folder: there is no app-local probing to fall
-			// back on, and the engine's assembly-resolve hook only matches assemblies that are already loaded. The
-			// server loads exactly one assembly this way - the catalog store, which CatalogStore.Initialize resolves
-			// from Server.DefaultCatalogStoreClassName with Type.GetType - and a missing entry is invisible at compile
-			// time and shows up only when a server starts, as error 115107.
-			string[] storeClassName = Server.DefaultCatalogStoreClassName.Split(',');
-			Assert.That(storeClassName.Length, Is.EqualTo(2), "DefaultCatalogStoreClassName is no longer <type>,<assembly>; this case needs rewriting");
-			string storeAssemblyFileName = storeClassName[1].Trim() + ".dll";
+			// back on, and the engine's assembly-resolve hook only matches assemblies that are already loaded. What the
+			// server loads this way is its catalog store, which CatalogStore.CreateStore resolves with Type.GetType from
+			// the instance's catalogstoreclassname setting or, where that is empty, from Server.DefaultCatalogStoreClassName.
+			// A missing entry is invisible at compile time and shows up only when a server starts on that store, as error
+			// 115107 - so every store the layout ships is checked, not only the default: shipping one a deployment cannot
+			// name is the same bug with a quieter symptom.
+			string[] defaultStoreClassName = Server.DefaultCatalogStoreClassName.Split(',');
+			Assert.That(defaultStoreClassName.Length, Is.EqualTo(2), "DefaultCatalogStoreClassName is no longer <type>,<assembly>; this case needs rewriting");
+			Assert.That
+			(
+				Array.ConvertAll(_shippedCatalogStoreTypes, type => type.Assembly.GetName().Name),
+				Does.Contain(defaultStoreClassName[1].Trim()),
+				"the default catalog store's assembly is not among the shipped stores this case checks"
+			);
 
 			string binDirectory = Path.Combine(TestEnvironment.LayoutDirectory, "bin");
 			foreach (string dependencyFileName in new string[] { "DAEServer.deps.json", "DAEService.deps.json" })
 			{
 				string dependencyFilePath = Path.Combine(binDirectory, dependencyFileName);
 				Assert.That(File.Exists(dependencyFilePath), Is.True, String.Format("the runtime layout has no {0}; the host executables are not in it", dependencyFileName));
-				Assert.That
-				(
-					File.ReadAllText(dependencyFilePath),
-					Does.Contain(storeAssemblyFileName),
-					String.Format("{0} does not name {1}, so a server started from the layout cannot load its catalog store; give the executable's project a reference to the store project", dependencyFileName, storeAssemblyFileName)
-				);
+				string dependencies = File.ReadAllText(dependencyFilePath);
+				foreach (Type storeType in _shippedCatalogStoreTypes)
+					Assert.That
+					(
+						dependencies,
+						Does.Contain(storeType.Assembly.GetName().Name + ".dll"),
+						String.Format("{0} does not name {1}, so a server whose catalogstoreclassname names {2} cannot load it; give the executable's project a reference to the store project", dependencyFileName, storeType.Assembly.GetName().Name + ".dll", storeType.FullName)
+					);
 			}
 		}
 
