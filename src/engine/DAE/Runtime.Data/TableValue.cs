@@ -794,9 +794,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			tableVar.EnsureTableVarColumns();
 			Program.EnsureKey(tableVar);
 
+			// Reset() defaults to Close(); Open();, which re-executes the cursor's source, so resetting a
+			// cursor nobody has read from evaluates that source a second time and the copy below keeps the
+			// second pass's values - wrong for any non-deterministic source. A cursor still at the beginning
+			// has nothing to re-fetch, so it needs no reset.
 			if (!Active)
 				Open();
-			else
+			else if (!BOF())
 				Reset();
 
 			NativeTable nativeTable = new NativeTable(Manager, tableVar);
