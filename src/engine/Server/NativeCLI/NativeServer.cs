@@ -73,6 +73,11 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// it in a finally - so this is the one place the native interface's liveness clock has to be stamped, and no
 		/// change to the service contract <see cref="Alphora.Dataphor.DAE.Contracts.INativeCLIService"/> is needed to carry a ping: a client says "still
 		/// here" by making any call at all (<c>NativeCLISession</c>'s keep-alive calls GetTransactionCount).
+		/// NOTE: an operation added here that takes a handle and does not release in a finally would leave its session
+		/// counted in for ever, which once the idle sweep lands means a session nothing can reclaim - so the acquire,
+		/// the try and the finally are written out at each of the seven call sites rather than wrapped in a helper,
+		/// there being no delegate or guard idiom anywhere else in this assembly to wrap them with. If the set of
+		/// handle-taking operations ever grows past these seven, introduce the guard then.
 		/// </para>
 		/// <para>
 		/// Wholly under the session lock, which is also the fix for a pre-existing data race: the lookup this replaces

@@ -81,6 +81,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// leave this object looking alive, because the handle it left set would make a second Dispose call the far
 		/// server again, and the client it left undisposed holds the WCF channel and its cached channel factory open for
 		/// the life of the process.
+		/// One wait was added to this by the keep-alive: a ping already in flight holds the lock below, so the stop
+		/// waits for that ping's round trip before it sends its own. On a network that has stopped delivering without
+		/// closing the socket that is unbounded - the binding sets no send or receive time-out - but so is the stop
+		/// itself on the same channel, which is what this method waited on before there was a ping. The release of the
+		/// local half is therefore delayed by at most one more round trip than it already was, and a caller that cannot
+		/// afford either wait needs a bounded time-out on the binding, not a change here.
 		/// </remarks>
 		public void Dispose()
 		{
@@ -198,6 +204,13 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			without closing its socket never returns, and on the thread pool that would hold a pool thread for the life of
 			the process, one per hung session. If the thread count ever matters, the step is a single shared keep-alive
 			thread with a bounded wait per ping, not the pool.
+
+			NOTE: the constants, the fields and the three methods below are LocalServer's, copied rather than shared,
+			though both assemblies reference Common and a shared primitive could live there. Deliberate, and the same
+			call bug-native-cli-sessions-never-reclaimed records for the two idle watchers: extracting one now would
+			rework a path that port-abandoned-session-cleanup has only just proven, for no behaviour. If a third
+			keep-alive ever appears, extract one then - a shared one would also be where the single-thread change above
+			belongs.
 		*/
 
 		/// <summary>The number of seconds between keep-alive pings, unless the constructor is given another.</summary>

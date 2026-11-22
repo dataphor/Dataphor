@@ -65,6 +65,11 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			purpose: this clock is monotonic rather than wall-clock (see the field below), and it moves on every operation
 			rather than on a ping alone, because the native interface has no connection object for a ping to land on - a
 			client that wants to say "still here" has to make a call, which is what NativeCLISession's keep-alive does.
+
+			The three members below are internal rather than public because each of them is only correct under that lock,
+			which nothing outside this assembly can take: a caller that counted a call in and not out would leave the
+			session looking busy for ever, and one that counted a call out twice would leave a busy session looking idle.
+			NativeServer.GetSessionIdleSeconds is the public read, and says there why it is one.
 		*/
 
 		/// <summary>When a call last entered or left this session, in milliseconds since the machine started.</summary>
@@ -89,7 +94,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		private int _inUseCount;
 
 		/// <summary>Counts a call as started on this session and stamps its clock; call only under NativeServer's session lock.</summary>
-		public void EnterCall()
+		internal void EnterCall()
 		{
 			_inUseCount++;
 			_lastActivityTicks = Environment.TickCount64;
@@ -100,7 +105,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// Stamped on the way out as well as on the way in, so that a call which ran for an hour does not leave an hour-old
 		/// stamp behind it and look abandoned the moment it finished.
 		/// </remarks>
-		public void ExitCall()
+		internal void ExitCall()
 		{
 			_inUseCount--;
 			_lastActivityTicks = Environment.TickCount64;
@@ -108,7 +113,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		/// <summary>How long this session has been without a call, in seconds; 0 while a call is in flight.</summary>
 		/// <remarks>Read only under NativeServer's session lock, which is what the two fields behind it are written under.</remarks>
-		public long IdleSeconds
+		internal long IdleSeconds
 		{
 			get
 			{
