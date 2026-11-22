@@ -1,10 +1,10 @@
 # Performance baseline
 
-How fast the engine is, recorded by the test suite so that a change which makes it much slower shows up as a difference rather than as a hunch. Everything here is hand-written: the numbers come from `PerfBaselineTest` in `tests/DAE.Server.Tests`, which writes the machine-readable copy to `tests/goldens/perf/perf-baseline.json`, and this document says where they came from, what they mean and what they do not.
+How fast the engine is, recorded so that a change which makes it much slower shows up as a difference rather than as a hunch. There are two sources, each with its own sections below, and everything here is hand-written: `PerfBaselineTest` in `tests/DAE.Server.Tests` runs the coverage corpus's timing scripts on every test run and writes the machine-readable copy of their numbers to `tests/goldens/perf/perf-baseline.json`; the benchmark program `DAE.Benchmarks` in `tests/Dataphor.Benchmarks` is run by hand and measures what a script inside a running server cannot reach. This document says where every number came from, what it means and what it does not.
 
 This is a tripwire, not a performance measurement of the product. Nothing in the suite gates on these numbers unless a run explicitly asks it to.
 
-## This baseline
+## The timing scripts
 
 | | |
 |---|---|
@@ -22,15 +22,15 @@ Run-to-run spread on this machine, from the four runs taken while this was writt
 
 For comparison, the script's own comments record 12,500 ms for the same loop on the hardware of 2008, in a release build. So the current Debug build on this laptop runs the interpreter at roughly the speed a 2008 release build ran on 2008 hardware. That is a useful calibration to keep in mind when reading any other number here.
 
-## What these numbers do not mean
+## What the timing-script numbers do not mean
 
 **They are wall clock on a Debug build of one machine.** An absolute time here is comparable only with another run on the same machine class in the same configuration, which is what the label is for. Comparing a number from this table with one from a different label, or from a Release build, says nothing.
 
 **They are script time, not suite time.** The fixture starts its server once and then measures batches, so no number here includes the seconds a test case spends copying library folders and starting an engine. The coverage runner's figures for the same scripts do include that, so the two sets must never be put in one table.
 
-**A covered scenario is not a measured subsystem.** One counting loop says something about the interpreter's statement dispatch and nothing about the compiler, the catalog store, the devices or the network. The benchmark project that covers engine start, a representative mix of database work and the catalog store cold and warm is the follow-on work item `test-perf-baseline`, and its numbers will land in a section of their own.
+**A covered scenario is not a measured subsystem.** One counting loop says something about the interpreter's statement dispatch and nothing about the compiler, the catalog store, the devices or the network. Engine start, a mix of database work and the catalog store cold and warm are measured by the benchmark program instead; its numbers are further down this document and were taken in Release, so they are not comparable with the Debug numbers here.
 
-## How to regenerate, and how to compare
+## How to regenerate the timing-script numbers, and how to compare
 
 The pass is one NUnit case, `PerfBaselineTest.TheTimingScriptsRunAndTheirNumbersMatchTheBaseline`, and it reads two environment variables.
 
@@ -83,6 +83,60 @@ Blocks 1 and 2 are now several times *faster* than the 2008 note records, which 
 | 4,000 | 150,879 ms |
 
 Extrapolating that curve to the script's 10,000 rows gives roughly a quarter of an hour, against the 8 seconds the script's own note records. Deleting the same 2,000 rows one at a time by key instead - `for LIndex : Integer := 1 to 2000 do delete (T where ID = LIndex);` - costs 130 ms, and deleting the whole table in one statement costs 66 ms, so the cost is specific to the `delete <table> return <n>` form and not to per-row deletion or to the device. The ticket `bug-engine-delete-quota-scans-the-table` owns the cause; the `Timings` coverage entry records the timeout as a known failure against it, with a deliberately short timeout so that the suite does not pay for the grind. When it is fixed, `Timings` becomes one more row in the fixture's scenario table and one more line in the table above.
+
+## The benchmark program: engine start, a mix of database work, and the catalog store
+
+Three costs are invisible to the timing scripts above, because those run inside an already-started server: how long an engine takes to come up, which is what every test, every tool invocation and every service restart pays; a mix of database work as one number that moves when the compiler or the in-memory device gets slower; and the catalog store on a first start against a fresh catalog as against a later start that loads an existing one. The benchmark program `DAE.Benchmarks` ([tests/Dataphor.Benchmarks](../tests/Dataphor.Benchmarks)) measures those four things. Its own [README](../tests/Dataphor.Benchmarks/README.md) says what each benchmark does, how to run it and why it is configured as it is; this section carries its numbers.
+
+Nothing runs it automatically. `dotnet test` does not discover it (it is not a test project) and CI builds it and runs nobody, deliberately: a benchmark on a shared runner measures the runner.
+
+| | |
+|---|---|
+| Label | `dev-slow` |
+| Date | 2026-11-21 |
+| Configuration | **Release**, .NET 10, Windows x64 |
+| Machine | the same machine class as the table at the top of this document: one slow development laptop, nothing deliberately competing - the slower of the two classes the root [AGENTS.md](../AGENTS.md) quotes suite timings for. "Quiet" means no other work was started on purpose, not that the machine was idle |
+| Measured by | `DAE.Benchmarks` with no arguments: all four benchmarks, one warmup iteration and ten measured iterations each, one invocation per iteration |
+| Wall clock of the run | about 100 seconds (99 s and 104 s on the two runs below) |
+
+The table below is BenchmarkDotNet's own GitHub-markdown export, carried in by hand from `artifacts/benchmarks/results/DAE.Benchmarks.EngineBenchmarks-report-github.md`, the way [coverage-report.md](coverage-report.md) carries the coverage tool's output in by hand. `Mean` is the arithmetic mean of all ten iterations, `Error` half of the 99.9 % confidence interval and `StdDev` the standard deviation. The run's output also names the iterations it considers outliers; under `RunStrategy.Monitoring` BenchmarkDotNet reports them without removing them, so they are inside the means above (checked by adding up one benchmark's ten iterations by hand). The export's own environment header - the exact processor model, the Windows build and the SDK build - is **not** carried in, for the same reason this document uses a label rather than a machine name: the repository is public. It is in the run's log under `artifacts/benchmarks/`, which is git-ignored.
+
+```
+Toolchain=InProcessNoEmitToolchain  InvocationCount=1  IterationCount=10
+RunStrategy=Monitoring  UnrollFactor=1  WarmupCount=1
+```
+
+| Method           | Mean       | Error     | StdDev    |
+|----------------- |-----------:|----------:|----------:|
+| EngineStart      | 2,759.4 ms | 606.49 ms | 401.15 ms |
+| DdlDmlMix        |   180.5 ms |  77.02 ms |  50.94 ms |
+| CatalogStoreCold | 2,808.9 ms | 592.47 ms | 391.88 ms |
+| CatalogStoreWarm |   300.6 ms |  49.62 ms |  32.82 ms |
+
+A second run of the same build, minutes later on the same machine, gave 2,785.1, 165.2, 2,477.0 and 273.0 ms for the same four - so run to run the means moved by 1 %, 9 %, 12 % and 10 %. Within a run the spread between iterations is wider than that: `EngineStart` ranged from 2.24 to 3.16 seconds. Read these numbers with the same caution the top of this document asks for; a later run on this machine coming in at 1.3 times one of them is not yet evidence of anything.
+
+**What they say.** Starting an engine on a new instance directory costs about 2.8 seconds here, and starting one whose catalog already exists costs about 300 ms - so **about nine tenths of a cold start is work that a later start does not repeat**: creating the SQLite catalog and registering the system library. That is also why `EngineStart` and `CatalogStoreCold` come out within a few per cent of each other, which is what the two being the same measurement predicts. The warm number is the one `research-catalog-load-profile` extends to realistic catalogs; this is its empty-catalog case, where the only library registered is System.
+
+**Every iteration of every benchmark succeeded**, in both runs. Neither run shows the pattern that would be expected if the engine's process-wide static state leaked from one iteration to the next - a first iteration much cheaper or much dearer than the rest, or a drift across the ten. The one-off costs a process pays on its first engine are paid by the warmup iteration, which is not in the numbers.
+
+## What the benchmark numbers do not mean
+
+**They are Release; the timing-script numbers at the top of this document are Debug.** The two sets must never be put in one table or compared with each other. That is not a nuance: a Debug build of this engine runs its interpreter at roughly the speed a 2008 release build ran on 2008 hardware, as the first section records.
+
+**`EngineStart` and `CatalogStoreCold` are deliberately the same measurement, asked for by two different questions.** Starting an engine on a new instance directory *is* the catalog store's write path. Keep both: one is what somebody looks at when a test run feels slow, the other is what somebody looks at when the store is the suspect. If they ever stop agreeing, what separates them is `EngineStart`'s directory setup, and that is worth finding out about.
+
+**`DdlDmlMix` is a judgement about what "representative" means, and the judgement can change.** It creates a table on the in-memory device, inserts 3,000 rows one at a time, updates them all in one statement, reads them all back through a cursor, empties the table in one statement and drops it. The D4 is in one named place in `EngineBenchmarks.cs` with the reasoning beside it. **A change to that script, or to the row count, invalidates every number recorded for it** - re-record, do not compare. The row count is not arbitrary either: below about three thousand rows an iteration is short enough that BenchmarkDotNet warns it cannot measure it well.
+
+**Nothing here gates.** Unlike the timing scripts, these numbers have no machine-readable copy and no comparison step: a change that makes one of them much worse is caught by somebody running the program and reading this section, not by a red build. Giving them a checked-in baseline and a comparison, the way `PerfBaselineTest` has one, is a separate change and this is where to say it has happened.
+
+## How to regenerate the benchmark numbers
+
+```
+dotnet build Dataphor.slnx -c Release
+artifacts/bin/DAE.Benchmarks/release/DAE.Benchmarks.exe
+```
+
+Release, not Debug - the program says so on standard error if it was built in Debug. The run takes about 100 seconds and prints the table at the end; the same table, and the CSV and HTML versions, land under `artifacts/benchmarks/`, which is inside the git-ignored `artifacts/` folder on purpose, so a run leaves nothing in the tree. Copy the markdown table and the configuration line into the section above, and replace the head table's date, configuration and wall clock. Leave BenchmarkDotNet's environment header out, as above.
 
 ## The comparison with 3.1
 

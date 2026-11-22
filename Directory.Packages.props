@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- BenchmarkDotNet is used by one project, the benchmark program tests/Dataphor.Benchmarks, which nothing ships. -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.9.1" />
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
     <PackageVersion Include="Microsoft.Data.SqlClient.SNI.runtime" Version="4.0.0" />

@@ -118,4 +118,4 @@ Dataphor Reference documents the Dataphor product, including the Call-Level Inte
 - [Modernization plan](modernization-plan.md): the plan for moving Dataphor to .NET 10, with its workstreams, decisions and sequencing.
 - [Migration notes](migration-notes.md): the changes that an application, a deployment script or a custom extension will notice.
 - [Test coverage report](coverage-report.md): what the test suite reaches in the engine and what it does not, measured on one full run with the coverage collector switched on.
-- [Performance baseline](perf-baseline.md): how fast the engine is, recorded by the test suite so that a large slowdown is visible, and the procedure for the one-off comparison with 3.1.
+- [Performance baseline](perf-baseline.md): how fast the engine is, recorded by the test suite and by the benchmark program so that a large slowdown is visible, and the procedure for the one-off comparison with 3.1.
