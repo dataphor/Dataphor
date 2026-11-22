@@ -43,6 +43,7 @@
     <Compile Include="InternalCoverageTests.cs" />
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
+    <Compile Include="ObjectIDGeneratorTest.cs" />
     <Compile Include="OutOfProcessInstance.cs" />
     <Compile Include="OutOfProcessProtocolTest.cs" />
     <Compile Include="ParserRoundTripCorpusTest.cs" />

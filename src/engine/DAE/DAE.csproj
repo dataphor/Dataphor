@@ -223,8 +223,8 @@
     <Compile Include="Schema\GenericType.cs" />
     <Compile Include="Schema\Library.cs" />
     <Compile Include="Schema\ListType.cs" />
-    <Compile Include="Schema\Operator.cs" />
     <Compile Include="Schema\ObjectIDGenerator.cs" />
+    <Compile Include="Schema\Operator.cs" />
     <Compile Include="Schema\Reference.cs" />
     <Compile Include="Schema\RowType.cs" />
     <Compile Include="Schema\ScalarType.cs" />

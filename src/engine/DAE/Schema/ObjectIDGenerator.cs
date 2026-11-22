@@ -33,11 +33,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>The last identifier allocated; zero before the first allocation, so zero is never allocated.</summary>
 		private int _lastID;
 
-		/// <summary>Serializes <see cref="Reset"/> and <see cref="EnsureAllocatedThrough"/> against each other.</summary>
+		/// <summary>Serializes the methods that set the counter outright against each other.</summary>
 		/// <remarks>
 		/// Allocation stays lock-free, because the processes of one engine compile concurrently and every schema
-		/// object they create allocates. The two methods that move the counter run during engine start-up and
-		/// catalog rebuild, when nothing is allocating.
+		/// object they create allocates. The methods that set the counter run during engine start-up and catalog
+		/// rebuild, when nothing is allocating, so they are deliberately not serialized against <see cref="Allocate"/>.
 		/// </remarks>
 		private readonly object _syncRoot = new object();
 
@@ -51,12 +51,24 @@ namespace Alphora.Dataphor.DAE.Schema
 			// practical concern - at the few dozen identifiers a statement consumes it needs on the order of a
 			// hundred million statements in one catalog - but it must not be silent.
 			if (iD < 1)
+			{
+				// Hold the counter at the top rather than let it climb back through the identifiers already in use:
+				// an increment that wrapped once would otherwise reach 1 again after another two billion calls and
+				// hand out identifiers the catalog already holds, which is the silent corruption this refuses.
+				Interlocked.Exchange(ref _lastID, Int32.MaxValue);
 				throw new SchemaException(SchemaException.Codes.ObjectIDsExhausted);
+			}
 
 			return iD;
 		}
 
 		/// <summary>Honours a DAE.ObjectID tag in the given meta data, removing it; allocates when there is none.</summary>
+		/// <remarks>
+		/// NOTE: a tag-supplied identifier does not raise the generator, as it never has. Every path that loads
+		/// objects carrying these tags today is a catalog store load, and <c>Server.LoadServerState</c> raises the
+		/// generator past the store's maximum afterwards. A new load path that does not would let the generator
+		/// reissue an identifier a loaded object already holds, so it must raise the generator itself.
+		/// </remarks>
 		public int Allocate(MetaData metaData)
 		{
 			Tag tag = MetaData.RemoveTag(metaData, "DAE.ObjectID");
