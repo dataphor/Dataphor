@@ -1200,6 +1200,10 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			element.AppendChild(source);
 		}
 		
+		// NOTE: assumes every order column is in the elaborated expression. A column tagged Frontend.Include = "false"
+		// but left visible is in the order and not in the collection, so this throws Elaborated column "Main.<name>" not
+		// found - as the Browse page's search builder, which makes the same assumption, does first. No library does that
+		// today; name the Include tag in both messages if one ever does.
 		protected virtual string GetColumnTitle(Schema.TableVarColumn column)
 		{
 			return

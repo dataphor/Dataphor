@@ -75,10 +75,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </para>
 	/// <para>
 	/// No other normalization is applied, and none is needed: measured on 2026-11-21 over the whole corpus below, all
-	/// 416 forms came out byte-identical on two independently created server instances, and the 369 that derived at the
-	/// time of the first such measurement were identical when derived twice in one instance as well, so no timestamp,
-	/// identifier or machine name reaches the output and tag ordering is insertion-ordered. If a field ever does drift,
-	/// add a normalizer then and name the field; do not add one pre-emptively.
+	/// 416 forms came out byte-identical on two independently created server instances, and deriving twice in one
+	/// instance gave identical text as well - that half measured over the 369 forms that derived before K36 was fixed -
+	/// so no timestamp, identifier or machine name reaches the output and tag ordering is insertion-ordered. If a field
+	/// ever does drift, add a normalizer then and name the field; do not add one pre-emptively.
 	/// </para>
 	/// <para>
 	/// The corpus is 52 surfaces across eight of the ten carried libraries - System.Platform and SimpleDevice define no
