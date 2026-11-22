@@ -27,6 +27,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The AssemblyMetadata key under which the project file records the test server program's build output.</summary>
 		public const string TestHarnessPathMetadataKey = "DataphorTestHarnessPath";
 
+		/// <summary>The AssemblyMetadata key under which the project file records the repository's root directory.</summary>
+		public const string RepositoryDirectoryMetadataKey = "DataphorRepositoryDir";
+
 		/// <summary>Set to 1 to turn on the engine's logging and keep every test directory; see AGENTS.md "Build and test".</summary>
 		public const string LoggingVariable = "DATAPHOR_TEST_LOGGING";
 
@@ -86,6 +89,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				throw new InvalidOperationException(String.Format("The test server program is missing: \"{0}\" does not exist. Build tests/TestHarness/DAE.Test.Harness.csproj - dotnet build Dataphor.slnx, with the same -c configuration.", result));
 
 			return result;
+		}
+
+		// Lazy<T> caches a failure, so every test that needs the repository fails with the same message.
+		private static readonly Lazy<string> _repositoryDirectory = new Lazy<string>(FindRepositoryDirectory);
+		/// <summary>
+		/// The repository's own root, for the corpus tests that read source files (D4 scripts, form documents) rather than
+		/// the runtime layout. The layout holds only the libraries the build assembles, so a test that must see everything
+		/// in the tree reads the tree.
+		/// </summary>
+		public static string RepositoryDirectory => _repositoryDirectory.Value;
+
+		private static string FindRepositoryDirectory()
+		{
+			string repositoryDirectory = Metadata(RepositoryDirectoryMetadataKey);
+			if (String.IsNullOrEmpty(repositoryDirectory))
+				throw new InvalidOperationException(String.Format("The test assembly does not record the repository directory (AssemblyMetadata \"{0}\"). Build it through its project file: dotnet build Dataphor.slnx", RepositoryDirectoryMetadataKey));
+
+			// The solution file is the marker the whole suite identifies the repository by; its absence means the recorded
+			// path is stale (a moved or copied test assembly), which is worth saying plainly rather than failing later.
+			if (!File.Exists(Path.Combine(repositoryDirectory, "Dataphor.slnx")))
+				throw new InvalidOperationException(String.Format("The recorded repository directory \"{0}\" does not hold Dataphor.slnx. Rebuild the test project: dotnet build Dataphor.slnx", repositoryDirectory));
+
+			return repositoryDirectory;
 		}
 
 		private static readonly Lazy<string> _runDirectory = new Lazy<string>(CreateRunDirectory);

@@ -28,6 +28,9 @@
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
+    <Compile Include="FormCustomizationTest.cs" />
+    <Compile Include="FormDocumentCorpusTest.cs" />
+    <Compile Include="FrontendFixture.cs" />
     <Compile Include="HostBindingHookTest.cs" />
     <Compile Include="HostCommandLineTest.cs" />
     <Compile Include="HostProgramTest.cs" />
@@ -100,6 +103,15 @@
   -->
   <ItemGroup>
     <AssemblyMetadata Include="DataphorLayoutDir" Value="$(DataphorLayoutDir)" />
+  </ItemGroup>
+
+  <!--
+    The repository root, which the corpus tests read source files from (the layout holds only what the build assembles,
+    so a test that must see every file in the tree reads the tree). Normalized here rather than in code, so that nothing
+    spells the path; like the layout path it is an absolute build-machine path in a test assembly that never ships.
+  -->
+  <ItemGroup>
+    <AssemblyMetadata Include="DataphorRepositoryDir" Value="$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..'))" />
   </ItemGroup>
 
   <!--
