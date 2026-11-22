@@ -1208,7 +1208,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 					column.MetaData,
 					"Caption",
 					_derivationInfo.PageType,
-					_derivationInfo.ElaboratedExpression.Columns[column.Name].GetTitleSeed() + 
+					_derivationInfo.ElaboratedExpression.Columns[Schema.Object.Qualify(column.Name, DerivationUtility.MainElaboratedTableName)].GetTitleSeed() + 
 						DerivationUtility.GetTag(column.MetaData, "Title", _derivationInfo.PageType, Schema.Object.Unqualify(column.Name))
 				);
 		}

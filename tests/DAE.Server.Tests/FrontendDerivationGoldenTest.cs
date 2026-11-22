@@ -75,14 +75,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </para>
 	/// <para>
 	/// No other normalization is applied, and none is needed: measured on 2026-11-21 over the whole corpus below, all
-	/// 369 forms that derive came out byte-identical on two independently created server instances and identical when
-	/// derived twice in one, so no timestamp, identifier or machine name reaches the output and tag ordering is
-	/// insertion-ordered. If a field ever does drift, add a normalizer then and name the field; do not add one
-	/// pre-emptively.
+	/// 416 forms came out byte-identical on two independently created server instances, and the 369 that derived at the
+	/// time of the first such measurement were identical when derived twice in one instance as well, so no timestamp,
+	/// identifier or machine name reaches the output and tag ordering is insertion-ordered. If a field ever does drift,
+	/// add a normalizer then and name the field; do not add one pre-emptively.
 	/// </para>
 	/// <para>
 	/// The corpus is 52 surfaces across eight of the ten carried libraries - System.Platform and SimpleDevice define no
-	/// table variable of their own - which is 416 cases, of which 369 derive and 47 fail, all of them OrderBrowse.
+	/// table variable of their own - which is 416 cases, every one of which derives.
 	/// </para>
 	/// </remarks>
 	// Not [Parallelizable]: this fixture starts a server, and two engines in one process share the engine's static state
@@ -134,15 +134,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// longer matches a single failing case fails this pass, so the row drains when the defect is fixed - and a case
 		/// that fails with no row matching it fails with its error, so a new defect cannot slip in as a missing file.
 		/// </remarks>
-		// NOTE: a new entry carries the ticket that owns the cause and the text its failure must carry, same shape as
-		// this one; see ParserRoundTripCorpusTest.AllowList.
-		private static readonly ExpectedFailure[] ExpectedFailures =
-		[
-			// OrderBrowse fails on 47 of the 52 surfaces, each with Elaborated column "<name>" not found, the name being
-			// the first column of the table's order. The five that derive are the surfaces with no visible order column,
-			// and they have goldens like any other case.
-			new ExpectedFailure("OrderBrowse", "*", "bug-orderbrowse-derivation-fails", "Elaborated column"),
-		];
+		// NOTE: empty today - every case of the corpus derives, so every case has a golden. This is where the next
+		// derivation defect is recorded rather than left as a missing file: an entry carries the ticket that owns the
+		// cause and a substring the failure must contain, as the row for bug-orderbrowse-derivation-fails did until that
+		// defect was fixed; see ParserRoundTripCorpusTest.AllowList for a live example of the shape.
+		private static readonly ExpectedFailure[] ExpectedFailures = [];
 
 		/// <summary>One row of <see cref="ExpectedFailures"/>.</summary>
 		private sealed class ExpectedFailure

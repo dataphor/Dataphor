@@ -1,0 +1,21 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="OrderBrowse Windows Client Application Settings" mainsource="Main">
+	<source bop:name="Main" usebrowse="False" expression="table of { OrderName : String, Description : String } { row { &quot;by Application_ID&quot; Description, &quot;order { Application_ID asc include nil }&quot; OrderName }  } order by { OrderName }" isreadonly="True" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<grid bop:name="MainGrid" source="Main" readonly="True">
+			<textcolumn bop:name="MainGridColumnDescription" columnname="Description" width="45" />
+		</grid>
+	</column>
+</interface>
