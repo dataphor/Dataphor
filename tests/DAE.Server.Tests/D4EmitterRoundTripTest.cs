@@ -45,6 +45,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestCase("try F(); commit;", TestName = "TryCommit_OneStatementBody")]
 		[TestCase("try F(); G(); commit;", TestName = "TryCommit_TwoStatementBody")]
 		[TestCase("try begin F(); G(); end; commit;", TestName = "TryCommit_DelimitedBlockBody")]
+		// A multi-variable "var" is the other producer of a plain Block, so it is the other body the try arm
+		// splices; VariableStatement builds that block directly rather than returning it from DelimitedBlock.
+		[TestCase("try var a, b; commit;", TestName = "TryCommit_MultiVariableDeclarationBody")]
 		[TestCase("for i := 1 to 3 do F();", TestName = "For_NoVariableDeclaration")]
 		[TestCase("for var i := 1 to 3 do F();", TestName = "For_VariableDeclaration")]
 		[TestCase("for var i : Integer := 1 to 3 do F();", TestName = "For_VariableDeclarationWithTypeSpecifier")]

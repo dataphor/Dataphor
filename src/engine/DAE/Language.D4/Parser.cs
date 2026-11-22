@@ -4116,7 +4116,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					block.Line = line;
 					block.LinePos = linePos;
 					Block commitBlock = new Block();
-					commitBlock.SetPosition(_lexer);
+					// Same position as the block it is the statement list of, which is what begin..end gives.
+					commitBlock.Line = line;
+					commitBlock.LinePos = linePos;
 					block.Statements.Add(commitBlock);
 					commitBlock.Statements.Add(new ExpressionStatement(new CallExpression("BeginTransaction", new Expression[]{})));
 					TryExceptStatement commitStatement = new TryExceptStatement();
@@ -4124,14 +4126,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					commitStatement.LinePos = linePos;
 					Block tryBlock = new Block();
 					tryBlock.SetPosition(_lexer);
-					// The body's statements belong in the try arm's own list, so a bare Block body is spliced in.
-					// A DelimitedBlock body is a begin..end the source wrote: its children belong inside its own
-					// frame, so it stays nested.
-					Block tryStatements = tryStatement as Block;
-					if ((tryStatements != null) && !(tryStatements is DelimitedBlock))
+					// The body's statements belong in the try arm's own list, so a plain Block body - a statement list,
+					// whether DelimitedBlock above returned it or VariableStatement did for a multi-variable "var" - is
+					// spliced in. A DelimitedBlock body is a begin..end the source wrote: its children belong inside its
+					// own frame, so it stays nested. The test is the exact type rather than "Block and not
+					// DelimitedBlock", because a statement's shape here is its exact type: InternalCompileStatement
+					// dispatches on GetType().Name, so a further Block subclass would need its own arm there too.
+					if (tryStatement.GetType() == typeof(Block))
 					{
-						for (int tryIndex = 0; tryIndex < tryStatements.Statements.Count; tryIndex++)
-							tryBlock.Statements.Add(tryStatements.Statements[tryIndex]);
+						Statements bodyStatements = ((Block)tryStatement).Statements;
+						for (int tryIndex = 0; tryIndex < bodyStatements.Count; tryIndex++)
+							tryBlock.Statements.Add(bodyStatements[tryIndex]);
 					}
 					else
 						tryBlock.Statements.Add(tryStatement);
