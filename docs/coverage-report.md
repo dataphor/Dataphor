@@ -10,7 +10,7 @@ What the test suite reaches in the engine, and what it does not, measured on one
 | Commit | `f6200026` |
 | Configuration | Debug, .NET 10, Windows x64 |
 | Machine | one slow development laptop, nothing else running |
-| Suite | one full three-part run: 582 tests passed, 0 failed, 24 coverage scripts skipped as the manifest's recorded known failures |
+| Suite | one full three-part run: 582 tests passed, 0 failed, 24 coverage scripts skipped - the 21 the manifest records as known failures and the 3 it records as fragments, which only run inside another script |
 | Collector | Microsoft's `Code Coverage` collector through `dotnet test --collect`, three Cobertura reports merged into one |
 
 The three parts are the ones the root `AGENTS.md` describes under *Agents run the suite in parts*, so between them every test in the repository ran once. That matters for reading the areas below: several engine subsystems are reached only by the NUnit fixtures in part 1 (application transactions, server links, connection security, library loading) and several others only by the D4 coverage scripts in parts 2 and 3, so a report built from fewer than three parts would understate whichever it left out.
@@ -21,7 +21,7 @@ The three parts are the ones the root `AGENTS.md` describes under *Agents run th
 
 The suite's 116 passing coverage scripts are the clearest case of the difference. Nine of them assert nothing at all - the manifest records each as "no assertions": `Functions`, `LibraryFilesCoverage`, `LockAllocation`, `Register`, `RowAllocation`, `ScalarAllocation`, `SerializationDevices`, `TestGH37` and `Warnings`. Eight hold only comments and one is empty. Every line they execute is green in the tables below and nothing about it is checked, so the parts of the engine those nine were written for are, in substance, untested however they colour. Their names are a fair list of what their authors meant to cover and did not: allocation and leak counting, library file registration, device serialization, the function library and compiler warnings.
 
-Two more mechanical points. Line counts are not statement counts and are not comparable between builds, because the collector decides which lines are coverable and that moves with the code - compare *rates* between runs of the same build, not counts. And an area's rate is a weighted average over its files, so one large well-covered file can hide a wholly untested neighbour; that is what the per-file tables under each gap are for.
+Two more mechanical points. Line counts are not statement counts and are not comparable between builds, because the collector decides which lines are coverable and that moves with the code - compare *rates* between runs of the same build, not counts. And an area's rate is a weighted average over its files, so one large well-covered file can hide a wholly untested neighbour. The generated tables below show files only for the two areas marked `gap`, so a file at 0 % inside a `covered` area does not appear anywhere in them: *Wholly untested files the area rates hide*, further down, is the hand-written list of those, and `debt-coverage-report-zero-files` is the ticket to make the tool print them.
 
 An area below 25 % line coverage is a **gap** unless it has fewer than 200 coverable lines; below 50 % and not a gap it is **thin**. Areas are listed worst first by uncovered line count, so the biggest holes are the first a reader meets.
 
@@ -34,8 +34,10 @@ dotnet build Dataphor.slnx
 dotnet test Dataphor.slnx --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part1 -- "NUnit.Where=class != Alphora.Dataphor.DAE.Server.Tests.CoverageScripts"
 dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part2 -- "NUnit.Where=test =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.CoverageScripts\.(Script\.)?(?!Script$)[A-Ra-r]'"
 dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part3 -- "NUnit.Where=test =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.CoverageScripts\.(Script\.)?(?!Script$)[^A-Ra-r]'"
-python tools/coverage-report/coverage_report.py artifacts/coverage -o docs/coverage-report.md
+python tools/coverage-report/coverage_report.py artifacts/coverage -o artifacts/coverage/report.md
 ```
+
+**Point `-o` at a scratch file, not at this one.** The tool writes a whole document of its own, head included, so `-o docs/coverage-report.md` replaces everything above as well as the tables below - generate beside the collection as shown, then carry the generated half in under *Line coverage per assembly* and bring this head up to date by hand.
 
 `artifacts/` is git-ignored, so a run leaves nothing in the tree. The tool's options, the area map it classifies against and its two boundary checks are documented in [tools/coverage-report/README.md](../tools/coverage-report/README.md).
 
@@ -61,7 +63,7 @@ Three files turned out to be neither covered nor worth covering: `src/engine/Bas
 
 ## Tickets this pass filed
 
-Six, all in `tickets/backlog/`, so the report and the board can be read against each other.
+Six, all filed into `tickets/backlog/`, so the report and the board could be read against each other from the start. Tickets move between stages as they are worked, so look a slug up rather than a path.
 
 | Ticket | Area | Measured |
 |---|---|---|
@@ -74,11 +76,46 @@ Six, all in `tickets/backlog/`, so the report and the board can be read against 
 
 Three areas the tables mark `thin` deliberately have no ticket, and the reasons belong with the numbers:
 
-- **Base utilities**, 42.3 %, the largest uncovered block left. Its holes are not engine behaviour: `BOP/Inheritance.cs` and `BOP/Dilx.cs` (423 lines, both at 0 %) are the form-document customization machinery, reached only through the Frontend library's customization operators, and `CRC32.cs` only through the Frontend client's document cache. The Frontend server assembly itself sits at 14.2 % and is outside the engine area map, so this belongs to a Frontend coverage pass rather than to an engine ticket.
-- **Device connections (engine)**, 33.1 %. Its 0 % files are all the MSSQL connection and command classes, which need a running SQL Server. The suite already records that absence: the three `Transaction.Atomicity.TestMSSQL*` scripts are skipped known failures for exactly this reason, so a new ticket would only restate what the manifest says.
+- **Base utilities**, 42.3 %, the largest uncovered block left. Most of its holes are not engine behaviour: `BOP/Inheritance.cs` and `BOP/Dilx.cs` (423 lines, both at 0 %) are the form-document customization machinery, reached only through the Frontend library's customization operators, and `CRC32.cs` (69 lines, 0 %) only through the Frontend client's document cache. The Frontend server assembly itself sits at 14.2 % and is outside the engine area map, so that part belongs to a Frontend coverage pass rather than to an engine ticket. One hole here *is* engine behaviour and is not covered by that argument: `MemoryUtility.cs`, 161 lines at 0 %, which the D4 operators `Diagnostics.GetInstanceSize` and `Diagnostics.GetInstanceSizes` call to measure the size of a live object graph. Nothing in the suite calls either operator. It is left unticketed as a diagnostic rather than a data path, not because it is somebody else's code.
+- **Device connections (engine)**, 33.1 %. Three of its four 0 % files are the MSSQL connection, command and cursor classes (398 lines), which need a running SQL Server. The suite already records that absence: the three `Transaction.Atomicity.TestMSSQL*` scripts are skipped known failures for exactly this reason, so a new ticket would only restate what the manifest says. The fourth, `GenericDotNetConnection.cs` (111 lines, 0 %), is not an MSSQL class and is not uncovered for that reason: it is a compiled public ADO.NET `DbProviderFactory` wrapper that nothing in the repository references, and its own documentation comment says using it is "NOT RECOMMENDED for anything, ever". It is a fourth instance of the dead compiled code described below, and is now named on `debt-ws12-hygiene-remainder` rather than counted as a coverage gap.
 - **WCF services and contracts**, 50.9 %, which the tool marks `covered`; listed here only because it is the closest of the covered areas to the line.
 
 The cap on this pass was eight tickets. Six were filed, so nothing was left out for want of room.
+
+Its review added two more, both from the per-file data rather than the area rates:
+
+| Ticket | What it is |
+|---|---|
+| `debt-coverage-report-zero-files` | the tool prints files only for areas it already calls gaps, so 21 files at 0 % - 1,300 lines - appear nowhere in the generated half of this report |
+| `debt-unreachable-redefine-nodes` | 446 of those lines are the D4 `redefine` operator's node implementation, which the compiler can no longer emit, and which the system catalog still registers |
+
+It also found a fourth file of the dead compiled kind, `src/engine/Server/Connection/GenericDotNetConnection.cs`, and named it on `debt-ws12-hygiene-remainder`. Unlike the three below it is still counted in its area, so the *Device connections (engine)* rate includes 111 lines of code nothing in the repository references.
+
+## Wholly untested files the area rates hide
+
+The generated tables print a per-file breakdown only for an area marked `gap`. Twenty-one source files in areas marked `covered` are themselves at **0 %**, 1,300 coverable lines between them, and nothing below names one. They are listed here because that is the report's whole subject, and `debt-coverage-report-zero-files` exists so that the next run prints them without anyone having to remember to look.
+
+The eleven of 20 lines or more:
+
+| File | Coverable | Area, and that area's rate |
+|---|---:|---|
+| src/engine/DAE/Runtime.Instructions/RedefineNode.cs | 257 | Plan nodes, 66.6 % |
+| src/engine/DAE/Runtime.Data/ObjectMarshal.cs | 183 | Runtime values, 60.4 % |
+| src/engine/DAE/Runtime.Data/NativeMap.cs | 159 | Runtime values, 60.4 % |
+| src/engine/DAE/Runtime.Data/NativeRowMap.cs | 130 | Runtime values, 60.4 % |
+| src/engine/Server/Server/RemoteServerBatch.cs | 111 | Server and sessions, 65.7 % |
+| src/engine/DAE/Runtime.Instructions/BinaryNodes.cs | 96 | Plan nodes, 66.6 % |
+| src/engine/DAE/Runtime.Data/NativeSet.cs | 84 | Runtime values, 60.4 % |
+| src/engine/DAE/Runtime.Data/RedefineTable.cs | 65 | Runtime values, 60.4 % |
+| src/engine/DAE/Runtime.Instructions/ObjectNodes.cs | 48 | Plan nodes, 66.6 % |
+| src/engine/Server/Server/RemoteServerScript.cs | 41 | Server and sessions, 65.7 % |
+| src/engine/DAE/Utility.cs | 21 | Engine errors and registration, 60.6 % |
+
+The remaining ten are exception classes and small helpers of 17 lines or fewer.
+
+**The largest of them is not untested, it is unreachable.** `RedefineNode.cs` (257) and `RedefineTable.cs` (65), with the class `RowRedefineNode` inside the covered file `Runtime.Instructions/RowNodes.cs` (124), are the three implementations of the D4 `redefine` operator, 446 lines at exactly zero hits - while `redefine` itself is executed by `Exists`, `RowLibrary`, `Cursors` and `DML`, four scripts that all pass. The reason is in `src/engine/DAE/Compiling/Compiler.cs`: `EmitRedefineNode` puts the whole node-emitting branch behind `#if USEREDEFINENODE`, a symbol defined nowhere in the repository, and the live `#else` branch rewrites `T redefine { A := ... }` into `T add { ... Temp } remove { A } rename { Temp A }`. So the compiler cannot produce these nodes. They are nevertheless the registered D4 classes of `iRedefine(row)` and `iRedefine(table)` in `src/engine/DAE/Schema/SystemCatalog.d4`, which makes removing them a compatibility question rather than a sweep: `debt-unreachable-redefine-nodes` carries it.
+
+None of the other nine has been investigated. Whether each is live code nothing exercises, or more code the engine can no longer reach, is the first question for whoever picks one up - this run says only that no test touched it.
 
 ## Line coverage per assembly
 

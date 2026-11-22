@@ -18,7 +18,9 @@ tradeoffs: The debugger is a development aid, not something a deployed applicati
 
 ## What the 35.7 % is, and what the gap is
 
-The 35.7 % is not an accident: one coverage script, `DebugLibrary.d4`, passes and reaches a real part of this. It starts a debugger, checks it appears in `GetDebuggers()`, sets break-on-exception and break-on-start, attaches and detaches a process and a session, and checks each against `Debug.GetProcesses()` and `Debug.GetSessions()`. That is the whole of what the suite covers.
+The 35.7 % is not an accident: one coverage script, `DebugLibrary.d4`, passes and reaches a real part of this. Reading the script against the per-class measurement, this is exactly what it covers and nothing else: `Debug.Start()` and `Debug.Stop()` (both 100 %), `SetBreakOnException` (100 %), `AttachProcess` and `DetachProcess` (both 100 %), `GetDebuggers()` (90.7 %) and `GetProcesses()` (81.7 %), each checked by selecting from the last two. It also asserts that attaching the debugger to its *own* session fails, which is why `AttachSession` reads 50 % (2 of 4 lines - the refusal, not the attach).
+
+Three operators a reader might assume are covered because the script mentions this area are **not**, and the measurement is flat: `SetBreakOnStart` **0 %**, `GetSessions()` **0 % of 38 lines**, `DetachSession` **0 %**. The script's real session attach/detach pair is commented out, with its author's note "This needs to be run on a separate session... Probably needs to be managed by an NUnit test directly" - so session-level debugging has never run here either, and that note is a fair statement of what it needs. `GetSource` is a fourth at 0 % of 10 lines.
 
 The gap is everything after a program actually stops. `Breakpoint.cs`, `CallStackEntry.cs` and `DebugContext.cs` are at **exactly zero**, and those three are the types that only come into being when something is paused. So: no test in this repository has ever hit a breakpoint. Everything that follows from one - the paused program's call stack, its stack frames and their values, stepping, resuming - is unreached, and that is the two thirds of `Debugger.cs` and `DebugNodes.cs` that is dark.
 
@@ -28,7 +30,9 @@ The operators that make up the untested half, from `DebugNodes.cs` and `src/engi
 - `Debug.Pause()`, `Debug.WaitForPause()`, `Debug.Run()`, `Debug.RunTo(processID, locator, line, linePos)`
 - `Debug.StepOver(processID)`, `Debug.StepInto(processID)`, `StepIntoSpecific(processID, operatorName)`, `GetStepIntoOperators(processID)`
 - `GetCallStack(processID)` and `GetStack(processID, windowIndex)` - the two that read a paused program, and the reason `CallStackEntry` is at zero
-- `Debug.Stop()`, and break-on-exception actually breaking rather than merely being set
+- `Debug.SetBreakOnStart`, `Debug.GetSessions()` and `Debug.DetachSession` - all at zero, none of them about a paused program; session attach needs a second session, as `DebugLibrary.d4`'s own comment says
+- `Debug.GetSource(locator)`
+- break-on-exception actually breaking rather than merely being set (`Debug.Stop()` is already covered; it is the only operator in this list the suite reaches)
 
 ## Do not reuse what `DebugTest.d4` does
 
