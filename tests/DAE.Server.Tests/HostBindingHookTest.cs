@@ -27,9 +27,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	[TestFixture]
 	// Not [Parallelizable]: the hooks are process-wide static fields, so a case here changes what every host built in
 	// this process would be served on; and two servers in one process share the engine's static state (see the note on
-	// TestServerInstance). No case restores the engine's object-id counter, unlike CoreWcfProtocolTest's second hosts:
-	// nothing here outlives a case, and every fixture that needs a server starts one in its own set-up, which sets the
-	// counter from that server's own catalog.
+	// TestServerInstance).
 	public class HostBindingHookTest
 	{
 		/// <summary>What a throwing hook throws, so that a case can find it again in the failure that reaches the caller.</summary>

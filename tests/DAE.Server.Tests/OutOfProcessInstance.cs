@@ -20,8 +20,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <para>
 	/// Shaped like <see cref="HostedInstance"/>, which does the same for a host in the test's own process, and it reuses
 	/// that class's port reservation and configuration. What the separate program adds is that the server's engine is
-	/// genuinely not this process's: no static the engine keeps - the object-id counter among them - is shared between
-	/// the two sides, which is how the product runs and what no in-process fixture can show.
+	/// genuinely not this process's: no static the engine keeps is shared between the two sides, which is how the
+	/// product runs and what no in-process fixture can show.
 	/// </para>
 	/// <para>
 	/// The child is stopped by a line on its standard input, and also stops when that input reaches its end, which is

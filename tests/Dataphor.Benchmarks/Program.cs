@@ -124,8 +124,9 @@ namespace DAE.Benchmarks
 					// beside compiled ones in this codebase) and redirects ArtifactsPath - so the generated project
 					// compiles nothing and the run fails in a way that looks like a BenchmarkDotNet defect. An in-process
 					// toolchain generates and builds nothing. It costs nothing here either: every iteration starts an
-					// engine, so process-level isolation would buy little, and the engine has process-wide static state in
-					// any case (BenchmarkServerInstance's object-id counter).
+					// engine, so process-level isolation would buy little, and the engine still has some process-wide
+					// static state in any case (the object-id counter was part of it until
+					// bug-object-id-counter-is-process-wide gave each engine a generator of its own).
 					.WithToolchain(InProcessNoEmitToolchain.Instance)
 					.WithStrategy(RunStrategy.Monitoring)
 					.WithWarmupCount(WarmupCount)

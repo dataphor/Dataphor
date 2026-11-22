@@ -36,8 +36,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: the child processes share no engine state with this one, but the clients this case builds do
-	// - each LocalServer starts a client-side engine here, and those share the object-id counter (see ProtocolClient).
-	// Nothing in this project is parallelizable.
+	// - each LocalServer starts a client-side engine here, and two engines in one process share whatever engine statics
+	// are left (see the note on TestServerInstance). Nothing in this project is parallelizable.
 	public class AbandonedClientProcessTest
 	{
 		private const string InstanceName = "AbandonedClientProcess";

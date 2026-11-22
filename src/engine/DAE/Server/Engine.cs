@@ -1231,6 +1231,10 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			// Create the Catalog device
 			// Note that this must be the first object created to avoid the ID being different on subsequent loads
+			// NOTE: ClearCatalog calls this method again, so a catalog rebuild restarts this engine's generator from one.
+			// Deliberately unchanged by bug-object-id-counter-is-process-wide, which only stopped the reset from reaching
+			// *other* engines; whether a repository engine - a client's catalog cache, which rebuilds mid-life when the
+			// server's catalog moves on - should reset at all is bug-client-catalog-rebuild-reuses-object-ids's question.
 			ObjectIDGenerator.Reset();
 			_catalogDevice = CreateCatalogDevice();
 
