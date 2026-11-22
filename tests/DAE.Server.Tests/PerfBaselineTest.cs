@@ -255,11 +255,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			if (String.IsNullOrEmpty(label))
 				return;
 
-			PerfBaselineFile baseline = ReadBaseline();
-			if (baseline != null && baseline.Schema != BaselineSchema)
-				Assert.Fail(String.Format("{0} has schema {1}; this pass reads schema {2}. Update the reader, or the file.", BaselineRelativePath, baseline.Schema, BaselineSchema));
-
-			PerfComparison comparison = Compare(measured, baseline, label, WarnFactor, FailFactor);
+			PerfComparison comparison = Compare(measured, ReadBaseline(), label, WarnFactor, FailFactor);
 			string report = String.Format("{0} finding(s) comparing this run with \"{1}\" in {2}:{3}", comparison.Findings.Count, label, BaselineRelativePath, String.Concat(comparison.Findings.Select(finding => Environment.NewLine + "  " + finding)));
 			if (comparison.Outcome == PerfOutcome.Fail)
 				Assert.Fail(report);
@@ -326,6 +322,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// numbers, because each BenchmarkExecute call is its own batch, and it is the shape a person running these scripts
 		/// in the IDE sees - one implicit transaction per batch rather than one for the whole script.
 		/// </remarks>
+		// NOTE: no wall-clock cap on a scenario, and a line is printed only when a batch ends, so a batch that runs away prints
+		// nothing for its whole duration - which the ticket runner kills at ten minutes of silence, and which is how Timings was
+		// found. Harmless while every batch is seconds. If a scenario is ever added that can legitimately run for minutes, or a
+		// regression makes one do so, give this loop a timeout of its own, the way a coverage entry has timeoutSeconds.
 		private void Measure(PerfScenario scenario, SortedDictionary<string, long> measured)
 		{
 			Progress(String.Format("{0}: {1}", scenario.Name, scenario.What));
@@ -507,13 +507,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				};
 		}
 
+		/// <summary>The checked-in file, or null when there is none.</summary>
+		/// <remarks>
+		/// Every reader comes through here, so that the schema is checked on the update path as well as the comparing one: an
+		/// update that rewrote a file of a later shape as this one would silently discard whatever that shape carries.
+		/// </remarks>
 		private static PerfBaselineFile ReadBaseline()
 		{
 			string path = BaselinePath;
 			if (!File.Exists(path))
 				return null;
+			PerfBaselineFile file;
 			using (FileStream stream = File.OpenRead(path))
-				return JsonSerializer.Deserialize<PerfBaselineFile>(stream, ReadOptions);
+				file = JsonSerializer.Deserialize<PerfBaselineFile>(stream, ReadOptions);
+			if (file != null && file.Schema != BaselineSchema)
+				Assert.Fail(String.Format("{0} has schema {1}; this pass reads schema {2}. Update the reader, or the file.", BaselineRelativePath, file.Schema, BaselineSchema));
+			return file;
 		}
 
 		/// <summary>
