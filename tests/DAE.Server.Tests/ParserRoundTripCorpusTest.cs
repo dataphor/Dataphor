@@ -22,6 +22,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// L0 of the WS3 test layer: every .d4 file in the repository parses, and re-emitting the parse tree then parsing
 	/// the result gives the same tree. Exercises the lexer, parser and D4TextEmitter in isolation, with no server.
 	/// </summary>
+	/// <remarks>
+	/// Three kinds of .d4 file are not a whole D4 script, and each has its own rule here. A device's SystemCatalog
+	/// resource is a String.Format template, so <see cref="FormatTemplates"/> formats it first, as the device does. A
+	/// document under the parked trees that the parser cannot read is Ignored rather than failed, with
+	/// <see cref="TheParkedTreeIsNoLessReadableThanItWas"/> holding the number of them from rising. Everything else that
+	/// is not a script is named in <see cref="AllowList"/> with the line the parser stops at, and
+	/// <see cref="EveryExcludedFileIsStillWhatItsReasonSays"/> holds those entries against the tree.
+	/// </remarks>
 	[TestFixture]
 	public class ParserRoundTripCorpusTest
 	{
@@ -39,64 +47,74 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"tickets/.logs",
 		};
 
-		// Files the corpus pass excludes, each with a one-line reason. The test ticket expects this to be empty; one
-		// category is left, and it is tracked:
-		//   (parse)        - the parser emits recovery messages on the first read; file is effectively not
-		//                     parseable through today's parser (most of legacy/libraries/FHIR.Server/, device
-		//                     SystemCatalog variants, and some Coverage.Scripts documents that use grammar the
-		//                     parser does not yet accept). Owned by bug-d4-parser-rejects-active-sources.
-		// The two emitter categories are gone. (emitter-malformed) - re-parse of the emitted text produced syntax
-		// errors - was fixed by bug-d4-emitter-malformed-output. (emitter-reshape) - both parses succeeded but the
-		// tree came back a different shape - was three defects fixed in two tickets:
-		// bug-d4-parser-desugars-for-and-try-commit made the parser's own desugaring of "for" and "try ... commit"
-		// build the shape the equivalent explicit D4 parses to, and bug-d4-emitter-reshapes-parse-tree stopped the
-		// emitter reordering metadata tags, printing a "by" clause the source did not have, and splitting a
-		// multi-variable declaration into separate statements. D4EmitterRoundTripTest holds all of them fixed.
-		// NOTE: see ticket review/test-parser-roundtrip-corpus handoff for the follow-up tickets that drain this
-		// list. New entries added here outside that workflow must carry a one-line reason, same shape as these.
+		// The repository folder holding the parked trees - the libraries and prototypes this modernization set aside
+		// (library-park-move, library-park-side-projects). Nobody owns the D4 in them, so a parked document the parser
+		// cannot read is not a defect anyone will fix: its case is Ignored rather than failed (see RoundTrips), and the
+		// number of such documents is held by TheParkedTreeIsNoLessReadableThanItWas.
+		private const string ParkedTreeDirectory = "legacy";
+
+		// The .d4 files that are not scripts but String.Format templates. Each is a SQL device's SystemCatalog resource,
+		// where "{0}" is the device name and "{{" / "}}" are escaped braces; the device formats the resource before
+		// executing it, so the corpus formats it before parsing it. The arguments mirror what that device's own C# call
+		// site passes, faithfully, because the count has to cover the template's highest placeholder or String.Format
+		// throws - Oracle's call site passes two where the SQL Server and PostgreSQL ones pass four. The values
+		// themselves change nothing the parser sees beyond the substitution, so a placeholder device name is enough.
+		private static readonly Dictionary<string, object[]> FormatTemplates = new Dictionary<string, object[]>(StringComparer.OrdinalIgnoreCase)
+		{
+			// libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLDevice.cs RegisterSystemObjectMaps:
+			// String.Format(text, Name, "false", IsMSSQL70, IsAccess)
+			{ "libraries/MSSQLDevice/Source/SystemCatalog.d4", new object[] { "TestDevice", "false", "false", "false" } },
+			// libraries/PGSQLDevice/Source/Device.PGSQL/PostgreSQLDevice.cs RegisterSystemObjectMaps:
+			// String.Format(script, Name, "false", false, false)
+			{ "libraries/PGSQLDevice/Source/SystemCatalog.d4", new object[] { "TestDevice", "false", "false", "false" } },
+			// legacy/libraries/OracleDevice/Source/Device.Oracle/OracleDevice.cs RegisterSystemObjectMaps:
+			// String.Format(text, Name, "false") - two arguments, not four
+			{ "legacy/libraries/OracleDevice/Source/SystemCatalog.d4", new object[] { "TestDevice", "false" } },
+		};
+
+		// Files the corpus pass excludes, each with the reason the parser stops on it. All fifteen were verified by
+		// parsing them one at a time on 2026-11-22, and not one is a parser defect: each is a document that is not a
+		// whole D4 script - a missing ";" or "then", or a type specifier the language does not have - and the parser is
+		// right to refuse it. Repairing that text is not this list's call to make. The eight Coverage.Scripts entries are
+		// owned by test-pre-3-1-scripts-policy (and recorded as known-failure against it in coverage-manifest.json, with
+		// the same error text), and that ticket carries the seven below as a second arm; it asks the owner before editing
+		// any D4 document to make it run, because without a reference runtime the text is the record of correct behaviour.
+		//
+		// This list held 38 entries in three categories, all now resolved rather than suppressed.
+		// (emitter-malformed) - the re-parse of emitted text produced syntax errors - was fixed by
+		// bug-d4-emitter-malformed-output. (emitter-reshape) - both parses succeeded but the tree came back a different
+		// shape - was three defects, fixed by bug-d4-parser-desugars-for-and-try-commit (the parser's own desugaring of
+		// "for" and "try ... commit" built a shape the equivalent explicit D4 does not) and by
+		// bug-d4-emitter-reshapes-parse-tree (reordered metadata tags, a "by" clause the source did not have, a split
+		// multi-variable declaration); D4EmitterRoundTripTest holds all of them fixed. (parse) - 38 files the parser
+		// would not read - was bug-d4-parser-rejects-active-sources, which found no parser gap behind any of them: three
+		// were String.Format templates and are covered through FormatTemplates above (Oracle's is also a parked
+		// document), nineteen more were parked documents now Ignored by the rule above, one was an orphan using a
+		// "create device { ... }" form removed from the grammar in
+		// 2006 and was deleted, and these fifteen are what is left.
+		//
+		// A new entry carries a reason in the same shape: what the file is, and the line and token the parser stops at.
 		private static readonly Dictionary<string, string> AllowList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
-			// (parse) - legacy FHIR / parked libraries whose documents use grammar the current parser rejects
-			{ "legacy/libraries/FHIR.Core/Documents/UpdatesToSupportNestUnnest.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/BundleProcessing.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/CPGProcessing.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/Connectathon21.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/ELMAnalysis.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/FHIR.CreateModelInfo.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/FHIR.LoadCQMData.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/FHIR.ModelInfoScratchPad.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/PatientSchemaMusings.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/PostResources.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/QUICK.CreateModelInfo.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/QUICKFHIR.CreateModelInfo.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/SimpleFHIR.CreateModelInfo.d4", "parse" },
-			{ "legacy/libraries/FHIR.Server/Documents/USCore.CreateModelInfo.d4", "parse" },
-			{ "legacy/libraries/OracleDevice/Source/SystemCatalog.d4", "parse" },
-			{ "legacy/libraries/PHINVADS.Test/Documents/TestDevice.d4", "parse" },
-			{ "legacy/libraries/SASDevice/Source/Device.SAS/SASDeviceMappings.d4", "parse" },
-			{ "legacy/libraries/TestCQL/Documents/Register.d4", "parse" },
-			{ "legacy/libraries/TestCache/Documents/Device.d4", "parse" },
-			{ "legacy/libraries/TestCache/Documents/DeviceCatalogExpressions.d4", "parse" },
-			// (parse) - active SQL device SystemCatalog files use integer literals with device-type prefixes the parser rejects
-			{ "libraries/MSSQLDevice/Source/SystemCatalog.d4", "parse" },
-			{ "libraries/PGSQLDevice/Source/SystemCatalog.d4", "parse" },
-			{ "src/engine/DAE/Schema/SQLDeviceMappings.d4", "parse" },
-			// (parse) - active samples and tests with grammar the parser does not yet accept
-			{ "samples/Sample.Common/Documents/D4LanguageTour.d4", "parse" },
-			{ "samples/Sample.Shipping/Documents/Coverage.AdministrationRole.d4", "parse" },
-			{ "samples/Sample.Shipping/Documents/Coverage.Controller.d4", "parse" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Administration.d4", "parse" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Sales.d4", "parse" },
-			{ "samples/Sample.Shipping/Source/Shipping.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Base/Documents/UnsupportedOracleOperators.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Domains.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EntryLibrary.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ForeignSuperKeysAndConstantReferences.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IStringLibrary.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LibraryDomains.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "parse" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "parse" },
+			// Owned by test-pre-3-1-scripts-policy: documents in the pre-3.1 coverage script set, whose fate that ticket is
+			// deciding. Changing them, or their coverage-manifest.json entries, is its job and not this list's.
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Domains.d4", "stops at line 9's \"create domain TestDomain like Integer;\": \"domain\" was the pre-3.0 spelling of \"type\" and is not a keyword today. Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EntryLibrary.d4", "stops at line 8's \"entry {ID : Integer, Name : String}\": D4 has no \"entry\" type specifier (TypeSpecifier offers generic, scalar, row, table, list, cursor and typeof). Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ForeignSuperKeysAndConstantReferences.d4", "the statement ending at line 19 has no \";\", so the parser stops at line 24's \"alter table A\". Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IStringLibrary.d4", "stops at line 12's IString literal \"Blah\"i: IString lives behind the USEISTRING conditional, which no project defines. Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LibraryDomains.d4", "stops at line 10's IString literal, the same USEISTRING conditional as IStringLibrary.d4. Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", "stops at line 10's \"presentation{entry{}}\": neither type specifier exists in D4. Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "the debugging \"select\" on line 17 has no \";\", so the parser stops at line 18. Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "stops at line 13's \"create domain SimpleDomain like String;\", the pre-3.0 spelling of \"type\". Owned by test-pre-3-1-scripts-policy." },
+			// Documents in the supported tree that are not whole scripts. test-pre-3-1-scripts-policy carries these seven as
+			// its second arm: five want one or two characters added, two want a statement rewritten.
+			{ "tests/libraries/TestFramework.Coverage.Base/Documents/UnsupportedOracleOperators.d4", "line 8's \"EnsureDeviceStarted('TestOracle.OracleTestDevice')\" has no \";\"; the document also targets the Oracle device, which is parked." },
+			{ "samples/Sample.Common/Documents/D4LanguageTour.d4", "a guided tour of D4 meant to be run a statement at a time in the IDE: most of its statements are terminated and a handful are not, so the \"select ... union (...)\" on line 131 has no \";\" and the parser stops at line 133." },
+			{ "samples/Sample.Shipping/Documents/Coverage.Controller.d4", "line 15's \"select ServerSettings\" has no \";\", so the parser stops at line 16." },
+			{ "samples/Sample.Shipping/Documents/Coverage.AdministrationRole.d4", "line 16's \"if exists (...)\" has no \"then\" before the statement on line 17." },
+			{ "samples/Sample.Shipping/Source/CoverageRoles/Administration.d4", "the same missing \"then\" at the same line - this file and Coverage.AdministrationRole.d4 are copies of each other." },
+			{ "samples/Sample.Shipping/Source/CoverageRoles/Sales.d4", "line 179's \"table { ..., key { Number } }\": a table type specifier takes a column list only, since keys belong to table variables and not to table types." },
+			{ "samples/Sample.Shipping/Source/Shipping.d4", "line 658's \"entry { ... }\" as an operator's parameter type: D4 has no \"entry\" type specifier." },
 		};
 
 		public static IEnumerable<TestCaseData> D4Files()
@@ -114,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestCaseSource(nameof(D4Files))]
 		public void RoundTrips(string absolutePath, string relativePath)
 		{
-			string source = File.ReadAllText(absolutePath, Encoding.UTF8);
+			string source = ReadSourceForParsing(absolutePath, relativePath);
 
 			Parser firstParser = new Parser();
 			ParserMessages firstMessages = new ParserMessages();
@@ -131,7 +149,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				return;
 			}
 			if (firstMessages.Count > 0)
+			{
+				// Keyed on the first parse having produced messages and not on the path alone: a parked document that does
+				// parse still owes a faithful round-trip, and the 58 that do are a good part of what tests the emitter.
+				// NOTE: TheParkedTreeIsNoLessReadableThanItWas bounds how many parked documents may be unreadable, not which
+				// ones, so a regression that breaks one parked document while a different one starts parsing is invisible to
+				// it. If the parked trees ever matter more than that, hold the set of paths rather than their number.
+				if (IsUnderTheParkedTree(relativePath))
+					Assert.Ignore(String.Format(
+						"Parked document \"{0}\" does not parse, and nobody owns the D4 in the parked trees: {1}",
+						relativePath, firstMessages[0].Message));
 				Assert.Fail(String.Format("Parse of \"{0}\" produced {1} message(s); first: {2}", relativePath, firstMessages.Count, firstMessages[0].Message));
+			}
 
 			D4TextEmitter emitter = new D4TextEmitter();
 			string emitted = emitter.Emit(first);
@@ -181,6 +210,129 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Statement a = new Parser().ParseScript("select 1 + 2;", null);
 			Statement b = new Parser().ParseScript("select 1 + 3;", null);
 			Assert.That(TreesEqual(a, b, out string _), Is.False);
+		}
+
+		/// <summary>
+		/// The number of .d4 files under the parked trees whose first parse produces messages, measured 2026-11-22 by
+		/// <c>dotnet test tests/DAE.Server.Tests --filter "FullyQualifiedName~ParserRoundTripCorpusTest"</c> and counting
+		/// the Ignored cases: 20 of the 77 parked documents, less the Oracle SystemCatalog template, which is in
+		/// <see cref="FormatTemplates"/> and parses once formatted.
+		/// </summary>
+		private const int ParkedDocumentsTheParserCannotRead = 19;
+
+		/// <summary>
+		/// A ratchet over the parked trees: the number of parked documents the parser cannot read may fall but not rise.
+		/// Those documents' own cases are Ignored, so without this nothing would notice a parser regression that broke one
+		/// of the readable ones, nor a newly parked document that does not parse arriving unremarked. Deleting a parked
+		/// document only makes this pass, which is intended - the assertion is an upper bound.
+		/// </summary>
+		[Test]
+		public void TheParkedTreeIsNoLessReadableThanItWas()
+		{
+			string repoRoot = TestEnvironment.RepositoryDirectory;
+			List<string> parked = new List<string>();
+			List<string> unreadable = new List<string>();
+			foreach (string path in EnumerateD4Files(repoRoot))
+			{
+				string relative = Path.GetRelativePath(repoRoot, path).Replace('\\', '/');
+				if (!IsUnderTheParkedTree(relative))
+					continue;
+				parked.Add(relative);
+				ParserMessages messages = new ParserMessages();
+				new Parser().ParseScript(ReadSourceForParsing(path, relative), messages);
+				if (messages.Count > 0)
+					unreadable.Add(relative);
+			}
+
+			Assert.Multiple(() =>
+			{
+				// Without this the ratchet passes vacuously if the parked trees are moved or renamed out from under it.
+				Assert.That(parked, Is.Not.Empty, String.Format("The walk found no .d4 file under \"{0}/\"; if the parked trees moved, this fixture's rule for them has to move with them.", ParkedTreeDirectory));
+				Assert.That
+				(
+					unreadable.Count,
+					Is.LessThanOrEqualTo(ParkedDocumentsTheParserCannotRead),
+					String.Format("{0} of the {1} parked documents do not parse, up from {2}. Either the parser has regressed on one that used to read, or a parked document that does not parse was added - in which case raise {3} in the same commit. The unreadable ones are:\n{4}",
+						unreadable.Count, parked.Count, ParkedDocumentsTheParserCannotRead, nameof(ParkedDocumentsTheParserCannotRead), String.Join("\n", unreadable))
+				);
+			});
+		}
+
+		/// <summary>
+		/// Holds the two hand-written lists against the tree: every path either of them names is really there, and every
+		/// <see cref="AllowList"/> path still produces at least one parser message. The first catches an entry a rename or
+		/// a deletion left stale; the second catches a reason that has outlived its cause, which is how a suppression
+		/// quietly becomes permanent.
+		/// </summary>
+		[Test]
+		public void EveryExcludedFileIsStillWhatItsReasonSays()
+		{
+			string repoRoot = TestEnvironment.RepositoryDirectory;
+			List<string> nowParses = new List<string>();
+			foreach (string relative in AllowList.Keys)
+			{
+				string absolute = Path.Combine(repoRoot, relative);
+				if (!File.Exists(absolute))
+					continue;
+				ParserMessages messages = new ParserMessages();
+				new Parser().ParseScript(ReadSourceForParsing(absolute, relative), messages);
+				if (messages.Count == 0)
+					nowParses.Add(relative);
+			}
+
+			Assert.Multiple(() =>
+			{
+				Assert.That
+				(
+					AllowList.Keys.Concat(FormatTemplates.Keys).Where(relative => !File.Exists(Path.Combine(repoRoot, relative))),
+					Is.Empty,
+					String.Format("These entries name no file under \"{0}\". Delete the entry, or find out what became of the file.", repoRoot)
+				);
+
+				// A path in both lists would be silently excluded rather than formatted, since D4Files skips the allow list.
+				Assert.That
+				(
+					AllowList.Keys.Where(FormatTemplates.ContainsKey),
+					Is.Empty,
+					String.Format("These files are in both {0} and {1}. A template is an ordinary case once formatted, so delete the {0} entry.", nameof(AllowList), nameof(FormatTemplates))
+				);
+
+				Assert.That
+				(
+					nowParses,
+					Is.Empty,
+					String.Format("These files now parse; remove their {0} entries so the corpus covers them.", nameof(AllowList))
+				);
+			});
+		}
+
+		/// <summary>Whether this repository-relative path is inside the parked trees.</summary>
+		private static bool IsUnderTheParkedTree(string relativePath)
+		{
+			return relativePath.StartsWith(ParkedTreeDirectory + "/", StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// The text the corpus parses for this file: the file as it stands, or - for one of the <see cref="FormatTemplates"/>
+		/// - the file formatted with its own device's argument list, which is the text that device executes.
+		/// </summary>
+		private static string ReadSourceForParsing(string absolutePath, string relativePath)
+		{
+			string source = File.ReadAllText(absolutePath, Encoding.UTF8);
+			if (!FormatTemplates.TryGetValue(relativePath, out object[] arguments))
+				return source;
+			try
+			{
+				return String.Format(source, arguments);
+			}
+			catch (FormatException exception)
+			{
+				// A template referencing a placeholder the argument list does not reach throws rather than failing a parse,
+				// and String.Format's own message names neither the file nor what to do about it.
+				throw new FormatException(String.Format(
+					"\"{0}\" is a String.Format template and the {1} argument(s) {2} gives it do not fit it. The argument list has to match the one its device's C# call site passes. String.Format said: {3}",
+					relativePath, arguments.Length, nameof(FormatTemplates), exception.Message), exception);
+			}
 		}
 
 		private static IEnumerable<string> EnumerateD4Files(string repoRoot)
