@@ -530,7 +530,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (IsValidScanOrder(plan, order, _closedConditions, _openConditions, _scanCondition))
 					return order;
 					
-			newOrder = new Schema.Order();
+			newOrder = new Schema.Order(plan.GetNextObjectID());
 			Schema.OrderColumn newOrderColumn;
 			for (int index = 0; index < _closedConditions.Count; index++)
 				if (!Object.ReferenceEquals(_closedConditions[index], _scanCondition))

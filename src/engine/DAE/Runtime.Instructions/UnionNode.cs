@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineRemotable(plan);
 			
 			// Determine key
-			Schema.Key key = new Schema.Key();
+			Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 			key.IsInherited = true;
 			foreach (Schema.TableVarColumn column in TableVar.Columns)
 				key.Columns.Add(column);

@@ -118,11 +118,11 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 		{
 			foreach (Schema.Order order in tableVar.Orders)
 				if (Convert.ToBoolean(DerivationUtility.GetTag(order.MetaData, "IsDefault", "False")))
-					return new Schema.Order(order);
+					return new Schema.Order(_program.Plan.GetNextObjectID(), order);
 			
 			foreach (Schema.Key key in tableVar.Keys)
 				if (Convert.ToBoolean(DerivationUtility.GetTag(key.MetaData, "IsDefault", "False")))
-					return new Schema.Order(key);
+					return new Schema.Order(_program.Plan.GetNextObjectID(), key);
 			
 			if (tableVar.Keys.Count > 0)
 			{
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 
 				foreach (Schema.Key key in tableVar.Keys)
 				{
-					order = new Schema.Order(key);
+					order = new Schema.Order(_program.Plan.GetNextObjectID(), key);
 					if (IsOrderVisible(order))
 						return order;
 				}

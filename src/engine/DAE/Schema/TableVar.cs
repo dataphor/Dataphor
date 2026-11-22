@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Device.Catalog;
@@ -691,7 +692,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public Key Intersect(TableVarColumnsBase columns)
 		{
-			Key key = new Key();
+			Key key = new Key(Object.UnassignedID);
 			foreach (TableVarColumn column in columns)
 				if (ContainsName(column.Name))
 					key.Columns.Add(column);
@@ -701,7 +702,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public Key Difference(TableVarColumnsBase columns)
 		{
-			Key key = new Key();
+			Key key = new Key(Object.UnassignedID);
 			foreach (TableVarColumn column in this)
 				if (!columns.ContainsName(column.Name))
 					key.Columns.Add(column);
@@ -711,7 +712,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public Key Union(TableVarColumnsBase columns)
 		{
-			Key key = new Key();
+			Key key = new Key(Object.UnassignedID);
 			foreach (TableVarColumn column in this)
 				key.Columns.Add(column);
 				
@@ -1120,10 +1121,16 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Order : Object
     {		
-		public Order() : base(String.Empty) {}
+		// NOTE: an order is a catalog object, so the constructors that take no identifier leave it unassigned
+		// rather than allocate one: only the engine that owns the catalog can number its objects, and an order is
+		// also built where there is no engine at all - by the Windows client and the data access components, as a
+		// description of how a list is sorted, and by the run time, for a throwaway table variable describing an
+		// in-memory sort. Construct an order that belongs to a catalog through the overload taking an identifier,
+		// from plan.GetNextObjectID(). See Schema.Object.UnassignedID.
+		public Order() : base(UnassignedID, String.Empty) {}
 		public Order(int iD) : base(iD, String.Empty) {}
 
-		public Order(MetaData metaData) : base(String.Empty)
+		public Order(MetaData metaData) : base(UnassignedID, String.Empty)
 		{
 			MetaData = metaData;
 		}
@@ -1133,7 +1140,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			MetaData = metaData;
 		}
 		
-		public Order(Order order) : base(String.Empty)
+		public Order(Order order) : this(UnassignedID, order) {}
+		
+		public Order(int iD, Order order) : base(iD, String.Empty)
 		{
 			OrderColumn newOrderColumn;
 			OrderColumn column;
@@ -1147,7 +1156,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public Order(Order order, bool reverse) : base(String.Empty)
+		public Order(Order order, bool reverse) : this(UnassignedID, order, reverse) {}
+		
+		public Order(int iD, Order order, bool reverse) : base(iD, String.Empty)
 		{
 			OrderColumn newOrderColumn;
 			OrderColumn column;
@@ -1161,7 +1172,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public Order(Key key) : base(String.Empty)
+		public Order(Key key) : this(UnassignedID, key) {}
+		
+		public Order(int iD, Key key) : base(iD, String.Empty)
 		{
 			for (int index = 0; index < key.Columns.Count; index++)
 				_columns.Add(new OrderColumn(key.Columns[index], true, true));
@@ -1416,11 +1429,13 @@ namespace Alphora.Dataphor.DAE.Schema
     
 	public class Key : Object
     {
-		public Key() : base(String.Empty)
-		{
-			InternalInitialize();
-			UpdateKeyName();
-		}
+		// NOTE: a key is a catalog object, so the constructors that take no identifier leave it unassigned rather
+		// than allocate one: only the engine that owns the catalog can number its objects, and a key is also built
+		// where there is no engine at all - by the Windows client and the data access components, as a description
+		// of what identifies a row, and by the run time, for a throwaway table variable. Construct a key that
+		// belongs to a catalog through the overload taking an identifier, from plan.GetNextObjectID(). See
+		// Schema.Object.UnassignedID.
+		public Key() : this(UnassignedID) {}
 		
 		public Key(int iD) : base(iD, String.Empty)
 		{
@@ -1428,12 +1443,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateKeyName();
 		}
 		
-        public Key(MetaData metaData) : base(String.Empty)
-        {
-			MetaData = metaData;
-			InternalInitialize();
-			UpdateKeyName();
-        }
+        public Key(MetaData metaData) : this(UnassignedID, metaData) {}
         
         public Key(int iD, MetaData metaData) : base(iD, String.Empty)
         {
@@ -1442,7 +1452,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateKeyName();
         }
         
-        public Key(TableVarColumn[] columns) : base(String.Empty)
+        public Key(TableVarColumn[] columns) : this(UnassignedID, columns) {}
+        
+        public Key(int iD, TableVarColumn[] columns) : base(iD, String.Empty)
         {
 			InternalInitialize();
 			if (columns.Length > 0)
@@ -1452,7 +1464,9 @@ namespace Alphora.Dataphor.DAE.Schema
 				UpdateKeyName();
         }
         
-        public Key(MetaData metaData, TableVarColumn[] columns) : base(String.Empty)
+        public Key(MetaData metaData, TableVarColumn[] columns) : this(UnassignedID, metaData, columns) {}
+        
+        public Key(int iD, MetaData metaData, TableVarColumn[] columns) : base(iD, String.Empty)
         {
 			MetaData = metaData;
 			InternalInitialize();
@@ -1772,7 +1786,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public Key SuperKey(bool allowSparse, bool allowNilable)
 		{
 			var isValid = false;
-			var superKey = new Key();
+			var superKey = new Key(Object.UnassignedID);
 
 			for (int index = 0; index < Count; index++)
 			{
@@ -2383,7 +2397,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 				if (LReferenceIncluded)
 				{
-					Key LIntersection = new Key();
+					Key LIntersection = new Key(UnassignedID);
 					foreach (TableVarColumn LColumn in LReference.SourceKey.Columns)
 						if ((LInvariant == null) || (LInvariant.Columns.ContainsName(LColumn.Name)))
 							LIntersection.Columns.Add(LColumn);
@@ -2392,7 +2406,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			
 			if (LInvariant == null)
-				LInvariant = new Key();
+				LInvariant = new Key(UnassignedID);
 				
 			return LInvariant;
 		}
@@ -2512,13 +2526,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			return false;
 		}
 		
-		public void CopyTableVar(TableNode sourceNode)
+		public void CopyTableVar(Plan plan, TableNode sourceNode)
 		{
-			CopyTableVar(sourceNode, false);
+			CopyTableVar(plan, sourceNode, false);
 		}
 		
 		// IsInference indicates whether this copy should be an inference, as in the case of a table var inference on a view
-		public void CopyTableVar(TableNode sourceNode, bool isInference)
+		// NOTE: the plan is here to number the keys and orders this copies. Two of the three call paths are the
+		// compiler creating a table or a view, whose keys and orders are written into the catalog store as part of
+		// its definition, so they cannot be left unnumbered (Schema.Object.UnassignedID).
+		public void CopyTableVar(Plan plan, TableNode sourceNode, bool isInference)
 		{
 			// create datatype
 			DataType = new Schema.TableType();
@@ -2564,7 +2581,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			Schema.Key newKey;
 			foreach (Schema.Key key in sourceNode.TableVar.Keys)
 			{
-				newKey = new Schema.Key();
+				newKey = new Schema.Key(plan.GetNextObjectID());
 				newKey.IsInherited = true;
 				newKey.IsSparse = key.IsSparse;
 				if (isInference)
@@ -2581,7 +2598,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			Schema.OrderColumn newOrderColumn;
 			foreach (Schema.Order order in sourceNode.TableVar.Orders)
 			{
-				newOrder = new Schema.Order();
+				newOrder = new Schema.Order(plan.GetNextObjectID());
 				newOrder.IsInherited = true;
 				if (isInference)
 					newOrder.InheritMetaData(order.MetaData);

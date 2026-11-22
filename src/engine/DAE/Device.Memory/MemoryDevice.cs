@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 						isSupported = true;
 						break;
 					}
-					else if (node.RequestedOrder.Equivalent(new Schema.Order(tableOrder, true)))
+					else if (node.RequestedOrder.Equivalent(new Schema.Order(plan.Plan.GetNextObjectID(), tableOrder, true)))
 					{
 						node.PhysicalOrder = tableOrder;
 						node.ScanDirection = ScanDirection.Backward;
@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 							isSupported = true;
 							break;
 						}
-						else if (node.RequestedOrder.Equivalent(new Schema.Order(order, true)))
+						else if (node.RequestedOrder.Equivalent(new Schema.Order(plan.Plan.GetNextObjectID(), order, true)))
 						{
 							node.PhysicalOrder = order;
 							node.ScanDirection = ScanDirection.Backward;
@@ -128,7 +128,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 
 				if (isSupported)
 				{
-					node.Order = new Schema.Order();
+					node.Order = new Schema.Order(plan.Plan.GetNextObjectID());
 					node.Order.MergeMetaData(node.RequestedOrder.MetaData);
 					node.Order.IsInherited = false;
 					Schema.OrderColumn orderColumn;

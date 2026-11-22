@@ -221,6 +221,25 @@ namespace Alphora.Dataphor.DAE.Schema
 		public const int MaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
 		public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
 		
+		/// <summary>The identifier of an object that no catalog has numbered.</summary>
+		/// <remarks>
+		/// <para>
+		/// Identifiers belong to a catalog and are handed out by the <see cref="ObjectIDGenerator"/> of the engine
+		/// that owns it, so an object built where no engine is in reach cannot have one. The Windows client and the
+		/// data access components build keys and orders purely as descriptions of how a list is sorted or
+		/// identified; the run time builds throwaway table variables for in-memory sorts and marshalled values.
+		/// None of those objects enters a catalog, and none of them can be numbered.
+		/// </para>
+		/// <para>
+		/// Zero is free for this: a generator allocates from one upwards and so never hands out zero, and -1
+		/// already means "this object has no containing object" (<see cref="CatalogObjectID"/>,
+		/// <see cref="ParentObjectID"/>). Pass it explicitly at a site that has no engine, so a reader can tell a
+		/// deliberate "none" from an allocation nobody thought about, and <c>SaveObjectID</c>,
+		/// <c>InternalInsertPersistentObject</c> and <c>CacheCatalogObject</c> refuse an object still carrying it.
+		/// </para>
+		/// </remarks>
+		public const int UnassignedID = 0;
+		
 		public Object(int iD, string name) : base(name)
 		{
 			_iD = iD;
@@ -788,10 +807,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Ensures that the object has metadata and a DAE.ObjectID tag with the id of the object.</summary>		
 		public void SaveObjectID()
 		{
-			// An identifier of zero means the object was built where no engine was in reach, so no generator could
-			// number it (see ObjectIDGenerator, which never allocates zero). Refuse to emit it: a missed allocation
-			// site must fail here rather than write an unnumbered object into a catalog store.
-			if (_iD == 0)
+			// An unassigned identifier means the object was built where no engine was in reach, so no generator
+			// could number it (see ObjectIDGenerator, which never allocates zero). Refuse to emit it: a missed
+			// allocation site must fail here rather than write an unnumbered object into a catalog store.
+			if (_iD == UnassignedID)
 				throw new SchemaException(SchemaException.Codes.ObjectIDRequired, Name);
 			
 			AddMetaDataTag("DAE.ObjectID", _iD.ToString(), true);

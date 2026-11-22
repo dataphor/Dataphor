@@ -170,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_distinctRequired = TableVar.Keys.Count == 0;
 			if (_distinctRequired)
 			{
-				Schema.Key newKey = new Schema.Key();
+				Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 				foreach (Schema.TableVarColumn column in TableVar.Columns)
 					newKey.Columns.Add(column);
 				newKey.IsInherited = true;

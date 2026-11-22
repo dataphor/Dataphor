@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public virtual void DetermineOrder(Plan plan)
 		{
 			// Set up the order columns
-			Order = new Schema.Order(_requestedOrder.MetaData);
+			Order = new Schema.Order(plan.GetNextObjectID(), _requestedOrder.MetaData);
 			Order.IsInherited = false;
 
 			Schema.OrderColumn newColumn;			
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.Columns.Add(column);
 				_sequenceColumnIndex = TableVar.Columns.Count - 1;
 
-				Schema.Key sequenceKey = new Schema.Key();
+				Schema.Key sequenceKey = new Schema.Key(plan.GetNextObjectID());
 				sequenceKey.IsInherited = true;
 				sequenceKey.Columns.Add(column);
 				TableVar.Keys.Add(sequenceKey);
@@ -911,7 +911,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						_sourceExpression, 
 						EmitBrowseConditionExpression(originIndex < 0 ? Order : originOrder, originIndex < 0 ? null : origin, forward, inclusive)
 					), 
-					(from c in (new Schema.Order(Order, !forward)).Columns select (OrderColumnDefinition)c.EmitStatement(EmitMode.ForCopy)).ToArray()
+					(from c in (new Schema.Order(Schema.Object.UnassignedID, Order, !forward)).Columns select (OrderColumnDefinition)c.EmitStatement(EmitMode.ForCopy)).ToArray()
 				);
 		}
 		
@@ -920,7 +920,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected PlanNode EmitBrowseVariantNode(Plan plan, int originIndex, bool forward, bool inclusive)
 		{
-			Schema.Order originOrder = new Schema.Order();
+			Schema.Order originOrder = new Schema.Order(plan.GetNextObjectID());
 			for (int index = 0; index <= originIndex; index++)
 				originOrder.Columns.Add(new Schema.OrderColumn(Order.Columns[index].Column, Order.Columns[index].Ascending, Order.Columns[index].IncludeNils));
 			Schema.IRowType origin = new Schema.RowType(originOrder.Columns, Keywords.Origin);

@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Order = null;
 			if (SourceNode.Order != null)
 			{
-				Schema.Order newOrder = new Schema.Order();
+				Schema.Order newOrder = new Schema.Order(plan.GetNextObjectID());
 				Schema.OrderColumn orderColumn;
 				Schema.OrderColumn newOrderColumn;
 				newOrder.InheritMetaData(SourceNode.Order.MetaData);
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.Key newKey;
 			foreach (Schema.Key key in SourceTableVar.Keys)
 			{
-				newKey = new Schema.Key();
+				newKey = new Schema.Key(plan.GetNextObjectID());
 				newKey.InheritMetaData(key.MetaData);
 				newKey.IsInherited = true;
 				newKey.IsSparse = key.IsSparse;
@@ -160,7 +160,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.OrderColumn newOrderColumn;
 			foreach (Schema.Order order in SourceTableVar.Orders)
 			{
-				newOrder = new Schema.Order();
+				newOrder = new Schema.Order(plan.GetNextObjectID());
 				newOrder.InheritMetaData(order.MetaData);
 				newOrder.IsInherited = true;
 				for (int index = 0; index < order.Columns.Count; index++)

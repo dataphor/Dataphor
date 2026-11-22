@@ -172,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				tableVar.Columns.Add(newColumn);
 			}
 			
-			Schema.Order order = new Schema.Order();
+			Schema.Order order = new Schema.Order(Program.Plan.GetNextObjectID());
 			Schema.OrderColumn newOrderColumn;
 			Schema.OrderColumn orderColumn;
 			for (int index = 0; index < Node.Order.Columns.Count; index++)

@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						newTableVar.EnsureTableVarColumns();
 						// Assume the first column is the key, this is potentially problematic, but without key information in table types, not much else we can do....
 						// The assumption here is that the C# representation of a "table" is a dictionary
-						newTableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { newTableVar.Columns[0] }));
+						newTableVar.Keys.Add(new Schema.Key(Schema.Object.UnassignedID, new Schema.TableVarColumn[] { newTableVar.Columns[0] }));
 						var newTable = new NativeTable(valueManager, newTableVar);
 						foreach (DictionaryEntry entry in iDictionary)
 						{

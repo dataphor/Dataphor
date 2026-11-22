@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				_differenceAlgorithm = typeof(SearchedDifferenceTable);
 				// ensure that the right side is a searchable node
-				Schema.Key searchKey = new Schema.Key();
+				Schema.Key searchKey = new Schema.Key(plan.GetNextObjectID());
 				foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 					searchKey.Columns.Add(column);
 

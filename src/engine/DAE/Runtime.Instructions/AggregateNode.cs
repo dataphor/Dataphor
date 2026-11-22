@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				Schema.TableType tableType = new Schema.TableType();
 				TableSelectorNode node = new TableSelectorNode(tableType);
-				node.TableVar.Keys.Add(new Schema.Key());
+				node.TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID()));
 				node.Nodes.Add(new RowSelectorNode(new Schema.RowType()));
 				node.DetermineCharacteristics(plan);
 				Nodes[0] = node;

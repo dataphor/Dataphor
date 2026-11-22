@@ -650,8 +650,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order order = new Schema.Order();
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
@@ -732,8 +732,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order order = new Schema.Order();
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
@@ -835,8 +835,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order order = new Schema.Order();
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
@@ -928,8 +928,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order order = new Schema.Order();
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
 			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
@@ -1034,7 +1034,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);

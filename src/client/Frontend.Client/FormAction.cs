@@ -586,8 +586,8 @@ namespace Alphora.Dataphor.Frontend.Client
 								string[] targetKeyNames = RefreshKeyNames.Split(new char[]{';', ','});
 								if (sourceKeyNames.Length == targetKeyNames.Length)
 								{
-									sourceKey = new Schema.Order();
-									targetKey = new Schema.Order();
+									sourceKey = new Schema.Order(Schema.Object.UnassignedID);
+									targetKey = new Schema.Order(Schema.Object.UnassignedID);
 									for (int index = 0; index < sourceKeyNames.Length; index++)
 									{
 										sourceKey.Columns.Add(new Schema.OrderColumn(sourceView.TableVar.Columns[sourceKeyNames[index]], true));
@@ -608,7 +608,7 @@ namespace Alphora.Dataphor.Frontend.Client
 									Schema.Key minimumKey = sourceView.TableVar.Keys.MinimumSubsetKey(targetView.TableVar.Columns);
 									if (minimumKey != null)
 									{
-										sourceKey = new Schema.Order(minimumKey);
+										sourceKey = new Schema.Order(Schema.Object.UnassignedID, minimumKey);
 										targetKey = sourceKey;
 									}
 								}

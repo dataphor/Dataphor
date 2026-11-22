@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Dictionary<string, Schema.Key> keyColumns = new Dictionary<string, Schema.Key>();
 			foreach (Schema.TableVarColumn tableVarColumn in TableVar.Columns)
 				if (SourceTableVar.Keys.IsKeyColumnName(tableVarColumn.Name) && !keyColumns.ContainsKey(tableVarColumn.Name))
-					keyColumns.Add(tableVarColumn.Name, new Schema.Key(new Schema.TableVarColumn[]{tableVarColumn}));
+					keyColumns.Add(tableVarColumn.Name, new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{tableVarColumn}));
 			
 			ApplicationTransaction transaction = null;
 			if (plan.ApplicationTransactionID != Guid.Empty)
@@ -129,7 +129,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											if (keyColumns.TryGetValue(referencedColumn.Name, out key))
 												key.Columns.Add(newColumn);
 											else
-												keyColumns.Add(referencedColumn.Name, new Schema.Key(new Schema.TableVarColumn[]{newColumn}));
+												keyColumns.Add(referencedColumn.Name, new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{newColumn}));
 										}
 									}
 									
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// Seed the result key set with the empty set
 				Schema.Keys resultKeys = new Schema.Keys();
-				resultKeys.Add(new Schema.Key());
+				resultKeys.Add(new Schema.Key(plan.GetNextObjectID()));
 				
 				foreach (Schema.TableVarColumn column in key.Columns)
 					resultKeys = KeyProduct(resultKeys, keyColumns[column.Name]);
@@ -195,13 +195,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
+		// The products are intermediate: the caller copies the ones it keeps onto the table variable, and there is
+		// no plan here to number them from.
 		protected Schema.Keys KeyProduct(Schema.Keys keys, Schema.Key key)
 		{
 			Schema.Keys result = new Schema.Keys();
 			foreach (Schema.Key localKey in keys)
 				foreach (Schema.TableVarColumn newColumn in key.Columns)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(Schema.Object.UnassignedID);
 					newKey.Columns.AddRange(localKey.Columns);
 					newKey.Columns.Add(newColumn);
 					result.Add(newKey);

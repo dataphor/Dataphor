@@ -1342,7 +1342,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			foreach (Schema.Key key in dataSet.TableVar.Keys)
 				if (!key.IsSparse)
 				{
-					orderForKey = new Schema.Order(key);
+					orderForKey = new Schema.Order(Schema.Object.UnassignedID, key);
 					if (!orders.Contains(orderForKey))
 						orders.Add(orderForKey);
 				}

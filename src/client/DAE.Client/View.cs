@@ -796,7 +796,7 @@ namespace Alphora.Dataphor.DAE.Client
 										bool isSuperset = false;
 										foreach (Schema.Key key in dataView.TableVar.Keys)
 										{
-											Schema.Key masterKey = new Schema.Key();
+											Schema.Key masterKey = new Schema.Key(Schema.Object.UnassignedID);
 											masterKey.Columns.AddRange(key.Columns);
 											if (dataView.IsMasterSetup() && dataView.IsMasterEnlisted())
 												foreach (Schema.TableVarColumn keyColumn in dataView.DetailKey.Columns)

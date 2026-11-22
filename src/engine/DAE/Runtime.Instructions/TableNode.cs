@@ -255,9 +255,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		// NOTE: CopyKey and CopyOrder populate this node's own result table variable, which is an artefact of the
+		// compile and never enters the catalog, and no plan is in reach here - so the copies carry no identifier.
+		// engine-object-id-transient-tablevars does the same for the result table variable itself.
 		protected Schema.Key CopyKey(Schema.Key key, bool isSparse)	  
 		{
-			Schema.Key localKey = new Schema.Key();
+			Schema.Key localKey = new Schema.Key(Schema.Object.UnassignedID);
 			localKey.InheritMetaData(key.MetaData);
 			localKey.IsInherited = true;
 			localKey.IsSparse = key.IsSparse || isSparse;
@@ -359,7 +362,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         protected Schema.Order CopyOrder(Schema.Order order)
         {
-			Schema.Order localOrder = new Schema.Order();
+			Schema.Order localOrder = new Schema.Order(Schema.Object.UnassignedID);
 			localOrder.InheritMetaData(order.MetaData);
 			localOrder.IsInherited = true;
 			Schema.OrderColumn newOrderColumn;

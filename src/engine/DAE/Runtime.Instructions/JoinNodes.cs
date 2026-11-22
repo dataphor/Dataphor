@@ -1392,7 +1392,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					key = new Schema.Key();
+					key = new Schema.Key(plan.GetNextObjectID());
 					key.IsInherited = true;
 					key.IsSparse = leftKey.IsSparse || rightKey.IsSparse;
 					foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -1423,7 +1423,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (!TableVar.Keys.Contains(key))
 						TableVar.Keys.Add(key);
 						
-					key = new Schema.Key();
+					key = new Schema.Key(plan.GetNextObjectID());
 					key.IsInherited = true;
 					key.IsSparse = leftKey.IsSparse || rightKey.IsSparse;
 					foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -1473,7 +1473,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					newKey = new Schema.Key();
+					newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse = 
 						leftKey.IsSparse 
@@ -1497,7 +1497,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (!TableVar.Keys.Contains(newKey))
 						TableVar.Keys.Add(newKey);
 							
-					newKey = new Schema.Key();
+					newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse =
 						rightKey.IsSparse
@@ -1549,7 +1549,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = leftKey.IsSparse;
 						foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -1574,7 +1574,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = rightKey.IsSparse;
 						foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -1601,7 +1601,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key, excluding join columns that are not key columns in the left, with all correlated columns replaced with the left join key columns (a no-op for natural joins)
 				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse = rightKey.IsSparse;
 					foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -1616,7 +1616,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = rightKey.IsSparse;
 						foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -1644,7 +1644,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key, excluding join columns that are not key columns in the right, with all correlated columns replaced with the right join key columns (a no-op for natural joins)
 				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse = leftKey.IsSparse;
 					
@@ -1660,7 +1660,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = leftKey.IsSparse;
 						foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -3200,7 +3200,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = true;
 						foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -3227,7 +3227,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						if (!IsNatural)
 						{
-							newKey = new Schema.Key();
+							newKey = new Schema.Key(plan.GetNextObjectID());
 							newKey.IsInherited = true;
 							newKey.IsSparse = !RightKey.Columns.IsSupersetOf(rightKey.Columns);
 							foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -3256,7 +3256,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// In addition to these, the same keys inferred for many-to-many joins are inferred
 				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
@@ -3272,7 +3272,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = rightKey.IsSparse;
 						foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -3302,7 +3302,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key with all correlated columns replaced with the right key columns (a no-op for natural joins), inferred as sparse if the left join key is not a superset of the key's columns
 				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse = leftKey.IsSparse;
 					
@@ -3318,7 +3318,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
@@ -4046,7 +4046,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = true;
 						foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -4073,7 +4073,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						if (!IsNatural)
 						{
-							newKey = new Schema.Key();
+							newKey = new Schema.Key(plan.GetNextObjectID());
 							newKey.IsInherited = true;
 							newKey.IsSparse = !LeftKey.Columns.IsSupersetOf(leftKey.Columns);
 							foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -4101,7 +4101,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key, excluding join columns that are not key columns of the right, with all correlated columns replaced with the right key columns (a no-op for natural joins), non-sparse
 				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
@@ -4117,7 +4117,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (!IsNatural)
 					{
-						newKey = new Schema.Key();
+						newKey = new Schema.Key(plan.GetNextObjectID());
 						newKey.IsInherited = true;
 						newKey.IsSparse = leftKey.IsSparse;
 						foreach (Schema.TableVarColumn column in leftKey.Columns)
@@ -4146,7 +4146,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// In addition to these, the same keys inferred for many-to-many joins are inferred
 				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key newKey = new Schema.Key();
+					Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					newKey.IsSparse = rightKey.IsSparse;
 					foreach (Schema.TableVarColumn column in rightKey.Columns)
@@ -4159,7 +4159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (!TableVar.Keys.Contains(newKey))
 						TableVar.Keys.Add(newKey);
 	
-					newKey = new Schema.Key();
+					newKey = new Schema.Key(plan.GetNextObjectID());
 					newKey.IsInherited = true;
 					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{

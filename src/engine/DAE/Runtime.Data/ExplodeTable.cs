@@ -136,7 +136,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				_sequenceColumnIndex = Node.SequenceColumnIndex;
 
 			_targetRow = new Row(Manager, _tableType.RowType);
-			Schema.Key key = new Schema.Key();
+			Schema.Key key = new Schema.Key(Program.Plan.GetNextObjectID());
 			key.Columns.Add(_tableVar.Columns[_sequenceColumnIndex]);
 			_tableVar.Keys.Add(key);
 			_buffer = new NativeTable(Manager, _tableVar);

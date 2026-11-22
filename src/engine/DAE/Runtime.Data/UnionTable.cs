@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				tableVar.Columns.Add(column);
 			}
 			
-			Schema.Key key = new Schema.Key();
+			Schema.Key key = new Schema.Key(Program.Plan.GetNextObjectID());
 			foreach (Schema.TableVarColumn column in Node.TableVar.Keys.MinimumKey(true).Columns)
 				key.Columns.Add(tableVar.Columns[column.Name]);
 			tableVar.Keys.Add(key);

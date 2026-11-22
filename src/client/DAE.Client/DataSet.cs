@@ -2050,7 +2050,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public static Schema.Key GetKeyFromNames(string keyNames)
 		{
-			Schema.Key result = new Schema.Key();
+			Schema.Key result = new Schema.Key(Schema.Object.UnassignedID);
 			string trimmed;
 			foreach (string item in keyNames.Split(ColumnNameDelimiters))
 			{
@@ -2080,7 +2080,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public static Schema.Order GetOrderFromNames(string orderNames)
 		{
-			Schema.Order result = new Schema.Order();
+			Schema.Order result = new Schema.Order(Schema.Object.UnassignedID);
 			string trimmed;
 			foreach (string item in orderNames.Split(ColumnNameDelimiters))
 			{

@@ -127,7 +127,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Name"] }));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[] { TableVar.Columns["Name"] }));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);

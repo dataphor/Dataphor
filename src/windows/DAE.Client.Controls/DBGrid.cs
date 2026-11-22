@@ -2218,7 +2218,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					
 				foreach (Schema.Key key in _link.DataSet.TableVar.Keys)
 					if (!key.IsSparse && (key.Columns.Count >= 1) && (key.Columns[0].Name == column.ColumnName))
-						return new Schema.Order(key);
+						return new Schema.Order(Schema.Object.UnassignedID, key);
 			}
 					
 			return null;
@@ -2244,7 +2244,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 						
 						bool descending = (currentColumnIndex >= 0) && currentOrder.Columns[currentColumnIndex].Ascending;
 						if (!descending ^ order.Columns[column.ColumnName].Ascending)
-							order = new Schema.Order(order, true);
+							order = new Schema.Order(Schema.Object.UnassignedID, order, true);
 							
 						dataSet.Order = order;
 						InvalidateHeader();

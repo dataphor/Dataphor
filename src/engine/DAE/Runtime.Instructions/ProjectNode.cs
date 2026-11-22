@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_distinctRequired = (TableVar.Keys.Count == 0);
 			if (_distinctRequired)
 			{
-				Schema.Key newKey = new Schema.Key();
+				Schema.Key newKey = new Schema.Key(plan.GetNextObjectID());
 				newKey.IsInherited = true;
 				var isComparable = true;
 				foreach (Schema.TableVarColumn column in TableVar.Columns)

@@ -3172,7 +3172,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 			if (ensureKey && (tableVar.Keys.Count == 0))
 			{
-				Schema.Key key = new Schema.Key();
+				Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 				foreach (Schema.TableVarColumn tableColumn in tableVar.Columns)
 					if (SupportsComparison(plan, tableColumn.DataType))
 						key.Columns.Add(tableColumn);
@@ -3182,7 +3182,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Key KeyFromKeyColumnDefinitions(Plan plan, Schema.TableVar tableVar, KeyColumnDefinitions keyColumns)
 		{
-			Schema.Key key = new Schema.Key();
+			Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 			foreach (KeyColumnDefinition column in keyColumns)
 				key.Columns.Add(tableVar.Columns[column.ColumnName]);
 			return key;
@@ -3230,7 +3230,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if (tableVar.Keys.Count == 0)
 			{
-				Schema.Key key = new Schema.Key();
+				Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 				foreach (Schema.TableVarColumn column in tableVar.Columns)
 					if (SupportsComparison(plan, column.DataType))
 						key.Columns.Add(column);
@@ -3436,7 +3436,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Order OrderFromKey(Plan plan, Schema.TableVarColumnsBase columns)
 		{
-			Schema.Order order = new Schema.Order();
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			Schema.OrderColumn orderColumn;
 			Schema.TableVarColumn column;
 			for (int index = 0; index < columns.Count; index++)
@@ -4289,7 +4289,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 										
 									fromNode = EnsureTableNode(plan, fromNode);
 										
-									node.Table.CopyTableVar((TableNode)fromNode);
+									node.Table.CopyTableVar(plan, (TableNode)fromNode);
 									
 									InsertNode insertNode = new InsertNode();
 									insertNode.SetLineInfo(plan, localStatement.FromExpression.LineInfo);
@@ -4419,7 +4419,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						
 					planNode = EnsureTableNode(plan, planNode);
 
-					node.View.CopyTableVar((TableNode)planNode, planNode is TableVarNode);
+					node.View.CopyTableVar(plan, (TableNode)planNode, planNode is TableVarNode);
 					
 					// If we are in an A/T, or we are loading an A/T object
 					if ((plan.ApplicationTransactionID != Guid.Empty) || node.View.IsATObject)
@@ -12588,7 +12588,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				
 				if (expression.HasByClause || (expression.Expressions.Count == 0))
 				{
-					resolvedKey = new Schema.Key();
+					resolvedKey = new Schema.Key(plan.GetNextObjectID());
 					if (expression.HasByClause)
 						foreach (KeyColumnDefinition column in expression.ByClause)
 							resolvedKey.Columns.Add(tableNode.TableVar.Columns[column.ColumnName]);
@@ -12693,7 +12693,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								
 								Schema.Key signatureKey = tableNode.TableVar.Keys[Convert.ToInt32(contexts[signatureIndex].Matches.Match.Signature.Operator.OperatorName)];
 								
-								resolvedKey = new Schema.Key();
+								resolvedKey = new Schema.Key(plan.GetNextObjectID());
 								expression.HasByClause = true;
 								for (int index = 0; index < indexerSignature.Length; index++)
 								{
@@ -14220,7 +14220,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static PlanNode EmitCopyNode(Plan plan, TableNode sourceNode, Schema.Key key)
 		{
-			Schema.Order order = new Schema.Order();
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID());
 			Schema.OrderColumn orderColumn;
 			foreach (Schema.TableVarColumn column in key.Columns)
 			{
@@ -14277,7 +14277,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			bool isAccelerator
 		)
 		{
-			Schema.Order order = new Schema.Order(metaData);
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID(), metaData);
 			Schema.OrderColumn orderColumn;
 			foreach (Schema.TableVarColumn column in key.Columns)
 			{
@@ -14373,7 +14373,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		public static PlanNode EmitBrowseNode(Plan plan, TableNode sourceNode, Schema.Key key, MetaData metaData, bool isAccelerator)
 		{
-			Schema.Order order = new Schema.Order(metaData);
+			Schema.Order order = new Schema.Order(plan.GetNextObjectID(), metaData);
 			foreach (Schema.TableVarColumn column in key.Columns)
 			{
 				Schema.OrderColumn newOrderColumn = new Schema.OrderColumn(sourceNode.TableVar.Columns[column], true);

@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			_mainElaboratedTableVar = new ElaboratedTableVar(this, tableVar, _pageType, AddTableName(mainElaboratedTableName), query);
 
 			// The invariant is the dequlified detail key
-			_invariant = new Schema.Key();
+			_invariant = new Schema.Key(program.Plan.GetNextObjectID());
 			for (int index = 0; index < _detailKeys.Length; index++)
 				_invariant.Columns.Add(_mainElaboratedTableVar.TableVar.Columns[Schema.Object.Dequalify(_detailKeys[index])]);
 
@@ -939,7 +939,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 					}
 					
 					// If the intersection of the reference columns and the detail key of the derivation is non-empty
-					Schema.Key subsetKey = new Schema.Key();
+					Schema.Key subsetKey = new Schema.Key(ElaboratedExpression.Program.Plan.GetNextObjectID());
 					if (ElaboratedExpression.DetailKeys.Length > 0)
 					{
 						foreach (Schema.TableVarColumn column in reference.Reference.SourceKey.Columns)
@@ -995,7 +995,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 							if (otherReference.IsEmbedded && (otherReference.ReferenceType == ReferenceType.Lookup) && otherReference.Reference.SourceKey.Columns.IsSubsetOf(_elaboratedReference.Reference.TargetKey.Columns))
 							{
 								// Translate the source key for LOtherReference into the current table var
-								Schema.Key key = new Schema.Key();
+								Schema.Key key = new Schema.Key(ElaboratedExpression.Program.Plan.GetNextObjectID());
 								foreach (Schema.TableVarColumn column in otherReference.Reference.SourceKey.Columns)
 									key.Columns.Add(_elaboratedReference.Reference.SourceKey.Columns[_elaboratedReference.Reference.TargetKey.Columns.IndexOfName(column.Name)]);
 									

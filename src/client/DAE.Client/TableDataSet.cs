@@ -393,7 +393,7 @@ namespace Alphora.Dataphor.DAE.Client
 			if (order.IndexOf(Keywords.Key) >= 0)
 			{
 				KeyDefinition keyDefinition = _parser.ParseKeyDefinition(order);
-				Schema.Order localOrder = new Schema.Order();
+				Schema.Order localOrder = new Schema.Order(Schema.Object.UnassignedID);
 				foreach (KeyColumnDefinition column in keyDefinition.Columns)
 					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], true));
 				return localOrder;
@@ -401,7 +401,7 @@ namespace Alphora.Dataphor.DAE.Client
 			else
 			{
 				OrderDefinition orderDefinition = _parser.ParseOrderDefinition(order);
-				Schema.Order localOrder = new Schema.Order();
+				Schema.Order localOrder = new Schema.Order(Schema.Object.UnassignedID);
 				foreach (OrderColumnDefinition column in orderDefinition.Columns)
 					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
 				return localOrder;
@@ -462,7 +462,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public Schema.Order OrderDefinitionToOrder(OrderDefinition order)
 		{
-			Schema.Order localOrder = new Schema.Order(order.MetaData);
+			Schema.Order localOrder = new Schema.Order(Schema.Object.UnassignedID, order.MetaData);
 			foreach (OrderColumnDefinition column in order.Columns)
 				localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
 			return localOrder;

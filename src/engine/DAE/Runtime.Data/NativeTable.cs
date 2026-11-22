@@ -191,7 +191,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			foreach (Schema.Order order in TableVar.Orders)
 			{
 				// This is a potentially non-unique index, so add a GUID to ensure uniqueness of the key in the BTree
-				key = new Schema.Order(order);
+				key = new Schema.Order(Schema.Object.UnassignedID, order);
 				#if USEINTERNALID
 				if (!manager.OrderIncludesOrder(key, clusteringKey))
 				{

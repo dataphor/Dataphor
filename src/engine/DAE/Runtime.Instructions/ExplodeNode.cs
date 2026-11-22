@@ -113,7 +113,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			//CopyKeys(SourceTableVar.Keys);
 			if (_sequenceColumnIndex >= 0)
 			{
-				Schema.Key sequenceKey = new Schema.Key();
+				Schema.Key sequenceKey = new Schema.Key(plan.GetNextObjectID());
 				sequenceKey.IsInherited = true;
 				sequenceKey.Columns.Add(TableVar.Columns[_sequenceColumnIndex]);
 				TableVar.Keys.Add(sequenceKey);

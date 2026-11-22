@@ -974,7 +974,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);
@@ -2579,7 +2579,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["DeclaringType"], TableVar.Columns["FieldName"] }));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[] { TableVar.Columns["DeclaringType"], TableVar.Columns["FieldName"] }));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);

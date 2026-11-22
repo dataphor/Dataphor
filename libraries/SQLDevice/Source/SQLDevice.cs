@@ -2217,12 +2217,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Compiler.OrderFromKey(plan, key);
 		}
 
+		// NOTE: the key is a probe for Keys.Contains, which compares columns and sparseness, not identifiers; it
+		// is never added to a table variable, and there is no engine in reach here to number it.
 		private Schema.Key CreateSparseKeyFromOrder(Schema.Order order)
 		{
 			TableVarColumn[] orderColumns = new TableVarColumn[order.Columns.Count];
 			for (int i = 0; i < order.Columns.Count; i++)
 				orderColumns[i] = order.Columns[i].Column;
-			Schema.Key key = new Schema.Key(orderColumns);
+			Schema.Key key = new Schema.Key(Alphora.Dataphor.DAE.Schema.Object.UnassignedID, orderColumns);
 			key.IsSparse = true;
 			return key;
 		}
@@ -2543,9 +2545,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							D4.MetaData metaData = new D4.MetaData();
 							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, false, true));
 							if (Convert.ToInt32(cursor[5]) != 0)
-								key = new Key(metaData);
+								key = new Key(plan.GetNextObjectID(), metaData);
 							else
-								order = new Order(metaData);
+								order = new Order(plan.GetNextObjectID(), metaData);
 							shouldIncludeIndex = true;
 						}
 						
@@ -2563,9 +2565,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							D4.MetaData metaData = new D4.MetaData();
 							metaData.Tags.Add(new D4.Tag("Storage.Name", indexName, false, true));
 							if (Convert.ToInt32(cursor[5]) != 0)
-								key = new Key(metaData);
+								key = new Key(plan.GetNextObjectID(), metaData);
 							else
-								order = new Order(metaData);
+								order = new Order(plan.GetNextObjectID(), metaData);
 							shouldIncludeIndex = true;
 						}
 						
@@ -2729,7 +2731,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					if ((objectValue is TableVar) && (((TableVar)objectValue).Keys.Count == 0))
 					{
 						TableVar localTableVar = (TableVar)objectValue;
-						Key key = new Key();
+						Key key = new Key(plan.GetNextObjectID());
 						foreach (TableVarColumn column in localTableVar.Columns)
 							if (!Convert.ToBoolean(D4.MetaData.GetTag(column.MetaData, "Storage.Deferred", "false")))
 								key.Columns.Add(column);
@@ -5541,7 +5543,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						{
 							if (sQLIndex.IsUnique)
 							{
-								Schema.Key key = new Schema.Key();
+								Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 								foreach (SQLIndexColumn sQLIndexColumn in sQLIndex.Columns)
 									key.Columns.Add(_tableVar.Columns[sQLIndexColumn.Name]);
 									
@@ -5717,7 +5719,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);
@@ -5793,7 +5795,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			foreach (Schema.Column column in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
+			TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID(), new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
 			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(plan, TableVar);

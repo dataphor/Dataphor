@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
-			Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, new Schema.Order(_quotaOrder), true);
+			Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, new Schema.Order(plan.GetNextObjectID(), _quotaOrder), true);
 			_dataType = new Schema.TableType();
 			_tableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if ((Nodes[1].IsLiteral) && ((int)plan.EvaluateLiteralArgument(Nodes[1], "quota") == 1))
 				{
-					Schema.Key key = new Schema.Key();
+					Schema.Key key = new Schema.Key(plan.GetNextObjectID());
 					key.IsInherited = true;
 					TableVar.Keys.Add(key);
 				}

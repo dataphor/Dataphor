@@ -888,7 +888,7 @@ namespace Alphora.Dataphor.DAE.Server
 					
 				viewNode = Compiler.EmitAdornNode(plan, viewNode, adornExpression);
 
-				tableVar.CopyTableVar((TableNode)viewNode);
+				tableVar.CopyTableVar(plan, (TableNode)viewNode);
 				tableVar.CopyReferences((TableNode)viewNode);
 				tableVar.InheritMetaData(((TableNode)viewNode).TableVar.MetaData);
 				#if USEORIGINALEXPRESSION

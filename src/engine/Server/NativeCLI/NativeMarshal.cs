@@ -236,7 +236,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			{
 				foreach (NativeKey nativeKey in nativeTable.Keys)
 				{
-					Key key = new Key();
+					Key key = new Key(plan.GetNextObjectID());
 					foreach (string columnName in nativeKey.KeyColumns)
 						key.Columns.Add(tableVar.Columns[columnName]);
 					tableVar.Keys.Add(key);
