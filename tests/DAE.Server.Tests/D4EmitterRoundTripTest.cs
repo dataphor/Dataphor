@@ -53,6 +53,27 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestCase("for var i : Integer := 1 to 3 do F();", TestName = "For_VariableDeclarationWithTypeSpecifier")]
 		[TestCase("for i := 10 downto 1 step 2 do F();", TestName = "For_DowntoWithExplicitStep")]
 		[TestCase("for var i := 1 to 2 do for var j := 1 to 2 do F();", TestName = "For_Nested")]
+		// A multi-variable "var" is one statement in the source but a plain Block of VariableStatements in the tree,
+		// and the emitter printed that block's statements one per line. In a statement list that only changed the
+		// shape; in a single-statement position it changed what the script does - "if c then var a, b;" came back
+		// with "var b" declared unconditionally. These cases cover each single-statement position, the two spellings
+		// of a begin..end that parse to the same tree, and a script whose statements are all declarations (which must
+		// stay a list of statements, not become one group).
+		[TestCase("if c then var a, b;", TestName = "VariableGroup_IfArm_WasSplitOutOfTheCondition")]
+		[TestCase("while c do var a, b;", TestName = "VariableGroup_WhileBody_WasSplitOutOfTheLoop")]
+		[TestCase("try F(); except on E do var a, b; end;", TestName = "VariableGroup_ErrorHandler_WasSplitOutOfTheHandler")]
+		[TestCase("for var i := 1 to 2 do var a, b;", TestName = "VariableGroup_ForBody_WasSplitOutOfTheLoop")]
+		[TestCase("begin var a; var b; end;", TestName = "VariableGroup_BeginEnd_SeparateDeclarations")]
+		[TestCase("begin var a, b; end;", TestName = "VariableGroup_BeginEnd_OneDeclaration")]
+		[TestCase("var a; var b;", TestName = "VariableGroup_ScriptOfOnlyDeclarations_MustStayAList")]
+		[TestCase("var a := 1, b : Integer, c : Integer := 2;", TestName = "VariableGroup_WithAndWithoutTypeSpecifierAndInitializer")]
+		// Printing the static and the dynamic tags as two groups reordered a mixed set. Two tags take EmitTags's
+		// single-line layout, four take its multi-line branch.
+		[TestCase("create table T { ID : Integer, key { ID } } static tags { A.Two = \"2\" } tags { A.One = \"1\" };", TestName = "MixedMetaData_TwoTags_WasRegrouped")]
+		[TestCase("create table T { ID : Integer, key { ID } } static tags { A.Two = \"2\", A.Four = \"4\" } tags { A.One = \"1\", A.Three = \"3\" };", TestName = "MixedMetaData_FourTags_WasRegrouped")]
+		// The "by" clause of a quota expression is optional, and the emitter printed an empty one regardless.
+		[TestCase("var x := T return 1;", TestName = "Quota_NoByClause_WasPrintedWithAnEmptyOne")]
+		[TestCase("var x := T return 1 by { ID };", TestName = "Quota_ByClause")]
 		public void EmittedTextReParsesToTheSameTree(string source)
 		{
 			Statement first = new Parser().ParseScript(source, null);

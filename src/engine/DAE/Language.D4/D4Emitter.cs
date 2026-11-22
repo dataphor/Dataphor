@@ -29,7 +29,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { _emitMode = value; }
 		}
 		
-		private void EmitTags(Tags tags, bool staticValue)
+		// staticValue prints the group's "static" keyword, which makes every tag in it static; qualifyStaticTags
+		// prints "static" in front of each static tag, for a group that holds both kinds.
+		private void EmitTags(Tags tags, bool staticValue, bool qualifyStaticTags)
 		{
 			if (tags.Count > 2)
 			{
@@ -73,6 +75,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					NewLine();
 					Indent();
 				}
+				if (qualifyStaticTags && tag.IsStatic)
+					AppendFormat("{0} ", Keywords.Static);
 				AppendFormat(@"{0} {1} ""{2}""", tag.Name, Keywords.Equal, tag.Value.Replace(@"""", @"""""")); 
 			}
 			if (tags.Count > 2)
@@ -87,12 +91,19 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AppendFormat(" {0}", Keywords.EndList);
 		}
 
+		// Printing the static and the dynamic tags as two groups reordered the source's tags, so a mixed set came
+		// back grouped. One pass keeps the order: the grammar lets a tag carry its own "static" or "dynamic"
+		// modifier (Parser.MetaDataTag), so a mixed set prints as one group with "static" in front of the tags that
+		// need it. An all-static or an all-dynamic set - nearly every one - prints exactly as it did before.
+		// NOTE: Parser.MetaData calls MetaDataTags exactly twice, so the grammar accepts at most two tag groups.
+		// Anything that printed more than one group here - preserving runs of like tags, say - could produce text the
+		// parser cannot read back. Keep it to one.
 		protected virtual void EmitMetaData(MetaData metaData)
 		{
 			if (metaData != null)
 			{
-				// Emit dynamic tags
 				Tags tags = new Tags();
+				int staticCount = 0;
 				#if USEHASHTABLEFORTAGS
 				foreach (Tag tag in AMetaData.Tags)
 				{
@@ -102,29 +113,19 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					tag = metaData.Tags[index];
 				#endif
-					if ((!tag.IsStatic) && ((_emitMode == EmitMode.ForRemote) || !(/*AMetaData.Tags.IsReference(LTag.Name) || */tag.IsInherited)))
-						tags.Add(tag);
-				}
-				
-				if (tags.Count > 0)
-					EmitTags(tags, false);
-				
-				// Emit static tags
-				tags = new Tags();
-				#if USEHASHTABLEFORTAGS
-				foreach (Tag tag2 in AMetaData.Tags)
-				{
-				#else
-				for (int index = 0; index < metaData.Tags.Count; index++)
-				{
-					tag = metaData.Tags[index];
-				#endif
+					// The filter is the one the two passes used: a static tag always prints, a dynamic one only when
+					// printing for a remote or when it is not inherited.
 					if (tag.IsStatic)
+					{
+						tags.Add(tag);
+						staticCount++;
+					}
+					else if ((_emitMode == EmitMode.ForRemote) || !(/*AMetaData.Tags.IsReference(LTag.Name) || */tag.IsInherited))
 						tags.Add(tag);
 				}
 				
 				if (tags.Count > 0)
-					EmitTags(tags, true);
+					EmitTags(tags, staticCount == tags.Count, (staticCount > 0) && (staticCount < tags.Count));
 			}
 		}
 		
@@ -1285,14 +1286,19 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			AppendFormat("{0} ", Keywords.Return);
 			EmitExpression(expression.Quota);
-			AppendFormat(" {0} {1} ", Keywords.By, Keywords.BeginList);
-			for (int index = 0; index < expression.Columns.Count; index++)
+			// The "by" clause is optional in the grammar, so printing it unconditionally invents one: the text reads
+			// back with HasByClause true where the tree had it false. Guarded like every other by/order-by site here.
+			if (expression.HasByClause)
 			{
-				if (index > 0)
-					EmitListSeparator();
-				EmitOrderColumnDefinition(expression.Columns[index]);
+				AppendFormat(" {0} {1} ", Keywords.By, Keywords.BeginList);
+				for (int index = 0; index < expression.Columns.Count; index++)
+				{
+					if (index > 0)
+						EmitListSeparator();
+					EmitOrderColumnDefinition(expression.Columns[index]);
+				}
+				AppendFormat(" {0}", Keywords.EndList);
 			}
-			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
@@ -1690,6 +1696,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			EmitStatementTerminator();
 		}
 		
+		// A script's outermost statement is the statement list Parser.ParseScript builds, not a statement the source
+		// wrote, so it is printed as a list. Without this a script whose statements are all variable declarations
+		// would meet the variable-statement-group rule in EmitStatement and print as one "var" statement.
+		protected override void InternalEmit(Statement statement)
+		{
+			if ((statement is Block) && !(statement is DelimitedBlock))
+				EmitBlock((Block)statement);
+			else
+				base.InternalEmit(statement);
+		}
+		
 		protected override void EmitStatement(Statement statement)
 		{
 			if (statement is D4Statement)
@@ -1707,7 +1724,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else if (statement is DelimitedBlock)
 				EmitDelimitedBlock((DelimitedBlock)statement);
 			else if (statement is Block)
-				EmitBlock((Block)statement);
+			{
+				if (IsVariableStatementGroup((Block)statement))
+					EmitVariableStatementGroup((Block)statement);
+				else
+					EmitBlock((Block)statement);
+			}
 			else if (statement is ExitStatement)
 				EmitExitStatement((ExitStatement)statement);
 			else if (statement is WhileStatement)
@@ -1746,6 +1768,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected virtual void EmitVariableStatement(VariableStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Var);
+			EmitVariableDeclaration(statement);
+		}
+		
+		/// <summary>Emits one declaration of a "var" statement - the name, its type specifier and its initializer - without the "var" keyword.</summary>
+		protected virtual void EmitVariableDeclaration(VariableStatement statement)
+		{
 			EmitIdentifierExpression(statement.VariableName);
 			if (statement.TypeSpecifier != null)
 			{
@@ -1757,6 +1785,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				AppendFormat(" {0} ", Keywords.Assign);
 				EmitExpression(statement.Expression);
+			}
+		}
+		
+		/// <summary>True if the block is the plain Block a multi-variable "var" statement parses to.</summary>
+		/// <remarks>
+		/// "var a : X, b : Y" is one statement in the source but a plain Block of VariableStatements in the tree
+		/// (Parser.VariableStatement); no token stands for the block. Printing its statements one per line reads back
+		/// as several statements of the enclosing list, which in a single-statement position - the arm of an "if", a
+		/// loop body, an exception handler - declares all but the first unconditionally.
+		/// </remarks>
+		protected static bool IsVariableStatementGroup(Block statement)
+		{
+			if ((statement is DelimitedBlock) || (statement.Statements.Count < 2))
+				return false;
+			for (int index = 0; index < statement.Statements.Count; index++)
+				if (!(statement.Statements[index] is VariableStatement))
+					return false;
+			return true;
+		}
+		
+		protected virtual void EmitVariableStatementGroup(Block statement)
+		{
+			AppendFormat("{0} ", Keywords.Var);
+			for (int index = 0; index < statement.Statements.Count; index++)
+			{
+				if (index > 0)
+					EmitListSeparator();
+				EmitVariableDeclaration((VariableStatement)statement.Statements[index]);
 			}
 		}
 		
@@ -1793,7 +1849,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			Append(Keywords.Begin);
 			IncreaseIndent();
-			EmitBlock(statement);
+			// A begin..end holds exactly one child, the statement list (see the canonical-shape rule on
+			// Parser.DelimitedBlock). That child is not a block the source wrote, so its statements are printed here
+			// rather than handed to EmitStatement, which prints the child as one nested statement and leaves a stray
+			// ";" and a blank line behind it. Both spellings read back as the same tree; this is the tidier one.
+			if ((statement.Statements.Count == 1) && (statement.Statements[0] is Block) && !(statement.Statements[0] is DelimitedBlock))
+				EmitBlock((Block)statement.Statements[0]);
+			else
+				EmitBlock(statement);
 			DecreaseIndent();
 			NewLine();
 			Indent();

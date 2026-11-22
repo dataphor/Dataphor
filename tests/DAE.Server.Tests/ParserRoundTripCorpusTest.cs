@@ -39,20 +39,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"tickets/.logs",
 		};
 
-		// Files the corpus pass excludes, each with a one-line reason. The test ticket expects this to be empty;
-		// this working set exists only because the first run surfaced one class of defect and one class of file,
-		// both of which are tracked for follow-up in the review handoff (see ticket test-parser-roundtrip-corpus):
+		// Files the corpus pass excludes, each with a one-line reason. The test ticket expects this to be empty; one
+		// category is left, and it is tracked:
 		//   (parse)        - the parser emits recovery messages on the first read; file is effectively not
 		//                     parseable through today's parser (most of legacy/libraries/FHIR.Server/, device
 		//                     SystemCatalog variants, and some Coverage.Scripts documents that use grammar the
-		//                     parser does not yet accept).
-		//   (emitter-reshape)   - both parses succeed but the emitter reshapes the tree (multi-var splitting,
-		//                     metadata tag ordering, a "by" clause the source did not have).
-		// The third category, (emitter-malformed) - re-parse of the emitted text produced syntax errors - is gone:
-		// bug-d4-emitter-malformed-output fixed those emitter sites, and D4EmitterRoundTripTest holds them fixed.
-		// The thirty-four files whose reshape was the parser's own desugaring of "for" and "try ... commit" are gone
-		// too: bug-d4-parser-desugars-for-and-try-commit made those trees the shape the equivalent explicit D4 parses
-		// to, and D4EmitterRoundTripTest holds that fixed as well.
+		//                     parser does not yet accept). Owned by bug-d4-parser-rejects-active-sources.
+		// The two emitter categories are gone. (emitter-malformed) - re-parse of the emitted text produced syntax
+		// errors - was fixed by bug-d4-emitter-malformed-output. (emitter-reshape) - both parses succeeded but the
+		// tree came back a different shape - was three defects fixed in two tickets:
+		// bug-d4-parser-desugars-for-and-try-commit made the parser's own desugaring of "for" and "try ... commit"
+		// build the shape the equivalent explicit D4 parses to, and bug-d4-emitter-reshapes-parse-tree stopped the
+		// emitter reordering metadata tags, printing a "by" clause the source did not have, and splitting a
+		// multi-variable declaration into separate statements. D4EmitterRoundTripTest holds all of them fixed.
 		// NOTE: see ticket review/test-parser-roundtrip-corpus handoff for the follow-up tickets that drain this
 		// list. New entries added here outside that workflow must carry a one-line reason, same shape as these.
 		private static readonly Dictionary<string, string> AllowList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -98,26 +97,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", "parse" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "parse" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "parse" },
-			// (emitter-reshape) - parses twice, but the emitter changes the tree shape
-			{ "libraries/System.Integration/Documents/Register.d4", "emitter-reshape" },
-			{ "samples/Sample.IssueTracker/Documents/Register.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Schema.DataTypes.d4", "emitter-reshape" },
-			{ "src/engine/DAE/Schema/DataTypes.d4", "emitter-reshape" },
-			{ "src/engine/DAE/Schema/SystemCatalog.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Devices/Documents/Logic.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/BooleanLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ByteLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Conversions.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/CursorLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DecimalLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/GuidLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IntegerLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LanguageConstructs.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LongLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationTypes.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ShortLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/StringLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SystemCatalog.d4", "emitter-reshape" },
 		};
 
 		public static IEnumerable<TestCaseData> D4Files()
