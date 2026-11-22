@@ -10,7 +10,8 @@ using NUnit.Framework;
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
-	/// Starting a second engine in this process does not disturb the catalog of an engine that is already running.
+	/// The two ways an engine's catalog object identifiers used to be handed out twice: by another engine's start, and
+	/// by the engine's own catalog rebuild.
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -67,6 +68,86 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					() => instance.ExecuteScript("create table ObjectIDPerEngineSecond { ID : Integer, key { ID } };"),
 					"A second engine's start reached the first server's object identifiers."
 				);
+			}
+		}
+
+		/// <summary>
+		/// The reproduction of bug-client-catalog-rebuild-reuses-object-ids, at the lowest layer that shows it. A
+		/// repository engine - the catalog cache on the client side of every network connection - throws its catalog away
+		/// and rebuilds it whenever the server's catalog moves on, and the rebuild used to restart the engine's generator,
+		/// so the rebuilt catalog was handed the identifiers the catalog it replaced had used. Those are not free: every
+		/// prepared table expression the client still holds owns a view in the replaced catalog, and dropping one of those
+		/// stale views removed the *rebuilt* object's entry from the catalog device's identifier-to-name index, leaving a
+		/// live object in the catalog that could no longer be resolved by its identifier.
+		/// </summary>
+		/// <remarks>
+		/// Measured on the unfixed tree: both tables below are given identifier 359. A bare engine rather than a client
+		/// over the wire, because <c>LocalServer.EnsureCacheConsistent</c> rebuilds by calling exactly this, and an
+		/// out-of-process client fixture would take seconds to say the same thing.
+		/// </remarks>
+		[Test]
+		public void RebuildingAnEnginesCatalogDoesNotReissueTheIdentifiersItHasAlreadyGivenOut()
+		{
+			// As LocalServer builds its client-side engine; see the case above for why the name and the logging flag.
+			Engine engine = new Engine();
+			try
+			{
+				engine.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
+				engine.LoggingEnabled = false;
+				engine.Start();
+
+				ExecuteScript(engine, "create table ObjectIDBeforeRebuild { ID : Integer, key { ID } };");
+				int beforeRebuild = engine.Catalog["ObjectIDBeforeRebuild"].ID;
+
+				engine.ClearCatalog();
+
+				ExecuteScript(engine, "create table ObjectIDAfterRebuild { ID : Integer, key { ID } };");
+				int afterRebuild = engine.Catalog["ObjectIDAfterRebuild"].ID;
+
+				Assert.That
+				(
+					afterRebuild,
+					Is.Not.EqualTo(beforeRebuild),
+					"The rebuilt catalog reissued an identifier this engine had already given out, so the objects of the catalog it replaced - which its clients still hold - collide with it."
+				);
+			}
+			finally
+			{
+				engine.Dispose();
+			}
+		}
+
+		/// <summary>Runs D4 on a session and process of its own, as TestServerInstance does for a full server.</summary>
+		/// <remarks>
+		/// <para>
+		/// The session is the one <c>LocalSession</c> opens on the catalog cache, verbatim: the system user in the System
+		/// library. A repository engine has neither the Admin user nor the General library a default <c>SessionInfo</c>
+		/// asks for, so connecting the way an ordinary client does fails with a schema error naming General.
+		/// </para>
+		/// <para>
+		/// Nothing is left connected across the rebuild deliberately: <c>ClearCatalog</c> replaces the users and the
+		/// catalog a live session holds, and <c>LocalServer</c> has fix-up code for that which is not what this case is
+		/// about.
+		/// </para>
+		/// </remarks>
+		private static void ExecuteScript(Engine engine, string script)
+		{
+			IServerSession session = ((IServer)engine).Connect(new SessionInfo(Engine.SystemUserID, String.Empty, Engine.SystemLibraryName, false));
+			try
+			{
+				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+				try
+				{
+					process.ExecuteScript(script);
+				}
+				finally
+				{
+					session.StopProcess(process);
+				}
+			}
+			finally
+			{
+				engine.Disconnect(session);
 			}
 		}
 	}

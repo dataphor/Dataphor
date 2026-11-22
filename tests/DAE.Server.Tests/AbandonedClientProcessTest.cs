@@ -179,18 +179,40 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return sinceTheKill.Elapsed; // Assert.Fail throws; the compiler needs this.
 		}
 
-		/// <summary>How many sessions the server has with this identifier - one or none - asked over the wire as a scalar.</summary>
+		/// <summary>How many sessions the server has with this identifier - one or none - read over the wire as a table.</summary>
 		/// <remarks>
-		/// A count rather than a read of <c>System.Sessions</c> itself. Reading a table over the wire makes the client
-		/// build a view from a catalog fragment the server sends, and a handful of those followed by a change to the
-		/// server's catalog - which this case produces by design - trips a defect in that path, owned by
-		/// bug-client-catalog-rebuild-reuses-object-ids. A count sends no catalog fragment and has nothing to do with it.
+		/// <para>
+		/// A cursor over <c>System.Sessions</c> rather than a <c>Count</c>, which is the natural way to say this and takes
+		/// the case through the one client path nothing else in the suite walks. Reading a table over the wire makes the
+		/// client build a view in its catalog cache from a catalog fragment the server sends, and the rollback of the
+		/// transaction the killed client never committed moves the server's catalog timestamp under this polling loop, so
+		/// the observer goes through <c>LocalServer.EnsureCacheConsistent</c>'s rebuild. Measured by probe: one rebuild per
+		/// run of this case.
+		/// </para>
+		/// <para>
+		/// It is not, however, a reproduction of bug-client-catalog-rebuild-reuses-object-ids, which is why the <c>Count</c>
+		/// this replaced was not load-bearing: measured with that fix reverted, this case still passes. Each poll closes
+		/// its cursor before the next one opens, so no view from before the rebuild is still held when the rebuilt catalog
+		/// is numbered, and the collision needs one that is. The reproduction lives at the engine layer, in
+		/// <see cref="ObjectIDPerEngineTest"/>.
+		/// </para>
 		/// </remarks>
 		private static int SessionCount(IServerProcess observing, int sessionID)
 		{
 			try
 			{
-				return (int)observing.Evaluate(String.Format("Count(Sessions where ID = {0})", sessionID), null).AsNative;
+				int count = 0;
+				IServerCursor cursor = observing.OpenCursor(String.Format("select Sessions where ID = {0}", sessionID), null);
+				try
+				{
+					while (cursor.Next())
+						count++;
+				}
+				finally
+				{
+					observing.CloseCursor(cursor);
+				}
+				return count;
 			}
 			catch (Exception exception)
 			{

@@ -1912,6 +1912,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				// if the object is already in the cache (by name), then it must be there as a result of some error
 				// and the best course of action in a production scenario is to just replace it with the new object
+				// NOTE: accepted tradeoff - Debug and release deliberately diverge here. In release this silently replaces
+				// the stale entry, so a catalog cache that has gone wrong degrades instead of failing; in Debug the Add
+				// below throws on the duplicate name. Turning it into a throw in release was declined: it is a last-ditch
+				// recovery for a cache that is already wrong, so it would turn a degraded client into a dead one with no
+				// upside, and a release client that started failing a user's form where it used to limp is a behaviour
+				// change applications could notice. Revisit if the catalog cache ever gains a consistency check that fails
+				// the same way in both configurations.
 				#if !DEBUG
 				int index = Catalog.IndexOfName(objectValue.Name);
 				if (index >= 0)
@@ -1932,6 +1939,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				// Remove the object from the cache index
+				// NOTE: removed by identifier, without checking that the entry still names this object. That is sound only
+				// while no engine reissues an identifier an object in its catalog already holds - the rule
+				// Engine.InitializeCatalog now keeps for a repository engine too. If one ever does, clearing a stale object
+				// silently evicts the live object's entry and the live object stops being findable by its identifier
+				// (ResolveCatalogObject, ResolveCachedCatalogObject, MarkViewForRecompile). A check is possible should that
+				// happen, because nothing renames a catalog object in place today - there is no rename path in this class -
+				// so the name in the index always matches the name of the object that put it there.
 				Device.CatalogIndex.Remove(objectValue.ID);
 				
 				// Remove the object from the cache

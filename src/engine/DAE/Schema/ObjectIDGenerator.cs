@@ -26,7 +26,11 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// <para>
 	/// An engine that persists its catalog creates a handful of built-in objects programmatically before it reads
 	/// its store, and those must land on the same identifiers the store already holds for them; that is what
-	/// <see cref="Reset"/> is for, and why it is called at a fixed point in catalog initialization.
+	/// <see cref="Reset"/> is for, and why it is called at a fixed point in catalog initialization. An engine that
+	/// does not persist its catalog - a repository engine, <c>Engine.IsEngine</c> - does not call it: its identifiers
+	/// need only be unique, and restarting its generator on a catalog rebuild would reissue the identifiers of the
+	/// catalog being replaced to objects the rebuilt catalog holds, while the replaced catalog's objects are still
+	/// alive in their clients' hands.
 	/// </para>
 	/// </remarks>
 	public sealed class ObjectIDGenerator
@@ -79,6 +83,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		/// <summary>Starts again from one, for an engine whose built-in objects must be numbered the same on every load of its catalog store.</summary>
+		/// <remarks>
+		/// Only such an engine may call this. See the remarks on this class: an engine with no catalog store rebuilds its
+		/// catalog while the objects of the catalog it is replacing are still in use, so it must go on allocating.
+		/// </remarks>
 		public void Reset()
 		{
 			lock (_syncRoot)
