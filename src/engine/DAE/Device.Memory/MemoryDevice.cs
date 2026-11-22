@@ -76,7 +76,14 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 				node.Order = Compiler.OrderFromKey(plan.Plan, Compiler.FindClusteringKey(plan.Plan, node.TableVar));
 				return new DevicePlanNode(node);
 			}
-			else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode) && (plan.Plan.CursorContext.CursorType != CursorType.Static))
+			// The ordered scan is offered whatever cursor type the requesting plan asked for. The device knows what it can serve
+			// from an index it already maintains; the requested cursor type says what the consumer needs and nothing about what
+			// sits in between, and declining a static request only moved the work to the engine's OrderTable, which materializes
+			// and sorts every row of the table - once per statement, since every data-modification statement binds its target in
+			// a static context. Where a static cursor is really required the engine makes it itself, with Compiler.EmitCopyNode
+			// above whatever has already narrowed the row count (InsertNode, UpdateNode, DeleteNode, CursorNode), so "delete T
+			// return 1 by { ID }" now copies the one row the quota keeps instead of sorting all of them.
+			else if ((planNode is OrderNode) && (planNode.Nodes[0] is BaseTableVarNode))
 			{
 				OrderNode node = (OrderNode)planNode;
 				BaseTableVarNode tableVarNode = (BaseTableVarNode)planNode.Nodes[0];

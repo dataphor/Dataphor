@@ -9,16 +9,21 @@ This is a tripwire, not a performance measurement of the product. Nothing in the
 | | |
 |---|---|
 | Label | `dev-slow` |
-| Date | 2026-11-21 |
+| Date | 2026-11-22 |
 | Configuration | Debug, .NET 10, Windows x64 |
 | Machine | one slow development laptop, nothing deliberately competing - the slower of the two machine classes the root [AGENTS.md](../AGENTS.md) quotes suite timings for. Suite timings on this machine varied by half again between runs of the same build on the day these numbers were taken, so "quiet" here means no other work was started on purpose, not that the machine was idle |
-| Measured by | `PerfBaselineTest`, one scenario, script time only |
+| Measured by | `PerfBaselineTest`, two scenarios, script time only |
 
 | Scenario | What it runs | Milliseconds |
 |---|---|---|
-| `Timing` | the `Timing` coverage script: a ten-million-iteration counting loop, which is the engine interpreter's per-node cost and nothing else | 16,144 |
+| `Timing` | the `Timing` coverage script: a ten-million-iteration counting loop, which is the engine interpreter's per-node cost and nothing else | 17,764 |
+| `Timings` | the `Timings` coverage script, whole: the four blocks below, each timed by the engine's own `BenchmarkExecute` operator | 3,959 |
+| `Timings#1` | insert 10,000 rows into a table on the in-memory device, one row per statement | 663 |
+| `Timings#2` | update all 10,000 rows in one statement | 1,711 |
+| `Timings#3` | `while exists (T) do delete T return 1 by { ID };`, then drop the table | 1,346 |
+| `Timings#4` | 100,000 integer additions in a loop | 204 |
 
-Run-to-run spread on this machine, from the four runs taken while this was written: 15,246, 16,144, 17,333 and 19,291 ms, which is about ±12 % around the middle of that range. The recorded number is the second of the four and sits near the low end, so a later run on the same machine can legitimately come in at 1.2 times it. That spread, on one machine with nothing deliberately competing, is the reason the warning factor is 3 and not something tighter.
+Run-to-run spread on this machine. `Timing` has been measured six times: 15,246, 16,144, 17,333 and 19,291 ms over the four runs taken when this table first held one scenario, and 15,111 and 17,764 ms on the day `Timings` was added - about ±12 % around the middle of that range. `Timings` has been measured twice, at 3,343 and 3,959 ms (its blocks at 447/1,409/1,294/150 and 663/1,711/1,346/204 ms). The recorded numbers are one run's, the run that rewrote the file, and for `Timing` that run sits in the upper half of the range, so a later run on this machine has room to be slower without warning - read a warning on these scenarios as a reason to measure again, not as a finding. That spread, on one machine with nothing deliberately competing, is the reason the warning factor is 3 and not something tighter.
 
 For comparison, the script's own comments record 12,500 ms for the same loop on the hardware of 2008, in a release build. So the current Debug build on this laptop runs the interpreter at roughly the speed a 2008 release build ran on 2008 hardware. That is a useful calibration to keep in mind when reading any other number here.
 
@@ -28,7 +33,7 @@ For comparison, the script's own comments record 12,500 ms for the same loop on 
 
 **They are script time, not suite time.** The fixture starts its server once and then measures batches, so no number here includes the seconds a test case spends copying library folders and starting an engine. The coverage runner's figures for the same scripts do include that, so the two sets must never be put in one table.
 
-**A covered scenario is not a measured subsystem.** One counting loop says something about the interpreter's statement dispatch and nothing about the compiler, the catalog store, the devices or the network. Engine start, a mix of database work and the catalog store cold and warm are measured by the benchmark program instead; its numbers are further down this document and were taken in Release, so they are not comparable with the Debug numbers here.
+**A covered scenario is not a measured subsystem.** A counting loop and one script of inserts, updates and deletes against the in-memory device say something about the interpreter's statement dispatch and that device's write path, and nothing about the compiler, the catalog store, the SQL devices or the network. Engine start, a mix of database work and the catalog store cold and warm are measured by the benchmark program instead; its numbers are further down this document and were taken in Release, so they are not comparable with the Debug numbers here.
 
 ## How to regenerate the timing-script numbers, and how to compare
 
@@ -59,30 +64,33 @@ DATAPHOR_UPDATE_PERF_BASELINE=1 DATAPHOR_PERF_BASELINE=<label> dotnet test tests
 
 **CI does not compare.** The workflow sets neither variable, so every CI run records and passes. It will compare once someone records a baseline on a CI runner under a label of its own and sets `DATAPHOR_PERF_BASELINE` in `.github/workflows/build.yml`; that is a separate change and this document is where to say it has happened.
 
-## The other timing script, and why it is not in the table
+## The `Timings` blocks against their own 2008 notes, and what the drain costs by table size
 
-The coverage corpus has a second script that exists only to be timed, `Timings`. It times four blocks through the `BenchmarkExecute` operator: inserting 10,000 rows into a table on the in-memory device, updating all of them, draining the table one row at a time, and 100,000 integer additions. The operator it needs now exists - it is declared in the test-only D4 library `tests/libraries/TestFramework.Perf`, which binds the name to the engine node that has always been there - so the script resolves and runs, where before it failed to compile.
-
-It is still not a baseline scenario, because its third block does not finish in a usable time. Measured on this machine on 2026-11-21, in Debug:
+`Timings` is the one scenario whose numbers can be read against a figure from outside this project: the script carries its 2008 measurements in a comment at the end. It times four blocks through the `BenchmarkExecute` operator, which is declared in the test-only D4 library `tests/libraries/TestFramework.Perf` (that library also lifts the in-memory device's 1,000-row cap, which the script's 10,000 rows need).
 
 | Block | What it does | Measured | The script's own 2008 note |
 |---|---|---|---|
-| 1 | insert 10,000 rows, one row per statement | 431 ms | about 5,000 ms |
-| 2 | update all 10,000 rows in one statement | 1,461 ms | about 9,500 ms |
-| 3 | `while exists (T) do delete T return 1 by { ID };`, then drop the table | did not finish; see below | about 8,000 ms |
-| 4 | 100,000 integer additions in a loop | not reached | about 650 ms |
+| 1 | insert 10,000 rows, one row per statement | 663 ms | about 5,000 ms |
+| 2 | update all 10,000 rows in one statement | 1,711 ms | about 9,500 ms |
+| 3 | `while exists (T) do delete T return 1 by { ID };`, then drop the table | 1,346 ms | about 8,000 ms |
+| 4 | 100,000 integer additions in a loop | 204 ms | about 650 ms |
 
-Blocks 1 and 2 are now several times *faster* than the 2008 note records, which is what the `Timing` calibration above would predict. Block 3 is the outlier. Timing the same drain on smaller tables gives a clean quadratic curve - each doubling of the row count costs about 4.4 times as much:
+Every block is now several times *faster* than the 2008 note records, which is what the `Timing` calibration above would predict. Block 3 was the exception until `bug-engine-delete-quota-scans-the-table`: the in-memory device would not serve an ordered scan from an index it already had to a statement that wanted a snapshot, and every `delete` wants one, so the engine sorted the whole table once per deleted row and the drain cost time proportional to the *square* of the table's size. The script needed about a quarter of an hour, and was a recorded known failure of the coverage pass against a short timeout rather than a measured scenario.
 
-| Rows | Drain |
-|---|---|
-| 250 | 397 ms |
-| 500 | 1,885 ms |
-| 1,000 | 7,866 ms |
-| 2,000 | 34,308 ms |
-| 4,000 | 150,879 ms |
+The drain, by table size, before and after that fix - the same statement on a table `T { ID : Integer }` on `System.Temp`:
 
-Extrapolating that curve to the script's 10,000 rows gives roughly a quarter of an hour, against the 8 seconds the script's own note records. Deleting the same 2,000 rows one at a time by key instead - `for LIndex : Integer := 1 to 2000 do delete (T where ID = LIndex);` - costs 130 ms, and deleting the whole table in one statement costs 66 ms, so the cost is specific to the `delete <table> return <n>` form and not to per-row deletion or to the device. The ticket `bug-engine-delete-quota-scans-the-table` owns the cause; the `Timings` coverage entry records the timeout as a known failure against it, with a deliberately short timeout so that the suite does not pay for the grind. When it is fixed, `Timings` becomes one more row in the fixture's scenario table and one more line in the table above.
+| Rows | With the defect | Now |
+|---|---|---|
+| 250 | 397 ms | 46 ms |
+| 500 | 1,885 ms | 50 ms |
+| 1,000 | 7,866 ms | 66 ms |
+| 2,000 | 34,308 ms | 134 ms |
+| 4,000 | 150,879 ms | 245 ms |
+| 10,000 | about a quarter of an hour, by extrapolation | 1,346 ms (block 3 above, which also drops the table) |
+
+Each doubling of the row count used to cost about 4.4 times as much; now the cost per row is roughly flat - 0.19 ms at 250 rows, 0.066 at 1,000 and 0.13 at 10,000, the fall and then the rise being a drain's fixed costs spread over more rows and then the index getting deeper. Both columns were checked at two sizes by putting the device's old rule back on 2026-11-22: with it, drains of 250 and 1,000 rows cost 415 and 8,665 ms, which reproduces the left column; without it they cost 14-17 and 57-66 ms, below the right column because those runs were warmed by a throwaway drain first where the right column's each paid a first compile. `QuotaDeleteCostTest` in `tests/DAE.Server.Tests` is the regression test, and it asserts a *ratio* rather than a time: one row of a 1,000-row drain may cost at most twice what one row of a 250-row drain costs. With the defect that ratio is 5.2; without it, 0.95 to 1.18 over five runs.
+
+Deleting rows by key instead - `for LIndex : Integer := 1 to 2000 do delete (T where ID = LIndex);` - cost 130 ms for 2,000 rows even with the defect, and deleting a whole table in one statement cost 66 ms, because neither plan sorts: the cost was specific to the `delete <table> return <n>` form and never to per-row deletion or to the device.
 
 ## The benchmark program: engine start, a mix of database work, and the catalog store
 
@@ -149,8 +157,6 @@ The steps, for whoever runs the pilot:
 - On each server in turn, through that server's own IDE or script runner, run the four `Timings` blocks as four separate `BenchmarkExecute` calls - the text is in `tests/libraries/TestFramework.Coverage.Scripts/Documents/Timings.d4` - and the `Timing` script. On the modern side the `BenchmarkExecute` operator comes from registering `TestFramework.Perf`; on 3.1 declare it with the same `create operator` that library's `Documents/Register.d4` holds, and lift the in-memory device's row cap the same way.
 - Note the configuration of each server: the modern build in Release, and which 3.1 build and edition.
 - Paste both sides' output into the table below, one row per block, and say in a sentence what the comparison showed.
-
-Until block 3 of `Timings` is fixed, the drain row of this comparison cannot be filled in on the modern side; run the other four and leave that row empty rather than waiting.
 
 | Scenario | 3.1 | This build (Release) | Ratio |
 |---|---|---|---|

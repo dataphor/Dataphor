@@ -1031,6 +1031,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			_dataType = Nodes[0].DataType;
 		}
 		
+		// NOTE: the static cursor context these two methods push cannot make a var table parameter a live scan, so neither needs
+		// the EmitCopyNode compensation CursorNode performs, now that the in-memory device offers an ordered scan whatever cursor
+		// type was requested (bug-engine-delete-quota-scans-the-table). A genuine var operand leaves no ParameterNode to bind:
+		// InstructionNodeBase.DetermineDataType removes it and requires what remains to be a StackReferenceNode, which is a leaf,
+		// and a base table var cannot be passed by reference at all ("Constant data object cannot be passed by reference"). What
+		// does survive binding is only "var" written on an operand the resolved operator declares in, and such an argument was
+		// never a snapshot either: "Op(var T)" hands the callee the live BaseTableVarNode, as it did before. Both shapes were
+		// read off their plans through Diagnostics.ShowPlan, 2026-11-22.
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			if (Modifier == Modifier.Var)

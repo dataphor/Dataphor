@@ -159,16 +159,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// not a second fixture.
 		/// </summary>
 		/// <remarks>
-		/// The coverage corpus's other timing script, Timings, is deliberately not here yet. Its four blocks are an insert,
-		/// an update and a one-row-at-a-time drain of a 10,000-row table plus 100,000 additions, and the drain - the
-		/// statement "while exists (T) do delete T return 1 by { ID };" - costs time quadratic in the table's size, so the
-		/// script needs about a quarter of an hour where its own 2008 comments record eight seconds (measured, with the
-		/// curve, by test-perf-timing-scripts; owned by bug-engine-delete-quota-scans-the-table). Its first two blocks measured
-		/// 431 ms and 1,461 ms here, against the roughly 5 s and 9.5 s those comments record, so only the drain is at issue.
-		/// Add the row when that is fixed: one line, and a baseline re-recorded.
+		/// Timings is the one scenario whose numbers can be read against a figure from outside this project: its own 2008
+		/// comments record roughly 5 s, 9.5 s, 8 s and 650 ms for its four blocks on the hardware of that year. It joined the
+		/// table once bug-engine-delete-quota-scans-the-table made its third block - the drain, "while exists (T) do delete T
+		/// return 1 by { ID };" - cost time proportional to the table's size rather than to its square; until then the script
+		/// needed about a quarter of an hour and was a recorded known failure of the coverage pass.
 		/// </remarks>
-		// NOTE: accepted tradeoff - Timing now runs twice per suite: once as a coverage case, which checks only that it does
-		// not raise, and once here, which checks the same and also captures the number. The alternatives were to give the
+		// NOTE: accepted tradeoff - each scenario's script runs twice per suite: once as a coverage case, which checks only that
+		// it does not raise, and once here, which checks the same and also captures the number. The alternatives were to give the
 		// measurement to the coverage runner, which would put a gating concern inside the suite's most load-bearing fixture
 		// and force it to reason about the three-part split measuring only some scenarios, or to move the script out of the
 		// coverage corpus, which would shrink the audited script set and change the counts published in
@@ -177,6 +175,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private static readonly PerfScenario[] Scenarios =
 		[
 			new PerfScenario(CoverageScripts.ScriptsLibrary, "Timing", "a ten-million-iteration counting loop: the interpreter's per-node cost"),
+			new PerfScenario(CoverageScripts.ScriptsLibrary, "Timings", "10,000 single-row inserts into an in-memory table, one update of all of them, a one-row-at-a-time drain, and 100,000 integer additions"),
 		];
 
 		/// <summary>The scripts library, for the script text, and the perf library, for the operator. Neither requires anything but System.</summary>
@@ -186,10 +185,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// Only the perf library: the scripts are read as text and run here, not through the scripts library.
 		/// </summary>
 		/// <remarks>
-		/// Registered although the one scenario in the table today does not call BenchmarkExecute, for two reasons: it is
-		/// what makes adding Timings back a one-line change, and it is the only place in the suite where a breakage in that
-		/// library's Register.d4 fails plainly - the coverage entry that also registers it is a recorded known failure, so
-		/// a typo there would only change a failure's text.
+		/// Timings needs it twice over: for the BenchmarkExecute operator its four blocks call, and for the lifted row cap on
+		/// System.Temp that its 10,000 rows need (the default is 1,000 rows per table). Timing needs neither, and the library
+		/// would be registered for it alone anyway, as the one place in the suite where a breakage in that library's Register.d4
+		/// fails plainly rather than only changing the text of a failure.
 		/// </remarks>
 		protected override string[] LibrariesToRegister => [PerfLibrary];
 
