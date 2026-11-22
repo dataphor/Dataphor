@@ -227,8 +227,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// Identifiers belong to a catalog and are handed out by the <see cref="ObjectIDGenerator"/> of the engine
 		/// that owns it, so an object built where no engine is in reach cannot have one. The Windows client and the
 		/// data access components build keys and orders purely as descriptions of how a list is sorted or
-		/// identified; the run time builds throwaway table variables for in-memory sorts and marshalled values.
-		/// None of those objects enters a catalog, and none of them can be numbered.
+		/// identified, and the parts of the run time that reach only an <c>IValueManager</c>, or no plan at all,
+		/// build them for a native table's in-memory indexes, for a marshalled value, and for the result table
+		/// variable of a relational operator. None of those objects enters a catalog, so none of them can be
+		/// numbered. What decides is what is in reach at the site and not the kind of object: the run-time code that
+		/// does have a <c>Program</c> in hand allocates from it like any other engine path.
 		/// </para>
 		/// <para>
 		/// Zero is free for this: a generator allocates from one upwards and so never hands out zero, and -1

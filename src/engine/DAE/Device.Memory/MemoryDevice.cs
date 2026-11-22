@@ -100,7 +100,10 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 						isSupported = true;
 						break;
 					}
-					else if (node.RequestedOrder.Equivalent(new Schema.Order(plan.Plan.GetNextObjectID(), tableOrder, true)))
+					// The reversed order is only a probe: Equivalent compares columns, not identifiers, and the copy is
+					// discarded either way, so numbering it would spend one of the catalog's identifiers per candidate
+					// key on every compile. See Schema.Object.UnassignedID.
+					else if (node.RequestedOrder.Equivalent(new Schema.Order(Schema.Object.UnassignedID, tableOrder, true)))
 					{
 						node.PhysicalOrder = tableOrder;
 						node.ScanDirection = ScanDirection.Backward;
@@ -118,7 +121,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 							isSupported = true;
 							break;
 						}
-						else if (node.RequestedOrder.Equivalent(new Schema.Order(plan.Plan.GetNextObjectID(), order, true)))
+						else if (node.RequestedOrder.Equivalent(new Schema.Order(Schema.Object.UnassignedID, order, true)))
 						{
 							node.PhysicalOrder = order;
 							node.ScanDirection = ScanDirection.Backward;

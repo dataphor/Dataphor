@@ -167,9 +167,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			foreach (Schema.Key key in SourceTableVar.Keys)
 			{
-				// Seed the result key set with the empty set
+				// Seed the result key set with the empty set. These keys go onto this node's own result table variable,
+				// which is an artefact of the compile and never enters the catalog, so none of them carries an
+				// identifier - as with TableNode.CopyKey. See Schema.Object.UnassignedID.
 				Schema.Keys resultKeys = new Schema.Keys();
-				resultKeys.Add(new Schema.Key(plan.GetNextObjectID()));
+				resultKeys.Add(new Schema.Key(Schema.Object.UnassignedID));
 				
 				foreach (Schema.TableVarColumn column in key.Columns)
 					resultKeys = KeyProduct(resultKeys, keyColumns[column.Name]);
@@ -195,8 +197,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		// The products are intermediate: the caller copies the ones it keeps onto the table variable, and there is
-		// no plan here to number them from.
+		// The products go straight onto the caller's result table variable, so they carry no identifier for the
+		// reason given there; there is no plan here to number them from in any case.
 		protected Schema.Keys KeyProduct(Schema.Keys keys, Schema.Key key)
 		{
 			Schema.Keys result = new Schema.Keys();

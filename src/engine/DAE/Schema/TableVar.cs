@@ -1124,9 +1124,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		// NOTE: an order is a catalog object, so the constructors that take no identifier leave it unassigned
 		// rather than allocate one: only the engine that owns the catalog can number its objects, and an order is
 		// also built where there is no engine at all - by the Windows client and the data access components, as a
-		// description of how a list is sorted, and by the run time, for a throwaway table variable describing an
-		// in-memory sort. Construct an order that belongs to a catalog through the overload taking an identifier,
-		// from plan.GetNextObjectID(). See Schema.Object.UnassignedID.
+		// description of how a list is sorted, and by the parts of the run time that reach no plan, such as a
+		// native table's in-memory indexes. Construct an order that belongs to a catalog through the overload
+		// taking an identifier, from plan.GetNextObjectID(). See Schema.Object.UnassignedID.
 		public Order() : base(UnassignedID, String.Empty) {}
 		public Order(int iD) : base(iD, String.Empty) {}
 
@@ -1432,7 +1432,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		// NOTE: a key is a catalog object, so the constructors that take no identifier leave it unassigned rather
 		// than allocate one: only the engine that owns the catalog can number its objects, and a key is also built
 		// where there is no engine at all - by the Windows client and the data access components, as a description
-		// of what identifies a row, and by the run time, for a throwaway table variable. Construct a key that
+		// of what identifies a row, and by the parts of the run time that reach no plan. Construct a key that
 		// belongs to a catalog through the overload taking an identifier, from plan.GetNextObjectID(). See
 		// Schema.Object.UnassignedID.
 		public Key() : this(UnassignedID) {}
