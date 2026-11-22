@@ -226,7 +226,6 @@ namespace DAE.Benchmarks
 		/// <summary>Copies the named libraries from the runtime layout. None is valid: System is built in, and the server creates General.</summary>
 		public BenchmarkServerInstance(string name, params string[] libraryNames)
 		{
-			_nextObjectID = Alphora.Dataphor.DAE.Schema.Object.GetNextObjectID();
 			_directory = BenchmarkEnvironment.NewDirectory(name);
 			try
 			{
@@ -250,7 +249,6 @@ namespace DAE.Benchmarks
 			if (template.Server.State != ServerState.Stopped)
 				throw new InvalidOperationException(String.Format("The template instance in {0} must be stopped before it is copied.", template._directory));
 
-			_nextObjectID = Alphora.Dataphor.DAE.Schema.Object.GetNextObjectID();
 			_directory = BenchmarkEnvironment.NewDirectory(name);
 			try
 			{
@@ -287,17 +285,6 @@ namespace DAE.Benchmarks
 		private readonly Server _server;
 		public Server Server => _server;
 
-		/// <summary>The process-wide object-id counter as it stood before this instance existed, handed back when the instance is disposed.</summary>
-		/// <remarks>
-		/// Starting an engine sets the engine's process-wide object-id counter from that engine's own catalog
-		/// (bug-object-id-counter-is-process-wide), so a program that starts dozens of engines in one process would
-		/// otherwise leave later ones allocating ids an earlier catalog already holds. An engine that started and was then
-		/// stopped has moved the counter just as much as one that stayed up, which is why the counter is captured per
-		/// instance rather than around one call: a benchmark's start and its stop are in different methods.
-		/// TestEnvironment.WithTheObjectIDCounterRestored is the same fix in the shape the test suite needs.
-		/// </remarks>
-		private readonly int _nextObjectID;
-
 		public IServerSession Connect()
 		{
 			return _server.Connect(new SessionInfo("Admin", ""));
@@ -327,7 +314,7 @@ namespace DAE.Benchmarks
 
 		private bool _disposed;
 
-		/// <summary>Stops the server if it is running, deletes the directory and hands the process its object-id counter back.</summary>
+		/// <summary>Stops the server if it is running and deletes the directory.</summary>
 		/// <remarks>
 		/// A failure to stop is rethrown rather than reported and swallowed, as the test suite's equivalent does: a
 		/// benchmark has no test output to report it to, and an iteration whose server would not stop has not left the
@@ -350,18 +337,10 @@ namespace DAE.Benchmarks
 			}
 		}
 
-		/// <summary>Deletes the instance's directory and raises the process's object-id counter back if this instance left it lower.</summary>
-		/// <remarks>
-		/// Upwards only, for the same reason as TestEnvironment.WithTheObjectIDCounterRestored: another engine of this
-		/// process can still be running when an instance is disposed, and handing a live engine a counter below what it has
-		/// already allocated gives two objects of its catalog one identifier - this workaround causing the very defect it
-		/// exists to avoid. Raising the counter is the whole of what it can safely do.
-		/// </remarks>
+		/// <summary>Deletes the instance's directory.</summary>
 		private void Release()
 		{
 			BenchmarkEnvironment.TryDeleteDirectory(_directory);
-			if (Alphora.Dataphor.DAE.Schema.Object.GetNextObjectID() < _nextObjectID)
-				Alphora.Dataphor.DAE.Schema.Object.SetNextObjectID(_nextObjectID);
 		}
 	}
 }

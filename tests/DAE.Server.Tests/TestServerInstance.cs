@@ -21,8 +21,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// writes neither a log file nor the Windows event log.
 	/// </summary>
 	// NOTE: two servers in one process share the engine's static state. port-catalog-emitter-race fixed the shared catalog
-	// emitter (K1) and the lazily built keyword tables; Schema.Object's object-id counter is a third, found by
-	// protocol-corewcf-proof and owned by bug-object-id-counter-is-process-wide. Re-check before fixtures run in parallel.
+	// emitter (K1) and the lazily built keyword tables; the object-id counter was a third, found by protocol-corewcf-proof
+	// and fixed by bug-object-id-counter-is-process-wide, which gave each engine a generator of its own. Re-check before
+	// fixtures run in parallel.
 	public sealed class TestServerInstance : IDisposable
 	{
 		public const string LibrariesFolderName = "Libraries";

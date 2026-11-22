@@ -21,10 +21,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// <para>
 	/// What the process boundary establishes, and nothing else in this suite does: a server started as a separate
-	/// program, from an instance list of its own, serves the shipped client stack and stops when it is asked to; and the
-	/// two engines are genuinely separate, which in one process they are not (starting a second engine resets a counter
-	/// the first is still using - bug-object-id-counter-is-process-wide). It is also the only place a second server, or
-	/// a second client program, can exist without the two sharing the engine's process-wide state.
+	/// program, from an instance list of its own, serves the shipped client stack and stops when it is asked to. It is
+	/// also the only place a second server, or a second client program, can exist without the two sharing the engine's
+	/// remaining process-wide state - the object-id counter was part of that until
+	/// bug-object-id-counter-is-process-wide gave each engine a generator of its own.
 	/// </para>
 	/// <para>
 	/// Deliberately not repeated here: streams over the wire, the message-size quotas and typed faults. Those already
@@ -295,8 +295,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <para>
 		/// Each <c>LocalServer</c> keeps a client-side catalog cache in an engine of its own, and refreshes it when a prepare
 		/// comes back carrying a catalog fragment and a newer cache time stamp. Nothing else in this suite reaches that: every
-		/// other fixture has at most one client-side engine, and in one process a second one cannot exist without disturbing
-		/// the first (bug-object-id-counter-is-process-wide). Two clients against a server in another program is the
+		/// other fixture has at most one client-side engine. Two clients against a server in another program is the
 		/// configuration the product runs in, and the first place this behaviour is reachable.
 		/// </para>
 		/// <para>
@@ -308,11 +307,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <para>
 		/// Both clients are built before any of the statements below run, so that each one's cache predates every statement
 		/// the other executes; B is built after A, which is the order that puts a second client-side engine's start between
-		/// A's construction and A's first allocation. Measured: this case passes with or without
-		/// <see cref="ProtocolClient"/>'s restoration of the process-wide object-id counter, because each client only ever
-		/// allocates into its own client-side catalog and clears that catalog before it does. The restoration is load-bearing
-		/// for <see cref="CoreWcfProtocolTest"/>, which hosts a server in this process and connects to it; it is kept here
-		/// because it belongs to the helper, not to a case.
+		/// A's construction and A's first allocation. That order mattered while the object-id counter was shared by every
+		/// engine in the process; bug-object-id-counter-is-process-wide gave each engine its own, so B's start no longer
+		/// reaches A's identifiers either way.
 		/// </para>
 		/// </remarks>
 		[Test]

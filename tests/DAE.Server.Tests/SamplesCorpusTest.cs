@@ -151,10 +151,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// element.
 		/// </summary>
 		/// <remarks>
-		/// The server is started inside the case rather than in a one-time setup because each case needs a different one.
-		/// Deliberately not wrapped in TestEnvironment.WithTheObjectIDCounterRestored: that guard is for code that starts
-		/// a second engine while one is already running, and these servers run one at a time, each disposed before the
-		/// next starts.
+		/// The server is started inside the case rather than in a one-time setup because each case needs a different one;
+		/// they run one at a time, each disposed before the next starts.
 		/// </remarks>
 		[TestCaseSource(nameof(Samples))]
 		public void TheSampleRegistersAndDerives(CorpusLibrary sample)

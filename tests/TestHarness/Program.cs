@@ -68,7 +68,7 @@ namespace DAE.Test.Harness
 		/// identifier is there so that the fixture can watch for that one session by name rather than reading the
 		/// server's whole session table: reading a table over the wire builds a client-side view from a catalog fragment
 		/// the server sends, and that path has a defect of its own which has nothing to do with what the case is about
-		/// (see the arm on bug-object-id-counter-is-process-wide).
+		/// (bug-client-catalog-rebuild-reuses-object-ids).
 		/// </remarks>
 		public const string HoldingPrefix = "HOLDING";
 

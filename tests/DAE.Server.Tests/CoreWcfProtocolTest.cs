@@ -612,8 +612,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		/// <remarks>
 		/// Unlike the listener port, the instance's own port not being available has to fail the start: a server nobody
-		/// can reach is not a server. The engine server starts before the port is opened, so the object-id counter moves
-		/// here even though no host results.
+		/// can reach is not a server.
 		/// </remarks>
 		[Test]
 		public void TestTheInstancePortBeingTakenStopsTheServer()
@@ -630,19 +629,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					TestEnvironment.CopyLibraries(Path.Combine(directory, TestServerInstance.LibrariesFolderName), new string[0]);
 
 					DataphorServiceHost host = HostedInstance.NewHost();
-					TestEnvironment.WithTheObjectIDCounterRestored
-					(
-						() =>
-						{
-							// ShouldListen false: this case is about the instance's own port, and no listener port is to be taken.
-							Exception error = Assert.Catch(() => host.Start(HostedInstance.Configuration(instanceName, directory, portNumber, false, 0)));
 
-							Assert.That(error, Is.InstanceOf<IOException>(), "The failure to bind did not arrive as itself; a failure from Stop on the way out would mask it. Actual: " + error.GetType().FullName + ": " + error.Message);
-							Assert.That(error.Message, Does.Contain(portNumber.ToString()));
-							Assert.That(host.IsActive, Is.False, "The engine server was left running by a host that could not open its port.");
-							Assert.DoesNotThrow(() => host.Stop(), "Stopping an already stopped host did something.");
-						}
-					);
+					// ShouldListen false: this case is about the instance's own port, and no listener port is to be taken.
+					Exception error = Assert.Catch(() => host.Start(HostedInstance.Configuration(instanceName, directory, portNumber, false, 0)));
+
+					Assert.That(error, Is.InstanceOf<IOException>(), "The failure to bind did not arrive as itself; a failure from Stop on the way out would mask it. Actual: " + error.GetType().FullName + ": " + error.Message);
+					Assert.That(error.Message, Does.Contain(portNumber.ToString()));
+					Assert.That(host.IsActive, Is.False, "The engine server was left running by a host that could not open its port.");
+					Assert.DoesNotThrow(() => host.Stop(), "Stopping an already stopped host did something.");
 				}
 				finally
 				{
@@ -655,17 +649,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>Runs <paramref name="body"/> against a second hosted instance, with the object-id counter handed back afterwards.</summary>
+		/// <summary>Runs <paramref name="body"/> against a second hosted instance.</summary>
 		private static void WithASecondHost(string instanceName, bool shouldListen, int listenerPortNumber, Action<HostedInstance> body)
 		{
-			TestEnvironment.WithTheObjectIDCounterRestored
-			(
-				() =>
-				{
-					using (HostedInstance host = new HostedInstance(instanceName, shouldListen, listenerPortNumber))
-						body(host);
-				}
-			);
+			using (HostedInstance host = new HostedInstance(instanceName, shouldListen, listenerPortNumber))
+				body(host);
 		}
 
 		/// <summary>

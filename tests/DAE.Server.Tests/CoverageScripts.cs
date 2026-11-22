@@ -287,9 +287,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			int listenerPortNumber = DataphorServiceUtility.ListenerPortNumber;
 			try
 			{
-				// A child process, not a second server in this one: two engines in one process share the object-id counter,
-				// and each script's own server resets it as it starts (bug-object-id-counter-is-process-wide), so an
-				// in-process linked server would be stomped by every later script. The cost falls on this one case.
+				// A child process, not a second server in this one: the script resolves the link through the listener
+				// service, so the linked server has to be hosted on a port, which an in-process server is not. (It was
+				// also the only safe arrangement while two engines in one process shared the object-id counter and each
+				// script's own server reset it as it started; bug-object-id-counter-is-process-wide removed that reason by
+				// giving each engine a generator of its own.) The cost falls on this one case.
 				using (OutOfProcessInstance linkedServer = new OutOfProcessInstance(LinkedServerInstanceName, OutOfProcessInstance.ServerDefaultConnectionIdleTime, true))
 				{
 					DataphorServiceUtility.ListenerPortNumber = linkedServer.ListenerPortNumber;

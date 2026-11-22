@@ -22,8 +22,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Int32.MaxValue on the wrap so it cannot climb back through identifiers in use. It takes another two billion
 	/// calls to tell the two apart and the counter is not readable, so there is nothing a test can observe.
 	///
-	/// Each case drives a generator of its own, so none of them disturbs the counter the rest of the suite allocates
-	/// from - until the end of the chain that engine-object-id-generator begins, every engine shares one instance.
+	/// Each case drives a generator of its own, which is also how every engine allocates since
+	/// bug-object-id-counter-is-process-wide.
 	/// </summary>
 	[TestFixture]
 	public class ObjectIDGeneratorTest

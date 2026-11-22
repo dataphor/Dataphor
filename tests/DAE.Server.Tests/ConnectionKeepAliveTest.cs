@@ -142,13 +142,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>The client half the product ships, pinging fast enough for a test to watch it.</summary>
+		/// <remarks>
+		/// The third argument is the client's own host name, which the server records against the connection; it is not a
+		/// connection target.
+		/// </remarks>
 		private static LocalServer NewClient(IRemoteServer remoteServer)
 		{
-			LocalServer result = null;
-			// The counter is handed back because LocalServer starts an engine of its own for its catalog cache. The third
-			// argument is the client's own host name, which the server records against the connection; it is not a target.
-			TestEnvironment.WithTheObjectIDCounterRestored(() => result = new LocalServer(remoteServer, false, "localhost", KeepAliveIntervalSeconds));
-			return result;
+			return new LocalServer(remoteServer, false, "localhost", KeepAliveIntervalSeconds);
 		}
 
 		private static void WaitForTheClockToMovePast(RemoteServerConnection connection, DateTime previous, string message)

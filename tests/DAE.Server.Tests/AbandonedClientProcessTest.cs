@@ -183,8 +183,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <remarks>
 		/// A count rather than a read of <c>System.Sessions</c> itself. Reading a table over the wire makes the client
 		/// build a view from a catalog fragment the server sends, and a handful of those followed by a change to the
-		/// server's catalog - which this case produces by design - trips a defect in that path, recorded as an arm on
-		/// bug-object-id-counter-is-process-wide. A count sends no catalog fragment and has nothing to do with it.
+		/// server's catalog - which this case produces by design - trips a defect in that path, owned by
+		/// bug-client-catalog-rebuild-reuses-object-ids. A count sends no catalog fragment and has nothing to do with it.
 		/// </remarks>
 		private static int SessionCount(IServerProcess observing, int sessionID)
 		{

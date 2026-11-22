@@ -105,11 +105,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public Engine() : base()
 		{
 			_sessions = new ServerSessions();
-			
-			// NOTE: for the transition this is the one generator shared by every engine in the program, so that the
-			// allocation sites not yet converted keep drawing from the same counter and nothing changes.
-			// bug-object-id-counter-is-process-wide makes it a new ObjectIDGenerator() per engine, which is the fix.
-			_objectIDGenerator = Schema.Object.SharedObjectIDGenerator;
+			_objectIDGenerator = new Schema.ObjectIDGenerator();
 		}
         
 		public void Dispose()
@@ -163,6 +159,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// ObjectIDGenerator
+		// One per engine, so that two engines in one program number their catalogs independently: a client connection
+		// starts an engine of its own for its catalog cache, and while the counter was shared that engine's start reset
+		// the counter an already-running engine was allocating from.
 		// Assigned in the constructor and never replaced: ClearCatalog throws the catalog away, and a generator
 		// that went with it would hand the rebuilt catalog identifiers this engine had already used.
 		private readonly Schema.ObjectIDGenerator _objectIDGenerator;

@@ -18,9 +18,10 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// independently, and an identifier is only meaningful against the catalog that handed it out.
 	/// </para>
 	/// <para>
-	/// NOTE: a generator belongs to an <c>Engine</c> and not to a <c>Schema.Catalog</c>. <c>Engine.ClearCatalog</c>
-	/// replaces the whole catalog, so a generator held on the catalog would start again from one on every catalog
-	/// rebuild and hand the rebuilt catalog identifiers the engine had already used.
+	/// NOTE: a generator belongs to an <c>Engine</c> - one each, so that two engines in one program number their
+	/// catalogs independently - and not to a <c>Schema.Catalog</c>. <c>Engine.ClearCatalog</c> replaces the whole
+	/// catalog, so a generator held on the catalog would start again from one on every catalog rebuild and hand the
+	/// rebuilt catalog identifiers the engine had already used.
 	/// </para>
 	/// <para>
 	/// An engine that persists its catalog creates a handful of built-in objects programmatically before it reads
@@ -83,20 +84,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			lock (_syncRoot)
 			{
 				_lastID = 0;
-			}
-		}
-
-		/// <summary>Sets the last allocated identifier outright, which is the one operation that can move the counter backwards.</summary>
-		/// <remarks>
-		/// NOTE: for the transition only. It exists because <c>Schema.Object.SetNextObjectID</c> is still on the
-		/// public surface and two tests save the counter and put it back; nothing else may move the counter down.
-		/// It goes with that method, in bug-object-id-counter-is-process-wide.
-		/// </remarks>
-		internal void SetLastAllocated(int iD)
-		{
-			lock (_syncRoot)
-			{
-				_lastID = iD;
 			}
 		}
 
