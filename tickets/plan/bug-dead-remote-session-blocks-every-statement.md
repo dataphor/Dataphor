@@ -41,4 +41,4 @@ Stated as the shape of the problem rather than as a design:
 
 `engine-server-link-session-outlives-drop` made the teardown of a connection complete whatever the network does: `NativeCLISession.Dispose` releases this side in a `finally`, and `RemoteSessionImplementation.Dispose` logs a failed remote stop as a warning instead of throwing. So discarding a dead connection is now a safe thing to do; what is missing is anything that decides to do it.
 
-The far-server half of the same situation - the *other* server keeping the abandoned session and its open transaction for as long as it runs - is `bug-native-cli-sessions-never-reclaimed`, also in `tickets/plan/`. Different site, and neither fix implies the other.
+The far-server half of the same situation - the *other* server keeping the abandoned session and its open transaction for as long as it runs - is `bug-native-cli-sessions-never-reclaimed`, which is planned and chained behind `native-cli-session-liveness-clock`. Different site, and neither fix implies the other.
