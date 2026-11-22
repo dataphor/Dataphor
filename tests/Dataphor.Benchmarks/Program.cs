@@ -55,8 +55,8 @@ namespace DAE.Benchmarks
 		/// <remarks>
 		/// Ten, not five: the two engine-start benchmarks vary by about a sixth of their mean between iterations on the
 		/// slow machine class, and at five iterations BenchmarkDotNet's 99.9 % confidence interval came out wider than
-		/// half the mean, which is too wide for a number anybody would compare against. Ten keeps the whole run near two
-		/// minutes of wall clock, which the README records.
+		/// half the mean, which is too wide for a number anybody would compare against. Ten keeps the whole run near a hundred
+		/// seconds of wall clock, which the README records.
 		/// </remarks>
 		public const int IterationCount = 10;
 
@@ -74,9 +74,6 @@ namespace DAE.Benchmarks
 
 			IEnumerable<Summary> summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args.Length == 0 ? EveryBenchmark : args, Configuration());
 
-			// A benchmark whose iterations threw is reported in the summary and would otherwise leave the process exiting 0,
-			// which is how a half-failed run gets published. Nothing measured at all - a filter that matched nothing - is a
-			// failure for the same reason.
 			int measured = 0;
 			bool failed = false;
 			foreach (Summary summary in summaries)
@@ -91,13 +88,29 @@ namespace DAE.Benchmarks
 				}
 			}
 
-			if (measured == 0)
+			// A benchmark whose iterations threw is reported in the summary and would otherwise leave the process exiting 0,
+			// which is how a half-failed run gets published. Nothing measured at all - a filter that matched nothing - is a
+			// failure for the same reason, unless the arguments asked BenchmarkDotNet to print something rather than to run
+			// anything: --list and --help measure nothing by design, and the line below recommends --list.
+			if (measured == 0 && !PrintsSomethingInsteadOfRunning(args))
 			{
 				Console.Error.WriteLine("No benchmark ran. Check the filter: DAE.Benchmarks --list flat shows the names.");
 				failed = true;
 			}
 
 			return failed ? 1 : 0;
+		}
+
+		/// <summary>The switches BenchmarkDotNet answers by printing something and running nothing, so that a run which asked for one of them is not a failed run.</summary>
+		private static readonly string[] SwitchesThatPrintInsteadOfRunning = ["--list", "--help", "-h", "--version", "--info"];
+
+		private static bool PrintsSomethingInsteadOfRunning(string[] args)
+		{
+			foreach (string arg in args)
+				foreach (string name in SwitchesThatPrintInsteadOfRunning)
+					if (String.Equals(arg, name, StringComparison.OrdinalIgnoreCase))
+						return true;
+			return false;
 		}
 
 		/// <summary>The configuration: the default one's columns, loggers and exporters, this program's job, and an artifacts path inside artifacts/.</summary>

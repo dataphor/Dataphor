@@ -11,7 +11,7 @@ The timing scripts (`Timing` and `Timings`, measured by `PerfBaselineTest` in [t
 | `CatalogStoreCold` | The catalog store's write path: a server started on a new instance directory, so that the SQLite catalog is created and the system library registered, then stopped. |
 | `CatalogStoreWarm` | The catalog store's read path: a server started on an instance directory a previous start already populated, then stopped. This is the number `research-catalog-load-profile` will extend to realistic catalogs. |
 
-`EngineStart` and `CatalogStoreCold` overlap on purpose — starting an engine on a new instance directory *is* the store's write path — because they answer two different questions. The difference between the two numbers is `EngineStart`'s directory setup, which is inside its measured region and outside the other's.
+`EngineStart` and `CatalogStoreCold` overlap on purpose — starting an engine on a new instance directory *is* the store's write path — because they answer two different questions. What separates them is `EngineStart`'s directory setup, which is inside its measured region and outside the other's — and which is far too small to see: over three runs the gap between the two means was −50 ms, +308 ms and +44 ms, changing sign, while the setup can only be a cost. Read nothing into the gap; `docs/perf-baseline.md` records the numbers.
 
 `EngineBenchmarks.cs` holds the four measurements and the D4 the mix runs; the D4 is in one named place so that the next person to change it can see what the published numbers were measured against. **A silent change to the mix, or to its row count, invalidates every recorded number for it**: re-record, do not compare.
 
@@ -30,9 +30,9 @@ With no arguments it runs every benchmark. Otherwise it takes BenchmarkDotNet's 
 artifacts/bin/DAE.Benchmarks/release/DAE.Benchmarks.exe --filter '*CatalogStore*'
 ```
 
-It exits non-zero if any benchmark's iterations failed, if a validator reported a critical error, or if nothing ran at all — a filter that matches nothing would otherwise look like a clean run.
+It exits non-zero if any benchmark's iterations failed, if a validator reported a critical error, or if nothing ran at all — a filter that matches nothing would otherwise look like a clean run. The switches that ask BenchmarkDotNet to print something instead of running anything (`--list`, `--help`, `--version`, `--info`) are the exception: they measure nothing by design and exit zero.
 
-**What a run costs.** Measured on 2026-11-21 in Release on the slower of the two machine classes the root [AGENTS.md](../../AGENTS.md) quotes suite timings for: **about 100 seconds** for all four benchmarks (99 s and 104 s on two runs). That is inside the roughly ten minutes the root `AGENTS.md` calls the limit of what an agent can run in a ticket, so it does not have to be a by-hand-only step — but mind that it is 100 seconds of near-silence, and raising the iteration count raises it proportionally.
+**What a run costs.** Measured on 2026-11-21 in Release on the slower of the two machine classes the root [AGENTS.md](../../AGENTS.md) quotes suite timings for: **about 100 seconds** for all four benchmarks (99 s, 104 s and 100 s on three runs). That is inside the roughly ten minutes the root `AGENTS.md` calls the limit of what an agent can run in a ticket, so it does not have to be a by-hand-only step — but mind that it is 100 seconds of near-silence, and raising the iteration count raises it proportionally.
 
 **Where its output goes.** BenchmarkDotNet writes its log and its exports (markdown, CSV, HTML) to `artifacts/benchmarks/`, not to the `BenchmarkDotNet.Artifacts/` folder it would otherwise create beside the working directory: `artifacts/` is already git-ignored, so a run leaves nothing in the tree and nothing new has to be ignored. `artifacts/benchmarks/results/DAE.Benchmarks.EngineBenchmarks-report-github.md` is the markdown table that gets carried into `docs/perf-baseline.md` by hand, the way `docs/coverage-report.md` carries the coverage tool's output in by hand.
 

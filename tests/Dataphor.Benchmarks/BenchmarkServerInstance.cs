@@ -283,8 +283,6 @@ namespace DAE.Benchmarks
 		}
 
 		private readonly string _directory;
-		/// <summary>The absolute path of this instance's directory.</summary>
-		public string Directory => _directory;
 
 		private readonly Server _server;
 		public Server Server => _server;
