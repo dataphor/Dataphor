@@ -45,6 +45,15 @@ namespace Alphora.Dataphor.DAE.Service
 		/// </summary>
 		public IServer Server { get { return _server; } }
 
+		/// <summary>Provides in-process access to the native CLI server, whose sessions carry that interface's liveness clock.</summary>
+		/// <remarks>
+		/// Beside <see cref="Server"/> and for the same kind of reason, but with one of its own: the test that watches a
+		/// native client's keep-alive move its session's clock (<c>NativeServer.GetSessionIdleSeconds</c>) is outside the
+		/// server assembly, and the repository has no InternalsVisibleTo convention to use instead - the precedent is
+		/// <c>DataphorHost.BuildHost</c>. Null before <c>Start</c> and after <c>Stop</c>, as <see cref="Server"/> is.
+		/// </remarks>
+		public NativeServer NativeServer { get { return _nativeServer; } }
+
 		private RemoteServer _remoteServer;
 		private DataphorService _service;
 		private NativeServer _nativeServer;

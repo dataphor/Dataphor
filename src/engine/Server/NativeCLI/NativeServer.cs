@@ -66,15 +66,75 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			return new NativeSessionHandle(nativeSession.ID);
 		}
 		
-		private NativeSession GetNativeSession(NativeSessionHandle sessionHandle)
+		/// <summary>Looks up the session a handle names, counts one call as started on it, and stamps its clock.</summary>
+		/// <remarks>
+		/// <para>
+		/// Every public operation of this class that takes a handle acquires its session here, does its work, and releases
+		/// it in a finally - so this is the one place the native interface's liveness clock has to be stamped, and no
+		/// change to the service contract <see cref="Alphora.Dataphor.DAE.Contracts.INativeCLIService"/> is needed to carry a ping: a client says "still
+		/// here" by making any call at all (<c>NativeCLISession</c>'s keep-alive calls GetTransactionCount).
+		/// </para>
+		/// <para>
+		/// Wholly under the session lock, which is also the fix for a pre-existing data race: the lookup this replaces
+		/// read the dictionary with no lock at all while AddNativeSession and RemoveNativeSession wrote it under one, and
+		/// the service runs under ConcurrencyMode.Multiple, so two clients' calls genuinely raced - a Dictionary read
+		/// concurrent with a write can return a wrong value or throw.
+		/// </para>
+		/// </remarks>
+		private NativeSession AcquireNativeSession(NativeSessionHandle sessionHandle)
 		{
-			NativeSession nativeSession;
-			if (_nativeSessions.TryGetValue(sessionHandle.ID, out nativeSession))
+			lock (_nativeSessions)
+			{
+				NativeSession nativeSession;
+				if (!_nativeSessions.TryGetValue(sessionHandle.ID, out nativeSession))
+					throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", sessionHandle.ID.ToString()));
+
+				nativeSession.EnterCall();
 				return nativeSession;
-			
-			throw new ArgumentException(String.Format("Invalid session handle: \"{0}\".", sessionHandle.ID.ToString()));
+			}
+		}
+
+		/// <summary>Counts the call finished and stamps the session's clock again.</summary>
+		/// <remarks>
+		/// Takes a session rather than a handle so that it cannot fail: a release that had to look the handle up again
+		/// could find the session gone - StopSession can remove it while a call is in flight - and would then throw out of
+		/// the finally that called it, replacing whatever the operation itself was reporting.
+		/// </remarks>
+		private void ReleaseNativeSession(NativeSession nativeSession)
+		{
+			lock (_nativeSessions)
+			{
+				nativeSession.ExitCall();
+			}
+		}
+
+		/// <summary>How long each session this server holds has been without a call, in seconds; a session with a call in flight reports 0.</summary>
+		/// <remarks>
+		/// The one public read of the session table, and public only for the test that watches a client's keep-alive move
+		/// a session's clock from outside this assembly: the repository has no InternalsVisibleTo convention to use
+		/// instead (the precedent, with the same reason, is <c>DataphorHost.BuildHost</c>). An idle watcher is in this
+		/// assembly and reads the sessions and their counts together under the lock above instead; one entry per session,
+		/// in no particular order, is all an observer needs.
+		/// </remarks>
+		public long[] GetSessionIdleSeconds()
+		{
+			lock (_nativeSessions)
+			{
+				long[] result = new long[_nativeSessions.Count];
+				int index = 0;
+				foreach (NativeSession nativeSession in _nativeSessions.Values)
+					result[index++] = nativeSession.IdleSeconds;
+				return result;
+			}
 		}
 		
+		/// <summary>Takes the session a handle names out of the table, whatever is happening on it.</summary>
+		/// <remarks>
+		/// NOTE: a StopSession arriving while a call is in flight on the same session removes it and leaves that call
+		/// running against a session the table no longer holds - the call completes, and its release stamps a clock
+		/// nothing will read again. That is how it has always behaved and this is not the ticket that changes it; the
+		/// in-use count AcquireNativeSession keeps does not cover it, and must not be read as covering it.
+		/// </remarks>
 		private NativeSession RemoveNativeSession(NativeSessionHandle sessionHandle)
 		{
 			lock (_nativeSessions)
@@ -127,7 +187,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				GetNativeSession(sessionHandle).Process.BeginTransaction(NativeCLIUtility.NativeIsolationLevelToIsolationLevel(isolationLevel));
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					nativeSession.Process.BeginTransaction(NativeCLIUtility.NativeIsolationLevelToIsolationLevel(isolationLevel));
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -139,7 +207,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				GetNativeSession(sessionHandle).Process.PrepareTransaction();
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					nativeSession.Process.PrepareTransaction();
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -151,7 +227,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				GetNativeSession(sessionHandle).Process.CommitTransaction();
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					nativeSession.Process.CommitTransaction();
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -163,7 +247,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				GetNativeSession(sessionHandle).Process.RollbackTransaction();
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					nativeSession.Process.RollbackTransaction();
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -175,7 +267,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				return GetNativeSession(sessionHandle).Process.TransactionCount;
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					return nativeSession.Process.TransactionCount;
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -183,6 +283,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			}
 		}
 
+		/// <summary>Runs one statement on a session of its own, which exists only for the duration of this call.</summary>
+		/// <remarks>
+		/// No liveness accounting, because there is nothing to account for: the session is created, used and stopped
+		/// inside this call and never enters the session table, so nothing outside can name it and no idle watcher can
+		/// ever see it. The same holds for the overload below.
+		/// </remarks>
 		public NativeResult Execute(NativeSessionInfo sessionInfo, string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
 			try
@@ -227,7 +333,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				return GetNativeSession(sessionHandle).Execute(statement, paramsValue, options);
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					return nativeSession.Execute(statement, paramsValue, options);
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
@@ -239,7 +353,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		{
 			try
 			{
-				return GetNativeSession(sessionHandle).Execute(operations);
+				NativeSession nativeSession = AcquireNativeSession(sessionHandle);
+				try
+				{
+					return nativeSession.Execute(operations);
+				}
+				finally
+				{
+					ReleaseNativeSession(nativeSession);
+				}
 			}
 			catch (Exception exception)
 			{
