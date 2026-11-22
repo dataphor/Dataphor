@@ -1240,6 +1240,11 @@ namespace Alphora.Dataphor.DAE.Server
 			// prepared table expression the client still holds owns a view in the catalog being replaced - so a generator
 			// that restarted would reissue their identifiers, and dropping a stale object would then evict the live
 			// object's entry from the catalog device's identifier-to-name index.
+			// NOTE: the reset runs only at start-up on an engine with a store today, because nothing rebuilds a full
+			// server's catalog while it runs: the D4 ClearCatalog operator throws, and ClearCatalog's only caller in the
+			// tree, LocalServer.EnsureCacheConsistent, holds a repository engine. If a rebuild on a live full server is
+			// ever made to work, dropping the reset is not available to it - its store load needs the fixed numbering - so
+			// the objects its sessions hold across the rebuild need an answer of their own.
 			if (!IsEngine)
 				ObjectIDGenerator.Reset();
 			_catalogDevice = CreateCatalogDevice();

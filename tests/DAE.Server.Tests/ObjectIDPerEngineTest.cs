@@ -48,20 +48,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				instance.Server.Start();
 				instance.ExecuteScript("create table ObjectIDPerEngineFirst { ID : Integer, key { ID } };");
 
-				// As LocalServer builds its client-side engine: a name of its own, no library directory and no catalog store,
-				// so starting it writes nothing to disk. Logging off for the reason every fixture here keeps it off - a logging
-				// server in an elevated process creates the Windows event-log source.
-				Engine second = new Engine();
-				try
-				{
-					second.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
-					second.LoggingEnabled = false;
-					second.Start();
-				}
-				finally
-				{
-					second.Dispose();
-				}
+				// Stopped again before the first server's next schema change, because a stopped engine used to have moved the
+				// shared counter just as far as a running one.
+				StartRepositoryEngine().Dispose();
 
 				Assert.DoesNotThrow
 				(
@@ -88,14 +77,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void RebuildingAnEnginesCatalogDoesNotReissueTheIdentifiersItHasAlreadyGivenOut()
 		{
-			// As LocalServer builds its client-side engine; see the case above for why the name and the logging flag.
-			Engine engine = new Engine();
-			try
+			using (Engine engine = StartRepositoryEngine())
 			{
-				engine.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
-				engine.LoggingEnabled = false;
-				engine.Start();
-
 				ExecuteScript(engine, "create table ObjectIDBeforeRebuild { ID : Integer, key { ID } };");
 				int beforeRebuild = engine.Catalog["ObjectIDBeforeRebuild"].ID;
 
@@ -111,9 +94,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					"The rebuilt catalog reissued an identifier this engine had already given out, so the objects of the catalog it replaced - which its clients still hold - collide with it."
 				);
 			}
-			finally
+		}
+
+		/// <summary>Starts an engine as <c>LocalServer</c> starts the one that holds a client's catalog cache.</summary>
+		/// <remarks>
+		/// A name of its own, no library directory and no catalog store, so starting it writes nothing to disk. Logging off
+		/// for the reason every fixture here keeps it off - a logging server in an elevated process creates the Windows
+		/// event-log source.
+		/// </remarks>
+		private static Engine StartRepositoryEngine()
+		{
+			Engine engine = new Engine();
+			try
+			{
+				engine.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
+				engine.LoggingEnabled = false;
+				engine.Start();
+				return engine;
+			}
+			catch
 			{
 				engine.Dispose();
+				throw;
 			}
 		}
 

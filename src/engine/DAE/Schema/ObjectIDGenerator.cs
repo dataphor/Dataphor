@@ -83,10 +83,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		/// <summary>Starts again from one, for an engine whose built-in objects must be numbered the same on every load of its catalog store.</summary>
-		/// <remarks>
-		/// Only such an engine may call this. See the remarks on this class: an engine with no catalog store rebuilds its
-		/// catalog while the objects of the catalog it is replacing are still in use, so it must go on allocating.
-		/// </remarks>
+		/// <remarks>Only such an engine may call it; the remarks on this class say what goes wrong when another kind does.</remarks>
 		public void Reset()
 		{
 			lock (_syncRoot)

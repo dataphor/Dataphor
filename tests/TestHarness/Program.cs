@@ -65,10 +65,8 @@ namespace DAE.Test.Harness
 		/// <summary>The first word of the one line the client mode writes once its transaction is open.</summary>
 		/// <remarks>
 		/// The rest of the line is the table name and the identifier of the server session holding the transaction. The
-		/// identifier is there so that the fixture can watch for that one session by name rather than reading the
-		/// server's whole session table: reading a table over the wire builds a client-side view from a catalog fragment
-		/// the server sends, and that path has a defect of its own which has nothing to do with what the case is about
-		/// (bug-client-catalog-rebuild-reuses-object-ids).
+		/// identifier is there so that the fixture can watch that one session go rather than a total of all of them, which
+		/// its own observing session is in too.
 		/// </remarks>
 		public const string HoldingPrefix = "HOLDING";
 
