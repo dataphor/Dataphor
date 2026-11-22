@@ -331,6 +331,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
         // Reset        
+        // NOTE: Reset() means two different things depending on the class: the default below re-executes the cursor's whole
+        // source pipeline, while a class over an already-materialized table (LocalTable, TableScan) overrides it with a cheap
+        // rewind. A caller that resets only to read a cursor from the beginning therefore re-runs the source on most classes,
+        // and on a non-deterministic source gets different rows - the defect guarded against in Table.CopyNativeAs below.
         protected virtual void InternalReset()
         {
             Close();
