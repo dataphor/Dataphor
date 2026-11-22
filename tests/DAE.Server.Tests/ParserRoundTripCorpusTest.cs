@@ -28,7 +28,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// document under the parked trees that the parser cannot read is Ignored rather than failed, with
 	/// <see cref="TheParkedTreeIsNoLessReadableThanItWas"/> holding the number of them from rising. Everything else that
 	/// is not a script is named in <see cref="AllowList"/> with the line the parser stops at, and
-	/// <see cref="EveryExcludedFileIsStillWhatItsReasonSays"/> holds those entries against the tree.
+	/// <see cref="EveryExcludedFileIsStillWhatItsReasonSays"/> holds those entries against the tree: each file it names
+	/// must still fail, and still fail at the line its entry records.
 	/// </remarks>
 	[TestFixture]
 	public class ParserRoundTripCorpusTest
@@ -76,9 +77,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// parsing them one at a time on 2026-11-22, and not one is a parser defect: each is a document that is not a
 		// whole D4 script - a missing ";" or "then", or a type specifier the language does not have - and the parser is
 		// right to refuse it. Repairing that text is not this list's call to make. The eight Coverage.Scripts entries are
-		// owned by test-pre-3-1-scripts-policy (and recorded as known-failure against it in coverage-manifest.json, with
-		// the same error text), and that ticket carries the seven below as a second arm; it asks the owner before editing
-		// any D4 document to make it run, because without a reference runtime the text is the record of correct behaviour.
+		// owned by test-pre-3-1-scripts-policy (and recorded as known-failure against it in coverage-manifest.json, against
+		// the same causes - the text there is the engine's error from running the script, not the parser's own), and that
+		// ticket carries the seven below as a second arm; it asks the owner before editing any D4 document to make it run,
+		// because without a reference runtime the text is the record of correct behaviour.
 		//
 		// This list held 38 entries in three categories, all now resolved rather than suppressed.
 		// (emitter-malformed) - the re-parse of emitted text produced syntax errors - was fixed by
@@ -90,31 +92,33 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// would not read - was bug-d4-parser-rejects-active-sources, which found no parser gap behind any of them: three
 		// were String.Format templates and are covered through FormatTemplates above (Oracle's is also a parked
 		// document), nineteen more were parked documents now Ignored by the rule above, one was an orphan using a
-		// "create device { ... }" form removed from the grammar in
-		// 2006 and was deleted, and these fifteen are what is left.
+		// "create device { ... }" form removed from the grammar in 2006 and was deleted, and these fifteen are what is left.
 		//
-		// A new entry carries a reason in the same shape: what the file is, and the line and token the parser stops at.
-		private static readonly Dictionary<string, string> AllowList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		// A new entry carries a reason in the same shape: the line the parser stops at, then what the file is and what the
+		// parser will not accept in it. The stop line is held against the parser by
+		// EveryExcludedFileIsStillWhatItsReasonSays, so it cannot drift from the file the way a number buried in prose can;
+		// the prose beside it still cannot be checked by anything, so keep it to what the stop line does not already say.
+		private static readonly Dictionary<string, (int StopLine, string Reason)> AllowList = new Dictionary<string, (int StopLine, string Reason)>(StringComparer.OrdinalIgnoreCase)
 		{
 			// Owned by test-pre-3-1-scripts-policy: documents in the pre-3.1 coverage script set, whose fate that ticket is
 			// deciding. Changing them, or their coverage-manifest.json entries, is its job and not this list's.
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Domains.d4", "stops at line 9's \"create domain TestDomain like Integer;\": \"domain\" was the pre-3.0 spelling of \"type\" and is not a keyword today. Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EntryLibrary.d4", "stops at line 8's \"entry {ID : Integer, Name : String}\": D4 has no \"entry\" type specifier (TypeSpecifier offers generic, scalar, row, table, list, cursor and typeof). Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ForeignSuperKeysAndConstantReferences.d4", "the statement ending at line 19 has no \";\", so the parser stops at line 24's \"alter table A\". Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IStringLibrary.d4", "stops at line 12's IString literal \"Blah\"i: IString lives behind the USEISTRING conditional, which no project defines. Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LibraryDomains.d4", "stops at line 10's IString literal, the same USEISTRING conditional as IStringLibrary.d4. Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", "stops at line 10's \"presentation{entry{}}\": neither type specifier exists in D4. Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "the debugging \"select\" on line 17 has no \";\", so the parser stops at line 18. Owned by test-pre-3-1-scripts-policy." },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "stops at line 13's \"create domain SimpleDomain like String;\", the pre-3.0 spelling of \"type\". Owned by test-pre-3-1-scripts-policy." },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Domains.d4", (9, "\"create domain TestDomain like Integer;\": \"domain\" was the pre-3.0 spelling of \"type\" and is not a keyword today. Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EntryLibrary.d4", (8, "\"entry {ID : Integer, Name : String}\": D4 has no \"entry\" type specifier (TypeSpecifier offers generic, scalar, row, table, list, cursor and typeof). Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ForeignSuperKeysAndConstantReferences.d4", (24, "\"alter table A\", because the \"create constraint\" ending at line 19 has no \";\". Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IStringLibrary.d4", (12, "the IString literal \"Blah\"i: the \"...\"i suffix lives behind the USEISTRING conditional in Parser.cs, which no project defines. Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LibraryDomains.d4", (10, "an IString literal, the same USEISTRING conditional as IStringLibrary.d4. Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PresentationLibrary.d4", (10, "\"presentation{entry{}}\": neither type specifier exists in D4. Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", (18, "a \"select\", because the debugging \"select\" on line 17 has no \";\". Owned by test-pre-3-1-scripts-policy.") },
+			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", (13, "\"create domain SimpleDomain like String;\", the pre-3.0 spelling of \"type\". Owned by test-pre-3-1-scripts-policy.") },
 			// Documents in the supported tree that are not whole scripts. test-pre-3-1-scripts-policy carries these seven as
 			// its second arm: five want one or two characters added, two want a statement rewritten.
-			{ "tests/libraries/TestFramework.Coverage.Base/Documents/UnsupportedOracleOperators.d4", "line 8's \"EnsureDeviceStarted('TestOracle.OracleTestDevice')\" has no \";\"; the document also targets the Oracle device, which is parked." },
-			{ "samples/Sample.Common/Documents/D4LanguageTour.d4", "a guided tour of D4 meant to be run a statement at a time in the IDE: most of its statements are terminated and a handful are not, so the \"select ... union (...)\" on line 131 has no \";\" and the parser stops at line 133." },
-			{ "samples/Sample.Shipping/Documents/Coverage.Controller.d4", "line 15's \"select ServerSettings\" has no \";\", so the parser stops at line 16." },
-			{ "samples/Sample.Shipping/Documents/Coverage.AdministrationRole.d4", "line 16's \"if exists (...)\" has no \"then\" before the statement on line 17." },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Administration.d4", "the same missing \"then\" at the same line - this file and Coverage.AdministrationRole.d4 are copies of each other." },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Sales.d4", "line 179's \"table { ..., key { Number } }\": a table type specifier takes a column list only, since keys belong to table variables and not to table types." },
-			{ "samples/Sample.Shipping/Source/Shipping.d4", "line 658's \"entry { ... }\" as an operator's parameter type: D4 has no \"entry\" type specifier." },
+			{ "tests/libraries/TestFramework.Coverage.Base/Documents/UnsupportedOracleOperators.d4", (8, "\"EnsureDeviceStarted(...)\", because the \"select\" on line 6 has no \";\" (nor does line 8's own statement, but the parser never reaches it); the document also targets the Oracle device, which is parked.") },
+			{ "samples/Sample.Common/Documents/D4LanguageTour.d4", (133, "a \"select\", because the \"select ... union (...)\" on line 131 has no \";\" - a guided tour of D4 meant to be run a statement at a time in the IDE, so most of its statements are terminated and a handful are not.") },
+			{ "samples/Sample.Shipping/Documents/Coverage.Controller.d4", (16, "a \"select\", because the \"select ServerSettings\" on line 14 has no \";\".") },
+			{ "samples/Sample.Shipping/Documents/Coverage.AdministrationRole.d4", (17, "the \"(\" of the statement on line 17, because the \"if exists (...)\" on line 16 has no \"then\".") },
+			{ "samples/Sample.Shipping/Source/CoverageRoles/Administration.d4", (17, "the same missing \"then\" at the same line - this file and Coverage.AdministrationRole.d4 are byte-identical copies.") },
+			{ "samples/Sample.Shipping/Source/CoverageRoles/Sales.d4", (179, "\"table { ..., key { Number } }\": a table type specifier takes a column list only, since keys belong to table variables and not to table types.") },
+			{ "samples/Sample.Shipping/Source/Shipping.d4", (658, "\"entry { ... }\" as an operator's parameter type: D4 has no \"entry\" type specifier.") },
 		};
 
 		public static IEnumerable<TestCaseData> D4Files()
@@ -259,25 +263,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// Holds the two hand-written lists against the tree: every path either of them names is really there, and every
-		/// <see cref="AllowList"/> path still produces at least one parser message. The first catches an entry a rename or
-		/// a deletion left stale; the second catches a reason that has outlived its cause, which is how a suppression
-		/// quietly becomes permanent.
+		/// Holds the two hand-written lists against the tree, each arm against a way an entry rots. A path neither list's
+		/// file exists at is an entry a rename or a deletion left stale. A path in both lists is a template silently
+		/// excluded rather than formatted. A file that now parses is a reason that has outlived its cause, which is how a
+		/// suppression quietly becomes permanent. A file that still fails but not at the line its entry records is a reason
+		/// still true of the file and no longer of the line, which is how the prose beside an entry goes quietly wrong.
 		/// </summary>
 		[Test]
 		public void EveryExcludedFileIsStillWhatItsReasonSays()
 		{
 			string repoRoot = TestEnvironment.RepositoryDirectory;
 			List<string> nowParses = new List<string>();
-			foreach (string relative in AllowList.Keys)
+			List<string> stopsElsewhere = new List<string>();
+			foreach (KeyValuePair<string, (int StopLine, string Reason)> entry in AllowList)
 			{
-				string absolute = Path.Combine(repoRoot, relative);
+				string absolute = Path.Combine(repoRoot, entry.Key);
 				if (!File.Exists(absolute))
 					continue;
 				ParserMessages messages = new ParserMessages();
-				new Parser().ParseScript(ReadSourceForParsing(absolute, relative), messages);
+				new Parser().ParseScript(ReadSourceForParsing(absolute, entry.Key), messages);
 				if (messages.Count == 0)
-					nowParses.Add(relative);
+				{
+					nowParses.Add(entry.Key);
+					continue;
+				}
+				// A syntax error carries the position the parser gave up at; anything else does not locate itself, and a
+				// first message that is not a syntax error is itself news about the file.
+				int stoppedAt = messages[0] is ILocatedException located ? located.Line : -1;
+				if (stoppedAt != entry.Value.StopLine)
+					stopsElsewhere.Add(String.Format("{0}: entry says line {1}, parser stopped at {2} with \"{3}\"",
+						entry.Key, entry.Value.StopLine, stoppedAt < 0 ? "no reported line" : stoppedAt.ToString(), messages[0].Message));
 			}
 
 			Assert.Multiple(() =>
@@ -302,6 +317,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					nowParses,
 					Is.Empty,
 					String.Format("These files now parse; remove their {0} entries so the corpus covers them.", nameof(AllowList))
+				);
+
+				Assert.That
+				(
+					stopsElsewhere,
+					Is.Empty,
+					String.Format("These files still fail, but not where their {0} entry says. Either the file changed or the parser now gives up somewhere else; re-read the file and correct the entry's line and its prose together.", nameof(AllowList))
 				);
 			});
 		}
