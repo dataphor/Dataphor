@@ -350,10 +350,18 @@ namespace DAE.Benchmarks
 			}
 		}
 
+		/// <summary>Deletes the instance's directory and raises the process's object-id counter back if this instance left it lower.</summary>
+		/// <remarks>
+		/// Upwards only, for the same reason as TestEnvironment.WithTheObjectIDCounterRestored: another engine of this
+		/// process can still be running when an instance is disposed, and handing a live engine a counter below what it has
+		/// already allocated gives two objects of its catalog one identifier - this workaround causing the very defect it
+		/// exists to avoid. Raising the counter is the whole of what it can safely do.
+		/// </remarks>
 		private void Release()
 		{
 			BenchmarkEnvironment.TryDeleteDirectory(_directory);
-			Alphora.Dataphor.DAE.Schema.Object.SetNextObjectID(_nextObjectID);
+			if (Alphora.Dataphor.DAE.Schema.Object.GetNextObjectID() < _nextObjectID)
+				Alphora.Dataphor.DAE.Schema.Object.SetNextObjectID(_nextObjectID);
 		}
 	}
 }

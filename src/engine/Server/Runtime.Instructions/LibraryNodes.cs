@@ -341,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -437,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -504,7 +504,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -570,7 +570,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))

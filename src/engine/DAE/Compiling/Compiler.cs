@@ -5301,6 +5301,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				if ((LParentType.ClassDefinition != null) && (LParentType.ClassDefinition.Equals(AScalarType.ClassDefinition)))
 				{
+					// NOTE: this block predates 4.0 and does not compile as it stands (Schema.Objects is generic now, and
+					// the parameter names are the pre-4.0 ones), so reviving it is a port of its own. When that happens the
+					// operator needs an identifier from the plan - it is added to APlan.PlanCatalog below, and
+					// Schema.Catalog.Validate asserts ID > 0 - so this must become new Schema.Operator(APlan.GetNextObjectID(), ...).
 					LOperator = new Schema.Operator(AScalarType.Name);
 					LOperator.IsGenerated = true;
 					LOperator.ReturnDataType = AScalarType;

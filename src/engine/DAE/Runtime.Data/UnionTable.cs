@@ -51,9 +51,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.TableVarColumn newColumn;
 			foreach (Schema.TableVarColumn column in _leftTable.Node.TableVar.Columns)
 			{
+				// The copy, not the source's own column: adding a column to a table variable's column list makes that
+				// table variable the column's parent, so adding the source's column here would reparent the left side's
+				// compiled columns onto this buffer and leave them pointing at it after it is discarded.
 				newColumn = column.Inherit();
-				tableType.Columns.Add(column.Column);
-				tableVar.Columns.Add(column);
+				tableType.Columns.Add(newColumn.Column);
+				tableVar.Columns.Add(newColumn);
 			}
 			
 			Schema.Key key = new Schema.Key(Program.Plan.GetNextObjectID());

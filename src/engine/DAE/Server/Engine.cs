@@ -1156,7 +1156,7 @@ namespace Alphora.Dataphor.DAE.Server
 				InternalLoadAvailableLibraries();
 
 				// Create the implicit system library
-				Schema.Library systemLibrary = new Schema.Library(ObjectIDGenerator.Allocate(), SystemLibraryName);
+				Schema.Library systemLibrary = new Schema.Library(SystemLibraryName);
 				systemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
 				systemLibrary.Version = SystemLibraryVersion;
 				systemLibrary.DefaultDeviceName = TempDeviceName;

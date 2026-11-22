@@ -303,11 +303,17 @@ namespace Alphora.Dataphor.DAE.Schema
 	//  Register each assembly with the DAE
 	//	run the register.d4 script if it exists in the library
 	//		catalog objects created in this script are part of this library
+	/// <remarks>
+	/// A library descriptor lives in <see cref="Catalog.Libraries"/> and in its own <c>.d4l</c> file, both of which find it
+	/// by name; it is not a <see cref="CatalogObject"/>, <see cref="Catalog"/> refuses it as a top-level object, the catalog
+	/// store keys every library table by library name, and nothing in the engine reads a library's identifier. So a library
+	/// carries <see cref="Object.UnassignedID"/>, even at the sites that do have a plan in hand. The
+	/// <see cref="LoadedLibrary"/> created when a library is registered is the catalog object, and that one is numbered.
+	/// </remarks>
 	public class Library : Schema.Object, ICloneable
 	{
 		public Library() : base(String.Empty) {}
 		public Library(string name) : base(name) {}
-		public Library(int iD, string name) : base(iD, name) {}
 		public Library(string name, VersionNumber version) : base(name)
 		{
 			_version = version;
@@ -485,7 +491,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public object Clone()
 		{
-			// A clone is a copy of the descriptor handed to a caller, not a second library, so it takes no identifier.
 			Library library = new Library(Name, _version, _defaultDeviceName);
 			library.Directory = _directory;
 			library.MergeMetaData(MetaData);
