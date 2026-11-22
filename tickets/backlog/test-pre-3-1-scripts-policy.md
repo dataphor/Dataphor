@@ -85,3 +85,28 @@ The `retired` status would be implemented like the `fragment` status that `test-
 ## If nothing is decided
 
 The sixteen stay `known-failure` against this slug and the run stays green; gate G1's "every script accounted for" holds, since each names a ticket on the board. Fully reversible: a status in a JSON file, two doc sentences, and (for the repairs) two script edits in their own commit.
+
+## Second arm (added 2026-11-22 by bug-d4-parser-rejects-active-sources): seven more documents with the same defect, outside the manifest
+
+`ParserRoundTripCorpusTest` parses every `.d4` file in the repository. Besides the eight scripts above that it cannot read (`Domains`, `EntryLibrary`, `ForeignSuperKeysAndConstantReferences`, `IStringLibrary`, `LibraryDomains`, `PresentationLibrary`, `Serialization`, `SerializationDomains` — the same errors this ticket already records), it found seven documents elsewhere in the supported tree with defects of exactly the same kind. They are not in the coverage manifest, so no run reports them; they sit on that test's exclusion list with a verified reason each. Each line below was confirmed by parsing the file on its own against the current parser on 2026-11-22.
+
+**A missing statement terminator or a missing `then` — one or two characters each.** This is the same repair the "Live intent, broken text" bullet above asks the owner to rule on, and the ruling should cover these too:
+
+| File | Defect |
+|---|---|
+| `samples/Sample.Common/Documents/D4LanguageTour.d4` | no `;` after line 131's `select … union (…)`, so the parser stops at line 133 |
+| `samples/Sample.Shipping/Documents/Coverage.Controller.d4` | no `;` after line 15's `select ServerSettings`, so the parser stops at line 16 |
+| `samples/Sample.Shipping/Documents/Coverage.AdministrationRole.d4` | line 16's `if exists (…)` has no `then` before the statement on line 17 |
+| `samples/Sample.Shipping/Source/CoverageRoles/Administration.d4` | the same defect at the same line; the two files are copies |
+| `tests/libraries/TestFramework.Coverage.Base/Documents/UnsupportedOracleOperators.d4` | no `;` after line 8's `EnsureDeviceStarted(…)`; it also targets the Oracle device, which is parked under `legacy/` |
+
+**Statements that want language features the engine does not have.** Repairing these means rewriting the statement, not adding a character, so they belong with the "features 3.1 did not have" group above rather than with the terminator repairs:
+
+| File | Defect |
+|---|---|
+| `samples/Sample.Shipping/Source/CoverageRoles/Sales.d4` | line 179 declares `table { …, key { Number } }`; a table *type specifier* takes a column list only, and keys belong to table variables |
+| `samples/Sample.Shipping/Source/Shipping.d4` | line 658 gives an operator a parameter of type `entry { … }`; there is no `entry` type, which is the same finding as `EntryLibrary` above |
+
+**The one with user-visible weight is `D4LanguageTour.d4`:** it is the guided tour of D4 that ships in `samples/Sample.Common`, and a reader who executes the whole document instead of one statement at a time gets a syntax error partway through. The other six are in `Sample.Shipping`, whose C# project is not converted and whose library the build does not assemble (`library-sample-shipping-convert`, a `feat-ws7-devices-and-libraries` work item), and in a coverage library document for a device that is parked.
+
+Note for whoever works this: the parser is not at fault in any of the fifteen files. `bug-d4-parser-rejects-active-sources` checked each supposed grammar gap against `Parser.cs` and the engine and found none — `entry`, `presentation` and `create domain` are not in the language, `table { … key … }` never was, and the `"…"i` literal is behind the undefined `USEISTRING`. So no parser change can make any of these files read; only editing the files, or leaving them excluded, can.
