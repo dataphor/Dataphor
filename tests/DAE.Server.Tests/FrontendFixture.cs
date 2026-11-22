@@ -90,6 +90,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>Every message in an exception chain, so that an assertion can look for text the engine wrapped.</summary>
+		// NOTE: this assembly now walks an exception chain in seven places - CoverageScripts.ErrorText, the four copies of
+		// FindError, CatalogStoreConcurrencyTest.Innermost and this. Each is a few lines and none is wrong; if an eighth is
+		// wanted, give the assembly one shared helper rather than adding it.
 		protected static string FlattenMessages(Exception exception)
 		{
 			System.Text.StringBuilder result = new System.Text.StringBuilder();

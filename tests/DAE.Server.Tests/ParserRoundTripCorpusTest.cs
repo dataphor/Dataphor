@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		public static IEnumerable<TestCaseData> D4Files()
 		{
-			string repoRoot = FindRepositoryRoot();
+			string repoRoot = TestEnvironment.RepositoryDirectory;
 			foreach (string path in EnumerateD4Files(repoRoot))
 			{
 				string relative = Path.GetRelativePath(repoRoot, path).Replace('\\', '/');
@@ -233,20 +233,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Statement a = new Parser().ParseScript("select 1 + 2;", null);
 			Statement b = new Parser().ParseScript("select 1 + 3;", null);
 			Assert.That(TreesEqual(a, b, out string _), Is.False);
-		}
-
-		private static string FindRepositoryRoot()
-		{
-			string directory = AppContext.BaseDirectory;
-			while (!String.IsNullOrEmpty(directory))
-			{
-				if (File.Exists(Path.Combine(directory, "Dataphor.slnx")))
-					return directory;
-				DirectoryInfo parent = Directory.GetParent(directory);
-				if (parent == null) break;
-				directory = parent.FullName;
-			}
-			throw new InvalidOperationException("Could not locate repository root (no Dataphor.slnx on the path from " + AppContext.BaseDirectory + ").");
 		}
 
 		private static IEnumerable<string> EnumerateD4Files(string repoRoot)
