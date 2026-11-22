@@ -1,0 +1,44 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Master" mainsource="Main" OnDefault="Edit">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.DetailAdd.Master&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Sample.DetailAdd.Detail_Master" text="Detail..." document="Form('Sample.DetailAdd', 'DetailBrowse')" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Master_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.DetailAdd.Detail_MasterDetailsMenuItem" action="Main.ID.Sample.DetailAdd.Detail_Master" />
+	</menu>
+	<showformaction bop:name="Add" text="&amp;Add..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'Add', '', '', true)" mode="Insert" sourcelinktype="Detail" sourcelink.source="Main" hint="Add a new row." image="Image('Frontend', 'Image.Add')" />
+	<showformaction bop:name="Edit" text="&amp;Edit..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'Edit', '', '', true)" mode="Edit" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.ID" hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" />
+	<showformaction bop:name="Delete" text="&amp;Delete..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'Delete', '', '', true)" mode="Delete" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.ID" hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" />
+	<showformaction bop:name="View" text="&amp;View..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.ID" hint="View the current row." image="Image('Frontend', 'Image.View')" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.ID" title="ID" width="20" columnname="Main.ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Master" source="Main">
+				<textcolumn bop:name="MainGridColumnMain.ID" title="ID" width="20" columnname="Main.ID" />
+				<textcolumn bop:name="MainGridColumnMain.Name" title="Name" width="20" columnname="Main.Name" />
+			</grid>
+			<column bop:name="GridBar">
+				<trigger bop:name="AddTrigger" action="Add" imagewidth="11" imageheight="13" />
+				<trigger bop:name="EditTrigger" action="Edit" imagewidth="11" imageheight="13" />
+				<trigger bop:name="DeleteTrigger" action="Delete" imagewidth="11" imageheight="13" />
+				<trigger bop:name="ViewTrigger" action="View" imagewidth="11" imageheight="13" />
+			</column>
+		</row>
+		<notebook bop:name="MainEmbeddedDetailsNotebook">
+			<notebookframepage bop:name="Sample.DetailAdd.Detail_MasterFrame" document="Form('Sample.DetailAdd', 'DetailBrowse')" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Master_ID" menutext="Detail" title="Detail" />
+		</notebook>
+	</column>
+</interface>

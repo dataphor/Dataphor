@@ -30,6 +30,7 @@
     <Compile Include="DeferredDeviceStopTest.cs" />
     <Compile Include="FormCustomizationTest.cs" />
     <Compile Include="FormDocumentCorpusTest.cs" />
+    <Compile Include="FrontendDerivationGoldenTest.cs" />
     <Compile Include="FrontendFixture.cs" />
     <Compile Include="HostBindingHookTest.cs" />
     <Compile Include="HostCommandLineTest.cs" />
@@ -112,6 +113,16 @@
   -->
   <ItemGroup>
     <AssemblyMetadata Include="DataphorRepositoryDir" Value="$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..'))" />
+  </ItemGroup>
+
+  <!--
+    The checked-in golden files (tests/goldens), which FrontendDerivationGoldenTest compares derived forms against and,
+    with DATAPHOR_UPDATE_FRONTEND_GOLDENS=1, writes. Deliberately above this project rather than inside it, so that the
+    other passes which compare generated output against a reviewed file keep their trees beside this one; like the two
+    paths above it is an absolute build-machine path in a test assembly that never ships.
+  -->
+  <ItemGroup>
+    <AssemblyMetadata Include="DataphorGoldensDir" Value="$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', 'goldens'))" />
   </ItemGroup>
 
   <!--

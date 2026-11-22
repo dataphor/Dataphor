@@ -1,0 +1,22 @@
+<report xmlns:bop="www.alphora.com/schemas/bop">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.UserRole&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.User_ID asc include nil, Main.Role_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" />
+	<header bop:name="PageHeader" height="15">
+		<textarea bop:name="ReportName" text="Role Report" y="0" />
+		<date bop:name="HeaderDate" x="520" y="0" />
+	</header>
+	<databand bop:name="RootDataBand" source="Main">
+		<header bop:name="RootDataBandHeader">
+			<box bop:name="RootDataBandHeaderBox" height="11" width="600" x="5" y="2" />
+			<textarea bop:name="MainColumnUser_IDHeader" text="User ID" x="10" y="3" maxlength="10" />
+			<textarea bop:name="MainColumnRole_NameHeader" text="Role Name" x="60" y="3" maxlength="50" />
+		</header>
+		<staticgroup bop:name="RootDataBandContent">
+			<field bop:name="MainColumnUser_ID" source="Main" columnname="User_ID" x="10" maxlength="10" />
+			<field bop:name="MainColumnRole_Name" source="Main" columnname="Role_Name" x="60" maxlength="50" />
+		</staticgroup>
+	</databand>
+	<footer bop:name="PageFooter" height="20">
+		<textarea bop:name="PageFooterPageText" text="Page" x="290" y="5" />
+		<pagenumber bop:name="PageFooterPageNumber" x="310" y="5" />
+	</footer>
+</report>

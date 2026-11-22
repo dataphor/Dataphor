@@ -1,0 +1,19 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Applications" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Frontend.Applications&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.ID.Frontend.ApplicationLibraries_Applications" text="Libraries..." document=".Frontend.Derive('Frontend.ApplicationLibraries', 'Browse', 'Main.ID', 'Main.Application_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Application_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Frontend.ApplicationLibraries_ApplicationsDetailsMenuItem" action="Main.ID.Frontend.ApplicationLibraries_Applications" />
+	</menu>
+	<showformaction bop:name="Main.ID.Frontend.WindowsClientApplications_Applications" text="Windows Client Application Settings..." document=".Frontend.Derive('Frontend.WindowsClientApplications', 'View', 'Main.ID', 'Main.Application_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Application_ID" mode="None" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.ID.Frontend.WindowsClientApplications_ApplicationsExtensionsMenuItem" action="Main.ID.Frontend.WindowsClientApplications_Applications" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="ID" nilifblank="False" width="25" source="Main" columnname="Main.ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.Description" title="Description" nilifblank="False" width="35" source="Main" columnname="Main.Description" readonly="True" />
+			<textbox bop:name="MainColumnMain.StartDocument" title="Start Document" nilifblank="False" source="Main" columnname="Main.StartDocument" readonly="True" />
+		</column>
+	</column>
+</interface>

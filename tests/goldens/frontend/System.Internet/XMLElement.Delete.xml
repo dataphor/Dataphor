@@ -1,0 +1,39 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete XMLElement" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLElement&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLDocument_XMLElement" text="XMLDocument..." document=".Frontend.Derive('System.Internet.XMLDocument', 'Browse', 'Main.ID', 'Main.Root_Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Root_Element_ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLContent_XMLElement" text="XMLContent..." document=".Frontend.Derive('System.Internet.XMLContent', 'Browse', 'Main.ID', 'Main.Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Element_ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLElementParent_Parent_XMLElement" text="XMLElementParent..." document=".Frontend.Derive('System.Internet.XMLElementParent', 'Browse', 'Main.ID', 'Main.Parent_Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Parent_Element_ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLAttribute_XMLElement" text="XMLAttribute..." document=".Frontend.Derive('System.Internet.XMLAttribute', 'Browse', 'Main.ID', 'Main.Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Element_ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLNamespaceAlias_XMLElement" text="XMLNamespaceAlias..." document=".Frontend.Derive('System.Internet.XMLNamespaceAlias', 'Browse', 'Main.ID', 'Main.Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Element_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.System.Internet.XMLDocument_XMLElementDetailsMenuItem" action="Main.ID.System.Internet.XMLDocument_XMLElement" />
+		<menu bop:name="Main.ID.System.Internet.XMLContent_XMLElementDetailsMenuItem" action="Main.ID.System.Internet.XMLContent_XMLElement" />
+		<menu bop:name="Main.ID.System.Internet.XMLElementParent_Parent_XMLElementDetailsMenuItem" action="Main.ID.System.Internet.XMLElementParent_Parent_XMLElement" />
+		<menu bop:name="Main.ID.System.Internet.XMLAttribute_XMLElementDetailsMenuItem" action="Main.ID.System.Internet.XMLAttribute_XMLElement" />
+		<menu bop:name="Main.ID.System.Internet.XMLNamespaceAlias_XMLElementDetailsMenuItem" action="Main.ID.System.Internet.XMLNamespaceAlias_XMLElement" />
+	</menu>
+	<showformaction bop:name="Main.ID.System.Internet.XMLElementParent_XMLElement" text="XMLElementParent..." document=".Frontend.Derive('System.Internet.XMLElementParent', 'View', 'Main.ID', 'Main.Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Element_ID" mode="None" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLDefaultNamespace_XMLElement" text="XMLDefaultNamespace..." document=".Frontend.Derive('System.Internet.XMLDefaultNamespace', 'View', 'Main.ID', 'Main.Element_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Element_ID" mode="None" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.ID.System.Internet.XMLElementParent_XMLElementExtensionsMenuItem" action="Main.ID.System.Internet.XMLElementParent_XMLElement" />
+		<menu bop:name="Main.ID.System.Internet.XMLDefaultNamespace_XMLElementExtensionsMenuItem" action="Main.ID.System.Internet.XMLDefaultNamespace_XMLElement" />
+	</menu>
+	<showformaction bop:name="Main.Document_ID.System.Internet.XMLElement_XMLDocument" text="XMLDocument..." document=".Frontend.Derive('System.Internet.XMLDocument', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Document_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Document_ID.System.Internet.XMLElement_XMLDocumentLookupMenuItem" action="Main.Document_ID.System.Internet.XMLElement_XMLDocument" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnMain.ID" title="Element ID" width="36" source="Main" columnname="Main.ID" readonly="True" />
+					<textbox bop:name="MainColumnSystem.Internet.XMLElement_XMLDocument_Main.Document_ID" title="Document ID" width="36" source="Main" columnname="Main.Document_ID" readonly="True" />
+					<textbox bop:name="MainColumnMain.NamespaceAlias" title="NamespaceAlias" nilifblank="False" source="Main" columnname="Main.NamespaceAlias" readonly="True" />
+					<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" source="Main" columnname="Main.Name" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

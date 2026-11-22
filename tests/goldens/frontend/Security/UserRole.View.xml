@@ -1,0 +1,16 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Role" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.UserRole&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.User_ID asc include nil, Main.Role_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" isreadonly="True" />
+	<showformaction bop:name="Main.Role_Name.Security.UserRole_Role" text="Role..." document=".Frontend.Derive('Security.Role', 'View', '', '', false)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Role_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.User_ID.System.UserRoles_Users" text="Users..." document=".Frontend.Derive('System.Users', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.User_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Role_Name.Security.UserRole_RoleLookupMenuItem" action="Main.Role_Name.Security.UserRole_Role" />
+		<menu bop:name="Main.User_ID.System.UserRoles_UsersLookupMenuItem" action="Main.User_ID.System.UserRoles_Users" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnSystem.UserRoles_Users_Main.User_ID" title="User ID" maxlength="255" maxwidth="15" width="10" source="Main" columnname="Main.User_ID" readonly="True" />
+			<textbox bop:name="MainColumnSecurity.UserRole_Role_Main.Role_Name" title="Role Name" width="50" source="Main" columnname="Main.Role_Name" readonly="True" />
+		</column>
+	</column>
+</interface>

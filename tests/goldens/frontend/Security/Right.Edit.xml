@@ -1,0 +1,13 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Edit Right" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.Right&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" />
+	<showformaction bop:name="Main.Name.System.UserRightAssignments_Rights" text="UserRightAssignments..." document=".Frontend.Derive('System.UserRightAssignments', 'List', 'Main.Name', 'Main.Right_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Right_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.RoleRightAssignments_Rights" text="RoleRightAssignments..." document=".Frontend.Derive('System.RoleRightAssignments', 'List', 'Main.Name', 'Main.Right_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Right_Name" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.Name.System.UserRightAssignments_RightsDetailsMenuItem" action="Main.Name.System.UserRightAssignments_Rights" />
+		<menu bop:name="Main.Name.System.RoleRightAssignments_RightsDetailsMenuItem" action="Main.Name.System.RoleRightAssignments_Rights" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" width="50" source="Main" columnname="Main.Name" />
+	</column>
+</interface>

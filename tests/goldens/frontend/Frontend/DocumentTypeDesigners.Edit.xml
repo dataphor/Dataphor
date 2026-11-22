@@ -1,0 +1,34 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Edit Document Type Designers" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  (&#xD;&#xA;   Frontend.DocumentTypeDesigners&#xD;&#xA;    rename Main&#xD;&#xA;  )&#xD;&#xA;   left lookup&#xD;&#xA;   (&#xD;&#xA;    (&#xD;&#xA;     Frontend.DocumentTypes&#xD;&#xA;      over { .ID, .Description }&#xD;&#xA;    )&#xD;&#xA;     rename DocumentTypes&#xD;&#xA;   )&#xD;&#xA;   by (.Main.DocumentType_ID = .DocumentTypes.ID)&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.Designers&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename Designers&#xD;&#xA;  )&#xD;&#xA;  by (.Main.Designer_ID = .Designers.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.DocumentType_ID asc include nil, Main.Designer_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" text="Document Type Default Designers..." document=".Frontend.Derive('Frontend.DocumentTypeDefaultDesigners', 'Edit', 'Main.DocumentType_ID,Main.Designer_ID', 'Main.DocumentType_ID,Main.Default_Designer_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID,Main.Designer_ID" sourcelink.detailkeynames="Main.DocumentType_ID,Main.Default_Designer_ID" mode="Edit" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesignersExtensionsMenuItem" action="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" />
+	</menu>
+	<showformaction bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypes" text="Document Type..." document=".Frontend.Derive('Frontend.DocumentTypes', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Designer_ID.Frontend.DocumentTypeDesigners_Designers" text="Designer..." document=".Frontend.Derive('Frontend.Designers', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Designer_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypesLookupMenuItem" action="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypes" />
+		<menu bop:name="Main.Designer_ID.Frontend.DocumentTypeDesigners_DesignersLookupMenuItem" action="Main.Designer_ID.Frontend.DocumentTypeDesigners_Designers" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<group bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypesGroup" title="Document Type">
+				<row bop:name="Element2">
+					<quicklookup bop:name="MainColumnFrontend.DocumentTypeDesigners_DocumentTypes_Main.DocumentType_ID_Lookup" title="Document Type" source="Main" columnname="Main.DocumentType_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('Frontend.DocumentTypes', 'Browse', '', '', true)">
+						<textbox bop:name="MainColumnFrontend.DocumentTypeDesigners_DocumentTypes_Main.DocumentType_ID" title="Document Type" source="Main" columnname="Main.DocumentType_ID" titlealignment="None" />
+					</quicklookup>
+					<textbox bop:name="MainColumnDocumentTypes.Description" title="Description" nilifblank="False" width="35" source="Main" columnname="DocumentTypes.Description" readonly="True" />
+				</row>
+			</group>
+			<group bop:name="Main.Designer_ID.Frontend.DocumentTypeDesigners_DesignersGroup" title="Designer">
+				<row bop:name="Element3">
+					<quicklookup bop:name="MainColumnFrontend.DocumentTypeDesigners_Designers_Main.Designer_ID_Lookup" title="Designer" source="Main" columnname="Main.Designer_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('Frontend.Designers', 'Browse', '', '', true)">
+						<textbox bop:name="MainColumnFrontend.DocumentTypeDesigners_Designers_Main.Designer_ID" title="Designer" source="Main" columnname="Main.Designer_ID" titlealignment="None" />
+					</quicklookup>
+					<textbox bop:name="MainColumnDesigners.Description" title="Description" nilifblank="False" width="25" source="Main" columnname="Designers.Description" readonly="True" />
+				</row>
+			</group>
+		</column>
+	</column>
+</interface>

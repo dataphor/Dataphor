@@ -1,0 +1,16 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Detail" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.DetailAdd.Detail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Master_ID asc include nil, Main.Category_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.Master_ID.Sample.DetailAdd.Detail_Master" text="Master..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Master_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Category_ID.Sample.DetailAdd.Detail_Category" text="Category..." document=".Frontend.Derive('Sample.DetailAdd.Category', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Category_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Master_ID.Sample.DetailAdd.Detail_MasterLookupMenuItem" action="Main.Master_ID.Sample.DetailAdd.Detail_Master" />
+		<menu bop:name="Main.Category_ID.Sample.DetailAdd.Detail_CategoryLookupMenuItem" action="Main.Category_ID.Sample.DetailAdd.Detail_Category" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnSample.DetailAdd.Detail_Master_Main.Master_ID" title="Master_ID" source="Main" columnname="Main.Master_ID" readonly="True" />
+			<textbox bop:name="MainColumnSample.DetailAdd.Detail_Category_Main.Category_ID" title="Category_ID" source="Main" columnname="Main.Category_ID" readonly="True" />
+		</column>
+	</column>
+</interface>

@@ -1,0 +1,38 @@
+<report xmlns:bop="www.alphora.com/schemas/bop">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.IssueDetail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Action.Issue_ID asc include nil, Main.Action.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<header bop:name="PageHeader" height="15">
+		<textarea bop:name="ReportName" text="IssueDetail Report" y="0" />
+		<date bop:name="HeaderDate" x="520" y="0" />
+	</header>
+	<databand bop:name="RootDataBand" source="Main">
+		<header bop:name="RootDataBandHeader">
+			<box bop:name="RootDataBandHeaderBox" height="11" width="600" x="5" y="2" />
+			<textarea bop:name="MainColumnIssue.Product_IDHeader" text="Product ID" x="10" y="3" maxlength="4" />
+			<textarea bop:name="MainColumnIssue.VersionHeader" text="Issue.Version" x="30" y="3" maxlength="11" />
+			<textarea bop:name="MainColumnIssue.PriorityHeader" text="Priority" x="85" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnIssue.DescriptionHeader" text="Issue.Description" x="285" y="3" maxlength="50" />
+			<textarea bop:name="MainColumnIssue.ReproductionStepsHeader" text="Steps To Reproduce" x="535" y="3" maxlength="50" />
+			<textarea bop:name="MainColumnAction.Issue_IDHeader" text="Issue ID" x="785" y="3" maxlength="10" />
+			<textarea bop:name="MainColumnAction.DateTimeHeader" text="Date/Time" x="835" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnAction.State_IDHeader" text="New State" x="1035" y="3" maxlength="4" />
+			<textarea bop:name="MainColumnAction.AssigneeEmployee_IDHeader" text="New Assignee" x="1055" y="3" maxlength="4" />
+			<textarea bop:name="MainColumnAction.NotesHeader" text="Action.Notes" x="1075" y="3" maxlength="50" />
+		</header>
+		<staticgroup bop:name="RootDataBandContent">
+			<field bop:name="MainColumnIssue.Product_ID" source="Main" columnname="Issue.Product_ID" x="10" maxlength="4" />
+			<field bop:name="MainColumnIssue.Version" source="Main" columnname="Issue.Version" x="30" maxlength="11" />
+			<field bop:name="MainColumnIssue.Priority" source="Main" columnname="Issue.Priority" x="85" maxlength="40" />
+			<field bop:name="MainColumnIssue.Description" source="Main" columnname="Issue.Description" x="285" maxlength="50" />
+			<field bop:name="MainColumnIssue.ReproductionSteps" source="Main" columnname="Issue.ReproductionSteps" x="535" maxlength="50" />
+			<field bop:name="MainColumnAction.Issue_ID" source="Main" columnname="Action.Issue_ID" x="785" maxlength="10" />
+			<field bop:name="MainColumnAction.DateTime" source="Main" columnname="Action.DateTime" x="835" maxlength="40" />
+			<field bop:name="MainColumnAction.State_ID" source="Main" columnname="Action.State_ID" x="1035" maxlength="4" />
+			<field bop:name="MainColumnAction.AssigneeEmployee_ID" source="Main" columnname="Action.AssigneeEmployee_ID" x="1055" maxlength="4" />
+			<field bop:name="MainColumnAction.Notes" source="Main" columnname="Action.Notes" x="1075" maxlength="50" />
+		</staticgroup>
+	</databand>
+	<footer bop:name="PageFooter" height="20">
+		<textarea bop:name="PageFooterPageText" text="Page" x="290" y="5" />
+		<pagenumber bop:name="PageFooterPageNumber" x="310" y="5" />
+	</footer>
+</report>

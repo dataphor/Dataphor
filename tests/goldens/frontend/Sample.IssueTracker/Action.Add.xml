@@ -1,0 +1,32 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Add Action" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.Action&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Issue_ID asc include nil, Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Issue_ID.Main.ID.Sample.IssueTracker.ActionDetail_Action" text="Action Detail..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'Edit', 'Main.Issue_ID,Main.ID', 'Main.Issue_ID,Main.Action_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID,Main.ID" sourcelink.detailkeynames="Main.Issue_ID,Main.Action_ID" mode="Edit" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.Issue_ID.Main.ID.Sample.IssueTracker.ActionDetail_ActionExtensionsMenuItem" action="Main.Issue_ID.Main.ID.Sample.IssueTracker.ActionDetail_Action" />
+	</menu>
+	<exposed bop:name="Main.Issue_ID.Main.ID.Sample.IssueTracker.ActionDetail_ActionExtensionsExposed" action="Main.Issue_ID.Main.ID.Sample.IssueTracker.ActionDetail_Action" />
+	<showformaction bop:name="Main.Issue_ID.Sample.IssueTracker.Action_Issue" text="Issue..." document=".Frontend.Derive('Sample.IssueTracker.Issue', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.State_ID.Sample.IssueTracker.Issue_State" text="State..." document=".Frontend.Derive('Sample.IssueTracker.State', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.State_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" text="Employee..." document=".Frontend.Derive('Sample.IssueTracker.Employee', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.AssigneeEmployee_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Issue_ID.Sample.IssueTracker.Action_IssueLookupMenuItem" action="Main.Issue_ID.Sample.IssueTracker.Action_Issue" />
+		<menu bop:name="Main.State_ID.Sample.IssueTracker.Issue_StateLookupMenuItem" action="Main.State_ID.Sample.IssueTracker.Issue_State" />
+		<menu bop:name="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_EmployeeLookupMenuItem" action="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<quicklookup bop:name="MainColumnSample.IssueTracker.Action_Issue_Main.Issue_ID_Lookup" title="Issue ID" source="Main" columnname="Main.Issue_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('Sample.IssueTracker.Issue', 'Browse', '', '', true)">
+				<numerictextbox bop:name="MainColumnSample.IssueTracker.Action_Issue_Main.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" source="Main" columnname="Main.Issue_ID" titlealignment="None" />
+			</quicklookup>
+			<datetimebox bop:name="MainColumnMain.DateTime" title="Date/Time" hint="Date/time the action occured" source="Main" columnname="Main.DateTime" />
+			<quicklookup bop:name="MainColumnSample.IssueTracker.Issue_State_Main.State_ID_Lookup" title="New State" source="Main" columnname="Main.State_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('Sample.IssueTracker.State', 'Browse', '', '', true)">
+				<textbox bop:name="MainColumnSample.IssueTracker.Issue_State_Main.State_ID" title="New State" hint="The state of the issue after this action" width="4" source="Main" columnname="Main.State_ID" titlealignment="None" />
+			</quicklookup>
+			<quicklookup bop:name="MainColumnSample.IssueTracker.Issue_Assignee_Employee_Main.AssigneeEmployee_ID_Lookup" title="New Assignee" source="Main" columnname="Main.AssigneeEmployee_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('Sample.IssueTracker.Employee', 'Browse', '', '', true)">
+				<textbox bop:name="MainColumnSample.IssueTracker.Issue_Assignee_Employee_Main.AssigneeEmployee_ID" title="New Assignee" hint="The Employee assigned to this issue after this action" width="4" source="Main" columnname="Main.AssigneeEmployee_ID" titlealignment="None" />
+			</quicklookup>
+			<textbox bop:name="MainColumnMain.Notes" title="Notes" hint="Notes about the action taken" height="5" nilifblank="False" width="50" source="Main" columnname="Main.Notes" />
+		</column>
+	</column>
+</interface>

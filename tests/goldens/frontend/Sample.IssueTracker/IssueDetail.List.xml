@@ -1,0 +1,50 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List IssueDetail" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.IssueDetail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Action.Issue_ID asc include nil, Main.Action.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.Action.Issue_ID.Main.Action.ID.Sample.IssueTracker.ActionDetail_Action" text="Action Detail..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'Edit', 'Main.Action.Issue_ID,Main.Action.ID', 'Main.Issue_ID,Main.Action_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Action.Issue_ID,Main.Action.ID" sourcelink.detailkeynames="Main.Issue_ID,Main.Action_ID" mode="Edit" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.Action.Issue_ID.Main.Action.ID.Sample.IssueTracker.ActionDetail_ActionExtensionsMenuItem" action="Main.Action.Issue_ID.Main.Action.ID.Sample.IssueTracker.ActionDetail_Action" />
+	</menu>
+	<exposed bop:name="Main.Action.Issue_ID.Main.Action.ID.Sample.IssueTracker.ActionDetail_ActionExtensionsExposed" action="Main.Action.Issue_ID.Main.Action.ID.Sample.IssueTracker.ActionDetail_Action" />
+	<showformaction bop:name="Main.Issue.Product_ID.Sample.IssueTracker.Issue_Product" text="Product..." document=".Frontend.Derive('Sample.IssueTracker.Product', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue.Product_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Action.State_ID.Sample.IssueTracker.Issue_State" text="State..." document=".Frontend.Derive('Sample.IssueTracker.State', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Action.State_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Action.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" text="Employee..." document=".Frontend.Derive('Sample.IssueTracker.Employee', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Action.AssigneeEmployee_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Issue.Product_ID.Sample.IssueTracker.Issue_ProductLookupMenuItem" action="Main.Issue.Product_ID.Sample.IssueTracker.Issue_Product" />
+		<menu bop:name="Main.Action.State_ID.Sample.IssueTracker.Issue_StateLookupMenuItem" action="Main.Action.State_ID.Sample.IssueTracker.Issue_State" />
+		<menu bop:name="Main.Action.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_EmployeeLookupMenuItem" action="Main.Action.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Issue.ID" title="Issue ID" hint="Issue Identification #" width="10" columnname="Main.Issue.ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Action.ID" title="Action ID" hint="Action Identification #" width="10" columnname="Main.Action.ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Action.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" columnname="Main.Action.Issue_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="IssueDetail" source="Main">
+				<textcolumn bop:name="MainGridColumnSample.IssueTracker.Issue_Product_Main.Issue.Product_ID" title="Product ID" hint="Identifier of the product involved" width="4" columnname="Main.Issue.Product_ID" />
+				<textcolumn bop:name="MainGridColumnMain.Issue.Version" title="Version" hint="The version of the product" width="11" columnname="Main.Issue.Version" />
+				<textcolumn bop:name="MainGridColumnMain.Issue.Priority" title="Priority" hint="Numeric priority (0 = Highest)" width="20" columnname="Main.Issue.Priority" />
+				<textcolumn bop:name="MainGridColumnMain.Issue.Description" title="Description" hint="Complete description of the problem" width="50" columnname="Main.Issue.Description" />
+				<textcolumn bop:name="MainGridColumnMain.Issue.ReproductionSteps" title="Steps To Reproduce" hint="Steps necessary to reproduce the issue" width="50" columnname="Main.Issue.ReproductionSteps" />
+				<textcolumn bop:name="MainGridColumnMain.Action.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" columnname="Main.Action.Issue_ID" />
+				<textcolumn bop:name="MainGridColumnMain.Action.DateTime" title="Date/Time" hint="Date/time the action occured" width="20" columnname="Main.Action.DateTime" />
+				<textcolumn bop:name="MainGridColumnSample.IssueTracker.Issue_State_Main.Action.State_ID" title="New State" hint="The state of the issue after this action" width="4" columnname="Main.Action.State_ID" />
+				<textcolumn bop:name="MainGridColumnSample.IssueTracker.Issue_Assignee_Employee_Main.Action.AssigneeEmployee_ID" title="New Assignee" hint="The Employee assigned to this issue after this action" width="4" columnname="Main.Action.AssigneeEmployee_ID" />
+				<textcolumn bop:name="MainGridColumnMain.Action.Notes" title="Notes" hint="Notes about the action taken" width="50" columnname="Main.Action.Notes" />
+			</grid>
+		</row>
+	</column>
+</interface>

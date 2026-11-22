@@ -1,0 +1,30 @@
+<report xmlns:bop="www.alphora.com/schemas/bop">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  Frontend.WindowsClientApplications&#xD;&#xA;   rename Main&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.Applications&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename Applications&#xD;&#xA;  )&#xD;&#xA;  by (.Main.Application_ID = .Applications.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.Application_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<header bop:name="PageHeader" height="15">
+		<textarea bop:name="ReportName" text="Windows Client Application Settings Report" y="0" />
+		<date bop:name="HeaderDate" x="520" y="0" />
+	</header>
+	<databand bop:name="RootDataBand" source="Main">
+		<header bop:name="RootDataBandHeader">
+			<box bop:name="RootDataBandHeaderBox" height="11" width="600" x="5" y="2" />
+			<textarea bop:name="MainColumnApplication_IDHeader" text="Application_ID" x="10" y="3" maxlength="50" />
+			<textarea bop:name="MainColumnThemeDocumentHeader" text="Theme Document" x="260" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnDefaultIconImageHeader" text="Default Form Icon Image" x="460" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnDocumentCacheSizeHeader" text="Document Cache Size" x="660" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnImageCacheSizeHeader" text="Image Cache Size" x="860" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnHelpDocumentHeader" text="Help Document" x="1060" y="3" maxlength="40" />
+		</header>
+		<staticgroup bop:name="RootDataBandContent">
+			<field bop:name="MainColumnApplication_ID" source="Main" columnname="Application_ID" x="10" maxlength="50" />
+			<field bop:name="MainColumnThemeDocument" source="Main" columnname="ThemeDocument" x="260" maxlength="40" />
+			<field bop:name="MainColumnDefaultIconImage" source="Main" columnname="DefaultIconImage" x="460" maxlength="40" />
+			<field bop:name="MainColumnDocumentCacheSize" source="Main" columnname="DocumentCacheSize" x="660" maxlength="40" />
+			<field bop:name="MainColumnImageCacheSize" source="Main" columnname="ImageCacheSize" x="860" maxlength="40" />
+			<field bop:name="MainColumnHelpDocument" source="Main" columnname="HelpDocument" x="1060" maxlength="40" />
+		</staticgroup>
+	</databand>
+	<footer bop:name="PageFooter" height="20">
+		<textarea bop:name="PageFooterPageText" text="Page" x="290" y="5" />
+		<pagenumber bop:name="PageFooterPageNumber" x="310" y="5" />
+	</footer>
+</report>

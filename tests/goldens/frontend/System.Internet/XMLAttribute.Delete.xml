@@ -1,0 +1,21 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete XMLAttribute" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLAttribute&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Element_ID asc include nil, Main.NamespaceAlias asc include nil, Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Element_ID.System.Internet.XMLAttribute_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Element_ID.System.Internet.XMLAttribute_XMLElementLookupMenuItem" action="Main.Element_ID.System.Internet.XMLAttribute_XMLElement" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnSystem.Internet.XMLAttribute_XMLElement_Main.Element_ID" title="Element ID" width="36" source="Main" columnname="Main.Element_ID" readonly="True" />
+					<textbox bop:name="MainColumnMain.NamespaceAlias" title="NamespaceAlias" nilifblank="False" source="Main" columnname="Main.NamespaceAlias" readonly="True" />
+					<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" source="Main" columnname="Main.Name" readonly="True" />
+					<textbox bop:name="MainColumnMain.Value" title="Value" nilifblank="False" source="Main" columnname="Main.Value" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

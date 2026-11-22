@@ -1,0 +1,46 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Windows Client Application Settings" mainsource="Main" OnDefault="Edit">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  Frontend.WindowsClientApplications&#xD;&#xA;   rename Main&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.Applications&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename Applications&#xD;&#xA;  )&#xD;&#xA;  by (.Main.Application_ID = .Applications.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.Application_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Application_ID.Frontend.WindowsClientApplications_Applications" text="Applications..." document=".Frontend.Derive('Frontend.Applications', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Application_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Application_ID.Frontend.WindowsClientApplications_ApplicationsLookupMenuItem" action="Main.Application_ID.Frontend.WindowsClientApplications_Applications" />
+	</menu>
+	<showformaction bop:name="Add" text="&amp;Add..." document=".Frontend.Derive('Frontend.WindowsClientApplications', 'Add', '', '', true)" mode="Insert" sourcelinktype="Detail" sourcelink.source="Main" hint="Add a new row." image="Image('Frontend', 'Image.Add')" />
+	<showformaction bop:name="Edit" text="&amp;Edit..." document=".Frontend.Derive('Frontend.WindowsClientApplications', 'Edit', '', '', true)" mode="Edit" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Application_ID" sourcelink.detailkeynames="Main.Application_ID" hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" />
+	<showformaction bop:name="Delete" text="&amp;Delete..." document=".Frontend.Derive('Frontend.WindowsClientApplications', 'Delete', '', '', true)" mode="Delete" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Application_ID" sourcelink.detailkeynames="Main.Application_ID" hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" />
+	<showformaction bop:name="View" text="&amp;View..." document=".Frontend.Derive('Frontend.WindowsClientApplications', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Application_ID" sourcelink.detailkeynames="Main.Application_ID" hint="View the current row." image="Image('Frontend', 'Image.View')" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Application_ID" title="Application_ID" width="50" columnname="Main.Application_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Windows Client Application Settings" source="Main">
+				<textcolumn bop:name="MainGridColumnFrontend.WindowsClientApplications_Applications_Main.Application_ID" title="Application_ID" width="50" columnname="Main.Application_ID" />
+				<textcolumn bop:name="MainGridColumnApplications.Description" title="Applications Description" width="35" columnname="Applications.Description" />
+				<textcolumn bop:name="MainGridColumnMain.ThemeDocument" title="Theme Document" width="20" columnname="Main.ThemeDocument" />
+				<textcolumn bop:name="MainGridColumnMain.DefaultIconImage" title="Default Form Icon Image" width="20" columnname="Main.DefaultIconImage" />
+				<textcolumn bop:name="MainGridColumnMain.DocumentCacheSize" title="Document Cache Size" hint="0 = client-side document cache off" width="20" columnname="Main.DocumentCacheSize" />
+				<textcolumn bop:name="MainGridColumnMain.ImageCacheSize" title="Image Cache Size" hint="0 = client-side image cache off" width="20" columnname="Main.ImageCacheSize" />
+				<textcolumn bop:name="MainGridColumnMain.HelpDocument" title="Help Document" width="20" columnname="Main.HelpDocument" />
+			</grid>
+			<column bop:name="GridBar">
+				<trigger bop:name="AddTrigger" action="Add" imagewidth="11" imageheight="13" />
+				<trigger bop:name="EditTrigger" action="Edit" imagewidth="11" imageheight="13" />
+				<trigger bop:name="DeleteTrigger" action="Delete" imagewidth="11" imageheight="13" />
+				<trigger bop:name="ViewTrigger" action="View" imagewidth="11" imageheight="13" />
+			</column>
+		</row>
+	</column>
+</interface>

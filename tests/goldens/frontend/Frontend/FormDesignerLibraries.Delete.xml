@@ -1,0 +1,16 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Form Designer Libraries" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Frontend.FormDesignerLibraries&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Library_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Library_Name.Frontend.FormDesignerLibraries_Library" text="Libraries..." document=".Frontend.Derive('System.Libraries', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Library_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Library_Name.Frontend.FormDesignerLibraries_LibraryLookupMenuItem" action="Main.Library_Name.Frontend.FormDesignerLibraries_Library" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<textbox bop:name="MainColumnFrontend.FormDesignerLibraries_Library_Main.Library_Name" title="Library Name" width="50" source="Main" columnname="Main.Library_Name" readonly="True" />
+			</column>
+		</group>
+	</row>
+</interface>

@@ -1,0 +1,17 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete SentEmail" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.SendEmail.SentEmail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnMain.From" title="From" nilifblank="False" source="Main" columnname="Main.From" readonly="True" />
+					<textbox bop:name="MainColumnMain.To" title="To" nilifblank="False" source="Main" columnname="Main.To" readonly="True" />
+					<textbox bop:name="MainColumnMain.Subject" title="Subject" nilifblank="False" width="60" source="Main" columnname="Main.Subject" readonly="True" />
+					<textbox bop:name="MainColumnMain.Message" title="Message" height="7" nilifblank="False" source="Main" columnname="Main.Message" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

@@ -1,0 +1,29 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Devices" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.DevicesView&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Name.Security.UserDeviceUser_DevicesView" text="Device User..." document=".Frontend.Derive('Security.UserDeviceUser', 'List', 'Main.Name', 'Main.Device_Name', false)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.DeviceUsers_Devices" text="DeviceUsers..." document=".Frontend.Derive('System.DeviceUsers', 'List', 'Main.Name', 'Main.Device_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.DeviceSessions_Devices" text="DeviceSessions..." document=".Frontend.Derive('System.DeviceSessions', 'List', 'Main.Name', 'Main.Device_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.DeviceScalarTypes_Devices" text="DeviceScalarTypes..." document=".Frontend.Derive('System.DeviceScalarTypes', 'List', 'Main.Name', 'Main.Device_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.DeviceOperators_Devices" text="DeviceOperators..." document=".Frontend.Derive('System.DeviceOperators', 'List', 'Main.Name', 'Main.Device_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.ApplicationTransactions_Devices" text="ApplicationTransactions..." document=".Frontend.Derive('System.ApplicationTransactions', 'List', 'Main.Name', 'Main.Device_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Device_Name" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.Name.System.DeviceUsers_DevicesDetailsMenuItem" action="Main.Name.System.DeviceUsers_Devices" />
+		<menu bop:name="Main.Name.System.DeviceSessions_DevicesDetailsMenuItem" action="Main.Name.System.DeviceSessions_Devices" />
+		<menu bop:name="Main.Name.System.DeviceScalarTypes_DevicesDetailsMenuItem" action="Main.Name.System.DeviceScalarTypes_Devices" />
+		<menu bop:name="Main.Name.System.DeviceOperators_DevicesDetailsMenuItem" action="Main.Name.System.DeviceOperators_Devices" />
+		<menu bop:name="Main.Name.System.ApplicationTransactions_DevicesDetailsMenuItem" action="Main.Name.System.ApplicationTransactions_Devices" />
+	</menu>
+	<showformaction bop:name="Main.Name.System.Devices_CatalogObjects" text="CatalogObjects..." document=".Frontend.Derive('System.CatalogObjects', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Name.System.Devices_CatalogObjectsLookupMenuItem" action="Main.Name.System.Devices_CatalogObjects" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<textbox bop:name="MainColumnSystem.Devices_CatalogObjects_Main.Name" title="Name" width="50" source="Main" columnname="Main.Name" readonly="True" />
+			</column>
+		</group>
+	</row>
+</interface>

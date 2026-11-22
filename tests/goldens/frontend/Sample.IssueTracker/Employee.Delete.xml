@@ -1,0 +1,24 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Employee" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.Employee&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Sample.IssueTracker.Issue_Assignee_Employee" text="Action..." document=".Frontend.Derive('Sample.IssueTracker.Action', 'Browse', 'Main.ID', 'Main.AssigneeEmployee_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.AssigneeEmployee_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.IssueTracker.Issue_Assignee_EmployeeDetailsMenuItem" action="Main.ID.Sample.IssueTracker.Issue_Assignee_Employee" />
+	</menu>
+	<showformaction bop:name="Main.Department_ID.Sample.IssueTracker.Employee_Department" text="Department..." document=".Frontend.Derive('Sample.IssueTracker.Department', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Department_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Department_ID.Sample.IssueTracker.Employee_DepartmentLookupMenuItem" action="Main.Department_ID.Sample.IssueTracker.Employee_Department" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnMain.ID" title="Employee ID" hint="Three Character Short Identifier" nilifblank="False" width="4" source="Main" columnname="Main.ID" readonly="True" />
+					<textbox bop:name="MainColumnSample.IssueTracker.Employee_Department_Main.Department_ID" title="Department ID" hint="Three Character Short Identifier" width="4" source="Main" columnname="Main.Department_ID" readonly="True" />
+					<textbox bop:name="MainColumnMain.Name" title="Name" hint="The name of the Employee" nilifblank="False" width="30" source="Main" columnname="Main.Name" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

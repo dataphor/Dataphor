@@ -1,0 +1,34 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View NewIssue" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.NewIssue&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" text="Action Detail..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'View', 'Main.ID,Main.Action_ID', 'Main.Issue_ID,Main.Action_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID,Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID,Main.Action_ID" mode="None" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionExtensionsMenuItem" action="Main.ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	</menu>
+	<exposed bop:name="Main.ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionExtensionsExposed" action="Main.ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	<showformaction bop:name="Main.Product_ID.Sample.IssueTracker.Issue_Product" text="Product..." document=".Frontend.Derive('Sample.IssueTracker.Product', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Product_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.State_ID.Sample.IssueTracker.Issue_State" text="State..." document=".Frontend.Derive('Sample.IssueTracker.State', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.State_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" text="Employee..." document=".Frontend.Derive('Sample.IssueTracker.Employee', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.AssigneeEmployee_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Product_ID.Sample.IssueTracker.Issue_ProductLookupMenuItem" action="Main.Product_ID.Sample.IssueTracker.Issue_Product" />
+		<menu bop:name="Main.State_ID.Sample.IssueTracker.Issue_StateLookupMenuItem" action="Main.State_ID.Sample.IssueTracker.Issue_State" />
+		<menu bop:name="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_EmployeeLookupMenuItem" action="Main.AssigneeEmployee_ID.Sample.IssueTracker.Issue_Assignee_Employee" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<row bop:name="Element1">
+			<column bop:name="Element2">
+				<textbox bop:name="MainColumnSample.IssueTracker.Issue_Product_Main.Product_ID" title="Product ID" hint="Identifier of the product involved" width="4" source="Main" columnname="Main.Product_ID" readonly="True" />
+				<textbox bop:name="MainColumnMain.Version" title="Version" hint="The version of the product" nilifblank="False" width="11" source="Main" columnname="Main.Version" readonly="True" />
+				<textbox bop:name="MainColumnMain.Priority" title="Priority" hint="Numeric priority (0 = Highest)" source="Main" columnname="Main.Priority" readonly="True" />
+				<textbox bop:name="MainColumnMain.Description" title="Description" hint="Complete description of the problem" height="5" nilifblank="False" width="50" source="Main" columnname="Main.Description" readonly="True" />
+				<textbox bop:name="MainColumnMain.ReproductionSteps" title="Steps To Reproduce" hint="Steps necessary to reproduce the issue" height="7" nilifblank="False" width="50" source="Main" columnname="Main.ReproductionSteps" readonly="True" />
+			</column>
+			<column bop:name="Element3">
+				<textbox bop:name="MainColumnMain.DateTime" title="Date/Time" hint="Date/time the action occured" source="Main" columnname="Main.DateTime" readonly="True" />
+				<textbox bop:name="MainColumnSample.IssueTracker.Issue_State_Main.State_ID" title="New State" hint="The state of the issue after this action" width="4" source="Main" columnname="Main.State_ID" readonly="True" />
+				<textbox bop:name="MainColumnSample.IssueTracker.Issue_Assignee_Employee_Main.AssigneeEmployee_ID" title="New Assignee" hint="The Employee assigned to this issue after this action" width="4" source="Main" columnname="Main.AssigneeEmployee_ID" readonly="True" />
+				<textbox bop:name="MainColumnMain.Notes" title="Notes" hint="Notes about the action taken" height="5" nilifblank="False" width="50" source="Main" columnname="Main.Notes" readonly="True" />
+			</column>
+		</row>
+	</column>
+</interface>

@@ -73,6 +73,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private static readonly string[] RejectedPageTypes = ["Manage", "Preview", "Filter"];
 
 		/// <summary>A surface of a registered library whose Browse page does derive, so that only the page type is in question.</summary>
+		/// <remarks>
+		/// That its Browse page derives is not asserted here: FrontendDerivationGoldenTest derives Browse for all 52
+		/// surfaces of the carried libraries, so a control case beside this one would assert the same thing again.
+		/// </remarks>
 		private const string DerivableSurface = "Security.Role";
 
 		private static (string Reason, string Error)? FindExclusion(FormDocument document)
@@ -313,19 +317,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(failure, Is.Not.Null, String.Format("Deriving a \"{0}\" page of {1} succeeded; the derivation engine has no builder for that page type.", pageType, DerivableSurface));
 			Assert.That(FlattenMessages(failure), Does.Contain(String.Format("\"{0}\"", pageType)),
 				String.Format("Deriving a \"{0}\" page of {1} failed without naming the page type.", pageType, DerivableSurface));
-		}
-
-		/// <summary>
-		/// The other side of the case above: a page type the engine does accept, so that the refusal is known to be
-		/// about the page type and not about the surface.
-		/// </summary>
-		// NOTE: test-frontend-derivation-golden derives Browse for all 45 surfaces; once its goldens are in they are this
-		// control, and this case should go rather than assert the same thing a 321st time.
-		[Test]
-		public void DeriveAcceptsTheBrowsePageType()
-		{
-			string derived = EvaluateString("Frontend.Derive(ASurface, APageType)", ("ASurface", DerivableSurface), ("APageType", "Browse"));
-			Assert.That(XDocument.Parse(derived).Root.Name.LocalName, Is.EqualTo(FormDocumentCorpusTest.InterfaceElementName));
 		}
 
 		/// <summary>

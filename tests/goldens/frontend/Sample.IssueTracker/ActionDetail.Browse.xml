@@ -1,0 +1,45 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Action Detail" mainsource="Main" OnDefault="Edit">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.ActionDetail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Issue_ID asc include nil, Main.Action_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" text="Action..." document=".Frontend.Derive('Sample.IssueTracker.Action', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID,Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID,Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionLookupMenuItem" action="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	</menu>
+	<exposed bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionLookupExposed" action="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	<showformaction bop:name="Add" text="&amp;Add..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'Add', '', '', true)" mode="Insert" sourcelinktype="Detail" sourcelink.source="Main" hint="Add a new row." image="Image('Frontend', 'Image.Add')" />
+	<showformaction bop:name="Edit" text="&amp;Edit..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'Edit', '', '', true)" mode="Edit" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID, Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID, Main.Action_ID" hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" />
+	<showformaction bop:name="Delete" text="&amp;Delete..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'Delete', '', '', true)" mode="Delete" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID, Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID, Main.Action_ID" hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" />
+	<showformaction bop:name="View" text="&amp;View..." document=".Frontend.Derive('Sample.IssueTracker.ActionDetail', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID, Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID, Main.Action_ID" hint="View the current row." image="Image('Frontend', 'Image.View')" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" columnname="Main.Issue_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Action_ID" title="Action ID" hint="Action Identification #" width="10" columnname="Main.Action_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Action Detail" source="Main">
+				<textcolumn bop:name="MainGridColumnSample.IssueTracker.ActionDetail_Action_Main.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" columnname="Main.Issue_ID" />
+				<textcolumn bop:name="MainGridColumnSample.IssueTracker.ActionDetail_Action_Main.Action_ID" title="Action ID" hint="Action Identification #" width="10" columnname="Main.Action_ID" />
+				<textcolumn bop:name="MainGridColumnMain.SoftwareEnvironment" title="Software Environment" width="20" columnname="Main.SoftwareEnvironment" />
+				<textcolumn bop:name="MainGridColumnMain.HardwareEnvironment" title="Hardware Environment" width="20" columnname="Main.HardwareEnvironment" />
+			</grid>
+			<column bop:name="GridBar">
+				<trigger bop:name="AddTrigger" action="Add" imagewidth="11" imageheight="13" />
+				<trigger bop:name="EditTrigger" action="Edit" imagewidth="11" imageheight="13" />
+				<trigger bop:name="DeleteTrigger" action="Delete" imagewidth="11" imageheight="13" />
+				<trigger bop:name="ViewTrigger" action="View" imagewidth="11" imageheight="13" />
+			</column>
+		</row>
+	</column>
+</interface>

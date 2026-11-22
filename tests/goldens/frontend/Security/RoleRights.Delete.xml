@@ -1,0 +1,27 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete RoleRights" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.RoleRights&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Role_Name asc include nil, Main.Right_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.Role_Name.System.Roles_CatalogObjects" text="CatalogObjects..." document=".Frontend.Derive('System.CatalogObjects', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Role_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Role_Name.System.RoleRightAssignments_Roles" text="Roles..." document=".Frontend.Derive('System.Roles', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Role_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Right_Name.System.RoleRightAssignments_Rights" text="Rights..." document=".Frontend.Derive('System.Rights', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Right_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Role_Name.System.Roles_CatalogObjectsLookupMenuItem" action="Main.Role_Name.System.Roles_CatalogObjects" />
+		<menu bop:name="Main.Role_Name.System.RoleRightAssignments_RolesLookupMenuItem" action="Main.Role_Name.System.RoleRightAssignments_Roles" />
+		<menu bop:name="Main.Right_Name.System.RoleRightAssignments_RightsLookupMenuItem" action="Main.Right_Name.System.RoleRightAssignments_Rights" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnSystem.Roles_CatalogObjects_Main.Role_Name" title="Role_Name" width="50" source="Main" columnname="Main.Role_Name" readonly="True" />
+					<textbox bop:name="MainColumnSystem.RoleRightAssignments_Roles_Main.Role_Name" title="Role_Name" width="50" source="Main" columnname="Main.Role_Name" readonly="True" />
+					<textbox bop:name="MainColumnSystem.RoleRightAssignments_Rights_Main.Right_Name" title="Right Name" width="50" source="Main" columnname="Main.Right_Name" readonly="True" />
+					<checkbox bop:name="MainColumnMain.HasRight" title="Has Right" source="Main" columnname="Main.HasRight" readonly="True" />
+					<checkbox bop:name="MainColumnMain.HasAssignment" title="Has Assignment" source="Main" columnname="Main.HasAssignment" readonly="True" />
+					<checkbox bop:name="MainColumnMain.IsGranted" title="IsGranted" source="Main" columnname="Main.IsGranted" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

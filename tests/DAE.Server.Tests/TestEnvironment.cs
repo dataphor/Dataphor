@@ -30,6 +30,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The AssemblyMetadata key under which the project file records the repository's root directory.</summary>
 		public const string RepositoryDirectoryMetadataKey = "DataphorRepositoryDir";
 
+		/// <summary>The AssemblyMetadata key under which the project file records the directory holding the checked-in golden files.</summary>
+		public const string GoldensDirectoryMetadataKey = "DataphorGoldensDir";
+
 		/// <summary>Set to 1 to turn on the engine's logging and keep every test directory; see AGENTS.md "Build and test".</summary>
 		public const string LoggingVariable = "DATAPHOR_TEST_LOGGING";
 
@@ -112,6 +115,35 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				throw new InvalidOperationException(String.Format("The recorded repository directory \"{0}\" does not hold Dataphor.slnx. Rebuild the test project: dotnet build Dataphor.slnx", repositoryDirectory));
 
 			return repositoryDirectory;
+		}
+
+		// Lazy<T> caches a failure, so every test that needs the goldens fails with the same message.
+		private static readonly Lazy<string> _goldensDirectory = new Lazy<string>(FindGoldensDirectory);
+		/// <summary>
+		/// Where the checked-in golden files live (tests/goldens). One tree per kind of golden beneath it, so that the
+		/// passes comparing generated output against a reviewed file - derived forms today, device SQL later - keep their
+		/// files side by side rather than each inside its own test project.
+		/// </summary>
+		/// <remarks>
+		/// Unlike the layout and the test program, the directory is not required to exist: the pass that owns a tree
+		/// creates it the first time it writes one, and a missing tree is a set of missing goldens, which that pass
+		/// reports file by file.
+		/// </remarks>
+		public static string GoldensDirectory => _goldensDirectory.Value;
+
+		private static string FindGoldensDirectory()
+		{
+			string goldensDirectory = Metadata(GoldensDirectoryMetadataKey);
+			if (String.IsNullOrEmpty(goldensDirectory))
+				throw new InvalidOperationException(String.Format("The test assembly does not record the goldens directory (AssemblyMetadata \"{0}\"). Build it through its project file: dotnet build Dataphor.slnx", GoldensDirectoryMetadataKey));
+
+			// The recorded path is a build-machine absolute path and a pass that updates its goldens writes to it, so a
+			// moved or copied test assembly must not be allowed to write into a tree that is not the repository's.
+			// RepositoryDirectory checks itself against Dataphor.slnx.
+			if (!goldensDirectory.StartsWith(RepositoryDirectory, StringComparison.OrdinalIgnoreCase))
+				throw new InvalidOperationException(String.Format("The recorded goldens directory \"{0}\" is not inside the repository \"{1}\". Rebuild the test project: dotnet build Dataphor.slnx", goldensDirectory, RepositoryDirectory));
+
+			return goldensDirectory;
 		}
 
 		private static readonly Lazy<string> _runDirectory = new Lazy<string>(CreateRunDirectory);

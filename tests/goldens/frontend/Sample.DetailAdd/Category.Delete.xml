@@ -1,0 +1,19 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Category" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.DetailAdd.Category&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Sample.DetailAdd.Detail_Category" text="Detail..." document=".Frontend.Derive('Sample.DetailAdd.Detail', 'Browse', 'Main.ID', 'Main.Category_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Category_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.DetailAdd.Detail_CategoryDetailsMenuItem" action="Main.ID.Sample.DetailAdd.Detail_Category" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnMain.ID" title="ID" source="Main" columnname="Main.ID" readonly="True" />
+					<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" source="Main" columnname="Main.Name" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

@@ -1,0 +1,23 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Role" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.Role&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" />
+	<showformaction bop:name="Main.Name.Security.UserRole_Role" text="Role..." document=".Frontend.Derive('Security.UserRole', 'List', 'Main.Name', 'Main.Role_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Role_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.RoleRightAssignments_Roles" text="RoleRightAssignments..." document=".Frontend.Derive('System.RoleRightAssignments', 'List', 'Main.Name', 'Main.Role_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Role_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.UserRoles_Roles" text="UserRoles..." document=".Frontend.Derive('System.UserRoles', 'List', 'Main.Name', 'Main.Role_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Role_Name" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.Name.System.RoleRightAssignments_RolesDetailsMenuItem" action="Main.Name.System.RoleRightAssignments_Roles" />
+		<menu bop:name="Main.Name.System.UserRoles_RolesDetailsMenuItem" action="Main.Name.System.UserRoles_Roles" />
+	</menu>
+	<showformaction bop:name="Main.Name.System.Roles_CatalogObjects" text="CatalogObjects..." document=".Frontend.Derive('System.CatalogObjects', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Name.System.Roles_CatalogObjectsLookupMenuItem" action="Main.Name.System.Roles_CatalogObjects" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<textbox bop:name="MainColumnSystem.Roles_CatalogObjects_Main.Name" title="Name" width="50" source="Main" columnname="Main.Name" readonly="True" />
+			</column>
+		</group>
+	</row>
+</interface>

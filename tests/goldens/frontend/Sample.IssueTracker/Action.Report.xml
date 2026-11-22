@@ -1,0 +1,28 @@
+<report xmlns:bop="www.alphora.com/schemas/bop">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.Action&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Issue_ID asc include nil, Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<header bop:name="PageHeader" height="15">
+		<textarea bop:name="ReportName" text="Action Report" y="0" />
+		<date bop:name="HeaderDate" x="520" y="0" />
+	</header>
+	<databand bop:name="RootDataBand" source="Main">
+		<header bop:name="RootDataBandHeader">
+			<box bop:name="RootDataBandHeaderBox" height="11" width="600" x="5" y="2" />
+			<textarea bop:name="MainColumnIssue_IDHeader" text="Issue ID" x="10" y="3" maxlength="10" />
+			<textarea bop:name="MainColumnDateTimeHeader" text="Date/Time" x="60" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnState_IDHeader" text="New State" x="260" y="3" maxlength="4" />
+			<textarea bop:name="MainColumnAssigneeEmployee_IDHeader" text="New Assignee" x="280" y="3" maxlength="4" />
+			<textarea bop:name="MainColumnNotesHeader" text="Notes" x="300" y="3" maxlength="50" />
+		</header>
+		<staticgroup bop:name="RootDataBandContent">
+			<field bop:name="MainColumnIssue_ID" source="Main" columnname="Issue_ID" x="10" maxlength="10" />
+			<field bop:name="MainColumnDateTime" source="Main" columnname="DateTime" x="60" maxlength="40" />
+			<field bop:name="MainColumnState_ID" source="Main" columnname="State_ID" x="260" maxlength="4" />
+			<field bop:name="MainColumnAssigneeEmployee_ID" source="Main" columnname="AssigneeEmployee_ID" x="280" maxlength="4" />
+			<field bop:name="MainColumnNotes" source="Main" columnname="Notes" x="300" maxlength="50" />
+		</staticgroup>
+	</databand>
+	<footer bop:name="PageFooter" height="20">
+		<textarea bop:name="PageFooterPageText" text="Page" x="290" y="5" />
+		<pagenumber bop:name="PageFooterPageNumber" x="310" y="5" />
+	</footer>
+</report>

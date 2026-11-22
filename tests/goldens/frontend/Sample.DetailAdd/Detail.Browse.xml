@@ -1,0 +1,44 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Detail" mainsource="Main" OnDefault="Edit">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.DetailAdd.Detail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Master_ID asc include nil, Main.Category_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Master_ID.Sample.DetailAdd.Detail_Master" text="Master..." document=".Frontend.Derive('Sample.DetailAdd.Master', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Master_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Category_ID.Sample.DetailAdd.Detail_Category" text="Category..." document=".Frontend.Derive('Sample.DetailAdd.Category', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Category_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Master_ID.Sample.DetailAdd.Detail_MasterLookupMenuItem" action="Main.Master_ID.Sample.DetailAdd.Detail_Master" />
+		<menu bop:name="Main.Category_ID.Sample.DetailAdd.Detail_CategoryLookupMenuItem" action="Main.Category_ID.Sample.DetailAdd.Detail_Category" />
+	</menu>
+	<showformaction bop:name="Add" text="&amp;Add..." document=".Frontend.Derive('Sample.DetailAdd.Detail', 'Add', '', '', true)" mode="Insert" sourcelinktype="Detail" sourcelink.source="Main" hint="Add a new row." image="Image('Frontend', 'Image.Add')" />
+	<showformaction bop:name="Edit" text="&amp;Edit..." document=".Frontend.Derive('Sample.DetailAdd.Detail', 'Edit', '', '', true)" mode="Edit" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Master_ID, Main.Category_ID" sourcelink.detailkeynames="Main.Master_ID, Main.Category_ID" hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" />
+	<showformaction bop:name="Delete" text="&amp;Delete..." document=".Frontend.Derive('Sample.DetailAdd.Detail', 'Delete', '', '', true)" mode="Delete" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Master_ID, Main.Category_ID" sourcelink.detailkeynames="Main.Master_ID, Main.Category_ID" hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" />
+	<showformaction bop:name="View" text="&amp;View..." document=".Frontend.Derive('Sample.DetailAdd.Detail', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Master_ID, Main.Category_ID" sourcelink.detailkeynames="Main.Master_ID, Main.Category_ID" hint="View the current row." image="Image('Frontend', 'Image.View')" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Master_ID" title="Master_ID" width="20" columnname="Main.Master_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Category_ID" title="Category_ID" width="20" columnname="Main.Category_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Detail" source="Main">
+				<textcolumn bop:name="MainGridColumnSample.DetailAdd.Detail_Master_Main.Master_ID" title="Master_ID" width="20" columnname="Main.Master_ID" />
+				<textcolumn bop:name="MainGridColumnSample.DetailAdd.Detail_Category_Main.Category_ID" title="Category_ID" width="20" columnname="Main.Category_ID" />
+			</grid>
+			<column bop:name="GridBar">
+				<trigger bop:name="AddTrigger" action="Add" imagewidth="11" imageheight="13" />
+				<trigger bop:name="EditTrigger" action="Edit" imagewidth="11" imageheight="13" />
+				<trigger bop:name="DeleteTrigger" action="Delete" imagewidth="11" imageheight="13" />
+				<trigger bop:name="ViewTrigger" action="View" imagewidth="11" imageheight="13" />
+			</column>
+		</row>
+	</column>
+</interface>

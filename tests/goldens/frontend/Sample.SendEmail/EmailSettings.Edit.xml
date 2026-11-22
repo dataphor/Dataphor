@@ -1,0 +1,10 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Edit EmailSettings" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.SendEmail.EmailSettings&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.SmtpServer" title="SmtpServer" nilifblank="False" source="Main" columnname="Main.SmtpServer" />
+			<textbox bop:name="MainColumnMain.DefaultFromAddress" title="DefaultFromAddress" nilifblank="False" source="Main" columnname="Main.DefaultFromAddress" />
+		</column>
+	</column>
+</interface>

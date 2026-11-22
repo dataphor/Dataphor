@@ -1,0 +1,37 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List UserRights" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.UserRights&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.User_ID asc include nil, Main.Right_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.User_ID.System.UserRightAssignments_Users" text="Users..." document=".Frontend.Derive('System.Users', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.User_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Right_Name.System.UserRightAssignments_Rights" text="Rights..." document=".Frontend.Derive('System.Rights', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Right_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.User_ID.System.UserRightAssignments_UsersLookupMenuItem" action="Main.User_ID.System.UserRightAssignments_Users" />
+		<menu bop:name="Main.Right_Name.System.UserRightAssignments_RightsLookupMenuItem" action="Main.Right_Name.System.UserRightAssignments_Rights" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.User_ID" title="User ID" width="10" columnname="Main.User_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Right_Name" title="Right Name" width="50" columnname="Main.Right_Name" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="UserRights" source="Main">
+				<textcolumn bop:name="MainGridColumnSystem.UserRightAssignments_Users_Main.User_ID" title="User ID" width="10" columnname="Main.User_ID" />
+				<textcolumn bop:name="MainGridColumnSystem.UserRightAssignments_Rights_Main.Right_Name" title="Right Name" width="50" columnname="Main.Right_Name" />
+				<checkboxcolumn bop:name="MainGridColumnMain.HasRight" title="Has Right" width="20" columnname="Main.HasRight" />
+				<checkboxcolumn bop:name="MainGridColumnMain.HasAssignment" title="Has Assignment" width="20" columnname="Main.HasAssignment" />
+				<checkboxcolumn bop:name="MainGridColumnMain.IsGranted" title="IsGranted" width="20" columnname="Main.IsGranted" />
+			</grid>
+		</row>
+	</column>
+</interface>

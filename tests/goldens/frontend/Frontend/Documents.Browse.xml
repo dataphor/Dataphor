@@ -1,0 +1,46 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Documents" mainsource="Main" OnDefault="Edit">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  Frontend.Documents&#xD;&#xA;   rename Main&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.DocumentTypes&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename DocumentTypes&#xD;&#xA;  )&#xD;&#xA;  by (.Main.Type_ID = .DocumentTypes.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.Library_Name asc include nil, Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Library_Name.Frontend.Documents_Libraries" text="Library..." document=".Frontend.Derive('System.Libraries', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Library_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Type_ID.Frontend.Documents_DocumentTypes" text="Document Type..." document=".Frontend.Derive('Frontend.DocumentTypes', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Type_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Library_Name.Frontend.Documents_LibrariesLookupMenuItem" action="Main.Library_Name.Frontend.Documents_Libraries" />
+		<menu bop:name="Main.Type_ID.Frontend.Documents_DocumentTypesLookupMenuItem" action="Main.Type_ID.Frontend.Documents_DocumentTypes" />
+	</menu>
+	<showformaction bop:name="Add" text="&amp;Add..." document=".Frontend.Derive('Frontend.Documents', 'Add', '', '', true)" mode="Insert" sourcelinktype="Detail" sourcelink.source="Main" hint="Add a new row." image="Image('Frontend', 'Image.Add')" />
+	<showformaction bop:name="Edit" text="&amp;Edit..." document=".Frontend.Derive('Frontend.Documents', 'Edit', '', '', true)" mode="Edit" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Library_Name, Main.Name" sourcelink.detailkeynames="Main.Library_Name, Main.Name" hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" />
+	<showformaction bop:name="Delete" text="&amp;Delete..." document=".Frontend.Derive('Frontend.Documents', 'Delete', '', '', true)" mode="Delete" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Library_Name, Main.Name" sourcelink.detailkeynames="Main.Library_Name, Main.Name" hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" />
+	<showformaction bop:name="View" text="&amp;View..." document=".Frontend.Derive('Frontend.Documents', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Library_Name, Main.Name" sourcelink.detailkeynames="Main.Library_Name, Main.Name" hint="View the current row." image="Image('Frontend', 'Image.View')" />
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Library_Name" title="Library Name" width="50" columnname="Main.Library_Name" />
+			<searchcolumn bop:name="MainSearchColumnMain.Name" title="Name" width="50" columnname="Main.Name" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Documents" source="Main">
+				<textcolumn bop:name="MainGridColumnFrontend.Documents_Libraries_Main.Library_Name" title="Library Name" width="50" columnname="Main.Library_Name" />
+				<textcolumn bop:name="MainGridColumnMain.Name" title="Name" width="50" columnname="Main.Name" />
+				<textcolumn bop:name="MainGridColumnFrontend.Documents_DocumentTypes_Main.Type_ID" title="Document Type" width="20" columnname="Main.Type_ID" />
+				<textcolumn bop:name="MainGridColumnDocumentTypes.Description" title="Document Type Description" width="35" columnname="DocumentTypes.Description" />
+			</grid>
+			<column bop:name="GridBar">
+				<trigger bop:name="AddTrigger" action="Add" imagewidth="11" imageheight="13" />
+				<trigger bop:name="EditTrigger" action="Edit" imagewidth="11" imageheight="13" />
+				<trigger bop:name="DeleteTrigger" action="Delete" imagewidth="11" imageheight="13" />
+				<trigger bop:name="ViewTrigger" action="View" imagewidth="11" imageheight="13" />
+			</column>
+		</row>
+	</column>
+</interface>

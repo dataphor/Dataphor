@@ -1,0 +1,11 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Client Types" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Frontend.ClientTypes&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="ID" nilifblank="False" source="Main" columnname="Main.ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.Description" title="Description" nilifblank="False" width="35" source="Main" columnname="Main.Description" readonly="True" />
+			<textbox bop:name="MainColumnMain.Environment" title="Environment" nilifblank="False" width="35" source="Main" columnname="Main.Environment" readonly="True" />
+		</column>
+	</column>
+</interface>

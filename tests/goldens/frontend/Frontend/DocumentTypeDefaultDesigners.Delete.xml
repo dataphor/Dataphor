@@ -1,0 +1,26 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Document Type Default Designers" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  Frontend.DocumentTypeDefaultDesigners&#xD;&#xA;   rename Main&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.DocumentTypes&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename DocumentTypes&#xD;&#xA;  )&#xD;&#xA;  by (.Main.DocumentType_ID = .DocumentTypes.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.DocumentType_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypes" text="Document Types..." document=".Frontend.Derive('Frontend.DocumentTypes', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.DocumentType_ID.Main.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" text="Document Type Designers..." document=".Frontend.Derive('Frontend.DocumentTypeDesigners', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID,Main.Default_Designer_ID" sourcelink.detailkeynames="Main.DocumentType_ID,Main.Designer_ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypesLookupMenuItem" action="Main.DocumentType_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypes" />
+		<menu bop:name="Main.DocumentType_ID.Main.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesignersLookupMenuItem" action="Main.DocumentType_ID.Main.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<group bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypesGroup" title="Document Types">
+						<column bop:name="Element2">
+							<textbox bop:name="MainColumnFrontend.DocumentTypeDefaultDesigners_DocumentTypes_Main.DocumentType_ID" title="Document Type" source="Main" columnname="Main.DocumentType_ID" readonly="True" />
+							<textbox bop:name="MainColumnDocumentTypes.Description" title="Description" nilifblank="False" width="35" source="Main" columnname="DocumentTypes.Description" readonly="True" />
+						</column>
+					</group>
+					<textbox bop:name="MainColumnFrontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners_Main.Default_Designer_ID" title="Default Designer" source="Main" columnname="Main.Default_Designer_ID" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

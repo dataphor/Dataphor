@@ -1,0 +1,24 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Issue" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.Issue&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Product_ID asc, Main.Version asc, Main.Priority asc }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.ID.Sample.IssueTracker.Action_Issue" text="Action..." document=".Frontend.Derive('Sample.IssueTracker.Action', 'Browse', 'Main.ID', 'Main.Issue_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Issue_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.IssueTracker.Action_IssueDetailsMenuItem" action="Main.ID.Sample.IssueTracker.Action_Issue" />
+	</menu>
+	<showformaction bop:name="Main.Product_ID.Sample.IssueTracker.Issue_Product" text="Product..." document=".Frontend.Derive('Sample.IssueTracker.Product', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Product_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Product_ID.Sample.IssueTracker.Issue_ProductLookupMenuItem" action="Main.Product_ID.Sample.IssueTracker.Issue_Product" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnSample.IssueTracker.Issue_Product_Main.Product_ID" title="Product ID" hint="Identifier of the product involved" width="4" source="Main" columnname="Main.Product_ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.Version" title="Version" hint="The version of the product" nilifblank="False" width="11" source="Main" columnname="Main.Version" readonly="True" />
+			<textbox bop:name="MainColumnMain.Priority" title="Priority" hint="Numeric priority (0 = Highest)" source="Main" columnname="Main.Priority" readonly="True" />
+			<textbox bop:name="MainColumnMain.Description" title="Description" hint="Complete description of the problem" height="5" nilifblank="False" width="50" source="Main" columnname="Main.Description" readonly="True" />
+			<textbox bop:name="MainColumnMain.ReproductionSteps" title="Steps To Reproduce" hint="Steps necessary to reproduce the issue" height="7" nilifblank="False" width="50" source="Main" columnname="Main.ReproductionSteps" readonly="True" />
+		</column>
+		<notebook bop:name="MainEmbeddedDetailsNotebook">
+			<notebookframepage bop:name="Sample.IssueTracker.Action_IssueFrame" document=".Frontend.Derive('Sample.IssueTracker.Action', 'Browse', 'Main.ID', 'Main.Issue_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Issue_ID" menutext="Action" title="Action" />
+		</notebook>
+	</column>
+</interface>

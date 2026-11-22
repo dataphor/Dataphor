@@ -1,0 +1,14 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View XMLDefaultNamespace" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLDefaultNamespace&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Element_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.Element_ID.System.Internet.XMLDefaultNamespace_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Element_ID.System.Internet.XMLDefaultNamespace_XMLElementLookupMenuItem" action="Main.Element_ID.System.Internet.XMLDefaultNamespace_XMLElement" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnSystem.Internet.XMLDefaultNamespace_XMLElement_Main.Element_ID" title="Element ID" width="36" source="Main" columnname="Main.Element_ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.URI" title="URI" nilifblank="False" source="Main" columnname="Main.URI" readonly="True" />
+		</column>
+	</column>
+</interface>

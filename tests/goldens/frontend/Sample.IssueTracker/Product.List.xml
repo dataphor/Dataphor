@@ -1,0 +1,31 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List Product" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.Product&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.ID.Sample.IssueTracker.Issue_Product" text="Issue..." document=".Frontend.Derive('Sample.IssueTracker.Issue', 'Browse', 'Main.ID', 'Main.Product_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Product_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.IssueTracker.Issue_ProductDetailsMenuItem" action="Main.ID.Sample.IssueTracker.Issue_Product" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.ID" title="Product ID" hint="Three Character Short Identifier" width="4" columnname="Main.ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Product" source="Main">
+				<textcolumn bop:name="MainGridColumnMain.ID" title="Product ID" hint="Three Character Short Identifier" width="4" columnname="Main.ID" />
+				<textcolumn bop:name="MainGridColumnMain.Name" title="Name" hint="The name of the product" width="30" columnname="Main.Name" />
+			</grid>
+		</row>
+	</column>
+</interface>

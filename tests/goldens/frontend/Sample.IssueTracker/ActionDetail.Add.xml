@@ -1,0 +1,21 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Add Action Detail" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.ActionDetail&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Issue_ID asc include nil, Main.Action_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" text="Action..." document=".Frontend.Derive('Sample.IssueTracker.Action', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Issue_ID,Main.Action_ID" sourcelink.detailkeynames="Main.Issue_ID,Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionLookupMenuItem" action="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	</menu>
+	<exposed bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionLookupExposed" action="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_Action" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<fulllookup bop:name="Main.Issue_ID.Main.Action_ID.Sample.IssueTracker.ActionDetail_ActionGroup" title="Action" source="Main" columnnames="Main.Issue_ID;Main.Action_ID" lookupcolumnnames="Main.Issue_ID;Main.ID" document=".Frontend.Derive('Sample.IssueTracker.Action', 'Browse', '', '', true)">
+				<column bop:name="Element2">
+					<numerictextbox bop:name="MainColumnSample.IssueTracker.ActionDetail_Action_Main.Issue_ID" title="Issue ID" hint="Issue Identification #" width="10" source="Main" columnname="Main.Issue_ID" />
+					<numerictextbox bop:name="MainColumnSample.IssueTracker.ActionDetail_Action_Main.Action_ID" title="Action ID" hint="Action Identification #" width="10" source="Main" columnname="Main.Action_ID" />
+				</column>
+			</fulllookup>
+			<textbox bop:name="MainColumnMain.SoftwareEnvironment" title="Software Environment" nilifblank="False" source="Main" columnname="Main.SoftwareEnvironment" />
+			<textbox bop:name="MainColumnMain.HardwareEnvironment" title="Hardware Environment" nilifblank="False" source="Main" columnname="Main.HardwareEnvironment" />
+		</column>
+	</column>
+</interface>

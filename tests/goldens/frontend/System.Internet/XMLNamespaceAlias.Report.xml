@@ -1,0 +1,24 @@
+<report xmlns:bop="www.alphora.com/schemas/bop">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLNamespaceAlias&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Element_ID asc include nil, Main.NamespaceAlias asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<header bop:name="PageHeader" height="15">
+		<textarea bop:name="ReportName" text="XMLNamespaceAlias Report" y="0" />
+		<date bop:name="HeaderDate" x="520" y="0" />
+	</header>
+	<databand bop:name="RootDataBand" source="Main">
+		<header bop:name="RootDataBandHeader">
+			<box bop:name="RootDataBandHeaderBox" height="11" width="600" x="5" y="2" />
+			<textarea bop:name="MainColumnElement_IDHeader" text="Element ID" x="10" y="3" maxlength="36" />
+			<textarea bop:name="MainColumnNamespaceAliasHeader" text="NamespaceAlias" x="190" y="3" maxlength="40" />
+			<textarea bop:name="MainColumnURIHeader" text="URI" x="390" y="3" maxlength="40" />
+		</header>
+		<staticgroup bop:name="RootDataBandContent">
+			<field bop:name="MainColumnElement_ID" source="Main" columnname="Element_ID" x="10" maxlength="36" />
+			<field bop:name="MainColumnNamespaceAlias" source="Main" columnname="NamespaceAlias" x="190" maxlength="40" />
+			<field bop:name="MainColumnURI" source="Main" columnname="URI" x="390" maxlength="40" />
+		</staticgroup>
+	</databand>
+	<footer bop:name="PageFooter" height="20">
+		<textarea bop:name="PageFooterPageText" text="Page" x="290" y="5" />
+		<pagenumber bop:name="PageFooterPageNumber" x="310" y="5" />
+	</footer>
+</report>

@@ -1,0 +1,36 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List XMLElementParent" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLElementParent&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Element_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.Element_ID.System.Internet.XMLElementParent_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Parent_Element_ID.System.Internet.XMLElementParent_Parent_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Parent_Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Element_ID.System.Internet.XMLElementParent_XMLElementLookupMenuItem" action="Main.Element_ID.System.Internet.XMLElementParent_XMLElement" />
+		<menu bop:name="Main.Parent_Element_ID.System.Internet.XMLElementParent_Parent_XMLElementLookupMenuItem" action="Main.Parent_Element_ID.System.Internet.XMLElementParent_Parent_XMLElement" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Parent_Element_ID" title="Element ID" width="36" columnname="Main.Parent_Element_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Element_ID" title="Element ID" width="36" columnname="Main.Element_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.Sequence" title="Sequence" width="20" columnname="Main.Sequence" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="XMLElementParent" source="Main">
+				<textcolumn bop:name="MainGridColumnSystem.Internet.XMLElementParent_XMLElement_Main.Element_ID" title="Element ID" width="36" columnname="Main.Element_ID" />
+				<textcolumn bop:name="MainGridColumnSystem.Internet.XMLElementParent_Parent_XMLElement_Main.Parent_Element_ID" title="Element ID" width="36" columnname="Main.Parent_Element_ID" />
+				<textcolumn bop:name="MainGridColumnMain.Sequence" title="Sequence" width="20" columnname="Main.Sequence" />
+			</grid>
+		</row>
+	</column>
+</interface>

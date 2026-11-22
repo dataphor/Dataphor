@@ -1,0 +1,41 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List Device User" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.AddUserDeviceUserBase&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Device_Name asc include nil, Main.User_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" isreadonly="True" />
+	<showformaction bop:name="Main.Device_Name.Security.UserDeviceUser_DevicesView" text="Device..." document=".Frontend.Derive('Security.DevicesView', 'View', '', '', false)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Device_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Device_Name.System.DeviceUsers_Devices" text="Devices..." document=".Frontend.Derive('System.Devices', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Device_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.User_ID.System.DeviceUsers_Users" text="Users..." document=".Frontend.Derive('System.Users', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.User_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Device_Name.Security.UserDeviceUser_DevicesViewLookupMenuItem" action="Main.Device_Name.Security.UserDeviceUser_DevicesView" />
+		<menu bop:name="Main.Device_Name.System.DeviceUsers_DevicesLookupMenuItem" action="Main.Device_Name.System.DeviceUsers_Devices" />
+		<menu bop:name="Main.User_ID.System.DeviceUsers_UsersLookupMenuItem" action="Main.User_ID.System.DeviceUsers_Users" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Device_Name" title="Device Name" width="50" columnname="Main.Device_Name" />
+			<searchcolumn bop:name="MainSearchColumnMain.User_ID" title="User ID" width="10" columnname="Main.User_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Device User" source="Main">
+				<textcolumn bop:name="MainGridColumnSystem.DeviceUsers_Users_Main.User_ID" title="User ID" width="10" columnname="Main.User_ID" />
+				<textcolumn bop:name="MainGridColumnSecurity.UserDeviceUser_DevicesView_Main.Device_Name" title="Device Name" width="50" columnname="Main.Device_Name" />
+				<textcolumn bop:name="MainGridColumnSystem.DeviceUsers_Devices_Main.Device_Name" title="Device Name" width="50" columnname="Main.Device_Name" />
+				<textcolumn bop:name="MainGridColumnMain.UserID" title="User ID" hint="The user id used to login to the given device." width="20" columnname="Main.UserID" />
+				<textcolumn bop:name="MainGridColumnMain.ConnectionParameters" title="Connection Parameters" hint="A semi-colon delimited list of name=value pairs of connection parameters to be used when connecting to this device" width="20" columnname="Main.ConnectionParameters" />
+				<textcolumn bop:name="MainGridColumnMain.Password" title="Password" width="20" columnname="Main.Password" />
+				<textcolumn bop:name="MainGridColumnMain.ConfirmPassword" title="Confirm Password" width="20" columnname="Main.ConfirmPassword" />
+			</grid>
+		</row>
+	</column>
+</interface>

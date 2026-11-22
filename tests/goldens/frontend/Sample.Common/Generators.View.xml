@@ -1,0 +1,10 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Generators" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.Common.Generators&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="ID" nilifblank="False" width="50" source="Main" columnname="Main.ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.NextKey" title="NextKey" source="Main" columnname="Main.NextKey" readonly="True" />
+		</column>
+	</column>
+</interface>

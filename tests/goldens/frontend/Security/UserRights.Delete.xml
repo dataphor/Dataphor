@@ -1,0 +1,24 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete UserRights" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.UserRights&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.User_ID asc include nil, Main.Right_Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.User_ID.System.UserRightAssignments_Users" text="Users..." document=".Frontend.Derive('System.Users', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.User_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Right_Name.System.UserRightAssignments_Rights" text="Rights..." document=".Frontend.Derive('System.Rights', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Right_Name" sourcelink.detailkeynames="Main.Name" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.User_ID.System.UserRightAssignments_UsersLookupMenuItem" action="Main.User_ID.System.UserRightAssignments_Users" />
+		<menu bop:name="Main.Right_Name.System.UserRightAssignments_RightsLookupMenuItem" action="Main.Right_Name.System.UserRightAssignments_Rights" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnSystem.UserRightAssignments_Users_Main.User_ID" title="User ID" maxlength="255" maxwidth="15" width="10" source="Main" columnname="Main.User_ID" readonly="True" />
+					<textbox bop:name="MainColumnSystem.UserRightAssignments_Rights_Main.Right_Name" title="Right Name" width="50" source="Main" columnname="Main.Right_Name" readonly="True" />
+					<checkbox bop:name="MainColumnMain.HasRight" title="Has Right" source="Main" columnname="Main.HasRight" readonly="True" />
+					<checkbox bop:name="MainColumnMain.HasAssignment" title="Has Assignment" source="Main" columnname="Main.HasAssignment" readonly="True" />
+					<checkbox bop:name="MainColumnMain.IsGranted" title="IsGranted" source="Main" columnname="Main.IsGranted" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

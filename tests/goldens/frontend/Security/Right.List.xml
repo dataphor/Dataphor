@@ -1,0 +1,32 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List Right" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Security.Right&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Name asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" useapplicationtransactions="False" isreadonly="True" />
+	<showformaction bop:name="Main.Name.System.UserRightAssignments_Rights" text="UserRightAssignments..." document=".Frontend.Derive('System.UserRightAssignments', 'List', 'Main.Name', 'Main.Right_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Right_Name" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Name.System.RoleRightAssignments_Rights" text="RoleRightAssignments..." document=".Frontend.Derive('System.RoleRightAssignments', 'List', 'Main.Name', 'Main.Right_Name', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Right_Name" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.Name.System.UserRightAssignments_RightsDetailsMenuItem" action="Main.Name.System.UserRightAssignments_Rights" />
+		<menu bop:name="Main.Name.System.RoleRightAssignments_RightsDetailsMenuItem" action="Main.Name.System.RoleRightAssignments_Rights" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Name" title="Name" width="50" columnname="Main.Name" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Right" source="Main">
+				<textcolumn bop:name="MainGridColumnMain.Name" title="Name" width="50" columnname="Main.Name" />
+			</grid>
+		</row>
+	</column>
+</interface>

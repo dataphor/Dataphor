@@ -1,0 +1,12 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete Form Types" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Frontend.PageTypes&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<textbox bop:name="MainColumnMain.ID" title="ID" nilifblank="False" source="Main" columnname="Main.ID" readonly="True" />
+			</column>
+		</group>
+	</row>
+</interface>

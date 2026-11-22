@@ -1,0 +1,18 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Add XMLContent" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLContent&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.Element_ID asc include nil, Main.Sequence asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.Element_ID.System.Internet.XMLContent_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Element_ID.System.Internet.XMLContent_XMLElementLookupMenuItem" action="Main.Element_ID.System.Internet.XMLContent_XMLElement" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<quicklookup bop:name="MainColumnSystem.Internet.XMLContent_XMLElement_Main.Element_ID_Lookup" title="Element ID" source="Main" columnname="Main.Element_ID" lookupcolumnname="Main.ID" document=".Frontend.Derive('System.Internet.XMLElement', 'Browse', '', '', true)">
+				<textbox bop:name="MainColumnSystem.Internet.XMLContent_XMLElement_Main.Element_ID" title="Element ID" width="36" source="Main" columnname="Main.Element_ID" titlealignment="None" />
+			</quicklookup>
+			<numerictextbox bop:name="MainColumnMain.Sequence" title="Sequence" source="Main" columnname="Main.Sequence" />
+			<numerictextbox bop:name="MainColumnMain.Type" title="Content Type" source="Main" columnname="Main.Type" />
+			<textbox bop:name="MainColumnMain.Content" title="Content" nilifblank="False" source="Main" columnname="Main.Content" />
+		</column>
+	</column>
+</interface>

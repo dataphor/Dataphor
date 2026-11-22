@@ -1,0 +1,40 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="List Document Type Designers" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  (&#xD;&#xA;   Frontend.DocumentTypeDesigners&#xD;&#xA;    rename Main&#xD;&#xA;  )&#xD;&#xA;   left lookup&#xD;&#xA;   (&#xD;&#xA;    (&#xD;&#xA;     Frontend.DocumentTypes&#xD;&#xA;      over { .ID, .Description }&#xD;&#xA;    )&#xD;&#xA;     rename DocumentTypes&#xD;&#xA;   )&#xD;&#xA;   by (.Main.DocumentType_ID = .DocumentTypes.ID)&#xD;&#xA; )&#xD;&#xA;  left lookup&#xD;&#xA;  (&#xD;&#xA;   (&#xD;&#xA;    Frontend.Designers&#xD;&#xA;     over { .ID, .Description }&#xD;&#xA;   )&#xD;&#xA;    rename Designers&#xD;&#xA;  )&#xD;&#xA;  by (.Main.Designer_ID = .Designers.ID)&#xD;&#xA;)&#xD;&#xA; browse by { Main.DocumentType_ID asc include nil, Main.Designer_ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<showformaction bop:name="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" text="Document Type Default Designers..." document=".Frontend.Derive('Frontend.DocumentTypeDefaultDesigners', 'Edit', 'Main.DocumentType_ID,Main.Designer_ID', 'Main.DocumentType_ID,Main.Default_Designer_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID,Main.Designer_ID" sourcelink.detailkeynames="Main.DocumentType_ID,Main.Default_Designer_ID" mode="Edit" sourcelinkrefresh="False" />
+	<menu bop:name="ExtensionsMenuItem" text="E&amp;xtensions">
+		<menu bop:name="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesignersExtensionsMenuItem" action="Main.DocumentType_ID.Main.Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" />
+	</menu>
+	<showformaction bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypes" text="Document Type..." document=".Frontend.Derive('Frontend.DocumentTypes', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.DocumentType_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.Designer_ID.Frontend.DocumentTypeDesigners_Designers" text="Designer..." document=".Frontend.Derive('Frontend.Designers', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Designer_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypesLookupMenuItem" action="Main.DocumentType_ID.Frontend.DocumentTypeDesigners_DocumentTypes" />
+		<menu bop:name="Main.Designer_ID.Frontend.DocumentTypeDesigners_DesignersLookupMenuItem" action="Main.Designer_ID.Frontend.DocumentTypeDesigners_Designers" />
+	</menu>
+	<sourceaction bop:name="MoveFirst" source="Main" text="&amp;First" action="First" image="Image('Frontend', 'Image.First')" />
+	<sourceaction bop:name="MovePrior" source="Main" text="&amp;Prior" action="Prior" image="Image('Frontend', 'Image.Prior')" />
+	<sourceaction bop:name="MoveNext" source="Main" text="&amp;Next" action="Next" image="Image('Frontend', 'Image.Next')" />
+	<sourceaction bop:name="MoveLast" source="Main" text="&amp;Last" action="Last" image="Image('Frontend', 'Image.Last')" />
+	<sourceaction bop:name="Refresh" source="Main" text="&amp;Refresh" action="Refresh" image="Image('Frontend', 'Image.Refresh')" />
+	<menu bop:name="NavigationMenu" text="&amp;Navigation">
+		<menu bop:name="MoveFirstMenu" action="MoveFirst" />
+		<menu bop:name="MovePriorMenu" action="MovePrior" />
+		<menu bop:name="MoveNextMenu" action="MoveNext" />
+		<menu bop:name="MoveLastMenu" action="MoveLast" />
+		<menu bop:name="NavSepMenu1" text="-" />
+		<menu bop:name="RefreshMenu" action="Refresh" />
+	</menu>
+	<column bop:name="RootBrowseColumn">
+		<search bop:name="MainSearch" hint="Search for a specific row." source="Main">
+			<searchcolumn bop:name="MainSearchColumnMain.Designer_ID" title="Designer" width="20" columnname="Main.Designer_ID" />
+			<searchcolumn bop:name="MainSearchColumnMain.DocumentType_ID" title="Document Type" width="20" columnname="Main.DocumentType_ID" />
+		</search>
+		<row bop:name="GridRow">
+			<grid bop:name="Grid" hint="Document Type Designers" source="Main">
+				<textcolumn bop:name="MainGridColumnFrontend.DocumentTypeDesigners_DocumentTypes_Main.DocumentType_ID" title="Document Type" width="20" columnname="Main.DocumentType_ID" />
+				<textcolumn bop:name="MainGridColumnDocumentTypes.Description" title="Document Type Description" width="35" columnname="DocumentTypes.Description" />
+				<textcolumn bop:name="MainGridColumnFrontend.DocumentTypeDesigners_Designers_Main.Designer_ID" title="Designer" width="20" columnname="Main.Designer_ID" />
+				<textcolumn bop:name="MainGridColumnDesigners.Description" title="Designer Description" width="25" columnname="Designers.Description" />
+			</grid>
+		</row>
+	</column>
+</interface>

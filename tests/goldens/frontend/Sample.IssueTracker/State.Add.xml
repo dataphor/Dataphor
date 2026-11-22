@@ -1,0 +1,14 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Add State" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.IssueTracker.State&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Sample.IssueTracker.Issue_State" text="Action..." document=".Frontend.Derive('Sample.IssueTracker.Action', 'Browse', 'Main.ID', 'Main.State_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.State_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.IssueTracker.Issue_StateDetailsMenuItem" action="Main.ID.Sample.IssueTracker.Issue_State" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="State ID" hint="Three Character Short Identifier" nilifblank="False" width="4" source="Main" columnname="Main.ID" />
+			<textbox bop:name="MainColumnMain.Description" title="Description" nilifblank="False" width="20" source="Main" columnname="Main.Description" />
+		</column>
+	</column>
+</interface>

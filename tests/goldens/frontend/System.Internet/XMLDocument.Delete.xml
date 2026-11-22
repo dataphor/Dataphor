@@ -1,0 +1,23 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Delete XMLDocument" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; System.Internet.XMLDocument&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.System.Internet.XMLElement_XMLDocument" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'Browse', 'Main.ID', 'Main.Document_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Document_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.System.Internet.XMLElement_XMLDocumentDetailsMenuItem" action="Main.ID.System.Internet.XMLElement_XMLDocument" />
+	</menu>
+	<showformaction bop:name="Main.Root_Element_ID.System.Internet.XMLDocument_XMLElement" text="XMLElement..." document=".Frontend.Derive('System.Internet.XMLElement', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.Root_Element_ID" sourcelink.detailkeynames="Main.ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="Main.Root_Element_ID.System.Internet.XMLDocument_XMLElementLookupMenuItem" action="Main.Root_Element_ID.System.Internet.XMLDocument_XMLElement" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<row bop:name="RootDeleteRow">
+		<staticimage bop:name="DeleteImage" image="Image('Frontend', 'Image.Warning')" imagewidth="32" imageheight="32" />
+		<group bop:name="DeleteGroup" title="Press Accept to delete the following row:">
+			<column bop:name="DeleteColumn">
+				<column bop:name="Element1">
+					<textbox bop:name="MainColumnMain.ID" title="Document ID" width="36" source="Main" columnname="Main.ID" readonly="True" />
+					<textbox bop:name="MainColumnSystem.Internet.XMLDocument_XMLElement_Main.Root_Element_ID" title="Element ID" width="36" source="Main" columnname="Main.Root_Element_ID" readonly="True" />
+				</column>
+			</column>
+		</group>
+	</row>
+</interface>

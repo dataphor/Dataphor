@@ -1,0 +1,25 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Edit Document Types" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; (&#xD;&#xA;  Frontend.DocumentTypes&#xD;&#xA;   rename Main&#xD;&#xA; )&#xD;&#xA;  left join&#xD;&#xA;  (&#xD;&#xA;   Frontend.DocumentTypeDefaultDesigners&#xD;&#xA;    rename DocumentTypeDefaultDesigners&#xD;&#xA;  )&#xD;&#xA;  by (.DocumentTypeDefaultDesigners.DocumentType_ID = .Main.ID)&#xD;&#xA;   include rowexists DocumentTypeDefaultDesigners.RowExists&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Frontend.DocumentTypeDesigners_DocumentTypes" text="Designers..." document=".Frontend.Derive('Frontend.DocumentTypeDesigners', 'Browse', 'Main.ID', 'Main.DocumentType_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.DocumentType_ID" sourcelinkrefresh="False" />
+	<showformaction bop:name="Main.ID.Frontend.Documents_DocumentTypes" text="Documents..." document=".Frontend.Derive('Frontend.Documents', 'Browse', 'Main.ID', 'Main.Type_ID', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Type_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Frontend.DocumentTypeDesigners_DocumentTypesDetailsMenuItem" action="Main.ID.Frontend.DocumentTypeDesigners_DocumentTypes" />
+		<menu bop:name="Main.ID.Frontend.Documents_DocumentTypesDetailsMenuItem" action="Main.ID.Frontend.Documents_DocumentTypes" />
+	</menu>
+	<showformaction bop:name="DocumentTypeDefaultDesigners.DocumentType_ID.DocumentTypeDefaultDesigners.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" text="Document Type Designers..." document=".Frontend.Derive('Frontend.DocumentTypeDesigners', 'View', '', '', true)" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="DocumentTypeDefaultDesigners.DocumentType_ID,DocumentTypeDefaultDesigners.Default_Designer_ID" sourcelink.detailkeynames="Main.DocumentType_ID,Main.Designer_ID" sourcelinkrefresh="False" />
+	<menu bop:name="LookupViewMenuItem" text="Vie&amp;w">
+		<menu bop:name="DocumentTypeDefaultDesigners.DocumentType_ID.DocumentTypeDefaultDesigners.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesignersLookupMenuItem" action="DocumentTypeDefaultDesigners.DocumentType_ID.DocumentTypeDefaultDesigners.Default_Designer_ID.Frontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="ID" nilifblank="False" source="Main" columnname="Main.ID" />
+			<textbox bop:name="MainColumnMain.Description" title="Description" nilifblank="False" width="35" source="Main" columnname="Main.Description" />
+			<textbox bop:name="MainColumnMain.DataType" title="Data Type" nilifblank="False" width="50" source="Main" columnname="Main.DataType" />
+			<checkbox bop:name="MainColumnDocumentTypeDefaultDesigners.RowExists" title="Has Default Designer" source="Main" columnname="DocumentTypeDefaultDesigners.RowExists" />
+			<quicklookup bop:name="MainColumnFrontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners_DocumentTypeDefaultDesigners.Default_Designer_ID_Lookup" title="Default Designer" source="Main" columnname="DocumentTypeDefaultDesigners.Default_Designer_ID" lookupcolumnname="Main.Designer_ID" document=".Frontend.Derive('Frontend.DocumentTypeDesigners', 'Browse', 'DocumentTypeDefaultDesigners.DocumentType_ID', 'Main.DocumentType_ID', true)" masterkeynames="DocumentTypeDefaultDesigners.DocumentType_ID" detailkeynames="Main.DocumentType_ID">
+				<textbox bop:name="MainColumnFrontend.DocumentTypeDefaultDesigners_DocumentTypeDesigners_DocumentTypeDefaultDesigners.Default_Designer_ID" title="Default Designer" source="Main" columnname="DocumentTypeDefaultDesigners.Default_Designer_ID" titlealignment="None" />
+			</quicklookup>
+		</column>
+	</column>
+</interface>

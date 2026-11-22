@@ -1,0 +1,17 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Edit Master" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.DetailAdd.Master&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" />
+	<showformaction bop:name="Main.ID.Sample.DetailAdd.Detail_Master" text="Detail..." document="Form('Sample.DetailAdd', 'DetailBrowse')" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Master_ID" sourcelinkrefresh="False" />
+	<menu bop:name="DetailsMenuItem" text="De&amp;tails">
+		<menu bop:name="Main.ID.Sample.DetailAdd.Detail_MasterDetailsMenuItem" action="Main.ID.Sample.DetailAdd.Detail_Master" />
+	</menu>
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<numerictextbox bop:name="MainColumnMain.ID" title="ID" source="Main" columnname="Main.ID" />
+			<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" source="Main" columnname="Main.Name" />
+		</column>
+		<notebook bop:name="MainEmbeddedDetailsNotebook">
+			<notebookframepage bop:name="Sample.DetailAdd.Detail_MasterFrame" document="Form('Sample.DetailAdd', 'DetailBrowse')" sourcelinktype="Detail" sourcelink.source="Main" sourcelink.masterkeynames="Main.ID" sourcelink.detailkeynames="Main.Master_ID" menutext="Detail" title="Detail" />
+		</notebook>
+	</column>
+</interface>

@@ -1,0 +1,15 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="View Customer" mainsource="Main">
+	<source bop:name="Main" expression="(&#xD;&#xA; Sample.Forms.Customer&#xD;&#xA;  rename Main&#xD;&#xA;)&#xD;&#xA; browse by { Main.ID asc include nil }&#xD;&#xA;capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable }&#xD;&#xA;isolation browse" isreadonly="True" />
+	<sourceaction bop:name="Validate" source="Main" text="&amp;Validate" action="Validate" />
+	<column bop:name="RootEditColumn">
+		<column bop:name="Element1">
+			<textbox bop:name="MainColumnMain.ID" title="ID" source="Main" columnname="Main.ID" readonly="True" />
+			<textbox bop:name="MainColumnMain.Name" title="Name" nilifblank="False" source="Main" columnname="Main.Name" readonly="True" />
+			<textbox bop:name="MainColumnMain.Phone" title="Phone" nilifblank="False" source="Main" columnname="Main.Phone" readonly="True" />
+			<textbox bop:name="MainColumnMain.Address" title="Address" nilifblank="False" source="Main" columnname="Main.Address" readonly="True" />
+			<textbox bop:name="MainColumnMain.City" title="City" nilifblank="False" source="Main" columnname="Main.City" readonly="True" />
+			<textbox bop:name="MainColumnMain.State" title="State" nilifblank="False" source="Main" columnname="Main.State" readonly="True" />
+			<textbox bop:name="MainColumnMain.Zip" title="Zip" nilifblank="False" source="Main" columnname="Main.Zip" readonly="True" />
+		</column>
+	</column>
+</interface>
