@@ -105,6 +105,11 @@ namespace Alphora.Dataphor.DAE.Server
 		public Engine() : base()
 		{
 			_sessions = new ServerSessions();
+			
+			// NOTE: for the transition this is the one generator shared by every engine in the program, so that the
+			// allocation sites not yet converted keep drawing from the same counter and nothing changes.
+			// bug-object-id-counter-is-process-wide makes it a new ObjectIDGenerator() per engine, which is the fix.
+			_objectIDGenerator = Schema.Object.SharedObjectIDGenerator;
 		}
         
 		public void Dispose()
@@ -156,6 +161,13 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return true; }
 		}
+		
+		// ObjectIDGenerator
+		// Assigned in the constructor and never replaced: ClearCatalog throws the catalog away, and a generator
+		// that went with it would hand the rebuilt catalog identifiers this engine had already used.
+		private readonly Schema.ObjectIDGenerator _objectIDGenerator;
+		/// <summary>Hands out the surrogate keys of the objects of this engine's catalog.</summary>
+		public Schema.ObjectIDGenerator ObjectIDGenerator { get { return _objectIDGenerator; } }
 
 		#region Devices
 		
@@ -735,7 +747,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_systemProcess.CatalogDeviceSession.InsertCatalogObject(_catalogDevice);
 
 			// Create the Temp Device
-			_tempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), TempDeviceName);
+			_tempDevice = new MemoryDevice(ObjectIDGenerator.Allocate(), TempDeviceName);
 			_tempDevice.Owner = _systemUser;
 			_tempDevice.Library = _systemLibrary;
 			_tempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
@@ -746,7 +758,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_systemProcess.CatalogDeviceSession.InsertCatalogObject(_tempDevice);
 
 			// Create the A/T Device
-			_aTDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), ATDeviceName);
+			_aTDevice = new ApplicationTransactionDevice(ObjectIDGenerator.Allocate(), ATDeviceName);
 			_aTDevice.Owner = _systemUser;
 			_aTDevice.Library = _systemLibrary;
 			_aTDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
@@ -1220,7 +1232,7 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			// Create the Catalog device
 			// Note that this must be the first object created to avoid the ID being different on subsequent loads
-			Schema.Object.SetNextObjectID(0);
+			ObjectIDGenerator.Reset();
 			_catalogDevice = CreateCatalogDevice();
 
 			// Create the system user
@@ -1266,7 +1278,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected virtual CatalogDevice CreateCatalogDevice()
 		{
-			return new CatalogDevice(Schema.Object.GetNextObjectID(), CatalogDeviceName);
+			return new CatalogDevice(ObjectIDGenerator.Allocate(), CatalogDeviceName);
 		}
 		
 		protected virtual void LoadSystemAssemblies()

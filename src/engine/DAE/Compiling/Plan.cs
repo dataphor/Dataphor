@@ -531,6 +531,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Catalog		
 		public bool IsEngine { get { return _serverProcess.ServerSession.Server.IsEngine; } }
 		
+		/// <summary>Returns an identifier no object in the catalog this plan compiles against has been given.</summary>
+		public int GetNextObjectID()
+		{
+			return _serverProcess.ServerSession.Server.ObjectIDGenerator.Allocate();
+		}
+		
+		/// <summary>Honours a DAE.ObjectID tag in the given meta data, removing it; allocates when there is none.</summary>
+		public int GetObjectID(MetaData metaData)
+		{
+			return _serverProcess.ServerSession.Server.ObjectIDGenerator.Allocate(metaData);
+		}
+		
 		public Schema.Catalog Catalog { get { return _serverProcess.ServerSession.Server.Catalog; } }
 		
 		public Schema.DataTypes DataTypes { get { return _serverProcess.DataTypes; } }

@@ -1964,7 +1964,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						program.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(scalarType, null);
 					}
 					
-					Schema.Special newSpecial = new Schema.Special(Schema.Object.GetNextObjectID(), special.Name);
+					Schema.Special newSpecial = new Schema.Special(program.Plan.GetNextObjectID(), special.Name);
 					newSpecial.Library = scalarType.Library == null ? null : program.Plan.CurrentLibrary;
 					program.Plan.PushCreationObject(newSpecial);
 					try

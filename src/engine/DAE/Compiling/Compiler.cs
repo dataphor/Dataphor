@@ -3125,7 +3125,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Key CompileKeyDefinition(Plan plan, Schema.TableVar tableVar, KeyDefinition key)
 		{
-			Schema.Key localKey = new Schema.Key(Schema.Object.GetObjectID(key.MetaData), key.MetaData);
+			Schema.Key localKey = new Schema.Key(plan.GetObjectID(key.MetaData), key.MetaData);
 			foreach (KeyColumnDefinition column in key.Columns)
 				localKey.Columns.Add(tableVar.Columns[column.ColumnName]);
 
@@ -3362,7 +3362,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Order CompileOrderColumnDefinitions(Plan plan, Schema.TableVar tableVar, OrderColumnDefinitions columns, MetaData metaData, bool ensureUnique)
 		{
-			Schema.Order order = new Schema.Order(Schema.Object.GetObjectID(metaData), metaData);
+			Schema.Order order = new Schema.Order(plan.GetObjectID(metaData), metaData);
 			ProcessIsClusteredTag(plan, order.MetaData);
 			Schema.OrderColumn column;
 			foreach (OrderColumnDefinition orderColumn in columns)
@@ -3523,7 +3523,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.RowConstraint CompileRowConstraint(Plan plan, Schema.TableVar tableVar, ConstraintDefinition constraint)
 		{
-			Schema.RowConstraint newConstraint = new Schema.RowConstraint(Schema.Object.GetObjectID(constraint.MetaData), constraint.ConstraintName);
+			Schema.RowConstraint newConstraint = new Schema.RowConstraint(plan.GetObjectID(constraint.MetaData), constraint.ConstraintName);
 			newConstraint.Library = tableVar.Library == null ? null : plan.CurrentLibrary;
 			newConstraint.IsGenerated = constraint.IsGenerated || tableVar.IsGenerated;
 			plan.PushCreationObject(newConstraint);
@@ -3611,7 +3611,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.TransitionConstraint CompileTransitionConstraint(Plan plan, Schema.TableVar tableVar, TransitionConstraintDefinition constraint)
 		{
 			PlanNode constraintNode;
-			Schema.TransitionConstraint newConstraint = new Schema.TransitionConstraint(Schema.Object.GetObjectID(constraint.MetaData), constraint.ConstraintName);
+			Schema.TransitionConstraint newConstraint = new Schema.TransitionConstraint(plan.GetObjectID(constraint.MetaData), constraint.ConstraintName);
 			newConstraint.Library = tableVar.Library == null ? null : plan.CurrentLibrary;
 			newConstraint.IsGenerated = constraint.IsGenerated || tableVar.IsGenerated;
 			plan.PushCreationObject(newConstraint);
@@ -4000,7 +4000,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.ScalarTypeDefault CompileScalarTypeDefault(Plan plan, Schema.ScalarType scalarType, DefaultDefinition defaultValue)
 		{
-			int defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
+			int defaultID = plan.GetObjectID(defaultValue.MetaData);
 			string defaultName = Schema.Object.EnsureNameLength(String.Format("{0}_Default", scalarType.Name));
 			Schema.ScalarTypeDefault localDefaultValue = new Schema.ScalarTypeDefault(defaultID, defaultName);
 			localDefaultValue.Library = scalarType.Library == null ? null : plan.CurrentLibrary;
@@ -4010,7 +4010,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.TableVarColumnDefault CompileTableVarColumnDefault(Plan plan, Schema.TableVar tableVar, Schema.TableVarColumn column, DefaultDefinition defaultValue)
 		{
-			int defaultID = Schema.Object.GetObjectID(defaultValue.MetaData);
+			int defaultID = plan.GetObjectID(defaultValue.MetaData);
 			string defaultName = Schema.Object.EnsureNameLength(String.Format("{0}_{1}_Default", tableVar.Name, column.Name));
 			Schema.TableVarColumnDefault localDefaultValue = new Schema.TableVarColumnDefault(defaultID, defaultName);
 			localDefaultValue.Library = tableVar.Library == null ? null : plan.CurrentLibrary;
@@ -4103,7 +4103,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.TableVarColumn CompileTableVarColumnDefinition(Plan plan, Schema.TableVar tableVar, ColumnDefinition column)
 		{
 			Schema.Column newColumn = new Schema.Column(column.ColumnName, CompileTypeSpecifier(plan, column.TypeSpecifier));
-			Schema.TableVarColumn newTableVarColumn = new Schema.TableVarColumn(Schema.Object.GetObjectID(column.MetaData), newColumn, column.MetaData, Schema.TableVarColumnType.Stored);
+			Schema.TableVarColumn newTableVarColumn = new Schema.TableVarColumn(plan.GetObjectID(column.MetaData), newColumn, column.MetaData, Schema.TableVarColumnType.Stored);
 			newTableVarColumn.IsNilable = column.IsNilable;
 				
 			foreach (ConstraintDefinition constraint in column.Constraints)
@@ -4181,7 +4181,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				
 				CheckValidCatalogObjectName(plan, statement, tableName);
 
-				node.Table = new Schema.BaseTableVar(Schema.Object.GetObjectID(localStatement.MetaData), tableName);
+				node.Table = new Schema.BaseTableVar(plan.GetObjectID(localStatement.MetaData), tableName);
 				node.Table.SessionObjectName = sessionTableName;
 				node.Table.SessionID = plan.SessionID;
 				node.Table.SourceTableName = sourceTableName;
@@ -4382,7 +4382,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			
 			CheckValidCatalogObjectName(plan, statement, viewName);
 
-			node.View = new Schema.DerivedTableVar(Schema.Object.GetObjectID(localStatement.MetaData), viewName);
+			node.View = new Schema.DerivedTableVar(plan.GetObjectID(localStatement.MetaData), viewName);
 			node.View.SessionObjectName = sessionViewName;
 			node.View.SessionID = plan.SessionID;
 			node.View.SourceTableName = sourceTableName;
@@ -4711,7 +4711,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Property CompileProperty(Plan plan, Schema.ScalarType scalarType, Schema.Representation representation, PropertyDefinition propertyDefinition)
 		{
-			Schema.Property property = new Schema.Property(Schema.Object.GetObjectID(propertyDefinition.MetaData), propertyDefinition.PropertyName);
+			Schema.Property property = new Schema.Property(plan.GetObjectID(propertyDefinition.MetaData), propertyDefinition.PropertyName);
 			plan.PushCreationObject(property);
 			try
 			{
@@ -4813,7 +4813,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Representation CompileRepresentation(Plan plan, Schema.ScalarType scalarType, Schema.Objects operators, RepresentationDefinition definition)
 		{
-			Schema.Representation representation = new Schema.Representation(Schema.Object.GetObjectID(definition.MetaData), definition.RepresentationName);
+			Schema.Representation representation = new Schema.Representation(plan.GetObjectID(definition.MetaData), definition.RepresentationName);
 			representation.IsGenerated = definition.IsGenerated;
 			if (representation.IsGenerated)
 				representation.Generator = scalarType;
@@ -5324,7 +5324,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			Schema.TableVarColumnConstraint constraint = 
 				new Schema.TableVarColumnConstraint
 				(
-					Schema.Object.GetObjectID(constraintDefinition.MetaData),
+					plan.GetObjectID(constraintDefinition.MetaData),
 					constraintDefinition.ConstraintName
 				);
 			constraint.ConstraintType = Schema.ConstraintType.Column;
@@ -5339,7 +5339,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			Schema.ScalarTypeConstraint constraint = 
 				new Schema.ScalarTypeConstraint
 				(
-					Schema.Object.GetObjectID(constraintDefinition.MetaData),
+					plan.GetObjectID(constraintDefinition.MetaData),
 					constraintDefinition.ConstraintName
 				);
 			constraint.ConstraintType = Schema.ConstraintType.ScalarType;
@@ -5404,7 +5404,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Special CompileSpecial(Plan plan, Schema.ScalarType scalarType, SpecialDefinition specialDefinition)
 		{
-			Schema.Special special = new Schema.Special(Schema.Object.GetObjectID(specialDefinition.MetaData), specialDefinition.Name);
+			Schema.Special special = new Schema.Special(plan.GetObjectID(specialDefinition.MetaData), specialDefinition.Name);
 			special.Library = plan.CurrentLibrary;
 			special.MergeMetaData(specialDefinition.MetaData);
 			plan.PushCreationObject(special);
@@ -5524,7 +5524,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				// Generate the Schema.IScalarType for this scalar type
-				node.ScalarType = new Schema.ScalarType(Schema.Object.GetObjectID(localStatement.MetaData), scalarTypeName);
+				node.ScalarType = new Schema.ScalarType(plan.GetObjectID(localStatement.MetaData), scalarTypeName);
 				Schema.Objects operators = new Schema.Objects();
 				node.ScalarType.Owner = plan.User;
 				node.ScalarType.Library = plan.CurrentLibrary;
@@ -5773,7 +5773,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							Schema.Representation representation = FindLikeRepresentation(node.ScalarType);
 							string conversionName = Schema.Object.Qualify(Schema.Object.MangleQualifiers(String.Format("Conversion_{0}_{1}", node.ScalarType.LikeType.Name, node.ScalarType.Name)), plan.CurrentLibrary.Name);
 							CheckValidCatalogObjectName(plan, statement, conversionName);
-							narrowingConversion = new Schema.Conversion(Schema.Object.GetNextObjectID(), conversionName, node.ScalarType.LikeType, node.ScalarType, representation.Selector, true);
+							narrowingConversion = new Schema.Conversion(plan.GetNextObjectID(), conversionName, node.ScalarType.LikeType, node.ScalarType, representation.Selector, true);
 							narrowingConversion.IsGenerated = true;
 							narrowingConversion.Generator = node.ScalarType;
 							narrowingConversion.Owner = plan.User;
@@ -5790,7 +5790,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 							conversionName = Schema.Object.Qualify(Schema.Object.MangleQualifiers(String.Format("Conversion_{0}_{1}", node.ScalarType.Name, node.ScalarType.LikeType.Name)), plan.CurrentLibrary.Name);
 							CheckValidCatalogObjectName(plan, statement, conversionName);							
-							wideningConversion = new Schema.Conversion(Schema.Object.GetNextObjectID(), conversionName, node.ScalarType, node.ScalarType.LikeType, representation.Properties[0].ReadAccessor, false);
+							wideningConversion = new Schema.Conversion(plan.GetNextObjectID(), conversionName, node.ScalarType, node.ScalarType.LikeType, representation.Properties[0].ReadAccessor, false);
 							wideningConversion.IsGenerated = true;
 							wideningConversion.Generator = node.ScalarType;
 							wideningConversion.Owner = plan.User;
@@ -5906,7 +5906,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Sort CompileSortDefinition(Plan plan, Schema.IDataType dataType, SortDefinition sortDefinition, bool isScalarSort)
 		{
-			int objectID = Schema.Object.GetObjectID(sortDefinition.MetaData);
+			int objectID = plan.GetObjectID(sortDefinition.MetaData);
 			var isEquality = false;
 			string sortQualifier = String.Empty;
 			if (isScalarSort)
@@ -5983,7 +5983,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			int messageIndex = plan.Messages.Count;
 			try
 			{
-				Schema.Sort sort = new Schema.Sort(Schema.Object.GetNextObjectID(), String.Format("{0}EqualitySort", dataType.Name), dataType);
+				Schema.Sort sort = new Schema.Sort(plan.GetNextObjectID(), String.Format("{0}EqualitySort", dataType.Name), dataType);
 				sort.Library = plan.CurrentLibrary;
 				sort.Owner = plan.User;
 				sort.IsGenerated = true;
@@ -6050,7 +6050,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			int messageIndex = plan.Messages.Count;
 			try
 			{
-				Schema.Sort sort = new Schema.Sort(Schema.Object.GetNextObjectID(), String.Format("{0}UniqueSort", dataType.Name), dataType);
+				Schema.Sort sort = new Schema.Sort(plan.GetNextObjectID(), String.Format("{0}UniqueSort", dataType.Name), dataType);
 				sort.Library = plan.CurrentLibrary;
 				sort.Owner = plan.User;
 				sort.IsGenerated = true;
@@ -6479,7 +6479,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				sourceOperatorName = MetaData.GetTag(localStatement.MetaData, "DAE.SourceOperatorName", String.Empty);
 			try
 			{
-				node.CreateOperator = new Schema.Operator(Schema.Object.GetObjectID(localStatement.MetaData), operatorName);
+				node.CreateOperator = new Schema.Operator(plan.GetObjectID(localStatement.MetaData), operatorName);
 				node.CreateOperator.MetaData = localStatement.MetaData;
 				node.CreateOperator.SessionObjectName = sessionOperatorName;
 				node.CreateOperator.SessionID = plan.SessionID;
@@ -6846,7 +6846,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			try
 			{
-				Schema.AggregateOperator operatorValue = new Schema.AggregateOperator(Schema.Object.GetObjectID(localStatement.MetaData), operatorName);
+				Schema.AggregateOperator operatorValue = new Schema.AggregateOperator(plan.GetObjectID(localStatement.MetaData), operatorName);
 				operatorValue.MetaData = localStatement.MetaData;
 				operatorValue.IsOrderDependent = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsOrderDependent", "false"));
 				operatorValue.SessionObjectName = sessionOperatorName;
@@ -7272,7 +7272,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				
 				CheckValidCatalogObjectName(plan, statement, constraintName);
 
-				node.Constraint = new Schema.CatalogConstraint(Schema.Object.GetObjectID(localStatement.MetaData), constraintName);
+				node.Constraint = new Schema.CatalogConstraint(plan.GetObjectID(localStatement.MetaData), constraintName);
 				node.Constraint.SessionObjectName = sessionConstraintName;
 				node.Constraint.SessionID = plan.SessionID;
 				node.Constraint.IsGenerated = localStatement.IsSession;
@@ -8671,7 +8671,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				
 				CheckValidCatalogObjectName(plan, statement, referenceName);
 
-				node.Reference = new Schema.Reference(Schema.Object.GetObjectID(localStatement.MetaData), referenceName);
+				node.Reference = new Schema.Reference(plan.GetObjectID(localStatement.MetaData), referenceName);
 				node.Reference.SessionObjectName = sessionReferenceName;
 				node.Reference.SessionID = plan.SessionID;
 				node.Reference.IsGenerated = localStatement.IsSession;
@@ -9102,7 +9102,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (requiredScalarType == null)
 				plan.CheckRight(Schema.RightNames.HostImplementation);
 
-			int objectID = Schema.Object.GetObjectID(deviceScalarTypeMap.MetaData);
+			int objectID = plan.GetObjectID(deviceScalarTypeMap.MetaData);
 			string deviceScalarTypeName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, dataType.Name), objectID);
 			object deviceScalarTypeObject = plan.CreateObject(classDefinition, new object[]{objectID, deviceScalarTypeName});
 			if (!(deviceScalarTypeObject is Schema.DeviceScalarType))
@@ -9160,7 +9160,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					throw new CompilerException(CompilerException.Codes.DuplicateDeviceOperator, deviceOperatorMap, device.Name, operatorValue.OperatorName, operatorValue.Signature.ToString());
 			}
 				
-			int objectID = Schema.Object.GetObjectID(deviceOperatorMap.MetaData);
+			int objectID = plan.GetObjectID(deviceOperatorMap.MetaData);
 			string deviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, operatorValue.Name), objectID);
 			object deviceOperatorObject = plan.CreateObject(deviceOperatorMap.ClassDefinition, new object[]{objectID, deviceOperatorName});
 			if (!(deviceOperatorObject is Schema.DeviceOperator))
@@ -9194,7 +9194,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (deviceOperator == null)
 			{
 				deviceScalarType.AddDependency(baseDeviceScalarType);
-				int objectID = Schema.Object.GetNextObjectID();
+				int objectID = plan.GetNextObjectID();
 				string deviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", device.Name, operatorValue.Name), objectID);
 				deviceOperator = (Schema.DeviceOperator)plan.CreateObject(classDefinition, new object[] { objectID, deviceOperatorName });
 				deviceOperator.Library = deviceScalarType.Library;
@@ -9312,7 +9312,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			string serverName = Schema.Object.Qualify(localStatement.ServerName, plan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(plan, statement, serverName);
 			CreateServerNode node = new CreateServerNode();
-			node.ServerLink = new Schema.ServerLink(Schema.Object.GetObjectID(localStatement.MetaData), serverName);
+			node.ServerLink = new Schema.ServerLink(plan.GetObjectID(localStatement.MetaData), serverName);
 			node.ServerLink.Owner = plan.User;
 			node.ServerLink.Library = plan.CurrentLibrary;
 			// TODO: Set ServerLink attributes from MetaData
@@ -9358,7 +9358,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			CreateDeviceNode node = new CreateDeviceNode();
 			plan.CheckRight(Schema.RightNames.HostImplementation);
 			plan.CheckClassDependency(plan.CurrentLibrary, localStatement.ClassDefinition);
-			object objectValue = plan.CreateObject(localStatement.ClassDefinition, new object[] { Schema.Object.GetObjectID(localStatement.MetaData), deviceName });
+			object objectValue = plan.CreateObject(localStatement.ClassDefinition, new object[] { plan.GetObjectID(localStatement.MetaData), deviceName });
 			if (!(objectValue is Schema.Device))
 				throw new CompilerException(CompilerException.Codes.DeviceClassExpected, localStatement.ClassDefinition, objectValue == null ? "null" : objectValue.GetType().AssemblyQualifiedName);
 			node.NewDevice = (Schema.Device)objectValue;
@@ -9799,7 +9799,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else
 				conversionName = Schema.Object.Qualify(Schema.Object.MangleQualifiers(String.Format("Conversion_{0}_{1}", sourceScalarType.Name, targetScalarType.Name)), plan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(plan, localStatement, conversionName);
-			Schema.Conversion conversion = new Schema.Conversion(Schema.Object.GetObjectID(localStatement.MetaData), conversionName, sourceScalarType, targetScalarType, context.Operator, localStatement.IsNarrowing);
+			Schema.Conversion conversion = new Schema.Conversion(plan.GetObjectID(localStatement.MetaData), conversionName, sourceScalarType, targetScalarType, context.Operator, localStatement.IsNarrowing);
 			conversion.Owner = plan.User;
 			conversion.Library = plan.CurrentLibrary;
 			conversion.MergeMetaData(localStatement.MetaData);
@@ -9911,7 +9911,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			string roleName = Schema.Object.Qualify(localStatement.RoleName, plan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(plan, statement, roleName);
 
-			node.Role = new Schema.Role(Schema.Object.GetObjectID(localStatement.MetaData), roleName);
+			node.Role = new Schema.Role(plan.GetObjectID(localStatement.MetaData), roleName);
 			node.Role.MetaData = localStatement.MetaData;
 			node.Role.Owner = plan.User;
 			node.Role.Library = plan.CurrentLibrary;
@@ -10587,7 +10587,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			bool creationObjectPushed = false;
 			try
 			{
-				int objectID = Schema.Object.GetObjectID(statement.MetaData);
+				int objectID = plan.GetObjectID(statement.MetaData);
 				if (statement.EventSourceSpecifier is ObjectEventSourceSpecifier)
 				{
 					node.EventSource = ResolveCatalogIdentifier(plan, ((ObjectEventSourceSpecifier)statement.EventSourceSpecifier).ObjectName, true);

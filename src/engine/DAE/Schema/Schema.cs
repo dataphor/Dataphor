@@ -760,32 +760,41 @@ namespace Alphora.Dataphor.DAE.Schema
 			return String.Format("Object_{0}", iD.ToString().Replace("-", "_"));
 		}
 
-		private static int _nextID = 0;		
+		// NOTE: the transition's shared generator. Identifiers belong to one catalog (see ObjectIDGenerator), but
+		// moving every allocation in the tree onto the generator of the engine that owns the catalog takes several
+		// tickets, and a counter that is reset alongside one that is not would sooner or later give two objects of
+		// one catalog the same identifier. So until the last of them lands, every Engine.ObjectIDGenerator is this
+		// one instance and the three statics below draw from it, which keeps converted and unconverted call sites
+		// on one counter and the identifiers handed out unchanged. bug-object-id-counter-is-process-wide gives each
+		// engine its own generator and removes this field and the three statics with it.
+		private static readonly ObjectIDGenerator _sharedObjectIDGenerator = new ObjectIDGenerator();
+		internal static ObjectIDGenerator SharedObjectIDGenerator { get { return _sharedObjectIDGenerator; } }
+		
 		public static int GetNextObjectID()
 		{
-			return Interlocked.Increment(ref _nextID);
+			return _sharedObjectIDGenerator.Allocate();
 		}
 		
 		public static void SetNextObjectID(int nextID)
 		{
-			lock (typeof(Schema.Object))
-			{
-				_nextID = nextID;
-			}
+			_sharedObjectIDGenerator.SetLastAllocated(nextID);
 		}
 		
 		/// <summary>Gets the object id from the given meta data and removes the DAE.ObjectID tag, if it exists. Otherwise, returns the value of GetNextObjectID().</summary>
 		public static int GetObjectID(MetaData metaData)
 		{
-			Tag tag = MetaData.RemoveTag(metaData, "DAE.ObjectID");
-			if (tag != Tag.None)
-				return Int32.Parse(tag.Value);
-			return GetNextObjectID();
+			return _sharedObjectIDGenerator.Allocate(metaData);
 		}
 
 		/// <summary>Ensures that the object has metadata and a DAE.ObjectID tag with the id of the object.</summary>		
 		public void SaveObjectID()
 		{
+			// An identifier of zero means the object was built where no engine was in reach, so no generator could
+			// number it (see ObjectIDGenerator, which never allocates zero). Refuse to emit it: a missed allocation
+			// site must fail here rather than write an unnumbered object into a catalog store.
+			if (_iD == 0)
+				throw new SchemaException(SchemaException.Codes.ObjectIDRequired, Name);
+			
 			AddMetaDataTag("DAE.ObjectID", _iD.ToString(), true);
 		}
 		

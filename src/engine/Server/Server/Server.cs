@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected override CatalogDevice CreateCatalogDevice()
 		{
-			return new ServerCatalogDevice(Schema.Object.GetNextObjectID(), CatalogDeviceName);
+			return new ServerCatalogDevice(ObjectIDGenerator.Allocate(), CatalogDeviceName);
 		}
 		
 		protected override void LoadSystemAssemblies()
@@ -501,8 +501,10 @@ namespace Alphora.Dataphor.DAE.Server
 			// Load server configuration settings
 			catalogDeviceSession.LoadServerSettings(this);
 
-			// Set the object ID generator				
-			Schema.Object.SetNextObjectID(catalogDeviceSession.GetMaxObjectID() + 1);
+			// Raise the object ID generator above every identifier the catalog store holds. It is raised and never
+			// set, because the built-in objects created before the store was read are already numbered above the
+			// maximum of an empty or first-run store.
+			ObjectIDGenerator.EnsureAllocatedThrough(catalogDeviceSession.GetMaxObjectID());
 
 			// Insert a row into TableDee...
 			RunScript(_systemProcess, "insert table { row { } } into TableDee;");

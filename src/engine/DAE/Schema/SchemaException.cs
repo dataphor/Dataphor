@@ -454,6 +454,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			/// <summary>Error code 113248: "Errors occurred while attempting to apply device settings for device "{0}", setting "{1}", value "{2}"."</summary>
 			ErrorApplyingDeviceSetting = 113248,
+			
+			/// <summary>Error code 113249: "Object "{0}" has not been given an object identifier."</summary>
+			ObjectIDRequired = 113249,
+			
+			/// <summary>Error code 113250: "The object identifiers of this catalog have been exhausted."</summary>
+			ObjectIDsExhausted = 113250,
 		}		
 
 		// Resource manager for this exception class

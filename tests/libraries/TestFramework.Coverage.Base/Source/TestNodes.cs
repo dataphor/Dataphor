@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			Schema.Objects objects = new Schema.Objects();
 			for (int index = 0; index < 100; index++)
 			{
-				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), String.Format("Object_{0}", index.ToString())));
+				objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), String.Format("Object_{0}", index.ToString())));
 			}
 			
 			// Verify lookup by name and id
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			bool errorHit = false;
 			try
 			{
-				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "Object_1"));
+				objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "Object_1"));
 			}
 			catch
 			{
@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			errorHit = false;
 			try
 			{
-				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.Object_1")); // cannot create a hiding identifier
+				objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "A.Object_1")); // cannot create a hiding identifier
 			}
 			catch
 			{
@@ -128,12 +128,12 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			if (!errorHit)
 				throw new TestException("Hiding object name allowed.");
 			
-			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A.A"));
+			objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "A.A"));
 
 			errorHit = false;
 			try
 			{
-				objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "A")); // cannot create a hidden identifier
+				objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "A")); // cannot create a hidden identifier
 			}
 			catch
 			{
@@ -144,14 +144,14 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 				throw new TestException("Hidden object name allowed.");
 			
 			// Verify that ambiguous references are not allowed
-			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "B.A"));
+			objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "B.A"));
 			List<string> names = new List<string>();
 			int objectIndex = objects.IndexOf("A", names);
 			if (objectIndex >= 0)
 				throw new TestException("Ambiguous resolution allowed.");
 				
-			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Y.Z"));
-			objects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "X.Z"));
+			objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "X.Y.Z"));
+			objects.Add(new Schema.ScalarType(program.Plan.GetNextObjectID(), "X.Z"));
 			names.Clear();
 			objectIndex = objects.IndexOf("Z", names);
 			if (objectIndex >= 0)

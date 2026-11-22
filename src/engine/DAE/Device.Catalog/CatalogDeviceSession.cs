@@ -1902,6 +1902,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Adds the given object to the catalog cache.</summary>
 		public void CacheCatalogObject(Schema.CatalogObject objectValue)
 		{
+			// An identifier of zero means no generator numbered the object (see Schema.ObjectIDGenerator, which never
+			// allocates zero). The cache index below is keyed by it, so refuse it: a missed allocation site must fail
+			// here rather than put an unnumbered object in the catalog cache.
+			if (objectValue.ID == 0)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectIDRequired, objectValue.Name);
+			
 			lock (Catalog)
 			{
 				// if the object is already in the cache (by name), then it must be there as a result of some error

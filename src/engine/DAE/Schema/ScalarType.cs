@@ -31,11 +31,6 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public Property(int iD, string name) : base(iD, name) {}
 		
-		public Property(int iD, string name, IDataType dataType) : base(name)
-		{
-			_dataType = dataType;
-		}
-		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Property"), DisplayName, _representation.DisplayName, _representation.ScalarType.DisplayName); } }
 
 		public override int CatalogObjectID { get { return _representation == null ? -1 : _representation.CatalogObjectID; } }

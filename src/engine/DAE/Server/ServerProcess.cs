@@ -694,7 +694,7 @@ namespace Alphora.Dataphor.DAE.Server
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
 			#endif
 			Schema.DerivedTableVar tableVar = null;
-			tableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(program.ID));
+			tableVar = new Schema.DerivedTableVar(plan.GetNextObjectID(), Schema.Object.NameFromGuid(program.ID));
 			tableVar.SessionObjectName = tableVar.Name;
 			tableVar.SessionID = plan.SessionID;
 			plan.PushCreationObject(tableVar);

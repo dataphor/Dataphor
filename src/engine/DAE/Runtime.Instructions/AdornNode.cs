@@ -386,7 +386,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (ReferenceDefinition referenceDefinition in _references)
 			{
 				// Create a reference on the table var
-				Schema.Reference reference = new Schema.Reference(Schema.Object.GetObjectID(referenceDefinition.MetaData), referenceDefinition.ReferenceName, referenceDefinition.MetaData);
+				Schema.Reference reference = new Schema.Reference(plan.GetObjectID(referenceDefinition.MetaData), referenceDefinition.ReferenceName, referenceDefinition.MetaData);
 				reference.Enforced = false;
 				reference.SourceTable = TableVar;
 				

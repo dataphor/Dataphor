@@ -342,6 +342,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		private void InternalInsertPersistentObject(Schema.Object objectValue)
 		{
+			// An identifier of zero means no generator numbered the object (see Schema.ObjectIDGenerator, which never
+			// allocates zero). It would go into DAEObjects.ID, where it is the row's key, so refuse it: a missed
+			// allocation site must fail here rather than corrupt the catalog store.
+			if (objectValue.ID == 0)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectIDRequired, objectValue.Name);
+			
 			CatalogStoreConnection.InsertPersistentObject(objectValue, ScriptPersistentObject(objectValue));
 		}
 

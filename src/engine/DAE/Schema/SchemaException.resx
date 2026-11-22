@@ -561,4 +561,10 @@
   <data name="113248" xml:space="preserve">
     <value>Errors occurred while attempting to apply device settings for device "{0}", setting "{1}", value "{2}".</value>
   </data>
+  <data name="113249" xml:space="preserve">
+    <value>Object "{0}" has not been given an object identifier.</value>
+  </data>
+  <data name="113250" xml:space="preserve">
+    <value>The object identifiers of this catalog have been exhausted.</value>
+  </data>
 </root>

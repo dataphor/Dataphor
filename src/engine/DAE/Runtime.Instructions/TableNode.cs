@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         protected void CopySourceReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
-			int newReferenceID = Schema.Object.GetNextObjectID();
+			int newReferenceID = plan.GetNextObjectID();
 			string newReferenceName = DeriveSourceReferenceName(reference, newReferenceID);
 			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;
@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         protected void CopyTargetReference(Plan plan, Schema.ReferenceBase reference, bool isExcluded)
         {
-			int newReferenceID = Schema.Object.GetNextObjectID();
+			int newReferenceID = plan.GetNextObjectID();
 			string newReferenceName = DeriveTargetReferenceName(reference, newReferenceID);
 			Schema.DerivedReference newReference = new Schema.DerivedReference(newReferenceID, newReferenceName, reference);
 			newReference.IsExcluded = isExcluded;
