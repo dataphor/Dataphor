@@ -16,6 +16,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// asking plan wanted a static cursor, which every data-modification statement does, so the engine sorted the whole table
 	/// once per delete and the drain was quadratic (bug-engine-delete-quota-scans-the-table).
 	/// </summary>
+	/// <remarks>
+	/// This case weighs the statement's cost and never its result. What a quota yields and what a modification through one leaves
+	/// behind are pinned by the coverage corpus, which is the record of correct behaviour: ViewUpdatability.d4 inserts, updates
+	/// and deletes through a quota view and asserts each outcome, ApplicationTransactions.d4 runs a quota update inside an event
+	/// handler, and DML.d4 and TestProject.d4 assert the exact rows a quota reads, nils and all.
+	/// </remarks>
 	[TestFixture]
 	public class QuotaDeleteCostTest : InProcessTestFixture
 	{
@@ -36,20 +42,24 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <remarks>
 		/// A ratio, never an absolute time, so that the case says nothing about how fast the machine is. Measured on one slow
 		/// development laptop in Debug, 2026-11-22, by putting the device's old rule back: with the defect the two drains cost
-		/// 415 and 8,665 ms, a per-row ratio of 5.2 and a failing run of 19 s; without it the ratio came out between 0.95 and
-		/// 1.18 over five runs (0.92 to 1.35 when each size was drained once rather than twice), and the case takes 0.4 s. Two
-		/// sits above the widest of those and well below the defect.
+		/// 415 and 8,665 ms, a per-row ratio of 5.2 and a failing run of 19 s. Without it, twelve runs on that machine gave
+		/// ratios of 0.90 to 1.18 and one of 1.60, the drains behind that one costing 17 and 109 ms where the others cost 14 to
+		/// 34 and 62 to 122 - so the clean range reaches at least 1.6, and a bound of two had a quarter of its width in hand. Three
+		/// is roughly the geometric middle of 1.6 and the defect's 5.2: a drain whose cost is proportional to the table's size
+		/// cannot plausibly reach it, and one proportional to the square cannot come under it, since four times the rows costs
+		/// about four times as much per row. Raise it again rather than the row counts if it ever flakes: 2,000 rows would make
+		/// a failing run 35 s where this case takes 0.4 s.
 		/// </remarks>
-		private const double MaxPerRowGrowth = 2.0;
+		private const double MaxPerRowGrowth = 3.0;
 
 		/// <summary>
 		/// The smaller drain counts as at least this many milliseconds in the comparison, so that a fast machine measuring it at
 		/// the timer's resolution cannot fail the case by dividing by nearly nothing.
 		/// </summary>
 		/// <remarks>
-		/// It costs nothing in sensitivity: with this floor the larger drain may take 80 ms, and a quadratic drain of 1,000 rows
-		/// took 7,866 ms on the machine above - a machine would have to be a hundred times faster than that one for a quadratic
-		/// drain to come in under the bound.
+		/// It costs nothing in sensitivity: with this floor the larger drain may take 120 ms, and a quadratic drain of 1,000 rows
+		/// took 7,866 ms on the machine above - a machine would have to be sixty times faster than that one for a quadratic drain
+		/// to come in under the bound.
 		/// </remarks>
 		private const double SmallFloorMilliseconds = 10.0;
 

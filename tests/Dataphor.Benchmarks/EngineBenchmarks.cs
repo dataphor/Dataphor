@@ -61,8 +61,11 @@ namespace DAE.Benchmarks
 		/// together, not six numbers, which Timings already gives for the individual operations.
 		///
 		/// The delete is the whole table in one statement, deliberately not the "delete T return 1 by { ID }" form the
-		/// Timings script uses: that form costs time quadratic in the table's size
-		/// (bug-engine-delete-quota-scans-the-table), so a mix built on it would measure that defect rather than a mix.
+		/// Timings script uses. That form cost time quadratic in the table's size when this mix was written and would have
+		/// measured that defect rather than a mix; it costs time proportional to the size since
+		/// bug-engine-delete-quota-scans-the-table, and the mix still does not use it, because Timings measures the drain
+		/// and a whole-table delete is the shape an application uses. Neither the mix nor its recorded numbers were
+		/// affected by that fix: no statement here narrows a table in an order, which is the only shape it changed.
 		///
 		/// The cursor loop counts the rows it reads and raises if the count is not the number inserted, so that an
 		/// iteration which silently did less work than the one before it fails instead of publishing a faster number.

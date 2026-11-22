@@ -22,6 +22,7 @@ create operator BenchmarkExecute(const AString : String) : TimeSpan
 // predates 3.1 and its own recorded numbers are for 10,000 rows, so it ran with the cap lifted: the old
 // hand-wired fixture registered TestFramework.Coverage.Devices, whose Register.d4 lifts it. Coverage
 // scripts are the record of correct behaviour and are never edited, so the cap is lifted here instead -
-// once, for the two consumers that register this library (the Timings manifest entry and PerfBaselineTest)
-// and for nothing else. LongAggregates.d4 does the same thing inside its own script.
+// once, for the three consumers that register this library (the Timings manifest entry, PerfBaselineTest
+// and QuotaDeleteCostTest, which wants only the lifted cap) and for nothing else. LongAggregates.d4 does
+// the same thing inside its own script.
 alter device System.Temp alter class { alter "MaxRowCount" = "-1" };
