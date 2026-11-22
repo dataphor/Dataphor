@@ -74,11 +74,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// PreserveWhitespace then, and regenerate.
 	/// </para>
 	/// <para>
-	/// No other normalization is applied, and none is needed: measured on 2026-11-21 over the 45 surfaces of the seven
-	/// libraries other than System.Internet, all 320 forms that derive came out byte-identical on two independently
-	/// created server instances and identical when derived twice in one, so no timestamp, identifier or machine name
-	/// reaches the output and tag ordering is insertion-ordered. If a field ever does drift, add a normalizer then and
-	/// name the field; do not add one pre-emptively.
+	/// No other normalization is applied, and none is needed: measured on 2026-11-21 over the whole corpus below, all
+	/// 369 forms that derive came out byte-identical on two independently created server instances and identical when
+	/// derived twice in one, so no timestamp, identifier or machine name reaches the output and tag ordering is
+	/// insertion-ordered. If a field ever does drift, add a normalizer then and name the field; do not add one
+	/// pre-emptively.
 	/// </para>
 	/// <para>
 	/// The corpus is 52 surfaces across eight of the ten carried libraries - System.Platform and SimpleDevice define no
@@ -116,8 +116,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// NOTE: accepted tradeoff - the System library's surfaces are left out, although deriving its catalog tables is
 		// what the IDE does most: those forms change with every engine change, so their goldens would churn on work that
 		// has nothing to do with the Frontend, while the libraries named here change only when a library changes.
-		// Revisit if a derivation defect is ever found on a catalog table and not on a library table - then add "System"
-		// to this list and generate its goldens.
+		// Revisit if a derivation defect is ever found on a catalog table and not on a library table - but note that
+		// "System" cannot simply be added here: this is the fixture's list, which also names the library folders to copy,
+		// and System is the built-in catalog library with no folder of its own. Give this field an array of its own, with
+		// "System" added, and generate its goldens.
 		public static readonly string[] CorpusLibraries = FrontendLibraries;
 
 		/// <summary>A surface whose Browse page derives, for the cases that are about something other than the surface.</summary>
@@ -402,7 +404,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					: String.Format("{0}: deriving still fails, but not for the recorded reason {1}: {2}", derivation, wrongError, messages);
 		}
 
-		/// <summary>At most this many of the problems are listed; a failure that names every one of 320 files is unreadable.</summary>
+		/// <summary>At most this many of the problems are listed; a failure that names every file of the corpus is unreadable.</summary>
 		private const int ReportLimit = 25;
 
 		private static string Report(List<string> problems)
