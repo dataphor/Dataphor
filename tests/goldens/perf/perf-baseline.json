@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "baselines": [
+    {
+      "label": "dev-slow",
+      "configuration": "Debug",
+      "recorded": "2026-11-21",
+      "note": "one slow development laptop, Windows x64, nothing deliberately competing; the slower of the two machine classes the root AGENTS.md quotes suite timings for",
+      "scenarios": {
+        "Timing": 16144
+      }
+    }
+  ]
+}

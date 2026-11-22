@@ -63,8 +63,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// entry with no script, fails the run.
 	/// </summary>
 	/// <remarks>
-	/// <para>Format: strict JSON (no comments, no trailing commas), UTF-8 without a byte-order mark, LF line endings; one array,
-	/// one entry (an object) per line, sorted by <c>script</c> in ordinal order. Fields, and nothing else:</para>
+	/// <para>Format: strict JSON (no comments, no trailing commas), UTF-8 without a byte-order mark, CRLF line endings (as the
+	/// file has, and as .gitattributes leaves alone); one array, one entry (an object) per line, sorted by <c>script</c> in
+	/// ordinal order. Fields, and nothing else:</para>
 	/// <list type="bullet">
 	/// <item><c>script</c> (always): the file name in Documents/ without ".d4", exact case.</item>
 	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c>, <c>unstable</c> or <c>fragment</c> (see

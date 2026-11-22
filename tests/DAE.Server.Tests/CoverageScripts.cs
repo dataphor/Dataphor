@@ -32,7 +32,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// The library folders copied for every script's server: a fixed list rather than all of Libraries, so that the libraries
 		/// a script can see stay the same. The set the spike measured, without MSSQLDevice: nothing the template registers needs
-		/// a SQL Server (K14).
+		/// a SQL Server (K14), plus TestFramework.Perf, which is two text files and is registered only by the entries that name
+		/// it in <c>register</c> (the timing scripts' BenchmarkExecute operator; test-perf-timing-scripts).
 		/// </summary>
 		public static readonly string[] Libraries =
 		[
@@ -43,6 +44,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"Connection",
 			"TestFramework",
 			"TestFramework.Coverage.Scripts",
+			"TestFramework.Perf",
 			"System.Internet"
 		];
 
