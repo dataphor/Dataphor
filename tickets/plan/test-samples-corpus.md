@@ -35,9 +35,30 @@ One `implement/` ticket, prerequisite on `test-frontend-derivation-golden` (so i
 - **Frontend dependency.** Every sample needs `Frontend` registered first. The fixture the parent plan ticket `test-frontend-derivation-golden` builds already does this.
 - **Culture.** The invariant culture of the test host is already pinned by the harness; samples that write culture-sensitive strings into forms rely on it.
 
+## Measured while planning `test-frontend-derivation-golden`
+
+Appended 2026-11-21 from a throwaway probe in `tests/DAE.Server.Tests` (Debug, development machine; output in `tickets/.logs/test-frontend-derivation-golden.probe*.log` while that directory's pruner keeps it). This answers parts of open questions 1, 3 and 5 for free; take it as given rather than re-measuring.
+
+- **Thirteen libraries register on a server with no SQL Server**, in this order: `System.Platform`, `SimpleDevice`, `Frontend`, `System.Internet`, `Security`, `Sample.Common`, `Sample.DetailAdd`, `Sample.Forms`, `Sample.Rental`, `Sample.IssueTracker`, `Sample.Components`, `Sample.ScriptAction`, `Sample.SendEmail`. Note the order: `Frontend` must come before `System.Internet`, because `System.Internet`'s registration script calls the `Frontend.ExecuteScript` operator without declaring the dependency (`backlog/bug-system-internet-registration-needs-frontend`).
+- **`Sample.IssueTracker` needs no SQL Server.** Its `.d4l` references only `Sample.Common`, which uses `SimpleDevice`; it registers and exposes 9 table variables. The plan's WS4 note lists `Sample.Demo`, `Sample.Forum`, `Sample.Pubs` and `Sample.Shipping` as the SQL Server set, and that holds: those four reference `MSSQLDevice`, the rest do not.
+- **The surface-enumeration query that works** (open question 3): `TableVars where Library_Name = '<library>' and not(IsGenerated) over { Name } order by { Name }`. `TableVars` covers base tables and views in one go, and `IsGenerated` filters the ones the engine creates for application transactions and device reconciliation. Surfaces found: `Frontend` 11, `Security` 18, `Sample.Common` 1, `Sample.DetailAdd` 3, `Sample.Forms` 1, `Sample.IssueTracker` 9, `Sample.SendEmail` 2 — 45 in all.
+- **Three samples expose no table variables at all** after registration and so have nothing to derive: `Sample.Components`, `Sample.ScriptAction` and `Sample.Rental`. The first two are document-and-script libraries by design. `Sample.Rental` is the interesting one — see below.
+- **Cost** (open question 5): registering those libraries on each of two independent servers, running 720 derivations and loading the whole repository's customized-form corpus took **18.1 s** of one `dotnet test` run. Per-sample server isolation is affordable; no need to fall back on server resets.
+- **The fixture already exists.** `InProcessTestFixture` in `tests/DAE.Server.Tests` takes a list of library folders to copy and a list to register. `test-frontend-document-corpus` adds the Frontend sister fixture on top of it; this ticket's harness should take the same route rather than building a third.
+
+### `Sample.Rental` cannot be registered into a usable state
+
+`samples/Sample.Rental/Documents/Register.d4` is an **empty file**. The tutorial's device, tables, views and operators are created by running the scripts in its `Documents` folder by hand, in the order `RegisterCompleted.d4` lists. Two things go wrong when a test tries to do that:
+
+- Running `RegisterCompleted.d4` as one batch fails at its seventh step, `MovieActorTable`, with "The table Movie does not have a row with ID (1)." and the enclosing implicit transaction rolls the whole thing back. Running its 17 `ExecuteScript` statements as separate batches (what Dataphoria does) gets 11 through and still fails 6, beginning at the same step; the five later failures are all consequences (`Unknown identifier "Video"`, `"RentedVideo"`, `"VideoDetail"`).
+- The objects the successful steps *do* create are not in the `Sample.Rental` library: after those 11 steps `TableVars where Library_Name = 'Sample.Rental'` is still empty, although `Movie` plainly exists (that is what the failure message is about). They land in the session's current library, so they cannot be enumerated per library.
+
+So this sample needs a verdict of its own under open question 1, and the "Movie does not have a row with ID (1)" failure needs diagnosing before any of it can be corpus — the generator-based identifier allocation in `Generators.d4` is the first place to look. `test-frontend-document-corpus` excludes `Sample.Rental`'s four customized form documents for this reason.
+
 ## TODO
 
-- Walk the samples once: per sample, note the devices it uses, the surfaces it exposes and whether it has an upgrade script. Produce the per-sample verdict table.
+- Walk the samples once: per sample, note the devices it uses, the surfaces it exposes and whether it has an upgrade script. Produce the per-sample verdict table; the section above already covers the ten that register, the surface query and the three with no surfaces.
+- Diagnose `Sample.Rental`'s `RegisterCompleted` failure, or give it a documented verdict of "excluded, with this cause".
 - Settle the harness signature shared with `compat-corpus-harness`.
 - Settle the surface-enumeration query against the catalog.
 - Emit the implement ticket keeping the slug `test-samples-corpus`.
