@@ -74,6 +74,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// The "by" clause of a quota expression is optional, and the emitter printed an empty one regardless.
 		[TestCase("var x := T return 1;", TestName = "Quota_NoByClause_WasPrintedWithAnEmptyOne")]
 		[TestCase("var x := T return 1 by { ID };", TestName = "Quota_ByClause")]
+		// A "by" clause that is present and empty is not the same tree as none: the compiler orders by no columns
+		// for the first and by the clustering key for the second (Compiler.CompileQuotaExpression), so the guard
+		// on the clause has to read the flag rather than the column count.
+		[TestCase("var x := T return 1 by { };", TestName = "Quota_EmptyByClause_IsNotNoByClause")]
 		public void EmittedTextReParsesToTheSameTree(string source)
 		{
 			Statement first = new Parser().ParseScript(source, null);
@@ -96,6 +100,56 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(
 				ParserRoundTripCorpusTest.TreesEqual(first, second, out string difference), Is.True,
 				String.Format("Round-trip changed the parse tree.\nSource:  {0}\nEmitted: {1}\nAt:      {2}", source, emitted, difference));
+		}
+
+		/// <summary>
+		/// A quota expression built in C# rather than parsed - through the constructor that takes order columns -
+		/// prints its "by" clause. The columns are read only where HasByClause is set, so leaving the flag unset
+		/// dropped them from the printed text once the emitter started honouring it.
+		/// </summary>
+		[Test]
+		public void QuotaExpressionBuiltWithColumnsPrintsItsByClause()
+		{
+			QuotaExpression expression =
+				new QuotaExpression
+				(
+					new IdentifierExpression("T"),
+					new ValueExpression(1L),
+					new OrderColumnDefinition[] { new OrderColumnDefinition("ID", true) }
+				);
+
+			Assert.That(new D4TextEmitter().Emit(expression), Does.Contain("by { ID asc }"));
+		}
+
+		/// <summary>
+		/// The filter EmitMetaData applies: a static tag always prints, a dynamic one only where the mode is
+		/// ForRemote or the tag is not inherited. Printing the static and the dynamic tags as two groups reordered a
+		/// mixed set, and the one ordered pass that replaced those two had to keep this filter exactly as it was;
+		/// nothing else in the suite prints with EmitMode.ForRemote, which is the mode the server sends a remote
+		/// client its plan catalog in.
+		/// </summary>
+		[TestCase(EmitMode.ForCopy, false, TestName = "MetaDataFilter_ForCopy_DropsAnInheritedDynamicTag")]
+		[TestCase(EmitMode.ForRemote, true, TestName = "MetaDataFilter_ForRemote_KeepsAnInheritedDynamicTag")]
+		public void InheritedDynamicTagPrintsOnlyForRemote(EmitMode mode, bool keepsInheritedDynamic)
+		{
+			Block script = (Block)new Parser().ParseScript("create table T { ID : Integer, key { ID } };", null);
+			CreateTableStatement statement = (CreateTableStatement)script.Statements[0];
+			statement.MetaData =
+				new MetaData
+				(
+					new Tag[]
+					{
+						new Tag("A.InheritedDynamic", "1", true, false),
+						new Tag("A.OwnDynamic", "2", false, false),
+						new Tag("A.InheritedStatic", "3", true, true)
+					}
+				);
+
+			string emitted = new D4TextEmitter(mode).Emit(script);
+
+			Assert.That(emitted, Does.Contain("A.OwnDynamic"), "a dynamic tag the object owns prints in every mode");
+			Assert.That(emitted, Does.Contain("A.InheritedStatic"), "a static tag prints in every mode, inherited or not");
+			Assert.That(emitted.Contains("A.InheritedDynamic"), Is.EqualTo(keepsInheritedDynamic));
 		}
 	}
 }

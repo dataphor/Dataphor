@@ -1701,7 +1701,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// would meet the variable-statement-group rule in EmitStatement and print as one "var" statement.
 		protected override void InternalEmit(Statement statement)
 		{
-			if ((statement is Block) && !(statement is DelimitedBlock))
+			if (IsStatementList(statement))
 				EmitBlock((Block)statement);
 			else
 				base.InternalEmit(statement);
@@ -1788,6 +1788,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
+		/// <summary>True if the statement is a statement list - the plain Block the parser builds for a sequence of
+		/// statements, which no token in the source stands for - rather than a begin..end block.</summary>
+		private static bool IsStatementList(Statement statement)
+		{
+			return (statement is Block) && !(statement is DelimitedBlock);
+		}
+		
 		/// <summary>True if the block is the plain Block a multi-variable "var" statement parses to.</summary>
 		/// <remarks>
 		/// "var a : X, b : Y" is one statement in the source but a plain Block of VariableStatements in the tree
@@ -1797,7 +1804,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// </remarks>
 		protected static bool IsVariableStatementGroup(Block statement)
 		{
-			if ((statement is DelimitedBlock) || (statement.Statements.Count < 2))
+			if (!IsStatementList(statement) || (statement.Statements.Count < 2))
 				return false;
 			for (int index = 0; index < statement.Statements.Count; index++)
 				if (!(statement.Statements[index] is VariableStatement))
@@ -1853,7 +1860,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			// Parser.DelimitedBlock). That child is not a block the source wrote, so its statements are printed here
 			// rather than handed to EmitStatement, which prints the child as one nested statement and leaves a stray
 			// ";" and a blank line behind it. Both spellings read back as the same tree; this is the tidier one.
-			if ((statement.Statements.Count == 1) && (statement.Statements[0] is Block) && !(statement.Statements[0] is DelimitedBlock))
+			if ((statement.Statements.Count == 1) && IsStatementList(statement.Statements[0]))
 				EmitBlock((Block)statement.Statements[0]);
 			else
 				EmitBlock(statement);

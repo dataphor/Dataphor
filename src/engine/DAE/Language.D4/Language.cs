@@ -1516,6 +1516,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			_expression = expression;
 			_quota = quota;
+			// Columns are read only where the flag is set - without it the compiler orders by the clustering key
+			// (Compiler.CompileQuotaExpression) and the emitter prints no "by" clause - so passing columns sets it.
+			_hasByClause = true;
 			_columns.AddRange(columns);
 		}
 
