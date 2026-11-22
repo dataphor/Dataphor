@@ -256,13 +256,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public static void CopyLibraries(string targetDirectory, IEnumerable<string> names)
 		{
 			string librariesDirectory = LibrariesDirectory; // checks the layout even when no library is named
-			Directory.CreateDirectory(targetDirectory);
+			List<string> sourceDirectories = new List<string>();
 			foreach (string name in names)
 			{
 				string source = Path.Combine(librariesDirectory, name);
+				// Checked here rather than left to CopyLibraryFolders, so that the message names the library a fixture asked
+				// for and not just the folder that is missing.
 				if (!Directory.Exists(source))
 					throw new ArgumentException(String.Format("The runtime layout has no library \"{0}\" (expected the folder \"{1}\").", name, source), nameof(names));
-				CopyDirectory(source, Path.Combine(targetDirectory, name));
+				sourceDirectories.Add(source);
+			}
+			CopyLibraryFolders(targetDirectory, sourceDirectories);
+		}
+
+		/// <summary>
+		/// Copies each of <paramref name="sourceDirectories"/>, recursively, into <paramref name="targetDirectory"/>,
+		/// keeping each folder's own name - which is the library name a server reads it as.
+		/// </summary>
+		/// <remarks>
+		/// Takes folders rather than names so that a corpus whose libraries are not all in the runtime layout copies what
+		/// it discovered rather than reaching into the layout for it: SamplesCorpusTest resolves its closure in the layout
+		/// but the external corpus of compat-corpus-harness has no layout to resolve against.
+		/// </remarks>
+		public static void CopyLibraryFolders(string targetDirectory, IEnumerable<string> sourceDirectories)
+		{
+			Directory.CreateDirectory(targetDirectory);
+			foreach (string source in sourceDirectories)
+			{
+				if (!Directory.Exists(source))
+					throw new ArgumentException(String.Format("There is no library folder \"{0}\".", source), nameof(sourceDirectories));
+				CopyDirectory(source, Path.Combine(targetDirectory, Path.GetFileName(Path.TrimEndingDirectorySeparator(source))));
 			}
 		}
 

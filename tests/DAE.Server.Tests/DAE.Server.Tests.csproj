@@ -22,6 +22,7 @@
     <Compile Include="ConnectionKeepAliveTest.cs" />
     <Compile Include="ConnectionSecurityModeTest.cs" />
     <Compile Include="ContractParityTest.cs" />
+    <Compile Include="CorpusLibrary.cs" />
     <Compile Include="CoreWcfProtocolTest.cs" />
     <Compile Include="CoverageManifest.cs" />
     <Compile Include="CoverageScripts.cs" />
@@ -49,6 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolClient.cs" />
     <Compile Include="QuotaDeleteCostTest.cs" />
+    <Compile Include="SamplesCorpusTest.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
     <Compile Include="ServerLinkConnectionTest.cs" />
     <Compile Include="ServerLinkUserRollbackTest.cs" />

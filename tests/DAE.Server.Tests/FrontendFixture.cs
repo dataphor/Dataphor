@@ -90,10 +90,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>Every message in an exception chain, so that an assertion can look for text the engine wrapped.</summary>
-		// NOTE: this assembly now walks an exception chain in seven places - CoverageScripts.ErrorText, the four copies of
-		// FindError, CatalogStoreConcurrencyTest.Innermost and this. Each is a few lines and none is wrong; if an eighth is
-		// wanted, give the assembly one shared helper rather than adding it.
-		protected static string FlattenMessages(Exception exception)
+		// NOTE: this assembly walks an exception chain in seven places - CoverageScripts.ErrorText, the four copies of
+		// FindError, CatalogStoreConcurrencyTest.Innermost and this. Each is a few lines and none is wrong, and rather
+		// than adding an eighth, SamplesCorpusTest (which is not a FrontendFixture) calls this one, which is why it is
+		// public. A ninth caller is the point at which the assembly should get one shared helper and these six should
+		// drain into it.
+		public static string FlattenMessages(Exception exception)
 		{
 			System.Text.StringBuilder result = new System.Text.StringBuilder();
 			for (Exception current = exception; current != null; current = current.InnerException)

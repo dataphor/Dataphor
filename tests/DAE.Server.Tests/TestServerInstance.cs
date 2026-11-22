@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -33,11 +34,35 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>Copies the named libraries from the runtime layout. None is valid: System is built in, and the server creates General.</summary>
 		public TestServerInstance(string name, params string[] libraryNames)
+			: this(name, librariesDirectory => TestEnvironment.CopyLibraries(librariesDirectory, libraryNames))
+		{
+		}
+
+		/// <summary>
+		/// Copies the given library folders, wherever they are, each under its own folder name. For a corpus whose
+		/// libraries are not all in the runtime layout; the constructor above is the one an ordinary fixture uses.
+		/// </summary>
+		// NOTE: an argument of static type string[] binds to the constructor above, not to this one - the compiler prefers
+		// the exact array match over the conversion to IEnumerable<string> - so a caller holding an array of *folders*
+		// must pass it as something else (a List<string>, as SamplesCorpusTest does) or the folders would be read as
+		// layout library names. Either way a folder that does not exist fails loudly rather than producing a server
+		// missing a library.
+		public TestServerInstance(string name, IEnumerable<string> libraryDirectories)
+			: this(name, librariesDirectory => TestEnvironment.CopyLibraryFolders(librariesDirectory, libraryDirectories))
+		{
+		}
+
+		/// <summary>
+		/// The shared body of the two constructors above: a new directory, the libraries copied into its Libraries folder
+		/// by <paramref name="copyLibraries"/>, and a server configured over it, with the directory removed again if any
+		/// of that fails.
+		/// </summary>
+		private TestServerInstance(string name, Action<string> copyLibraries)
 		{
 			_directory = TestEnvironment.NewDirectory(name);
 			try
 			{
-				TestEnvironment.CopyLibraries(Path.Combine(_directory, LibrariesFolderName), libraryNames);
+				copyLibraries(Path.Combine(_directory, LibrariesFolderName));
 				_server = CreateServer(name);
 			}
 			catch
