@@ -505,7 +505,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						if (loadedLibrary != null)
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyRegistered, libraryName);
 							
-						loadedLibrary = new Schema.LoadedLibrary(libraryName);
+						loadedLibrary = new Schema.LoadedLibrary(program.Plan.GetNextObjectID(), libraryName);
 						loadedLibrary.Owner = program.Plan.User;
 							
 						//	Ensure that each required library is registered
@@ -617,7 +617,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					Schema.LoadedLibrary loadedLibrary = null;
 					try
 					{
-						loadedLibrary = new Schema.LoadedLibrary(libraryName);
+						loadedLibrary = new Schema.LoadedLibrary(program.Plan.GetNextObjectID(), libraryName);
 						loadedLibrary.Owner = program.CatalogDeviceSession.ResolveUser(((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetLibraryOwner(libraryName));
 							
 						//	Ensure that each required library is loaded

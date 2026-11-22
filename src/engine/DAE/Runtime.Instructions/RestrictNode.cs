@@ -575,7 +575,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!Nodes[1].IsRepeatable)
 				throw new CompilerException(CompilerException.Codes.InvalidRestrictionCondition);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);

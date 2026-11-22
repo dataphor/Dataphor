@@ -1194,10 +1194,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
     public class TableSelectorNode : TableNode
     {
-		public TableSelectorNode(Schema.ITableType dataType) : base()
+		// The result table variable has to exist by the time the caller adds columns to it, so it is built here
+		// rather than in DetermineDataType, and the plan is needed to number it.
+		public TableSelectorNode(Plan plan, Schema.ITableType dataType) : base()
 		{
 			_dataType = dataType;
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 		}
 		
 		public override void DetermineCharacteristics(Plan plan)
@@ -1356,7 +1358,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = Nodes[0].DataType;
-			TableVar = new Schema.ResultTableVar(this);
+			TableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			TableVar.EnsureTableVarColumns();
 
@@ -2503,7 +2505,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.TableVar tableVar = plan.RemoteConnect(_serverLink).PrepareTableVar(plan, _expression, new DataParams());
 			
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(tableVar.MetaData);
 			CopyTableVarColumns(tableVar.Columns);

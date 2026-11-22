@@ -586,7 +586,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(plan);
 			InternalCreateDataType(plan);
 
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(LeftTableVar.MetaData);
 			
@@ -1819,7 +1819,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(plan);
 			InternalCreateDataType(plan);
 
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(LeftTableVar.MetaData);
 			_tableVar.JoinInheritMetaData(RightTableVar.MetaData);

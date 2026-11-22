@@ -307,6 +307,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public Library() : base(String.Empty) {}
 		public Library(string name) : base(name) {}
+		public Library(int iD, string name) : base(iD, name) {}
 		public Library(string name, VersionNumber version) : base(name)
 		{
 			_version = version;
@@ -484,6 +485,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public object Clone()
 		{
+			// A clone is a copy of the descriptor handed to a caller, not a second library, so it takes no identifier.
 			Library library = new Library(Name, _version, _defaultDeviceName);
 			library.Directory = _directory;
 			library.MergeMetaData(MetaData);
@@ -582,6 +584,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class LoadedLibrary : Schema.CatalogObject
 	{
 		public LoadedLibrary(string name) : base(name) {}
+		public LoadedLibrary(int iD, string name) : base(iD, name) {}
 		
 		private List _assemblies = new List();
 		public List Assemblies { get { return _assemblies; } }

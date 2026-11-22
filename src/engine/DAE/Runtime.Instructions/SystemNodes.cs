@@ -966,7 +966,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));			
@@ -1016,7 +1016,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						string tableName = (string)Nodes[1].Execute(program);
 						Schema.TableVar tableVar = Compiler.ResolveCatalogIdentifier(program.Plan, tableName, false) as Schema.TableVar;
 						if (tableVar == null)
-							tableVar = new Schema.BaseTableVar(tableName, new Schema.TableType(), device);
+							tableVar = new Schema.BaseTableVar(program.Plan.GetNextObjectID(), tableName, new Schema.TableType(), device);
 							
 						errorList = device.Reconcile(program.ServerProcess, tableVar);
 					}
@@ -2177,7 +2177,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			
@@ -2569,7 +2569,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("DeclaringType", plan.DataTypes.SystemName));

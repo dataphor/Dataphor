@@ -127,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
@@ -211,7 +211,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -471,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -558,7 +558,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -642,7 +642,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Key_ID", plan.DataTypes.SystemInteger));
@@ -709,7 +709,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -789,7 +789,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Order_ID", plan.DataTypes.SystemInteger));
@@ -869,7 +869,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -978,7 +978,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -1062,7 +1062,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("ID", plan.DataTypes.SystemInteger));
@@ -1189,7 +1189,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			DataType.Columns.Add(new Schema.Column("Reference_ID", plan.DataTypes.SystemInteger));

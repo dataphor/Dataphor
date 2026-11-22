@@ -471,6 +471,19 @@ namespace Alphora.Dataphor.DAE.Schema
 			return column;
         }
         
+		/// <summary>Inherits this column under the given identifier, for a copy that a catalog will hold.</summary>
+		/// <remarks>
+		/// A column's identifier is written into the creation script of the table variable that holds it, so a copy
+		/// landing on a table or a view needs one of its own; the no-argument overloads leave the copy unnumbered,
+		/// which is what the relational operators want for the columns of an intermediate result.
+		/// </remarks>
+        public TableVarColumn Inherit(int iD)
+        {
+			TableVarColumn column = new TableVarColumn(iD, _column.Copy(), MetaData == null ? null : MetaData.Inherit(), _columnType);
+			InternalCopy(column);
+			return column;
+        }
+        
         public TableVarColumn Inherit(string prefix)
         {
 			TableVarColumn column = new TableVarColumn(_column.Copy(prefix), MetaData == null ? null : MetaData.Inherit(), _columnType);
@@ -488,6 +501,14 @@ namespace Alphora.Dataphor.DAE.Schema
         public TableVarColumn Copy()
         {
 			TableVarColumn column = new TableVarColumn(_column.Copy(), MetaData == null ? null : MetaData.Copy(), _columnType);
+			InternalCopy(column);
+			return column;
+		}
+
+		/// <summary>Copies this column under the given identifier; see <see cref="Inherit(int)"/>.</summary>
+        public TableVarColumn Copy(int iD)
+        {
+			TableVarColumn column = new TableVarColumn(iD, _column.Copy(), MetaData == null ? null : MetaData.Copy(), _columnType);
 			InternalCopy(column);
 			return column;
 		}
@@ -2532,9 +2553,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// IsInference indicates whether this copy should be an inference, as in the case of a table var inference on a view
-		// NOTE: the plan is here to number the keys and orders this copies. Two of the three call paths are the
-		// compiler creating a table or a view, whose keys and orders are written into the catalog store as part of
-		// its definition, so they cannot be left unnumbered (Schema.Object.UnassignedID).
+		// NOTE: the plan is here to number the columns, keys and orders this copies. Two of the three call paths
+		// are the compiler creating a table or a view, whose columns, keys and orders are written into the catalog
+		// store as part of its definition, so they cannot be left unnumbered (Schema.Object.UnassignedID).
 		public void CopyTableVar(Plan plan, TableNode sourceNode, bool isInference)
 		{
 			// create datatype
@@ -2551,9 +2572,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			foreach (Schema.TableVarColumn column in sourceNode.TableVar.Columns)
 			{
 				if (isInference)
-					newColumn = column.Inherit();
+					newColumn = column.Inherit(plan.GetNextObjectID());
 				else
-					newColumn = column.Copy();
+					newColumn = column.Copy(plan.GetNextObjectID());
 				DataType.Columns.Add(newColumn.Column);
 				Columns.Add(newColumn);
 			}
@@ -2834,7 +2855,18 @@ namespace Alphora.Dataphor.DAE.Schema
 			DataType = tableType;
 		}
 		
+		public BaseTableVar(int iD, string name, ITableType tableType) : base(iD, name)
+		{
+			DataType = tableType;
+		}
+		
 		public BaseTableVar(string name, ITableType tableType, Device device) : base(name)
+		{
+			DataType = tableType;
+			Device = device;
+		}
+		
+		public BaseTableVar(int iD, string name, ITableType tableType, Device device) : base(iD, name)
 		{
 			DataType = tableType;
 			Device = device;
@@ -2852,7 +2884,18 @@ namespace Alphora.Dataphor.DAE.Schema
 			DataType = tableType;
 		}
 		
+		public BaseTableVar(int iD, ITableType tableType) : base(iD, Schema.Object.GetUniqueName())
+		{
+			DataType = tableType;
+		}
+		
 		public BaseTableVar(ITableType tableType, Device device) : base(Schema.Object.GetUniqueName())
+		{
+			DataType = tableType;
+			Device = device;
+		}
+		
+		public BaseTableVar(int iD, ITableType tableType, Device device) : base(iD, Schema.Object.GetUniqueName())
 		{
 			DataType = tableType;
 			Device = device;
@@ -2910,7 +2953,14 @@ namespace Alphora.Dataphor.DAE.Schema
 	// These are not persisted in the catalog, they only exist in the context of a compiled plan.
 	public class ResultTableVar : TableVar
 	{
-		public ResultTableVar(TableNode node) : base(Schema.Object.GetNextObjectID(), Schema.Object.GetUniqueName())
+		/// <summary>Builds the schema stub for the intermediate result of a relational operator.</summary>
+		/// <remarks>
+		/// A result table variable never enters a catalog, but its identifier is still used to uniquify derived
+		/// names (see <see cref="Object.GetGeneratedName"/>), so it is a real allocation from the plan that is
+		/// compiling the operator rather than <see cref="Object.UnassignedID"/>: every intermediate result of one
+		/// plan carrying the same number would collide there.
+		/// </remarks>
+		public ResultTableVar(Plan plan, TableNode node) : base(plan.GetNextObjectID(), Schema.Object.GetUniqueName())
 		{
 			_node = node;
 			DataType = node.DataType;
@@ -3018,7 +3068,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					if (reference.SourceTable.Equals(sourceNode.TableVar))
 					{
-						Schema.DerivedReference newReference = new Schema.DerivedReference(reference.Name, reference);
+						// A derived reference is inferred from the view's expression and recomputed whenever the view is
+						// recompiled, so it is never persisted and Schema.Catalog does not accept one. Its name is the
+						// parent's rather than a generated one, so it needs no identifier to make it unique either.
+						Schema.DerivedReference newReference = new Schema.DerivedReference(Schema.Object.UnassignedID, reference.Name, reference);
 						newReference.IsExcluded = reference.IsExcluded;
 						newReference.InheritMetaData(reference.MetaData);
 						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;
@@ -3034,7 +3087,10 @@ namespace Alphora.Dataphor.DAE.Schema
 					}
 					else if (reference.TargetTable.Equals(sourceNode.TableVar) && !References.Contains(reference.Name))
 					{
-						Schema.DerivedReference newReference = new Schema.DerivedReference(reference.Name, reference);
+						// A derived reference is inferred from the view's expression and recomputed whenever the view is
+						// recompiled, so it is never persisted and Schema.Catalog does not accept one. Its name is the
+						// parent's rather than a generated one, so it needs no identifier to make it unique either.
+						Schema.DerivedReference newReference = new Schema.DerivedReference(Schema.Object.UnassignedID, reference.Name, reference);
 						newReference.IsExcluded = reference.IsExcluded;
 						newReference.InheritMetaData(reference.MetaData);
 						//newReference.UpdateReferenceAction = reference.UpdateReferenceAction;

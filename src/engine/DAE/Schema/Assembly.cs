@@ -62,6 +62,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
+	/// <summary>Names a host implementation class that a loaded library's assembly offers.</summary>
+	/// <remarks>
+	/// The registered classes are rebuilt from each assembly's class list every time a library's assemblies are
+	/// registered, are resolved by name through <see cref="ClassLoader"/>, and are never put in a catalog or
+	/// written to the catalog store, so a registered class carries <see cref="Schema.Object.UnassignedID"/>.
+	/// </remarks>
 	public class RegisteredClass : Schema.Object
 	{
 		public RegisteredClass(string name, LoadedLibrary library, RegisteredAssembly assembly, string className) : base(name) 

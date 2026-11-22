@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 
@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			{
 				Schema.TableType tableType = new Schema.TableType();
-				TableSelectorNode node = new TableSelectorNode(tableType);
+				TableSelectorNode node = new TableSelectorNode(plan, tableType);
 				node.TableVar.Keys.Add(new Schema.Key(plan.GetNextObjectID()));
 				node.Nodes.Add(new RowSelectorNode(new Schema.RowType()));
 				node.DetermineCharacteristics(plan);

@@ -163,7 +163,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			// TODO: Rewrite this...
 			Schema.TableType tableType = new Schema.TableType();
-			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(tableType);
+			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(Program.Plan.GetNextObjectID(), tableType);
 			Schema.TableVarColumn newColumn;
 			foreach (Schema.TableVarColumn column in Node.TableVar.Columns)
 			{

@@ -290,13 +290,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// Runs <paramref name="body"/> and hands the process its object-id counter back afterwards: starting an engine sets
-		/// the process-wide counter from that engine's own catalog (bug-object-id-counter-is-process-wide), which would
-		/// otherwise leave a server that was already running allocating ids its catalog already holds. An engine that started
-		/// and was then stopped has moved the counter just as much as one that stayed up, and a client-side LocalServer moves
-		/// it too: it starts an engine of its own for its catalog cache. Out of process - how the product runs - the counters
-		/// are separate and none of this arises.
+		/// Runs <paramref name="body"/> and raises the process's object-id counter back afterwards if the body left it
+		/// lower: starting an engine resets the process-wide counter and then numbers that engine's own catalog from zero
+		/// (bug-object-id-counter-is-process-wide), which would otherwise leave a server that was already running
+		/// allocating ids its catalog already holds. An engine that started and was then stopped has moved the counter just
+		/// as much as one that stayed up, and a client-side LocalServer moves it too: it starts an engine of its own for its
+		/// catalog cache. Out of process - how the product runs - the counters are separate and none of this arises.
 		/// </summary>
+		/// <remarks>
+		/// Upwards only. An engine started inside the body can still be running when this returns - a LocalServer's engine
+		/// lives as long as its client - and handing a live engine a counter below what it has already allocated gives two
+		/// objects of its catalog one identifier, which is this workaround causing the defect it exists to avoid rather than
+		/// a cure for it. Raising the counter is the whole of what it can safely do.
+		/// </remarks>
 		public static void WithTheObjectIDCounterRestored(Action body)
 		{
 			int nextObjectID = Schema.Object.GetNextObjectID();
@@ -306,7 +312,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 			finally
 			{
-				Schema.Object.SetNextObjectID(nextObjectID);
+				if (Schema.Object.GetNextObjectID() < nextObjectID)
+					Schema.Object.SetNextObjectID(nextObjectID);
 			}
 		}
 

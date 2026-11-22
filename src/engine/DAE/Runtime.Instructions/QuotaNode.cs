@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(plan);
 			Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, new Schema.Order(plan.GetNextObjectID(), _quotaOrder), true);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);

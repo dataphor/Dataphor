@@ -3125,7 +3125,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			EnsureModifyNodes(program.Plan);
 			
 			// Create a table constructor node to serve as the source for the insert
-			TableSelectorNode sourceNode = new TableSelectorNode(new Schema.TableType());
+			TableSelectorNode sourceNode = new TableSelectorNode(program.Plan, new Schema.TableType());
 			RowSelectorNode rowNode = new RowSelectorNode(row.DataType);
 			sourceNode.Nodes.Add(rowNode);
 			for (int index = 0; index < row.DataType.Columns.Count; index++)

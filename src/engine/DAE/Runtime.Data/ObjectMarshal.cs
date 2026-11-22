@@ -72,7 +72,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					var iDictionary = value as IDictionary;
 					if (iDictionary != null)
 					{
-						var newTableVar = new Schema.BaseTableVar(tableType);
+						// Only an IValueManager is in reach here, so there is no engine to number the table variable; it
+						// describes the native table built for a marshalled dictionary and never enters a catalog.
+						var newTableVar = new Schema.BaseTableVar(Schema.Object.UnassignedID, tableType);
 						newTableVar.EnsureTableVarColumns();
 						// Assume the first column is the key, this is potentially problematic, but without key information in table types, not much else we can do....
 						// The assumption here is that the C# representation of a "table" is a dictionary

@@ -12,6 +12,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 {
 	using Alphora.Dataphor.DAE.Schema;
 	
+	/// <summary>Indexes the signatures of every operator sharing one name.</summary>
+	/// <remarks>
+	/// An operator map is an index, not a catalog object: it lives in <see cref="OperatorMaps"/>, is found by name
+	/// and is never cached or persisted, so it carries <see cref="Schema.Object.UnassignedID"/>. The operators it
+	/// indexes are the ones the catalog numbers.
+	/// </remarks>
 	public class OperatorMap : Schema.Object
     {
 		public OperatorMap(string name) : base(name)

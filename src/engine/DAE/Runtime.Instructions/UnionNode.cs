@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			_tableVar.InheritMetaData(LeftTableVar.MetaData);
 			_tableVar.JoinInheritMetaData(RightTableVar.MetaData);

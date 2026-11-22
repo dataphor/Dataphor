@@ -553,6 +553,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		public int DeletedTableVarID;
 	}
 
+	/// <summary>Maps a table variable to its application transaction translation and the nodes that maintain it.</summary>
+	/// <remarks>
+	/// A table map is held in <see cref="TableMaps"/> and found by name; it is never catalogued or persisted, so
+	/// it carries <see cref="Schema.Object.UnassignedID"/>. The translated table variable is what gets numbered.
+	/// </remarks>
 	public class TableMap : Schema.Object
 	{
 		public TableMap(string tableVarName) : base(tableVarName) {}
@@ -637,6 +642,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		public TableMap this[TableVar tableVar] { get { return this[tableVar.Name]; } }
 	}
 	
+	/// <summary>Maps an operator's name to the name of its application transaction translation.</summary>
+	/// <remarks>
+	/// Like the compiler's operator map this is a name map held in its own list and never catalogued or persisted,
+	/// so it carries <see cref="Schema.Object.UnassignedID"/>; the translated operator is what gets numbered.
+	/// </remarks>
 	public class OperatorMap : Schema.Object
 	{
 		public OperatorMap(string operatorName, string translatedOperatorName) : base(operatorName)

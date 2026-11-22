@@ -1559,7 +1559,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			_nonNilableColumns = new Schema.Objects<Schema.TableVarColumn>();
 			_defaultColumns = new Schema.Objects<Schema.TableVarColumn>();
-			Schema.BaseTableVar dummy = new Schema.BaseTableVar(table.Name);
+			// Pushed as the creation object so the new columns' defaults and constraints attach their dependencies to
+			// the stand-in rather than to the table being altered; it never enters a catalog, so it is not numbered.
+			Schema.BaseTableVar dummy = new Schema.BaseTableVar(Schema.Object.UnassignedID, table.Name);
 			dummy.Library = table.Library;
 			dummy.IsGenerated = table.IsGenerated;
 			plan.PushCreationObject(dummy);
@@ -2362,7 +2364,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				CheckNoDependents(program, operatorValue);
 					
-				Schema.Operator tempOperator = new Schema.Operator(operatorValue.Name);
+				// Holds the recompiled block until AlterOperator moves it onto the real operator; never catalogued.
+				Schema.Operator tempOperator = new Schema.Operator(Schema.Object.UnassignedID, operatorValue.Name);
 				program.Plan.PushCreationObject(tempOperator);
 				try
 				{
@@ -2532,7 +2535,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			if (_alterConstraintStatement.Expression != null)
 			{
-				Schema.CatalogConstraint tempConstraint = new Schema.CatalogConstraint(constraint.Name);
+				// Holds the recompiled expression while it is validated; AlterConstraint then moves it onto the real
+				// constraint, so the stand-in never enters a catalog and is not numbered.
+				Schema.CatalogConstraint tempConstraint = new Schema.CatalogConstraint(Schema.Object.UnassignedID, constraint.Name);
 				tempConstraint.ConstraintType = constraint.ConstraintType;
 				program.Plan.PushCreationObject(tempConstraint);
 				try

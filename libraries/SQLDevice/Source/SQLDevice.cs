@@ -2405,7 +2405,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							
 							// Search for a table with this name unqualified in the server catalog
 							string tableTitle = (string)cursor[4];
-							localTableVar = new BaseTableVar(GetServerTableName(plan, serverCatalog, schemaName, tableName), null);
+							localTableVar = new BaseTableVar(plan.GetNextObjectID(), GetServerTableName(plan, serverCatalog, schemaName, tableName), null);
 							localTableVar.Owner = plan.User;
 							localTableVar.Library = plan.CurrentLibrary;
 							localTableVar.Device = this;
@@ -2441,9 +2441,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						if (ShouldIncludeColumn(plan, tableName, columnName, nativeDomainName))
 						{
 							D4.MetaData metaData = new D4.MetaData();
+							// The reconciled table variable is inserted into the server catalog by CreateDeviceTableInServer,
+							// so its columns are persisted with it and have to be numbered.
 							TableVarColumn column =
 								new TableVarColumn
 								(
+									plan.GetNextObjectID(),
 									new Column(columnName, FindScalarType(plan, nativeDomainName, length, metaData)),
 									metaData, 
 									TableVarColumnType.Stored
@@ -2676,7 +2679,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								metaData.Tags.Add(new D4.Tag("Storage.Name", constraintName, false, true));
 								metaData.Tags.Add(new D4.Tag("Storage.Schema", (string)cursor[0], false, true));
 								metaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", false, true));
-								reference = new Schema.Reference(DAE.Schema.Object.Qualify(FromSQLIdentifier(constraintName), DAE.Schema.Object.Qualifier(sourceTableVar.Name)));
+								reference = new Schema.Reference(plan.GetNextObjectID(), DAE.Schema.Object.Qualify(FromSQLIdentifier(constraintName), DAE.Schema.Object.Qualifier(sourceTableVar.Name)));
 								reference.MergeMetaData(metaData);
 								reference.Owner = plan.User;
 								reference.Library = plan.CurrentLibrary;
@@ -5523,7 +5526,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 					
 					_dataType = new Schema.TableType();
-					_tableVar = new Schema.ResultTableVar(this);
+					_tableVar = new Schema.ResultTableVar(plan, this);
 					_tableVar.Owner = plan.User;
 					_sQLColumns = new SQLTableColumns();
 					foreach (SQLColumn sQLColumn in schema.Columns)
@@ -5566,7 +5569,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				_dataType = Compiler.CompileTypeSpecifier(plan, new D4.Parser().ParseTypeSpecifier(tableType)) as Schema.TableType;
 				if (_dataType == null)
 					throw new CompilerException(CompilerException.Codes.TableTypeExpected);
-				_tableVar = new Schema.ResultTableVar(this);
+				_tableVar = new Schema.ResultTableVar(plan, this);
 				_tableVar.Owner = plan.User;
 				_sQLColumns = new SQLTableColumns();
 
@@ -5711,7 +5714,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
@@ -5787,7 +5790,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			
 			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));

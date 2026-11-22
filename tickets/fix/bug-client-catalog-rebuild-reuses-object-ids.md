@@ -45,3 +45,21 @@ Two different things in one engine's catalog never carry the same identifier, wh
 - The fix. The planning pass's candidate, to be confirmed or discarded against the reproduction: a repository engine should not reset its identifier generator when its catalog is rebuilt, because nothing requires its identifiers to be reproducible, only unique; its generator starts at zero when the engine is constructed, and `ClearCatalog` should leave it where it is. An engine that persists its catalog must keep resetting, for the reason `bug-object-id-counter-is-process-wide` and the comment in `InitializeCatalog` give. If that is not sufficient, the reproduction will say so.
 - Whatever `AbandonedClientProcessTest.SessionCount` had to avoid because of this defect, reconsidered: its `NOTE:` records that it uses a scalar count where a cursor-based poll would have been natural.
 - A decision, recorded, about the `#if !DEBUG` replace-by-name block in `CacheCatalogObject`. It is what turns this defect into silent wrongness in a shipped client rather than a visible error. Keeping it as an accepted tradeoff is a legitimate answer; leaving it undiscussed is not.
+
+## Arm added by `engine-object-id-transient-tablevars` (2026-11-22): one mechanism measured, at the same site
+
+`engine-object-id-transient-tablevars` stopped a schema object built from a name alone from taking an identifier, which among other things stopped a column of a row or table type from taking one. That shrank the number of identifiers an engine spends on its own start-up from several hundred to a few dozen, and it immediately turned `AbandonedClientProcessTest.AKilledClientProcessIsReclaimedAndTheServerKeepsServing` red with this ticket's exact failure: `An item with the same key has already been added` out of `CatalogDeviceSession.CacheCatalogObject`, reached from `LocalExpressionPlan.GetDataType`, with the colliding identifier small (5) rather than large (984).
+
+That instance was traced to the end and **is not a catalog rebuild**. Instrumenting `ObjectIDGenerator.Reset`, `SetLastAllocated` and the duplicate-key branch of `CacheCatalogObject` showed, in order:
+
+- one `Reset` only, from the first `Engine.InitializeCatalog` of the run (so no rebuild had happened yet);
+- the engine numbering its own catalog from there - `.System.Temp` came out as identifier 5;
+- `SETLAST from 358 to 1` - `tests/DAE.Server.Tests/TestEnvironment.WithTheObjectIDCounterRestored` putting the process-wide counter back to the value it had saved before the body, **while the `LocalServer`'s engine from inside that body was still running**;
+- that engine allocating 5 again a moment later, for the operator `System.iCompare0000000005`, which collided with `.System.Temp` in `CatalogDevice.CatalogIndex`.
+
+Two things worth carrying forward:
+
+- **The fixture's save-and-restore was itself handing a live engine identifiers its catalog already held.** It now restores the counter only when that would raise it (`TestEnvironment.cs`), which is all it can safely do; `bug-object-id-counter-is-process-wide` deletes the workaround outright. `tests/Dataphor.Benchmarks/BenchmarkServerInstance.cs` still has the unguarded form, in a project no solution builds.
+- **`Schema.Operator.Name` is generated from the operator's own identifier** (`Operator.EnsureNameReset` -> `Schema.Object.GetGeneratedName(_operatorName, ID)`). So the colliding object's *name* tells you the identifier it was given, which is how the above was read off a single line of output. If this ticket's recorded reproduction (identifier 984) names a `…0000000984` object, the same reading applies to it.
+
+**What this does not settle.** The reproduction on record is a client over the network doing eight table reads and then a schema change, and this arm's instance needed neither the reads nor the change - so they may be two mechanisms reaching one site, or one. Rebuild the recorded reproduction first and check it against the fixture above: if it was the same rewind, the fix in `TestEnvironment.cs` has already removed it and the reproduction will no longer fail, which is itself the answer to "name the mechanism". If it still fails, the rebuild path is a second mechanism and this arm is only context.

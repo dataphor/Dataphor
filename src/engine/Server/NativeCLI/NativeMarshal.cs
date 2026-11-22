@@ -230,7 +230,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			foreach (Column column in NativeColumnsToColumns(plan.DataTypes, nativeTable.Columns))
 				tableType.Columns.Add(column);
 
-			BaseTableVar tableVar = new BaseTableVar(tableType);
+			BaseTableVar tableVar = new BaseTableVar(plan.GetNextObjectID(), tableType);
 			tableVar.EnsureTableVarColumns();
 			if (nativeTable.Keys != null)
 			{

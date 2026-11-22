@@ -738,7 +738,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_systemProcess.CatalogDeviceSession.InsertUser(_systemUser);
 			_systemProcess.CatalogDeviceSession.InsertUser(_adminUser);
 
-			_userRole = new Schema.Role(UserRoleName);
+			_userRole = new Schema.Role(ObjectIDGenerator.Allocate(), UserRoleName);
 			_userRole.Owner = _systemUser;
 			_userRole.Library = _systemLibrary;
 			_systemProcess.CatalogDeviceSession.InsertRole(_userRole);
@@ -1156,7 +1156,7 @@ namespace Alphora.Dataphor.DAE.Server
 				InternalLoadAvailableLibraries();
 
 				// Create the implicit system library
-				Schema.Library systemLibrary = new Schema.Library(SystemLibraryName);
+				Schema.Library systemLibrary = new Schema.Library(ObjectIDGenerator.Allocate(), SystemLibraryName);
 				systemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
 				systemLibrary.Version = SystemLibraryVersion;
 				systemLibrary.DefaultDeviceName = TempDeviceName;
@@ -1239,7 +1239,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_systemUser = new Schema.User(SystemUserID, "System User", String.Empty);
 
 			// Create the system library
-			_systemLibrary = new Schema.LoadedLibrary(SystemLibraryName);
+			_systemLibrary = new Schema.LoadedLibrary(ObjectIDGenerator.Allocate(), SystemLibraryName);
 			_systemLibrary.Owner = _systemUser;
 			LoadSystemAssemblies();
 			_catalog.LoadedLibraries.Add(_systemLibrary);

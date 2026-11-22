@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		 	PushSourceTable(null);
 			_sourceRow = new Row(Manager, ((TableNode)Node.Nodes[0]).DataType.RowType);
 			_tableType = new Schema.TableType();
-			_tableVar = new Schema.BaseTableVar(_tableType, Program.TempDevice);
+			_tableVar = new Schema.BaseTableVar(Program.Plan.GetNextObjectID(), _tableType, Program.TempDevice);
 			Schema.TableVarColumn newColumn;
 			foreach (Schema.TableVarColumn column in Node.TableVar.Columns)
 			{

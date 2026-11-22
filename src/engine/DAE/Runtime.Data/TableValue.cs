@@ -793,7 +793,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			// We need to construct a new TableVar here because otherwise the native table
 			// will be constructed with the keys inferred for the source, resulting in
 			// incorrect access plans (see Defect #33978 for more).
-			Schema.ResultTableVar tableVar = new Schema.ResultTableVar(Node);
+			Schema.ResultTableVar tableVar = new Schema.ResultTableVar(Program.Plan, Node);
 			tableVar.Owner = Program.Plan.User;
 			tableVar.EnsureTableVarColumns();
 			Program.EnsureKey(tableVar);

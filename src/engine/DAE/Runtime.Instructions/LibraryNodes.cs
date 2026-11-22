@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (arguments[0] == null)
 				return null;
 			#endif
-			Schema.Library library = new Schema.Library(Schema.Object.EnsureUnrooted((string)arguments[0]));
+			Schema.Library library = new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted((string)arguments[0]));
 			if (arguments.Length >= 2)
 			{
 				#if NILPROPOGATION

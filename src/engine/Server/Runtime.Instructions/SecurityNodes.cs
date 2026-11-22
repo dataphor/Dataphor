@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role role = new Schema.Role(Schema.Object.Qualify((string)arguments[0], program.Plan.CurrentLibrary.Name));
+			Schema.Role role = new Schema.Role(program.Plan.GetNextObjectID(), Schema.Object.Qualify((string)arguments[0], program.Plan.CurrentLibrary.Name));
 			role.Owner = program.Plan.User;
 			role.Library = program.Plan.CurrentLibrary;
 			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertRole(role);

@@ -248,9 +248,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			_iD = iD;
 		}
 		
+		/// <summary>Builds an object with no identifier; see <see cref="UnassignedID"/>.</summary>
+		/// <remarks>
+		/// A name is all the identity a schema object needs until a catalog holds it, and only the engine that
+		/// owns that catalog can number it. A site that does have an engine in reach - a <c>Plan</c> or a
+		/// <c>Program</c> - calls the identifier-taking overload with <c>plan.GetNextObjectID()</c>; the rest
+		/// build compile-time stand-ins, name maps and marshalled values that no catalog will ever hold.
+		/// </remarks>
 		public Object(string name) : base(name)
 		{
-			_iD = GetNextObjectID();
+			_iD = UnassignedID;
 		}
 
 		// ID
@@ -2136,6 +2143,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string DisplayName { get { return _sessionObjectName == null ? Name : _sessionObjectName; } }
 	}
     
+    /// <summary>Maps the session-local name of an object to the global name it was created under.</summary>
+    /// <remarks>
+    /// A session object is a name map held in a session's or a plan's own list and resolved only by name: it is
+    /// never put in a <see cref="Catalog"/>, never cached as a catalog object and never written to the catalog
+    /// store, so it carries <see cref="Object.UnassignedID"/> even at the compiler sites that do have a plan in
+    /// hand. The object it names is the one that gets numbered.
+    /// </remarks>
     public class SessionObject : Schema.Object
     {
 		public SessionObject(string name) : base(name) {}

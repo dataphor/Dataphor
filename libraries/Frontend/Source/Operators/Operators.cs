@@ -426,7 +426,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			
 			DataType.Columns.Add(new Schema.Column("Library_Name", plan.DataTypes.SystemString));

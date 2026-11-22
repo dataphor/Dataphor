@@ -341,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -437,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -504,7 +504,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -570,7 +570,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			lock (program.Catalog.Libraries)
 			{
 				if (!program.Catalog.Libraries.Contains(libraryName))
-					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(Schema.Object.EnsureUnrooted(libraryName)), true, false);
+					SystemCreateLibraryNode.CreateLibrary(program, new Schema.Library(program.Plan.GetNextObjectID(), Schema.Object.EnsureUnrooted(libraryName)), true, false);
 
 				Schema.Library library = program.Catalog.Libraries[libraryName];
 				if (Schema.Object.NamesEqual(library.Name, Server.SystemLibraryName))
@@ -1233,7 +1233,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			
 			DataType.Columns.Add(new Schema.Column("Version", Compiler.ResolveCatalogIdentifier(plan, "System.VersionNumber", true) as Schema.ScalarType));

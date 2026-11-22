@@ -263,7 +263,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// Ensure the general library exists
 				if (!Catalog.Libraries.Contains(GeneralLibraryName))
 				{
-					Schema.Library generalLibrary = new Schema.Library(GeneralLibraryName);
+					Schema.Library generalLibrary = new Schema.Library(ObjectIDGenerator.Allocate(), GeneralLibraryName);
 					generalLibrary.Libraries.Add(new Schema.LibraryReference(SystemLibraryName, new VersionNumber(-1, -1, -1, -1)));
 					Catalog.Libraries.Add(generalLibrary);
 					string libraryDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(LibraryDirectory), generalLibrary.Name);

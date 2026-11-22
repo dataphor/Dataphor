@@ -1774,7 +1774,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						Schema.Device device = GetDefaultDevice(plan, false);
 						if (device != null)
 						{
-							Schema.BaseTableVar tableVar = new Schema.BaseTableVar(context.Identifier, new Schema.TableType(), device);
+							Schema.BaseTableVar tableVar = new Schema.BaseTableVar(plan.GetNextObjectID(), context.Identifier, new Schema.TableType(), device);
 							plan.CheckDeviceReconcile(tableVar);
 							return EmitCatalogIdentifierNode(plan, statement, context);
 						}
@@ -2322,7 +2322,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					if (currentCatalogCreationObject is Schema.Operator)
 					{
-						Schema.Operator dummyOperator = new Schema.Operator(currentCreationObject.Name);
+						// The dummy is only pushed as the creation object, to stop the right-hand side attaching its
+						// dependencies to the object actually being created; it never enters a catalog, so it is not numbered.
+						Schema.Operator dummyOperator = new Schema.Operator(Schema.Object.UnassignedID, currentCreationObject.Name);
 						dummyOperator.SessionObjectName = currentCatalogCreationObject.SessionObjectName;
 						dummyOperator.SourceOperatorName = ((Schema.Operator)currentCreationObject).SourceOperatorName;
 						dummyOperator.Library = currentCreationObject.Library;
@@ -2331,7 +2333,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 					else
 					{
-						Schema.BaseTableVar dummyCatalogCreationObject = new Schema.BaseTableVar(currentCreationObject.Name);
+						Schema.BaseTableVar dummyCatalogCreationObject = new Schema.BaseTableVar(Schema.Object.UnassignedID, currentCreationObject.Name);
 						dummyCatalogCreationObject.SessionObjectName = currentCatalogCreationObject.SessionObjectName;
 						if (currentCreationObject is Schema.TableVar)
 							dummyCatalogCreationObject.SourceTableName = ((Schema.TableVar)currentCreationObject).SourceTableName;
@@ -4560,7 +4562,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (!representation.IsDefaultRepresentation)
 				operatorName = Schema.Object.Qualify(representation.Name, operatorName);
 
-			Schema.Operator operatorValue = new Schema.Operator(operatorName);
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), operatorName);
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = representation;
 			operatorValue.ReturnDataType = scalarType;
@@ -4619,7 +4621,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			// Read Accessor
 			// operator <type name>.Read<property name>(const value : <type>) : <property type>
-			Schema.Operator operatorValue = new Schema.Operator(String.Format("{0}{1}{2}{3}", scalarType.Name, Keywords.Qualifier, ReadAccessorName, property.Name));
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}{1}{2}{3}", scalarType.Name, Keywords.Qualifier, ReadAccessorName, property.Name));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = property;
 			operatorValue.ReturnDataType = property.DataType;
@@ -4665,7 +4667,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			// Write Accessor
 			// operator <type name>.Write<property name>(const value : <type>, const <property name> : <property type>) : <type>
-			Schema.Operator operatorValue = new Schema.Operator(String.Format("{0}{1}{2}{3}", scalarType.Name, Keywords.Qualifier, WriteAccessorName, property.Name));
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}{1}{2}{3}", scalarType.Name, Keywords.Qualifier, WriteAccessorName, property.Name));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = property;
 			operatorValue.ReturnDataType = scalarType;
@@ -5003,7 +5005,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			// create an operator of the form <scalar type name qualifier>.IsSpecial(AValue : <scalar type name>) : boolean
 			// Compile IsSpecial operator (result := Parent.IsSpecial(AValue) or AValue = Special1Value or AValue = Special2Value...)
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(IsSpecialOperatorName, Schema.Object.Qualifier(scalarType.Name)));
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), Schema.Object.Qualify(IsSpecialOperatorName, Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = scalarType;
 			operatorValue.Operands.Add(new Schema.Operand(operatorValue, "AValue", scalarType, Modifier.Const));
@@ -5092,7 +5094,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.Operator CompileSpecialSelector(Plan plan, Schema.ScalarType scalarType, Schema.Special special, string specialName, PlanNode valueNode)
 		{
 			// Create an operator of the form ScalarTypeNameSpecialName() : ScalarType as a selector for the given special
-			Schema.Operator operatorValue = new Schema.Operator(String.Format("{0}{1}", scalarType.Name, specialName));
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}{1}", scalarType.Name, specialName));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = special;
 			operatorValue.ReturnDataType = scalarType;
@@ -5127,7 +5129,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.Operator CompileSpecialComparer(Plan plan, Schema.ScalarType scalarType, Schema.Special special, string specialName, PlanNode valueNode)
 		{
 			// Create an operator of the form <scalar type name qualifier>.Is<special name>(const AValue : <scalar type name>) : Boolean as a comparison operator for the given special
-			Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), Schema.Object.Qualifier(scalarType.Name)));
+			Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), Schema.Object.Qualify(String.Format("{0}{1}", IsSpecialComparerPrefix, specialName), Schema.Object.Qualifier(scalarType.Name)));
 			operatorValue.IsGenerated = true;
 			operatorValue.Generator = special;
 			plan.PushCreationObject(operatorValue);
@@ -5189,7 +5191,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (planNode != null)
 				{
 					Schema.Operator componentOperator = ((InstructionNodeBase)planNode).Operator;
-					Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(Instructions.Equal, scalarType.Library.Name));
+					Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), Schema.Object.Qualify(Instructions.Equal, scalarType.Library.Name));
 					operatorValue.IsGenerated = true;
 					operatorValue.Generator = scalarType;
 					operatorValue.IsBuiltin = true;
@@ -5225,7 +5227,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (planNode != null)
 				{
 					Schema.Operator componentOperator = ((InstructionNodeBase)planNode).Operator;
-					Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(Instructions.Compare, scalarType.Library.Name));
+					Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), Schema.Object.Qualify(Instructions.Compare, scalarType.Library.Name));
 					operatorValue.IsGenerated = true;
 					operatorValue.Generator = scalarType;
 					operatorValue.IsBuiltin = true;
@@ -5259,7 +5261,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			else
 			{
-				Schema.Operator operatorValue = new Schema.Operator(Schema.Object.Qualify(Instructions.Equal, scalarType.Library.Name));
+				Schema.Operator operatorValue = new Schema.Operator(plan.GetNextObjectID(), Schema.Object.Qualify(Instructions.Equal, scalarType.Library.Name));
 				operatorValue.IsGenerated = true;
 				operatorValue.Generator = scalarType;
 				operatorValue.IsBuiltin = true;
@@ -6217,7 +6219,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else if (typeSpecifier is TypeOfTypeSpecifier)
 			{
 				// Push a dummy creation object to prevent dependencies on typeof expression sources
-				Schema.BaseTableVar dummy = new Schema.BaseTableVar("Dummy");
+				// Pushed as the creation object so that a typeof expression attaches no dependencies; never catalogued.
+				Schema.BaseTableVar dummy = new Schema.BaseTableVar(Schema.Object.UnassignedID, "Dummy");
 				dummy.SessionObjectName = dummy.Name; // This will allow the typeof expression to reference session specific objects
 				dummy.SessionID = plan.SessionID;
 				//LDummy.Library = APlan.CurrentLibrary;
@@ -7522,7 +7525,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 			try
 			{
-				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Source", reference.Name));
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(plan.GetNextObjectID(), String.Format("{0}{1}", "Source", reference.Name));
 				constraint.Library = reference.Library;
 				constraint.MergeMetaData(reference.MetaData);
 				if (constraint.MetaData == null)
@@ -7762,7 +7765,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 			try
 			{
-				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(String.Format("{0}{1}", "Target", reference.Name));
+				Schema.TransitionConstraint constraint = new Schema.TransitionConstraint(plan.GetNextObjectID(), String.Format("{0}{1}", "Target", reference.Name));
 				constraint.Library = reference.Library;
 				constraint.MergeMetaData(reference.MetaData);
 				if (constraint.MetaData == null)
@@ -8351,7 +8354,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//  Count(T where <keys>.IsNotNil() { <keys> }) = Count(T where <keys>.IsNotNil())
 		public static Schema.CatalogConstraint CompileCatalogConstraintForKey(Plan plan, Schema.TableVar tableVar, Schema.Key key)
 		{
-			Schema.CatalogConstraint constraint = new Schema.CatalogConstraint(Schema.Object.Qualify(key.Name, tableVar.Name));
+			Schema.CatalogConstraint constraint = new Schema.CatalogConstraint(plan.GetNextObjectID(), Schema.Object.Qualify(key.Name, tableVar.Name));
 			constraint.Owner = tableVar.Owner;
 			constraint.Library = tableVar.Library;
 			constraint.MergeMetaData(key.MetaData);
@@ -8444,7 +8447,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// not(exists(source where not(source.keys.IsNil()) and not(source.keys.IsSpecial()) and not(exists(target where target.keys = source.keys))))
 		public static Schema.CatalogConstraint CompileCatalogConstraintForReference(Plan plan, Schema.Reference reference)
 		{
-			Schema.CatalogConstraint constraint = new Schema.CatalogConstraint(Schema.Object.Qualify(reference.Name, Keywords.Reference));
+			Schema.CatalogConstraint constraint = new Schema.CatalogConstraint(plan.GetNextObjectID(), Schema.Object.Qualify(reference.Name, Keywords.Reference));
 			constraint.Owner = plan.User;
 			constraint.Library = reference.Library;
 			constraint.MergeMetaData(reference.MetaData);
@@ -8760,10 +8763,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 							switch (node.Reference.UpdateReferenceAction)
 							{
 								case ReferenceAction.Cascade:
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
 									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
 									node.Reference.UpdateHandler.IsGenerated = true;
 									node.Reference.UpdateHandler.Operator.IsGenerated = true;
@@ -8807,10 +8810,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 										}
 									}
 
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
 									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
 									node.Reference.UpdateHandler.IsGenerated = true;
 									node.Reference.UpdateHandler.Operator.IsGenerated = true;
@@ -8840,10 +8843,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 									for (int index = 0; index < localStatement.ReferencesDefinition.UpdateReferenceExpressions.Count; index++)
 										expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.UpdateReferenceExpressions[index]);
 
-									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterUpdate", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.Owner = node.Reference.Owner;
 									node.Reference.UpdateHandler.Library = node.Reference.Library;
-									node.Reference.UpdateHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
+									node.Reference.UpdateHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "UpdateHandler"));
 									node.Reference.UpdateHandler.EventType = EventType.AfterUpdate;
 									node.Reference.UpdateHandler.IsGenerated = true;
 									node.Reference.UpdateHandler.Operator.IsGenerated = true;
@@ -8880,10 +8883,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 							switch (node.Reference.DeleteReferenceAction)
 							{
 								case ReferenceAction.Cascade:
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
 									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
 									node.Reference.DeleteHandler.IsGenerated = true;
 									node.Reference.DeleteHandler.Operator.IsGenerated = true;
@@ -8932,10 +8935,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 										}
 									}
 
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
 									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
 									node.Reference.DeleteHandler.IsGenerated = true;
 									node.Reference.DeleteHandler.Operator.IsGenerated = true;
@@ -8971,10 +8974,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 									for (int index = 0; index < localStatement.ReferencesDefinition.DeleteReferenceExpressions.Count; index++)
 										expressionNodes[index] = CompileExpression(plan, localStatement.ReferencesDefinition.DeleteReferenceExpressions[index]);
 									
-									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler = new Schema.TableVarEventHandler(plan.GetNextObjectID(), String.Format("{0}_{1}_{2}_{3}", node.Reference.TargetTable.Name, "AfterDelete", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.Owner = node.Reference.Owner;
 									node.Reference.DeleteHandler.Library = node.Reference.Library;
-									node.Reference.DeleteHandler.Operator = new Schema.Operator(String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
+									node.Reference.DeleteHandler.Operator = new Schema.Operator(plan.GetNextObjectID(), String.Format("{0}_{1}", node.Reference.Name, "DeleteHandler"));
 									node.Reference.DeleteHandler.EventType = EventType.AfterDelete;
 									node.Reference.DeleteHandler.IsGenerated = true;
 									node.Reference.DeleteHandler.Operator.IsGenerated = true;
@@ -9995,7 +9998,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Schema.Device device = GetDefaultDevice(plan, false);
 				if (device != null)
 				{
-					plan.CheckDeviceReconcile(new Schema.BaseTableVar(localStatement.TableVarName, new Schema.TableType(), device));
+					plan.CheckDeviceReconcile(new Schema.BaseTableVar(plan.GetNextObjectID(), localStatement.TableVarName, new Schema.TableType(), device));
 					objectValue = ResolveCatalogIdentifier(plan, localStatement.TableVarName, true);
 				}
 			}
@@ -10188,7 +10191,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Schema.Device device = GetDefaultDevice(plan, false);
 				if (device != null)
 				{
-					plan.CheckDeviceReconcile(new Schema.BaseTableVar(localStatement.ObjectName, new Schema.TableType(), device));
+					plan.CheckDeviceReconcile(new Schema.BaseTableVar(plan.GetNextObjectID(), localStatement.ObjectName, new Schema.TableType(), device));
 					objectValue = ResolveCatalogIdentifier(plan, localStatement.ObjectName, true);	
 				}
 			}
@@ -12618,7 +12621,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 						for (int index = 0; index < tableNode.TableVar.Keys.Count; index++)
 							if (tableNode.TableVar.Keys[index].Columns.Count == terms.Length)
 							{
-								Schema.Operator operatorValue = new Schema.Operator(String.Format("{0}", index.ToString()));
+								// Only a carrier for the signature of a candidate key, to detect an ambiguous implicit table indexer; discarded.
+								Schema.Operator operatorValue = new Schema.Operator(Schema.Object.UnassignedID, String.Format("{0}", index.ToString()));
 								foreach (Schema.TableVarColumn column in tableNode.TableVar.Keys[index].Columns)
 									operatorValue.Operands.Add(new Schema.Operand(operatorValue, column.Name, column.DataType));
 								if (operatorSignatures.Contains(operatorValue.Signature))
@@ -13025,7 +13029,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else
 				tableType = new Schema.TableType();
 
-			TableSelectorNode node = new TableSelectorNode(tableType);
+			TableSelectorNode node = new TableSelectorNode(plan, tableType);
 
 			foreach (Schema.Column column in node.DataType.Columns)
 				node.TableVar.Columns.Add(new Schema.TableVarColumn(column));

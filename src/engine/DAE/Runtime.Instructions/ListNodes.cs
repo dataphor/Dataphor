@@ -595,7 +595,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DetermineModifiers(plan);
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 			
 			Schema.ListType listType = (Schema.ListType)Nodes[0].DataType;
@@ -1206,7 +1206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(plan);
 			// A ForEach TableNode returns a table of the same type as the row type of the return
 			_dataType = new Schema.TableType();
-			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar = new Schema.ResultTableVar(plan, this);
 			_tableVar.Owner = plan.User;
 
 			Schema.RowType rowType = (Schema.RowType)Nodes[1].DataType;

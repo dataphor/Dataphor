@@ -47,7 +47,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			
 			Schema.TableType tableType = new Schema.TableType();
-			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(tableType, Program.TempDevice);
+			Schema.BaseTableVar tableVar = new Schema.BaseTableVar(Program.Plan.GetNextObjectID(), tableType, Program.TempDevice);
 			Schema.TableVarColumn newColumn;
 			foreach (Schema.TableVarColumn column in _leftTable.Node.TableVar.Columns)
 			{
