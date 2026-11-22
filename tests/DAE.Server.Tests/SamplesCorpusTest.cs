@@ -12,8 +12,6 @@ using System.Xml.Linq;
 
 using NUnit.Framework;
 
-using Alphora.Dataphor.DAE.Runtime;
-
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
@@ -108,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		private static readonly Dictionary<string, string> NotInTheRuntimeLayout = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
-			{ "Sample.Shipping", "has a C# project that is not converted to the SDK format, so the build leaves its library folder out of the runtime layout (registering it would fail on the missing assembly) and no server can carry it. Converting it is unowned - the modernization plan's runtime-layout paragraph names this ticket - and even once converted the sample needs a SQL Server, so its entry moves to NeedsADatabaseServer rather than becoming an ordinary case." },
+			{ "Sample.Shipping", "has a C# project that is not converted to the SDK format, so the build leaves its library folder out of the runtime layout (registering it would fail on the missing assembly) and no server can carry it. library-sample-shipping-convert, a feat-ws7-devices-and-libraries work item, owns converting it, and even once converted the sample needs a SQL Server, so its entry moves to NeedsADatabaseServer rather than becoming an ordinary case." },
 		};
 
 		/// <summary>The three lists above, for the assertions that hold each of them against the tree.</summary>
@@ -270,7 +268,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			string derived;
 			try
 			{
-				derived = Derive(process, surfaceName, pageType);
+				derived = FrontendDerivationGoldenTest.Derive(process, surfaceName, pageType);
 			}
 			catch (Exception exception)
 			{
@@ -305,18 +303,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private static string ExpectedRootElementName(string pageType)
 		{
 			return String.Equals(pageType, ReportPageType, StringComparison.Ordinal) ? ReportElementName : FormDocumentCorpusTest.InterfaceElementName;
-		}
-
-		/// <summary>
-		/// The form Frontend.Derive builds, as the single-line XML string the operator returns. Values go in as parameters
-		/// rather than as literals in the expression, as the other Frontend passes do.
-		/// </summary>
-		private static string Derive(IServerProcess process, string surfaceName, string pageType)
-		{
-			DataParams parameters = new DataParams();
-			parameters.Add(DataParam.Create(process, "ASurface", surfaceName));
-			parameters.Add(DataParam.Create(process, "APageType", pageType));
-			return (string)((ServerProcess)process).Evaluate("Frontend.Derive(ASurface, APageType)", parameters).AsNative;
 		}
 
 		/// <summary>

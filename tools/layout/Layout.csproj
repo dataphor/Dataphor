@@ -75,7 +75,7 @@
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLConnection\PGSQLConnection.d4l" /><!-- device-pgsql-port -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-port -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\ODBCConnection\ODBCConnection.d4l" /><!-- device-connection-cleanup -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)samples\Sample.Shipping\Sample.Shipping.d4l" /><!-- test-samples-corpus -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)samples\Sample.Shipping\Sample.Shipping.d4l" /><!-- library-sample-shipping-convert -->
   </ItemGroup>
 
   <!-- Every write and delete below goes through _DataphorLayoutDirFull, which this target confines to artifacts\layout\<something>\. -->

@@ -13,6 +13,7 @@ using System.Xml.Linq;
 
 using NUnit.Framework;
 
+using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
@@ -234,7 +235,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private string Derive(string surfaceName, string pageType)
 		{
-			return EvaluateString("Frontend.Derive(ASurface, APageType)", ("ASurface", surfaceName), ("APageType", pageType));
+			return Derive(Process, surfaceName, pageType);
+		}
+
+		/// <summary>The same derivation on a process this fixture does not own.</summary>
+		/// <remarks>
+		/// Static and taking the process for the reason EnumerateSurfaces above gives: a corpus pass that is not a
+		/// FrontendFixture - SamplesCorpusTest, and the corpus outside this repository that compat-corpus-harness points
+		/// at - adds a caller rather than a second copy of the expression and its parameter names. Values go in as
+		/// parameters rather than as literals for the reason EvaluateString gives: a derived form is XML holding quotes of
+		/// both kinds.
+		/// </remarks>
+		public static string Derive(IServerProcess process, string surfaceName, string pageType)
+		{
+			DataParams parameters = new DataParams();
+			parameters.Add(DataParam.Create(process, "ASurface", surfaceName));
+			parameters.Add(DataParam.Create(process, "APageType", pageType));
+			return (string)((ServerProcess)process).Evaluate("Frontend.Derive(ASurface, APageType)", parameters).AsNative;
 		}
 
 		/// <summary>
