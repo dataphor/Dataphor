@@ -47,9 +47,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		//                     SystemCatalog variants, and some Coverage.Scripts documents that use grammar the
 		//                     parser does not yet accept).
 		//   (emitter-reshape)   - both parses succeed but the emitter reshapes the tree (multi-var splitting,
-		//                     try/commit desugaring, metadata tag ordering, missing "by" clause, etc.).
+		//                     metadata tag ordering, a "by" clause the source did not have).
 		// The third category, (emitter-malformed) - re-parse of the emitted text produced syntax errors - is gone:
 		// bug-d4-emitter-malformed-output fixed those emitter sites, and D4EmitterRoundTripTest holds them fixed.
+		// The thirty-four files whose reshape was the parser's own desugaring of "for" and "try ... commit" are gone
+		// too: bug-d4-parser-desugars-for-and-try-commit made those trees the shape the equivalent explicit D4 parses
+		// to, and D4EmitterRoundTripTest holds that fixed as well.
 		// NOTE: see ticket review/test-parser-roundtrip-corpus handoff for the follow-up tickets that drain this
 		// list. New entries added here outside that workflow must carry a one-line reason, same shape as these.
 		private static readonly Dictionary<string, string> AllowList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -96,59 +99,25 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Serialization.d4", "parse" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationDomains.d4", "parse" },
 			// (emitter-reshape) - parses twice, but the emitter changes the tree shape
-			{ "legacy/libraries/FHIR.Core/Documents/Structure.Definition.d4", "emitter-reshape" },
-			{ "legacy/libraries/FHIR.Server/Documents/FHIR.TestData.d4", "emitter-reshape" },
-			{ "legacy/libraries/PHINVADS.Test/Documents/InsertTablePerformance.d4", "emitter-reshape" },
 			{ "libraries/System.Integration/Documents/Register.d4", "emitter-reshape" },
 			{ "samples/Sample.IssueTracker/Documents/Register.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Coverage.Common.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Coverage.ManagementRole.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Coverage.ProcessingRole.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Coverage.PurchasingRole.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Coverage.SalesRole.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Schema.ContactTables.d4", "emitter-reshape" },
 			{ "samples/Sample.Shipping/Documents/Schema.DataTypes.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Documents/Schema.InvoiceProcessing.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Common.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Management.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Processing.d4", "emitter-reshape" },
-			{ "samples/Sample.Shipping/Source/CoverageRoles/Purchasing.d4", "emitter-reshape" },
 			{ "src/engine/DAE/Schema/DataTypes.d4", "emitter-reshape" },
 			{ "src/engine/DAE/Schema/SystemCatalog.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Base/Documents/DiagnosticsLogic.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Base/Documents/Logic.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Devices/Documents/Logic.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/AggregateOperators.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ApplicationTransactions.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/BooleanLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ByteLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Conversions.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/CursorLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Cursors.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DML.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DecimalLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DeferredConstraintChecking.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/DeferredConstraintsWithKeys.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/EventHandlers.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/GuidLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/IntegerLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/KeyAffectingUpdate.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LanguageConstructs.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LongAggregates.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/LongLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/MaximumRowCount.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/PlanCache.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationOperators.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SerializationTypes.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/ShortLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/StringLibrary.d4", "emitter-reshape" },
 			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/SystemCatalog.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/TableLibrary.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/TestSargabilityWithConversion.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Timing.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Transaction.Atomicity.Run.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/Transaction.Isolation.Run.d4", "emitter-reshape" },
-			{ "tests/libraries/TestFramework.Coverage.Scripts/Documents/TransitionConstraints.d4", "emitter-reshape" },
 		};
 
 		public static IEnumerable<TestCaseData> D4Files()

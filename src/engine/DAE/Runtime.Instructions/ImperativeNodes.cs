@@ -83,6 +83,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override Statement EmitStatement(EmitMode mode)
 		{
+			// NOTE: this DelimitedBlock holds its children directly, which is not the shape parsing "begin ... end"
+			// gives (see the canonical-shape rule on Parser.DelimitedBlock(string[])). It prints correctly - the
+			// emitter walks whatever statements it finds - and nothing compares a plan-emitted tree with a re-parse
+			// of its text, so it is fine as it stands. If something ever does compare them, give this block one Block
+			// child the way the parser now does.
 			DelimitedBlock block = new DelimitedBlock();
 			Statement statement;
 			for (int index = 0; index < NodeCount; index++)

@@ -405,6 +405,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return false;
 		}
 		
+		/*
+			Canonical shapes. The parser desugars some constructs (see ForStatement and the commit arm of
+			TryStatement) and builds statements that no token in the source stands for. Such a statement must have
+			the shape that parsing the equivalent explicit D4 text would give, or printing the tree through
+			D4TextEmitter and reading it back yields a different tree. Three rules, all of them read off this method
+			and VariableStatement:
+				- A statement list of exactly one statement *is* that statement (the return below). So the arms of
+				  try/finally/except, a while body and the inside of begin..end hold a bare statement when there is
+				  one and a Block when there are several; wrapping a single statement in a Block is as wrong as
+				  flattening several.
+				- begin..end is a DelimitedBlock holding one child: the statement list.
+				- An integer literal is a boxed long (Lexer.Token.AsInteger returns long), so a synthesized one
+				  carries 1L, not 1.
+		*/
 		protected Statement DelimitedBlock(string[] delimiters)
 		{
 			Block block = new Block();
@@ -3752,8 +3766,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		*/
 		protected Statement ForStatement()
 		{
-			Block block = new DelimitedBlock();
+			// Desugared; the shape follows the canonical-shape rule on DelimitedBlock(string[]). The outer
+			// DelimitedBlock is what begin..end gives, and it is what gives the loop variable its own symbol
+			// frame (only CompileDelimitedBlock pushes one); it holds exactly one child, the statement list.
+			DelimitedBlock outerBlock = new DelimitedBlock();
+			Block block = new Block();
+			outerBlock.Statements.Add(block);
 			_lexer.NextToken();
+			outerBlock.SetPosition(_lexer);
 			block.SetPosition(_lexer);
 			bool isAllocation = false;
 			if (_lexer.PeekTokenSymbol(1) == Keywords.Var)
@@ -3805,20 +3825,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				stepExpression = Expression();
 			}
 			else
-				stepExpression = new ValueExpression(1, TokenType.Integer);
+				stepExpression = new ValueExpression(1L, TokenType.Integer);
 			_lexer.NextToken().CheckSymbol(Keywords.Do);
 			WhileStatement whileStatement = new WhileStatement();
 			whileStatement.Condition = new BinaryExpression(new IdentifierExpression(variableName), isPositive ? Instructions.InclusiveLess : Instructions.InclusiveGreater, finalExpression);
 			Statement iterationStatement = Statement();
 			Statement incrementStatement = new AssignmentStatement(new IdentifierExpression(variableName), new BinaryExpression(new IdentifierExpression(variableName), isPositive ? Instructions.Addition : Instructions.Subtraction, stepExpression));
 			TryFinallyStatement iterationBlock = new TryFinallyStatement();
+			// Both arms are single statements, so they stay bare: a one-statement list is that statement.
 			iterationBlock.TryStatement = iterationStatement;
 			iterationBlock.FinallyStatement = incrementStatement;
 			iterationStatement = iterationBlock;
 			whileStatement.Statement = iterationStatement;
 			block.Statements.Add(whileStatement);
 			block.SetEndPosition(_lexer);
-			return block;
+			outerBlock.SetEndPosition(_lexer);
+			return outerBlock;
 		}
 		
 		/*
@@ -4088,24 +4110,45 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					return exceptStatement;
 					
 				case Keywords.Commit:
+					// Desugared; the shape follows the canonical-shape rule on DelimitedBlock(string[]). The outer
+					// DelimitedBlock is the begin..end and holds exactly one child, the statement list.
 					DelimitedBlock block = new DelimitedBlock();
 					block.Line = line;
 					block.LinePos = linePos;
-					block.Statements.Add(new ExpressionStatement(new CallExpression("BeginTransaction", new Expression[]{})));
+					Block commitBlock = new Block();
+					commitBlock.SetPosition(_lexer);
+					block.Statements.Add(commitBlock);
+					commitBlock.Statements.Add(new ExpressionStatement(new CallExpression("BeginTransaction", new Expression[]{})));
 					TryExceptStatement commitStatement = new TryExceptStatement();
 					commitStatement.Line = line;
 					commitStatement.LinePos = linePos;
 					Block tryBlock = new Block();
 					tryBlock.SetPosition(_lexer);
-					tryBlock.Statements.Add(tryStatement);
+					// The body's statements belong in the try arm's own list, so a bare Block body is spliced in.
+					// A DelimitedBlock body is a begin..end the source wrote: its children belong inside its own
+					// frame, so it stays nested.
+					Block tryStatements = tryStatement as Block;
+					if ((tryStatements != null) && !(tryStatements is DelimitedBlock))
+					{
+						for (int tryIndex = 0; tryIndex < tryStatements.Statements.Count; tryIndex++)
+							tryBlock.Statements.Add(tryStatements.Statements[tryIndex]);
+					}
+					else
+						tryBlock.Statements.Add(tryStatement);
 					tryBlock.Statements.Add(new ExpressionStatement(new CallExpression("CommitTransaction", new Expression[]{})));
-					commitStatement.TryStatement = tryBlock;
-					DelimitedBlock errorBlock = new DelimitedBlock();
+					// An empty body leaves only the CommitTransaction() call, and a one-statement list is that
+					// statement.
+					if (tryBlock.Statements.Count == 1)
+						commitStatement.TryStatement = tryBlock.Statements[0];
+					else
+						commitStatement.TryStatement = tryBlock;
+					Block errorBlock = new Block();
 					errorBlock.SetPosition(_lexer);
 					errorBlock.Statements.Add(new ExpressionStatement(new CallExpression("RollbackTransaction", new Expression[]{})));
 					errorBlock.Statements.Add(new RaiseStatement());
 					commitStatement.ErrorHandlers.Add(new GenericErrorHandler(errorBlock));
-					block.Statements.Add(commitStatement);
+					commitBlock.Statements.Add(commitStatement);
+					commitBlock.SetEndPosition(_lexer);
 					block.SetEndPosition(_lexer);
 					return block;
 					
