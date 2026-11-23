@@ -27,6 +27,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// application transaction's copy of a table, does not begin it (see the server's BeginStoreWriteTransaction).
 		protected override void InternalBeforeExecute(Program program)
 		{
+			// Every statement that changes the catalog is a DDLNode, so invalidating here needs no per-statement discipline and
+			// no statement added later can be forgotten about; this and CatalogDeviceSession.InvalidateCachesAfterUndo are the
+			// whole set of places that bump this timestamp. Outside the loading guard below on purpose: a bump while a library
+			// loads costs one recompute per table variable and is harmless.
+			// NOTE: one counter for the whole catalog, so any DDL makes every table variable recompute its proposal summary once
+			// on its next read. Cheap - a recompute walks the table's columns, measured at 5.65 us on a 21-column table against
+			// 59.6 us for the whole-row Default proposal that reads it - and DDL is rare. If a workload that interleaves DDL
+			// with editing ever shows it, narrow the counter to the objects a statement actually touched.
+			program.Catalog.UpdateShouldCallProposablesTimeStamp();
+
 			if (!program.ServerProcess.InLoadingContext())
 				program.CatalogDeviceSession.BeginStoreWriteTransaction();
 		}
@@ -1333,15 +1343,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// CatalogDeviceSession.RedetermineRemotable) and so disagreed with the forward path. DetermineRemotable
 			// rather than setting the flag, so the whole derived family is what a restart would compute; it walks the
 			// columns, hence once after the loop and only when the statement created something.
-			// NOTE: this is one more per-statement recompute of a summary that bug-rolled-back-type-constraint-stops-
-			// the-column-check proposes to retire outright; if that lands, this goes with the rest of them.
+			// NOTE: the read path now brings this summary up to date for itself, before every proposal
+			// (Schema.TableVar.EnsureShouldCallProposables), so no proposal depends on this call any more. It stays because the
+			// stored flags have two readers that are not proposals: ServerProcess.CopyDataType builds the remote client's copy
+			// of the table variable from them at prepare time, and CatalogRollbackSnapshotTest compares them around a
+			// rolled-back statement.
 			// NOTE: on a view this raises a flag the undo cannot lower again - Schema.DerivedTableVar.DetermineRemotable
 			// recomputes without resetting, as CatalogDeviceSession.RedetermineRemotable's own remarks explain - so a
 			// rolled-back "alter view V { create constraint ... }" leaves ShouldValidate raised where before this call it
 			// stayed lowered. A raised flag costs a call that finds nothing to do, which that same note calls not a defect,
 			// and the alternative is to leave a view with the lowered flag this fixes for a table. It is why the matrix in
-			// CatalogRollbackSnapshotTest has no "alter view { create constraint }" case, and one more piece of evidence
-			// for retiring the mechanism rather than extending it.
+			// CatalogRollbackSnapshotTest has no "alter view { create constraint }" case.
 			if (createConstraints.Count > 0)
 				tableVar.DetermineRemotable(program.CatalogDeviceSession);
 		}
@@ -1538,7 +1550,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// table.DetermineRemotable here, as CreateColumns does. The undo path recomputes for itself, at each instruction
 		// that restores part of the definition: CatalogDeviceSession.RedetermineRemotable. One sibling site has since
 		// been seen stale after a committed alter and now recomputes - CreateConstraints, for a table-level row
-		// constraint - so the precedent for doing the same here exists if the staleness ever shows up.
+		// constraint - so the precedent for doing the same here exists if the staleness ever shows up. What is no longer
+		// at stake is the proposal path: every proposal now brings the summary up to date before reading it
+		// (Schema.TableVar.EnsureShouldCallProposables), so a stale summary left here costs only the two readers that are
+		// not proposals - the copy of the table variable a remote client is given at prepare time
+		// (ServerProcess.CopyDataType) and CatalogRollbackSnapshotTest's comparison around a rolled-back statement.
 		protected void AlterColumns(Plan plan, Program program, Schema.BaseTableVar table, AlterColumnDefinitions alterColumns)
 		{
 			Schema.TableVarColumn column;

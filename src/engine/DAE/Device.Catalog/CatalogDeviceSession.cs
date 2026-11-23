@@ -107,6 +107,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// a view this can raise a flag but not lower one. A flag left raised costs a call that finds nothing to do, which is why
 		/// only the lowered ones are defects.
 		/// </para>
+		/// <para>
+		/// No proposal depends on this any more: TableNode.Default, Change and Validate each bring the summary up to date before
+		/// reading it (Schema.TableVar.EnsureShouldCallProposables), which is what closed the case this undo path could not -
+		/// a change to a <em>type</em>, whose instruction holds only the type while the summaries that change with it belong to
+		/// every table with a column of that type. It stays because the stored flags have two readers that are not proposals:
+		/// ServerProcess.CopyDataType builds the remote client's copy of the table variable from them at prepare time, and
+		/// CatalogRollbackSnapshotTest compares them around a rolled-back statement.
+		/// </para>
 		/// </remarks>
 		private void RedetermineRemotable(Schema.TableVar tableVar)
 		{
@@ -1729,6 +1737,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			Catalog.UpdatePlanCacheTimeStamp();
 			Catalog.UpdateCacheTimeStamp();
 			Catalog.UpdateDerivationTimeStamp();
+			// An undo changes the definition again, so a proposal summary computed from the half-altered definition inside the
+			// transaction is as stale as one computed before the statement ran. This is the second of the two places that bump
+			// this timestamp; see Schema.Catalog.ShouldCallProposablesTimeStamp.
+			Catalog.UpdateShouldCallProposablesTimeStamp();
 			Catalog.OperatorResolutionCache.Clear();
 			Catalog.ConversionPathCache.Clear();
 		}

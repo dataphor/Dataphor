@@ -70,6 +70,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <see cref="Cases"/>'s remarks.
 	/// </item>
 	/// <item>
+	/// NOTE: a change to a data <em>type</em> that a table has a column of. The matrix changes types
+	/// (<c>CreateTypeConstraint</c> and its siblings) but never pairs one with such a table, and deliberately so: a
+	/// dependent table's stored <c>ShouldDefault</c>/<c>ShouldValidate</c>/<c>ShouldChange</c> flags are left alone by
+	/// both the statement and its undo, because the read path recomputes them for itself before every proposal
+	/// (<c>Schema.TableVar.EnsureShouldCallProposables</c>). A case here would reflect over the stored flags and report a
+	/// difference the engine no longer acts on. What a user meets in that situation is pinned behaviourally by
+	/// <c>TypeChangeSummaryTest</c> instead.
+	/// </item>
+	/// <item>
 	/// The forward direction: these cases only ask what a rollback leaves. The one exception is
 	/// <see cref="CreatedTableConstraintRaisesTheValidateSummary"/>, which is here because this fixture is what found
 	/// that defect - a rollback that recomputes derived state the forward path left stale shows up as a difference.

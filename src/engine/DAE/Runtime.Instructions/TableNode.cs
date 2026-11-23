@@ -1948,6 +1948,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual bool Validate(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
+			// The Should... test below reads a summary the table variable derives from its definition, and a plan can outlive a
+			// change to that definition - an open form holds its cursor for as long as the user has the form open - so the
+			// summary is brought up to date before it is read. In the ordinary case where nothing changed,
+			// EnsureShouldCallProposables is a timestamp comparison. Validate, Change and Default are also how a proposal
+			// descends a plan (UnaryTableNode.InternalValidate and its siblings call them on the source node), so these three
+			// calls cover every node of an open plan.
+			_tableVar.EnsureShouldCallProposables(program.Catalog);
 			if (ShouldValidate(columnName))
 			{
 				IRow oldPreparedRow = oldRow == null ? null : PrepareOldRow(program, oldRow, false);
@@ -2081,6 +2088,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual bool Change(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
+			// The summary is a cache of the definition, which an open plan can outlive; see Validate.
+			_tableVar.EnsureShouldCallProposables(program.Catalog);
 			if (ShouldChange(columnName))
 			{
 				IRow oldPreparedRow = PrepareOldRow(program, oldRow, false);
@@ -2134,6 +2143,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual bool Default(Program program, IRow oldRow, IRow newRow, BitArray valueFlags, string columnName)
 		{
+			// The summary is a cache of the definition, which an open plan can outlive; see Validate.
+			_tableVar.EnsureShouldCallProposables(program.Catalog);
 			if (ShouldDefault(columnName))
 			{
 				IRow tempRow;

@@ -2291,6 +2291,14 @@ namespace Alphora.Dataphor.DAE.Schema
 					);
         }
         
+        /// <summary>Recomputes the ShouldDefault/ShouldValidate/ShouldChange summary from the definition as it stands now.</summary>
+        /// <remarks>
+        /// Deliberately does not record Catalog.ShouldCallProposablesTimeStamp - EnsureShouldCallProposables is the only
+        /// place that does. The timestamp is bumped before a DDL statement runs, and a statement can compile an expression
+        /// over the table in the middle of its own work (AlterTableVarNode.ValidateConstraint does), which lands here.
+        /// Recording the stamp here would leave the statement's own later mutation wearing a current stamp on a summary
+        /// that is about to go stale, which is the defect the timestamp exists to close.
+        /// </remarks>
         public virtual void DetermineShouldCallProposables(bool reset)
         {
 			if (reset)
@@ -2327,6 +2335,46 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
+		/// <summary>The value of Catalog.ShouldCallProposablesTimeStamp this table variable's summary was last computed at.</summary>
+		/// <remarks>-1, not 0, so that a summary that has never been ensured is recomputed on its first read; the catalog's counter starts at 0.</remarks>
+		private long _shouldCallProposablesTimeStamp = -1;
+
+		/// <summary>Recomputes the ShouldDefault/ShouldValidate/ShouldChange summary if a definition it is derived from may have changed since it was last computed.</summary>
+		/// <remarks>
+		/// <para>
+		/// Called on every proposal the engine is asked for - TableNode.Validate, Change and Default - because the summary is a
+		/// cache of what the definition says, and a plan over the table can outlive a change to that definition. See
+		/// Schema.Catalog.ShouldCallProposablesTimeStamp for what the key means and where it is bumped, and each
+		/// RecomputeShouldCallProposables override for what recomputing means for that kind of table variable.
+		/// </para>
+		/// <para>
+		/// This is the only place the stamp is recorded; see DetermineShouldCallProposables for why the compile-time recompute
+		/// must not record it. Reading the catalog's counter before the recompute and recording that value afterwards is
+		/// deliberate: a bump that lands while the recompute is running then leaves the stamp behind the counter, which costs
+		/// one more recompute - never a stale summary wearing a current stamp.
+		/// </para>
+		/// <para>
+		/// NOTE: the flags live in one bit field with the rest of the table variable's characteristics, and a catalog table
+		/// variable is shared by every session, so two sessions recomputing at once are two unsynchronized read-modify-writes
+		/// of that field. They write the same values, and compiling any expression over the table has always done the same
+		/// thing from any session (TableVarNode.DetermineCharacteristics), so this adds writers at the rate compilations
+		/// already do rather than a new kind of race. If a lost characteristic bit is ever seen under concurrency, the field
+		/// needs interlocked updates or the table variable a lock - not this call removed.
+		/// </para>
+		/// </remarks>
+		public void EnsureShouldCallProposables(Catalog catalog)
+		{
+			long timeStamp = catalog.ShouldCallProposablesTimeStamp;
+			if (_shouldCallProposablesTimeStamp != timeStamp)
+			{
+				RecomputeShouldCallProposables();
+				_shouldCallProposablesTimeStamp = timeStamp;
+			}
+		}
+
+		/// <summary>How this kind of table variable recomputes its summary once the catalog says it may be stale; each override states why it does what it does.</summary>
+		protected abstract void RecomputeShouldCallProposables();
+
 		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
 			IsDefaultRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsDefaultRemotable", "true"));
@@ -2917,6 +2965,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			base.DetermineRemotable(session);
 			DetermineShouldCallProposables(true);
 		}
+
+		/// <summary>Recomputes from scratch: a base table's summary is a total function of its definition, so this is both correct and idempotent, and it can lower a flag as well as raise one - a dropped default or check is as much a change as a created one.</summary>
+		protected override void RecomputeShouldCallProposables()
+		{
+			DetermineShouldCallProposables(true);
+		}
 		
 		public override Statement EmitStatement(EmitMode mode)
 		{
@@ -3008,6 +3062,22 @@ namespace Alphora.Dataphor.DAE.Schema
 			IsValidateRemotable = IsValidateRemotable && InferredIsValidateRemotable;
 			IsChangeRemotable = IsChangeRemotable && InferredIsChangeRemotable;
 		}
+
+		/// <summary>Does nothing: a plan-local summary is built fresh by the compilation that builds the stub, so it is never stale.</summary>
+		/// <remarks>
+		/// A result table variable starts with all three flags raised (TableVar.InternalInitialize) and the nodes of the plan
+		/// then lower the ones their own proposal does not propagate - RenameNode, JoinNodes and DifferenceNode each gate a
+		/// flag on a Propagate... property. Recomputing here would read the flags back up out of the columns' definitions and
+		/// could reopen a gate the plan closed on purpose, a behaviour change with no defect behind it, and it would gain
+		/// nothing, because the whole stub is rebuilt the next time the expression is compiled.
+		/// NOTE: safe only while a plan-local summary depends on nothing but the compilation that built it. A node taught to
+		/// derive a flag from a catalog definition that can change under an open plan would make this the stale one, and it
+		/// would then need what a view gets - a raise-only recompute.
+		/// </remarks>
+		protected override void RecomputeShouldCallProposables()
+		{
+			// Nothing to do; see the remarks.
+		}
 	}
 
 	public class DerivedTableVar : TableVar
@@ -3031,6 +3101,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
 			base.DetermineRemotable(session);
+			DetermineShouldCallProposables(false);
+		}
+
+		/// <summary>Recomputes without clearing the flags first, so this can raise a flag but never lower one.</summary>
+		/// <remarks>
+		/// A view's summary carries what a compilation inferred from the expression the view is over as well as what its own
+		/// definition says, and only a compilation can produce that inference; clearing the flags first would throw it away,
+		/// which is why DetermineRemotable above passes false too. Raise-only is enough for what a user meets: a view's columns
+		/// carry the source columns' data types, so a recompute sees a type's new check or default, and a flag left raised
+		/// costs a call that finds nothing to do.
+		/// </remarks>
+		protected override void RecomputeShouldCallProposables()
+		{
 			DetermineShouldCallProposables(false);
 		}
 		

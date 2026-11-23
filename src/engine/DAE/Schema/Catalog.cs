@@ -151,6 +151,41 @@ namespace Alphora.Dataphor.DAE.Schema
 				_derivationTimeStamp += 1;
 			}
 		}
+
+		// ShouldCallProposablesTimeStamp
+		protected long _shouldCallProposablesTimeStamp = 0;
+		/// <summary>This timestamp is the validity key for the ShouldDefault/ShouldValidate/ShouldChange summary that each table variable derives from its definition.</summary>
+		/// <remarks>
+		/// <para>
+		/// Beside each table variable, and beside each of its columns, the engine keeps a three-bit summary of what a row of
+		/// that table needs while a client is editing it: is there a default worth asking for, a check worth running, a change
+		/// handler worth calling. The summary is derived and never stored - from the column's own default, constraints and
+		/// handlers, and from those of the column's data type - so a change to any of those definitions makes it stale. The
+		/// engine reads it as a fast path (TableNode.Default, Change and Validate each return at once when it says there is
+		/// nothing to do), so a stale one silently costs exactly the work it claims is not needed.
+		/// </para>
+		/// <para>
+		/// A statement that changes a type holds only the type, while the summaries that change with it belong to every table
+		/// with a column of that type, and there is no index from a type to those tables. So this timestamp invalidates every
+		/// summary at once and each table variable recomputes its own on its next read; see
+		/// Schema.TableVar.EnsureShouldCallProposables.
+		/// </para>
+		/// <para>
+		/// Two places increment it, and that is the complete set: DDLNode.InternalBeforeExecute, which every statement that
+		/// changes the catalog passes through, and CatalogDeviceSession.InvalidateCachesAfterUndo, which every rollback that
+		/// undid such a statement passes through. A third place would mean one of those two had stopped being complete.
+		/// </para>
+		/// </remarks>
+		public long ShouldCallProposablesTimeStamp { get { return _shouldCallProposablesTimeStamp; } }
+
+		/// <summary>Invalidates the derived ShouldDefault/ShouldValidate/ShouldChange summary of every table variable in this catalog.</summary>
+		public void UpdateShouldCallProposablesTimeStamp()
+		{
+			lock (this)
+			{
+				_shouldCallProposablesTimeStamp += 1;
+			}
+		}
 		
 		#if USEOBJECTVALIDATE
 		protected override void Validate(Object item)
