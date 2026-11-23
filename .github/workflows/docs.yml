@@ -10,6 +10,9 @@ on:
   push:
     branches: [master, modernization]
     # The tool's own path is here so that a change to the checker runs its tests.
+    # NOTE: this is an inclusion filter, so a pull request touching none of these paths gets no run at
+    # all. If branch protection ever requires this check, it would wait for a run that never happens;
+    # add a no-op job for the other paths or drop the filter then (build.yml carries the same note).
     paths:
       - 'docs/**'
       - 'tools/docs-size-check/**'

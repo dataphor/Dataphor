@@ -89,6 +89,16 @@ class SizeCheckTest(unittest.TestCase):
         code, output = self.run_main(root, "--limit", "10")
         self.assertEqual(code, 1, output)
 
+    def test_a_fence_inside_an_html_comment_is_not_a_fence(self):
+        # Comment text is not prose, and a line of backticks inside a comment does
+        # not open a code block: taken for one it would swallow the rest of the
+        # page and let an oversized page pass the gate.
+        commented = "<!--\n```\nnot a fence\n-->\n" + words(1501) + "\n"
+        root = self.tree({"docs/architecture.md": "# Root\n", "docs/architecture/a.md": commented})
+        code, output = self.run_main(root)
+        self.assertEqual(code, 1, output)
+        self.assertIn("docs/architecture/a.md: 1501 words (limit 1500)", output)
+
     def test_excepted_page_is_reported_but_not_an_error(self):
         root = self.tree({"docs/architecture.md": "# Root\n", "docs/architecture/a.md": words(1501) + "\n"})
         with mock.patch.dict(check_size.EXCEPTIONS, {"docs/architecture/a.md": "a generated table"}):

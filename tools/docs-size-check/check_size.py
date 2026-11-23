@@ -14,9 +14,11 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Configuration. Each of these values lives here and nowhere else.
 
-# Words of prose one page of the checked set may hold. AGENTS.md and
-# tickets/rules/10-dataphor.md name this number and point at this symbol, so a
-# change here has to be made in those two places as well.
+# Words of prose one page of the checked set may hold. Three documents state the
+# rule and name this number - AGENTS.md, which names this symbol and file as well,
+# tickets/rules/10-dataphor.md and WS8 of docs/modernization-plan.md - so a change
+# here has to be made in all three. Each names this folder, so `grep -rn
+# docs-size-check` finds them.
 LIMIT = 1500
 
 # The pages that are checked, as repository-relative glob patterns with forward
@@ -46,8 +48,11 @@ EXCEPTIONS = {}
 # that lets an oversized page pass. Unlike the link checker this ignores the
 # list-item exception, so a fence indented four spaces or more inside a list
 # counts as prose: over-counting can only fail a page early, never let one pass.
-# NOTE: this is a copy, not an import; if the link checker's fence rule changes, change this one
-# with it, or the two tools stop agreeing on what is prose.
+# HTML comment text is blanked before a line is tested, for the same reason and in
+# the same order as there: a line of backticks inside an HTML comment is not a
+# fence, and taking it for one would swallow the rest of the page from the count.
+# NOTE: _FENCE_OPEN and _strip_comments are copies, not imports; if the link checker's rules for
+# fences or comments change, change these with them, or the two tools stop agreeing on what is prose.
 _FENCE_OPEN = re.compile(r"^(?P<indent>[ \t]*)(?P<fence>`{3,}|~{3,})(?P<info>.*)$")
 
 
@@ -69,20 +74,43 @@ def _indent_width(line):
     return width
 
 
+def _strip_comments(line, in_comment):
+    """Blank out HTML comment text; returns (line, still_in_comment)."""
+    out = []
+    pos = 0
+    while True:
+        if in_comment:
+            end = line.find("-->", pos)
+            if end < 0:
+                return "".join(out), True
+            pos = end + 3
+            in_comment = False
+        start = line.find("<!--", pos)
+        if start < 0:
+            out.append(line[pos:])
+            return "".join(out), False
+        out.append(line[pos:start])
+        pos = start + 4
+        in_comment = True
+
+
 def prose_words(text):
     """The whitespace-separated tokens of a Markdown text outside fenced code blocks.
 
     Counted as `wc -w` counts, so Markdown punctuation counts too: this is a
-    budget for how long a page may get, not a measurement of its prose.
+    budget for how long a page may get, not a measurement of its prose. Fenced
+    code and HTML comment text are not prose and are not counted.
     """
     words = 0
     fence = None
-    for line in _normalise(text).split("\n"):
+    in_comment = False
+    for raw in _normalise(text).split("\n"):
         if fence is not None:
-            stripped = line.strip()
+            stripped = raw.strip()
             if len(stripped) >= fence[1] and stripped == fence[0] * len(stripped):
                 fence = None
             continue
+        line, in_comment = _strip_comments(raw, in_comment)
         opener = _FENCE_OPEN.match(line)
         if opener and _indent_width(opener.group("indent")) <= 3 and not (
             opener.group("fence")[0] == "`" and "`" in opener.group("info")
