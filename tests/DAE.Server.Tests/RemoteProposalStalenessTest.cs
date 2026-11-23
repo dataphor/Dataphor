@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// Why a client answers any of these itself, and what makes a plan's answer stale, is at LocalCursor.IsPlanSchemaCurrent.
+	/// Why a client answers any of these itself, and what makes a plan's answer stale, is at LocalPlan.IsSchemaCurrent.
 	/// The first three cases are the three calls, one each: a cursor opened before the type changed now gives the same answer
 	/// as the engine's own cursor afterwards, where before it went on giving the pre-change answer. The engine side of each
 	/// comparison is TypeChangeSummaryTest's subject and is here only as the oracle, as in the two sibling fixtures on this
@@ -72,9 +72,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				{
 					Assert.That(clientCursor.Plan.TableVar.IsValidateCallRemotable(String.Empty), Is.True, StillRemotable);
 
-					bool refusedByClient = IsRefused(clientCursor, 0);
-					Assert.That(refusedByClient, Is.EqualTo(IsRefused(engineCursor, 0)), "The client stack and the engine must give the same verdict.");
-					Assert.That(refusedByClient, Is.True, "A value the new check rejects must be refused.");
+					Exception refusedByClient = RefusalOf(clientCursor, 0);
+					Assert.That(refusedByClient != null, Is.EqualTo(RefusalOf(engineCursor, 0) != null), "The client stack and the engine must give the same verdict.");
+					Assert.That(refusedByClient, Is.Not.Null, "A value the new check rejects must be refused.");
+					// Named, because this is the one case whose client answer now comes back over the remote path, where an
+					// incidental failure would read as a refusal. TypeChangeSummaryTest names it the same way on the engine side.
+					Assert.That(refusedByClient.ToString(), Does.Contain("IsPositive"), "The refusal must be the new check's.");
 				}
 			);
 		}
@@ -156,11 +159,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				{
 					Assert.That(clientCursor.Plan.TableVar.IsValidateCallRemotable(String.Empty), Is.True, StillRemotable);
 
-					Assert.That(IsRefused(engineCursor, 0), Is.True, "The engine must refuse the value, or this case says nothing about the client.");
+					Assert.That(RefusalOf(engineCursor, 0), Is.Not.Null, "The engine must refuse the value, or this case says nothing about the client.");
 					Assert.That
 					(
-						IsRefused(clientCursor, 0),
-						Is.False,
+						RefusalOf(clientCursor, 0),
+						Is.Null,
 						"A client told nothing about the change must still answer from its own copy; closing this window is what the NOTE: at the staleness test weighs."
 					);
 				}
@@ -174,7 +177,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		/// <param name="tellTheClient">
 		/// Whether the client is given the one unrelated prepared expression that raises its highest-known catalog
-		/// generation. A real form supplies that constantly; a form sitting idle supplies none, which is the fourth case.
+		/// generation. A real form supplies that constantly; a form that sits idle - or that only posts statements, which do
+		/// not carry the newer generation - supplies none, which is the fourth case.
 		/// </param>
 		private void WhileBothCursorsStayOpen(string tableName, string alterStatement, bool tellTheClient, Action<IServerCursor, IServerCursor> ask)
 		{
@@ -190,7 +194,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					// Any prepared expression does it, because the server reports the catalog cache as changed on every
 					// prepare (RemoteServerPlan.GetCatalog) and the client raises its own value from the descriptor
 					// (LocalServer.EnsureCacheConsistent). One line of D4 that names nothing in this test is the smallest
-					// thing that does, and makes the point that it need not be related to the table being edited.
+					// thing that does, and makes the point that it need not be related to the table being edited. A
+					// statement would not do: no descriptor on that path reaches EnsureCacheConsistent.
 					if (tellTheClient)
 						ClientProcess.Evaluate("1", null);
 
@@ -207,9 +212,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>Offers a whole new row for checking, as a client does before sending it, and says whether it was refused.</summary>
-		/// <remarks>A refusal carries no error text: the client stack wraps the engine's exception and the two messages are not meant to be identical.</remarks>
-		private static bool IsRefused(IServerCursor cursor, int amount)
+		/// <summary>Offers a whole new row for checking, as a client does before sending it, and returns the refusal, or null where the row was accepted.</summary>
+		/// <remarks>
+		/// The exception rather than a flag, so that a case can name what refused the row: the two stacks' messages are not
+		/// meant to be identical - the client stack wraps the engine's exception - but both carry the constraint's name, and
+		/// a bare catch would be satisfied by any failure at all on the remote path a stale plan now takes.
+		/// </remarks>
+		private static Exception RefusalOf(IServerCursor cursor, int amount)
 		{
 			IRow row = cursor.Plan.RequestRow();
 			try
@@ -220,11 +229,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				try
 				{
 					cursor.Validate(null, row, String.Empty);
-					return false;
+					return null;
 				}
-				catch (Exception)
+				catch (Exception exception)
 				{
-					return true;
+					return exception;
 				}
 			}
 			finally
