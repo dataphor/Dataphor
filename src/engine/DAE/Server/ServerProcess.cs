@@ -1500,6 +1500,39 @@ namespace Alphora.Dataphor.DAE.Server
 			_transactions.EndTransaction(true);
 		}
 
+		/// <summary>Whether the connection to another server still holds the transaction level a rollback is now ending.</summary>
+		/// <remarks>
+		/// <para>
+		/// The same question <c>ServerCatalogDeviceSession.StoreHasEndingLevel</c> asks of the catalog store's connection, and
+		/// asked for the same reason. A commit that failed part-way left the connections it had already committed one level
+		/// shallower than this process - <see cref="RemoteSession.CommitTransaction"/> counts the level down whatever the far
+		/// server did, deliberately; see its remarks - and on those the innermost open level is the *outer* transaction, one this
+		/// session has not finished with and may still commit. Ending that level discarded the outer transaction's work on the
+		/// other server, silently, while the local half of the same transaction stayed live and committable.
+		/// </para>
+		/// <para>
+		/// Equality rather than a lower bound because a connection can never be deeper than this process: the invariant recorded
+		/// on <see cref="RemoteSession.TransactionCount"/> and asserted in <see cref="InternalPrepareTransaction"/>. Skipping the
+		/// shallower connections restores that invariant rather than deferring it, since the rollback pops this process to the
+		/// depth those connections are already at.
+		/// </para>
+		/// <para>
+		/// The device loop in <see cref="InternalRollbackTransaction"/> asks only whether the device session is in a transaction
+		/// at all, and so is wrong in this same way for a device session whose commit succeeded before a later participant's
+		/// failed; <c>bug-partial-commit-rolls-back-committed-participants</c> owns making one predicate answer this question for
+		/// every kind of participant.
+		/// </para>
+		/// <para>
+		/// NOTE: comparing a connection's level count against this process's depth is sound only while every connection is
+		/// enlisted at every level. If <c>debt-remote-session-lazy-enlistment</c> lands, a connection may hold fewer levels by
+		/// design, and this has to ask which transaction each of its levels was begun for instead.
+		/// </para>
+		/// </remarks>
+		private bool HoldsEndingLevel(RemoteSession remoteSession)
+		{
+			return remoteSession.TransactionCount == _transactions.Count;
+		}
+
 		protected internal void InternalRollbackTransaction()
 		{
 			CheckInTransaction();
@@ -1514,23 +1547,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						try
 						{
-							// Only a connection that still holds the level being ended. A commit that failed part-way left the
-							// connections it had already committed one level shallower than this process (RemoteSession.CommitTransaction
-							// decrements whatever the far server did, deliberately; see its remarks), and on those the innermost open
-							// level is the *outer* transaction - one this session has not finished with and may still commit. Rolling
-							// that back discarded the outer transaction's work on the other server, silently, while the local half of
-							// the same transaction stayed live and committable.
-							// == rather than >= because a connection can never be deeper than the process: the invariant recorded on
-							// RemoteSession.TransactionCount and asserted in InternalPrepareTransaction. Skipping the shallower
-							// connections restores that invariant rather than deferring it, since this process pops to
-							// _transactions.Count - 1 below, which is where those connections already are.
-							// The device loop below guards on InTransaction and is right to: Schema.DeviceSession.CommitTransaction
-							// ends its level only after InternalCommitTransaction returns, so a device session whose commit threw
-							// still holds the level this rollback is ending.
-							// NOTE: comparing against the process's depth is sound only while every connection is enlisted at every
-							// level. If debt-remote-session-lazy-enlistment lands, a connection may hold fewer levels by design, and
-							// this has to ask which transaction each of its levels was begun for instead.
-							if (remoteSession.TransactionCount == _transactions.Count)
+							if (HoldsEndingLevel(remoteSession))
 								remoteSession.RollbackTransaction();
 						}
 						catch (Exception E)

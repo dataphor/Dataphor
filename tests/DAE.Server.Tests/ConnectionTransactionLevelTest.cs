@@ -30,6 +30,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// SQLDeviceSession.InternalBeginTransaction - and showing that would need a real DBMS, which this suite has not got.
 	/// </remarks>
 	[TestFixture]
+	// Not [Parallelizable]: RecordingRemoteSession's log and the connection a case reads are static, because the engine builds
+	// the connection and a case has no other handle on it, so two cases of this fixture running at once would read each other's.
 	public class ConnectionTransactionLevelTest : InProcessTestFixture
 	{
 		[OneTimeSetUp]
