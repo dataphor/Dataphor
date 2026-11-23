@@ -172,6 +172,11 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					// The level this begin added, and only that one: the depth rather than InTransaction, so that a commit which
 					// threw after it had already ended the level does not get the enclosing transaction rolled back in its place.
+					// NOTE: in that window the record below cannot be read either - the nested transaction object is gone with the level -
+					// so this level stays retryable and a retried commit runs the handlers a second time, over work the nested commit
+					// had already committed on every participant. It needs ServerTransaction.Dispose to throw, which nothing on that path
+					// does today (see the note there); if one ever can, carry the record out of the nested commit rather than reading it
+					// off a transaction object that may be gone.
 					if (program.ServerProcess.TransactionCount > enclosingDepth)
 					{
 						// Read before the rollback, which ends the nested level and with it the only record of its state. A nested

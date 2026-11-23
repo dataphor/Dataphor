@@ -1209,6 +1209,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// move is a rollback either way. The cost, recorded in docs/migration-notes.md, is that a client whose error handler reads
 		/// something in order to log it must roll back first.
 		/// </para>
+		/// <para>
+		/// <see cref="DeviceConnect"/> is deliberately not a seam, where <see cref="RemoteConnect"/> is, and the asymmetry is not an
+		/// oversight: connecting a device session and catching it up to this process's depth does the back end no harm that the
+		/// rollback does not undo - the new session holds every level this process does, so the rollback ends the half-committed one
+		/// on it like any other participant - and the work that follows the connect is refused at the four methods below it. A
+		/// connection to another Dataphor server is asked at the connect because the catch-up begins transactions on a *far server*,
+		/// which this process cannot clean up if the link then fails (see <c>DiscardRemoteSession</c>).
+		/// </para>
 		/// </remarks>
 		public void CheckNotHalfCommitted()
 		{
