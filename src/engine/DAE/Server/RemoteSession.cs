@@ -38,20 +38,116 @@ namespace Alphora.Dataphor.DAE.Server
 		private Schema.ServerLink _serverLink;
 		public Schema.ServerLink ServerLink { get { return _serverLink; } }
 		
-		public abstract int TransactionCount { get; }
+		private int _transactionCount;
+		/// <summary>How many transaction levels the local process has begun on this connection.</summary>
+		/// <remarks>
+		/// <para>
+		/// Counted here rather than asked of the other server. Asking was a network round trip on every begin, and on a
+		/// connection whose server has gone it is a question that cannot be answered at all - which is the one question the
+		/// process has to answer to decide whether a dead connection is a participant in a transaction it still has open
+		/// (see <see cref="ServerProcess.InternalBeginTransaction"/>).
+		/// </para>
+		/// <para>
+		/// The count is exact because of this invariant: <b>every remote session in a process's
+		/// <see cref="ServerProcess.RemoteSessions"/> list has begun exactly as many transaction levels as the process has
+		/// open.</b> <c>ServerProcess.RemoteConnect</c> catches a new connection up to the process's depth before adding it
+		/// to the list; <c>ServerProcess.InternalBeginTransaction</c> either begins a level on a connection, lets the
+		/// connection go, or fails the whole begin; and the unwind decrements the count on every path, failures included.
+		/// </para>
+		/// </remarks>
+		public int TransactionCount { get { return _transactionCount; } }
 		
 		public bool InTransaction
 		{
 			get { return TransactionCount > 0; }
 		}
 		
-		public abstract void BeginTransaction(IsolationLevel isolationLevel);
+		/// <summary>Begins a transaction level on the connection; the level is counted only if the other server took it.</summary>
+		public void BeginTransaction(IsolationLevel isolationLevel)
+		{
+			try
+			{
+				InternalBeginTransaction(isolationLevel);
+			}
+			catch (Exception exception)
+			{
+				throw TransactionFailure(exception);
+			}
+			
+			_transactionCount++;
+		}
 		
-		public abstract void PrepareTransaction();
+		public void PrepareTransaction()
+		{
+			try
+			{
+				InternalPrepareTransaction();
+			}
+			catch (Exception exception)
+			{
+				throw TransactionFailure(exception);
+			}
+		}
 		
-		public abstract void CommitTransaction();
+		/// <summary>Commits the innermost transaction level on the connection.</summary>
+		/// <remarks>
+		/// The count comes down whatever the other server did with the commit: the level is being abandoned locally either
+		/// way, and a count left high would make the next begin treat a dead connection as a participant and so never let
+		/// it go.
+		/// </remarks>
+		public void CommitTransaction()
+		{
+			try
+			{
+				InternalCommitTransaction();
+			}
+			catch (Exception exception)
+			{
+				throw TransactionFailure(exception);
+			}
+			finally
+			{
+				_transactionCount--;
+			}
+		}
 		
-		public abstract void RollbackTransaction();
+		/// <summary>Rolls back the innermost transaction level on the connection.</summary>
+		/// <remarks>The count comes down whatever the other server did, for the reason given on <see cref="CommitTransaction"/>.</remarks>
+		public void RollbackTransaction()
+		{
+			try
+			{
+				InternalRollbackTransaction();
+			}
+			catch (Exception exception)
+			{
+				throw TransactionFailure(exception);
+			}
+			finally
+			{
+				_transactionCount--;
+			}
+		}
+		
+		/// <summary>The error a failed transaction operation on this connection reaches its caller as.</summary>
+		/// <remarks>
+		/// A bare communication exception says nothing about which of a process's connections broke, and a process can hold
+		/// one per server link. This names the link, the instance and the host and carries what the network said as its
+		/// inner exception. It is only how the failure is reported: the decision whether a dead connection may be let go is
+		/// made on <see cref="TransactionCount"/>, never on the exception.
+		/// </remarks>
+		private ServerException TransactionFailure(Exception exception)
+		{
+			return new ServerException(ServerException.Codes.RemoteSessionTransactionFailed, exception, ServerLink.Name, ServerLink.InstanceName, ServerLink.HostName);
+		}
+		
+		protected abstract void InternalBeginTransaction(IsolationLevel isolationLevel);
+		
+		protected abstract void InternalPrepareTransaction();
+		
+		protected abstract void InternalCommitTransaction();
+		
+		protected abstract void InternalRollbackTransaction();
 		
 		public abstract void Execute(string statement, DataParams paramsValue);
 		

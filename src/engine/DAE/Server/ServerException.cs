@@ -334,6 +334,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 			/// <summary>Error code 106211: "An error occurred attempting to communicate with the service."</summary>
 			CommunicationFailure = 106211,
+
+			/// <summary>Error code 106212: "A transaction operation failed on the connection to instance "{1}" on host "{2}" through server link "{0}"."</summary>
+			RemoteSessionTransactionFailed = 106212,
 			
 		}
 		

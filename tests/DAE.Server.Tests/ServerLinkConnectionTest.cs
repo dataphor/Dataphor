@@ -11,8 +11,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
 	/// What a process's connection to another Dataphor server does when the server link naming that server is dropped,
-	/// re-created or altered: a link is followed by its identity rather than by its name, and a drop or an alter ends the
-	/// issuing process's connection to it.
+	/// re-created or altered, and when that server itself goes away: a link is followed by its identity rather than by its
+	/// name, a drop or an alter ends the issuing process's connection to it, and a connection whose server has gone is let
+	/// go at the next transaction begin unless it is a participant in a transaction the process still has open.
 	/// </summary>
 	/// <remarks>
 	/// The other server is a separate program rather than a second server in this process, for the reason given on
@@ -25,7 +26,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The instance the child server serves; a link's InstanceName tag has to name it, because the connection URI carries it.</summary>
 		private const string TargetInstanceName = "ServerLinkTarget";
 
-		/// <summary>The instance served by the child one case starts and stops itself, so that it can drop a link whose server has gone.</summary>
+		/// <summary>The instance served by the child a case starts and stops itself, so that the case can watch what happens to a link whose server has gone.</summary>
+		/// <remarks>Reused by every such case: each gets a child of its own, with its own temporary root and its own reserved port, and the cases of a fixture run one at a time.</remarks>
 		private const string DoomedTargetInstanceName = "ServerLinkDoomedTarget";
 
 		/// <summary>The call depth a remote session gets from a link with no DefaultMaxCallDepth tag: this session's own default, which is Engine.DefaultMaxCallDepth.</summary>
@@ -178,6 +180,121 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>A connection whose server has gone stops failing the process's statements: the next transaction begin lets it go and the statement runs.</summary>
+		/// <remarks>
+		/// Every transaction a process begins begins one on every connection to another server it holds, whether the
+		/// statement uses that connection or not, so a dead connection used to fail every statement the process issued -
+		/// including <c>drop server</c>, the one statement that would have cleared it. Both are asserted here.
+		/// </remarks>
+		[Test]
+		public void TestADeadConnectionIsLetGoAndTheStatementRuns()
+		{
+			using (OutOfProcessInstance doomedServer = new OutOfProcessInstance(DoomedTargetInstanceName))
+			{
+				ExecuteScript(CreateLink("ReclaimedLink", doomedServer, null));
+
+				// A process of its own, so that the connection this case kills is not the one the fixture's own teardown stops.
+				IServerProcess holder = Session.StartProcess(new ProcessInfo(Session.SessionInfo));
+				try
+				{
+					Assert.That(RemoteCallDepth(holder, "ReclaimedLink"), Is.EqualTo(DefaultCallDepth));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(1));
+
+					doomedServer.Stop();
+
+					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("A statement with nothing to do with the link failed because the server the link named was down."));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(0));
+					Assert.DoesNotThrow(() => holder.ExecuteScript("drop server ReclaimedLink;"), doomedServer.Diagnostic("Dropping the link failed because the server it named was down."));
+				}
+				finally
+				{
+					Session.StopProcess(holder);
+				}
+			}
+		}
+
+		/// <summary>Only the connection whose server has gone is let go; a live one on the same process keeps its session on the other server.</summary>
+		[Test]
+		public void TestOnlyTheConnectionWhoseServerHasGoneIsLetGo()
+		{
+			using (OutOfProcessInstance doomedServer = new OutOfProcessInstance(DoomedTargetInstanceName))
+			{
+				ExecuteScript(CreateLink("SurvivingLink", null));
+				ExecuteScript(CreateLink("DyingLink", doomedServer, null));
+
+				IServerProcess holder = Session.StartProcess(new ProcessInfo(Session.SessionInfo));
+				try
+				{
+					Assert.That(RemoteCallDepth(holder, "SurvivingLink"), Is.EqualTo(DefaultCallDepth));
+					Assert.That(RemoteCallDepth(holder, "DyingLink"), Is.EqualTo(DefaultCallDepth));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(2));
+
+					doomedServer.Stop();
+
+					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("A statement with nothing to do with either link failed because the server one of them named was down."));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(1));
+					Assert.That(RemoteCallDepth(holder, "SurvivingLink"), Is.EqualTo(DefaultCallDepth));
+				}
+				finally
+				{
+					Session.StopProcess(holder);
+				}
+			}
+		}
+
+		/// <summary>A connection that is a participant in a transaction the process still has open may not be let go: the begin fails naming the link, and the session recovers once the transaction is rolled back.</summary>
+		/// <remarks>
+		/// Work has been done on such a connection at a level that is still open, so forgetting it would let the local
+		/// commit believe the remote half committed. The failure is asserted by error code rather than by message: a
+		/// failure from this layer can arrive wrapped, as the remark on TestLinkUserChangeClosesTheChangingProcessConnection
+		/// records, and matching the message would pin the wrapping rather than the behaviour.
+		/// </remarks>
+		[Test]
+		public void TestABeginOnADeadParticipantFailsNamingTheLink()
+		{
+			using (OutOfProcessInstance doomedServer = new OutOfProcessInstance(DoomedTargetInstanceName))
+			{
+				ExecuteScript(CreateLink("ParticipantLink", doomedServer, null));
+
+				IServerProcess holder = Session.StartProcess(new ProcessInfo(Session.SessionInfo));
+				try
+				{
+					Assert.That(RemoteCallDepth(holder, "ParticipantLink"), Is.EqualTo(DefaultCallDepth));
+
+					// Begun while the child is alive, so the connection is a participant at depth 1 when the child goes.
+					holder.BeginTransaction(IsolationLevel.Isolated);
+					doomedServer.Stop();
+
+					Exception failedBegin = Assert.Catch(() => holder.BeginTransaction(IsolationLevel.Isolated), doomedServer.Diagnostic("Beginning a nested transaction succeeded on a connection whose server was down and which was a participant in the open transaction."));
+					Assert.That(DataphorErrorCode(failedBegin), Is.EqualTo((int)ServerException.Codes.RemoteSessionTransactionFailed));
+					Assert.That(holder.TransactionCount, Is.EqualTo(1));
+
+					Assert.Catch(() => holder.RollbackTransaction(), doomedServer.Diagnostic("Rolling back a transaction whose remote half could not be rolled back reported nothing."));
+					Assert.That(holder.InTransaction, Is.False);
+
+					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("The session did not recover after the transaction holding the dead connection was rolled back."));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(0));
+				}
+				finally
+				{
+					Session.StopProcess(holder);
+				}
+			}
+		}
+
+		/// <summary>The Dataphor error code of the first DataphorException in the exception and its inner exception chain, or 0 if there is none.</summary>
+		private static int DataphorErrorCode(Exception exception)
+		{
+			for (Exception current = exception; current != null; current = current.InnerException)
+			{
+				DataphorException dataphorException = current as DataphorException;
+				if (dataphorException != null)
+					return dataphorException.Code;
+			}
+
+			return 0;
+		}
+
 		/// <summary>A link naming the shared child server; the overload says what the tags are.</summary>
 		private string CreateLink(string name, int? defaultMaxCallDepth)
 		{
@@ -214,7 +331,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>How many connections to other servers this process holds.</summary>
 		private int ConnectionCount()
 		{
-			return (int)Evaluate("Count(RemoteSessions where Process_ID = ProcessID())");
+			return ConnectionCount(Process);
+		}
+
+		/// <summary>The same, for a process other than the fixture's own.</summary>
+		private static int ConnectionCount(IServerProcess process)
+		{
+			return (int)Evaluate(process, "Count(RemoteSessions where Process_ID = ProcessID())");
 		}
 
 		private object Evaluate(string expression)

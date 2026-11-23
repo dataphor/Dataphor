@@ -1268,15 +1268,34 @@ namespace Alphora.Dataphor.DAE.Server
 				throw new ServerException(ServerException.Codes.DTCNotSupported);
 
 			ServerTransaction transaction = _transactions.BeginTransaction(this, isolationLevel);
-			int remoteSessionsBegun = 0;
+			List<RemoteSession> remoteSessionsBegun = new List<RemoteSession>();
 			int deviceSessionsBegun = 0;
 			try
 			{
-				// Begin a transaction on all remote sessions
-				foreach (RemoteSession remoteSession in RemoteSessions)
+				// Begin a transaction on all remote sessions. A snapshot of the list rather than the list itself:
+				// DiscardRemoteSession takes the session it is given out of RemoteSessions, which would invalidate an
+				// enumerator over the list.
+				foreach (RemoteSession remoteSession in new List<RemoteSession>(RemoteSessions))
 				{
-					remoteSession.BeginTransaction(isolationLevel);
-					remoteSessionsBegun++;
+					try
+					{
+						remoteSession.BeginTransaction(isolationLevel);
+					}
+					catch (Exception exception)
+					{
+						// A connection with no level of its own open is a participant in no transaction this process still
+						// has open: nothing has been done on it that this process's transaction protocol still owes an answer
+						// for, so it may be let go and this begin carries on without it. A connection that does have a level
+						// open may not be - work has been done on it at a level that is still open, and forgetting it would
+						// let the local commit believe the remote half committed - so its failure fails the whole begin.
+						if (remoteSession.InTransaction)
+							throw;
+
+						DiscardRemoteSession(remoteSession, exception);
+						continue;
+					}
+
+					remoteSessionsBegun.Add(remoteSession);
 				}
 
 				// Begin a transaction on all device sessions
@@ -1306,12 +1325,59 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
+		/// <summary>Lets a connection to another server go, because a transaction operation on it failed and it is a participant in no transaction this process still has open.</summary>
+		/// <remarks>
+		/// One warning in the server log naming the link, shaped on <c>RemoteSessionImplementation.ReportFailedRemoteStop</c>,
+		/// which is the existing warning for the neighbouring case. One warning per connection let go, so the volume is
+		/// bounded by connections rather than by statements.
+		/// </remarks>
+		// NOTE: the reclaim is at the transaction begin because that is the one call this process makes on every connection
+		// it holds whether the statement uses that connection or not, and the one point at which the far server has provably
+		// done nothing yet at the level being begun. A failed Execute or Evaluate is not a reclaim point - the call may have
+		// been delivered and run - and a process that holds a dead connection and begins no transaction on it keeps it,
+		// which with UseImplicitTransactions on (the default) cannot outlast one statement.
+		private void DiscardRemoteSession(RemoteSession session, Exception cause)
+		{
+			// Logged before the disposal, which clears the session's ServerProcess, so the link is read while the session is still live.
+			ServerSession.Server.LogMessage
+			(
+				LogEntryType.Warning,
+				String.Format
+				(
+					"The connection the server link \"{0}\" held to instance \"{1}\" on host \"{2}\" has been released by this server, because a transaction operation on it failed and it was a participant in no transaction this process still has open; the next use of the link connects again. The error was: {3}",
+					session.ServerLink.Name,
+					session.ServerLink.InstanceName,
+					session.ServerLink.HostName,
+					cause.Message
+				)
+			);
+
+			// Disowned first, so that the entry is out of the list however the disposal goes: a DisposableList drops an item
+			// when the item raises Disposed, so a disposal that threw before raising it would leave the dead entry in place
+			// to fail the next statement in the same way.
+			RemoteSessions.Disown(session);
+			try
+			{
+				session.Dispose();
+			}
+			catch (Exception exception)
+			{
+				// A guard rather than an expected path: RemoteSessionImplementation.Dispose logs a failed remote stop as a
+				// warning rather than throwing, since engine-server-link-session-outlives-drop.
+				ServerSession.Server.LogError(exception);
+			}
+		}
+
 		/// <summary>
 		/// Rolls back the level a failed InternalBeginTransaction began on its first remote and device sessions: the device sessions
 		/// in reverse with the catalog device session last, as InternalRollbackTransaction orders it, then the remote sessions in reverse.
 		/// Rollback errors are logged and not thrown, so that the begin's own error reaches the caller.
 		/// </summary>
-		private void RollbackBegunParticipants(int remoteSessionCount, int deviceSessionCount)
+		/// <remarks>
+		/// The remote sessions are named rather than counted, because the begin may have let a connection go, which takes it
+		/// out of RemoteSessions and shifts the index of every entry after it.
+		/// </remarks>
+		private void RollbackBegunParticipants(List<RemoteSession> remoteSessionsBegun, int deviceSessionCount)
 		{
 			Schema.DeviceSession catalogDeviceSession = null;
 			for (int index = deviceSessionCount - 1; index >= 0; index--)
@@ -1326,8 +1392,8 @@ namespace Alphora.Dataphor.DAE.Server
 			if (catalogDeviceSession != null)
 				RollbackBegunParticipant(catalogDeviceSession.RollbackTransaction);
 
-			for (int index = remoteSessionCount - 1; index >= 0; index--)
-				RollbackBegunParticipant(RemoteSessions[index].RollbackTransaction);
+			for (int index = remoteSessionsBegun.Count - 1; index >= 0; index--)
+				RollbackBegunParticipant(remoteSessionsBegun[index].RollbackTransaction);
 		}
 
 		private void RollbackBegunParticipant(Action rollback)
@@ -1350,7 +1416,21 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!transaction.Prepared)
 			{
 				foreach (RemoteSession remoteSession in RemoteSessions)
+				{
+					// The invariant recorded on RemoteSession.TransactionCount, asserted where it is load-bearing: prepare is
+					// the first of the three ending operations to run and a commit reaches it, so this covers both. A count
+					// that disagreed would otherwise reach the far server as a "no transaction in progress" error from there.
+					Error.AssertFail
+					(
+						remoteSession.TransactionCount == _transactions.Count,
+						"The connection for server link \"{0}\" has {1} transaction level(s) open where this process has {2}.",
+						remoteSession.ServerLink.Name,
+						remoteSession.TransactionCount,
+						_transactions.Count
+					);
+
 					remoteSession.PrepareTransaction();
+				}
 					
 				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
 					deviceSession.PrepareTransaction();
@@ -1386,6 +1466,9 @@ namespace Alphora.Dataphor.DAE.Server
 			InternalPrepareTransaction();
 
 			// Commit
+			// NOTE: every remote session commits before any device session, and that order is load-bearing: it is what makes
+			// a commit on a connection whose server has gone fail (at the remote prepare above, in fact) before anything
+			// local has committed. Do not reorder these two loops.
 			foreach (RemoteSession remoteSession in RemoteSessions)
 				remoteSession.CommitTransaction();
 

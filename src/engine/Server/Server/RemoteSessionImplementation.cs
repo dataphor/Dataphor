@@ -258,27 +258,22 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private NativeCLISession _nativeCLISession;
 		
-		public override int TransactionCount
-		{
-			get { return _nativeCLISession.GetTransactionCount(); }
-		}
-		
-		public override void BeginTransaction(IsolationLevel isolationLevel)
+		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
 			_nativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToNativeIsolationLevel(isolationLevel));
 		}
 		
-		public override void PrepareTransaction()
+		protected override void InternalPrepareTransaction()
 		{
 			_nativeCLISession.PrepareTransaction();
 		}
 		
-		public override void CommitTransaction()
+		protected override void InternalCommitTransaction()
 		{
 			_nativeCLISession.CommitTransaction();
 		}
 		
-		public override void RollbackTransaction()
+		protected override void InternalRollbackTransaction()
 		{
 			_nativeCLISession.RollbackTransaction();
 		}
