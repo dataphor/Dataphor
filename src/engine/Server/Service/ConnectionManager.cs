@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Service
 			_remoteServer = remoteServer;
 			// Held as a TimeSpan rather than as the seconds it arrives as, so that the sweep's comparison is exact ticks
 			// against a connection's idle time rather than a TotalSeconds double.
-			_idleTime = TimeSpan.FromSeconds(idleTimeInSeconds);
+			_idleThreshold = TimeSpan.FromSeconds(idleTimeInSeconds);
 			// A quarter of the threshold, with a floor of a second: see the bound in the class remarks. The cost of the
 			// shorter period is four wakeups an hour rather than one, each an array copy under the server's lock and one
 			// TimeSpan comparison per connection.
@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Service
 		#endregion
 
 		private RemoteServer _remoteServer;
-		private readonly TimeSpan _idleTime;
+		private readonly TimeSpan _idleThreshold;
 		private readonly int _wakePeriodInSeconds;
 
 		private ManualResetEvent _lifetimeSignal;
@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Service
 				// which is the boundary the wall-clock comparison this replaced had: a stamp exactly at the cut-off was
 				// kept.
 				TimeSpan idleTime = connections[index].IdleTime;
-				if (idleTime > _idleTime)
+				if (idleTime > _idleThreshold)
 				{
 					try
 					{

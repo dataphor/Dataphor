@@ -184,6 +184,9 @@ namespace Alphora.Dataphor.DAE.Server
 		/// (<see cref="Alphora.Dataphor.DAE.NativeCLI.NativeSession"/>) is the same count for the same reason, and its
 		/// remarks carry the rest of the argument - including why a signed 64-bit millisecond count needs no wrap guard.
 		/// </remarks>
+		// NOTE: the two stamp fields are deliberately not a shared helper. They are one expression each, and the third
+		// monotonic measure in the engine - the deadline in Engine.TerminateProcessThread - is a local Stopwatch, which is
+		// already the shared primitive for that shape. Extract one if a third field of this kind appears.
 		private long _lastActivityTicks;
 
 		/// <summary>How long since this connection was last pinged, or since it was established if it never has been.</summary>
@@ -195,7 +198,17 @@ namespace Alphora.Dataphor.DAE.Server
 		/// a reference to the RemoteServer rather than to the connection it belongs to, so there is no path from a handle
 		/// back to the connection to stamp.
 		/// </remarks>
-		public TimeSpan IdleTime { get { return TimeSpan.FromMilliseconds(Environment.TickCount64 - Volatile.Read(ref _lastActivityTicks)); } }
+		public TimeSpan IdleTime
+		{
+			get
+			{
+				// The stamp read before the clock, not after it: the other order reads the clock, a ping then moves the stamp
+				// past that reading, and the difference comes out negative. Nothing would act wrongly on a negative - the
+				// sweep spares it - but an elapsed time that can run backwards is not what a caller is promised.
+				long lastActivityTicks = Volatile.Read(ref _lastActivityTicks);
+				return TimeSpan.FromMilliseconds(Environment.TickCount64 - lastActivityTicks);
+			}
+		}
 
 		/// <remarks> Provides a way to check that the session is still available (the message will reset the server's keep alive timeout). </remarks>
 		public void Ping()

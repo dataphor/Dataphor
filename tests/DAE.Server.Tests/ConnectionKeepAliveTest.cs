@@ -41,9 +41,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The idle threshold the one case that runs a watcher uses; the shipped default is five minutes.</summary>
 		/// <remarks>
 		/// Ten times the keep-alive interval, not three, and that margin is the point: the watcher wakes every quarter of
-		/// this (so every 2.5 s here), and a case that gave the client only three intervals of slack would fail on a loaded
-		/// machine whenever one ping was late. Ten intervals means a connection has to miss ten pings in a row before the
-		/// sweep can see it as idle.
+		/// this in whole seconds (so every 2 s here), and a case that gave the client only three intervals of slack would
+		/// fail on a loaded machine whenever one ping was late. Ten intervals means a connection has to miss ten pings in a
+		/// row before the sweep can see it as idle.
 		/// </remarks>
 		private const int SweepThresholdSeconds = 10;
 
