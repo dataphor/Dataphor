@@ -19,6 +19,7 @@
     <Compile Include="BufferedOperatorColumnOwnershipTest.cs" />
     <Compile Include="CatalogStoreTest.cs" />
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
+    <Compile Include="ColumnChangeRollbackTest.cs" />
     <Compile Include="ConcurrentDDLTest.cs" />
     <Compile Include="ConnectionKeepAliveTest.cs" />
     <Compile Include="ConnectionSecurityModeTest.cs" />
