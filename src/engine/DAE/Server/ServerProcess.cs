@@ -1327,9 +1327,10 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary>Lets a connection to another server go, because a transaction operation on it failed and it is a participant in no transaction this process still has open.</summary>
 		/// <remarks>
-		/// One warning in the server log naming the link, shaped on <c>RemoteSessionImplementation.ReportFailedRemoteStop</c>,
-		/// which is the existing warning for the neighbouring case. One warning per connection let go, so the volume is
-		/// bounded by connections rather than by statements.
+		/// The warning is shaped on <c>RemoteSessionImplementation.ReportFailedRemoteStop</c>, which is the existing warning
+		/// for the neighbouring case, and a connection whose server has gone usually writes that one too, out of the disposal
+		/// below: this one says the connection was released, that one says the far server could not be told. Both are per
+		/// connection let go, so the volume is bounded by connections rather than by statements.
 		/// </remarks>
 		// NOTE: the reclaim is at the transaction begin because that is the one call this process makes on every connection
 		// it holds whether the statement uses that connection or not, and the one point at which the far server has provably
@@ -1338,7 +1339,9 @@ namespace Alphora.Dataphor.DAE.Server
 		// which with UseImplicitTransactions on (the default) cannot outlast one statement.
 		private void DiscardRemoteSession(RemoteSession session, Exception cause)
 		{
-			// Logged before the disposal, which clears the session's ServerProcess, so the link is read while the session is still live.
+			// Before the disposal so that the log reads in causal order: this warning, then whatever the disposal writes about
+			// not reaching the far server. Nothing forces the order - the link survives the disposal, and the log is reached
+			// through this process's own session rather than through the one being let go.
 			ServerSession.Server.LogMessage
 			(
 				LogEntryType.Warning,
