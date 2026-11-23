@@ -68,6 +68,14 @@ namespace Alphora.Dataphor.DAE.Service
 		/// </remarks>
 		public NativeSessionManager(NativeServer nativeServer, int idleTimeInSeconds)
 		{
+			// NOTE: only the floor is checked, and the same is true of ConnectionManager. A threshold above about
+			// 8,589,934 seconds (99 days) makes the wake period's conversion to milliseconds in LifetimeWatcher overflow
+			// int, so WaitOne is handed a negative time-out, throws, and the blanket catch there ends the watcher for the
+			// life of the process - silently, and whatever the threshold was meant to be. Harmless today, because the only
+			// plausible reason to ask for a threshold that large is to turn reclamation off, which is what happens. If a
+			// host ever needs a very long threshold that still sweeps, add the upper bound both classes want:
+			// LocalServer and NativeCLISession already validate their keep-alive intervals to 1..2,147,483 for this
+			// same millisecond overflow, and that is the bound and the reason to copy.
 			if (idleTimeInSeconds < 1)
 				throw new ArgumentOutOfRangeException(nameof(idleTimeInSeconds), idleTimeInSeconds, "The idle threshold must be at least 1 second.");
 
