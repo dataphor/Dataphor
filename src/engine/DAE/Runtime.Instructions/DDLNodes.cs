@@ -374,6 +374,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.CatalogDeviceSession.CreateSort(_sort);
 				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, _isUnique, _isEquality);
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);
+				// As in AlterSortNode: compiling resolves a scalar type's sort into the plan's order and key columns, so a plan
+				// compiled before this statement goes on comparing with the sort this one displaces - where the type had no sort of
+				// its own, the generated unique sort GetSort falls back to. Not in a loading context: there the compiler is executing
+				// this node itself to fill in a type's missing unique or equality sort (Compiler.GetUniqueSort, GetEqualitySort), or
+				// the catalog is loading a stored one, and neither can displace an answer an earlier plan captured - the first sort a
+				// type gets is the one every plan compiled before it resolved to as well.
+				if (!program.ServerProcess.InLoadingContext())
+					program.Catalog.UpdatePlanCacheTimeStamp();
 				return null;
 			}
 		}
@@ -2872,6 +2880,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Compiling asks the device whether it can run each node (PlanNode.DetermineDevice, which calls Device.Prepare) and
 			// keeps that answer and the device's translation of the node in the plan, decided from the class settings and the
 			// scalar type and operator maps this statement changes. After the change, for the reason in DropDeviceNode.
+			// NOTE: a device scalar type or operator map is a catalog object of its own, stored as the alter device statement that
+			// creates it, so the catalog's lazy load of one runs this node and flushes every session's cached plans - as the load
+			// of a stored operator has always done through CreateOperatorNode. A SQL device has many maps, so a cold server warms
+			// up with one flush per map first used. Unmeasured and correctness-neutral; if plan-cache churn on a cold server ever
+			// shows up, gate this bump on program.ServerProcess.ShouldAffectTimeStamp, which is already false inside the
+			// time-stamp-safe context the load enters (ServerCatalogDeviceSession.LoadPersistentObject) and true for every user
+			// statement and every library registration, which would go on bumping as they do now.
 			program.Catalog.UpdatePlanCacheTimeStamp();
 
 			return null;

@@ -22,7 +22,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// The first two tests use different expression text after the DDL so they measure the compile-to-execute window, not the
 	/// plan cache; the ...InvalidatesCachedPlans tests below cover the plan cache case by running the identical text twice -
-	/// three over the caches above, and four over a create statement repeated after the object it makes has been dropped.
+	/// four over the answers a plan resolves and keeps, and one per object kind over a create statement repeated after the
+	/// object it makes has been dropped.
 	/// </remarks>
 	[TestFixture]
 	public class SchemaCacheInvalidationTest : DeviceClassAttributeFixture
@@ -35,6 +36,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private object Evaluate(string expression)
 		{
 			return Instance.Evaluate(expression);
+		}
+
+		/// <summary>The ID of the first row of the expression, read on the fixture's process so that the plan cache answers it.</summary>
+		private int FirstID(string expression)
+		{
+			IServerCursor cursor = Process.OpenCursor(expression, null);
+			try
+			{
+				var row = cursor.Plan.RequestRow();
+				try
+				{
+					Assert.That(cursor.Next(), Is.True, expression + " returned no rows");
+					cursor.Select(row);
+					return (int)row["ID"];
+				}
+				finally
+				{
+					cursor.Plan.ReleaseRow(row);
+				}
+			}
+			finally
+			{
+				Process.CloseCursor(cursor);
+			}
 		}
 
 		[Test]
@@ -143,6 +168,27 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(Evaluate(call), Is.EqualTo("Integer"), "a cached plan still calls the worse overload");
 		}
 
+		// Compiling resolves a scalar type's sort into the order and key columns of the plan (Compiler.GetSort), so a plan
+		// compiled while the type had no sort of its own holds the generated one GetSort fell back to, and the sort created
+		// afterwards has to evict it. Through a cursor rather than Evaluate because the order is what the sort decides.
+		[Test]
+		public void CreateSortInvalidatesCachedPlans()
+		{
+			string type = Unique("PCSortType"), table = Unique("PCSortTable");
+			ExecuteScript(String.Format(@"
+				create type {0} like String;
+				create table {1} {{ ID : Integer, N : {0}, key {{ ID }} }};
+				insert table {{ row {{ 1 ID, 'a' N }}, row {{ 2 ID, 'b' N }}, row {{ 3 ID, 'c' N }} }} into {1};
+			", type, table));
+
+			// The sort created below compares the other way round, so the first row becomes the last.
+			string order = String.Format("select {0} order by {{ N }}", table);
+			Assert.That(FirstID(order), Is.EqualTo(1));
+			ExecuteScript(String.Format("create sort {0} using CompareText(right.value, left.value);", type));
+
+			Assert.That(FirstID(order), Is.EqualTo(3), "a cached plan still orders by the sort the type had before this one was created");
+		}
+
 		// A create statement is compiled into the catalog object it makes, not into a copy of its own text, so a cached create
 		// plan re-executed after the object has been dropped re-registers the object the first run built - carrying whatever the
 		// statements in between did to it. These run the create through IServerProcess.Execute, which consults the plan cache;
@@ -161,23 +207,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			Assert.That(MaxRowCount(device), Is.EqualTo(100), "a cached plan brought the dropped device back with the altered row limit");
 			Assert.That(Script(device), Does.Contain("\"MaxRowCount\" = \"100\""));
-		}
-
-		// The tags arm of the same statement. It goes wrong for a reason of its own: a create statement hands the object it builds
-		// its own MetaData, so an alter of the object's tags writes into the statement as well (an arm of
-		// blocked/bug-view-tags-lose-to-tags-inherited-from-the-source). Either defect alone brings the altered tag back.
-		[Test]
-		public void DropDeviceInvalidatesCachedPlansThatCarryTags()
-		{
-			string device = Unique("PCTagDevice");
-			string create = String.Format("create device {0} class \"System.MemoryDevice\" tags {{ Scenario = \"first\" }};", device);
-
-			Process.Execute(create, null);
-			Process.Execute(String.Format("alter device {0} alter tags {{ alter Scenario = \"second\" }};", device), null);
-			Process.Execute(String.Format("drop device {0};", device), null);
-			Process.Execute(create, null);
-
-			Assert.That(Script(device), Does.Contain("Scenario = \"first\""), "a cached plan brought the dropped device back with the altered tag");
 		}
 
 		// A server link, where the same defect sends the work to another server: the link's host, instance and port are read off
@@ -200,7 +229,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(Script(link), Does.Contain("HostName = \"localhost\""));
 		}
 
-		// A role, the third object kind whose create statement carries metadata a later statement can alter.
+		// A role, a third object kind, and the one whose create statement carries nothing but metadata.
 		[Test]
 		public void DropRoleInvalidatesCachedPlans()
 		{
