@@ -11,3 +11,65 @@ select HTMLEncode('Oh what a happy day Steeeempy!  You & I <are gunna shine>!');
 select HTMLDecode(HTMLEncode('Oh what a happy day Steeeempy!  You & I <are gunna shine>!'));
 select HTMLAttributeEncode('And I say & quote, "the world couldn''t seem any <stranger>"');
 select HTMLDecode(HTMLAttributeEncode('And I say & quote, "the world couldn''t seem any <stranger>"'));
+
+// JSON nesting depth. Newtonsoft.Json 13 refuses to read JSON nested more than 64 levels deep;
+// version 9, which 3.1 shipped, had no limit. Measured against 13.0.4; see docs/migration-notes.md.
+// The library's other JSON reader, in JSONObjectConveyor.cs, is unreachable (it never reports itself
+// as streaming), so there is nothing to assert about it here; see bug-json-conveyor-declares-itself-non-streaming.
+begin
+	var LMaxDepthError : String := 'MaxDepth of 64 has been exceeded';
+	var LOpen : String := '';
+	var LClose : String := '';
+	var LIndex : Integer := 0;
+	while LIndex < 64 do
+	begin
+		LOpen := LOpen + '{"a":';
+		LClose := LClose + '}';
+		LIndex := LIndex + 1;
+	end;
+	var LAt64 : String := LOpen + '1' + LClose;
+	var LAt65 : String := LOpen + '{"a":1}' + LClose;
+
+	// 64 levels read
+	if GetType(Dynamic(LAt64)) <> 'Object' then
+		raise Error('Dynamic did not read 64 levels of nesting');
+
+	// 65 levels are refused by the string selector
+	var LCaught : String := '';
+	try
+		var LTooDeep : Dynamic := Dynamic(LAt65);
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, LMaxDepthError) < 0 then
+		raise Error('Dynamic read 65 levels of nesting, or failed with an unexpected error: ' + LCaught);
+
+	// and by the Content write accessor, the other reader D4 can reach
+	LCaught := '';
+	try
+		var LValue : Dynamic := Dynamic('{"a":1}');
+		LValue.Content := LAt65;
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, LMaxDepthError) < 0 then
+		raise Error('The Content write accessor read 65 levels of nesting, or failed with an unexpected error: ' + LCaught);
+
+	// Writing has no limit, so a value the engine builds itself can be deeper than it can read back.
+	var LDeep : Dynamic := Dynamic('{"a":1}');
+	LIndex := 0;
+	while LIndex < 70 do
+	begin
+		LDeep := Set(Dynamic('{}'), 'a', LDeep);
+		LIndex := LIndex + 1;
+	end;
+	var LDeepContent : String := LDeep.Content;
+	LCaught := '';
+	try
+		var LRead : Dynamic := Dynamic(LDeepContent);
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, LMaxDepthError) < 0 then
+		raise Error('A 71 level value serialized and read back, or failed with an unexpected error: ' + LCaught);
+end;
