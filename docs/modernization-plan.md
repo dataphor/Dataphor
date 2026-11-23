@@ -415,7 +415,7 @@ Cross-cutting requirements:
 
 **Objective.** A .NET 10 server process that existing and new clients can connect to, running as a console application or a Windows service.
 
-**Current state.** Three self-hosted WCF services on a custom binding (binary encoding over TCP); see [architecture.md](architecture.md#hosting-protocol-discovery). On modern .NET the client side works with the `System.ServiceModel` packages except for two constructors that take an endpoint configuration name. The server side is CoreWCF: `protocol-corewcf-host` put the two hosts (`DataphorServiceHost`, `ListenerServiceHost`) in `src/engine/Server.Hosting` and compiles the three service classes against CoreWCF in the server assembly, on the same binding, addresses and ports, and `UseServiceConfiguration` - endpoints read from `<system.serviceModel>` - is gone. The Windows service is the Generic Host's `UseWindowsService` (`host-generic-host`), and registration is `ServiceUtility` driving the Windows service control manager rather than an installer class writing its own registry keys (`host-service-registration`).
+**Current state.** Three self-hosted WCF services on a custom binding (binary encoding over TCP); see [architecture/hosting-protocol-discovery.md](architecture/hosting-protocol-discovery.md). On modern .NET the client side works with the `System.ServiceModel` packages except for two constructors that take an endpoint configuration name. The server side is CoreWCF: `protocol-corewcf-host` put the two hosts (`DataphorServiceHost`, `ListenerServiceHost`) in `src/engine/Server.Hosting` and compiles the three service classes against CoreWCF in the server assembly, on the same binding, addresses and ports, and `UseServiceConfiguration` - endpoints read from `<system.serviceModel>` - is gone. The Windows service is the Generic Host's `UseWindowsService` (`host-generic-host`), and registration is `ServiceUtility` driving the Windows service control manager rather than an installer class writing its own registry keys (`host-service-registration`).
 
 **Target.**
 
@@ -599,6 +599,7 @@ One server-side source change was needed, and it is invisible on the wire: `Data
 docs/
   README.md                 index
   architecture.md, modernization-plan.md
+  architecture/             one page per subsystem, linked from architecture.md
   users-guide/              from Documentation/UsersGuide
   developers-guide/         from Documentation/DevelopersGuide
   glossary.md, bibliography.md   from Documentation/GLOSSARY.adoc, BIBLIOGRAPHY.adoc

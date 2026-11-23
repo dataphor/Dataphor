@@ -4,7 +4,7 @@ files: src/engine/Server/Runtime.Instructions/LibraryNodes.cs, src/engine/Server
 ----
 ## Owner decision (2026-11-23): accept the proposed answer, with one condition
 
-Take *Proposed answer* items 1-3 as written: document the rule in `docs/architecture.md`, make `DropLibrary` refuse inside an explicit transaction (new error code, `docs/migration-notes.md` entry), leave `CreateLibrary`, `SetLibraryDescriptor` and `SetDefaultDeviceName` alone.
+Take *Proposed answer* items 1-3 as written: document the rule in `docs/architecture/libraries-and-class-loading.md`, make `DropLibrary` refuse inside an explicit transaction (new error code, `docs/migration-notes.md` entry), leave `CreateLibrary`, `SetLibraryDescriptor` and `SetDefaultDeviceName` alone.
 
 **Condition: before adding the refusal, verify that no caller that ships runs `DropLibrary` inside an explicit transaction**, or the guard breaks the feature. Check every path that drops a library, not only D4 scripts:
 
@@ -13,7 +13,7 @@ Take *Proposed answer* items 1-3 as written: document the rule in `docs/architec
 - the client and CLI paths a tool would use (`DAE.Client` `DataSession`, NativeCLI, the script runner `D4Runner`), and session or process options that open a transaction implicitly (for example a session's default isolation or `UseImplicitTransactions`-style settings) - the guard must distinguish those from the implicit per-statement transaction;
 - the coverage scripts and tests that drop libraries.
 
-Record what each caller does in the ticket. **If any shipped caller does open an explicit transaction around `DropLibrary`, do not add the guard and do not route back to `blocked/`** (owner, 2026-11-23): do item 1 only - document the rule in `docs/architecture.md`, including that a rolled-back `DropLibrary` has already deleted the library folder and which callers run it inside an explicit transaction - and leave the code as it is. Do not change those callers either.
+Record what each caller does in the ticket. **If any shipped caller does open an explicit transaction around `DropLibrary`, do not add the guard and do not route back to `blocked/`** (owner, 2026-11-23): do item 1 only - document the rule in `docs/architecture/libraries-and-class-loading.md`, including that a rolled-back `DropLibrary` has already deleted the library folder and which callers run it inside an explicit transaction - and leave the code as it is. Do not change those callers either.
 
 **Blocked on a decision, not on work: what should the operators that create, delete and reconfigure a library do when they are called inside a transaction that then rolls back?** It unblocks as soon as that is answered; the work itself is small either way.
 
@@ -32,7 +32,7 @@ In memory and on disk those agree, so by itself this is only "library DDL is not
 
 **Write it down and guard the destructive one.** Specifically:
 
-1. State the rule in `docs/architecture.md`, in the section that describes libraries: *a library's descriptor and folder are files, not catalog rows; the operators that create, delete or reconfigure a library take effect when they run and are not undone by a rollback. Registering and unregistering a library are catalog changes and are undone normally.*
+1. State the rule in `docs/architecture/libraries-and-class-loading.md`: *a library's descriptor and folder are files, not catalog rows; the operators that create, delete or reconfigure a library take effect when they run and are not undone by a rollback. Registering and unregistering a library are catalog changes and are undone normally.*
 2. Make `DropLibrary` refuse to run inside an **explicit** transaction — one the session opened itself, not the implicit transaction every statement runs in — because that is the only one of the four whose effect cannot be repaired by running the inverse statement. New error code; `docs/migration-notes.md` entry.
 3. Leave `CreateLibrary`, `SetLibraryDescriptor` and `SetDefaultDeviceName` as they are. A rolled-back `CreateLibrary` leaves a library nobody asked for, which is untidy and fixable by dropping it; nothing is lost.
 

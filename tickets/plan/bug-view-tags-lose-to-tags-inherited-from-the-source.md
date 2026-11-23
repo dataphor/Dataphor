@@ -8,7 +8,7 @@ tradeoffs: The fix changes what 14 of the 416 derived forms say, which means rew
 ----
 ## Owner decision (2026-11-23): the view's own tags always win
 
-A view's own tags take precedence over every tag it inherits from its source. This is the rule; write it down in `docs/architecture.md` (where views and metadata inheritance are described) and add a `docs/migration-notes.md` entry: views that carry a `Frontend.*` (or any) tag their source also carries now honour their own value, so derived forms can change.
+A view's own tags take precedence over every tag it inherits from its source. This is the rule; write it down in `docs/architecture/catalog-and-store.md`, which describes schema objects and their metadata (a better page may exist; pick it if you find one) and add a `docs/migration-notes.md` entry: views that carry a `Frontend.*` (or any) tag their source also carries now honour their own value, so derived forms can change.
 
 Fix as the ticket describes (copy, not share, at `Compiler.cs:4394`), add the direct case (a view with a tag its source also has; the view's value is the one derived), regenerate the goldens and read every one of the 14 differences. The 8 title changes are expected. The 6 `Security.Role` page-type changes must be explained: if they follow from the view's own tags now winning, say why in the commit; if they point at a second defect, file it rather than accepting the goldens blind. Also do the check the ticket lists for the other create statements that share the statement's metadata.
 
