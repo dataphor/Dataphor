@@ -2381,6 +2381,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			IsValidateRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsValidateRemotable", "true"));
 			IsChangeRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsChangeRemotable", "true"));
 			
+			// NOTE: the three table-level flags above are reset from the metadata tag before the loop, but the three all*Remotable
+			// summaries are not, so this call can only ever turn them off - a table variable whose last handler is detached keeps
+			// saying "not all columns are remotable" for the life of the catalog object. Harmless today, in the safe direction,
+			// and unobservable: nothing reads these on the server (IsChangeCallRemotable and its siblings are called only by
+			// LocalCursor, on the client's own table variable), CopyDataType sends the client the per-column flags rather than
+			// these, and a client builds a fresh table variable per plan because the plan's catalog object is named from the
+			// plan's id (RemoteServerPlan.GetCatalog). If a server-side reader is ever added, or a client-side table variable is
+			// ever reused across plans, reset the three to true here first - the cost is one needless round trip per whole-row
+			// proposal, not a wrong answer.
 			foreach (TableVarColumn column in Columns)
 			{
 				allDefaultsRemotable = allDefaultsRemotable && column.IsDefaultRemotable;

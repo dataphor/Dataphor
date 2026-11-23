@@ -17,28 +17,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// An event handler never runs on a client: a handler is not remotable, so it is deliberately left out of the catalog a
-	/// client is sent (Schema.TableVar.IncludeHandlers filters on that, and Schema.EventHandler.DetermineRemotable makes it
-	/// false for every handler). What a client is sent instead, with every prepared plan, is a description of the result that
-	/// says for each column whether the client may answer a Change, Default or Validate proposal out of its own copy of the
-	/// definition or has to call the server for it - ServerProcess.CopyDataType emits those as DAE.Is*Remotable tags on the
-	/// expression the client compiles. Attaching a handler flips that answer from "answer it yourself" to "call the server".
-	/// </para>
-	/// <para>
-	/// That description is built when the plan is compiled and kept with the plan in the server's plan cache, which is keyed
-	/// by statement text and evicted by Schema.Catalog.PlanCacheTimeStamp. CreateEventHandlerNode and AlterEventHandlerNode
-	/// moved no such counter, so a client re-preparing the same statement text after the attach was handed the description
-	/// built before it, went on answering the proposal itself out of a copy with no handler, and the handler never ran for
-	/// that user - not in the form that was open at the time, and not in one opened afterwards either. A client whose query
-	/// happened to be worded differently from any prepared before the attach got the right answer, which is why this is
-	/// invisible to anything that connects, does one thing and disconnects.
-	/// </para>
-	/// <para>
-	/// A plan the client still holds open is the other half, and no eviction can reach it - nothing re-sends an open plan its
-	/// description. What the client has for free there is Schema.Catalog.CacheTimeStamp, which these nodes now move as well:
-	/// the client keeps the highest value it has heard of and each plan carries the value it was prepared at, so a plan that
-	/// is behind can be recognized locally. Consulting it in the proposal calls is bug-remote-form-is-never-told-about-a-type-change,
-	/// and the cases for that belong with it; what is pinned here is that the counter moves, through the gate case below.
+	/// Why a client can miss a handler at all, and what each of the two counters these statements now move is for, is at
+	/// DDLNode.InvalidateCachesForHandlerChange, which all three of them call. What is pinned here is the outcome: a client
+	/// that has already prepared a query over the table runs a handler attached afterwards, and stops running one that is
+	/// detached. A plan the client is still holding *open* is the other half, which no eviction can reach;
+	/// bug-remote-form-is-never-told-about-a-type-change owns that and the cases for it belong there.
 	/// </para>
 	/// <para>
 	/// Every case asks the same question of both stacks - the client's LocalCursor and the engine's own ServerCursor - and
@@ -86,10 +69,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// The other direction. DropEventHandlerNode has moved the counter since the nine nodes of
-		/// bug-recreated-device-comes-back-as-the-one-that-was-dropped, for a different reason - a cached create handler plan
-		/// re-attaching the handler just dropped - and this is the case that holds that bump in place for this reason too: a
-		/// client whose plan still says "call the server" keeps paying a round trip for a handler that is gone.
+		/// The other direction, and the one case here that passes with and without this change: DropEventHandlerNode has moved
+		/// the plan-cache counter since bug-recreated-device-comes-back-as-the-one-that-was-dropped, for a reason of its own.
+		/// It is kept because that ticket left the event-handler nodes with no case at all, and because the detach direction
+		/// is a contract in its own right - a client whose plan still says "call the server" keeps paying a round trip for a
+		/// handler that is gone.
 		/// </summary>
 		[Test]
 		public void TestDetachingFromAColumnReachesAClientHoldingIt()
