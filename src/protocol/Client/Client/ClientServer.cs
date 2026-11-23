@@ -147,10 +147,18 @@ namespace Alphora.Dataphor.DAE.Client
 				throw new ServerException(ServerException.Codes.ServerActive);
 		}
 		
+		/// <summary>Builds the channel factory and the holder that hands out channels on it.</summary>
+		/// <remarks>
+		/// Both are settled in locals and the factory field is assigned last, so that IsActive is true only once there is
+		/// a holder to answer with. A hook or a constructor that throws part way through then leaves the client inactive
+		/// and openable again, rather than active and unable to supply a channel - which is a state GetServiceInterface
+		/// could only answer with ServerInactive, for the life of an object whose IsActive said otherwise.
+		/// </remarks>
 		public void Open()
 		{
 			if (!IsActive)
 			{
+				ChannelFactory<IClientDataphorService> channelFactory;
 				if (!String.IsNullOrEmpty(_clientConfigurationName))
 				{
 					// The .NET WCF client cannot read endpoints from an application configuration file.
@@ -174,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Client
 						// for a setting this connection never consults would be gratuitous.
 						DataphorServiceUtility.CheckSecurityMode(_listenerSecurityMode, ListenerSecurityModeSettingName);
 						Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _instanceName));
-						_channelFactory =
+						channelFactory =
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
@@ -183,7 +191,7 @@ namespace Alphora.Dataphor.DAE.Client
 					}
 					else
 					{
-						_channelFactory = 
+						channelFactory = 
 							new ChannelFactory<IClientDataphorService>
 							(
 								DataphorServiceUtility.GetBinding(), 
@@ -196,29 +204,32 @@ namespace Alphora.Dataphor.DAE.Client
 					}
 				}
 
-				DataphorServiceUtility.ServiceEndpointHook(_channelFactory.Endpoint);
+				DataphorServiceUtility.ServiceEndpointHook(channelFactory.Endpoint);
 
-				// Read once into a local and captured, so that the holder creates channels on this factory whatever Close
-				// does to the field afterwards.
-				ChannelFactory<IClientDataphorService> channelFactory = _channelFactory;
+				// The local is what the holder captures, so it creates channels on this factory whatever Close does to the
+				// field afterwards; the field is assigned last, for the reason in the remarks above.
 				_channelHolder = new ChannelHolder<IClientDataphorService>(() => channelFactory.CreateChannel());
+				_channelFactory = channelFactory;
 			}
 		}
 		
+		/// <summary>Releases the holder and then the factory its channels were made on. Does nothing if not open.</summary>
+		/// <remarks>
+		/// The holder goes first: disposing it closes the channel it holds and refuses any further one, so no channel can
+		/// be created on a factory this method has already closed. Each field is tested in its own right rather than
+		/// behind IsActive, so a client left half open by an Open that threw is still cleaned up.
+		/// </remarks>
 		public void Close()
 		{
-			if (IsActive)
+			if (_channelHolder != null)
 			{
-				if (_channelHolder != null)
-				{
-					_channelHolder.Dispose();
-					_channelHolder = null;
-				}
-				if (_channelFactory != null)
-				{
-					CloseChannelFactory();
-					_channelFactory = null;
-				}
+				_channelHolder.Dispose();
+				_channelHolder = null;
+			}
+			if (_channelFactory != null)
+			{
+				CloseChannelFactory();
+				_channelFactory = null;
 			}
 		}
 

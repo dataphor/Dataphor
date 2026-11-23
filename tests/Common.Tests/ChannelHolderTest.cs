@@ -98,6 +98,31 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		/// <summary>
+		/// Disposal releases the channel the holder is holding - closed, because this is the one orderly shutdown the
+		/// holder attempts - and every later call is refused by an exception that names the object rather than handing
+		/// back a channel nothing will close. The clients this holder sits in dispose while their keep-alive thread may
+		/// still be calling, so what a call after disposal raises is part of the contract: ObjectDisposedException, which
+		/// the keep-alive already swallows, and never NullReferenceException.
+		/// </summary>
+		[Test]
+		public void TestDisposeClosesTheHeldChannelAndRefusesLaterCalls()
+		{
+			ChannelHolder<IStubService> holder = new ChannelHolder<IStubService>(() => new StubChannel());
+			StubChannel channel = (StubChannel)holder.GetChannel();
+			channel.SetState(CommunicationState.Opened);
+
+			holder.Dispose();
+
+			Assert.That(channel.CloseCount, Is.EqualTo(1), "Disposal did not close the channel the holder was holding.");
+			Assert.That(channel.AbortCount, Is.EqualTo(0), "Disposal aborted an open channel rather than closing it.");
+			Assert.That(() => holder.GetChannel(), Throws.InstanceOf<ObjectDisposedException>(), "A call after disposal was not refused by an exception naming the object.");
+
+			holder.Dispose();
+
+			Assert.That(channel.CloseCount, Is.EqualTo(1), "A second disposal shut the channel down again.");
+		}
+
+		/// <summary>
 		/// Every channel the holder creates is handed to a caller, and every channel it replaces is aborted exactly once.
 		/// This is the accounting the pattern it replaced got wrong: two threads that both found the field unusable both
 		/// created a channel, the second assignment overwrote the first without closing it, and the method returned the

@@ -75,9 +75,9 @@ namespace Alphora.Common.WCF
 					result = _channel;
 				else
 				{
+					abandoned = _channel;
 					// Assigned after the call returns, so a factory that throws leaves the held channel in place for the next
 					// call to replace rather than losing it.
-					abandoned = _channel;
 					_channel = _createChannel();
 					result = _channel;
 				}
@@ -129,8 +129,9 @@ namespace Alphora.Common.WCF
 		/// <summary>Releases a channel that is being replaced.</summary>
 		/// <remarks>
 		/// Abort and not Close: a channel being replaced is faulted, superseded or already closing, so there is no
-		/// orderly shutdown to attempt, and Close against a server that has gone blocks for the binding's send timeout -
-		/// which this client's binding does not set. Abort returns at once and releases the socket.
+		/// orderly shutdown to attempt, and Close against a server that has gone blocks for the binding's send time-out,
+		/// which the binding this product's clients use sets to TimeSpan.MaxValue (DataphorServiceUtility) - an unbounded
+		/// wait. Abort returns at once and releases the socket.
 		/// </remarks>
 		private static void Abort(T channel)
 		{
@@ -145,6 +146,13 @@ namespace Alphora.Common.WCF
 		}
 
 		/// <summary>Shuts a channel down on disposal, orderly if it is open.</summary>
+		/// <remarks>
+		/// The orderly close is the one place this class waits on the network, and with no bounded send time-out on the
+		/// binding (see Abort) that wait has no limit if the far server has gone. Disposal is the only caller -
+		/// replacement aborts instead - and this is the behaviour both of the product's clients had on disposal before
+		/// this class existed, kept deliberately rather than inherited: a disposal is the one moment an orderly
+		/// shutdown is worth attempting.
+		/// </remarks>
 		private static void Close(T channel)
 		{
 			try

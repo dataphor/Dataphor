@@ -91,11 +91,9 @@ namespace Alphora.Common.WCF
 			{
 				try
 				{
-					if (_channelHolder != null)
-					{
-						_channelHolder.Dispose();
-						_channelHolder = null;
-					}
+					// Not nulled: the holder's Dispose is idempotent, and leaving the field in place is what makes a call on
+					// a disposed client raise ObjectDisposedException from the holder rather than NullReferenceException.
+					_channelHolder.Dispose();
 				}
 				catch (Exception e)
 				{
@@ -118,7 +116,7 @@ namespace Alphora.Common.WCF
 		}
 
 		private ChannelFactoryWrapper<T> _channelFactoryWrapper;
-		private ChannelHolder<T> _channelHolder;
+		private readonly ChannelHolder<T> _channelHolder;
 
 		/// <summary>
 		/// Returns the channel to be used to invoke service methods.
