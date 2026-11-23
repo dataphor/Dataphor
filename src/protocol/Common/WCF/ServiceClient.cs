@@ -34,7 +34,7 @@ namespace Alphora.Common.WCF
 	/// caching to actually work, the same binding instance must be used per logical endpoint.
 	/// </para>
 	/// </remarks>
-	public abstract class ServiceClient<T> : IDisposable
+	public abstract class ServiceClient<T> : IDisposable where T : class
 	{
 		private static ChannelFactoryCache<T> _channelFactoryCache = new ChannelFactoryCache<T>();
 
@@ -45,7 +45,12 @@ namespace Alphora.Common.WCF
 		/// <param name="endpointAddress">The endpoint address to connect to.</param>
 		public ServiceClient(Binding binding, EndpointAddress endpointAddress)
 		{
-			_channelFactoryWrapper = _channelFactoryCache.GetChannelFactory(binding, endpointAddress);
+			ChannelFactoryWrapper<T> channelFactoryWrapper = _channelFactoryCache.GetChannelFactory(binding, endpointAddress);
+			_channelFactoryWrapper = channelFactoryWrapper;
+			// The holder creates channels on the local rather than on the field, which Dispose nulls: a Dispose racing a
+			// call cannot leave the holder reading a field that has been cleared. Disposing the holder first stops it
+			// creating any further channel on a wrapper that is about to be released.
+			_channelHolder = new ChannelHolder<T>(() => channelFactoryWrapper.ChannelFactory.CreateChannel());
 		}
 
 		/// <summary>
@@ -86,10 +91,10 @@ namespace Alphora.Common.WCF
 			{
 				try
 				{
-					if (_channel != null)
+					if (_channelHolder != null)
 					{
-						CloseChannel();
-						SetChannel(default(T));
+						_channelHolder.Dispose();
+						_channelHolder = null;
 					}
 				}
 				catch (Exception e)
@@ -113,53 +118,19 @@ namespace Alphora.Common.WCF
 		}
 
 		private ChannelFactoryWrapper<T> _channelFactoryWrapper;
-		private T _channel;
-
-		private bool IsChannelFaulted(T channel)
-		{
-			return ((ICommunicationObject)channel).State == CommunicationState.Faulted;
-		}
-		
-		private bool IsChannelValid(T channel)
-		{
-			return ((ICommunicationObject)channel).State == CommunicationState.Opened;
-		}
-		
-		private void SetChannel(T channel)
-		{
-			if (_channel != null)
-				((ICommunicationObject)_channel).Faulted -= new EventHandler(ChannelFaulted);
-			_channel = channel;
-			if (_channel != null)
-				((ICommunicationObject)_channel).Faulted += new EventHandler(ChannelFaulted);
-		}
-		
-		private void ChannelFaulted(object sender, EventArgs args)
-		{
-			((ICommunicationObject)sender).Faulted -= new EventHandler(ChannelFaulted);
-			if (Object.ReferenceEquals(_channel, sender))
-				_channel = default(T);
-		}
-		
-		private void CloseChannel()
-		{
-			ICommunicationObject channel = _channel as ICommunicationObject;
-			if (channel != null)
-				if (channel.State == CommunicationState.Opened)
-					channel.Close();
-				else
-					channel.Abort();
-		}
+		private ChannelHolder<T> _channelHolder;
 
 		/// <summary>
 		/// Returns the channel to be used to invoke service methods.
 		/// </summary>
 		/// <returns>The channel to be used to invoke service methods.</returns>
+		/// <remarks>
+		/// One guarded decision, in ChannelHolder: the channel is reused from the moment it is created, a channel being
+		/// replaced is aborted rather than dropped, and the result is never null.
+		/// </remarks>
 		protected internal T GetInterface()
 		{
-			if ((_channel == null) || !IsChannelValid(_channel))
-				SetChannel(_channelFactoryWrapper.ChannelFactory.CreateChannel());
-			return _channel;
+			return _channelHolder.GetChannel();
 		}
 	}
 }

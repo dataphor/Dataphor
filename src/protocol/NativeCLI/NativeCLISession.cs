@@ -62,10 +62,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// <summary>Serializes this session's operations against each other and against the keep-alive ping.</summary>
 		/// <remarks>
 		/// The far server identifies the session by a handle rather than by a connection, so two threads calling through
-		/// one of these objects would otherwise reach it at once. Taking it around every operation is also what keeps the
-		/// one new concurrent caller this class has - its own keep-alive thread - off the unsynchronized lazy channel field
-		/// in ServiceClient&lt;T&gt;.GetInterface; bug-wcf-client-channel-field-is-unsynchronized owns that pre-existing
-		/// race, and nothing here depends on its being fixed.
+		/// one of these objects would otherwise reach it at once. Taking it around every operation also kept the one new
+		/// concurrent caller this class has - its own keep-alive thread - off the lazy channel field in
+		/// ServiceClient&lt;T&gt;.GetInterface, which was unsynchronized when this lock was added. That field is guarded in
+		/// its own right now (ChannelHolder, K38), so the lock below is here for the session handle alone.
 		/// NOTE: the cost is that an application call can now wait for a ping in flight. On a network that has stopped
 		/// delivering, that means waiting about as long as the call would itself have waited, the client's binding setting
 		/// no send time-out: it is the same wait, not a new one.

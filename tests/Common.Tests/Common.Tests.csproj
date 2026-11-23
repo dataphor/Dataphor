@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ChannelHolderTest.cs" />
     <Compile Include="FixedSizeCacheTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\engine\Base\Base.csproj" />
     <ProjectReference Include="..\..\src\engine\Base.Windows\Base.Windows.csproj" />
+    <ProjectReference Include="..\..\src\protocol\Common\Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,6 +10,8 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 
+using Alphora.Common.WCF;
+
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Server;
@@ -139,12 +141,6 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public bool IsActive { get { return _channelFactory != null; } }
 		
-		private void CheckActive()
-		{
-			if (!IsActive)
-				throw new ServerException(ServerException.Codes.ServerInactive);
-		}
-		
 		private void CheckInactive()
 		{
 			if (IsActive)
@@ -201,6 +197,11 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 
 				DataphorServiceUtility.ServiceEndpointHook(_channelFactory.Endpoint);
+
+				// Read once into a local and captured, so that the holder creates channels on this factory whatever Close
+				// does to the field afterwards.
+				ChannelFactory<IClientDataphorService> channelFactory = _channelFactory;
+				_channelHolder = new ChannelHolder<IClientDataphorService>(() => channelFactory.CreateChannel());
 			}
 		}
 		
@@ -208,9 +209,11 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (IsActive)
 			{
-				if (_channel != null)
-					CloseChannel(_channel);
-				SetChannel(null);
+				if (_channelHolder != null)
+				{
+					_channelHolder.Dispose();
+					_channelHolder = null;
+				}
 				if (_channelFactory != null)
 				{
 					CloseChannelFactory();
@@ -224,33 +227,7 @@ namespace Alphora.Dataphor.DAE.Client
 			Close();
 		}
 		
-		private IClientDataphorService _channel;
-		
-		private bool IsChannelFaulted(IClientDataphorService channel)
-		{
-			return ((ICommunicationObject)channel).State == CommunicationState.Faulted;
-		}
-		
-		private bool IsChannelValid(IClientDataphorService channel)
-		{
-			return ((ICommunicationObject)channel).State == CommunicationState.Opened;
-		}
-		
-		private void CloseChannel(IClientDataphorService channel)
-		{
-			try
-			{
-				ICommunicationObject localChannel = (ICommunicationObject)channel;
-				if (localChannel.State == CommunicationState.Opened)
-					localChannel.Close();
-				else
-					localChannel.Abort();
-			}
-			catch
-			{
-				// Ignore exceptions here, there's nothing we can do about it anyway.
-			}
-		}
+		private ChannelHolder<IClientDataphorService> _channelHolder;
 		
 		private void CloseChannelFactory()
 		{
@@ -267,38 +244,33 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private void SetChannel(IClientDataphorService channel)
-		{
-			if (_channel != null)
-				((ICommunicationObject)_channel).Faulted -= new EventHandler(ChannelFaulted);
-			_channel = channel;
-			if (_channel != null)
-				((ICommunicationObject)_channel).Faulted += new EventHandler(ChannelFaulted);
-		}
-		
-		private void ChannelFaulted(object sender, EventArgs args)
-		{
-			((ICommunicationObject)sender).Faulted -= new EventHandler(ChannelFaulted);
-			if (_channel == sender)
-				_channel = null;
-		}
-		
+		/// <summary>Returns a channel on which to call the far server, creating one if the held channel is unusable.</summary>
+		/// <remarks>
+		/// The holder field is read once into a local rather than tested for activity and then dereferenced: the keep-alive
+		/// pings from a thread of its own, so a Close can land between the two, and what that used to raise was a
+		/// NullReferenceException from the middle of a ping. A thread that took the local just before the Close now gets
+		/// ObjectDisposedException from the holder, which SendKeepAlive already swallows. The error raised when the client
+		/// was never opened, or was closed before the local was taken, is ServerInactive, as it was.
+		/// </remarks>
 		public IClientDataphorService GetServiceInterface()
 		{
-			CheckActive();
-			if ((_channel == null) || !IsChannelValid(_channel))
-				SetChannel(_channelFactory.CreateChannel());
-			return _channel;
+			ChannelHolder<IClientDataphorService> channelHolder = _channelHolder;
+			if (channelHolder == null)
+				throw new ServerException(ServerException.Codes.ServerInactive);
+			return channelHolder.GetChannel();
 		}
 
 		public void ReportCommunicationError()
 		{
-			// A communication failure has occurred, reset the channel
-			// The communication object is supposed to be reporting Faulted, but in some cases, it still indicates it's open, even though any call will result in a CommunicationException
-			// If the server is gone, this is actually worse, because it attempts to reconnect and times out everytime, so unwinding takes ten times as long...
-			//if (_channel != null)
-			//	CloseChannel(_channel);
-			//SetChannel(null);
+			// NOTE: accepted tradeoff - a communication failure does not reset the channel here, and the caller is left to
+			// its own retry. Closing the channel was tried and declined: the communication object is supposed to be
+			// reporting Faulted, but in some cases it still reports Opened even though any call on it raises
+			// CommunicationException, and when the server is gone closing it attempts to reconnect and times out every
+			// time, so unwinding takes ten times as long. What the channel holder's state test now covers instead is a
+			// channel reporting Faulted, Closing or Closed: the next call replaces it. The case still left to the caller
+			// is the one this method was written for - a channel reporting Opened on which every call fails. Revisit if a
+			// bounded time-out is ever set on the client binding, which would cap the cost of a close against a server
+			// that has gone.
 		}
 
 		#region IRemoteServer Members

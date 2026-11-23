@@ -30,6 +30,7 @@
     <Compile Include="WCF\ChannelFactoryCache.cs" />
     <Compile Include="WCF\ChannelFactoryEntry.cs" />
     <Compile Include="WCF\ChannelFactoryWrapper.cs" />
+    <Compile Include="WCF\ChannelHolder.cs" />
     <Compile Include="WCF\EndpointDescriptor.cs" />
     <Compile Include="WCF\ServiceClient.cs" />
   </ItemGroup>

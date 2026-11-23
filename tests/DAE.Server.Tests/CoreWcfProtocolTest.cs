@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: two servers in one process share the engine's static state (see the note on TestServerInstance).
-	// NOTE: 754 lines (wc -l, 2026-11-21), still the largest file in this test project; the host plumbing moved out to
+	// NOTE: 767 lines (wc -l, 2026-11-22), still the largest file in this test project; the host plumbing moved out to
 	// HostedInstance.cs when protocol-host-binding-hook needed a second hosted fixture, and the client plumbing to
 	// ProtocolClient.cs when test-client-server-fixture needed it out of process. What is left is the cases themselves,
 	// so a split from here would be by subject - the hosting and listener cases away from the wire cases.
@@ -398,6 +398,31 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					}
 				}
 			);
+		}
+
+		/// <summary>
+		/// A call on a <see cref="ClientServer"/> that has been closed is refused with ServerException.Codes.ServerInactive
+		/// - an error that names what is wrong - rather than raising NullReferenceException from inside the client. The
+		/// client's keep-alive pings from a thread of its own, so a dispose on the application's thread really does land
+		/// between the activity test and the use of the channel field; the field is now read once into a local and tested
+		/// there.
+		/// </summary>
+		/// <remarks>
+		/// No server is contacted: constructing the client with an override port builds a channel factory and nothing
+		/// more, and a closed client makes no call at all, so the fixture's own port is used only to make the address a
+		/// real one.
+		/// </remarks>
+		[Test]
+		public void TestACallOnAClosedClientServerIsRefusedByCode()
+		{
+			ClientServer clientServer = new ClientServer(HostedInstance.LoopbackAddress, InstanceName, _host.PortNumber, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default);
+			clientServer.Close();
+
+			Exception error = Assert.Catch(() => clientServer.GetServiceInterface());
+
+			Assert.That(error, Is.Not.InstanceOf<NullReferenceException>(), "A closed client dereferenced the channel field it had cleared.");
+			Assert.That(error, Is.InstanceOf<ServerException>(), "Actual: " + error.GetType().FullName + ": " + error.Message);
+			Assert.That(((ServerException)error).Code, Is.EqualTo((int)ServerException.Codes.ServerInactive));
 		}
 
 		/// <summary>
