@@ -7,8 +7,6 @@ using System;
 
 using NUnit.Framework;
 
-using Alphora.Dataphor.DAE.Device.Memory;
-
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
@@ -16,12 +14,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// class, and the attributes of their class definition are applied to the live object as properties; a rollback has to
 	/// put both back, so that the running server never goes on enforcing a setting its own catalog does not hold.
 	/// </summary>
-	/// <remarks>
-	/// The in-memory device's row limit is the setting under test because nothing outside the engine is needed to reach it;
-	/// the SQL devices take class attributes of their own (server name, connection parameters) through the same code.
-	/// </remarks>
 	[TestFixture]
-	public class DeviceClassAttributeRollbackTest : InProcessTestFixture
+	public class DeviceClassAttributeRollbackTest : DeviceClassAttributeFixture
 	{
 		/// <summary>A rolled-back created attribute leaves the live device's property as it was, not only the class definition.</summary>
 		[Test]
@@ -111,42 +105,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Process.RollbackTransaction();
 
 			Assert.That(OperatorScript("NoInstanceRollbackOp()"), Does.Not.Contain("Nonesuch"));
-		}
-
-		/// <summary>The row limit the running device enforces, read off the live object: nothing in the catalog reports it.</summary>
-		private int MaxRowCount(string deviceName)
-		{
-			return ((MemoryDevice)Device(deviceName)).MaxRowCount;
-		}
-
-		private bool IgnoreUnsupported(string deviceName)
-		{
-			return Device(deviceName).IgnoreUnsupported;
-		}
-
-		private Schema.Device Device(string deviceName)
-		{
-			foreach (Schema.Object objectValue in Instance.Server.Catalog)
-				if ((objectValue is Schema.Device) && (Schema.Object.Unqualify(objectValue.Name) == deviceName))
-					return (Schema.Device)objectValue;
-			Assert.Fail(String.Format("Device {0} is not in the catalog.", deviceName));
-			return null;
-		}
-
-		/// <summary>The create statement the catalog emits for the device, which carries its class definition.</summary>
-		private string Script(string deviceName)
-		{
-			return (string)Evaluate(String.Format("Script(Name(LibraryName() + '.{0}'))", deviceName));
-		}
-
-		private string OperatorScript(string operatorSpecifier)
-		{
-			return (string)Evaluate(String.Format("Script(LibraryName() + '.{0}')", operatorSpecifier));
-		}
-
-		private object Evaluate(string expression)
-		{
-			return ((ServerProcess)Process).Evaluate(expression, null).AsNative;
 		}
 	}
 }

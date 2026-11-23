@@ -1004,7 +1004,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (instance != null)
 						ClassLoader.SetProperty(instance, attributeDefinition.AttributeName, attributeDefinition.AttributeValue);
 
-					classDefinition.Attributes.Add(attributeDefinition);
+					// A clone, because the live definition's attributes belong to the catalog object: the alter loop above writes a new
+					// value straight into them, and a statement the caller may run again - one the plan cache kept, or a plan the caller
+					// prepared and executes twice - must still carry the value it was written with.
+					classDefinition.Attributes.Add(attributeDefinition.Clone());
 				}
 			}
 		}

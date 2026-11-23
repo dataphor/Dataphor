@@ -126,10 +126,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		
         // ClassDefinition
         private ClassDefinition _classDefinition;
+		/// <remarks>
+		/// Stores a clone of what is assigned: the object owns its class definition, because an alteration writes new attribute
+		/// values into it in place (see AlterNode.AlterClassDefinition) and the statement or object the definition came from must
+		/// not change with it. To change a stored definition, mutate the one the getter returns.
+		/// </remarks>
 		public ClassDefinition ClassDefinition
         {
 			get { return _classDefinition; }
-			set { _classDefinition = value; }
+			set { _classDefinition = value == null ? null : (ClassDefinition)value.Clone(); }
         }
         
 		public abstract Statement Translate(DevicePlan devicePlan, PlanNode planNode);
@@ -227,10 +232,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		
         // ClassDefinition
         private ClassDefinition _classDefinition;
+		/// <remarks>
+		/// Stores a clone of what is assigned: the object owns its class definition, because an alteration writes new attribute
+		/// values into it in place (see AlterNode.AlterClassDefinition) and the statement or object the definition came from must
+		/// not change with it. To change a stored definition, mutate the one the getter returns.
+		/// </remarks>
 		public ClassDefinition ClassDefinition
         {
 			get { return _classDefinition; }
-			set { _classDefinition = value; }
+			set { _classDefinition = value == null ? null : (ClassDefinition)value.Clone(); }
         }
         
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
@@ -640,10 +650,15 @@ namespace Alphora.Dataphor.DAE.Schema
 
         // ClassDefinition
         private ClassDefinition _classDefinition;
+		/// <remarks>
+		/// Stores a clone of what is assigned: the object owns its class definition, because an alteration writes new attribute
+		/// values into it in place (see AlterNode.AlterClassDefinition) and the statement or object the definition came from must
+		/// not change with it. To change a stored definition, mutate the one the getter returns.
+		/// </remarks>
 		public ClassDefinition ClassDefinition
         {
 			get { return _classDefinition; }
-			set { _classDefinition = value; }
+			set { _classDefinition = value == null ? null : (ClassDefinition)value.Clone(); }
         }
         
         // IgnoreUnsupported
