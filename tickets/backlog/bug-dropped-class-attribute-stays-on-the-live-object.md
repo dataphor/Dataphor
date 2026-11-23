@@ -32,4 +32,4 @@ A maintainer should pick before this is worked. If the answer is the third, it i
 
 ## How a fix would be confirmed
 
-The reproduction above, as a case next to the rollback cases in `tests/DAE.Server.Tests/CatalogStoreTest.cs`: a memory device given a row limit, the limit dropped, and the live device's limit asserted — against the catalog's own view of it through `System.Devices` where that is readable, otherwise against the device object. It needs no database server.
+The reproduction above, as a case in `tests/DAE.Server.Tests/DeviceClassAttributeRollbackTest.cs`, which `bug-rolled-back-class-attribute-stays-on-the-live-object` added for the rollback face of these two lines and which already has the device helpers this needs: a memory device given a row limit, the limit dropped, and the live device's limit asserted. It needs no database server. The fixture's name says *rollback*; a forward case is the first thing in it that is not one, so either rename the fixture in the same commit or say in the handoff why it stays.

@@ -616,8 +616,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			/// <summary>The instance's own value for each attribute the alteration names, as it stood before; empty when the class definition has no live instance.</summary>
 			private List<KeyValuePair<string, string>> _originalProperties = new List<KeyValuePair<string, string>>();
 
-			// An attribute the instance exposes no readable property for is left out rather than reported: the alteration raises
-			// PropertyNotFound for such a name itself, and this recording runs first, so raising here would move or replace that failure.
+			// An unreadable attribute name is left out rather than reported, because this recording runs before the alteration: a name
+			// the instance has no property of at all is one the alteration raises PropertyNotFound for itself, and raising here would
+			// move that failure.
+			// NOTE: a name it has a property of but no *getter* for is a different case the same skip swallows - the undo is then
+			// silently unable to restore it, which is the defect this instruction exists to close - and a property type that does not
+			// round-trip through a string is restored only approximately. Neither is reachable here (checked 2026-11-23: no write-only
+			// property, and none of such a type, on the device and schema classes). A custom C# extension could bring either; then
+			// record the value as an object rather than as a string, and refuse the write-only case outright.
 			private void RecordProperties(ClassAttributeDefinitions attributeDefinitions)
 			{
 				foreach (ClassAttributeDefinition attributeDefinition in attributeDefinitions)
