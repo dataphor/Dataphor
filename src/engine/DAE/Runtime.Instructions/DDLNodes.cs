@@ -1289,6 +1289,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 				program.CatalogDeviceSession.CreateTableVarConstraint(tableVar, newConstraint);
 			}
+
+			// The table derives a ShouldDefault/ShouldValidate/ShouldChange summary from its definition, and a row
+			// constraint raises its validate flag; nothing else in this statement recomputes it, so without this a
+			// committed create left the table claiming there was nothing to validate until the next compilation over
+			// it happened to repair the flag. Found by CatalogRollbackSnapshotTest, whose undo path recomputes (see
+			// CatalogDeviceSession.RedetermineRemotable) and so disagreed with the forward path. DetermineRemotable
+			// rather than setting the flag, so the whole derived family is what a restart would compute; it walks the
+			// columns, hence once after the loop and only when the statement created something.
+			// NOTE: this is one more per-statement recompute of a summary that bug-rolled-back-type-constraint-stops-
+			// the-column-check proposes to retire outright; if that lands, this goes with the rest of them.
+			if (createConstraints.Count > 0)
+				tableVar.DetermineRemotable(program.CatalogDeviceSession);
 		}
 
 		protected void DropReferences(Plan plan, Program program, Schema.TableVar tableVar, DropReferenceDefinitions dropReferences)
@@ -1481,7 +1493,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// comment calls that side effect wrong). Which compilation that is was not pinned, so treat the forward path as
 		// right by accident rather than by construction: if a stale summary is ever seen after a *committed* alter, call
 		// table.DetermineRemotable here, as CreateColumns does. The undo path recomputes for itself, at each instruction
-		// that restores part of the definition: CatalogDeviceSession.RedetermineRemotable.
+		// that restores part of the definition: CatalogDeviceSession.RedetermineRemotable. One sibling site has since
+		// been seen stale after a committed alter and now recomputes - CreateConstraints, for a table-level row
+		// constraint - so the precedent for doing the same here exists if the staleness ever shows up.
 		protected void AlterColumns(Plan plan, Program program, Schema.BaseTableVar table, AlterColumnDefinitions alterColumns)
 		{
 			Schema.TableVarColumn column;

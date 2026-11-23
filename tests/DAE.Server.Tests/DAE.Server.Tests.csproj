@@ -17,6 +17,7 @@
     <Compile Include="AbandonedSessionCleanupTest.cs" />
     <Compile Include="ApplicationTransactionTest.cs" />
     <Compile Include="BufferedOperatorColumnOwnershipTest.cs" />
+    <Compile Include="CatalogRollbackSnapshotTest.cs" />
     <Compile Include="CatalogStoreTest.cs" />
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
     <Compile Include="ColumnChangeRollbackTest.cs" />
