@@ -6,6 +6,12 @@ severity: wrong-result
 likelihood: normal-use
 tradeoffs: The fix changes what 14 of the 416 derived forms say, which means rewriting checked-in expectation files that are the only record of this engine's form output — a maintainer may prefer today's wrong-but-known titles to a change every application's users would see at once.
 ----
+## Owner decision (2026-11-23): the view's own tags always win
+
+A view's own tags take precedence over every tag it inherits from its source. This is the rule; write it down in `docs/architecture.md` (where views and metadata inheritance are described) and add a `docs/migration-notes.md` entry: views that carry a `Frontend.*` (or any) tag their source also carries now honour their own value, so derived forms can change.
+
+Fix as the ticket describes (copy, not share, at `Compiler.cs:4394`), add the direct case (a view with a tag its source also has; the view's value is the one derived), regenerate the goldens and read every one of the 14 differences. The 8 title changes are expected. The 6 `Security.Role` page-type changes must be explained: if they follow from the view's own tags now winning, say why in the commit; if they point at a second defect, file it rather than accepting the goldens blind. Also do the check the ticket lists for the other create statements that share the statement's metadata.
+
 ## What goes wrong
 
 A D4 object can carry *tags* — named settings read by other parts of the system; the user interface layer reads `Frontend.*` tags to decide what a derived form says and how it looks. A view carries its own tags, and it also inherits the tags of the table variable its expression is built from. Inheritance is supposed to fill gaps only: `Schema.Object.InheritMetaData` is documented as referencing each tag "if the metadata for this object does not already contain it", and `CompileCreateViewStatement` merges the view's own tags back on top afterwards, which only makes sense as "the view's own tags win".
