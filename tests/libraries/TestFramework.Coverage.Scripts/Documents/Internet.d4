@@ -17,8 +17,9 @@ select HTMLDecode(HTMLAttributeEncode('And I say & quote, "the world couldn''t s
 // NOTE: the assertions below match Newtonsoft's own message text; an upgrade that moves the limit or
 // rewords the message breaks them on purpose - re-measure against the new version (debt-library-upgrades-coverage).
 // All three reader sites in DynamicNodes.cs are asserted below. The library's fourth JSON reader, in
-// JSONObjectConveyor.cs, is unreachable (it never reports itself as streaming), so there is nothing to
-// assert about it here; see bug-json-conveyor-declares-itself-non-streaming.
+// JSONObjectConveyor.cs, is not reachable from a D4 script: it renders a value for storage or for the wire,
+// and a Dynamic column can only live in the memory device, which never asks for that. It is covered by
+// JSONObjectConveyorTest in tests/DAE.Server.Tests, which drives the engine path directly.
 begin
 	var LMaxDepthError : String := 'MaxDepth of 64 has been exceeded';
 	var LOpen : String := '';

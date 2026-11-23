@@ -42,6 +42,7 @@
     <Compile Include="InstanceConfigurationTest.cs" />
     <Compile Include="InstanceManagerTest.cs" />
     <Compile Include="InternalCoverageTests.cs" />
+    <Compile Include="JSONObjectConveyorTest.cs" />
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
     <Compile Include="NativeSessionCleanupTest.cs" />
