@@ -730,7 +730,7 @@ namespace Alphora.Dataphor.DAE.Server
 			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return InternalValidate(newRow, oldRow, column);
+				return InternalValidate(oldRow, newRow, column);
 			}
 			catch (Exception E)
 			{

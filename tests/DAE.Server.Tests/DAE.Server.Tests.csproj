@@ -20,6 +20,7 @@
     <Compile Include="CatalogRollbackSnapshotTest.cs" />
     <Compile Include="CatalogStoreTest.cs" />
     <Compile Include="CatalogStoreConcurrencyTest.cs" />
+    <Compile Include="ClientStackTestFixture.cs" />
     <Compile Include="ColumnChangeRollbackTest.cs" />
     <Compile Include="ConcurrentDDLTest.cs" />
     <Compile Include="ConnectionKeepAliveTest.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolClient.cs" />
     <Compile Include="QuotaDeleteCostTest.cs" />
+    <Compile Include="RemoteValidateTest.cs" />
     <Compile Include="SamplesCorpusTest.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
     <Compile Include="ServerLinkConnectionTest.cs" />
