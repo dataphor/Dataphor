@@ -16,6 +16,7 @@
 { "script": "DML", "status": "pass" },
 { "script": "DateLibrary", "status": "pass" },
 { "script": "DateTimeLibrary", "status": "pass" },
+{ "script": "DebugBreakpoints", "status": "pass", "preamble": "SetUseImplicitTransactions(false);", "timeoutSeconds": 60, "note": "stops a process at a breakpoint and reads the paused program. Implicit transactions off because the script reads back, from the Operators catalog table, the locator and line of an operator it creates itself: the harness runs a whole document inside the one implicit transaction of its outer ExecuteScript batch, and a catalog store view deliberately answers from committed data only, so with them on that read finds nothing. Timeout below the default 120 s because every wait in the script is bounded by the script itself - 5 s for each pause and a 2 s bounded call for the run with the breakpoints cleared - and each raises an error naming what it was waiting for, so a lower timeout is what gets a diagnosis rather than a bare HarnessTimeout a minute later. About 4 s of case time measured 2026-11-23 in Debug on one slow development laptop" },
 { "script": "DebugLibrary", "status": "pass" },
 { "script": "DebugTest", "status": "known-failure", "ticket": "test-pre-3-1-scripts-policy", "error": "HarnessTimeout", "timeoutSeconds": 5, "note": "infinite loop by design: a debugger stepping exercise" },
 { "script": "DecimalLibrary", "status": "pass" },

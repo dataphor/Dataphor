@@ -1,0 +1,229 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Debugger Breakpoints
+
+	Stops a running program at a breakpoint and reads what the debugger reports about it while it is stopped: where it
+	is, its call stack, the variables of its innermost frame, and the source text behind both. DebugLibrary covers the
+	half that needs no pause - starting a debugger, attaching and detaching a process, listing both.
+
+	How a breakpoint is addressed. A breakpoint is a locator, a line and a line position, compared against the location
+	of the running program at every breakable plan node. The locator of an operator a script created is the locator of
+	the script that created it, and the lines of its body are compiled relative to its own create operator line, so the
+	line the debugger reports for a statement in the body is that statement's line in the script. Both halves come out
+	of the catalog: the Operators table carries each operator's Locator and the Line its declaration starts on. Under
+	the coverage harness that locator is the document locator doc:Coverage.Scripts:DebugBreakpoints, because the
+	harness runs each script through the Frontend library's ExecuteScript(library, document), whose locator starts at
+	line 1 - so the catalog's Line is the absolute line of the create operator statement below. A script run with no
+	document locator at all gets the locator operator:<name><signature> and a Line of 0 instead, and the lines it then
+	reports are relative to the declaration; the breakpoint lines below are computed from a declaration line of at
+	least 1 so that they are right either way.
+
+	Why the manifest entry turns implicit transactions off. A catalog store view answers from committed catalog data
+	only: it reads on a connection of its own, outside the calling transaction's store transaction, which the NOTE on
+	CatalogDeviceTable.InternalOpen records as deliberate. The coverage harness runs a whole document inside one
+	implicit transaction - the transaction belongs to the harness's outer ExecuteScript batch and a nested batch begins
+	none of its own - so with implicit transactions on, the Operators read below finds nothing for an operator this
+	script has just created, whatever batch created it. With them off the create operator commits as it runs.
+
+	What is not here. Stepping, pausing a running process, break on exception and the teardown paths belong to
+	debt-debugger-stepping-script; debugging a second session, which no D4 operator can reach from a script, belongs to
+	debt-debugger-coverage.
+*/
+
+// The operator the breakpoints are set in. Pure integer arithmetic, deliberately: a process paused inside it holds no
+// lock that the script's own process could then wait for, and it finishes on its own even if every Debug call below
+// does nothing. The parameter and the two locals are what the stack window reads.
+create operator TestDebugTarget(AValue : Integer)	// declaration line 1
+begin
+	var LTripled := AValue * 3;
+	var LTotal := LTripled + 4;
+	LTotal := LTotal + AValue;						// declaration line 5: the first breakpoint
+	LTotal := LTotal * 10;
+	LTotal := LTotal - 1;							// declaration line 7: the second breakpoint
+end;
+
+// Waits for a process to pause, with a budget, so that a pause that never comes fails here and says which case was
+// waiting rather than ending the script in the harness's timeout with nothing to read. Not Debug.WaitForPause(), which
+// blocks with no timeout of its own.
+// NOTE: polls the process, not the debugger. Debug.GetDebuggers().IsPaused is true as soon as a pause has been
+// requested and every attached process is paused - which a debugger with no attached process satisfies with both
+// counts at zero.
+create operator TestDebugAwaitPause(AProcessID : Integer, AWhat : String)
+begin
+	var LWaited := 0;
+	while (not exists (Debug.GetProcesses() where Process_ID = AProcessID and IsPaused)) and (LWaited < 5000) do
+	begin
+		Sleep(50);
+		LWaited := LWaited + 50;
+	end;
+	if not exists (Debug.GetProcesses() where Process_ID = AProcessID and IsPaused) then
+		raise Error('The debugged process never paused waiting for ' + AWhat);
+end;
+
+Debug.Start();
+
+if not exists (Debug.GetDebuggers() where Session_ID = SessionID()) then
+	raise Error('Debug.Start did not start a debugger for this session');
+
+// The locator and the two lines every case below addresses its breakpoint by. OperatorName is qualified with the
+// session's current library, which is General for a session that named no default library, so the name is matched
+// rather than compared.
+if not exists (Operators where OperatorName like '%TestDebugTarget') then
+	raise Error('The Operators catalog table has no row for TestDebugTarget, so a breakpoint in it cannot be addressed');
+
+var LLocator := (Operators where OperatorName like '%TestDebugTarget')[].Locator;
+var LDeclarationLine := (Operators where OperatorName like '%TestDebugTarget')[].Line;
+var LDeclarationBase := if LDeclarationLine < 1 then 1 else LDeclarationLine;
+var LFirstLine := LDeclarationBase + 4;
+var LSecondLine := LDeclarationBase + 6;
+
+// A breakpoint can be set, listed and cleared, with no process involved.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LFirstLine, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint as cleared, not set');
+	if Count(Debug.GetBreakpoints()) <> 1 then
+		raise Error('Debug.GetBreakpoints reports ' + (Count(Debug.GetBreakpoints())).ToString() + ' breakpoint(s), not 1');
+	if not exists (Debug.GetBreakpoints() where Locator = LLocator and Line = LFirstLine and LinePos = -1) then
+		raise Error('Debug.GetBreakpoints does not report the breakpoint set at ' + LLocator + '@' + (LFirstLine).ToString());
+	// Breakpoint equality is an exact match on all three values, so clearing has to pass the same -1 it was set with.
+	if Debug.ToggleBreakpoint(LLocator, LFirstLine, -1) then
+		raise Error('Toggling the same breakpoint a second time reported it as set, not cleared');
+	if Count(Debug.GetBreakpoints()) <> 0 then
+		raise Error('Debug.GetBreakpoints still reports a breakpoint after it was cleared');
+end;
+
+// The breakpoint is hit, and everything that only exists once a program is paused can be read.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LFirstLine, -1)) then
+		raise Error('The breakpoint for the hit case was not set');
+
+	// The second process has to be attached by process: Debug.AttachSession of the debugger's own session is refused by
+	// design, and DebugLibrary asserts that refusal.
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		// An error raised by an asynchronous script is not returned to the caller, so a call that fails shows up only as
+		// a pause that never happens - which is why the wait raises an error of its own.
+		ExecuteAsync(LProcessID, 'TestDebugTarget(1);');
+		TestDebugAwaitPause(LProcessID, 'the first breakpoint, at ' + LLocator + '@' + (LFirstLine).ToString());
+
+		// NOTE: Locator, Line, LinePos and DidBreak are nil for a process that is not paused, not zero and not false, so
+		// every read of them belongs behind the IsPaused test the wait above has already made.
+		if (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator <> LLocator then
+			raise Error('The paused process reports the locator ' + (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator + ', not ' + LLocator);
+		// Read into a local before printing it: ((...)[].Line).ToString() is a construct the D4 emitter cannot print back
+		// unchanged (bug-d4-emitter-drops-qualifier-grouping), which fails this file's ParserRoundTripCorpusTest case.
+		var LPausedLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LPausedLine <> LFirstLine then
+			raise Error('The paused process reports line ' + (LPausedLine).ToString() + ', not ' + (LFirstLine).ToString());
+		// DidBreak is what tells a breakpoint hit from a pause the debugger was asked for.
+		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
+			raise Error('The paused process does not report DidBreak, so a breakpoint is not what stopped it');
+
+		// Returns at once, the pause having already happened; it is the blocking form and has no timeout of its own.
+		Debug.WaitForPause();
+
+		// The call stack of the paused program: the operator frame, then the program that called it.
+		if Count(Debug.GetCallStack(LProcessID)) < 2 then
+			raise Error('The paused process reports ' + (Count(Debug.GetCallStack(LProcessID))).ToString() + ' call stack frame(s), fewer than the 2 expected');
+		if (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator <> LLocator then
+			raise Error('The innermost frame reports the locator ' + (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator + ', not ' + LLocator);
+		var LFrameLine := (Debug.GetCallStack(LProcessID) where Index = 0)[].Line;
+		if LFrameLine <> LFirstLine then
+			raise Error('The innermost frame reports line ' + (LFrameLine).ToString() + ', not ' + (LFirstLine).ToString());
+		if IndexOf((Debug.GetCallStack(LProcessID) where Index = 0)[].Statement, 'LTotal') < 0 then
+			raise Error('The innermost frame does not report the statement it is stopped on: ' + (Debug.GetCallStack(LProcessID) where Index = 0)[].Statement);
+		if IndexOf((Debug.GetCallStack(LProcessID) where Index = 1)[].Location, 'program:') <> 0 then
+			raise Error('The calling frame reports the location ' + (Debug.GetCallStack(LProcessID) where Index = 1)[].Location + ', which is not a program locator');
+
+		// GetSource answers for both locator kinds the call stack hands it, and both need the process paused: the
+		// operator locator re-emits the operator's declaration, the program locator returns the text the process runs.
+		var LOperatorSource := Debug.GetSource((Debug.GetCallStack(LProcessID) where Index = 0)[].Location);
+		if IndexOf(LOperatorSource, 'LTripled') < 0 then
+			raise Error('Debug.GetSource of the operator locator did not return the operator declaration: ' + LOperatorSource);
+		var LProgramSource := Debug.GetSource((Debug.GetCallStack(LProcessID) where Index = 1)[].Location);
+		if IndexOf(LProgramSource, 'TestDebugTarget(1)') < 0 then
+			raise Error('Debug.GetSource of the program locator did not return the script the process is running: ' + LProgramSource);
+		// The two sources are different texts, not the same one twice: the program locator answers with the script the
+		// process was given, which is one call and none of the operator's body.
+		if IndexOf(LProgramSource, 'LTripled') >= 0 then
+			raise Error('Debug.GetSource of the program locator returned the operator body as well: ' + LProgramSource);
+
+		// The variables of the innermost frame: the parameter, then the two locals, in the order they were pushed. Window
+		// 0 is the innermost frame.
+		// NOTE: the Name column is filled positionally - Location0, Location1, ... - rather than with the D4 identifiers,
+		// which is what the IDE's stack window shows today, so these assertions are on the values and the row count.
+		if Count(Debug.GetStack(LProcessID, 0)) <> 3 then
+			raise Error('The innermost frame reports ' + (Count(Debug.GetStack(LProcessID, 0))).ToString() + ' variable(s), not the 3 expected (AValue, LTripled, LTotal)');
+		if (Debug.GetStack(LProcessID, 0) where Index = 0)[].Value <> '1' then
+			raise Error('The innermost frame reports the parameter as ' + (Debug.GetStack(LProcessID, 0) where Index = 0)[].Value + ', not the 1 the caller passed');
+		if (Debug.GetStack(LProcessID, 0) where Index = 1)[].Value <> '3' then
+			raise Error('The innermost frame reports LTripled as ' + (Debug.GetStack(LProcessID, 0) where Index = 1)[].Value + ', not 3');
+		if (Debug.GetStack(LProcessID, 0) where Index = 2)[].Value <> '7' then
+			raise Error('The innermost frame reports LTotal as ' + (Debug.GetStack(LProcessID, 0) where Index = 2)[].Value + ', not 7');
+
+		// Debug.Run lets the process go. That it then stops at the second breakpoint, with LTotal carrying the result of
+		// the two statements between the two lines, is the evidence that it ran rather than merely reported itself again.
+		if not(Debug.ToggleBreakpoint(LLocator, LSecondLine, -1)) then
+			raise Error('The second breakpoint was not set');
+		Debug.Run();
+		TestDebugAwaitPause(LProcessID, 'the second breakpoint, at ' + LLocator + '@' + (LSecondLine).ToString());
+		var LSecondPausedLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LSecondPausedLine <> LSecondLine then
+			raise Error('After Debug.Run the process reports line ' + (LSecondPausedLine).ToString() + ', not the second breakpoint at ' + (LSecondLine).ToString());
+		if (Debug.GetStack(LProcessID, 0) where Index = 2)[].Value <> '80' then
+			raise Error('At the second breakpoint LTotal is ' + (Debug.GetStack(LProcessID, 0) where Index = 2)[].Value + ', not the 80 the statements between the two breakpoints make of it');
+
+		// Both breakpoints off, and the process let go to finish.
+		if Debug.ToggleBreakpoint(LLocator, LFirstLine, -1) then
+			raise Error('Clearing the first breakpoint reported it as set');
+		if Debug.ToggleBreakpoint(LLocator, LSecondLine, -1) then
+			raise Error('Clearing the second breakpoint reported it as set');
+		if Count(Debug.GetBreakpoints()) <> 0 then
+			raise Error('Debug.GetBreakpoints still reports ' + (Count(Debug.GetBreakpoints())).ToString() + ' breakpoint(s) after both were cleared');
+		Debug.Run();
+		if exists (Debug.GetProcesses() where Process_ID = LProcessID and IsPaused) then
+			raise Error('The process still reports itself paused after Debug.Run');
+	finally
+		// ExecuteAsync does not stop a process it was given, so the script owns it. Stopping it detaches it from the
+		// debugger, which DebugLibrary asserts.
+		StopProcess(LProcessID);
+	end;
+end;
+
+// A cleared breakpoint stops nothing. ExecuteWithTimeout rather than ExecuteAsync, because it reports whether the
+// script finished inside its timeout: with no breakpoint set it must, and a process that paused instead would not.
+// A process of its own, so that the case inherits nothing from the one above.
+begin
+	if Count(Debug.GetBreakpoints()) <> 0 then
+		raise Error('A breakpoint outlived the case that set it');
+
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		var LTimedOut := false;
+		try
+			ExecuteWithTimeout(LProcessID, 'TestDebugTarget(5);', 2000);
+		except
+			LTimedOut := true;
+		end;
+		if LTimedOut then
+			raise Error('A call with every breakpoint cleared did not finish inside its timeout, so something stopped the debugged process');
+		if exists (Debug.GetProcesses() where Process_ID = LProcessID and IsPaused) then
+			raise Error('The debugged process reports itself paused although no breakpoint was set');
+	finally
+		StopProcess(LProcessID);
+	end;
+end;
+
+Debug.Stop();
+
+if exists (Debug.GetDebuggers() where Session_ID = SessionID()) then
+	raise Error('Debug.Stop did not stop the debugger');
+
+drop operator TestDebugAwaitPause(Integer, String);
+drop operator TestDebugTarget(Integer);
