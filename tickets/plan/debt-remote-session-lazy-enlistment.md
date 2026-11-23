@@ -1,8 +1,20 @@
 description: Every statement a session runs opens a transaction on every other Dataphor server that session has ever queried, even when the statement has nothing to do with those servers - one network round trip each, per statement. Decide whether those servers should instead be brought into a transaction only when the statement actually uses them.
 architecture: docs/modernization-plan.md#ws2-engine-and-server-port
+prereq: bug-dead-remote-session-blocks-every-statement, bug-remote-catchup-uses-innermost-isolation
 files: src/engine/DAE/Server/ServerProcess.cs, src/engine/DAE/Server/RemoteSession.cs
 tradeoffs: Opening the remote transaction at the same moment as the local one is what makes a remote read see the same point in time as the rest of the transaction, so bringing a server in late is a real change to what a query sees and not only a saving - and the cost it removes is one round trip per statement per linked server, which only a deployment that uses server links heavily would ever notice.
 ----
+
+## Owner decision (2026-11-22): enlist on first use
+
+The owner chose **enlist a linked server's connection in a transaction only when a statement uses it** (the second shape below). The eager begin on every held connection goes; `ServerProcess.RemoteConnect`'s catch-up becomes the only way a connection joins open transactions. This decision explicitly accepts the change in what a transaction that spans two Dataphor servers promises. A remote read sees the remote state as of the connection's first use inside the transaction, not as of the transaction's start. Record that in `docs/migration-notes.md` and in the architecture or plan text that describes server links.
+
+What the planning step still owns:
+- `InternalPrepareTransaction`, `InternalCommitTransaction` and `InternalRollbackTransaction` must act per connection, by the levels that connection actually began, not by assuming the process's depth. State the weaker invariant that replaces the one `bug-dead-remote-session-blocks-every-statement` established, and make the dead-connection recovery from that ticket move with the (now lazy) begin.
+- Coordinate with `bug-remote-catchup-uses-innermost-isolation`: once catch-up is the only enlistment path, each level it opens must use that level's own isolation. If that fix has not landed, this work depends on it.
+- The round-trip saving was never measured. Measure it as the ticket proposes (one linked connection, a statement that does not use it, before and after) and record the number in the complete ticket, as evidence for the change rather than as a gate on it.
+- The "enlist only links the plan names" variant was not chosen.
+
 ## What happens now
 
 A *server link* is a D4 object naming another Dataphor server; the first `ExecuteOn`, `EvaluateOn` or `select … on <link>` opens a connection to it and the process keeps that connection. Beginning a transaction on the process then begins one on **every** connection it holds (`ServerProcess.InternalBeginTransaction`), and with implicit transactions on - the default - every statement begins a transaction. So a session that queried another server once pays a network round trip to that server on every statement it runs afterwards, including statements that will never touch the link, and pays another at the commit and another if it nests.

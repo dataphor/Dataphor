@@ -3,6 +3,11 @@ architecture: docs/modernization-plan.md#ws3-test-suite
 files: src/engine/DAE/Compiling/Compiler.cs, src/engine/DAE/Runtime.Instructions/RedefineNode.cs, src/engine/DAE/Runtime.Data/RedefineTable.cs, src/engine/DAE/Runtime.Instructions/RowNodes.cs, src/engine/DAE/Schema/SystemCatalog.d4, src/engine/DAE/Schema/SQLDeviceMappings.d4
 tradeoffs: Nothing is broken and nobody is asking for this - the operator works, through the rewrite - so a maintainer may well park 446 lines of unreachable code as harmless; against that it is 446 lines that every future coverage pass, every future reader of the compiler and every future dead-code sweep has to re-diagnose, and the engine currently tells applications it has classes it cannot use.
 ----
+
+## Owner decision (2026-11-22): retire
+
+The owner chose **retire**. The rewrite (`add` / `remove` / `rename`) is the implementation of `redefine`. Delete `RedefineNode`, `RowRedefineNode` and `RedefineTable`, their `Compile` entries, and the dead `#if USEREDEFINENODE` branch in `Compiler.EmitRedefineNode`. Also remove the `iRedefine` declarations in `src/engine/DAE/Schema/SystemCatalog.d4` and the `iRedefine` mappings in `src/engine/DAE/Schema/SQLDeviceMappings.d4` that no longer have anything behind them. This decision is the explicit authorization the compatibility rule asks for to remove those registered D4 class names. Record the removal in `docs/migration-notes.md`: a catalog rebuilt from scripts no longer has the `iRedefine` operators, and an extension that named those classes must stop. No performance measurement is needed first. The planning step checks whether anything else (libraries, samples, tests, `DAERegister.GetClasses()`) names the classes or operators, and removes or updates those references in the same change.
+
 ## What was found
 
 The D4 `redefine` operator - `T redefine { A := A + A }`, which replaces a column's value while keeping the column - has two implementations in the engine, and only one of them can run.
