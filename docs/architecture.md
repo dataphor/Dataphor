@@ -33,7 +33,7 @@ An application is written as a **D4 library**: scripts that declare types, table
    (27 DAE* tables)       PGSQL, …                  .d4l + Documents/ + dll
 ```
 
-Each box above is one or more assemblies; the table of assembly, project and role, and the note that the engine runs without the server layer, is in [assemblies.md](architecture/assemblies.md).
+Each box above is one or more assemblies; what each assembly holds, which project builds it, and that the engine runs without the server layer are all in [assemblies.md](architecture/assemblies.md).
 
 ## Sessions, processes, plans
 
@@ -41,7 +41,7 @@ A client connects and gets a session, a session starts processes, and a process 
 
 ## Catalog and catalog store
 
-The catalog is the set of all schema objects, loaded lazily from the catalog store - which also holds the users, rights and settings that exist nowhere else - and the transactions that write it: [catalog-and-store.md](architecture/catalog-and-store.md).
+The catalog is the set of all schema objects, loaded lazily from the catalog store, which also holds the users, rights and settings that exist nowhere else; the store and the transactions that write it are in [catalog-and-store.md](architecture/catalog-and-store.md).
 
 ## Libraries and class loading
 
@@ -49,7 +49,7 @@ A library is a directory with a descriptor, documents and optionally assemblies;
 
 ## Devices
 
-A device translates the plan nodes it claims to support into a native command and leaves the rest to the engine; which devices ship, and what they build on, is in [devices.md](architecture/devices.md).
+A device translates the plan nodes it claims to support into a native command and leaves the rest to the engine; which devices ship, and what they build on, are in [devices.md](architecture/devices.md).
 
 ## Frontend: from schema to screen
 
