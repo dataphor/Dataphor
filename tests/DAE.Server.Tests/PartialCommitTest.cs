@@ -62,6 +62,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// A case that fails before the phase it armed has run would otherwise leave the flag set on the device, which outlives
+		/// the case, and the next case's [SetUp] would fail in its own implicit commit rather than where it was looking.
+		/// </summary>
+		[TearDown]
+		public void DisarmTheFailingDevice()
+		{
+			FailingDevice.FailNextCommit = false;
+			FailingDevice.FailNextPrepare = false;
+		}
+
+		/// <summary>
 		/// The rollback of the level a failed commit left open ends that level only on the participants that still hold it. The
 		/// device loop used to ask whether the device session was in a transaction at all, which after a partial commit is true
 		/// of a committed participant for the <em>outer</em> level: that level was then rolled back on it, silently, taking work
@@ -137,7 +148,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			ExecuteScript("insert row { 1 ID } into GoodTable; insert row { 1 ID } into FailTable;");
 
 			FailingDevice.FailNextPrepare = true;
-			Assert.Catch(() => Process.CommitTransaction());
+			Exception exception = Assert.Catch(() => Process.CommitTransaction());
+			Assert.That(exception.ToString(), Does.Contain(FailingCommitDeviceSession.PrepareFailureMessage));
 			Assert.That(Process.TransactionCount, Is.EqualTo(1));
 			Assert.That(Levels(WorkingDeviceName), Is.EqualTo(1));
 			Assert.That(Levels(FailingDeviceName), Is.EqualTo(1));

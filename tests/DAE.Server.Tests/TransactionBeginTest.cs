@@ -112,6 +112,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return (int)Process.Evaluate(String.Format("Count({0})", tableExpression), null).AsNative;
 		}
 
+		/// <summary>A device whose begin of a transaction level can be made to fail. Its sibling, PartialCommitTest.FailingCommitDevice, fails a commit or a prepare instead.</summary>
 		public class FailingBeginDevice : MemoryDevice
 		{
 			public const string ClassName = "Test.FailingBeginDevice";

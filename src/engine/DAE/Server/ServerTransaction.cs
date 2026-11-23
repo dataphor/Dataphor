@@ -123,6 +123,13 @@ namespace Alphora.Dataphor.DAE.Server
 		/// level: the rollback that follows ends it only on the participants that still hold it, so the outer transaction's work
 		/// survives. Making a distributed commit recoverable is a much larger piece of work than correcting that clean-up.
 		/// </para>
+		/// <para>
+		/// What it does not yet stop is new work *inside* that level. A statement run between the failed commit and the rollback
+		/// is allowed - it begins no level, so neither refusal above sees it - and its work lands at the level each participant
+		/// now holds innermost, which is this level on the ones that have not committed and the enclosing one on the ones that
+		/// have; the rollback then undoes it on the first and keeps it on the second. That is
+		/// <c>bug-work-after-a-half-committed-level-is-torn</c>, which proposes refusing new work on such a level.
+		/// </para>
 		/// </remarks>
 		private bool _commitBegun;
 		public bool CommitBegun
