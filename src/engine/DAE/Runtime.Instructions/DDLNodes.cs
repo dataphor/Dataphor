@@ -32,9 +32,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// whole set of places that bump this timestamp. Outside the loading guard below on purpose: a bump while a library
 			// loads costs one recompute per table variable and is harmless.
 			// NOTE: one counter for the whole catalog, so any DDL makes every table variable recompute its proposal summary once
-			// on its next read. Cheap - a recompute walks the table's columns, measured at 5.65 us on a 21-column table against
-			// 59.6 us for the whole-row Default proposal that reads it - and DDL is rare. If a workload that interleaves DDL
-			// with editing ever shows it, narrow the counter to the objects a statement actually touched.
+			// on its next read. A recompute walks the table's columns, measured at 5.65 us on a 21-column table against 59.6 us
+			// for the whole-row Default proposal that reads it, and it is paid once per table variable after a bump rather than
+			// per proposal. Do not read that as "DDL is rare": beginning an application transaction creates its copy of each
+			// table by executing a create-table statement and ending it drops them (ApplicationTransactionDevice.AddTableVar),
+			// so a form's own edit cycle passes through here. If a workload that interleaves DDL with editing ever shows the
+			// cost, narrow the counter to the objects a statement actually touched.
+			// NOTE: this bump is before the statement's own mutation, so a proposal from another session that lands between the
+			// two recomputes from the not-yet-changed definition and records the new stamp over it - that one summary then stays
+			// stale until the next catalog change. The window is one statement wide and needs a concurrent editing session to
+			// fall inside it; closing it means bumping again once the statement has finished, and PlanNode.Execute offers only a
+			// before hook (adding an after hook puts a call on the hot path of every node, which is why the before hook carries
+			// the TODO it does). Left as it is while DDL and in-flight plans are unguarded against each other anyway - every
+			// AcquireCatalogLock call in Compiler.cs is commented out. If the window is ever seen, give DDLNode its own
+			// after-execute hook rather than moving this bump, which would reopen the compile-inside-a-statement case that
+			// Schema.TableVar.DetermineShouldCallProposables's remarks describe.
 			program.Catalog.UpdateShouldCallProposablesTimeStamp();
 
 			if (!program.ServerProcess.InLoadingContext())

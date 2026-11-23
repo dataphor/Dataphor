@@ -34,10 +34,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// the catalog's other timestamps.
 	/// </para>
 	/// <para>
-	/// Deliberately not covered: the same changes asked through a restriction or any other operator over the table. Those
-	/// put a plan-local table variable at the top of the plan, whose summary starts with every flag raised, so the proposal
-	/// descends and meets the real definition whatever the summary says. A case there would pin that accident of the plan
-	/// rather than a behaviour.
+	/// One case asks through a restriction over the table rather than over the table itself, because that is the shape a form
+	/// usually has and because the summary it meets is not the one at the top of the plan. An operator over the table puts a
+	/// plan-local stub at the top, whose summary starts with every flag raised, so the proposal does descend - and what it
+	/// descends to is the table's own summary, the stale one. The three calls therefore have to cover every node of a plan and
+	/// not only its top, which is what TestCommittedCreateTypeDefaultIsOfferedThroughARestriction pins and what no other case
+	/// here does. The check and the change-handler cases were tried through a restriction as well and both still pass with the
+	/// three calls removed, so either would be a case that cannot fail; only the whole-row default fails, and only it is here.
 	/// </para>
 	/// </remarks>
 	[TestFixture]
@@ -191,6 +194,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				ExecuteScript("attach operator ChangeHandlerT_Change to ChangeHandlerT on { change };");
 
 				Assert.That(AmountAfterChange(cursor, 1, 2), Is.EqualTo(99));
+			}
+			finally
+			{
+				Process.CloseCursor(cursor);
+			}
+		}
+
+		/// <summary>
+		/// A committed creation of a data type's default is offered to a cursor that was opened over a restriction of the table,
+		/// not over the table itself. The restriction's own summary is not the stale one - a plan-local stub starts with every
+		/// flag raised - so what this says is that the summary brought up to date is the one the proposal reaches by descending.
+		/// </summary>
+		[Test]
+		public void TestCommittedCreateTypeDefaultIsOfferedThroughARestriction()
+		{
+			ExecuteScript("create type RestrictDefaultT { representation RestrictDefaultT { Value : Integer } };");
+			ExecuteScript("create table RestrictDefaultTbl { ID : Integer, Amount : RestrictDefaultT, key { ID } };");
+
+			IServerCursor cursor = Process.OpenCursor("select RestrictDefaultTbl where ID = 1 capabilities { updateable }", null);
+			try
+			{
+				ExecuteScript("alter type RestrictDefaultT { create default RestrictDefaultT(7) };");
+
+				Assert.That(DefaultOf(cursor, "Amount"), Is.EqualTo(7));
 			}
 			finally
 			{
