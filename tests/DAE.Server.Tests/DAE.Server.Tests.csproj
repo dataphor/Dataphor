@@ -31,6 +31,7 @@
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
+    <Compile Include="DeviceClassAttributeRollbackTest.cs" />
     <Compile Include="FormCustomizationTest.cs" />
     <Compile Include="FormDocumentCorpusTest.cs" />
     <Compile Include="FrontendDerivationGoldenTest.cs" />

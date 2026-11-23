@@ -46,6 +46,25 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			propertyInfo.SetValue(objectValue, Convert.ChangeType(propertyValue, propertyInfo.PropertyType, System.Threading.Thread.CurrentThread.CurrentCulture), null);
 		}
 		
+		/// <summary>The value of a named property of an object, in the string form SetProperty takes; false if the object exposes no readable property of that name.</summary>
+		/// <remarks>
+		/// The read counterpart to SetProperty, for recording an object's settings before a class definition alteration overwrites
+		/// them. It answers false rather than raising PropertyNotFound because such a recording runs before the alteration it is to
+		/// undo: a name the alteration itself would reject has to go on failing where it failed before, not in the recording.
+		/// </remarks>
+		public static bool TryGetProperty(object objectValue, string propertyName, out string propertyValue)
+		{
+			PropertyInfo propertyInfo = objectValue.GetType().GetProperty(propertyName);
+			if ((propertyInfo == null) || !propertyInfo.CanRead)
+			{
+				propertyValue = null;
+				return false;
+			}
+			object value = propertyInfo.GetValue(objectValue, null);
+			propertyValue = value == null ? null : (string)Convert.ChangeType(value, typeof(string), System.Threading.Thread.CurrentThread.CurrentCulture);
+			return true;
+		}
+		
 		public object CreateObject(CatalogDeviceSession session, ClassDefinition classDefinition, object[] actualParameters)
 		{
 			object objectValue = Activator.CreateInstance(CreateType(session, classDefinition), actualParameters);

@@ -985,6 +985,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					classDefinition.ClassName = alterClassDefinition.ClassName;
 				}
 					
+				// NOTE: a dropped attribute leaves the live instance's property set to the value the dropped attribute gave it, where a
+				// created or altered one is applied to the instance below; whether a drop should put the property back to the class's
+				// default is filed as backlog/bug-dropped-class-attribute-stays-on-the-live-object.
 				foreach (ClassAttributeDefinition attributeDefinition in alterClassDefinition.DropAttributes)
 					classDefinition.Attributes.RemoveAt(classDefinition.Attributes.IndexOf(attributeDefinition.AttributeName));
 					

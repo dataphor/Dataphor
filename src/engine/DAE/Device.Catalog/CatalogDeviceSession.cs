@@ -596,34 +596,55 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected class AlterClassDefinitionInstruction : DDLInstruction
 		{
-			public AlterClassDefinitionInstruction(ClassDefinition classDefinition, AlterClassDefinition alterClassDefinition, ClassDefinition originalClassDefinition, object instance)
+			/// <summary>Takes the class definition, and the instance's value for every property the alteration touches, as they stand - so construct it before the change it is to undo.</summary>
+			public AlterClassDefinitionInstruction(ClassDefinition classDefinition, AlterClassDefinition alterClassDefinition, object instance)
 			{
 				_classDefinition = classDefinition;
-				_alterClassDefinition = alterClassDefinition;
-				_originalClassDefinition = originalClassDefinition;
+				_originalClassDefinition = (ClassDefinition)classDefinition.Clone();
 				_instance = instance;
+				if (instance != null)
+				{
+					RecordProperties(alterClassDefinition.CreateAttributes);
+					RecordProperties(alterClassDefinition.AlterAttributes);
+					RecordProperties(alterClassDefinition.DropAttributes);
+				}
 			}
 			
 			private ClassDefinition _classDefinition;
-			private AlterClassDefinition _alterClassDefinition;
 			private ClassDefinition _originalClassDefinition;
 			private object _instance;
+			/// <summary>The instance's own value for each attribute the alteration names, as it stood before; empty when the class definition has no live instance.</summary>
+			private List<KeyValuePair<string, string>> _originalProperties = new List<KeyValuePair<string, string>>();
 
+			// An attribute the instance exposes no readable property for is left out rather than reported: the alteration raises
+			// PropertyNotFound for such a name itself, and this recording runs first, so raising here would move or replace that failure.
+			private void RecordProperties(ClassAttributeDefinitions attributeDefinitions)
+			{
+				foreach (ClassAttributeDefinition attributeDefinition in attributeDefinitions)
+				{
+					string propertyValue;
+					if (ClassLoader.TryGetProperty(_instance, attributeDefinition.AttributeName, out propertyValue))
+						_originalProperties.Add(new KeyValuePair<string, string>(attributeDefinition.AttributeName, propertyValue));
+				}
+			}
+
+			/// <remarks>
+			/// Puts the copy of the class definition back, rather than applying the inverse alteration, and then the recorded property
+			/// values back on the instance. Two reasons not to lean on the inverse: the inverse of a created attribute is a drop, which
+			/// never touched the instance - the defect this instruction records for - and a create that threw before adding its attribute
+			/// leaves the inverse with an attribute to drop that is not there, which failed the rest of the undo with it.
+			/// Recorded values are also the only ones an undo may use: instructions are undone in reverse order of recording, so
+			/// anything recomputed here would read state a later-undone instruction has still to put back.
+			/// </remarks>
 			public override void Undo(CatalogDeviceSession session)
 			{
-				AlterClassDefinition undoClassDefinition = new AlterClassDefinition();
-				undoClassDefinition.ClassName = _alterClassDefinition.ClassName == String.Empty ? String.Empty : _originalClassDefinition.ClassName;
+				_classDefinition.ClassName = _originalClassDefinition.ClassName;
+				_classDefinition.Attributes.Clear();
+				foreach (ClassAttributeDefinition attributeDefinition in _originalClassDefinition.Attributes)
+					_classDefinition.Attributes.Add(attributeDefinition.Clone());
 				
-				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.DropAttributes)
-					undoClassDefinition.CreateAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, _originalClassDefinition.Attributes[attributeDefinition.AttributeName].AttributeValue));
-					
-				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.AlterAttributes)
-					undoClassDefinition.AlterAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, _originalClassDefinition.Attributes[attributeDefinition.AttributeName].AttributeValue));
-					
-				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.CreateAttributes)
-					undoClassDefinition.DropAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, String.Empty));
-				
-				AlterNode.AlterClassDefinition(_classDefinition, undoClassDefinition, _instance);
+				foreach (KeyValuePair<string, string> originalProperty in _originalProperties)
+					ClassLoader.SetProperty(_instance, originalProperty.Key, originalProperty.Value);
 			}
 		}
 		
@@ -2915,12 +2936,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			if (alterClassDefinition != null)
 			{
-				ClassDefinition originalClassDefinition = classDefinition.Clone() as ClassDefinition;
-				AlterNode.AlterClassDefinition(classDefinition, alterClassDefinition, instance);
 				#if LOGDDLINSTRUCTIONS
+				// Recorded before the change, not after: the alteration applies the attributes one at a time and throws on a value it
+				// cannot convert to the property's type, and a change that fails part-way has to be undoable too.
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					_instructions.Add(new AlterClassDefinitionInstruction(classDefinition, alterClassDefinition, originalClassDefinition, instance));
+					_instructions.Add(new AlterClassDefinitionInstruction(classDefinition, alterClassDefinition, instance));
 				#endif
+				AlterNode.AlterClassDefinition(classDefinition, alterClassDefinition, instance);
 			}
 		}
 		
