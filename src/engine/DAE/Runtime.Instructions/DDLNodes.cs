@@ -1473,11 +1473,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// TODO: Alter table variable column scalar type
 		// NOTE: nothing here recomputes the ShouldDefault/ShouldValidate/ShouldChange summary the table derives from its
-		// definition when a default or a column constraint changes. Every compilation of an expression over the table does
-		// it, through TableVarNode.DetermineCharacteristics, and this statement always compiles at least one - which is why
-		// the forward path is right today and why a stale summary only ever showed through a cursor already open. If a
-		// change ever lets an alter statement run without compiling over its own table, call table.DetermineRemotable here,
-		// as CreateColumns does. The undo path recomputes for itself: CatalogDeviceSession.RedetermineRemotable.
+		// definition when a default or a column constraint changes - and the only expression this method compiles over the
+		// table is the non-nilable check, so for a bare drop of a default the recompute is nowhere in sight here. Something
+		// in the statement does it: measured 2026-11-23, the summary is already lowered by the time a rollback of the
+		// statement runs, and the only thing that lowers it is Schema.TableVar.DetermineRemotable, which outside the catalog
+		// undo path is reached by compiling an expression over the table (TableVarNode.DetermineCharacteristics, whose own
+		// comment calls that side effect wrong). Which compilation that is was not pinned, so treat the forward path as
+		// right by accident rather than by construction: if a stale summary is ever seen after a *committed* alter, call
+		// table.DetermineRemotable here, as CreateColumns does. The undo path recomputes for itself, at each instruction
+		// that restores part of the definition: CatalogDeviceSession.RedetermineRemotable.
 		protected void AlterColumns(Plan plan, Program program, Schema.BaseTableVar table, AlterColumnDefinitions alterColumns)
 		{
 			Schema.TableVarColumn column;

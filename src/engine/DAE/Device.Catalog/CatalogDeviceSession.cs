@@ -91,19 +91,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Recomputes what a table variable derives from its definition, after an Undo has restored part of that definition.</summary>
 		/// <remarks>
 		/// <para>
-		/// The ShouldDefault, ShouldValidate and ShouldChange flags on a table variable and on each of its columns are not part
-		/// of its definition; they are derived from it and say "there is something here worth calling". The engine reads them as
-		/// a fast path - TableNode.Default, Validate and Change each return without doing anything when their flag is false -
-		/// and ServerProcess decides what to tell a remote client about a table from them as well. Restoring a column's default
-		/// or a constraint is therefore only half an undo: the flags have to be recomputed from what was restored, or the server
-		/// goes on answering from the summary of a definition it rolled back.
+		/// The ShouldDefault, ShouldValidate and ShouldChange flags, on a table variable and on each of its columns, are derived
+		/// from the definition rather than part of it, and the engine reads them as a fast path: TableNode.Default, Validate and
+		/// Change each return without doing anything when their flag is false, and ServerProcess decides what to tell a remote
+		/// client about a table from them as well. Restoring a column's default or a constraint is therefore only half an undo.
 		/// </para>
 		/// <para>
-		/// Call it last in an Undo, after the restore, so the recompute sees the whole restored definition. Several instructions
-		/// over the same table variable each recompute, and the last one to run sees it fully restored, so their order does not
-		/// matter. DetermineRemotable, not the flags directly: it recomputes the whole derived family from the definition, which
-		/// is what a restart would compute. It walks the table's columns, which is the same order of work the forward path does
-		/// once per alter statement - so never call it from inside a loop over columns.
+		/// Call it last in an Undo, after the restore, so the recompute sees the whole restored definition; several instructions
+		/// over one table variable may each recompute, and the last to run sees it fully restored, so their order does not
+		/// matter. It goes through DetermineRemotable rather than setting the flags, so that the whole derived family is what a
+		/// restart would compute. It walks the table's columns, so never call it from inside a loop over them.
 		/// </para>
 		/// <para>
 		/// A view's override does not reset the flags before recomputing them (Schema.DerivedTableVar.DetermineRemotable), so on
@@ -111,21 +108,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// only the lowered ones are defects.
 		/// </para>
 		/// </remarks>
-		private static void RedetermineRemotable(CatalogDeviceSession session, Schema.TableVar tableVar)
+		private void RedetermineRemotable(Schema.TableVar tableVar)
 		{
-			tableVar.DetermineRemotable(session);
+			tableVar.DetermineRemotable(this);
 		}
 
 		/// <summary>
-		/// <see cref="RedetermineRemotable(CatalogDeviceSession, Schema.TableVar)"/> for an instruction that holds only the
-		/// column. A column's back-reference to its table variable is null only while the column is detached, which an Undo
-		/// never sees: a drop of the column is logged after the change to the column, so the reverse-order replay has already
-		/// put the column back.
+		/// <see cref="RedetermineRemotable(Schema.TableVar)"/> for an instruction that holds only the column. A column's
+		/// back-reference to its table variable is null only while the column is detached, which an Undo never sees: a drop of
+		/// the column is logged after the change to the column, so the reverse-order replay has already put the column back.
 		/// </summary>
-		private static void RedetermineRemotable(CatalogDeviceSession session, Schema.TableVarColumn tableVarColumn)
+		private void RedetermineRemotable(Schema.TableVarColumn tableVarColumn)
 		{
 			if (tableVarColumn.TableVar != null)
-				RedetermineRemotable(session, tableVarColumn.TableVar);
+				RedetermineRemotable(tableVarColumn.TableVar);
 		}
 
 		protected class SetUserNameInstruction : DDLInstruction
@@ -823,7 +819,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.DetachTableVarConstraint(_tableVar, _tableVarConstraint);
-				RedetermineRemotable(session, _tableVar);
+				session.RedetermineRemotable(_tableVar);
 			}
 		}
 		
@@ -841,7 +837,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.AttachTableVarConstraint(_tableVar, _tableVarConstraint);
-				RedetermineRemotable(session, _tableVar);
+				session.RedetermineRemotable(_tableVar);
 			}
 		}
 		
@@ -859,7 +855,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.DetachTableVarColumn(_tableVar, _tableVarColumn);
-				RedetermineRemotable(session, _tableVar);
+				session.RedetermineRemotable(_tableVar);
 			}
 		}
 		
@@ -877,7 +873,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.AttachTableVarColumn(_tableVar, _tableVarColumn);
-				RedetermineRemotable(session, _tableVar);
+				session.RedetermineRemotable(_tableVar);
 			}
 		}
 		
@@ -929,7 +925,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.DetachTableVarColumnConstraint(_tableVarColumn, _tableVarColumnConstraint);
-				RedetermineRemotable(session, _tableVarColumn);
+				session.RedetermineRemotable(_tableVarColumn);
 			}
 		}
 		
@@ -947,7 +943,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				session.AttachTableVarColumnConstraint(_tableVarColumn, _tableVarColumnConstraint);
-				RedetermineRemotable(session, _tableVarColumn);
+				session.RedetermineRemotable(_tableVarColumn);
 			}
 		}
 		
@@ -1084,7 +1080,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession session)
 			{
 				_tableVarColumn.Default = _originalDefault;
-				RedetermineRemotable(session, _tableVarColumn);
+				session.RedetermineRemotable(_tableVarColumn);
 			}
 		}
 		
@@ -1104,7 +1100,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				_tableVarColumn.IsNilable = _originalIsNilable;
 				// Nothing derived reads nilability today; the recompute is here so that the rule is the same for every
 				// instruction that restores part of a column's definition.
-				RedetermineRemotable(session, _tableVarColumn);
+				session.RedetermineRemotable(_tableVarColumn);
 			}
 		}
 		

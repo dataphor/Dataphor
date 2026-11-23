@@ -28,7 +28,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	{
 		/// <summary>
 		/// A rolled-back drop of a column's default still defaults a new row. The table-level summary alone decides for a whole
-		/// new row, so a stale one costs every column of the table its default, not only the column that was altered.
+		/// new row, so a stale one costs every column of the table its default, not only the column that was altered. The
+		/// summary only goes false when the altered column's default was the table's only one, which is why Name's is.
 		/// </summary>
 		[Test]
 		public void TestRolledBackDropDefaultStillDefaultsANewRow()
