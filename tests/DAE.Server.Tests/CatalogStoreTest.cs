@@ -537,10 +537,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// A rollback undoes only its own transaction level: a session operator created outside the rolled-back transaction
-		/// keeps its session entry.
+		/// keeps its session entry and stays callable through it. The second case is what Engine.DropSessionOperator's guard
+		/// is for: every overload of a session operator shares the one global name and the one session entry, so undoing the
+		/// creation of an overload must leave the entry alone while another overload is still in the catalog.
 		/// </summary>
-		[Test]
-		public void InnerRollbackKeepsOuterSessionOperator()
+		[TestCase("create session operator InnerSOp() : Integer begin result := 2; end;")]
+		[TestCase("create session operator OuterSOp(AValue : Integer) : Integer begin result := AValue; end;")]
+		public void InnerRollbackKeepsOuterSessionOperator(string innerScript)
 		{
 			using (TestServerInstance instance = new TestServerInstance(nameof(InnerRollbackKeepsOuterSessionOperator)))
 			{
@@ -555,9 +558,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						process.BeginTransaction(IsolationLevel.Isolated);
 						process.ExecuteScript("create session operator OuterSOp() : Integer begin result := 1; end;");
 						process.BeginTransaction(IsolationLevel.Isolated);
-						process.ExecuteScript("create session operator InnerSOp() : Integer begin result := 2; end;");
+						process.ExecuteScript(innerScript);
 						process.RollbackTransaction();
 						process.CommitTransaction();
+
+						Assert.That((int)process.Evaluate("OuterSOp()", null).AsNative, Is.EqualTo(1));
 					}
 					finally
 					{

@@ -228,6 +228,11 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int index = 0; index < _sessionObjects.Count; index++)
 					objectNames.Add(((Schema.SessionObject)_sessionObjects[index]).GlobalName);
 					
+				// NOTE: an entry naming an operator that is no longer in the catalog throws out of ResolveOperatorName below and
+				// aborts the whole disconnect, so none of the session's objects is dropped and all of them outlive the session.
+				// Nothing produces such an entry today: every path that records one undoes it in an order that cannot leave one
+				// behind (see CatalogDeviceSession.CreateOperator). If one ever appears again, skip and log the entry here rather
+				// than failing the disconnect.
 				for (int index = 0; index < _sessionOperators.Count; index++)
 				{
 					_server._systemProcess.CatalogDeviceSession.ResolveOperatorName(((Schema.SessionObject)_sessionOperators[index]).GlobalName);
