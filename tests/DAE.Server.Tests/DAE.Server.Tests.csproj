@@ -22,6 +22,7 @@
     <Compile Include="ConcurrentDDLTest.cs" />
     <Compile Include="ConnectionKeepAliveTest.cs" />
     <Compile Include="ConnectionSecurityModeTest.cs" />
+    <Compile Include="ConnectionTransactionLevelTest.cs" />
     <Compile Include="ContractParityTest.cs" />
     <Compile Include="CorpusLibrary.cs" />
     <Compile Include="CoreWcfProtocolTest.cs" />

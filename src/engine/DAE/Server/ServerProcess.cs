@@ -543,8 +543,13 @@ namespace Alphora.Dataphor.DAE.Server
 					#if REFERENCECOUNTDEVICESESSIONS
 					session.FReferenceCount = 1;
 					#endif
+					// Each level gets the isolation level it was begun at, indexed by how deep the new session already is:
+					// the levels being caught up on are the outer ones, and a client may have begun each at a different
+					// level. On a SQL device the outermost level's is the one that becomes the back-end transaction's
+					// (SQLDeviceSession.InternalBeginTransaction records it only at Transactions.Count == 1), so passing
+					// the innermost level's here ran the whole back-end transaction at the wrong isolation.
 					while (session.Transactions.Count < _transactions.Count)
-						session.BeginTransaction(_transactions[_transactions.Count - 1].IsolationLevel);
+						session.BeginTransaction(_transactions[session.Transactions.Count].IsolationLevel);
 					DeviceSessions.Add(session);
 					return session;
 				}
@@ -620,8 +625,10 @@ namespace Alphora.Dataphor.DAE.Server
 				RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName, true), this, serverLink);
 				try
 				{
+					// Indexed by the connection's own depth, for the reason given in DeviceConnect: the levels being caught
+					// up on are the outer ones, each with the isolation level it was begun at.
 					while (session.TransactionCount < _transactions.Count)
-						session.BeginTransaction(_transactions[_transactions.Count - 1].IsolationLevel);
+						session.BeginTransaction(_transactions[session.TransactionCount].IsolationLevel);
 					RemoteSessions.Add(session);
 					return session;
 				}
@@ -1507,7 +1514,23 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						try
 						{
-							if (remoteSession.InTransaction)
+							// Only a connection that still holds the level being ended. A commit that failed part-way left the
+							// connections it had already committed one level shallower than this process (RemoteSession.CommitTransaction
+							// decrements whatever the far server did, deliberately; see its remarks), and on those the innermost open
+							// level is the *outer* transaction - one this session has not finished with and may still commit. Rolling
+							// that back discarded the outer transaction's work on the other server, silently, while the local half of
+							// the same transaction stayed live and committable.
+							// == rather than >= because a connection can never be deeper than the process: the invariant recorded on
+							// RemoteSession.TransactionCount and asserted in InternalPrepareTransaction. Skipping the shallower
+							// connections restores that invariant rather than deferring it, since this process pops to
+							// _transactions.Count - 1 below, which is where those connections already are.
+							// The device loop below guards on InTransaction and is right to: Schema.DeviceSession.CommitTransaction
+							// ends its level only after InternalCommitTransaction returns, so a device session whose commit threw
+							// still holds the level this rollback is ending.
+							// NOTE: comparing against the process's depth is sound only while every connection is enlisted at every
+							// level. If debt-remote-session-lazy-enlistment lands, a connection may hold fewer levels by design, and
+							// this has to ask which transaction each of its levels was begun for instead.
+							if (remoteSession.TransactionCount == _transactions.Count)
 								remoteSession.RollbackTransaction();
 						}
 						catch (Exception E)
