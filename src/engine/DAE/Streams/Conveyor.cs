@@ -17,7 +17,11 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	/// <remarks>    
     /// A Conveyor provides host language access to the physical representation of Dataphor values stored in streams
-    /// All Conveyors must descend from this base and provide a single constructor which takes a Stream as its only parameter
+    /// All Conveyors must descend from this base and provide a parameterless constructor: the class loader builds one
+    /// with ClassLoader.CreateObject(classDefinition, null), which passes no arguments
+    /// A Conveyor implements one of the two sets of methods below - the byte-buffer trio or the stream pair - and its
+    /// IsStreaming must name the set it implements: every method a subclass does not override throws, so a flag that
+    /// disagrees with the overrides throws from every call site that trusts it
     /// All reading and writing of Dataphor values in the host language should be done through these Conveyors, 
     /// although it is not strictly necessary to do so (physical access could occur in instruction implementations, but is not recommended)
     /// The intent of the Conveyor is to provide a single access point for host language access to Dataphor values.

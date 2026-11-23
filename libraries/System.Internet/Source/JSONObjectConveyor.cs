@@ -20,9 +20,10 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 		
 		public override bool IsStreaming { get { return true; } }
 		
-		// UTF-8 without a byte-order mark: what StreamReader and StreamWriter default to, named here because the
-		// leaveOpen overloads below have no default encoding. Encoding.UTF8 would prepend a three-byte preamble
-		// to every value written.
+		// UTF-8 without a byte-order mark, named here because the leaveOpen overloads below have no default encoding:
+		// Encoding.UTF8 would prepend a three-byte preamble to every value written. This is StreamWriter's own default
+		// exactly; it is StreamReader's too but for the fallback, which throws here rather than decoding a malformed
+		// byte to U+FFFD - for a physical representation, a value that cannot be decoded should fail rather than change.
 		private static readonly Encoding TextEncoding = new UTF8Encoding(false, true);
 		
 		public override object Read(Stream stream)

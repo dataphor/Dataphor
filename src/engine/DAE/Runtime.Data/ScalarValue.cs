@@ -805,6 +805,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Streams.IConveyor conveyor = Manager.GetConveyor(DataType);
 						if (conveyor.IsStreaming)
 						{
+							// NOTE: this stream spans the rest of the buffer, where RowValue and ListValue bound theirs to the value's own
+							// length. Every caller today passes a buffer that ends with this value, so nothing reads past it; one that did
+							// not would hand the following columns' bytes to a conveyor that decodes eagerly - JSONObjectConveyor's
+							// StreamReader fills a whole buffer at a time - and it would fail on them. Bound it if such a caller appears.
 							Stream stream = new MemoryStream(buffer, offset, buffer.Length - offset, false, true);
 							Value = conveyor.Read(stream);
 							stream.Close();
