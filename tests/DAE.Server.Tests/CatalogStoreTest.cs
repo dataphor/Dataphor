@@ -493,6 +493,88 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
+		/// <summary>
+		/// Rolling back the creation of a session operator leaves the session with no entry for it, so the session still
+		/// disconnects. A session operator has a global name of its own in the catalog and a per-session entry mapping the
+		/// name the user typed to that global name; Engine.DropSessionOperator removes the entry only once the global name
+		/// is gone from the catalog, so the undo of the create has to run after the catalog object has been cleared. With
+		/// the entry left behind, the session held an alias for an operator that no longer existed and Disconnect threw.
+		/// </summary>
+		[TestCase("create session operator RolledBackSOp() : Integer begin result := 1; end;")]
+		[TestCase("create session operator RolledBackSOp() : Integer begin result := 1; end; create session operator RolledBackSOp(AValue : Integer) : Integer begin result := AValue; end;")]
+		[TestCase("create session operator RolledBackSOp() : Integer begin result := 1; end; drop operator RolledBackSOp();")]
+		public void RolledBackSessionOperatorLeavesNoSessionEntry(string script)
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(RolledBackSessionOperatorLeavesNoSessionEntry)))
+			{
+				instance.Server.Start();
+
+				IServerSession session = instance.Server.Connect(new SessionInfo("Admin", ""));
+				try
+				{
+					IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+					try
+					{
+						process.BeginTransaction(IsolationLevel.Isolated);
+						process.ExecuteScript(script);
+						process.RollbackTransaction();
+					}
+					finally
+					{
+						session.StopProcess(process);
+					}
+
+					Assert.That(((ServerSession)session).SessionOperators.Count, Is.EqualTo(0));
+				}
+				finally
+				{
+					// The failure this test covers surfaced here, not at the rollback: the disconnect walks the session
+					// operators and raises ObjectNotFound for an entry whose operator the rollback removed.
+					instance.Server.Disconnect(session);
+				}
+			}
+		}
+
+		/// <summary>
+		/// A rollback undoes only its own transaction level: a session operator created outside the rolled-back transaction
+		/// keeps its session entry.
+		/// </summary>
+		[Test]
+		public void InnerRollbackKeepsOuterSessionOperator()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(InnerRollbackKeepsOuterSessionOperator)))
+			{
+				instance.Server.Start();
+
+				IServerSession session = instance.Server.Connect(new SessionInfo("Admin", ""));
+				try
+				{
+					IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+					try
+					{
+						process.BeginTransaction(IsolationLevel.Isolated);
+						process.ExecuteScript("create session operator OuterSOp() : Integer begin result := 1; end;");
+						process.BeginTransaction(IsolationLevel.Isolated);
+						process.ExecuteScript("create session operator InnerSOp() : Integer begin result := 2; end;");
+						process.RollbackTransaction();
+						process.CommitTransaction();
+					}
+					finally
+					{
+						session.StopProcess(process);
+					}
+
+					Schema.Objects sessionOperators = ((ServerSession)session).SessionOperators;
+					Assert.That(sessionOperators.Count, Is.EqualTo(1));
+					Assert.That(sessionOperators[0].Name, Is.EqualTo("General.OuterSOp"));
+				}
+				finally
+				{
+					instance.Server.Disconnect(session);
+				}
+			}
+		}
+
 		// Runs on a task, so that a store cursor that never leaves its range fails the test instead of hanging the run.
 		private static void RunWithin(TestServerInstance instance, Action action)
 		{

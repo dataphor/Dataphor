@@ -2558,12 +2558,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void CreateOperator(Schema.Operator operatorValue)
 		{	
-			InsertCatalogObject(operatorValue);
-			
-			// The compiler cleared this when it compiled the statement, before this change: another session may have cached a
-			// resolution since. Outside the catalog lock is enough, because the compiler looks up, resolves and caches under it.
-			Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
-			
+			// Before InsertCatalogObject, so that the undo log replays in the same order as DropOperator does its work: a rollback
+			// walks the log backwards, so recording the session operator first clears the catalog object first and removes the
+			// session entry second. Engine.DropSessionOperator only removes the entry once the operator's global name is gone from
+			// the catalog (its guard keeps the entry alive while another overload still exists), so the other order leaves the
+			// session holding an alias for an operator that no longer exists and Engine.Disconnect then fails to find it.
 			if (operatorValue.SessionObjectName != null)
 			{
 				CreateSessionOperator(operatorValue);
@@ -2572,6 +2571,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					_instructions.Add(new CreateSessionOperatorInstruction(operatorValue));
 				#endif
 			}
+			
+			InsertCatalogObject(operatorValue);
+			
+			// The compiler cleared this when it compiled the statement, before this change: another session may have cached a
+			// resolution since. Outside the catalog lock is enough, because the compiler looks up, resolves and caches under it.
+			Catalog.OperatorResolutionCache.Clear(operatorValue.OperatorName);
 		}
 		
 		public void AlterOperator(Schema.Operator oldOperator, Schema.Operator newOperator)
