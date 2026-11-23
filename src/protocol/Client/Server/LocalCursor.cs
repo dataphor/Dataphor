@@ -889,6 +889,63 @@ namespace Alphora.Dataphor.DAE.Server
 		public Schema.TableVar TableVar { get { return _plan.TableVar; } }
 		public TableNode TableNode { get { return _plan.TableNode; } }
 		
+		/// <summary>
+		/// Whether the schema this cursor's plan was compiled against is still the newest generation of the catalog the
+		/// client has been told about, and so may be trusted to answer a row proposal - Default, Change or Validate - out
+		/// of the client's own copy rather than by calling the server.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Permission to answer locally is computed once, when the plan is prepared, and sent with the plan descriptor as
+		/// the DAE.IsChangeRemotable, DAE.IsDefaultRemotable and DAE.IsValidateRemotable tags of the plan's table variable
+		/// (ServerProcess.CopyDataType), each meaning "the work is remotable, or there is no work". A form holds its plan
+		/// for as long as the user keeps the form open, and nothing re-sends either the permission or the copy of the schema
+		/// it is exercised against - so a data type that gains a check, a default or a handler after the plan was prepared
+		/// is invisible to that plan, and the user meets the error on saving rather than on leaving the field. Denying the
+		/// local branch sends the proposal to the server, which answers from the live schema.
+		/// </para>
+		/// <para>
+		/// The client learns of a newer generation in LocalServer.EnsureCacheConsistent, which every prepared expression
+		/// reaches because RemoteServerPlan.GetCatalog reports the catalog cache as changed on every prepare (a catalog
+		/// lookup miss on the client, LocalProcess.CatalogLookupFailed, is the other way in). So any other work on the
+		/// session - a lookup, a detail view, another form - brings this up to date at no cost. That also makes
+		/// the test worth having for a second reason: raising the client's value *clears the client's whole catalog copy*
+		/// and rebuilds it, while an open plan's table variable and plan node are not rebuilt with it, so a local proposal
+		/// on such a plan would be running against schema objects detached from the catalog they were compiled against.
+		/// </para>
+		/// <para>
+		/// Catalog.CacheTimeStamp rather than Catalog.ShouldCallProposablesTimeStamp, which is the key the server side uses
+		/// for this same summary: that one is deliberately coarse, bumped by DDLNode.InternalBeforeExecute for every
+		/// statement that changes the catalog - including the create and drop of the per-table copies an application
+		/// transaction makes, which is a form's own edit cycle. Server-side a recompute costs microseconds, so coarse is
+		/// affordable there; here the cost is a network round trip, and a client keyed on that counter would be sent remote
+		/// for almost every proposal almost immediately, which is this optimization gone. CacheTimeStamp is gated on
+		/// ServerProcess.ShouldAffectTimeStamp and therefore means "a change a client could care about".
+		/// </para>
+		/// <para>
+		/// The read is deliberately unsynchronized, where every write to that field is made under the client's exclusive
+		/// cache lock: taking even a shared lock here would be a lock per proposal taken to decide whether to take a lock,
+		/// and because the field only ever rises, a stale read can only read it low - which makes the test more permissive,
+		/// never less. So the worst it can do is answer one proposal the way it would have been answered before this test
+		/// existed; it can never report a current plan as behind, and so can never cost a round trip that is not needed.
+		/// </para>
+		/// </remarks>
+		private bool IsPlanSchemaCurrent
+		{
+			get
+			{
+				// NOTE: a form that prepares nothing at all between the catalog change and the user's edit still takes the
+				// local branch, and still reports the change only when the row is saved. The client's value is raised only
+				// when it fetches catalog from the server, and an idle form asks for none. Closing that needs either a round
+				// trip per proposal - the exact cost this permission exists to avoid - or the server telling the client
+				// unasked, for which this architecture has no channel: every client-cache mechanism in it is pull-based,
+				// carried on the response to a request the client made.
+				// Revisit if a per-proposal round trip ever becomes acceptable, or if a server-to-client notification channel
+				// is built for some other reason and this could ride on it.
+				return _plan.PreparedCacheTimeStamp >= _plan.LocalServer._serverCacheTimeStamp;
+			}
+		}
+		
 		// Copies the values from source row to the given target row, without using stream referencing
 		// ASourceRow and ATargetRow must be of equivalent row types.
 		protected void MarshalRow(IRow sourceRow, IRow targetRow)
@@ -930,7 +987,7 @@ namespace Alphora.Dataphor.DAE.Server
         /// <returns>A boolean value indicating whether any change was made to <paramref name="row"/>.</returns>
         public bool Default(IRow row, string columnName)
         {
-			if ((_internalProcess != null) && TableVar.IsDefaultCallRemotable(columnName))
+			if ((_internalProcess != null) && IsPlanSchemaCurrent && TableVar.IsDefaultCallRemotable(columnName))
 			{
 				// create a new row based on FInternalProcess, and copy the data from 
 				IRow localRow = row;
@@ -981,7 +1038,7 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			// if the table level change is remotable and the named column is remotable or no column is named and all columns are remotable
 				// the change can be evaluated locally, otherwise a remote call is required
-			if ((_internalProcess != null) && TableVar.IsChangeCallRemotable(columnName))
+			if ((_internalProcess != null) && IsPlanSchemaCurrent && TableVar.IsChangeCallRemotable(columnName))
 			{
 				IRow localOldRow = oldRow;
 				if (oldRow.HasNonNativeValues())
@@ -1041,7 +1098,7 @@ namespace Alphora.Dataphor.DAE.Server
         /// <returns>A boolean value indicating whether any change was made to <paramref name="newRow"/>.</returns>
         public bool Validate(IRow oldRow, IRow newRow, string columnName)
         {
-			if ((_internalProcess != null) && TableVar.IsValidateCallRemotable(columnName))
+			if ((_internalProcess != null) && IsPlanSchemaCurrent && TableVar.IsValidateCallRemotable(columnName))
 			{
 				IRow localOldRow = oldRow;
 				if ((oldRow != null) && oldRow.HasNonNativeValues())

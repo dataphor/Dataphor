@@ -50,6 +50,15 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Guid ID { get { return _descriptor.ID; } }
 		
+		/// <summary>The server's catalog cache timestamp as it stood when this plan was prepared.</summary>
+		/// <remarks>
+		/// Deliberately not LocalServer.CacheTimeStamp, which asks the server for its current value and so costs a round
+		/// trip: this is the generation of the catalog that this plan was compiled against, and what makes it useful is
+		/// that the client already knows the highest generation it has been told about, locally. LocalCursor's
+		/// IsPlanSchemaCurrent is the one caller and says what the comparison is for.
+		/// </remarks>
+		internal long PreparedCacheTimeStamp { get { return _descriptor.CacheTimeStamp; } }
+		
 		private CompilerMessages _messages;
 		public CompilerMessages Messages
 		{

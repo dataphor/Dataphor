@@ -65,6 +65,7 @@
     <Compile Include="ProtocolClient.cs" />
     <Compile Include="QuotaDeleteCostTest.cs" />
     <Compile Include="RemoteEventHandlerCacheTest.cs" />
+    <Compile Include="RemoteProposalStalenessTest.cs" />
     <Compile Include="RemoteValidateTest.cs" />
     <Compile Include="SamplesCorpusTest.cs" />
     <Compile Include="SchemaCacheInvalidationTest.cs" />
