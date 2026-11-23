@@ -13,7 +13,7 @@ Take *Proposed answer* items 1-3 as written: document the rule in `docs/architec
 - the client and CLI paths a tool would use (`DAE.Client` `DataSession`, NativeCLI, the script runner `D4Runner`), and session or process options that open a transaction implicitly (for example a session's default isolation or `UseImplicitTransactions`-style settings) - the guard must distinguish those from the implicit per-statement transaction;
 - the coverage scripts and tests that drop libraries.
 
-Record what each caller does in the ticket. If any shipped caller does open an explicit transaction around `DropLibrary`, stop and route back to `blocked/` with the finding rather than changing that caller or weakening the guard on your own.
+Record what each caller does in the ticket. **If any shipped caller does open an explicit transaction around `DropLibrary`, do not add the guard and do not route back to `blocked/`** (owner, 2026-11-23): do item 1 only - document the rule in `docs/architecture.md`, including that a rolled-back `DropLibrary` has already deleted the library folder and which callers run it inside an explicit transaction - and leave the code as it is. Do not change those callers either.
 
 **Blocked on a decision, not on work: what should the operators that create, delete and reconfigure a library do when they are called inside a transaction that then rolls back?** It unblocks as soon as that is answered; the work itself is small either way.
 
