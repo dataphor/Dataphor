@@ -1274,6 +1274,13 @@ namespace Alphora.Dataphor.DAE.Server
 			if (UseDTC)
 				throw new ServerException(ServerException.Codes.DTCNotSupported);
 
+			// A level begun on top of a half-committed one would be begun on every participant, so the participants the failed
+			// commit left shallow would stay one level behind the others at every depth above and a participant's level count
+			// would no longer say which of this process's levels it holds - which is what HoldsEndingLevel reads, and what the
+			// rollback of any of those levels then depends on. Beside the check above, before any transaction state changes.
+			if (InTransaction && _transactions.CurrentTransaction().CommitBegun)
+				throw new ServerException(ServerException.Codes.TransactionCanOnlyBeRolledBack);
+
 			ServerTransaction transaction = _transactions.BeginTransaction(this, isolationLevel);
 			List<RemoteSession> remoteSessionsBegun = new List<RemoteSession>();
 			int deviceSessionsBegun = 0;
@@ -1387,6 +1394,11 @@ namespace Alphora.Dataphor.DAE.Server
 		/// The remote sessions are named rather than counted, because the begin may have let a connection go, which takes it
 		/// out of RemoteSessions and shifts the index of every entry after it.
 		/// </remarks>
+		// Deliberately not HoldsEndingLevel, and not to be "helpfully" converted to it: this undoes a *partial* begin, where
+		// naming the participants that began the level is more precise than any level count - the ones after the failure never
+		// began it and must not be rolled back - and where the remote list the count would be read from may have changed under
+		// the begin anyway. HoldsEndingLevel belongs to InternalRollbackTransaction, which ends a level every participant was
+		// asked to begin.
 		private void RollbackBegunParticipants(List<RemoteSession> remoteSessionsBegun, int deviceSessionCount)
 		{
 			Schema.DeviceSession catalogDeviceSession = null;
@@ -1423,13 +1435,22 @@ namespace Alphora.Dataphor.DAE.Server
 			CheckInTransaction();
 
 			ServerTransaction transaction = _transactions.CurrentTransaction();
+
+			// Before the Prepared test, so that a retried commit is refused whether or not the prepare had completed. Committing
+			// a half-committed level again would commit the *outer* level on the participants the first commit had already
+			// brought down to it - a level the client never asked to commit and could no longer roll back.
+			if (transaction.CommitBegun)
+				throw new ServerException(ServerException.Codes.TransactionCanOnlyBeRolledBack);
+
 			if (!transaction.Prepared)
 			{
 				foreach (RemoteSession remoteSession in RemoteSessions)
 				{
 					// The invariant recorded on RemoteSession.TransactionCount, asserted where it is load-bearing: prepare is
-					// the first of the three ending operations to run and a commit reaches it, so this covers both. A count
-					// that disagreed would otherwise reach the far server as a "no transaction in progress" error from there.
+					// the first of the three ending operations to run and a commit reaches it, so this covers both. The one way
+					// a correct engine could reach it was a commit retried after a partial one, which the refusal above now
+					// rejects, so it is back to meaning what an assertion should mean: the engine has lost count. A count that
+					// disagreed would otherwise reach the far server as a "no transaction in progress" error from there.
 					Error.AssertFail
 					(
 						remoteSession.TransactionCount == _transactions.Count,
@@ -1475,6 +1496,12 @@ namespace Alphora.Dataphor.DAE.Server
 			// Prepare Commit Phase
 			InternalPrepareTransaction();
 
+			// From here on the participants are asked one at a time and no protocol can undo one that has said yes, so this level
+			// may end up half-committed; the record of that is what the refusals above read. Never cleared - the path that
+			// succeeds removes the transaction object - and set after the prepare, because a commit that fails in prepare has
+			// committed nothing. See ServerTransaction.CommitBegun.
+			_transactions.CurrentTransaction().CommitBegun = true;
+
 			// Commit
 			// NOTE: every remote session commits before any device session, and that order is load-bearing: it is what makes
 			// a commit on a connection whose server has gone fail (at the remote prepare above, in fact) before anything
@@ -1500,37 +1527,60 @@ namespace Alphora.Dataphor.DAE.Server
 			_transactions.EndTransaction(true);
 		}
 
-		/// <summary>Whether the connection to another server still holds the transaction level a rollback is now ending.</summary>
+		/// <summary>Whether a participant holding the given number of transaction levels still holds the level a rollback is now ending.</summary>
 		/// <remarks>
 		/// <para>
 		/// The same question <c>ServerCatalogDeviceSession.StoreHasEndingLevel</c> asks of the catalog store's connection, and
-		/// asked for the same reason. A commit that failed part-way left the connections it had already committed one level
+		/// asked for the same reason. A commit that failed part-way left the participants it had already committed one level
 		/// shallower than this process - <see cref="RemoteSession.CommitTransaction"/> counts the level down whatever the far
-		/// server did, deliberately; see its remarks - and on those the innermost open level is the *outer* transaction, one this
-		/// session has not finished with and may still commit. Ending that level discarded the outer transaction's work on the
-		/// other server, silently, while the local half of the same transaction stayed live and committable.
+		/// server did, deliberately (see its remarks), and <c>Schema.DeviceSession.CommitTransaction</c> removes the level as
+		/// soon as the device's own commit has returned - and on those the innermost open level is the *outer* transaction, one
+		/// this session has not finished with and may still commit. Ending that level discarded the outer transaction's work on
+		/// them, silently, while the local half of the same transaction stayed live and committable.
 		/// </para>
 		/// <para>
-		/// Equality rather than a lower bound because a connection can never be deeper than this process: the invariant recorded
-		/// on <see cref="RemoteSession.TransactionCount"/> and asserted in <see cref="InternalPrepareTransaction"/>. Skipping the
-		/// shallower connections restores that invariant rather than deferring it, since the rollback pops this process to the
-		/// depth those connections are already at.
+		/// Equality rather than a lower bound because a participant can never be deeper than this process: every level is begun
+		/// on every participant and only by this process - the three callers of <see cref="InternalBeginTransaction"/> and the
+		/// catch-up loops in <see cref="DeviceConnect"/> and RemoteConnect are all of them - and both kinds count the level down
+		/// in a finally on every path, failures included. Skipping the shallower participants restores that invariant rather than
+		/// deferring it, since the rollback pops this process to the depth they are already at. Asserted rather than assumed, as
+		/// <c>ServerCatalogDeviceSession.CheckStoreTransactionLevels</c> asserts it one layer down.
 		/// </para>
 		/// <para>
-		/// The device loop in <see cref="InternalRollbackTransaction"/> asks only whether the device session is in a transaction
-		/// at all, and so is wrong in this same way for a device session whose commit succeeded before a later participant's
-		/// failed; <c>bug-partial-commit-rolls-back-committed-participants</c> owns making one predicate answer this question for
-		/// every kind of participant.
+		/// One body, asked at every site that ends a level, so that a loop added later asks this question instead of re-deriving
+		/// it from a raw count: the device loops used to ask only whether the participant was in a transaction at all, which
+		/// after a partial commit is true of a committed participant for the level *outside* the one being ended.
 		/// </para>
 		/// <para>
-		/// NOTE: comparing a connection's level count against this process's depth is sound only while every connection is
-		/// enlisted at every level. If <c>debt-remote-session-lazy-enlistment</c> lands, a connection may hold fewer levels by
-		/// design, and this has to ask which transaction each of its levels was begun for instead.
+		/// NOTE: comparing a participant's level count against this process's depth is sound only while every participant is
+		/// enlisted at every level. If <c>debt-remote-session-lazy-enlistment</c> lands, a connection to another Dataphor server
+		/// may hold fewer levels by design, and this has to ask which transaction each of its levels was begun for instead.
 		/// </para>
 		/// </remarks>
+		private bool HoldsEndingLevel(int participantLevels, string participantKind, string participantName)
+		{
+			// The pieces of the message rather than the message: AssertFail formats only when the assertion fails, and this runs
+			// once per participant per level ended.
+			Error.AssertFail
+			(
+				participantLevels <= _transactions.Count,
+				"The {0} for \"{1}\" has {2} transaction level(s) open where this process has {3}.",
+				participantKind,
+				participantName,
+				participantLevels,
+				_transactions.Count
+			);
+			return participantLevels == _transactions.Count;
+		}
+
 		private bool HoldsEndingLevel(RemoteSession remoteSession)
 		{
-			return remoteSession.TransactionCount == _transactions.Count;
+			return HoldsEndingLevel(remoteSession.TransactionCount, "connection", remoteSession.ServerLink.Name);
+		}
+
+		private bool HoldsEndingLevel(Schema.DeviceSession deviceSession)
+		{
+			return HoldsEndingLevel(deviceSession.Transactions.Count, "device session", deviceSession.Device.Name);
 		}
 
 		protected internal void InternalRollbackTransaction()
@@ -1565,7 +1615,7 @@ namespace Alphora.Dataphor.DAE.Server
 							if (deviceSession is CatalogDeviceSession)
 								catalogDeviceSession = deviceSession;
 							else
-								if (deviceSession.InTransaction)
+								if (HoldsEndingLevel(deviceSession))
 									deviceSession.RollbackTransaction();
 						}
 						catch (Exception E)
@@ -1582,7 +1632,7 @@ namespace Alphora.Dataphor.DAE.Server
 						// but I don't have another option unless I start managing all transaction logging for
 						// all devices, so rolling it back last seems like the best option (even at that I have
 						// to ignore errors that occur during the rollback - see CatalogDeviceSession.InternalRollbackTransaction).
-						if ((catalogDeviceSession != null) && catalogDeviceSession.InTransaction)
+						if ((catalogDeviceSession != null) && HoldsEndingLevel(catalogDeviceSession))
 							catalogDeviceSession.RollbackTransaction();
 					}
 					catch (Exception E)

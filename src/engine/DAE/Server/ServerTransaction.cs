@@ -104,6 +104,32 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return _inRollback; }
 			set { _inRollback = value; }
 		}
+
+		/// <summary>Set when the commit of this level has started asking its participants to commit, and never cleared.</summary>
+		/// <remarks>
+		/// <para>
+		/// A level whose commit completes is removed from the stack, so a transaction object that still carries this is one whose
+		/// commit failed part-way: some participants have committed the level and some have not, and no protocol can undo the ones
+		/// that have. The level can then only be rolled back - see <c>ServerProcess.InternalPrepareTransaction</c>, which refuses a
+		/// retried commit, and <c>ServerProcess.InternalBeginTransaction</c>, which refuses a level on top of it.
+		/// </para>
+		/// <para>
+		/// Set after the prepare rather than before it: a commit that fails inside prepare - a deferred constraint violation, the
+		/// ordinary reason a commit fails - has committed nothing, and that transaction stays retryable.
+		/// </para>
+		/// <para>
+		/// NOTE: the level itself stays half-applied, and nothing here changes that - the participants that committed it have, and
+		/// the engine logs no two-phase recovery record to undo them with. What this records is that the damage stops at this
+		/// level: the rollback that follows ends it only on the participants that still hold it, so the outer transaction's work
+		/// survives. Making a distributed commit recoverable is a much larger piece of work than correcting that clean-up.
+		/// </para>
+		/// </remarks>
+		private bool _commitBegun;
+		public bool CommitBegun
+		{
+			get { return _commitBegun; }
+			set { _commitBegun = value; }
+		}
 		
 		private ServerTableVars _tableVars = new ServerTableVars();
 		public ServerTableVars TableVars { get { return _tableVars; } }

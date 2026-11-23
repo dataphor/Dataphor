@@ -337,6 +337,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 			/// <summary>Error code 106212: "A transaction operation failed on the connection to instance "{1}" on host "{2}" through server link "{0}"."</summary>
 			RemoteSessionTransactionFailed = 106212,
+
+			/// <summary>Error code 106213: "A previous commit of this transaction failed after part of it had already been committed; the transaction can now only be rolled back."</summary>
+			TransactionCanOnlyBeRolledBack = 106213,
 			
 		}
 		

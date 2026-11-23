@@ -443,4 +443,7 @@
   <data name="106212" xml:space="preserve">
     <value>A transaction operation failed on the connection to instance "{1}" on host "{2}" through server link "{0}".</value>
   </data>
+  <data name="106213" xml:space="preserve">
+    <value>A previous commit of this transaction failed after part of it had already been committed; the transaction can now only be rolled back.</value>
+  </data>
 </root>
