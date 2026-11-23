@@ -34,7 +34,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// itself out of its own copy of the table variable and no call is made. So each table tags its edited column
 	/// <c>DAE.IsValidateRemotable = "false"</c>, which is where <c>Compiler.CompileTableVarColumn</c> reads it - on a
 	/// constraint the same tag is metadata of the constraint and leaves the column's own flag alone, which is why the
-	/// constraint is added by a separate <c>alter</c>.
+	/// constraint is added by a separate <c>alter</c>. Each case asserts that flag rather than trusting it: a tag that
+	/// stopped applying would leave the cases passing while exercising nothing above the engine.
 	/// </para>
 	/// </remarks>
 	[TestFixture]
@@ -50,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			CreateConstrainedTable("SwapTbl");
 
-			AssertClientAgreesWithEngine("SwapTbl", 5, -1);
+			AssertClientAgreesWithEngine("SwapTbl", 5, -1, true);
 		}
 
 		/// <summary>
@@ -62,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			CreateConstrainedTable("NoSwapTbl");
 
-			AssertClientAgreesWithEngine("NoSwapTbl", -1, 5);
+			AssertClientAgreesWithEngine("NoSwapTbl", -1, 5, false);
 		}
 
 		/// <summary>
@@ -97,12 +98,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			ExecuteScript(String.Format("alter table {0} {{ alter column Amount {{ create constraint IsPositive value > 0 }} }};", name));
 		}
 
-		private void AssertClientAgreesWithEngine(string tableName, int oldAmount, int newAmount)
+		private void AssertClientAgreesWithEngine(string tableName, int oldAmount, int newAmount, bool refused)
 		{
 			ValidateOutcome throughClient = Validate(ClientProcess, tableName, oldAmount, newAmount, null, null);
 			ValidateOutcome throughEngine = Validate(EngineProcess, tableName, oldAmount, newAmount, null, null);
 
 			Assert.That(throughClient, Is.EqualTo(throughEngine), "The client stack and the engine must give the same answer.");
+			// Named as well as compared: agreement alone would be satisfied by both paths being broken the same way, and
+			// the refusal arm below is reached through a catch that any exception at all satisfies.
+			Assert.That
+			(
+				throughClient.Refused,
+				Is.EqualTo(refused),
+				String.Format("An edit of Amount from {0} to {1} must be {2}.", oldAmount, newAmount, refused ? "refused" : "accepted")
+			);
+			if (!refused)
+				Assert.That(throughClient.Amount, Is.EqualTo(newAmount), "An accepted row must still hold the value the user typed.");
 		}
 
 		/// <summary>
@@ -121,6 +132,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			IServerCursor cursor = process.OpenCursor(String.Format("select {0} capabilities {{ updateable }}", tableName), null);
 			try
 			{
+				// Asked of both plans, because the client's copy of the flag is built from the engine's when the plan is
+				// prepared: were validating Amount remotable, the client would answer the call out of that copy and no
+				// case here would reach the server at all.
+				Assert.That(cursor.Plan.TableVar.IsValidateCallRemotable("Amount"), Is.False, "Validating Amount must not be remotable, or the client answers the call itself.");
+
 				IRow oldRow = cursor.Plan.RequestRow();
 				try
 				{
