@@ -1836,6 +1836,11 @@ namespace Alphora.Dataphor.DAE.Schema
         
         public object Execute(Program program, PlanNode planNode)
         {
+			// Before anything else, and outside the try: the refusal is a decision about the process's transaction, not a failure
+			// of this device, so it must not pass through WrapException, which would read it as a connection or transaction
+			// failure and set StopError. The same reason the CheckCapability calls below sit where they do.
+			ServerProcess.CheckNotHalfCommitted();
+
 			var dropTableNode = planNode as DropTableNode;
 			if (dropTableNode != null)
 				RemoveTransactionReferences(dropTableNode.Table);
@@ -1857,6 +1862,10 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Row level operations are provided as implementation details only, not exposed through the Dataphor language.
+        // All three ask ServerProcess.CheckNotHalfCommitted as Execute does, and all four are needed: Execute carries the plan
+        // nodes a device supports (a SQL device's statements, and every read), while these three carry what BaseTableVarNode's
+        // insert, update and delete do on a device that supports row-level operations - the path an in-memory device's insert
+        // takes, and so the one a torn statement is most likely to reach.
         protected virtual void InternalInsertRow(Program program, TableVar table, IRow row, BitArray valueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelInsert, Device.Name);
@@ -1864,6 +1873,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
         public void InsertRow(Program program, TableVar table, IRow row, BitArray valueFlags)
         {
+			ServerProcess.CheckNotHalfCommitted();
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
 			CheckCapability(DeviceCapability.RowLevelInsert);
@@ -1888,6 +1898,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
         public void UpdateRow(Program program, TableVar table, IRow oldRow, IRow newRow, BitArray valueFlags)
         {
+			ServerProcess.CheckNotHalfCommitted();
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
 			CheckCapability(DeviceCapability.RowLevelUpdate);
@@ -1912,6 +1923,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
         public void DeleteRow(Program program, TableVar table, IRow row)
         {
+			ServerProcess.CheckNotHalfCommitted();
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
 			CheckCapability(DeviceCapability.RowLevelDelete);

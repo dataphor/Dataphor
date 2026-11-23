@@ -617,8 +617,17 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,AlphoraDataphorServer";
 		
+		/// <summary>This process's connection to another Dataphor server through the given link, opened and caught up to the process's transaction depth on first use.</summary>
+		/// <remarks>
+		/// The funnel for every use of a link - <c>Program.RemoteConnect</c> for the three runtime sites (<c>ExecuteOn</c>,
+		/// <c>EvaluateOn</c> and <c>select … on &lt;link&gt;</c>) and <c>Plan.RemoteConnect</c> for the compile-time one that
+		/// describes a remote table - which is why the refusal of work on a half-committed level is asked here. Refusing the
+		/// compile-time path too is harmless: it only happens as part of a statement that would be refused anyway.
+		/// </remarks>
 		internal RemoteSession RemoteConnect(Schema.ServerLink serverLink)
 		{
+			CheckNotHalfCommitted();
+
 			int index = RemoteSessions.IndexOf(serverLink);
 			if (index < 0)
 			{
@@ -1166,7 +1175,47 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!InTransaction)
 				throw new ServerException(ServerException.Codes.NoTransactionActive);
 		}
-        
+
+		/// <summary>Refuses work on a transaction level whose commit has already failed part-way: such a level can only be rolled back.</summary>
+		/// <remarks>
+		/// <para>
+		/// Asked at the seams where work reaches a participant - <c>Schema.DeviceSession</c>'s <c>Execute</c>, <c>InsertRow</c>,
+		/// <c>UpdateRow</c> and <c>DeleteRow</c>, <c>ServerCatalogDeviceSession.AcquireCatalogStoreConnection</c> for a write, and
+		/// <see cref="RemoteConnect"/> - rather than at the statement boundary. A statement is the wrong place for two measured
+		/// reasons: <c>RollbackTransaction()</c> is itself an ordinary D4 operator invocation, so a blanket refusal there would
+		/// refuse the one call that gets the session out (including the <c>while TransactionCount() &gt; 0 do
+		/// RollbackTransaction();</c> idiom, whose plan root is a <c>while</c> and so cannot be recognised and exempted); and a
+		/// script that swallows the failed commit in its own error handler has no statement boundary between that failure and the
+		/// work after it.
+		/// </para>
+		/// <para>
+		/// The third refusal reading <see cref="ServerTransaction.CommitBegun"/>, beside <see cref="InternalBeginTransaction"/>,
+		/// which refuses a level on top of a half-committed one, and <see cref="InternalPrepareTransaction"/>, which refuses a
+		/// retried commit of one. Because a nested begin is refused, the half-committed level is always the innermost one, so the
+		/// current transaction is the one to ask about; once it has been rolled back the enclosing level is clean and work is
+		/// allowed again.
+		/// </para>
+		/// <para>
+		/// The rollback exemption is load-bearing rather than defensive: the catalog device's rollback writes the catalog store
+		/// while the half-committed transaction is still the current one. <see cref="InternalRollbackTransaction"/> and
+		/// <c>RollbackBegunParticipants</c> set <see cref="ServerTransaction.InRollback"/> for exactly those spans. The commit
+		/// needs no such exemption, because <see cref="InternalCommitTransaction"/> records the half-commit only once it has
+		/// failed - see the note there.
+		/// </para>
+		/// <para>
+		/// Reads are refused along with writes, deliberately. A read of a half-committed level is consistent (measured: both
+		/// devices answered the same count), so this is a choice about predictability - one rule covering everything that reaches
+		/// a participant is simpler to hold than one that turns on a plan node being read-only, and the session's only useful next
+		/// move is a rollback either way. The cost, recorded in docs/migration-notes.md, is that a client whose error handler reads
+		/// something in order to log it must roll back first.
+		/// </para>
+		/// </remarks>
+		public void CheckNotHalfCommitted()
+		{
+			if (InTransaction && CurrentTransaction.CommitBegun && !CurrentTransaction.InRollback)
+				throw new ServerException(ServerException.Codes.TransactionCanOnlyBeRolledBack);
+		}
+
 		// UseDTC
 		public bool UseDTC
 		{
@@ -1496,35 +1545,51 @@ namespace Alphora.Dataphor.DAE.Server
 			// Prepare Commit Phase
 			InternalPrepareTransaction();
 
-			// From here on the participants are asked one at a time and no protocol can undo one that has said yes, so this level
-			// may end up half-committed; the record of that is what the refusals above read. Never cleared - the path that
-			// succeeds removes the transaction object - and set after the prepare, because a commit that fails in prepare has
-			// committed nothing. See ServerTransaction.CommitBegun.
-			_transactions.CurrentTransaction().CommitBegun = true;
-
-			// Commit
-			// NOTE: every remote session commits before any device session, and that order is load-bearing: it is what makes
-			// a commit on a connection whose server has gone fail (at the remote prepare above, in fact) before anything
-			// local has committed. Do not reorder these two loops.
-			foreach (RemoteSession remoteSession in RemoteSessions)
-				remoteSession.CommitTransaction();
-
-			Schema.DeviceSession catalogDeviceSession = null;
-			foreach (Schema.DeviceSession deviceSession in DeviceSessions)
+			// Held in a local because the clean-up below removes the transaction object from the stack, and because the record
+			// must land on this level whatever happens: a clean-up that throws after the level is gone must not mark the
+			// enclosing one, which the commit did reach the end of.
+			ServerTransaction transaction = _transactions.CurrentTransaction();
+			try
 			{
-				if (deviceSession is CatalogDeviceSession)
-					catalogDeviceSession = deviceSession;
-				else
-					deviceSession.CommitTransaction();
+				// Commit
+				// NOTE: every remote session commits before any device session, and that order is load-bearing: it is what makes
+				// a commit on a connection whose server has gone fail (at the remote prepare above, in fact) before anything
+				// local has committed. Do not reorder these two loops.
+				foreach (RemoteSession remoteSession in RemoteSessions)
+					remoteSession.CommitTransaction();
+
+				Schema.DeviceSession catalogDeviceSession = null;
+				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
+				{
+					if (deviceSession is CatalogDeviceSession)
+						catalogDeviceSession = deviceSession;
+					else
+						deviceSession.CommitTransaction();
+				}
+
+				// Commit the catalog device session last. The catalog device session tracks devices
+				// dropped during the session, and will defer the stop of those devices until after the
+				// transaction has committed, allowing any active transactions in that device to commit.
+				if (catalogDeviceSession != null)
+					catalogDeviceSession.CommitTransaction();
+
+				_transactions.EndTransaction(true);
 			}
-			
-			// Commit the catalog device session last. The catalog device session tracks devices
-			// dropped during the session, and will defer the stop of those devices until after the
-			// transaction has committed, allowing any active transactions in that device to commit.
-			if (catalogDeviceSession != null)
-				catalogDeviceSession.CommitTransaction();
-				
-			_transactions.EndTransaction(true);
+			catch
+			{
+				// The participants were asked one at a time and no protocol can undo one that has said yes, so this level may now
+				// be half-committed; this is the record of that, and it is what the three refusals read. Never cleared - the path
+				// that succeeds removes the transaction object - and after the prepare, because a commit that fails in prepare has
+				// committed nothing and stays retryable.
+				//
+				// In the catch rather than before the loops, so that the commit's own work on the participants is not refused by
+				// CheckNotHalfCommitted: EndTransaction(true) deletes the deferred constraint checks this level logged, which is a
+				// cursor and a delete on a device, and a deferred device stop can write the catalog store. Nothing can observe the
+				// record any earlier - the refusals that read it are reached only from outside a commit - so this costs nothing and
+				// saves the commit an exemption of its own, which the rollback needs (see ServerTransaction.InRollback).
+				transaction.CommitBegun = true;
+				throw;
+			}
 		}
 
 		/// <summary>Whether a participant holding the given number of transaction levels still holds the level a rollback is now ending.</summary>
@@ -1554,7 +1619,10 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <para>
 		/// NOTE: comparing a participant's level count against this process's depth is sound only while every participant is
 		/// enlisted at every level. If <c>debt-remote-session-lazy-enlistment</c> lands, a connection to another Dataphor server
-		/// may hold fewer levels by design, and this has to ask which transaction each of its levels was begun for instead.
+		/// may hold fewer levels by design, and this has to ask which transaction each of its levels was begun for instead. The
+		/// same landing changes what <see cref="CheckNotHalfCommitted"/> means on the remote arm: a connection enlisted lazily is
+		/// not a participant in the half-committed level until a statement uses it, so the question there becomes whether this
+		/// use would enlist it in that level rather than whether the level is half-committed at all.
 		/// </para>
 		/// </remarks>
 		private bool HoldsEndingLevel(int participantLevels, string participantKind, string participantName)

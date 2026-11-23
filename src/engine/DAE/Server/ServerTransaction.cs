@@ -47,6 +47,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		// NOTE: this transaction is still the current one while it disposes - ValidatingBaseList.RemoveAt disposes the item before
+		// it decrements the count - and by then CommitBegun may be set with InRollback back to false, so anything added here that
+		// reached a participant would be refused by ServerProcess.CheckNotHalfCommitted. Nothing on this path does today:
+		// UnprepareDeferredHandlers only deallocates native rows, and ServerTransactions.UnprepareDeferredConstraintChecks, which
+		// does touch a device, is reached only from ServerProcess.Dispose, after every transaction has been rolled back.
 		protected override void Dispose(bool disposing)
 		{
 			try
@@ -105,30 +110,33 @@ namespace Alphora.Dataphor.DAE.Server
 			set { _inRollback = value; }
 		}
 
-		/// <summary>Set when the commit of this level has started asking its participants to commit, and never cleared.</summary>
+		/// <summary>Set when the commit of this level has failed after it had started asking its participants to commit, and never cleared.</summary>
 		/// <remarks>
 		/// <para>
-		/// A level whose commit completes is removed from the stack, so a transaction object that still carries this is one whose
-		/// commit failed part-way: some participants have committed the level and some have not, and no protocol can undo the ones
-		/// that have. The level can then only be rolled back - see <c>ServerProcess.InternalPrepareTransaction</c>, which refuses a
-		/// retried commit, and <c>ServerProcess.InternalBeginTransaction</c>, which refuses a level on top of it.
+		/// A level whose commit completes is removed from the stack, so a transaction object that carries this is one whose commit
+		/// failed part-way: some participants may have committed the level and some not, and no protocol can undo the ones that
+		/// have. The level can then only be rolled back, which three refusals enforce: <c>ServerProcess.InternalPrepareTransaction</c>
+		/// refuses a retried commit, <c>ServerProcess.InternalBeginTransaction</c> refuses a level on top of it, and
+		/// <c>ServerProcess.CheckNotHalfCommitted</c> refuses work on it at every seam where work reaches a participant.
 		/// </para>
 		/// <para>
 		/// Set after the prepare rather than before it: a commit that fails inside prepare - a deferred constraint violation, the
-		/// ordinary reason a commit fails - has committed nothing, and that transaction stays retryable.
+		/// ordinary reason a commit fails - has committed nothing, and that transaction stays retryable. Set in the commit's catch
+		/// rather than before its participant loops, so that the commit's own work on the participants is not refused; the whole
+		/// of the reasoning is at <c>ServerProcess.InternalCommitTransaction</c>.
+		/// </para>
+		/// <para>
+		/// Also set by <see cref="InvokeDeferredHandlers"/> on the *enclosing* level when the nested transaction it runs the
+		/// deferred handlers in is the one whose commit failed part-way. The handlers' work is then committed on the participants
+		/// that said yes and nothing takes an applied handler out of the list, so a retried commit of the enclosing level would run
+		/// every handler a second time.
 		/// </para>
 		/// <para>
 		/// NOTE: the level itself stays half-applied, and nothing here changes that - the participants that committed it have, and
 		/// the engine logs no two-phase recovery record to undo them with. What this records is that the damage stops at this
-		/// level: the rollback that follows ends it only on the participants that still hold it, so the outer transaction's work
-		/// survives. Making a distributed commit recoverable is a much larger piece of work than correcting that clean-up.
-		/// </para>
-		/// <para>
-		/// What it does not yet stop is new work *inside* that level. A statement run between the failed commit and the rollback
-		/// is allowed - it begins no level, so neither refusal above sees it - and its work lands at the level each participant
-		/// now holds innermost, which is this level on the ones that have not committed and the enclosing one on the ones that
-		/// have; the rollback then undoes it on the first and keeps it on the second. That is
-		/// <c>bug-work-after-a-half-committed-level-is-torn</c>, which proposes refusing new work on such a level.
+		/// level: no further work is admitted, and the rollback that follows ends it only on the participants that still hold it, so
+		/// the outer transaction's work survives. Making a distributed commit recoverable is a much larger piece of work than
+		/// correcting that clean-up.
 		/// </para>
 		/// </remarks>
 		private bool _commitBegun;
@@ -141,11 +149,18 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerTableVars _tableVars = new ServerTableVars();
 		public ServerTableVars TableVars { get { return _tableVars; } }
 
+		/// <summary>Runs the handlers this transaction deferred to commit time, in a nested transaction of its own.</summary>
+		/// <remarks>
+		/// Called from the prepare phase of this level's commit, so a failure here fails that commit before any participant has
+		/// been asked to commit this level - which is why the ordinary failure (a handler that raises) leaves this level
+		/// retryable. The exception is a nested commit that itself failed part-way; see the catch.
+		/// </remarks>
 		public void InvokeDeferredHandlers(Program program)
 		{
 			if (_handlers.Count > 0)
 			{
 				// Outside the try: a failed begin leaves no level behind, so the catch's rollback would end the enclosing transaction
+				int enclosingDepth = program.ServerProcess.TransactionCount;
 				program.ServerProcess.InternalBeginTransaction(IsolationLevel.Isolated);
 				try
 				{
@@ -155,8 +170,16 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				catch (Exception exception)
 				{
-					if (program.ServerProcess.InTransaction)
+					// The level this begin added, and only that one: the depth rather than InTransaction, so that a commit which
+					// threw after it had already ended the level does not get the enclosing transaction rolled back in its place.
+					if (program.ServerProcess.TransactionCount > enclosingDepth)
 					{
+						// Read before the rollback, which ends the nested level and with it the only record of its state. A nested
+						// commit that failed part-way has committed the handlers' work on the participants that said yes, and nothing
+						// takes an applied handler out of _handlers, so a retried commit of this level would run every handler a
+						// second time - measured as a duplicate-key error from inside the handler, and as a silently doubled effect
+						// for a handler that appends to a log or adds to a running total.
+						bool nestedCommitBegun = program.ServerProcess.CurrentTransaction.CommitBegun;
 						try
 						{
 							program.ServerProcess.InternalRollbackTransaction();
@@ -164,6 +187,14 @@ namespace Alphora.Dataphor.DAE.Server
 						catch (Exception rollbackException)
 						{
 							throw new ServerException(ServerException.Codes.RollbackError, exception, rollbackException.ToString());
+						}
+						finally
+						{
+							// After the rollback, which has ended the nested level however it went, so this level is the current one
+							// again and the refusals that read the record are asking about it. Nothing in this transaction can be
+							// committed safely any more, so the session must roll it back.
+							if (nestedCommitBegun)
+								CommitBegun = true;
 						}
 					}
 					throw exception;

@@ -94,6 +94,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// </remarks>
 		protected void AcquireCatalogStoreConnection(bool isUpdatable)
 		{
+			// Every write to the catalog store funnels through here, which is how the refusal of work on a half-committed
+			// transaction level reaches DDL: no statement that changes the catalog passes through Schema.DeviceSession's four
+			// work methods. Before the acquire count goes up, so that a refused write releases nothing it never took.
+			if (isUpdatable)
+				ServerProcess.CheckNotHalfCommitted();
+
 			_acquireCount++;
 			try
 			{
