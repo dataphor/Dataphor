@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Device.Memory;
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
-	/// What the fixtures over class definitions need to see, and no assertions of its own. Some D4 objects are backed by a
+	/// What the fixtures over class definitions need to see, and no test cases of its own. Some D4 objects are backed by a
 	/// .NET class, and the attributes of their class definition are applied to the live object as properties; so a test over
 	/// one has to read both the running object's property and the class definition the catalog holds, which it reads back as
 	/// the create statement the catalog emits.
