@@ -876,6 +876,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((tableVar != null) && (!program.ServerProcess.InLoadingContext()))
 				program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, tableVar);
 			program.CatalogDeviceSession.CreateEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex, _beforeOperatorNames);
+
+			// The engine executing an already-compiled plan needs no eviction: firing a handler reads the live handler list of
+			// the table variable, column or type as the modification runs. A client outside the server is the reason for this
+			// bump. A prepared plan hands the client a description of the result - among it, for each column, whether the
+			// client may answer a Change, Default or Validate proposal out of its own copy or has to call the server
+			// (ServerProcess.CopyDataType emits those as DAE.Is*Remotable tags) - and attaching a handler flips that answer,
+			// because an event handler is never remotable (Schema.EventHandler.DetermineRemotable) and so is never part of
+			// what a client is sent. That description is built when the plan is compiled and cached with it, so without this a
+			// client re-preparing the same statement text is handed the description built before the attach, answers the
+			// proposal itself out of a copy that has no handler, and the handler never runs for that user.
+			// Gated, and read here rather than captured while compiling, exactly as DropEventHandlerNode's bump below: the
+			// server attaches handlers of its own to the copy an application transaction makes of each table it joins, and does
+			// it inside a time-stamp-safe context for this reason (ApplicationTransactionDevice.AddTableVar); loading a stored
+			// handler from the catalog is inside one too (ServerCatalogDeviceSession.LoadPersistentObject). A form edit cycle
+			// is made of application transactions, so an ungated bump would flush every session's cached plans on every edit.
+			// CacheTimeStamp is the second half, and the two answer different questions. The plan cache covers a client that
+			// prepares again; a form holds its plan open for as long as the user keeps the form open, and nothing re-sends
+			// that plan its description. What the client has for free is this counter: it keeps the highest value it has been
+			// told of, each plan carries the value the counter had when it was prepared, so a plan whose value is behind was
+			// prepared before a change the client has since heard about. Moving it here is what lets a client tell that about
+			// an attach - this counter is the one that already means "a change a client could care about", and the proposal
+			// calls are taught to consult it by bug-remote-form-is-never-told-about-a-type-change, which this is a prerequisite
+			// of. DerivationTimeStamp deliberately stays put: a handler changes no part of a form the Frontend derives.
+			if (program.ServerProcess.ShouldAffectTimeStamp)
+			{
+				program.Catalog.UpdatePlanCacheTimeStamp();
+				program.Catalog.UpdateCacheTimeStamp();
+				program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: attach handler {1} to {2}", program.Catalog.CacheTimeStamp.ToString(), _eventHandler.Name, _eventSource.Name));
+			}
 			return null;
 		}
     }
@@ -925,6 +954,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(program.ServerProcess, tableVar);
 			program.CatalogDeviceSession.AlterEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex, _beforeOperatorNames);
 			program.CatalogDeviceSession.UpdateCatalogObject(_eventHandler);
+
+			// As in CreateEventHandlerNode. This statement only reorders the handlers of one event, which changes nothing a
+			// client is told directly - but reordering recomputes the table variable remotable and proposal characteristics
+			// (CatalogDeviceSession.MoveEventHandler calls DetermineRemotable), and those are exactly what a cached plan
+			// description carries to a client. Bumping here also keeps the three statements that change a handler list from
+			// having a gap between them, which is what this defect was.
+			if (program.ServerProcess.ShouldAffectTimeStamp)
+			{
+				program.Catalog.UpdatePlanCacheTimeStamp();
+				program.Catalog.UpdateCacheTimeStamp();
+				program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: alter handler {1} on {2}", program.Catalog.CacheTimeStamp.ToString(), _eventHandler.Name, _eventSource.Name));
+			}
 			return null;
 		}
     }
@@ -971,8 +1012,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			program.CatalogDeviceSession.DropEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex);
 
-			// As in DropDeviceNode: a cached create handler plan holds the Schema.EventHandler the compiler built, so without
-			// this the next run of that text re-attaches the handler just dropped. Firing itself needs no bump: a modification
+			// Two reasons, and the first was the only one recorded here before. As in DropDeviceNode: a cached create handler
+			// plan holds the Schema.EventHandler the compiler built, so without this the next run of that text re-attaches the
+			// handler just dropped. And as in CreateEventHandlerNode: a cached plan description tells a client whether it may
+			// answer a proposal out of its own copy, detaching flips that answer back, and a client re-preparing the same text
+			// would otherwise go on calling the server for a handler that is gone. Firing itself needs no bump: a modification
 			// reads the live handler list of the table variable, column or type as it runs.
 			// Gated, as the neighbouring drop nodes gate their bumps: this node is also how the server drops the handlers it
 			// generates on its own copies of a table - at the end of every application transaction and at the disconnect of
@@ -980,8 +1024,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// (ServerSession.DropSessionObjects). Flushing every session's cached plans that often would cost far more than the
 			// re-registration it prevents. Read here rather than captured while compiling, as the siblings do, because what
 			// matters is whether this execution is one of the server's own; every internal caller holds the context across both.
+			// CacheTimeStamp for the third reason CreateEventHandlerNode gives: it is how a client tells that a plan it still
+			// holds open was prepared before this statement.
 			if (program.ServerProcess.ShouldAffectTimeStamp)
+			{
 				program.Catalog.UpdatePlanCacheTimeStamp();
+				program.Catalog.UpdateCacheTimeStamp();
+				program.ServerProcess.ServerSession.Server.LogMessage(String.Format("Catalog CacheTimeStamp updated to {0}: detach handler {1} from {2}", program.Catalog.CacheTimeStamp.ToString(), _eventHandler.Name, _eventSource.Name));
+			}
 			return null;
 		}
     }
