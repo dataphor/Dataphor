@@ -58,6 +58,7 @@ namespace Alphora.Dataphor.DAE.Service
 		private DataphorService _service;
 		private NativeServer _nativeServer;
 		private NativeCLIService _nativeService;
+		private NativeSessionManager _nativeSessionManager;
 		private IHost _host;
 		private ListenerServiceHost _listenerServiceHost;
 
@@ -154,6 +155,36 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 
+		private int _nativeSessionIdleTimeInSeconds = NativeSessionManager.IdleTimeInSeconds;
+		/// <summary>How long a native CLI session may go uncalled before this server stops it; applied to the watcher built when the server starts.</summary>
+		/// <remarks>
+		/// <para>
+		/// Five minutes by default, which is what the product serves
+		/// (<see cref="NativeSessionManager.IdleTimeInSeconds"/>), and a host-object property for the same reason
+		/// <see cref="ConnectionIdleTimeInSeconds"/> is: a <see cref="ServerConfiguration"/> is a compatibility surface
+		/// read from and written to an operator's instance list, and this is a knob a host application sets for itself,
+		/// not a setting an instance carries. The note on <see cref="ConnectionManager.IdleTimeInSeconds"/> records what
+		/// it would take to make either of the two thresholds an instance setting and what would have to be true first.
+		/// </para>
+		/// <para>
+		/// The floor is the keep-alive interval of the clients that will connect - two minutes for the shipped client
+		/// library (<c>NativeCLISession.DefaultKeepAliveInterval</c>) - and it has to be exceeded by enough to survive a
+		/// ping that is late or lost, or a live client's session is reclaimed between two of its pings. Below one second
+		/// the server does not start: the value is passed through unchecked to the
+		/// <see cref="NativeSessionManager"/> constructor, which refuses it. What this exists for is a test that cannot
+		/// wait five minutes to watch a reclamation happen.
+		/// </para>
+		/// </remarks>
+		public int NativeSessionIdleTimeInSeconds
+		{
+			get { return _nativeSessionIdleTimeInSeconds; }
+			set
+			{
+				CheckInactive();
+				_nativeSessionIdleTimeInSeconds = value;
+			}
+		}
+
 		/// <summary>Hosts the instance named by <see cref="InstanceName"/> in this machine's instance list.</summary>
 		/// <remarks>Adds a default configuration to the list and saves it when the list has no such instance, as it always has.</remarks>
 		public void Start()
@@ -197,6 +228,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 						_server.LogMessage("Creating Native CLI Service...");
 						_nativeService = new NativeCLIService(_nativeServer);
+						_nativeSessionManager = new NativeSessionManager(_nativeServer, _nativeSessionIdleTimeInSeconds);
 
 						_server.LogMessage("Configuring Service Host...");
 						_host = BuildHost(instance);
@@ -370,6 +402,14 @@ namespace Alphora.Dataphor.DAE.Service
 			{
 				_service.Dispose();
 				_service = null;
+			}
+
+			// Before the RemoteServer and the engine below, which is what makes the bounded join in its Dispose
+			// sufficient and keeps a sweep from running while the engine is being torn down.
+			if (_nativeSessionManager != null)
+			{
+				_nativeSessionManager.Dispose();
+				_nativeSessionManager = null;
 			}
 
 			_nativeService = null;

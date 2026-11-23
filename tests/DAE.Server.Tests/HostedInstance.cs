@@ -27,6 +27,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	{
 		/// <param name="listenerPortNumber">0 to reserve a free port; otherwise the port the listener must use, so that a test can hold it first.</param>
 		public HostedInstance(string instanceName, bool shouldListen, int listenerPortNumber)
+			: this(instanceName, shouldListen, listenerPortNumber, NativeSessionManager.IdleTimeInSeconds)
+		{
+		}
+
+		/// <param name="listenerPortNumber">0 to reserve a free port; otherwise the port the listener must use, so that a test can hold it first.</param>
+		/// <param name="nativeSessionIdleTimeInSeconds">The threshold the hosted server reclaims uncalled native CLI sessions at; the product's five minutes unless a case cannot wait that long.</param>
+		public HostedInstance(string instanceName, bool shouldListen, int listenerPortNumber, int nativeSessionIdleTimeInSeconds)
 		{
 			_instanceName = instanceName;
 			_directory = TestEnvironment.NewDirectory(instanceName);
@@ -48,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				// library directory, which the server requires.
 				TestEnvironment.CopyLibraries(Path.Combine(_directory, TestServerInstance.LibrariesFolderName), new string[0]);
 
-				_host = NewHost();
+				_host = NewHost(nativeSessionIdleTimeInSeconds);
 				_host.Start(Configuration(instanceName, _directory, _portNumber, shouldListen, _listenerPortNumber));
 			}
 			catch
@@ -129,6 +136,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			DataphorServiceHost host = new DataphorServiceHost();
 			host.HostName = LoopbackAddress;
 			host.LoggingEnabled = TestEnvironment.LoggingEnabled;
+			return host;
+		}
+
+		/// <summary>A host as <see cref="NewHost()"/> builds it, reclaiming native CLI sessions uncalled for <paramref name="nativeSessionIdleTimeInSeconds"/>.</summary>
+		/// <remarks>
+		/// Set here rather than by the caller because the property, like the other two above, refuses to change once the
+		/// host is active, and <see cref="HostedInstance"/>'s constructor starts it.
+		/// </remarks>
+		internal static DataphorServiceHost NewHost(int nativeSessionIdleTimeInSeconds)
+		{
+			DataphorServiceHost host = NewHost();
+			host.NativeSessionIdleTimeInSeconds = nativeSessionIdleTimeInSeconds;
 			return host;
 		}
 

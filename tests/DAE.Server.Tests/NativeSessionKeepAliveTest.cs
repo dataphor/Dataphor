@@ -22,9 +22,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </summary>
 	/// <remarks>
 	/// A hosted server on loopback, because the ping belongs to the client library and reaches the server over the wire;
-	/// this interface has no in-process half to measure it at instead. Nothing reclaims a native session yet: that is
-	/// bug-native-cli-sessions-never-reclaimed's subject, and the watcher it adds will read the same clock this case
-	/// reads.
+	/// this interface has no in-process half to measure it at instead. The first case measures the clock; the two below it
+	/// measure what the clock is for, against a server whose idle watcher is running at a threshold a case can wait for -
+	/// a session the client pings survives it, and the same session without the ping does not. What that watcher does to
+	/// an abandoned transaction, and what it leaves alone, is NativeSessionCleanupTest's, in process.
 	/// </remarks>
 	[TestFixture]
 	// Not [Parallelizable]: this fixture hosts a server of its own, and two servers in one process share the engine's
@@ -45,6 +46,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>How long a wait on the clock gives up after: many intervals, and still seconds rather than minutes.</summary>
 		private static readonly TimeSpan ClockWait = TimeSpan.FromSeconds(30);
 
+		/// <summary>The idle threshold the hosted server runs at in the two reclamation cases; the shipped default is five minutes.</summary>
+		/// <remarks>
+		/// Three seconds, so that the one-second keep-alive below has to miss three pings running before a live session is
+		/// reclaimed - a margin a loaded machine can be trusted with, where a one-second threshold could not be.
+		/// </remarks>
+		private const int IdleThresholdSeconds = 3;
+
+		/// <summary>The keep-alive interval the two reclamation cases run the client at, when they run it with one at all.</summary>
+		private const int FastKeepAliveIntervalSeconds = 1;
+
+		/// <summary>How long those cases leave the session alone before calling it: several thresholds, so a sweep that was going to happen has.</summary>
+		/// <remarks>
+		/// Waited out rather than polled, which is the one thing this pair cannot do: every call a case could poll with
+		/// would itself stamp the session's clock and keep the session alive.
+		/// </remarks>
+		private static readonly TimeSpan IdleTime = TimeSpan.FromSeconds(IdleThresholdSeconds * 3);
+
 		/// <summary>
 		/// A session the client holds and never calls is kept young anyway. That is what lets a server link hold a session
 		/// on another Dataphor server through hours of a user session's idle time without it looking abandoned.
@@ -54,27 +72,85 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			using (HostedInstance instance = new HostedInstance(nameof(NativeSessionKeepAliveTest), false, 0))
 			{
-				using
-				(
-					new NativeCLISession
-					(
-						HostedInstance.LoopbackAddress,
-						instance.InstanceName,
-						instance.PortNumber,
-						ConnectionSecurityMode.Default,
-						0,
-						ConnectionSecurityMode.Default,
-						new NativeSessionInfo(),
-						KeepAliveIntervalSeconds
-					)
-				)
+				using (NewSession(instance, KeepAliveIntervalSeconds))
 				{
 					// The case makes no call of its own on the session, so nothing but the keep-alive can move the clock -
-					// and the clock is read where the idle watcher to come will read it, on the server, through the host.
+					// and the clock is read where the idle watcher reads it, on the server, through the host.
 					WaitForTheClock(instance, idleSeconds => idleSeconds >= AgedSeconds, String.Format("the session's clock to age to {0} s", AgedSeconds));
 					WaitForTheClock(instance, idleSeconds => idleSeconds < AgedSeconds, "a ping to move the session's clock back");
 				}
 			}
+		}
+
+		/// <summary>
+		/// A session the client holds and pings, against a server that is reclaiming uncalled sessions, is still there
+		/// after several thresholds have passed with no call from the test at all. This is the case that says a server
+		/// link survives an idle user session, and the compatibility claim the whole design rests on.
+		/// </summary>
+		[Test]
+		public void ASessionTheClientKeepsAliveIsNotReclaimed()
+		{
+			using (HostedInstance instance = new HostedInstance(nameof(ASessionTheClientKeepsAliveIsNotReclaimed), false, 0, IdleThresholdSeconds))
+			{
+				using (NativeCLISession session = NewSession(instance, FastKeepAliveIntervalSeconds))
+				{
+					Thread.Sleep(IdleTime);
+
+					// The first call the case makes since the session was started. Nothing but the keep-alive can have kept
+					// the session alive across the wait above.
+					Assert.DoesNotThrow(() => session.GetTransactionCount(), String.Format("A session the client pinged every {0} s was reclaimed by a server at a {1} s idle threshold.", FastKeepAliveIntervalSeconds, IdleThresholdSeconds));
+				}
+			}
+		}
+
+		/// <summary>
+		/// The same session with the keep-alive turned off is reclaimed. Its only job is to keep the case above from
+		/// passing for the wrong reason - a watcher that was not running, or a threshold the wait never reached.
+		/// </summary>
+		[Test]
+		public void ASessionWithNoKeepAliveIsReclaimed()
+		{
+			using (HostedInstance instance = new HostedInstance(nameof(ASessionWithNoKeepAliveIsReclaimed), false, 0, IdleThresholdSeconds))
+			{
+				NativeCLISession session = NewSession(instance, 0);
+				try
+				{
+					Thread.Sleep(IdleTime);
+
+					Exception onAReclaimedSession = Assert.Catch(() => session.GetTransactionCount(), String.Format("A session with no keep-alive was still there {0:0} s after it was started, at a {1} s idle threshold.", IdleTime.TotalSeconds, IdleThresholdSeconds));
+					TestContext.Progress.WriteLine("A call on the reclaimed session raised {0}: {1}", onAReclaimedSession.GetType().Name, onAReclaimedSession.Message);
+				}
+				finally
+				{
+					try
+					{
+						session.Dispose();
+					}
+					catch
+					{
+						// Not a using, because Dispose ends the session on the far server and propagates the failure when it
+						// cannot - which is this case's whole point. The local half is released either way (see
+						// NativeCLISession.Dispose), so there is nothing left to do about it here.
+					}
+				}
+			}
+		}
+
+		/// <summary>A native client session on the given hosted instance, pinging every <paramref name="keepAliveIntervalSeconds"/> seconds; 0 for no keep-alive.</summary>
+		private static NativeCLISession NewSession(HostedInstance instance, int keepAliveIntervalSeconds)
+		{
+			return
+				new NativeCLISession
+				(
+					HostedInstance.LoopbackAddress,
+					instance.InstanceName,
+					instance.PortNumber,
+					ConnectionSecurityMode.Default,
+					0,
+					ConnectionSecurityMode.Default,
+					new NativeSessionInfo(),
+					keepAliveIntervalSeconds
+				);
 		}
 
 		/// <summary>Polls the server's clock for this case's one session until <paramref name="condition"/> holds of it, and fails if it never does.</summary>

@@ -40,6 +40,9 @@ namespace Alphora.Dataphor.DAE.Service
 		// test - is served by the second constructor instead. Revisit if a deployment reports schema changes blocked for
 		// minutes by vanished clients: the step then is an additive [DefaultValue] property on ServerConfiguration with a
 		// validated floor above the client's keep-alive interval, plus the user-guide section and a migration note.
+		// The native CLI's idle threshold is the same number in a constant of its own, NativeSessionManager.IdleTimeInSeconds,
+		// whose note points here: the two are separate because their floors are set by different clients' keep-alive
+		// intervals, but a decision to make either an operator setting is this one decision and covers both.
 		/// <summary>The default idle threshold: a connection nothing has pinged for this long is relinquished.</summary>
 		public const int IdleTimeInSeconds = 300; // 5 minutes
 

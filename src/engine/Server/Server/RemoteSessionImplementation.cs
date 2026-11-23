@@ -84,12 +84,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// A remote session is let go by a process tearing itself down and by a server link being dropped or altered.
 		/// Neither may fail because the other server is unreachable: the local half is released either way (see
 		/// NativeCLISession.Dispose), and the far session then stays on that server until that server reclaims it, which
-		/// there is nothing the caller can do about from here. What reclaims it, as of this version: nothing - the native
-		/// interface's sessions are watched by no one, so a session this process could not end stays on the far server for
-		/// as long as that server runs, and bug-native-cli-sessions-never-reclaimed is what adds the watcher that will end
-		/// it. The keep-alive NativeCLISession sends until this disposal is what keeps a session this process is still
-		/// holding out of that watcher's way. Reported as a warning in the server log, the way
-		/// ReportUnhonouredSecuritySettings reports.
+		/// there is nothing the caller can do about from here. What reclaims it, on a 4.0 server: that server's native
+		/// session watcher (Alphora.Dataphor.DAE.Service.NativeSessionManager), which stops a session nothing has called
+		/// for its idle threshold - five minutes by default - and rolls back its transaction; on a 3.1 server, nothing, so
+		/// a session this process could not end stays there for as long as that server runs. The keep-alive
+		/// NativeCLISession sends until this disposal is what keeps a session this process is still holding out of that
+		/// watcher's way. Reported as a warning in the server log, the way ReportUnhonouredSecuritySettings reports.
 		/// </remarks>
 		protected override void Dispose(bool disposing)
 		{

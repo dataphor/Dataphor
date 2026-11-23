@@ -99,6 +99,7 @@
     <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Service\ConnectionManager.cs" />
     <Compile Include="Service\DataphorService.cs" />
+    <Compile Include="Service\NativeSessionManager.cs" />
     <Compile Include="Service\HandleManager.cs" />
     <Compile Include="Streams\FileStreamProvider.cs" />
   </ItemGroup>
