@@ -9,7 +9,8 @@ on:
     # NOTE: if branch protection ever requires this check, a pull request that touches only these paths
     # waits for a check that never runs; add a no-op job for those paths or drop the filter then.
     # NOTE: a docs job (the link checker of docs-link-check-ci) must not be added to this workflow:
-    # this filter would skip it for exactly the changes it checks. Give it its own workflow.
+    # this filter would skip it for exactly the changes it checks. The docs workflow already exists -
+    # .github/workflows/docs.yml, which gates the architecture page size - so add docs checks there.
     paths-ignore:
       - 'tickets/**'
       - 'docs/**'

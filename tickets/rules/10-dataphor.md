@@ -14,6 +14,8 @@ Never run `dotnet test Dataphor.slnx` as one command: on a slow machine it takes
 
 **Migration notes.** A change that an application, a deployment script or a custom C# extension could notice — including a public type or member that extensions use — adds an entry to `docs/migration-notes.md` in the same commit.
 
+**Architecture documentation.** A ticket that adds architecture text names the page under `docs/architecture/` that owns the subject and puts the text there, never in the short root `docs/architecture.md`. Every page in that set is capped at 1,500 words: run `python tools/docs-size-check/check_size.py` after editing one, and split a page that outgrows the cap rather than raising it.
+
 **Bugs met along the way.** A defect with a local, obvious fix (a race, an off-by-one, a wrong API call) is fixed in the ticket that meets it, with its reproduction test, and listed in the handoff. A defect whose fix changes a design or a compatibility surface becomes its own ticket.
 
 **Source hygiene.** Source files here mostly use tabs and CRLF line endings; some `.cs` and `.d4l` files have a UTF-8 byte-order mark and others do not. Preserve each file's indentation, line endings and byte-order-mark state in files you edit, and never reformat or re-encode a file you are not otherwise changing. Moving a file and editing it are separate commits. On .NET 10 several removed APIs compile and then throw at run time: never suppress `WFDEV006` or `SYSLIB` warnings to get a build green.

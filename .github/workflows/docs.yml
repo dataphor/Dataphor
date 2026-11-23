@@ -1,0 +1,49 @@
+# Gates the documentation under docs/. Today that is one check: no architecture page may grow past the
+# word limit in tools/docs-size-check/check_size.py, so that the architecture documentation stays a short
+# root page plus one page per subsystem (the rule is in AGENTS.md, under "Rules that are easy to break").
+# This is where the link checker's step belongs too, when docs-link-check-ci adds it: a separate workflow
+# from build.yml because that one ignores docs/** on purpose, so a docs job in it would be skipped for
+# exactly the changes it checks.
+name: Docs
+
+on:
+  push:
+    branches: [master, modernization]
+    # The tool's own path is here so that a change to the checker runs its tests.
+    paths:
+      - 'docs/**'
+      - 'tools/docs-size-check/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [master, modernization]
+    paths:
+      - 'docs/**'
+      - 'tools/docs-size-check/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+# The repository is public: pull requests from forks run with this read-only token and no secrets.
+# Never switch to pull_request_target.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    name: Docs checks
+    # The checks are standard-library Python 3, so the runner's own python3 serves and no setup step is
+    # needed. Not Windows: nothing here is platform-specific. `python3` is what the Ubuntu image
+    # guarantees; the READMEs say `python`, which is what a Windows developer runs.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Architecture page size
+        run: python3 tools/docs-size-check/check_size.py
+
+      - name: Architecture page size checker tests
+        run: python3 -m unittest discover -s tools/docs-size-check
