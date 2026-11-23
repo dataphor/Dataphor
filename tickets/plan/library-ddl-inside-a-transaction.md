@@ -2,6 +2,19 @@ description: Creating or deleting one of the units a Dataphor application is shi
 architecture: docs/modernization-plan.md#ws2-engine-and-server-port
 files: src/engine/Server/Runtime.Instructions/LibraryNodes.cs, src/engine/Server/Schema/LibraryUtility.cs, src/engine/DAE/Schema/Library.cs
 ----
+## Owner decision (2026-11-23): accept the proposed answer, with one condition
+
+Take *Proposed answer* items 1-3 as written: document the rule in `docs/architecture.md`, make `DropLibrary` refuse inside an explicit transaction (new error code, `docs/migration-notes.md` entry), leave `CreateLibrary`, `SetLibraryDescriptor` and `SetDefaultDeviceName` alone.
+
+**Condition: before adding the refusal, verify that no caller that ships runs `DropLibrary` inside an explicit transaction**, or the guard breaks the feature. Check every path that drops a library, not only D4 scripts:
+
+- the IDE (`src/windows/Dataphoria`): its library tree's delete/drop action and anything it does around executing a script (does it begin a transaction, or run with a session option that wraps statements in one?);
+- the Frontend server side and any shipped form or D4 document that calls `DropLibrary` (`libraries/`, `samples/`);
+- the client and CLI paths a tool would use (`DAE.Client` `DataSession`, NativeCLI, the script runner `D4Runner`), and session or process options that open a transaction implicitly (for example a session's default isolation or `UseImplicitTransactions`-style settings) - the guard must distinguish those from the implicit per-statement transaction;
+- the coverage scripts and tests that drop libraries.
+
+Record what each caller does in the ticket. If any shipped caller does open an explicit transaction around `DropLibrary`, stop and route back to `blocked/` with the finding rather than changing that caller or weakening the guard on your own.
+
 **Blocked on a decision, not on work: what should the operators that create, delete and reconfigure a library do when they are called inside a transaction that then rolls back?** It unblocks as soon as that is answered; the work itself is small either way.
 
 ## What is going on
