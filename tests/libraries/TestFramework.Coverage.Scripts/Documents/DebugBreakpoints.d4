@@ -127,9 +127,10 @@ begin
 		// Returns at once, the pause having already happened; it is the blocking form and has no timeout of its own.
 		Debug.WaitForPause();
 
-		// The call stack of the paused program: the operator frame, then the program that called it.
-		if Count(Debug.GetCallStack(LProcessID)) < 2 then
-			raise Error('The paused process reports ' + (Count(Debug.GetCallStack(LProcessID))).ToString() + ' call stack frame(s), fewer than the 2 expected');
+		// The call stack of the paused program: exactly two frames - the operator's window and the base window of the
+		// program the async script runs, GetCallStack skipping the process's own program at index 0.
+		if Count(Debug.GetCallStack(LProcessID)) <> 2 then
+			raise Error('The paused process reports ' + (Count(Debug.GetCallStack(LProcessID))).ToString() + ' call stack frame(s), not the 2 expected');
 		if (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator <> LLocator then
 			raise Error('The innermost frame reports the locator ' + (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator + ', not ' + LLocator);
 		var LFrameLine := (Debug.GetCallStack(LProcessID) where Index = 0)[].Line;
@@ -140,8 +141,9 @@ begin
 		if IndexOf((Debug.GetCallStack(LProcessID) where Index = 1)[].Location, 'program:') <> 0 then
 			raise Error('The calling frame reports the location ' + (Debug.GetCallStack(LProcessID) where Index = 1)[].Location + ', which is not a program locator');
 
-		// GetSource answers for both locator kinds the call stack hands it, and both need the process paused: the
-		// operator locator re-emits the operator's declaration, the program locator returns the text the process runs.
+		// GetSource answers for both locator kinds the call stack hands it: the operator locator by re-emitting the
+		// operator's declaration out of the catalog, which needs no debugger at all, and the program locator by
+		// returning the text the process runs, which it can only find while the debugger is paused.
 		var LOperatorSource := Debug.GetSource((Debug.GetCallStack(LProcessID) where Index = 0)[].Location);
 		if IndexOf(LOperatorSource, 'LTripled') < 0 then
 			raise Error('Debug.GetSource of the operator locator did not return the operator declaration: ' + LOperatorSource);
@@ -185,9 +187,12 @@ begin
 			raise Error('Clearing the second breakpoint reported it as set');
 		if Count(Debug.GetBreakpoints()) <> 0 then
 			raise Error('Debug.GetBreakpoints still reports ' + (Count(Debug.GetBreakpoints())).ToString() + ' breakpoint(s) after both were cleared');
+		// NOTE: nothing is asserted after this Run, and nothing can be. GetProcesses reports IsPaused as the process
+		// running and the debugger's own IsPaused, which Run has just cleared, so the row reads not-paused whether the
+		// process resumed or not; and every other reader of a paused program (GetCallStack, GetStack, GetSource of a
+		// program locator) refuses once the debugger is running. The pause at the second breakpoint above, with the
+		// arithmetic of the two statements between the two lines, is this script's evidence that Run resumes.
 		Debug.Run();
-		if exists (Debug.GetProcesses() where Process_ID = LProcessID and IsPaused) then
-			raise Error('The process still reports itself paused after Debug.Run');
 	finally
 		// ExecuteAsync does not stop a process it was given, so the script owns it. Stopping it detaches it from the
 		// debugger, which DebugLibrary asserts.
@@ -196,8 +201,11 @@ begin
 end;
 
 // A cleared breakpoint stops nothing. ExecuteWithTimeout rather than ExecuteAsync, because it reports whether the
-// script finished inside its timeout: with no breakpoint set it must, and a process that paused instead would not.
-// A process of its own, so that the case inherits nothing from the one above.
+// script was still running when its timeout expired: a process held at a breakpoint would be, and with no breakpoint
+// set this one must not be. A process of its own, so that the case inherits nothing from the one above.
+// NOTE: still running is all it reports. An error raised by the script is swallowed on the worker thread
+// (AsyncExecution, SystemNodes.cs) and counts as finished, so this case would pass just as well if the call had
+// failed outright instead of pausing; the case above is what establishes that this call runs at all.
 begin
 	if Count(Debug.GetBreakpoints()) <> 0 then
 		raise Error('A breakpoint outlived the case that set it');
