@@ -1178,7 +1178,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						ConstraintDefinition newConstraintDefinition = new ConstraintDefinition();
 						newConstraintDefinition.ConstraintName = alterConstraintDefinition.ConstraintName;
-						newConstraintDefinition.MetaData = oldConstraint.MetaData.Copy();
+						// A constraint written without tags has no MetaData at all, so the copy is guarded here as it is at
+						// the sibling site, AlterColumnConstraints: unguarded, this threw NullReferenceException for every
+						// alter of a constraint that carried no tags, which is how they are usually written.
+						newConstraintDefinition.MetaData = oldConstraint.MetaData == null ? null : oldConstraint.MetaData.Copy();
 						newConstraintDefinition.Expression = alterConstraintDefinition.Expression;
 						Schema.TableVarConstraint newConstraint = Compiler.CompileTableVarConstraint(plan, tableVar, newConstraintDefinition);
 							
@@ -1206,7 +1209,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						TransitionConstraintDefinition newConstraintDefinition = new TransitionConstraintDefinition();
 
 						newConstraintDefinition.ConstraintName = alterConstraintDefinition.ConstraintName;
-						newConstraintDefinition.MetaData = oldConstraint.MetaData.Copy();
+						newConstraintDefinition.MetaData = oldConstraint.MetaData == null ? null : oldConstraint.MetaData.Copy();
 
 						if (alterConstraintDefinition.OnInsert is AlterTransitionConstraintDefinitionCreateItem)
 						{
@@ -1299,6 +1302,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// columns, hence once after the loop and only when the statement created something.
 			// NOTE: this is one more per-statement recompute of a summary that bug-rolled-back-type-constraint-stops-
 			// the-column-check proposes to retire outright; if that lands, this goes with the rest of them.
+			// NOTE: on a view this raises a flag the undo cannot lower again - Schema.DerivedTableVar.DetermineRemotable
+			// recomputes without resetting, as CatalogDeviceSession.RedetermineRemotable's own remarks explain - so a
+			// rolled-back "alter view V { create constraint ... }" leaves ShouldValidate raised where before this call it
+			// stayed lowered. A raised flag costs a call that finds nothing to do, which that same note calls not a defect,
+			// and the alternative is to leave a view with the lowered flag this fixes for a table. It is why the matrix in
+			// CatalogRollbackSnapshotTest has no "alter view { create constraint }" case, and one more piece of evidence
+			// for retiring the mechanism rather than extending it.
 			if (createConstraints.Count > 0)
 				tableVar.DetermineRemotable(program.CatalogDeviceSession);
 		}

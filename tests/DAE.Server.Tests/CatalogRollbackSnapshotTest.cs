@@ -19,8 +19,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <summary>
 	/// One general check of a whole family of defects: a rolled-back catalog change has to leave the running server's
 	/// in-memory catalog exactly as it was, not only the saved copy in the catalog store. Each case snapshots the live
-	/// catalog, runs one catalog-changing statement inside a transaction, rolls the transaction back, snapshots again
-	/// and requires the two to be equal.
+	/// catalog, runs one catalog-changing statement inside a transaction, requires that snapshot to have moved - a case
+	/// whose statement the snapshot cannot see would pass whatever the rollback did - then rolls the transaction back,
+	/// snapshots a third time and requires that one to equal the first.
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -41,20 +42,32 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// DDL should be transactional at all is a decision, filed as <c>blocked/library-ddl-inside-a-transaction</c>.
 	/// </item>
 	/// <item>
-	/// The cached user objects (<c>CatalogDevice.UsersCache</c>) and the cached answers to rights checks are not
-	/// reachable from this assembly, and this fixture deliberately does not widen access to reach them. Every user
-	/// change already records an undo instruction, and the rights-cache questions were settled by
+	/// Anything fifteen of the cases change. Users, rights, the assignments between them and roles, a right's owner and
+	/// an operator's body are each outside every dimension the snapshot has: users and rights are rows in the catalog
+	/// store with a cache in front of them rather than objects in <c>Catalog</c>, the cache is not reachable from this
+	/// assembly and this fixture deliberately does not widen access to reach it, and an operator's emitted statement
+	/// carries its signature and not its body. Those cases run their statement and check that the rollback leaves the
+	/// rest of the catalog alone; they say nothing about the state the statement itself touched. They are declared
+	/// through <c>CaseTheSnapshotCannotSee</c>, so the list is the exact one, and
+	/// <c>debt-snapshot-cannot-see-users-rights-and-operator-bodies</c> is the work that would shorten it. Every one of
+	/// these statements does record an undo instruction, and the rights-cache questions were settled by
 	/// <c>bug-right-cache-stale-across-transactions</c> and <c>bug-right-cache-shared-during-open-transaction</c>.
 	/// </item>
 	/// <item>
-	/// A child object's own derived state. Columns, keys and representations are compared only through their parent's
-	/// emitted statement and the parent's own scalar properties, so a column's <c>ShouldDefault</c> flag, for instance,
-	/// is not compared on its own.
+	/// A child object's own derived state. A table's constraints over the row and a type's constraints and default have
+	/// a dimension of their own, because the parent's statement does not carry them; columns, keys and representations
+	/// are compared only through that statement and through the parent's own scalar properties, so a column's
+	/// <c>ShouldDefault</c> flag, for instance, is not compared on its own.
 	/// </item>
 	/// <item>
 	/// The caches <c>InvalidateCachesAfterUndo</c> clears wholesale and the catalog store's own rows:
 	/// <c>CatalogStoreTest.NestedRollbackUndoesStatementWrites</c> already compares every row of every store table
 	/// around a rolled-back create and drop.
+	/// </item>
+	/// <item>
+	/// A rolled-back <c>alter view V { create constraint ... }</c>, the one statement whose rollback is known not to put
+	/// the catalog back as it was. It is left out of the matrix rather than asserted; the reason is in
+	/// <see cref="Cases"/>'s remarks.
 	/// </item>
 	/// <item>
 	/// The forward direction: these cases only ask what a rollback leaves. The one exception is
@@ -74,11 +87,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Differences reported before the message is cut short; a failure names the object and the property that differed.</summary>
 		private const int MaxReportedDifferences = 25;
 
-		/// <summary>Characters of an entry's value shown in the difference report. An emitted create statement can run to thousands.</summary>
+		/// <summary>
+		/// Characters of an entry's value shown in the difference report. A whole emitted create statement, flattened onto
+		/// one line, can run to thousands, which is why entries that appear or disappear are cut here. A <em>changed</em>
+		/// entry is reported line by line instead, and that is what makes a difference readable: measured over the 1,254
+		/// objects that emit on a bare server, the longest single line of any emitted statement is 268 characters, so no
+		/// differing line reaches this limit and none is cut short.
+		/// </summary>
 		private const int MaxReportedValueLength = 400;
 
 		[TestCaseSource(nameof(Cases))]
-		public void RolledBackStatementLeavesTheCatalogAsItWas(string setup, string statement)
+		public void RolledBackStatementLeavesTheCatalogAsItWas(string setup, string statement, bool isVisible)
 		{
 			if (!String.IsNullOrEmpty(setup))
 				ExecuteScript(setup);
@@ -91,6 +110,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			try
 			{
 				ExecuteScript(statement);
+
+				// The same trap one step further in: a statement that executes but changes nothing the snapshot can see
+				// also compares two identical snapshots afterwards, and then passes whatever the rollback did. Each case
+				// declares whether it is visible, and a visible one is held to it here - so a statement that quietly
+				// stops changing the catalog fails rather than going green. The cases that are genuinely outside the
+				// snapshot are declared through CaseTheSnapshotCannotSee and say why.
+				if (isVisible)
+					AssertDifferent(before, Snapshot(), statement);
 			}
 			finally
 			{
@@ -188,12 +215,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// drops them afterwards - a teardown that dropped them would itself change the catalog.
 		/// </summary>
 		/// <remarks>
-		/// Three statements are deliberately absent, so that they are not retried blind. <c>alter table T { create column
+		/// Four statements are deliberately absent, so that they are not retried blind. <c>alter table T { create column
 		/// ... }</c> and <c>{ drop column ... }</c> are refused for a table in a memory device ("Columns in a memory
 		/// device cannot be created in this release"), so they need a device that supports them. A device scalar type map
 		/// (<c>alter device D { create type Integer }</c>) is refused for the same reason - "Unable to determine a default
 		/// scalar type map for scalar type System.Integer" - because a memory device maps no types; it needs a SQL device,
 		/// and so a database server. The library operators are absent for the reason in the fixture's remarks.
+		/// </para>
+		/// <para>
+		/// The fourth, <c>alter view V { create constraint ... }</c>, is absent because the rollback genuinely does not put
+		/// the view back as it was and is not meant to: the statement raises the view's derived validate summary, and a
+		/// view's recompute raises flags without resetting them (<c>Schema.DerivedTableVar.DetermineRemotable</c>), so the
+		/// undo cannot lower it again. A flag left raised costs a call that finds nothing to do, which
+		/// <c>CatalogDeviceSession.RedetermineRemotable</c>'s own remarks call not a defect; the alternative would be to
+		/// leave a view with the lowered flag that <c>AlterTableVarNode.CreateConstraints</c> fixes for a table. Both sites
+		/// carry a <c>NOTE:</c> saying so. The equivalent statement on a table, <c>AlterTableConstraint</c>, is in the
+		/// matrix.
 		/// </remarks>
 		private static IEnumerable<TestCaseData> Cases()
 		{
@@ -212,24 +249,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("DropKey",
 				"create table DropKeySnap { ID : Integer, Name : String, key { ID }, key { Name } };",
 				"alter table DropKeySnap { drop key { Name } };");
+			yield return Case("AlterKey",
+				"create table AlterKeySnap { ID : Integer, key { ID } };",
+				"alter table AlterKeySnap { alter key { ID } alter tags { create Frontend.Title = \"Changed\" } };");
 			yield return Case("CreateOrder",
 				"create table CreateOrderSnap { ID : Integer, Name : String, key { ID } };",
 				"alter table CreateOrderSnap { create order { Name } };");
 			yield return Case("DropOrder",
 				"create table DropOrderSnap { ID : Integer, Name : String, key { ID }, order { Name } };",
 				"alter table DropOrderSnap { drop order { Name } };");
+			yield return Case("AlterOrder",
+				"create table AlterOrderSnap { ID : Integer, Name : String, key { ID }, order { Name } };",
+				"alter table AlterOrderSnap { alter order { Name } alter tags { create Frontend.Title = \"Changed\" } };");
 			yield return Case("CreateTableConstraint",
 				"create table TableConstraintSnap { ID : Integer, key { ID } };",
 				"alter table TableConstraintSnap { create constraint TableConstraintSnapCheck not exists (TableConstraintSnap where ID < 0) };");
 			yield return Case("DropTableConstraint",
 				"create table DropTableConstraintSnap { ID : Integer, key { ID } }; alter table DropTableConstraintSnap { create constraint DropTableConstraintSnapCheck not exists (DropTableConstraintSnap where ID < 0) };",
 				"alter table DropTableConstraintSnap { drop constraint DropTableConstraintSnapCheck };");
+			yield return Case("AlterTableConstraint",
+				"create table AlterTableConstraintSnap { ID : Integer, key { ID } }; alter table AlterTableConstraintSnap { create constraint AlterTableConstraintSnapCheck not exists (AlterTableConstraintSnap where ID < 0) };",
+				"alter table AlterTableConstraintSnap { alter constraint AlterTableConstraintSnapCheck not exists (AlterTableConstraintSnap where ID < -1) };");
 			yield return Case("CreateTransitionConstraint",
 				"create table TransitionConstraintSnap { ID : Integer, key { ID } };",
 				"alter table TransitionConstraintSnap { create transition constraint TransitionConstraintSnapCheck on insert new.ID >= 0 };");
 			yield return Case("DropTransitionConstraint",
 				"create table DropTransitionConstraintSnap { ID : Integer, key { ID } }; alter table DropTransitionConstraintSnap { create transition constraint DropTransitionConstraintSnapCheck on insert new.ID >= 0 };",
 				"alter table DropTransitionConstraintSnap { drop transition constraint DropTransitionConstraintSnapCheck };");
+			yield return Case("AlterTransitionConstraint",
+				"create table AlterTransitionConstraintSnap { ID : Integer, key { ID } }; alter table AlterTransitionConstraintSnap { create transition constraint AlterTransitionConstraintSnapCheck on insert new.ID >= 0 };",
+				"alter table AlterTransitionConstraintSnap { alter transition constraint AlterTransitionConstraintSnapCheck alter on insert new.ID >= 1 };");
 			yield return Case("AlterTableTag",
 				"create table TableTagSnap { ID : Integer, key { ID } }; alter table TableTagSnap alter tags { create Frontend.Title = \"Before\" };",
 				"alter table TableTagSnap alter tags { alter Frontend.Title = \"After\" };");
@@ -251,6 +300,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("DropView",
 				"create table DropViewSourceSnap { ID : Integer, key { ID } }; create view DropViewSnap DropViewSourceSnap;",
 				"drop view DropViewSnap;");
+			yield return Case("AlterViewTag",
+				"create table ViewTagSourceSnap { ID : Integer, key { ID } }; create view ViewTagSnap ViewTagSourceSnap;",
+				"alter view ViewTagSnap alter tags { create Frontend.Title = \"Changed\" };");
 
 			// Types
 			yield return Case("CreateType", null,
@@ -293,17 +345,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("CreateRepresentation",
 				"create type RepresentationSnap { representation RepresentationSnap { Value : Integer } };",
 				"alter type RepresentationSnap { create representation Doubled { Doubled : Integer read value.Value * 2 write RepresentationSnap(Doubled div 2) } selector RepresentationSnap(Doubled div 2) };");
+			yield return Case("DropRepresentation",
+				"create type DropRepresentationSnap { representation DropRepresentationSnap { Value : Integer }, representation Doubled { Doubled : Integer read value.Value * 2 write DropRepresentationSnap(Doubled div 2) } selector DropRepresentationSnap(Doubled div 2) };",
+				"alter type DropRepresentationSnap { drop representation Doubled };");
 			yield return Case("CreateConversion",
 				"create type ConversionSnap { representation ConversionSnap { Value : Integer } };",
 				"create conversion Integer to ConversionSnap using ConversionSnap;");
 			yield return Case("DropConversion",
 				"create type DropConversionSnap { representation DropConversionSnap { Value : Integer } }; create conversion Integer to DropConversionSnap using DropConversionSnap;",
 				"drop conversion Integer to DropConversionSnap;");
+			yield return Case("AttachOperatorToType",
+				"create type TypeHandlerSnap like String; create operator TypeHandlerSnap_Validate(var AValue : TypeHandlerSnap) : Boolean begin result := false; end;",
+				"attach operator TypeHandlerSnap_Validate to TypeHandlerSnap on { validate };");
+			yield return Case("DetachOperatorFromType",
+				"create type TypeDetachSnap like String; create operator TypeDetachSnap_Validate(var AValue : TypeDetachSnap) : Boolean begin result := false; end; attach operator TypeDetachSnap_Validate to TypeDetachSnap on { validate };",
+				"detach operator TypeDetachSnap_Validate from TypeDetachSnap on { validate };");
 
 			// Operators
 			yield return Case("CreateOperator", null,
 				"create operator CreateOperatorSnap() : Integer begin result := 1; end;");
-			yield return Case("AlterOperator",
+			// An operator's emitted statement carries its signature, not its body, and no property of the operator object
+			// reflects the body either, so a replaced body is outside the snapshot.
+			yield return CaseTheSnapshotCannotSee("AlterOperator",
 				"create operator AlterOperatorSnap() : Integer begin result := 1; end;",
 				"alter operator AlterOperatorSnap() begin result := 2; end;");
 			yield return Case("DropOperator",
@@ -311,6 +374,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				"drop operator DropOperatorSnap();");
 			yield return Case("CreateAggregateOperator", null,
 				"create aggregate operator CreateAggregateSnap(V : Integer) : Integer initialization begin end aggregation begin end finalization begin end;");
+			yield return Case("DropAggregateOperator",
+				"create aggregate operator DropAggregateSnap(V : Integer) : Integer initialization begin end aggregation begin end finalization begin end;",
+				"drop operator DropAggregateSnap(Integer);");
+			yield return Case("AlterOperatorTag",
+				"create operator OperatorTagSnap() : Integer begin result := 1; end;",
+				"alter operator OperatorTagSnap() alter tags { create Frontend.Title = \"Changed\" };");
 
 			// References and catalog constraints
 			yield return Case("CreateReference",
@@ -319,12 +388,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("DropReference",
 				"create table DropReferenceTargetSnap { ID : Integer, key { ID } }; create table DropReferenceSourceSnap { ID : Integer, Target_ID : Integer, key { ID } }; create reference DropReferenceSnap DropReferenceSourceSnap { Target_ID } references DropReferenceTargetSnap { ID };",
 				"drop reference DropReferenceSnap;");
+			yield return Case("AlterReference",
+				"create table AlterReferenceTargetSnap { ID : Integer, key { ID } }; create table AlterReferenceSourceSnap { ID : Integer, Target_ID : Integer, key { ID } }; create reference AlterReferenceSnap AlterReferenceSourceSnap { Target_ID } references AlterReferenceTargetSnap { ID };",
+				"alter reference AlterReferenceSnap alter tags { create Frontend.Title = \"Changed\" };");
 			yield return Case("CreateCatalogConstraint",
 				"create table CatalogConstraintSourceSnap { ID : Integer, key { ID } };",
 				"create constraint CreateCatalogConstraintSnap not exists (CatalogConstraintSourceSnap where ID < 0);");
 			yield return Case("DropCatalogConstraint",
 				"create table DropCatalogConstraintSourceSnap { ID : Integer, key { ID } }; create constraint DropCatalogConstraintSnap not exists (DropCatalogConstraintSourceSnap where ID < 0);",
 				"drop constraint DropCatalogConstraintSnap;");
+			yield return Case("AlterCatalogConstraint",
+				"create table AlterCatalogConstraintSourceSnap { ID : Integer, key { ID } }; create constraint AlterCatalogConstraintSnap not exists (AlterCatalogConstraintSourceSnap where ID < 0);",
+				"alter constraint AlterCatalogConstraintSnap not exists (AlterCatalogConstraintSourceSnap where ID < -1);");
 
 			// Devices
 			yield return Case("CreateDevice", null,
@@ -354,6 +429,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("CreateServerLinkUser",
 				"create server ServerLinkUserSnap tags { HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" };",
 				"CreateServerLinkUser('Admin', Name('ServerLinkUserSnap'), 'Remote', 'secret');");
+			yield return Case("DropServerLinkUser",
+				"create server DropServerLinkUserSnap tags { HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" }; CreateServerLinkUser('Admin', Name('DropServerLinkUserSnap'), 'Remote', 'secret');",
+				"DropServerLinkUser('Admin', Name('DropServerLinkUserSnap'));");
+			yield return Case("SetServerLinkUserID",
+				"create server SetServerLinkUserIDSnap tags { HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" }; CreateServerLinkUser('Admin', Name('SetServerLinkUserIDSnap'), 'Remote', 'secret');",
+				"SetServerLinkUserID('Admin', Name('SetServerLinkUserIDSnap'), 'Changed');");
+			yield return Case("SetServerLinkUserPassword",
+				"create server SetServerLinkUserPasswordSnap tags { HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" }; CreateServerLinkUser('Admin', Name('SetServerLinkUserPasswordSnap'), 'Remote', 'secret');",
+				"SetServerLinkUserPassword('Admin', Name('SetServerLinkUserPasswordSnap'), 'changed');");
 
 			// Event handlers
 			yield return Case("AttachOperatorToTable",
@@ -369,38 +453,57 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				"create table DetachColumnSnap { ID : Integer, Name : String, key { ID } }; create operator DetachColumnSnap_Name_Default(var AValue : String) : Boolean begin result := true; AValue := \"x\"; end; attach operator DetachColumnSnap_Name_Default to Name in DetachColumnSnap on { default };",
 				"detach operator DetachColumnSnap_Name_Default from Name in DetachColumnSnap on { default };");
 
+			// Security. Users, rights and the assignments between them and roles are rows in the catalog store with a cache
+			// in front of them, not objects in Catalog, and this fixture does not reach that cache - so most of these
+			// statements are outside the snapshot. The two that are not say so by being ordinary cases: a role is a catalog
+			// object, and an object's owner is a dimension of its own.
 			// Security
 			yield return Case("CreateRole", null,
 				"create role CreateRoleSnap;");
 			yield return Case("DropRole",
 				"create role DropRoleSnap;",
 				"drop role DropRoleSnap;");
-			yield return Case("CreateRight", null,
+			yield return CaseTheSnapshotCannotSee("CreateRight", null,
 				"CreateRight('CreateRightSnap');");
-			yield return Case("DropRight",
+			yield return CaseTheSnapshotCannotSee("DropRight",
 				"CreateRight('DropRightSnap');",
 				"DropRight('DropRightSnap');");
-			yield return Case("CreateUser", null,
+			yield return CaseTheSnapshotCannotSee("CreateUser", null,
 				"CreateUser('CreateUserSnap', 'Create User Snap', 'secret');");
-			yield return Case("DropUser",
+			yield return CaseTheSnapshotCannotSee("DropUser",
 				"CreateUser('DropUserSnap', 'Drop User Snap', 'secret');",
 				"DropUser('DropUserSnap');");
-			yield return Case("SetUserName",
+			yield return CaseTheSnapshotCannotSee("SetUserName",
 				"CreateUser('SetUserNameSnap', 'Before', 'secret');",
 				"SetUserName('SetUserNameSnap', 'After');");
-			yield return Case("SetPassword",
+			yield return CaseTheSnapshotCannotSee("SetPassword",
 				"CreateUser('SetPasswordSnap', 'Set Password Snap', 'secret');",
 				"SetPassword('SetPasswordSnap', 'changed');");
-			yield return Case("AddUserToRole",
+			yield return CaseTheSnapshotCannotSee("AddUserToRole",
 				"CreateUser('AddToRoleSnap', 'Add To Role Snap', 'secret'); create role AddToRoleSnapRole;",
 				"AddUserToRole('AddToRoleSnap', 'AddToRoleSnapRole');");
-			yield return Case("GrantRightToUser",
+			yield return CaseTheSnapshotCannotSee("RemoveUserFromRole",
+				"CreateUser('RemoveFromRoleSnap', 'Remove From Role Snap', 'secret'); create role RemoveFromRoleSnapRole; AddUserToRole('RemoveFromRoleSnap', 'RemoveFromRoleSnapRole');",
+				"RemoveUserFromRole('RemoveFromRoleSnap', 'RemoveFromRoleSnapRole');");
+			yield return CaseTheSnapshotCannotSee("GrantRightToUser",
 				"CreateUser('GrantRightSnap', 'Grant Right Snap', 'secret'); CreateRight('GrantRightSnapRight');",
 				"GrantRightToUser('GrantRightSnapRight', 'GrantRightSnap');");
+			yield return CaseTheSnapshotCannotSee("RevokeRightFromUser",
+				"CreateUser('RevokeRightSnap', 'Revoke Right Snap', 'secret'); CreateRight('RevokeRightSnapRight'); GrantRightToUser('RevokeRightSnapRight', 'RevokeRightSnap');",
+				"RevokeRightFromUser('RevokeRightSnapRight', 'RevokeRightSnap');");
+			yield return CaseTheSnapshotCannotSee("RevertRightForUser",
+				"CreateUser('RevertRightSnap', 'Revert Right Snap', 'secret'); CreateRight('RevertRightSnapRight'); GrantRightToUser('RevertRightSnapRight', 'RevertRightSnap');",
+				"RevertRightForUser('RevertRightSnapRight', 'RevertRightSnap');");
+			yield return CaseTheSnapshotCannotSee("GrantRightToRole",
+				"create role GrantRightToRoleSnapRole; CreateRight('GrantRightToRoleSnapRight');",
+				"GrantRightToRole('GrantRightToRoleSnapRight', 'GrantRightToRoleSnapRole');");
+			yield return CaseTheSnapshotCannotSee("RevokeRightFromRole",
+				"create role RevokeRightFromRoleSnapRole; CreateRight('RevokeRightFromRoleSnapRight'); GrantRightToRole('RevokeRightFromRoleSnapRight', 'RevokeRightFromRoleSnapRole');",
+				"RevokeRightFromRole('RevokeRightFromRoleSnapRight', 'RevokeRightFromRoleSnapRole');");
 			yield return Case("SetObjectOwner",
 				"CreateUser('SetObjectOwnerSnap', 'Set Object Owner Snap', 'secret'); create table SetObjectOwnerSnapTable { ID : Integer, key { ID } };",
 				"SetObjectOwner('SetObjectOwnerSnapTable', 'SetObjectOwnerSnap');");
-			yield return Case("SetRightOwner",
+			yield return CaseTheSnapshotCannotSee("SetRightOwner",
 				"CreateUser('SetRightOwnerSnap', 'Set Right Owner Snap', 'secret'); CreateRight('SetRightOwnerSnapRight');",
 				"SetRightOwner('SetRightOwnerSnapRight', 'SetRightOwnerSnap');");
 			yield return Case("CreateDeviceUser",
@@ -409,6 +512,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			yield return Case("SetDeviceUserID",
 				"CreateUser('SetDeviceUserIDSnap', 'Set Device User ID Snap', 'secret'); create device SetDeviceUserIDSnapDevice class \"System.MemoryDevice\"; CreateDeviceUser('SetDeviceUserIDSnap', 'SetDeviceUserIDSnapDevice', 'Remote', 'secret');",
 				"SetDeviceUserID('SetDeviceUserIDSnap', 'SetDeviceUserIDSnapDevice', 'Changed');");
+			yield return Case("SetDeviceUserPassword",
+				"CreateUser('SetDeviceUserPasswordSnap', 'Set Device User Password Snap', 'secret'); create device SetDeviceUserPasswordSnapDevice class \"System.MemoryDevice\"; CreateDeviceUser('SetDeviceUserPasswordSnap', 'SetDeviceUserPasswordSnapDevice', 'Remote', 'secret');",
+				"SetDeviceUserPassword('SetDeviceUserPasswordSnap', 'SetDeviceUserPasswordSnapDevice', 'changed');");
+			yield return Case("SetDeviceUserConnectionParameters",
+				"CreateUser('SetDeviceUserParametersSnap', 'Set Device User Parameters Snap', 'secret'); create device SetDeviceUserParametersSnapDevice class \"System.MemoryDevice\"; CreateDeviceUser('SetDeviceUserParametersSnap', 'SetDeviceUserParametersSnapDevice', 'Remote', 'secret');",
+				"SetDeviceUserConnectionParameters('SetDeviceUserParametersSnap', 'SetDeviceUserParametersSnapDevice', 'x=1');");
 			yield return Case("DropDeviceUser",
 				"CreateUser('DropDeviceUserSnap', 'Drop Device User Snap', 'secret'); create device DropDeviceUserSnapDevice class \"System.MemoryDevice\"; CreateDeviceUser('DropDeviceUserSnap', 'DropDeviceUserSnapDevice', 'Remote', 'secret');",
 				"DropDeviceUser('DropDeviceUserSnap', 'DropDeviceUserSnapDevice');");
@@ -431,7 +540,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		private static TestCaseData Case(string name, string setup, string statement)
 		{
-			return new TestCaseData(setup, statement).SetName(name);
+			return new TestCaseData(setup, statement, true).SetName(name);
+		}
+
+		/// <summary>
+		/// A case whose statement really does change the catalog but changes nothing any dimension of the snapshot
+		/// reaches, so that only the rollback's effect on the <em>rest</em> of the catalog is checked. Every one of these
+		/// is a dimension the snapshot does not have yet, not a statement that does nothing - see
+		/// <c>debt-snapshot-cannot-see-users-rights-and-operator-bodies</c>, which is the work that would retire the
+		/// distinction. Declared case by case rather than inferred, so that a statement which stops changing anything
+		/// cannot hide among them.
+		/// </summary>
+		private static TestCaseData CaseTheSnapshotCannotSee(string name, string setup, string statement)
+		{
+			return new TestCaseData(setup, statement, false).SetName(name);
 		}
 
 		#endregion
@@ -460,6 +582,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				// The sensitive dimension: the state derived from a definition rather than the definition itself.
 				// Reflected rather than listed by hand - a hand-written list is a list of the defects already known.
 				result["props:" + key] = ScalarProperties(objectValue);
+
+				// The children the parent's own statement leaves out, each emitted on one line of its own.
+				Schema.TableVar tableVar = objectValue as Schema.TableVar;
+				if (tableVar != null)
+					result["children:" + key] = TableVarChildren(tableVar);
+
+				Schema.ScalarType scalarType = objectValue as Schema.ScalarType;
+				if (scalarType != null)
+					result["children:" + key] = ScalarTypeChildren(scalarType);
 
 				Schema.CatalogObject catalogObject = objectValue as Schema.CatalogObject;
 				if (catalogObject != null)
@@ -506,6 +637,42 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				return String.Format("<threw {0}: {1}>", exception.GetType().Name, exception.Message);
 			}
+		}
+
+		/// <summary>
+		/// A table variable's constraints on the whole row, which its own statement does not carry: measured on this
+		/// server, <c>create table</c> emits each column with its default and its constraints, but a constraint over the
+		/// row is emitted as a separate <c>alter table</c> by whoever scripts the catalog, because its expression can name
+		/// the table itself. Without this a dropped or altered row constraint changed nothing the snapshot could see.
+		/// </summary>
+		private static string TableVarChildren(Schema.TableVar tableVar)
+		{
+			List<string> lines = new List<string>();
+			foreach (Schema.TableVarConstraint constraint in tableVar.Constraints)
+				lines.Add("constraint " + constraint.Name + ": " + OneLine(Emit(constraint)));
+			return Sorted(lines);
+		}
+
+		/// <summary>
+		/// A scalar type's constraints and its default, which its own statement does not carry either - measured, it
+		/// carries only the representations. These are what a cancelled <c>alter type</c> strands, so the dimension exists
+		/// for the same reason as <see cref="TableVarChildren"/>. Specials are left out: each one creates a selector and a
+		/// comparer that are catalog objects in their own right, so the snapshot already sees them.
+		/// </summary>
+		private static string ScalarTypeChildren(Schema.ScalarType scalarType)
+		{
+			List<string> lines = new List<string>();
+			foreach (Schema.ScalarTypeConstraint constraint in scalarType.Constraints)
+				lines.Add("constraint " + constraint.Name + ": " + OneLine(Emit(constraint)));
+			if (scalarType.Default != null)
+				lines.Add("default: " + OneLine(Emit(scalarType.Default)));
+			return Sorted(lines);
+		}
+
+		// One line per child, so that the difference report can pick out the child that changed.
+		private static string OneLine(string value)
+		{
+			return value.Replace("\r", String.Empty).Replace("\n", " ");
 		}
 
 		/// <summary>
@@ -596,6 +763,30 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// Compares two snapshots by key and fails naming what differed. An equality assertion on two 1.4 MB strings
 		/// would not be a usable failure: what the reader needs is the object and the property.
 		/// </summary>
+		/// <summary>
+		/// Fails when two snapshots are equal. The guard on the case matrix itself: a case is only worth running while
+		/// its statement still moves something the snapshot reads.
+		/// </summary>
+		private static void AssertDifferent(Dictionary<string, string> before, Dictionary<string, string> after, string what)
+		{
+			foreach (KeyValuePair<string, string> entry in before)
+			{
+				string afterValue;
+				if (!after.TryGetValue(entry.Key, out afterValue) || !String.Equals(afterValue, entry.Value, StringComparison.Ordinal))
+					return;
+			}
+			foreach (KeyValuePair<string, string> entry in after)
+				if (!before.ContainsKey(entry.Key))
+					return;
+
+			Assert.Fail(String.Format(
+				"Nothing the snapshot reads changed when this ran, so the comparison after the rollback would pass whatever the rollback did: {0}"
+					+ "\n  If the statement has stopped changing the catalog, that is the defect - fix the statement, not this check."
+					+ "\n  If the snapshot has stopped reading what it changes, give the snapshot that dimension, or declare the case"
+					+ "\n  with CaseTheSnapshotCannotSee and say there which dimension is missing.",
+				what));
+		}
+
 		private static void AssertSame(Dictionary<string, string> before, Dictionary<string, string> after, string what)
 		{
 			List<string> differences = new List<string>();
