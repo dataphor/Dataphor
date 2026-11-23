@@ -3,6 +3,12 @@ architecture: docs/modernization-plan.md#ws2-engine-and-server-port
 files: src/engine/DAE/Server/ServerPlan.cs, src/engine/DAE/Runtime.Instructions/DDLNodes.cs, src/engine/DAE/Compiling/Compiler.cs
 repro: verified
 ----
+## Owner decision (2026-11-23): recompile, and look at the cache key
+
+Take the proposed answer: a compiled create statement builds a fresh catalog object on each execution, so re-execution means what the statement says.
+
+The owner's reading of the root cause: **the plan cache key is insufficient.** A plan is reused by its statement text, but the plan also depends on catalog state the text does not capture (here, the object that the create built, which has since been altered and dropped). Before planning the fix, look at what the plan cache keys on and what a plan actually depends on, and say whether a better key (or a dependency check on reuse) closes this route and the cached-plan route together. The sibling ticket `bug-recreated-device-comes-back-as-the-one-that-was-dropped` (in implement when this was written) throws cached plans away on a drop; if a better key makes that targeted invalidation redundant or narrower, say so in this ticket and coordinate rather than undoing landed work. A held prepared plan never goes through the cache, so it still needs the recompile-on-execute change whatever the key becomes.
+
 **Blocked because the architecture is silent:** nothing in `docs/architecture.md` or `docs/modernization-plan.md` says whether a compiled statement that creates a catalog object may be executed more than once. Accepting or editing the proposal below unblocks it.
 
 ## What happens today
