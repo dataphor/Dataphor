@@ -20,6 +20,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// The in-memory device's row limit is the setting these fixtures reach for, because nothing outside the engine is needed
 	/// to set it; the SQL devices take class attributes of their own (server name, connection parameters) through the same code.
+	/// SchemaCacheInvalidationTest derives from this too: what it has to read after a repeated create statement is the same
+	/// live object and the same emitted create statement, for devices and for the other catalog objects a statement builds.
 	/// </remarks>
 	public abstract class DeviceClassAttributeFixture : InProcessTestFixture
 	{
@@ -36,17 +38,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		protected Schema.Device Device(string deviceName)
 		{
+			return CatalogObject<Schema.Device>(deviceName);
+		}
+
+		/// <summary>The object of that type with that unqualified name, as the running server's catalog holds it.</summary>
+		protected T CatalogObject<T>(string name) where T : Schema.Object
+		{
 			foreach (Schema.Object objectValue in Instance.Server.Catalog)
-				if ((objectValue is Schema.Device) && (Schema.Object.Unqualify(objectValue.Name) == deviceName))
-					return (Schema.Device)objectValue;
-			Assert.Fail(String.Format("Device {0} is not in the catalog.", deviceName));
+				if ((objectValue is T) && (Schema.Object.Unqualify(objectValue.Name) == name))
+					return (T)objectValue;
+			Assert.Fail(String.Format("{0} {1} is not in the catalog.", typeof(T).Name, name));
 			return null;
 		}
 
-		/// <summary>The create statement the catalog emits for the device, which carries its class definition.</summary>
-		protected string Script(string deviceName)
+		/// <summary>The create statement the catalog emits for the named object, which carries its class definition and its tags.</summary>
+		protected string Script(string objectName)
 		{
-			return (string)Evaluate(String.Format("Script(Name(LibraryName() + '.{0}'))", deviceName));
+			return (string)Evaluate(String.Format("Script(Name(LibraryName() + '.{0}'))", objectName));
 		}
 
 		protected string OperatorScript(string operatorSpecifier)
@@ -54,7 +62,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return (string)Evaluate(String.Format("Script(LibraryName() + '.{0}')", operatorSpecifier));
 		}
 
-		protected object Evaluate(string expression)
+		// Private, so that a fixture evaluating on a session of its own can keep its own Evaluate.
+		private object Evaluate(string expression)
 		{
 			return ((ServerProcess)Process).Evaluate(expression, null).AsNative;
 		}

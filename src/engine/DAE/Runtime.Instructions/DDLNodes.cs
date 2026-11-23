@@ -408,6 +408,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.CatalogDeviceSession.CreateSort(_sort);
 				program.CatalogDeviceSession.AttachSort(_scalarType, _sort, false, false);
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);
+				// Compiling resolves a scalar type's sort and keeps it in the plan's order and key columns (Compiler.GetSort and
+				// GetUniqueSort, assigned to column.Sort and orderColumn.Sort), so without this a plan compiled before this
+				// statement goes on comparing values with the sort this one replaced.
+				program.Catalog.UpdatePlanCacheTimeStamp();
 				return null;
 			}
 		}
@@ -443,6 +447,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program.CatalogDeviceSession.DropSort(sort);
 				}
 				program.CatalogDeviceSession.UpdateCatalogObject(_scalarType);
+				// As in AlterSortNode, for the sort this statement removes; and as in DropDeviceNode, for the cached create sort
+				// plan, which holds the Schema.Sort the compiler built and would otherwise re-attach the one just dropped.
+				program.Catalog.UpdatePlanCacheTimeStamp();
 				return null;
 			}
 		}
@@ -500,6 +507,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			program.CatalogDeviceSession.DeleteRole(_role);
+			// As in DropDeviceNode: a cached create role plan holds the Schema.Role the compiler built, so without this the next
+			// run of that text re-registers the role just dropped, with its object ID and its altered metadata.
+			program.Catalog.UpdatePlanCacheTimeStamp();
 			return null;
 		}
     }
@@ -930,6 +940,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				program.ServerProcess.ServerSession.Server.RemoveDeferredHandlers(_eventHandler);
 
 			program.CatalogDeviceSession.DropEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex);
+
+			// As in DropDeviceNode: a cached create handler plan holds the Schema.EventHandler the compiler built, so without
+			// this the next run of that text re-attaches the handler just dropped. Firing itself needs no bump: a modification
+			// reads the live handler list of the table variable, column or type as it runs.
+			// Gated, as the neighbouring drop nodes gate their bumps: this node is also how the server drops the handlers it
+			// generates on its own copies of a table - at the end of every application transaction and at the disconnect of
+			// every session holding session objects, both of which run inside a time-stamp-safe context for exactly this reason
+			// (ServerSession.DropSessionObjects). Flushing every session's cached plans that often would cost far more than the
+			// re-registration it prevents. Read here rather than captured while compiling, as the siblings do, because what
+			// matters is whether this execution is one of the server's own; every internal caller holds the context across both.
+			if (program.ServerProcess.ShouldAffectTimeStamp)
+				program.Catalog.UpdatePlanCacheTimeStamp();
 			return null;
 		}
     }
@@ -2847,6 +2869,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.CatalogDeviceSession.AlterMetaData(device, _alterDeviceStatement.AlterMetaData);
 			program.CatalogDeviceSession.UpdateCatalogObject(device);
 
+			// Compiling asks the device whether it can run each node (PlanNode.DetermineDevice, which calls Device.Prepare) and
+			// keeps that answer and the device's translation of the node in the plan, decided from the class settings and the
+			// scalar type and operator maps this statement changes. After the change, for the reason in DropDeviceNode.
+			program.Catalog.UpdatePlanCacheTimeStamp();
+
 			return null;
 		}
     }
@@ -3183,6 +3210,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				program.CatalogDeviceSession.DropConstraint(_constraint);
 
+				// As in DropDeviceNode: a cached create constraint plan holds the Schema.CatalogConstraint the compiler built,
+				// with the expression compiled against the catalog as it then stood, so without this the next run of that text
+				// re-registers the constraint just dropped rather than compiling it afresh. Enforcement itself needs no bump:
+				// a modification reads TableVar.CatalogConstraints as it runs (TableNode.ValidateCatalogConstraints), so the
+				// detach this drop does is seen by plans already compiled.
+				program.Catalog.UpdatePlanCacheTimeStamp();
+
 				return null;
 			}
 		}
@@ -3269,6 +3303,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				CheckNoDependents(program, _serverLink);
 				
 				program.CatalogDeviceSession.DeleteCatalogObject(_serverLink);
+
+				// As in DropDeviceNode: a cached create server plan holds the Schema.ServerLink the compiler built, so without this
+				// the next run of that text re-registers the link just dropped, under the host, instance, port and credentials an
+				// alter in between gave it rather than the ones the statement carries.
+				program.Catalog.UpdatePlanCacheTimeStamp();
 			}
 			
 			// Outside the catalog lock, because the close makes a network call to the other server and the catalog lock is never held
@@ -3309,6 +3348,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// After the checks: a failed drop leaves no pending stop behind in the open transaction (a failed statement does not roll it back)
 				program.CatalogDeviceSession.StopDevice(_dropDevice);
 				program.CatalogDeviceSession.DropDevice(_dropDevice);
+
+				// A cached create device plan holds the Schema.Device the compiler built, not the statement text, so without this
+				// the next run of that text re-registers the device just dropped - carrying whatever an alter in between did to it,
+				// and its object ID. After the change, never before: K33 records that a plan compiled in between would otherwise
+				// survive with the new stamp.
+				program.Catalog.UpdatePlanCacheTimeStamp();
 
 				return null;
 			}

@@ -14,14 +14,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <summary>
 	/// The catalog's shared conversion path and operator resolution caches must not keep an answer computed from the catalog as it
 	/// stood before a DDL statement changed it, including one another session computed after the statement compiled (which clears
-	/// them) and before it executed (which changes the catalog). PrepareStatement holds the statement between the two.
+	/// them) and before it executed (which changes the catalog). PrepareStatement holds the statement between the two. The plan
+	/// cache, keyed by statement text, is the third such memo, and a compiled create statement is its sharpest case: the plan
+	/// holds the catalog object the compiler built, so a drop has to evict it or the next run of the same text re-registers the
+	/// object that was dropped.
 	/// </summary>
 	/// <remarks>
 	/// The first two tests use different expression text after the DDL so they measure the compile-to-execute window, not the
-	/// plan cache; the three ...InvalidatesCachedPlans tests below cover the plan cache case by evaluating the identical text.
+	/// plan cache; the ...InvalidatesCachedPlans tests below cover the plan cache case by running the identical text twice -
+	/// three over the caches above, and four over a create statement repeated after the object it makes has been dropped.
 	/// </remarks>
 	[TestFixture]
-	public class SchemaCacheInvalidationTest : InProcessTestFixture
+	public class SchemaCacheInvalidationTest : DeviceClassAttributeFixture
 	{
 		private int _next;
 
@@ -137,6 +141,78 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			ExecuteScript(String.Format("create operator {0}(const X : Integer) : String begin result := 'Integer'; end;", op));
 
 			Assert.That(Evaluate(call), Is.EqualTo("Integer"), "a cached plan still calls the worse overload");
+		}
+
+		// A create statement is compiled into the catalog object it makes, not into a copy of its own text, so a cached create
+		// plan re-executed after the object has been dropped re-registers the object the first run built - carrying whatever the
+		// statements in between did to it. These run the create through IServerProcess.Execute, which consults the plan cache;
+		// ExecuteScript does not.
+
+		[Test]
+		public void DropDeviceInvalidatesCachedPlans()
+		{
+			string device = Unique("PCDevice");
+			string create = String.Format("create device {0} class \"System.MemoryDevice\" attributes {{ \"MaxRowCount\" = \"100\" }};", device);
+
+			Process.Execute(create, null);
+			Process.Execute(String.Format("alter device {0} alter class {{ alter \"MaxRowCount\" = \"200\" }};", device), null);
+			Process.Execute(String.Format("drop device {0};", device), null);
+			Process.Execute(create, null);
+
+			Assert.That(MaxRowCount(device), Is.EqualTo(100), "a cached plan brought the dropped device back with the altered row limit");
+			Assert.That(Script(device), Does.Contain("\"MaxRowCount\" = \"100\""));
+		}
+
+		// The tags arm of the same statement. It goes wrong for a reason of its own: a create statement hands the object it builds
+		// its own MetaData, so an alter of the object's tags writes into the statement as well (an arm of
+		// blocked/bug-view-tags-lose-to-tags-inherited-from-the-source). Either defect alone brings the altered tag back.
+		[Test]
+		public void DropDeviceInvalidatesCachedPlansThatCarryTags()
+		{
+			string device = Unique("PCTagDevice");
+			string create = String.Format("create device {0} class \"System.MemoryDevice\" tags {{ Scenario = \"first\" }};", device);
+
+			Process.Execute(create, null);
+			Process.Execute(String.Format("alter device {0} alter tags {{ alter Scenario = \"second\" }};", device), null);
+			Process.Execute(String.Format("drop device {0};", device), null);
+			Process.Execute(create, null);
+
+			Assert.That(Script(device), Does.Contain("Scenario = \"first\""), "a cached plan brought the dropped device back with the altered tag");
+		}
+
+		// A server link, where the same defect sends the work to another server: the link's host, instance and port are read off
+		// its tags into properties of the live object when the create statement executes.
+		[Test]
+		public void DropServerLinkInvalidatesCachedPlans()
+		{
+			string link = Unique("PCLink");
+			string create = String.Format("create server {0} tags {{ HostName = \"localhost\", InstanceName = \"Dataphor\" }};", link);
+
+			Process.Execute(create, null);
+			Process.Execute(String.Format("alter server {0} alter tags {{ alter HostName = \"elsewhere\" }};", link), null);
+			Process.Execute(String.Format("drop server {0};", link), null);
+			Process.Execute(create, null);
+
+			Assert.That(
+				CatalogObject<Schema.ServerLink>(link).HostName,
+				Is.EqualTo("localhost"),
+				"a cached plan brought the dropped link back pointing at the host the alter gave it");
+			Assert.That(Script(link), Does.Contain("HostName = \"localhost\""));
+		}
+
+		// A role, the third object kind whose create statement carries metadata a later statement can alter.
+		[Test]
+		public void DropRoleInvalidatesCachedPlans()
+		{
+			string role = Unique("PCRole");
+			string create = String.Format("create role {0} tags {{ Scenario = \"first\" }};", role);
+
+			Process.Execute(create, null);
+			Process.Execute(String.Format("alter role {0} alter tags {{ alter Scenario = \"second\" }};", role), null);
+			Process.Execute(String.Format("drop role {0};", role), null);
+			Process.Execute(create, null);
+
+			Assert.That(Script(role), Does.Contain("Scenario = \"first\""), "a cached plan brought the dropped role back with the altered tag");
 		}
 
 		// Loading a stored operator from the catalog compiles its body in a loading context, where only the

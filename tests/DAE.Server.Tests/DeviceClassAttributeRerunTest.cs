@@ -24,11 +24,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	[TestFixture]
 	public class DeviceClassAttributeRerunTest : DeviceClassAttributeFixture
 	{
-		/// <summary>The statement text that creates the row limit, run twice; the engine's plan cache answers the second run.</summary>
-		// NOTE: this case reaches a cached plan only because neither alter device nor drop device advances the plan cache's timestamp
-		// today. bug-recreated-device-comes-back-as-the-one-that-was-dropped adds that bump to both; once it lands the second run
-		// recompiles from the text, this case passes whether or not the attribute is cloned, and the prepared-plan case below is the
-		// only one still guarding the regression. Decide then whether this case still earns its keep.
+		/// <summary>The statement text that creates the row limit, run twice; the engine recompiles it for the second run.</summary>
+		// NOTE: this case no longer reaches a cached plan. It did only because neither alter device nor drop device advanced the
+		// plan cache's timestamp; bug-recreated-device-comes-back-as-the-one-that-was-dropped added that bump to both, so the
+		// second run now recompiles from the text and this case passes whether or not the attribute is cloned - the prepared-plan
+		// case below is the clone's only guard. Kept, deliberately: it is the only case over what a client sees when it runs one
+		// statement twice through the plan cache's path, and it fails if both mechanisms ever go at once. Do not read it as a
+		// reproduction of either defect on its own.
 		[Test]
 		public void TestStatementRunAgainFromThePlanCacheAppliesItsOwnValue()
 		{
