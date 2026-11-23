@@ -494,7 +494,14 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Exit(process.ExecutionSyncHandle);
 					handleReleased = true;
 					
-					DateTime endTime = DateTime.Now.AddTicks(ProcessTerminationTimeout.Ticks / 2);
+					// A Stopwatch rather than a DateTime.Now deadline: this budget is an elapsed time, and the difference
+					// between two readings of the wall clock is not the time that passed - a daylight-saving change, an
+					// operator correcting the time or a large time-synchronization step makes this expire on the loop's
+					// first pass, reporting ProcessNotResponding for a process that was about to unwind, or not expire for
+					// an hour. Same reason as the connection clock, RemoteServerConnection.IdleTime. The budget and the
+					// comparison are unchanged: still half of ProcessTerminationTimeout, still strict.
+					TimeSpan terminationBudget = TimeSpan.FromTicks(ProcessTerminationTimeout.Ticks / 2);
+					Stopwatch terminationWatch = Stopwatch.StartNew();
 					while (true)
 					{
 						Debug.Debugger debugger = null;
@@ -516,7 +523,7 @@ namespace Alphora.Dataphor.DAE.Server
 							debugger.Detach(process);
 
 						System.Threading.Thread.SpinWait(100);
-						if (DateTime.Now > endTime)
+						if (terminationWatch.Elapsed > terminationBudget)
 							throw new ServerException(ServerException.Codes.ProcessNotResponding);
 					}
 				}

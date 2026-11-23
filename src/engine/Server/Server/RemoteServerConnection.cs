@@ -22,7 +22,8 @@ namespace Alphora.Dataphor.DAE.Server
 			_hostName = hostName;
 			_connectionName = connectionName;
 			_sessions = new RemoteServerSessions(false);
-			_lastActivityTime = DateTime.Now;
+			// Stamped here so that a connection nothing has pinged yet is never already idle.
+			_lastActivityTicks = Environment.TickCount64;
 		}
 		
 		protected bool _disposed;
@@ -172,22 +173,39 @@ namespace Alphora.Dataphor.DAE.Server
         
 		#region Lifetime Management
 
-		private DateTime _lastActivityTime;
-		/// <summary>When this connection was last pinged, or established if it never has been.</summary>
+		/// <summary>When this connection was last pinged, in milliseconds since the machine started.</summary>
 		/// <remarks>
-		/// A last-<em>ping</em> time, not a last-call time: no ordinary operation moves it, so the client's keep-alive is
-		/// the only thing that does, and the server's idle watcher
+		/// <c>Environment.TickCount64</c> and not <c>DateTime.Now</c>, because the only thing anyone asks of this field is
+		/// how long ago it was stamped, and the difference between two readings of a wall clock is not the time that
+		/// passed: it is that plus however much the clock itself moved in between, which a daylight-saving change, an
+		/// operator correcting the time and a large time-synchronization step all do. A watcher subtracting wall-clock
+		/// readings finds every live connection an hour idle in the first sweep after such a step and relinquishes all of
+		/// them at once. The native CLI's session clock
+		/// (<see cref="Alphora.Dataphor.DAE.NativeCLI.NativeSession"/>) is the same count for the same reason, and its
+		/// remarks carry the rest of the argument - including why a signed 64-bit millisecond count needs no wrap guard.
+		/// </remarks>
+		private long _lastActivityTicks;
+
+		/// <summary>How long since this connection was last pinged, or since it was established if it never has been.</summary>
+		/// <remarks>
+		/// A time since the last <em>ping</em>, not since the last call: no ordinary operation moves the clock, so the
+		/// client's keep-alive is the only thing that does, and the server's idle watcher
 		/// (<see cref="Alphora.Dataphor.DAE.Service.ConnectionManager"/>) is the only thing that reads it. Nothing else
 		/// <em>can</em> move it without new plumbing - the service's handle table is flat, and a RemoteServerSession holds
 		/// a reference to the RemoteServer rather than to the connection it belongs to, so there is no path from a handle
 		/// back to the connection to stamp.
 		/// </remarks>
-		public DateTime LastActivityTime { get { return _lastActivityTime; } }
+		public TimeSpan IdleTime { get { return TimeSpan.FromMilliseconds(Environment.TickCount64 - Volatile.Read(ref _lastActivityTicks)); } }
 
 		/// <remarks> Provides a way to check that the session is still available (the message will reset the server's keep alive timeout). </remarks>
 		public void Ping()
 		{
-			_lastActivityTime = DateTime.Now;
+			// Volatile because ping threads write this field and the idle watcher's thread reads it, with nothing
+			// synchronizing the two. On the 64-bit runtime this product runs on an aligned 8-byte access is already atomic,
+			// so this is ordering and intent rather than a fix for an observed defect. Deliberately not the connection's
+			// _syncHandle: BeginCall holds that for the whole of Connect and Disconnect, so a sweep that took it would
+			// serialize itself against clients' in-flight calls.
+			Volatile.Write(ref _lastActivityTicks, Environment.TickCount64);
 		}
 
 		#endregion

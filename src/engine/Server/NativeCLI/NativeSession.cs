@@ -60,11 +60,11 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/*
 			Strategy: the server stamps this session's clock on its way into and out of every call that names its handle,
 			and counts the calls in flight on it. How long the session has been without a call is then what tells an idle
-			watcher that nothing is using it - the same job RemoteServerConnection.LastActivityTime does for a client
-			connection on the main interface, and the shape here is deliberately that one's. Two differences, both on
-			purpose: this clock is monotonic rather than wall-clock (see the field below), and it moves on every operation
-			rather than on a ping alone, because the native interface has no connection object for a ping to land on - a
-			client that wants to say "still here" has to make a call, which is what NativeCLISession's keep-alive does.
+			watcher that nothing is using it - the same job RemoteServerConnection.IdleTime does for a client connection on
+			the main interface, and the shape here is deliberately that one's. One difference, on purpose: this clock moves
+			on every operation rather than on a ping alone, because the native interface has no connection object for a ping
+			to land on - a client that wants to say "still here" has to make a call, which is what NativeCLISession's
+			keep-alive does. Both clocks are monotonic (see the field below).
 
 			The three members below are internal rather than public because each of them is only correct under that lock,
 			which nothing outside this assembly can take: a caller that counted a call in and not out would leave the
@@ -74,14 +74,14 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		/// <summary>When a call last entered or left this session, in milliseconds since the machine started.</summary>
 		/// <remarks>
-		/// <c>Environment.TickCount64</c>, not <c>DateTime.Now</c>, which is what the main interface's connection clock
-		/// (<see cref="Alphora.Dataphor.DAE.Server.RemoteServerConnection.LastActivityTime"/>) uses: a wall clock that
-		/// steps - a daylight-saving change, an operator setting the time, a large time-synchronization correction - makes
-		/// every stamp look an hour or more old at once, so a watcher reading it reclaims every live session in one sweep.
-		/// That is bug-idle-clocks-use-wall-clock-time, filed against the connection clock, and it is not repeated here. A
-		/// signed 64-bit millisecond count does not wrap within any machine's lifetime - unlike the 32-bit
-		/// <c>Environment.TickCount</c> - so nothing here guards against a machine that has been up a long time. Written
-		/// only under NativeServer's session lock, with the count below.
+		/// <c>Environment.TickCount64</c>, not <c>DateTime.Now</c>: a wall clock that steps - a daylight-saving change, an
+		/// operator setting the time, a large time-synchronization correction - makes every stamp look an hour or more old
+		/// at once, so a watcher reading it reclaims every live session in one sweep. The main interface's connection clock
+		/// (<see cref="Alphora.Dataphor.DAE.Server.RemoteServerConnection.IdleTime"/>) was a wall clock and is now the same
+		/// count for the same reason; that was bug-idle-clocks-use-wall-clock-time, and the pair is kept greppable by this
+		/// remark and the one there pointing at each other. A signed 64-bit millisecond count does not wrap within any
+		/// machine's lifetime - unlike the 32-bit <c>Environment.TickCount</c> - so nothing here guards against a machine
+		/// that has been up a long time. Written only under NativeServer's session lock, with the count below.
 		/// </remarks>
 		private long _lastActivityTicks;
 

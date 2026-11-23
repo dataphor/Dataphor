@@ -16,14 +16,15 @@ namespace Alphora.Dataphor.DAE.Service
 	/// <summary>Relinquishes the connections of clients that have stopped saying they are still there.</summary>
 	/// <remarks>
 	/// <para>
-	/// A connection's clock (<see cref="RemoteServerConnection.LastActivityTime"/>) moves only when the client pings it, so
-	/// the ping is the liveness signal and nothing else is. Two consequences, both deliberate: a client that has not pinged
-	/// for the threshold is relinquished whatever it is doing, and a client in the middle of a long call keeps its
-	/// connection only because it pings from a thread of its own, which the shipped client does (every
-	/// LocalServer.DefaultKeepAliveInterval seconds, two minutes). Relinquishing a connection closes its sessions, which
-	/// aborts each process's executing thread and rolls back its open transactions - releasing, among other things, the
-	/// catalog store's write lock, which an abandoned transaction that changed the catalog would otherwise hold against
-	/// every other session's schema changes.
+	/// A connection's idle time (<see cref="RemoteServerConnection.IdleTime"/>) returns to zero only when the client pings
+	/// it, so the ping is the liveness signal and nothing else is; it is measured from a monotonic clock, which is what
+	/// keeps a step of the machine's wall clock from making every connection look idle at once (the argument is at that
+	/// member). Two consequences, both deliberate: a client that has not pinged for the threshold is relinquished whatever
+	/// it is doing, and a client in the middle of a long call keeps its connection only because it pings from a thread of
+	/// its own, which the shipped client does (every LocalServer.DefaultKeepAliveInterval seconds, two minutes).
+	/// Relinquishing a connection closes its sessions, which aborts each process's executing thread and rolls back its
+	/// open transactions - releasing, among other things, the catalog store's write lock, which an abandoned transaction
+	/// that changed the catalog would otherwise hold against every other session's schema changes.
 	/// </para>
 	/// <para>
 	/// The watcher wakes every quarter of the idle threshold, so a connection is relinquished between the threshold and the
@@ -63,10 +64,12 @@ namespace Alphora.Dataphor.DAE.Service
 				throw new ArgumentOutOfRangeException(nameof(idleTimeInSeconds), idleTimeInSeconds, "The idle threshold must be at least 1 second.");
 
 			_remoteServer = remoteServer;
-			_idleTimeInSeconds = idleTimeInSeconds;
+			// Held as a TimeSpan rather than as the seconds it arrives as, so that the sweep's comparison is exact ticks
+			// against a connection's idle time rather than a TotalSeconds double.
+			_idleTime = TimeSpan.FromSeconds(idleTimeInSeconds);
 			// A quarter of the threshold, with a floor of a second: see the bound in the class remarks. The cost of the
 			// shorter period is four wakeups an hour rather than one, each an array copy under the server's lock and one
-			// DateTime comparison per connection.
+			// TimeSpan comparison per connection.
 			_wakePeriodInSeconds = Math.Max(1, idleTimeInSeconds / 4);
 			StartLifetimeWatcher();
 		}
@@ -89,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Service
 		#endregion
 
 		private RemoteServer _remoteServer;
-		private readonly int _idleTimeInSeconds;
+		private readonly TimeSpan _idleTime;
 		private readonly int _wakePeriodInSeconds;
 
 		private ManualResetEvent _lifetimeSignal;
@@ -127,7 +130,7 @@ namespace Alphora.Dataphor.DAE.Service
 					signaled = _lifetimeSignal.WaitOne(_wakePeriodInSeconds * 1000);
 
 					if (!signaled)
-						RelinquishIdleConnections(DateTime.Now.AddSeconds(-_idleTimeInSeconds));
+						RelinquishIdleConnections();
 				}
 
 				// The keep alive processing is complete.  Clean up...
@@ -143,12 +146,13 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 
-		/// <summary>Relinquishes every connection whose last ping is older than <paramref name="oldestActivityTime"/>.</summary>
+		/// <summary>Relinquishes every connection that has been idle for longer than the threshold.</summary>
 		/// <remarks>
 		/// Not public: nothing outside needs to force a sweep, and a test drives the real watcher through a short threshold
-		/// instead.
+		/// instead. It takes no cut-off time either, for the reason at <see cref="RemoteServerConnection.IdleTime"/>: the
+		/// decision is elapsed against elapsed, so there is no instant for a caller to compute.
 		/// </remarks>
-		private void RelinquishIdleConnections(DateTime oldestActivityTime)
+		private void RelinquishIdleConnections()
 		{
 			// Read once, and nothing below reaches for it again: the RemoteServer's Server is null from the moment it has
 			// been disposed, so a sweep that read it a second time - as the logging here used to - raised a
@@ -165,12 +169,18 @@ namespace Alphora.Dataphor.DAE.Service
 			// shortening the wait, which is what gives an aborted process the chance to unwind.
 			RemoteServerConnection[] connections = _remoteServer.GetCurrentConnections();
 			for (int index = 0; index < connections.Length; index++)
-				if (connections[index].LastActivityTime < oldestActivityTime)
+			{
+				// Read once into a local and logged from that local, so that the number in the log is the number the
+				// decision was made on; a ping arriving mid-sweep would otherwise make the two disagree. Strictly greater,
+				// which is the boundary the wall-clock comparison this replaced had: a stamp exactly at the cut-off was
+				// kept.
+				TimeSpan idleTime = connections[index].IdleTime;
+				if (idleTime > _idleTime)
 				{
 					try
 					{
 						// Connection has been idle for longer than the activity time, kill it
-						server.LogMessage(String.Format("Connection relinquished due to inactivity: ConnectionName={0}, HostName={1}, LastActivity={2}", connections[index].ConnectionName, connections[index].HostName, connections[index].LastActivityTime.ToShortTimeString()));
+						server.LogMessage(String.Format("Connection relinquished due to inactivity: ConnectionName={0}, HostName={1}, IdleSeconds={2:0.0}", connections[index].ConnectionName, connections[index].HostName, idleTime.TotalSeconds));
 						_remoteServer.Relinquish(connections[index]);
 					}
 					catch (Exception exception)
@@ -190,6 +200,7 @@ namespace Alphora.Dataphor.DAE.Service
 						}
 					}
 				}
+			}
 		}
 
 		private void StopLifetimeWatcher()
