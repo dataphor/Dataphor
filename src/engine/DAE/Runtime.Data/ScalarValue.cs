@@ -662,9 +662,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Value = value;
 					else
 					{
+						// Mirrors the AsNative setter above: a representation write sets the value, so the stream is
+						// truncated first. Without the SetLength, writing a shorter value left the tail of the old one
+						// on the end of it (bug-binary-write-accessor-keeps-the-old-values-tail).
+						if (StreamID == StreamID.Null)
+							StreamID = Manager.StreamManager.Allocate();
+
 						Stream stream = OpenStream();
 						try
 						{
+							stream.SetLength(0);
 							stream.Write(value, 0, value.Length);
 						}
 						finally

@@ -79,6 +79,7 @@
     <Compile Include="ServiceUtilityTest.cs" />
     <Compile Include="StoreContractTests.cs" />
     <Compile Include="StoreRebuildWorkflowTest.cs" />
+    <Compile Include="StreamBackedRepresentationWriteTest.cs" />
     <Compile Include="TableAssignmentEvaluationTest.cs" />
     <Compile Include="TestEnvironment.cs" />
     <Compile Include="TestServerInstance.cs" />
