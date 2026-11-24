@@ -1,5 +1,5 @@
 description: The engine holds large values such as pictures and documents in managed streams and counts the holders of each one, and almost nothing checks that bookkeeping; add a language-level test that puts such values through the operations an application performs and asserts the engine is holding nothing extra afterwards.
-prereq: debt-restore-stream-and-conveyor-tests, bug-assigning-a-binary-variable-leaks-its-stream, bug-binary-write-accessor-keeps-the-old-values-tail, bug-an-operator-argument-is-released-by-the-wrong-owner
+prereq: debt-restore-stream-and-conveyor-tests, bug-assigning-a-binary-variable-leaks-its-stream, bug-binary-write-accessor-keeps-the-old-values-tail, bug-an-operator-argument-is-released-by-the-wrong-owner, bug-an-error-inside-a-block-leaks-its-binary-values
 architecture: docs/modernization-plan.md#ws3-test-suite
 files: tests/libraries/TestFramework.Coverage.Scripts/Documents/, tests/DAE.Server.Tests/coverage-manifest.json, tests/DAE.Server.Tests/ParserRoundTripCorpusTest.cs, tests/libraries/TestFramework.Coverage.Base/Documents/DiagnosticsLogic.d4, src/engine/DAE/Streams/ServerStreamManager.cs, src/engine/DAE/Runtime.Instructions/BinaryNodes.cs, src/engine/DAE/Runtime.Data/ScalarValue.cs
 difficulty: medium
