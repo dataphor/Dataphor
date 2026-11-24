@@ -383,22 +383,31 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		private void EmitQualifierOperand(Expression expression)
 		{
-			// A numeric literal left of a "." has to be parenthesized: "1." lexes as a malformed number.
-			ValueExpression value = expression as ValueExpression;
-			bool needsGroup =
-				(value != null)
-					&& ((value.Token == TokenType.Integer) || (value.Token == TokenType.Hex) || (value.Token == TokenType.Float)
-						|| (value.Token == TokenType.Decimal) || (value.Token == TokenType.Money));
-			// A qualifier left of a "." also has to be parenthesized: "." is right-associative in the grammar, so
-			// "a.b.c" reads back as a.(b.c) and would lose this tree's grouping. The one qualifier that does not need
-			// it is the form EmitQualifierExpression prints inside its own parentheses, "(A.B from Y)".
-			QualifierExpression qualifier = expression as QualifierExpression;
-			needsGroup = needsGroup || ((qualifier != null) && (TrailingColumnExtractor(qualifier) == null));
+			bool needsGroup = QualifierOperandNeedsGroup(expression);
 			if (needsGroup)
 				Append(Keywords.BeginGroup);
 			EmitExpression(expression);
 			if (needsGroup)
 				Append(Keywords.EndGroup);
+		}
+		
+		/// <summary>Whether an operand on the left of a "." has to be parenthesized to read back as itself.</summary>
+		/// <remarks>
+		/// Two kinds of operand do. A numeric literal, because "1." lexes as a malformed number. And a qualifier,
+		/// because "." is right-associative in the grammar - Parser.QualifierExpression() takes the whole rest of the
+		/// chain as its right side - so an unparenthesized "a.b.c" reads back as a.(b.c) and a left-associative tree
+		/// would lose its grouping. The one qualifier exempt is the shape EmitQualifierExpression already prints
+		/// inside parentheses of its own, "(A.B from Y)", where a second pair would only be redundant.
+		/// </remarks>
+		private static bool QualifierOperandNeedsGroup(Expression expression)
+		{
+			ValueExpression value = expression as ValueExpression;
+			if (value != null)
+				return (value.Token == TokenType.Integer) || (value.Token == TokenType.Hex) || (value.Token == TokenType.Float)
+					|| (value.Token == TokenType.Decimal) || (value.Token == TokenType.Money);
+			
+			QualifierExpression qualifier = expression as QualifierExpression;
+			return (qualifier != null) && (TrailingColumnExtractor(qualifier) == null);
 		}
 		
 		protected virtual void EmitParameterExpression(ParameterExpression expression)

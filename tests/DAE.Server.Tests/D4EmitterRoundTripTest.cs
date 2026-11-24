@@ -38,13 +38,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[TestCase("var x := (A.B.Name from Y);", TestName = "DoublyQualifiedColumnExtractor_WasQualifiersOutsideParentheses")]
 		[TestCase("var x := (1).Max(50);", TestName = "NumericLiteralLeftOfQualifier_WasUnparenthesized")]
 		// A qualifier left of a "." needs the same parentheses, for the same kind of reason: "." is right-associative,
-		// so an unparenthesized "a.b.c" reads back as a.(b.c). The "from" arm must not get a second pair - the prefix
-		// form of EmitQualifierExpression already prints that shape inside parentheses of its own - and a plain dotted
-		// name must keep getting none, which is what makes the condition worth narrowing.
+		// so an unparenthesized "a.b.c" reads back as a.(b.c). The second case is the only one whose bracketed operand
+		// itself contains one; the third is the chain-of-dots shape the "from" arm of EmitQualifierExpression prints
+		// inside parentheses of its own, standing to the left of a further dot. Where the parentheses are spelled and
+		// where they are not is the other test below: a redundant pair would still be tree-equal.
 		[TestCase("var x := (A.B).C;", TestName = "QualifierLeftOfQualifier_WasUnparenthesized")]
 		[TestCase("var x := ((A.B).C).D;", TestName = "NestedQualifierLeftOfQualifier_WasUnparenthesized")]
-		[TestCase("var x := (A.B from Y).C;", TestName = "QualifiedColumnExtractorLeftOfQualifier_MustNotBeDoublyParenthesized")]
-		[TestCase("var x := A.B.C;", TestName = "DottedName_MustStayUnparenthesized")]
+		[TestCase("var x := (A.B from Y).C;", TestName = "QualifiedColumnExtractorLeftOfQualifier")]
 		// The parser desugars "for" and "try ... commit" as it reads them, so the shape it builds has to be the shape
 		// the equivalent explicit D4 parses to - see the canonical-shape rule on Parser.DelimitedBlock(string[]).
 		// These cases pin the arms of that shape: an empty, one-statement and multi-statement "try ... commit" body, a
@@ -108,6 +108,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(
 				ParserRoundTripCorpusTest.TreesEqual(first, second, out string difference), Is.True,
 				String.Format("Round-trip changed the parse tree.\nSource:  {0}\nEmitted: {1}\nAt:      {2}", source, emitted, difference));
+		}
+		
+		/// <summary>
+		/// The one thing the round-trip above cannot see is a redundant pair of parentheses: "((A.B from Y)).C" is
+		/// tree-equal to "(A.B from Y).C". So the exemption in D4Emitter.QualifierOperandNeedsGroup - and the fact
+		/// that an ordinary dotted name is still printed bare - can only be held by the emitted text itself.
+		/// </summary>
+		[TestCase("var x := (A.B).C;", "var x := (A.B).C;", TestName = "QualifierOperand_IsParenthesized")]
+		[TestCase("var x := (A.B from Y).C;", "var x := (A.B from Y).C;", TestName = "QualifierOperand_WithTrailingColumnExtractor_KeepsOnlyItsOwnParentheses")]
+		[TestCase("var x := A.B.C;", "var x := A.B.C;", TestName = "QualifierOperand_DottedName_IsNotParenthesized")]
+		public void EmittedTextSpellsQualifierOperandParenthesesExactly(string source, string expected)
+		{
+			string emitted = new D4TextEmitter().Emit(new Parser().ParseScript(source, null));
+			Assert.That(emitted.Trim(), Is.EqualTo(expected));
 		}
 
 		/// <summary>
