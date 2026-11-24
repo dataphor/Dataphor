@@ -322,6 +322,46 @@ begin
 	DropLibrary('UpgradeBase');
 end;
 
+// The two liberties the one shipped upgrade script takes, which nothing above covers. Frontend's Upgrades/Upgrade.2.0.8.d4
+// opens with RollbackTransaction(), registers and upgrades another library, and closes with BeginTransaction(): it discards
+// the transaction the upgrade machinery opened for it, works outside one, and hands a fresh one back. So an upgrade script
+// may upgrade another library - UpgradeNested is deliberately not a requisite of UpgradeNesting, so the nested call is the
+// only thing that can upgrade it, and the trace tells the two apart - and it may replace its own transaction. The closing
+// BeginTransaction is not decoration: the machinery records the version and commits on the script's process after the script
+// returns, so a script that leaves its transaction and does not open another fails on that commit with "No transaction in
+// progress for this process" - measured by removing it, 2026-11-23. The opening RollbackTransaction is not what makes the
+// nested call work, also measured: the nested call succeeds without it, because the transaction the machinery opens has
+// written nothing to the catalog store yet and so holds no write lock on it.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeNested', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('UpgradeNesting', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeNested');
+	RegisterLibrary('UpgradeNesting');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeNested', "create table NestedTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, 'nested;' Trace } } into NestedTrace;");
+	LInjected := InjectUpgrade('UpgradeNesting', "RollbackTransaction(); UpgradeLibrary('UpgradeNested'); update .UpgradeNested.NestedTrace set { Trace := Trace + 'nesting;' }; BeginTransaction();");
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName in { 'UpgradeNested', 'UpgradeNesting' };
+	UpgradeLibrary('UpgradeNesting');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeNested')) <> VersionNumber(1, 0, 1) then
+		raise Error('An UpgradeLibrary call from inside an upgrade script did not upgrade the library it named.');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeNesting')) <> VersionNumber(1, 0, 1) then
+		raise Error('An upgrade script that rolled back the transaction it was given and began another was not recorded as applied.');
+end;
+
+// The nested upgrade ran, and ran before the rest of the script that called it.
+if (Trace from row from .UpgradeNested.NestedTrace) <> 'nested;nesting;' then
+	raise Error('An upgrade script that upgrades another library did not see that library upgraded: ' + (Trace from row from .UpgradeNested.NestedTrace));
+
+begin
+	UnregisterLibrary('UpgradeNesting');
+	UnregisterLibrary('UpgradeNested');
+	DropLibrary('UpgradeNesting');
+	DropLibrary('UpgradeNested');
+end;
+
 // A failing upgrade, and what it leaves behind. This is the case that matters most: an upgrade that stops halfway must leave a
 // server that can be upgraded again once the broken script is fixed, not one that has to be rebuilt. The 1.0.2 upgrade raises
 // on its first statement - deliberately before it changes anything, because whether a half-finished upgrade's own catalog
@@ -378,8 +418,8 @@ begin
 	DropLibrary('UpgradeFail');
 end;
 
-if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeFail' }) then
+if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail' }) then
 	raise Error('The script left a library behind.');
 
-if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeFail' }) then
+if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail' }) then
 	raise Error('The script left a library version behind.');

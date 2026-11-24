@@ -1237,7 +1237,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	// create operator System.UpgradeVersions(const ALibraryName : Name, const ACurrentVersion : VersionNumber, const ATargetVersion : VersionNumber) : table { Version : VersionNumber };
+	// create operator System.UpgradeVersions(const ALibraryName : Name) : table { Version : VersionNumber };
 	public class UpgradeVersionsNode : TableNode
 	{
 		public override void DetermineDataType(Plan plan)
