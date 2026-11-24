@@ -25,7 +25,7 @@
 	less one, with the declaration line read from the catalog - so moving an operator within this file changes nothing.
 	The comment beside a statement gives its line within its own declaration.
 
-	All four target operators share one locator, because one document created them all. The line is what says which
+	All five target operators share one locator, because one document created them all. The line is what says which
 	operator a stopped process is in; the locator only tells an operator apart from the ad-hoc program that calls it.
 
 	What is not here. Debug.RunTo, Debug.StepIntoSpecific and Debug.GetStepIntoOperators do not exist - commented out
@@ -82,6 +82,21 @@ begin
 	raise Error('TestDebugStepRaiser raised on purpose');		// declaration line 4
 end;
 
+// The operator the second half of the Error-column case stops inside. TryExceptNode sets the program's error variable
+// as it catches, and clears it only once the handler has run, so a plain breakpoint inside the handler reports a value
+// in the Error column of Debug.GetProcesses with nothing having asked to break on the exception at all. Its own raise
+// is caught here, so the operator returns normally and the process is left running whatever happens to the assertions.
+create operator TestDebugStepHandler(AValue : Integer)			// declaration line 1
+begin
+	var LHandled := 0;
+	try
+		raise Error('TestDebugStepHandler raised on purpose');
+	except
+		on E : Error do
+			LHandled := AValue + 1;								// declaration line 8: the statement inside the handler
+	end;
+end;
+
 // Waits for a process to stop, with a budget, so that a stop that never comes fails here and says which case was
 // waiting rather than ending the script in the harness's timeout with nothing to read. Not Debug.WaitForPause(), which
 // blocks with no timeout of its own and is already covered by DebugBreakpoints.
@@ -121,9 +136,9 @@ Debug.Start();
 if not exists (Debug.GetDebuggers() where Session_ID = SessionID()) then
 	raise Error('Debug.Start did not start a debugger for this session');
 
-// The one locator all four operators carry, and the declaration line of each, which is what tells them apart.
+// The one locator all five operators carry, and the declaration line of each, which is what tells them apart.
 // OperatorName is qualified with the session's current library, which is General for a session that named no default
-// library, so the name is matched rather than compared. One guard covers all four reads: the four operators are created
+// library, so the name is matched rather than compared. One guard covers all five reads: the five operators are created
 // the same way in the same script, so a catalog read that finds one finds all of them. Without it the first failure
 // would be a nil encountered where a value was expected, because [] on an empty table yields nil rather than raising.
 if not exists (Operators where OperatorName like '%TestDebugStepOuter') then
@@ -134,6 +149,7 @@ var LOuterDeclared := (Operators where OperatorName like '%TestDebugStepOuter')[
 var LInnerDeclared := (Operators where OperatorName like '%TestDebugStepInner')[].Line;
 var LLoopDeclared := (Operators where OperatorName like '%TestDebugStepLoop')[].Line;
 var LRaiserDeclared := (Operators where OperatorName like '%TestDebugStepRaiser')[].Line;
+var LHandlerDeclared := (Operators where OperatorName like '%TestDebugStepHandler')[].Line;
 
 // A declaration line of 0, which is what an operator locator rather than a document locator gives, leaves the relative
 // line as it is; the bases below make the arithmetic right either way, as DebugBreakpoints does.
@@ -141,6 +157,7 @@ var LOuterBase := if LOuterDeclared < 1 then 1 else LOuterDeclared;
 var LInnerBase := if LInnerDeclared < 1 then 1 else LInnerDeclared;
 var LLoopBase := if LLoopDeclared < 1 then 1 else LLoopDeclared;
 var LRaiserBase := if LRaiserDeclared < 1 then 1 else LRaiserDeclared;
+var LHandlerBase := if LHandlerDeclared < 1 then 1 else LHandlerDeclared;
 
 var LOuterFirst := LOuterBase + 1;		// the first line of TestDebugStepOuter's body
 var LOuterCall := LOuterBase + 3;		// the statement that calls TestDebugStepInner
@@ -152,6 +169,7 @@ var LInnerLast := LInnerBase + 5;		// the last line of the declaration
 var LLoopFirst := LLoopBase + 1;		// the first line of TestDebugStepLoop's body
 var LLoopAfter := LLoopBase + 9;		// the statement reached only once its loop ends
 var LRaise := LRaiserBase + 3;			// the raise statement
+var LHandlerBody := LHandlerBase + 7;	// the statement inside TestDebugStepHandler's except handler
 
 // Break on start, and stepping from there into the operator the program calls.
 begin
@@ -370,8 +388,8 @@ begin
 
 		// The Error column carries the raised error itself, a D4 Error value over the CLR exception the engine threw
 		// (DebugGetProcessesNode assigns process.Error straight into it). This is the only case in the suite that reads
-		// it with a value in it: for a process stopped any other way the program's error variable is nil, and the
-		// column with it.
+		// it with a value in it: the error variable is set only while a raise unwinds or an except handler runs
+		// (RaiseNode and TryExceptNode), and no other case here stops in either.
 		var LError := (Debug.GetProcesses() where Process_ID = LProcessID)[].Error;
 		if IsNil(LError) then
 			raise Error('The process stopped by break on exception reports nothing in the Error column of Debug.GetProcesses');
@@ -385,6 +403,41 @@ begin
 	finally
 		StopProcess(LProcessID);
 	end;
+end;
+
+// And the other half of the Error column: what fills it is not break-on-exception but the program's error variable,
+// which an except handler leaves set for as long as it runs. A plain breakpoint inside the handler therefore reports
+// an error too, with DidBreak true, because a breakpoint is what stopped it. Break on exception is off again by here,
+// so the breakpoint is the only thing that can stop this process; were the flag still on, the stop would be at the
+// raise and the line assertion below would say so.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LHandlerBody, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint inside the except handler as cleared, not set');
+
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		ExecuteAsync(LProcessID, 'TestDebugStepHandler(2);');
+		TestDebugStepAwait(LProcessID, 'the breakpoint inside the except handler, at line ' + LHandlerBody.ToString());
+
+		var LHandlerLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LHandlerLine <> LHandlerBody then
+			raise Error('The process stopped at line ' + LHandlerLine.ToString() + ', not at the statement inside the except handler on line ' + LHandlerBody.ToString());
+		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
+			raise Error('The process stopped at the breakpoint inside the except handler does not report DidBreak');
+
+		var LHandledError := (Debug.GetProcesses() where Process_ID = LProcessID)[].Error;
+		if IsNil(LHandledError) then
+			raise Error('The process stopped inside the except handler reports nothing in the Error column of Debug.GetProcesses, so the handler does not leave the error variable set after all');
+		if IndexOf(LHandledError.Message, 'TestDebugStepHandler raised on purpose') < 0 then
+			raise Error('The Error column carries "' + LHandledError.Message + '", not the error the handler is handling');
+		Debug.Run();
+	finally
+		StopProcess(LProcessID);
+	end;
+
+	if Debug.ToggleBreakpoint(LLocator, LHandlerBody, -1) then
+		raise Error('Clearing the breakpoint inside the except handler reported it as set');
 end;
 
 // Detaching a process that is stopped lets it go. Debugger.Detach disowns the process and pulses the pause signal, and
@@ -441,6 +494,7 @@ end;
 
 drop operator TestDebugStepOnce(Integer, Boolean, String);
 drop operator TestDebugStepAwait(Integer, String);
+drop operator TestDebugStepHandler(Integer);
 drop operator TestDebugStepRaiser(Integer);
 drop operator TestDebugStepLoop(Integer);
 drop operator TestDebugStepOuter(Integer);
