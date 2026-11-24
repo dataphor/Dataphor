@@ -215,6 +215,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 
 	// operator RefreshLibraries(const ALibraryName : Name);
+	// NOTE: there is no such signature. SystemCatalog.d4 declares RefreshLibraries() with no arguments and this node ignores
+	// any, so the comment above is what is wrong; the declaration is a compatibility surface and stays as it is.
 	public class SystemRefreshLibrariesNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)

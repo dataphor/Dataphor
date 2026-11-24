@@ -1,0 +1,299 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Library administration coverage: settings, taking a library out of the server's list and putting it back, the operators that
+// are now only a message, and the errors an administrator meets. LibraryCoverage covers creating, renaming, dropping,
+// registering and unregistering a library and the descriptor round trip; LibraryDependencies covers the LibraryRequisites
+// table; LibraryLoadingTest (C#) covers loading a library with a real assembly. None of that is repeated here.
+//
+// Every library this script touches is one it creates, and each section drops what it created. The script opens no explicit
+// transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may make DropLibrary refuse inside one.
+//
+// An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the schema
+// code. Assertions below read the inner message out of E.Message, and where a numeric error code matters - error codes are a
+// compatibility surface - they find it in E.GetDetailedErrorDescription(), which flattens the whole chain and prints each
+// link as "Application:<code>".
+
+// Settings: the rows of the LibrarySettings catalog table, which reach AddLibrarySetting, UpdateLibrarySetting and
+// RemoveLibrarySetting through the catalog device session.
+begin
+	CreateLibrary(LibraryDescriptor('AdminSettings', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	insert table { row { 'AdminSettings' Library_Name, 'Alpha' Name, 'One' Value } } into LibrarySettings;
+	if LibrarySetting('AdminSettings', 'Alpha') <> 'One' then
+		raise Error('Inserting a library setting failed.');
+
+	update LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Alpha' set { Value := 'Two' };
+	if LibrarySetting('AdminSettings', 'Alpha') <> 'Two' then
+		raise Error('Changing the value of a library setting failed.');
+
+	// Renaming a setting is the arm of UpdateLibrarySetting that removes the old tag and adds a new one rather than updating
+	// the tag's value in place.
+	update LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Alpha' set { Name := 'Beta' };
+	if exists (LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Alpha') then
+		raise Error('Renaming a library setting left the old name behind.');
+
+	if LibrarySetting('AdminSettings', 'Beta') <> 'Two' then
+		raise Error('Renaming a library setting did not carry its value across.');
+
+	delete LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Beta';
+	if exists (LibrarySettings where Library_Name = 'AdminSettings') then
+		raise Error('Deleting a library setting failed.');
+
+	DropLibrary('AdminSettings');
+end;
+
+// Resolving a setting by name alone. LibrarySetting(name) walks the current session's library name resolution path and returns
+// the first unambiguous value, so the session's current library has to be set for it to have a path to walk. AdminSetC requires
+// AdminSetA and AdminSetB, which therefore sit at the same level of that path: a setting on one of them resolves, and a setting
+// on both is ambiguous.
+begin
+	CreateLibrary(LibraryDescriptor('AdminSetA', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('AdminSetB', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('AdminSetC', VersionNumber(1, 0), "", list(FileReference){}, { LibraryReference('AdminSetA', VersionNumber(1, 0)), LibraryReference('AdminSetB', VersionNumber(1, 0)) }));
+	insert table { row { 'AdminSetA' Library_Name, 'Theme' Name, 'FromA' Value } } into LibrarySettings;
+	RegisterLibrary('AdminSetC');
+
+	SetLibrary('AdminSetC');
+
+	if LibrarySetting('Theme') <> 'FromA' then
+		raise Error('Resolving a setting defined in one required library failed.');
+
+	if not IsNil(LibrarySetting('AdminNoSuchSetting')) then
+		raise Error('Resolving a setting no library in the path defines returned a value.');
+
+	insert table { row { 'AdminSetB' Library_Name, 'Theme' Name, 'FromB' Value } } into LibrarySettings;
+
+	begin
+		var LCaught : String := '';
+		try
+			var LValue : String := LibrarySetting('Theme');
+		except on E : Error do
+			LCaught := E.Message;
+		end;
+		if IndexOf(LCaught, 'Setting "Theme" is defined in at least the following libraries: AdminSetA, AdminSetB.') < 0 then
+			raise Error('A setting defined in two libraries at the same level of the resolution path did not raise 113230: ' + LCaught);
+	end;
+
+	// Back to General, not to TestFramework.Coverage.Scripts: that library holds this document but is not registered on the
+	// coverage server, and SetLibrary on an unregistered library raises.
+	SetLibrary('General');
+	if LibraryName() <> 'General' then
+		raise Error('SetLibrary back to General failed.');
+
+	delete LibrarySettings where Library_Name in { 'AdminSetA', 'AdminSetB' };
+	UnregisterLibrary('AdminSetC');
+	UnregisterLibrary('AdminSetA');
+	UnregisterLibrary('AdminSetB');
+	DropLibrary('AdminSetC');
+	DropLibrary('AdminSetA');
+	DropLibrary('AdminSetB');
+end;
+
+// Taking a library out of the server's list and putting it back. DetachLibrary removes the library from the catalog and leaves
+// its folder on disk; RefreshLibraries rescans the library directory and attaches whatever it finds that the catalog does not
+// have, which is the only way a D4 script reaches that operator. Its other half - dropping a library whose folder has gone -
+// needs a folder deleted behind the server's back and belongs to debt-library-attach-from-a-directory.
+begin
+	CreateLibrary(LibraryDescriptor('AdminDetach', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('AdminDetach');
+	UnregisterLibrary('AdminDetach');
+
+	DetachLibrary('AdminDetach');
+	if exists (Libraries where Name = 'AdminDetach') then
+		raise Error('DetachLibrary left the library in the catalog.');
+
+	RefreshLibraries();
+	if not exists (Libraries where Name = 'AdminDetach') then
+		raise Error('RefreshLibraries did not re-attach the detached library from its folder.');
+
+	// Re-attached before dropping: a detached library is not in the catalog, so DropLibrary on it would raise, and the folder
+	// DetachLibrary left behind would stay on disk.
+	DropLibrary('AdminDetach');
+	if exists (Libraries where Name = 'AdminDetach') then
+		raise Error('DropLibrary after a re-attach failed.');
+end;
+
+// The three operators that are now only a message. Each raises, whatever library it is given.
+begin
+	var LCaught : String := '';
+	try
+		LoadLibrary('General');
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, 'LoadLibrary is obsolete. Use RegisterLibrary instead.') < 0 then
+		raise Error('LoadLibrary did not report itself obsolete: ' + LCaught);
+
+	LCaught := '';
+	try
+		UnloadLibrary('General');
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, 'UnloadLibrary is obsolete. Use UnregisterLibrary instead.') < 0 then
+		raise Error('UnloadLibrary did not report itself obsolete: ' + LCaught);
+
+	LCaught := '';
+	try
+		SaveLibraryCatalog('General');
+	except on E : Error do
+		LCaught := E.Message;
+	end;
+	if IndexOf(LCaught, 'SaveLibraryCatalog is obsolete. Use ScriptCatalog instead.') < 0 then
+		raise Error('SaveLibraryCatalog did not report itself obsolete: ' + LCaught);
+end;
+
+// Registering a library that is already registered is not an error: both RegisterLibrary and EnsureLibraryRegistered check
+// first and do nothing, so neither raises LibraryAlreadyRegistered (113187) and the library stays registered once.
+begin
+	CreateLibrary(LibraryDescriptor('AdminReRegister', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('AdminReRegister');
+	RegisterLibrary('AdminReRegister');
+	EnsureLibraryRegistered('AdminReRegister');
+
+	if (Count from row from (LoadedLibraries where Name = 'AdminReRegister' group add { Count() Count })) <> 1 then
+		raise Error('Registering an already registered library did not leave it registered exactly once.');
+
+	UnregisterLibrary('AdminReRegister');
+	DropLibrary('AdminReRegister');
+end;
+
+// The errors an administrator meets. Error codes are a compatibility surface, so each is pinned by the code in the flattened
+// error chain as well as by its message.
+begin
+	CreateLibrary(LibraryDescriptor('AdminErrors', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('AdminErrors');
+
+	var LCaught : String := '';
+	try
+		DropLibrary('AdminErrors');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, '113196') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be dropped.') < 0) then
+		raise Error('Dropping a registered library did not raise 113196: ' + LCaught);
+
+	LCaught := '';
+	try
+		DetachLibrary('AdminErrors');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, '113231') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be detached.') < 0) then
+		raise Error('Detaching a registered library did not raise 113231: ' + LCaught);
+
+	UnregisterLibrary('AdminErrors');
+
+	LCaught := '';
+	try
+		UnregisterLibrary('AdminErrors');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, '113242') < 0) or (IndexOf(LCaught, "Library 'AdminErrors' is not registered.") < 0) then
+		raise Error('Unregistering a library that is not registered did not raise 113242: ' + LCaught);
+
+	DropLibrary('AdminErrors');
+
+	// A library the catalog has never heard of is an unresolved object name, not a library-specific error.
+	LCaught := '';
+	try
+		DropLibrary('AdminNoSuchLibrary');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, '113104') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
+		raise Error('Dropping a library that does not exist did not raise 113104: ' + LCaught);
+
+	LCaught := '';
+	try
+		RegisterLibrary('AdminNoSuchLibrary');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, '113104') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
+		raise Error('Registering a library that does not exist did not raise 113104: ' + LCaught);
+end;
+
+// File references, on a library that is deliberately left unregistered: on a registered library both arms call
+// RegisterLibraryFiles, which loads every file marked as an assembly, and this script has no assembly to offer.
+begin
+	CreateLibrary(LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	// The LibraryFiles table is what reaches AddLibraryFile and RemoveLibraryFile; SetLibraryDescriptor, below, replaces the
+	// whole library object instead.
+	insert table { row { 'AdminFiles' Library_Name, 'AdminNotes.txt' FileName, false IsAssembly } } into LibraryFiles;
+	if not exists (LibraryFiles where Library_Name = 'AdminFiles' and FileName = 'AdminNotes.txt' and not IsAssembly) then
+		raise Error('Inserting a library file failed.');
+
+	if GetLibraryDescriptor('AdminFiles') <> LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", { FileReference('AdminNotes.txt', false) }, list(LibraryReference){}) then
+		raise Error('An inserted library file did not reach the library descriptor.');
+
+	delete LibraryFiles where Library_Name = 'AdminFiles' and FileName = 'AdminNotes.txt';
+	if exists (LibraryFiles where Library_Name = 'AdminFiles') then
+		raise Error('Deleting a library file failed.');
+
+	if GetLibraryDescriptor('AdminFiles') <> LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}) then
+		raise Error('A deleted library file stayed in the library descriptor.');
+
+	// The same ground through the descriptor: a file reference set this way shows up in the LibraryFiles table, and clearing
+	// the descriptor's file list takes the row away again.
+	SetLibraryDescriptor('AdminFiles', LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", { FileReference('AdminManual.txt', false) }, list(LibraryReference){}));
+	if not exists (LibraryFiles where Library_Name = 'AdminFiles' and FileName = 'AdminManual.txt') then
+		raise Error('A file reference set through SetLibraryDescriptor did not reach the LibraryFiles table.');
+
+	SetLibraryDescriptor('AdminFiles', LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	if exists (LibraryFiles where Library_Name = 'AdminFiles') then
+		raise Error('Clearing the descriptor file list left the LibraryFiles row behind.');
+
+	DropLibrary('AdminFiles');
+end;
+
+// Required and dependent libraries. AdminDepD requires AdminDepC, which requires AdminDepA and AdminDepB, so the one-argument
+// forms - which are recursive - see the whole chain and the two-argument form with false sees only one level of it.
+// DependentLibraries reads the loaded libraries, so the chain has to be registered for it to answer.
+begin
+	CreateLibrary(LibraryDescriptor('AdminDepA', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('AdminDepB', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('AdminDepC', VersionNumber(1, 0), "", list(FileReference){}, { LibraryReference('AdminDepA', VersionNumber(1, 0)), LibraryReference('AdminDepB', VersionNumber(1, 0)) }));
+	CreateLibrary(LibraryDescriptor('AdminDepD', VersionNumber(1, 0), "", list(FileReference){}, { LibraryReference('AdminDepC', VersionNumber(1, 0)) }));
+	RegisterLibrary('AdminDepD');
+
+	if (Count from row from (RequiredLibraries('AdminDepD') group add { Count() Count })) <> 3 then
+		raise Error('RequiredLibraries did not recurse into the whole chain.');
+
+	if not exists (RequiredLibraries('AdminDepD') where Library_Name = 'AdminDepC' and Level = 1) then
+		raise Error('RequiredLibraries did not report the directly required library at level 1.');
+
+	if not exists (RequiredLibraries('AdminDepD') where Library_Name = 'AdminDepA' and Level = 2) then
+		raise Error('RequiredLibraries did not report an indirectly required library at level 2.');
+
+	if (Count from row from (RequiredLibraries('AdminDepD', false) group add { Count() Count })) <> 1 then
+		raise Error('RequiredLibraries(name, false) recursed.');
+
+	if (Count from row from (DependentLibraries('AdminDepA') group add { Count() Count })) <> 2 then
+		raise Error('DependentLibraries did not recurse into the whole chain.');
+
+	if not exists (DependentLibraries('AdminDepA') where Library_Name = 'AdminDepC' and Level = 1) then
+		raise Error('DependentLibraries did not report the directly dependent library at level 1.');
+
+	if not exists (DependentLibraries('AdminDepA') where Library_Name = 'AdminDepD' and Level = 2) then
+		raise Error('DependentLibraries did not report an indirectly dependent library at level 2.');
+
+	if (Count from row from (DependentLibraries('AdminDepA', false) group add { Count() Count })) <> 1 then
+		raise Error('DependentLibraries(name, false) recursed.');
+
+	UnregisterLibrary('AdminDepD');
+	UnregisterLibrary('AdminDepC');
+	UnregisterLibrary('AdminDepA');
+	UnregisterLibrary('AdminDepB');
+	DropLibrary('AdminDepD');
+	DropLibrary('AdminDepC');
+	DropLibrary('AdminDepA');
+	DropLibrary('AdminDepB');
+end;
+
+if exists (Libraries where Name in { 'AdminSettings', 'AdminSetA', 'AdminSetB', 'AdminSetC', 'AdminDetach', 'AdminReRegister', 'AdminErrors', 'AdminFiles', 'AdminDepA', 'AdminDepB', 'AdminDepC', 'AdminDepD' }) then
+	raise Error('The script left a library behind.');

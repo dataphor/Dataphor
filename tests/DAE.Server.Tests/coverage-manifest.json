@@ -48,6 +48,7 @@
 { "script": "KeyAffectingUpdate", "status": "pass" },
 { "script": "LanguageConstructs", "status": "pass" },
 { "script": "Lexer", "status": "pass" },
+{ "script": "LibraryAdministration", "status": "pass" },
 { "script": "LibraryCoverage", "status": "pass" },
 { "script": "LibraryDependencies", "status": "pass" },
 { "script": "LibraryDomains", "status": "known-failure", "ticket": "test-pre-3-1-scripts-policy", "error": "\",\" or \")\" expected" },
