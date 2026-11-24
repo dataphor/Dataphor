@@ -1,0 +1,44 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Stopping a process while asynchronous work on it is finishing
+
+	ExecuteAsync(<process ID>, <script>) runs the script on a worker thread; when the script ends, the worker cleans up
+	after it on that same thread, and the cleanup disposes the ServerScript the target process holds. StopProcess
+	disposes the process, which walks the same scripts and batches. The two have to be serialized against each other,
+	and until ServerProcess.Dispose took the process's call latch they were not: a StopProcess landing in the window
+	between the script's last call and the worker's cleanup found an idle process, returned at once, and ran down the
+	same object graph beside the worker. The teardown loops are check-then-act over collections the other thread is
+	emptying, so one of them dereferenced an emptied slot, and what a D4 author saw was the engine's message for any
+	null dereference under a plan node - "A nil was encountered where a value was expected" - reported against the
+	StopProcess statement. The statement's argument was never the problem.
+
+	The two 20 ms sleeps are what line the worker's cleanup up with the stop, and 200 iterations are what make a rare
+	window certain to be hit. Both are measured, not chosen: on one slow development laptop in Debug on 2026-11-23,
+	without the latch this shape failed all five of five consecutive runs, each within 2-3 s, and a probe that counted
+	the failures instead of raising saw 15 and 29 of them over 400 iterations, the first at iteration 22 and 65 - about
+	one iteration in 20, so 200 leaves a wide margin. With the latch it passed five consecutive runs at about 8 s of
+	case time. Do not shrink the loop or the sleeps without remeasuring against an engine whose Dispose does not take
+	the latch: a loop too short to hit the window is a test that reports nothing.
+*/
+
+begin
+	var LIndex := 0;
+	var LProcessID := 0;
+	while LIndex < 200 do
+	begin
+		LProcessID := StartProcess();
+		try
+			ExecuteAsync(LProcessID, 'Sleep(20);');
+			// Long enough that the asynchronous script is finishing, and its worker about to clean up after it, when
+			// the StopProcess below runs.
+			Sleep(20);
+		finally
+			StopProcess(LProcessID);
+		end;
+		LIndex := LIndex + 1;
+	end;
+end;

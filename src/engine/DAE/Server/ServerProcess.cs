@@ -83,6 +83,21 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected override void Dispose(bool disposing)
 		{
+			// Disposal is a call on the process like any other, and takes the latch BeginCall/EndCall take: two threads
+			// must never run down this object graph at once. Engine.TerminateProcess calls TerminateProcessThread first,
+			// but that waits only for ExecutingThread, and the cleanup ExecuteAsync's worker runs once its script has
+			// finished - SystemExecuteAsyncNode.ExecuteResults, which disposes the ServerScript - holds no executing
+			// thread. A StopProcess landing in that window used to tear the scripts and batches collections apart and
+			// report the resulting null dereference as a nil at the StopProcess statement.
+			// Cost: Dispose now waits for a call in flight on the process, bounded by Engine.ProcessWaitTimeout - a
+			// thread parked in BeginCall on the concurrent-process throttle has not raised the executing-thread count, so
+			// TerminateProcessThread returns at once and leaves the whole wait to this lock.
+			lock (_syncHandle)
+				InternalDispose(disposing);
+		}
+
+		private void InternalDispose(bool disposing)
+		{
 			try
 			{
 				try
@@ -408,6 +423,14 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private void UnprepareScripts()
 		{
+			// NOTE: check-then-act over a collection another thread could be emptying - ServerChildObjects locks each
+			// operation but not the pair, so Count can read non-zero and DisownAt(0) then find the slot already cleared.
+			// Safe only because Dispose, the one caller, now holds the process's call latch, so nothing else is running
+			// through the process. UnpreparePlans above and ServerScript.UnprepareBatches have the same shape and the
+			// same protection: each is reached only from a Dispose that runs under this latch. If another path that
+			// disposes these collections concurrently is ever found, the fix is an atomic "disown the first item or
+			// report empty" primitive on ServerChildObjects, not a second lock here: two threads running down the same
+			// object graph is the defect, and a lock at the crash site only makes it quiet.
 			Exception exception = null;
 			while (_scripts.Count > 0)
 			{
