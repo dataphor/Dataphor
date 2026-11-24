@@ -191,15 +191,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ITable table = null;
 				try
 				{
+					// Everything above this depth is released on the way out; read before the result slot is pushed, so
+					// that the result slot is one of them.
+					int releaseDepth = program.Stack.Count;
 					program.Stack.Push(null); // result
 					int stackDepth = program.Stack.Count;
 
 					// The three blocks share one scope above the result slot - the initialization block deliberately leaves
 					// its variables for the aggregation and finalization blocks to use - so the release that covers them all
-					// belongs here, above stackDepth, on every path out. The result slot is below stackDepth and is returned
-					// rather than released; the aggregate column slots are above it but are popped by the inner finally
-					// below before this one runs, so they are never released here - they hold values borrowed from the row
-					// the cursor selects into, and releasing one would be a use-after-free.
+					// belongs here, on every path out. The result slot is in that region too, and has to be: a path that
+					// does not reach the return below hands its value to nobody, so an aggregate whose initialization
+					// assigned result and whose aggregation then raised orphaned that value. The return nulls the slot, so
+					// a result the caller did take is not released. The aggregate column slots are above the result slot but
+					// are popped by the inner finally below before this one runs, so they are never released here - they
+					// hold values borrowed from the row the cursor selects into, and releasing one would be a
+					// use-after-free.
 					try
 					{
 						// Initialization
@@ -289,11 +295,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						catch (ExitError){}
 						
-						return program.Stack.Peek(program.Stack.Count - stackDepth);
+						// Hand the result to the caller, nulling the slot it came out of: the caller owns the value from here,
+						// and the release in the finally below must not take it back.
+						int resultOffset = program.Stack.Count - stackDepth;
+						object result = program.Stack.Peek(resultOffset);
+						program.Stack.Poke(resultOffset, null);
+						return result;
 					}
 					finally
 					{
-						program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
+						program.Stack.ReleaseAbove(releaseDepth, program.ValueManager);
 					}
 				}
 				finally

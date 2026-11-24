@@ -66,6 +66,12 @@ namespace Alphora.Dataphor.DAE.Runtime
 		/// ownership rule this is the other half of: a slot owns its value, and whatever takes a value out of a slot -
 		/// an assignment, or the scope that ends - releases it.
 		/// </para>
+		/// <para>
+		/// NOTE: the entry depth and this call must be read with AllowExtraWindowAccess in the same state, because Count
+		/// is window-relative only while it is off. Every caller today reads and releases with it off; one that recorded a
+		/// depth outside an extra-window-access region and released inside one would walk below its own window and release
+		/// another window's values.
+		/// </para>
 		/// </remarks>
 		public void ReleaseAbove(int depth, IValueManager manager)
 		{

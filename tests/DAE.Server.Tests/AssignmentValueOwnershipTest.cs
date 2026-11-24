@@ -16,10 +16,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference
 	/// through AssigningThroughAScalarProperty are the limits of that rule: slots whose value belongs to something
 	/// else, which an assignment must leave alone, and the two shapes in which a call used to hand one caller value
-	/// to two callee slots. The last four cases are the other half of the same ownership rule: a scope releases the
+	/// to two callee slots. The last six cases are the other half of the same ownership rule: a scope releases the
 	/// values of the variables it declared. That release used to be a statement the compiler appended to the end of
 	/// the block, so only control reaching the end of the block ran it, and a raise, an exit, a break or a continue
-	/// left every value behind (bug-an-error-inside-a-block-leaks-its-binary-values).
+	/// left every value behind (bug-an-error-inside-a-block-leaks-its-binary-values). The last two of those cover
+	/// the one variable such a release can miss: an operator's result, which the paths that do reach the caller hand
+	/// over rather than release.
 	/// </summary>
 	/// <remarks>
 	/// The leak cases assert on Diagnostics.StreamCount(), which reports how many streams the server is holding, read
@@ -420,6 +422,64 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			ExecuteScript("create operator ZBodyRaise() begin var LB : Binary := Binary('0001'); raise Error('ZBodyRaise'); end;");
 
 			AssertRaisingScriptLeavesNoStreams("ZBodyRaise();", "ZBodyRaise");
+		}
+
+		/// <summary>
+		/// A function that assigns its result and then raises. The result is a variable of the body like any other, but
+		/// the two sites that release a body's variables have to leave it alone on the path that hands it to the caller,
+		/// so it is the one slot a release driven by stack depth can miss. This is the operator-call site.
+		/// </summary>
+		[Test]
+		public void AFunctionLeftByARaiseReleasesTheResultItAssigned()
+		{
+			ExecuteScript("create operator ZResultRaise() : Binary begin result := Binary('0001'); raise Error('ZResultRaise'); end;");
+
+			AssertRaisingScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB : Binary := ZResultRaise();
+					end;
+				",
+				"ZResultRaise"
+			);
+		}
+
+		/// <summary>
+		/// The same for the aggregate-call site, whose result slot is filled by one block and read after another: the
+		/// initialization assigns it and the aggregation then raises, so the finalization and the read never happen. The
+		/// aggregate is invoked over a table literal, so the case needs no table of its own.
+		/// </summary>
+		[Test]
+		public void AnAggregateLeftByARaiseReleasesTheResultItAssigned()
+		{
+			ExecuteScript
+			(
+				@"
+					create aggregate operator ZAggResultRaise(AValue : Integer) : Binary
+					initialization
+					begin
+						result := Binary('0001');
+					end
+					aggregation
+					begin
+						raise Error('ZAggResultRaise');
+					end
+					finalization
+					begin
+					end;
+				"
+			);
+
+			AssertRaisingScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB : Binary := ZAggResultRaise(AValue from table { row { 1 AValue }, row { 2 } });
+					end;
+				",
+				"ZAggResultRaise"
+			);
 		}
 
 		/// <summary>Runs one of the loop forms above, failing with the form's name rather than only the engine's error.</summary>

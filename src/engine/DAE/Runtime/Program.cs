@@ -327,8 +327,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// at the moment it reappeared, and the count is already readable (ServerStreamManager.StreamCount, which the
 		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because two leaks would
 		// still fire it rather than anything new: an operator argument released by the wrong owner
-		// (bug-an-operator-argument-is-released-by-the-wrong-owner), and a foreach over a list, which never releases
-		// the list it evaluated. Add it once both have landed.
+		// (bug-an-operator-argument-is-released-by-the-wrong-owner), and a list value releasing none of its elements,
+		// which costs one stream per element of any list of Binary or Graphic
+		// (bug-a-list-value-never-releases-its-elements). Add it once both have landed.
 		public void Stop(DataParams paramsValue)
 		{
 			try

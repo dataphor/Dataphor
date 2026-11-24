@@ -456,9 +456,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							// a variable the script declared leaves that variable holding the list's last element - a value the
 							// list owns - and the scope that declared the variable then releases it (Stack.ReleaseAbove, or the
 							// statement the compiler used to append to the end of the block, which did the same on the one path
-							// it covered). Nothing breaks today, because this branch never releases the list it evaluated, so
-							// the element is released once either way; measured over five shapes, all of which ran. Whoever
-							// closes that leak must null the slot here in the same change, or the element is released twice.
+							// it covered). Nothing breaks today, because this branch never releases the list it evaluated and a
+							// list releases none of its elements either, so the element is released once in total; measured over
+							// seven shapes, all of which ran. Both of those are bug-a-list-value-never-releases-its-elements, and
+							// closing either without nulling the slot here releases that element twice.
 							if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
 								program.Stack.Pop();
 						}
@@ -1263,6 +1264,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						program.ServerProcess.PushGlobalContext();
 					try
 					{
+						// Everything above this depth is released on the way out; read before the result slot is pushed, so
+						// that the result slot is one of them and the operand slots below it are not.
+						int releaseDepth = program.Stack.Count;
+
 						// Prepare the result
 						if (_allocateResultNode != null)
 							_allocateResultNode.Execute(program);
@@ -1278,9 +1283,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							catch (ExitError){}
 
-							// Return the result
+							// Return the result, nulling the slot it came out of: the caller owns the value from here, and the
+							// release below must not take it back.
 							if (_allocateResultNode != null)
-								return program.Stack[program.Stack.Count - stackDepth];
+							{
+								int resultOffset = program.Stack.Count - stackDepth;
+								object result = program.Stack[resultOffset];
+								program.Stack.Poke(resultOffset, null);
+								return result;
+							}
 
 							return null;
 						}
@@ -1300,14 +1311,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							for (int index = 0; index < Operator.Operands.Count; index++)
 								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
 
-							// Then release whatever the body left above its own entry depth, on every path out. An operator
+							// Then release whatever the body left above the operand slots, on every path out. An operator
 							// body is not a FrameNode - the parser hands the body's statement list over directly - so the
 							// body's own locals are leftovers in this call's stack window rather than frame variables, and
-							// this is the site that owns them. stackDepth was recorded just above the operand and result
-							// slots, so neither is touched: the operands belong to the caller or to the instruction's
-							// cleanup, which the hand-back above has just given them to, and the result has already been
-							// read by the return in the try.
-							program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
+							// this is the site that owns them. The result slot is in that region too, and has to be: a body
+							// left by a raise never reaches the return that hands its value to the caller, so a function
+							// that assigned result and then raised orphaned that value. The return above nulls the slot, so
+							// a result the caller did take is not released here. The operands are below releaseDepth and are
+							// left alone: they belong to the caller or to the instruction's cleanup, which the hand-back
+							// above has just given them to.
+							program.Stack.ReleaseAbove(releaseDepth, program.ValueManager);
 						}
 					}
 					finally
