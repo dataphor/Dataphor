@@ -1,0 +1,447 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Debugger Stepping
+
+	What a person does with a program the debugger has already stopped: move it one statement at a time, stop a program
+	that is only running, stop a program on an error, and let it go again without leaving it stuck. DebugBreakpoints
+	covers getting a program stopped in the first place and reading it while it is held, and DebugLibrary the half that
+	needs no stop at all. Three separate files deliberately: each is self-contained, each gets its own case name in the
+	run, and a failure in one does not hide the others.
+
+	Read DebugBreakpoints.d4 first. Its locator convention applies here unchanged. An operator a script creates carries
+	the locator of the script that created it, which under the coverage harness is the document locator
+	doc:Coverage.Scripts:DebugStepping, and the lines of its body are compiled relative to its own create operator
+	line - so the line the debugger reports for a statement in the body is that statement's line in this file. Both
+	halves come out of the Operators catalog table, which is why the manifest entry turns implicit transactions off: a
+	catalog store view answers from committed catalog data only, and the harness runs a whole document inside the one
+	implicit transaction of its outer ExecuteScript batch, so with them on the read below finds nothing for an operator
+	this script has just created.
+
+	Every line asserted on below is therefore computed as the declaration line plus the line within the declaration,
+	less one, with the declaration line read from the catalog - so moving an operator within this file changes nothing.
+	The comment beside a statement gives its line within its own declaration.
+
+	All four target operators share one locator, because one document created them all. The line is what says which
+	operator a stopped process is in; the locator only tells an operator apart from the ad-hoc program that calls it.
+
+	What is not here. Debug.RunTo, Debug.StepIntoSpecific and Debug.GetStepIntoOperators do not exist - commented out
+	in both Debug.d4 and DebugNodes.cs, and called by nothing, the IDE included. Debugging a second session, which no
+	D4 operator can reach from a script, belongs to debt-debugger-coverage.
+*/
+
+// The two operators the stepping cases step through: an outer one that calls an inner one, so that stepping over the
+// call and stepping into it are distinguishable. Integer arithmetic only and no table access, deliberately: a process
+// stopped inside either holds no lock that the script's own process could then wait for, and both finish on their own
+// even if every Debug call below does nothing.
+create operator TestDebugStepInner(AValue : Integer) : Integer	// declaration line 1
+begin
+	var LDoubled := AValue * 2;
+	var LPlusOne := LDoubled + 1;
+	result := LPlusOne;											// declaration line 5: the last statement
+end;
+
+create operator TestDebugStepOuter(AValue : Integer)			// declaration line 1
+begin
+	var LFirst := AValue + 1;
+	var LSecond := TestDebugStepInner(LFirst);					// declaration line 4: the call
+	var LThird := LSecond + 1;									// declaration line 5: where stepping over the call lands
+	LThird := LThird * 2;
+	LThird := LThird - 1;
+end;															// declaration line 8
+
+// The operator the Debug.Pause case stops in flight. A million iterations, measured on one slow development laptop in
+// Debug at about 1.5 s on its own and about 2 s with a debugger attached, where every breakable node takes the
+// debugger's lock. The case asks for the pause 100 ms in, and the counter read off the stopped stack then stood at
+// about 30,000 - three per cent of the way through - so the margin is roughly thirtyfold. It counts rather than sums
+// because D4's Integer is signed 32 bits and a sum of this many indices overflows long before the loop is long enough
+// to be worth pausing. It also ends on its own, so a Pause that never takes effect fails an assertion in the case
+// rather than ending the script in the harness's timeout.
+// NOTE: that margin is the one timing assumption in this script. If a faster machine or a Release build ever lets the
+// loop finish inside the 100 ms before the pause is asked for, the case fails on its own assertion - it reports the
+// stop as being at the statement after the loop, with DidBreak set - and the fix is to raise the iteration count here.
+create operator TestDebugStepLoop(ACount : Integer)				// declaration line 1
+begin
+	var LCounted := 0;
+	var LIndex := 0;
+	while LIndex < ACount do									// declaration line 5
+	begin
+		LCounted := LCounted + 1;
+		LIndex := LIndex + 1;
+	end;
+	LCounted := LCounted + 1;									// declaration line 10: reached only once the loop ends
+end;
+
+// The operator the break-on-exception case raises in.
+create operator TestDebugStepRaiser(AValue : Integer)			// declaration line 1
+begin
+	var LDoubled := AValue * 2;
+	raise Error('TestDebugStepRaiser raised on purpose');		// declaration line 4
+end;
+
+// Waits for a process to stop, with a budget, so that a stop that never comes fails here and says which case was
+// waiting rather than ending the script in the harness's timeout with nothing to read. Not Debug.WaitForPause(), which
+// blocks with no timeout of its own and is already covered by DebugBreakpoints.
+// NOTE: polls the process, not the debugger. Debug.GetDebuggers().IsPaused is true as soon as a pause has been
+// requested and every attached process that is running is parked - which a debugger whose one attached process has
+// already finished satisfies with both counts at zero.
+create operator TestDebugStepAwait(AProcessID : Integer, AWhat : String)
+begin
+	var LWaited := 0;
+	while (not exists (Debug.GetProcesses() where Process_ID = AProcessID and IsPaused)) and (LWaited < 10000) do
+	begin
+		Sleep(50);
+		LWaited := LWaited + 50;
+	end;
+	if not exists (Debug.GetProcesses() where Process_ID = AProcessID and IsPaused) then
+		raise Error('The debugged process never stopped waiting for ' + AWhat);
+end;
+
+// One step and the wait that has to follow it, as one operation: Debug.StepInto and Debug.StepOver both let the process
+// go again (Debugger.InternalRun clears the pause request), so when the call returns the process is running and reports
+// itself not stopped until it reaches the next breakable node. Returns the line it then reports.
+// NOTE: a step on a debugger that is not paused does nothing at all - Debugger.StepOver and Debugger.StepInto both
+// guard on IsPaused and return - so the wait is also what turns a step that did nothing into a named error rather than
+// a silent pass, and the line returned here is what tells a step that moved from one that did not.
+create operator TestDebugStepOnce(AProcessID : Integer, AStepInto : Boolean, AWhat : String) : Integer
+begin
+	if AStepInto then
+		Debug.StepInto(AProcessID)
+	else
+		Debug.StepOver(AProcessID);
+	TestDebugStepAwait(AProcessID, AWhat);
+	result := (Debug.GetProcesses() where Process_ID = AProcessID)[].Line;
+end;
+
+Debug.Start();
+
+if not exists (Debug.GetDebuggers() where Session_ID = SessionID()) then
+	raise Error('Debug.Start did not start a debugger for this session');
+
+// The one locator all four operators carry, and the declaration line of each, which is what tells them apart.
+// OperatorName is qualified with the session's current library, which is General for a session that named no default
+// library, so the name is matched rather than compared. One guard covers all four reads: the four operators are created
+// the same way in the same script, so a catalog read that finds one finds all of them. Without it the first failure
+// would be a nil encountered where a value was expected, because [] on an empty table yields nil rather than raising.
+if not exists (Operators where OperatorName like '%TestDebugStepOuter') then
+	raise Error('The Operators catalog table has no row for TestDebugStepOuter, so a line in it cannot be addressed');
+
+var LLocator := (Operators where OperatorName like '%TestDebugStepOuter')[].Locator;
+var LOuterDeclared := (Operators where OperatorName like '%TestDebugStepOuter')[].Line;
+var LInnerDeclared := (Operators where OperatorName like '%TestDebugStepInner')[].Line;
+var LLoopDeclared := (Operators where OperatorName like '%TestDebugStepLoop')[].Line;
+var LRaiserDeclared := (Operators where OperatorName like '%TestDebugStepRaiser')[].Line;
+
+// A declaration line of 0, which is what an operator locator rather than a document locator gives, leaves the relative
+// line as it is; the bases below make the arithmetic right either way, as DebugBreakpoints does.
+var LOuterBase := if LOuterDeclared < 1 then 1 else LOuterDeclared;
+var LInnerBase := if LInnerDeclared < 1 then 1 else LInnerDeclared;
+var LLoopBase := if LLoopDeclared < 1 then 1 else LLoopDeclared;
+var LRaiserBase := if LRaiserDeclared < 1 then 1 else LRaiserDeclared;
+
+var LOuterFirst := LOuterBase + 1;		// the first line of TestDebugStepOuter's body
+var LOuterCall := LOuterBase + 3;		// the statement that calls TestDebugStepInner
+var LOuterNext := LOuterBase + 4;		// the statement after the call
+var LOuterLast := LOuterBase + 7;		// the last line of the declaration
+var LInnerFirst := LInnerBase + 1;		// the first line of TestDebugStepInner's body
+var LInnerResult := LInnerBase + 4;		// its last statement
+var LInnerLast := LInnerBase + 5;		// the last line of the declaration
+var LLoopFirst := LLoopBase + 1;		// the first line of TestDebugStepLoop's body
+var LLoopAfter := LLoopBase + 9;		// the statement reached only once its loop ends
+var LRaise := LRaiserBase + 3;			// the raise statement
+
+// Break on start, and stepping from there into the operator the program calls.
+begin
+	Debug.SetBreakOnStart(true);
+	if not((Debug.GetDebuggers() where Session_ID = SessionID())[].BreakOnStart) then
+		raise Error('Debug.GetDebuggers does not report BreakOnStart after Debug.SetBreakOnStart(true)');
+
+	var LProcessID := StartProcess();
+	try
+		// The second process has to be attached by process: Debug.AttachSession of the debugger's own session is refused
+		// by design, and DebugLibrary asserts that refusal.
+		Debug.AttachProcess(LProcessID);
+		// An error raised by an asynchronous script is not returned to the caller, so a call that fails shows up only as
+		// a stop that never happens - which is why the wait raises an error of its own.
+		ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+		TestDebugStepAwait(LProcessID, 'break on start, at the first statement of the script the process was given');
+
+		// Break on start stops the program at its own first breakable node, before the call, so the locator is that
+		// program's and not the operator's. Program.ReportStart asks for the stop through ServerProcess.SetStepInto, and
+		// Debugger.Yield records every stop it decided on in its broken set, so DidBreak is true here as it is for a
+		// breakpoint; Debug.Pause is the only stop for which it is false.
+		var LStartLocator := (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator;
+		if IndexOf(LStartLocator, 'program:') <> 0 then
+			raise Error('Break on start stopped the process at ' + LStartLocator + ', which is not a program locator');
+		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
+			raise Error('The process stopped by break on start does not report DidBreak');
+
+		// Stepping into leaves the ad-hoc program and enters the operator it calls. Bounded by a step count as well as
+		// by the wait inside each step: the program has one statement, so one step too many ends it instead of stopping
+		// it again, and a loop with no count would then wait out the budget of a stop that can never come.
+		var LSteps := 0;
+		var LLine := 0;
+		while (LSteps < 6) and ((Debug.GetProcesses() where Process_ID = LProcessID)[].Locator <> LLocator) do
+		begin
+			LLine := TestDebugStepOnce(LProcessID, true, 'a step into TestDebugStepOuter from the start of the program');
+			LSteps := LSteps + 1;
+		end;
+		if (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator <> LLocator then
+			raise Error('Stepping into the call ' + LSteps.ToString() + ' time(s) never reached ' + LLocator);
+		if (LLine < LOuterFirst) or (LLine > LOuterLast) then
+			raise Error('Stepping into the call reached line ' + LLine.ToString() + ', which is outside TestDebugStepOuter (lines ' + LOuterFirst.ToString() + ' to ' + LOuterLast.ToString() + ')');
+
+		// Off before the next case: ReportStart runs for every program a process executes, so a process left with the
+		// flag on stops again at the start of the next thing it is told to run.
+		Debug.SetBreakOnStart(false);
+		Debug.Run();
+	finally
+		// ExecuteAsync does not stop a process it was given, so the script owns it. Stopping it detaches it from the
+		// debugger, which DebugLibrary asserts.
+		StopProcess(LProcessID);
+	end;
+end;
+
+// The pair the whole feature rests on, from the same stopping point in both halves - the statement that calls
+// TestDebugStepInner - so that a reader can see the contrast: stepping into it reaches the inner operator, stepping
+// over it reaches the next statement of the outer one and never a line of the inner.
+// NOTE: both halves take two steps from that statement, not one, because it holds two breakable nodes at the same
+// line: the VariableNode of the var statement and the CallNode of the invocation, which sets IsBreakable in its own
+// constructor (an operator invocation is breakable; a built-in instruction such as an addition is not). That is why
+// each half steps in a bounded loop until the line changes rather than asserting on the result of one step.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LOuterCall, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint on the call statement as cleared, not set');
+
+	// Stepping into the call.
+	begin
+		var LProcessID := StartProcess();
+		try
+			Debug.AttachProcess(LProcessID);
+			ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+			TestDebugStepAwait(LProcessID, 'the breakpoint on the call statement, at line ' + LOuterCall.ToString());
+			var LAtCall := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+			if LAtCall <> LOuterCall then
+				raise Error('The process stopped at line ' + LAtCall.ToString() + ', not at the call statement on line ' + LOuterCall.ToString());
+
+			var LSteps := 0;
+			var LLine := LOuterCall;
+			while (LSteps < 4) and (LLine = LOuterCall) do
+			begin
+				LLine := TestDebugStepOnce(LProcessID, true, 'a step into the call on line ' + LOuterCall.ToString());
+				LSteps := LSteps + 1;
+			end;
+			if (LLine < LInnerFirst) or (LLine > LInnerLast) then
+				raise Error('Stepping into the call ' + LSteps.ToString() + ' time(s) reached line ' + LLine.ToString() + ', which is not a line of TestDebugStepInner (lines ' + LInnerFirst.ToString() + ' to ' + LInnerLast.ToString() + ')');
+			Debug.Run();
+		finally
+			StopProcess(LProcessID);
+		end;
+	end;
+
+	// Stepping over it, from the same breakpoint, on a process of its own so that this half inherits nothing from the
+	// one above.
+	begin
+		var LProcessID := StartProcess();
+		try
+			Debug.AttachProcess(LProcessID);
+			ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+			TestDebugStepAwait(LProcessID, 'the breakpoint on the call statement, stepping over it');
+			var LAtCall := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+			if LAtCall <> LOuterCall then
+				raise Error('The process stopped at line ' + LAtCall.ToString() + ', not at the call statement on line ' + LOuterCall.ToString());
+
+			var LSteps := 0;
+			var LLine := LOuterCall;
+			while (LSteps < 4) and (LLine = LOuterCall) do
+			begin
+				LLine := TestDebugStepOnce(LProcessID, false, 'a step over the call on line ' + LOuterCall.ToString());
+				LSteps := LSteps + 1;
+				if (LLine >= LInnerFirst) and (LLine <= LInnerLast) then
+					raise Error('Stepping over the call reached line ' + LLine.ToString() + ', which is inside TestDebugStepInner');
+			end;
+			if LLine <> LOuterNext then
+				raise Error('Stepping over the call ' + LSteps.ToString() + ' time(s) reached line ' + LLine.ToString() + ', not the next statement of TestDebugStepOuter on line ' + LOuterNext.ToString());
+			Debug.Run();
+		finally
+			StopProcess(LProcessID);
+		end;
+	end;
+
+	if Debug.ToggleBreakpoint(LLocator, LOuterCall, -1) then
+		raise Error('Clearing the breakpoint on the call statement reported it as set');
+end;
+
+// Step over is depth-based, not line-based: ServerProcess.SetStepOver records the executing-program count and the
+// stack call depth, and InternalShouldBreak stops the process when both match again, lowering each as the stack
+// unwinds. So stepping over the last statement of an operator surfaces in its caller, at the statement after the call,
+// which is correct behaviour and is asserted here once rather than treated as a miss.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LInnerResult, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint on the last statement of TestDebugStepInner as cleared, not set');
+
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+		TestDebugStepAwait(LProcessID, 'the breakpoint on the last statement of TestDebugStepInner, at line ' + LInnerResult.ToString());
+		var LAtResult := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LAtResult <> LInnerResult then
+			raise Error('The process stopped at line ' + LAtResult.ToString() + ', not at the last statement of TestDebugStepInner on line ' + LInnerResult.ToString());
+
+		var LLine := TestDebugStepOnce(LProcessID, false, 'a step over the last statement of TestDebugStepInner');
+		if LLine <> LOuterNext then
+			raise Error('Stepping over the last statement of TestDebugStepInner reached line ' + LLine.ToString() + ', not the statement after the call in its caller on line ' + LOuterNext.ToString());
+		Debug.Run();
+	finally
+		StopProcess(LProcessID);
+	end;
+
+	if Debug.ToggleBreakpoint(LLocator, LInnerResult, -1) then
+		raise Error('Clearing the breakpoint on the last statement of TestDebugStepInner reported it as set');
+end;
+
+// Debug.Pause stops a program that no breakpoint and no step asked anything of. The breakpoint on the statement after
+// the loop is what bounds the case in both directions: it gives the wait after Debug.Run something to see, and if the
+// pause never takes effect the loop reaches it and the case fails an assertion instead of timing out.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LLoopAfter, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint after the loop as cleared, not set');
+
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		ExecuteAsync(LProcessID, 'TestDebugStepLoop(1000000);');
+		Sleep(100);
+		Debug.Pause();
+		TestDebugStepAwait(LProcessID, 'Debug.Pause to stop the loop while it is running');
+
+		// DidBreak is what separates the two kinds of stop: Debugger.Yield records a process in its broken set only when
+		// it decided to stop the process, and a pause the debugger was asked for is not that.
+		if (Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak then
+			raise Error('The process stopped by Debug.Pause reports DidBreak, as though a breakpoint had stopped it');
+		var LPausedLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if (LPausedLine < LLoopFirst) or (LPausedLine >= LLoopAfter) then
+			raise Error('Debug.Pause stopped the process at line ' + LPausedLine.ToString() + ', not inside TestDebugStepLoop before the statement after its loop on line ' + LLoopAfter.ToString());
+
+		// Letting it go: the breakpoint after the loop is hit, which is the evidence that the loop ran on from where it
+		// was held rather than the debugger reporting the same stop again.
+		Debug.Run();
+		TestDebugStepAwait(LProcessID, 'the breakpoint after the loop, at line ' + LLoopAfter.ToString());
+		var LAfterLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LAfterLine <> LLoopAfter then
+			raise Error('After Debug.Run the process reports line ' + LAfterLine.ToString() + ', not the breakpoint after the loop on line ' + LLoopAfter.ToString());
+		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
+			raise Error('The process stopped at the breakpoint after the loop does not report DidBreak');
+		Debug.Run();
+	finally
+		StopProcess(LProcessID);
+	end;
+
+	if Debug.ToggleBreakpoint(LLocator, LLoopAfter, -1) then
+		raise Error('Clearing the breakpoint after the loop reported it as set');
+end;
+
+// Break on exception stops the program where the error is raised, and is the only thing that puts a value in the Error
+// column of Debug.GetProcesses.
+begin
+	Debug.SetBreakOnException(true);
+	if not((Debug.GetDebuggers() where Session_ID = SessionID())[].BreakOnException) then
+		raise Error('Debug.GetDebuggers does not report BreakOnException after Debug.SetBreakOnException(true)');
+
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		ExecuteAsync(LProcessID, 'TestDebugStepRaiser(2);');
+		TestDebugStepAwait(LProcessID, 'break on exception, at the raise on line ' + LRaise.ToString());
+
+		// RaiseNode asks for the stop through Program.ReportThrow as it throws, and the stop itself happens in the
+		// node's own exception path, which yields with the node already behind it - so the line reported is the raise
+		// statement's end line, which for a statement on one line is its own line. DidBreak is true because the
+		// debugger decided on this stop.
+		var LRaisedLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
+		if LRaisedLine <> LRaise then
+			raise Error('Break on exception stopped the process at line ' + LRaisedLine.ToString() + ', not at the raise on line ' + LRaise.ToString());
+		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
+			raise Error('The process stopped by break on exception does not report DidBreak');
+
+		// The Error column carries the raised error itself, a D4 Error value over the CLR exception the engine threw
+		// (DebugGetProcessesNode assigns process.Error straight into it). This is the only case in the suite that reads
+		// it with a value in it: for a process stopped any other way the program's error variable is nil, and the
+		// column with it.
+		var LError := (Debug.GetProcesses() where Process_ID = LProcessID)[].Error;
+		if IsNil(LError) then
+			raise Error('The process stopped by break on exception reports nothing in the Error column of Debug.GetProcesses');
+		if IndexOf(LError.Message, 'TestDebugStepRaiser raised on purpose') < 0 then
+			raise Error('The Error column carries "' + LError.Message + '", not the message TestDebugStepRaiser raised');
+
+		// Letting it go lets the error propagate on the worker thread, where it is discarded: SystemExecuteAsyncNode
+		// deliberately does not return an asynchronous script's error to the caller.
+		Debug.Run();
+		Debug.SetBreakOnException(false);
+	finally
+		StopProcess(LProcessID);
+	end;
+end;
+
+// Detaching a process that is stopped lets it go. Debugger.Detach disowns the process and pulses the pause signal, and
+// the wait inside Debugger.Yield falls out because its condition includes the process still being one the debugger
+// holds. The StopProcess below is the assertion, and its return is the whole of it: a process still parked in that
+// wait would keep Engine.TerminateProcessThread spinning for half of ProcessTerminationTimeout - 15 s of the 30 s
+// default - and then raise ProcessNotResponding. That is the failure a person meets as a server that will not stop.
+// That terminator has a rescue of its own - it detaches a paused debugged process in order to unblock this same wait -
+// but it cannot mask a failure here, because Debugger.Detach has already cleared the process's debugger.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LOuterCall, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint for the detach case as cleared, not set');
+
+	var LProcessID := StartProcess();
+	Debug.AttachProcess(LProcessID);
+	ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+	TestDebugStepAwait(LProcessID, 'the breakpoint for the detach case, at line ' + LOuterCall.ToString());
+
+	Debug.DetachProcess(LProcessID);
+	if exists (Debug.GetProcesses() where Process_ID = LProcessID) then
+		raise Error('Debug.GetProcesses still reports the process that was detached while it was stopped');
+	try
+		StopProcess(LProcessID);
+	except
+		on E : Error do
+			raise Error('Stopping the detached process failed, so detaching it did not release it from the debugger: ' + E.Message);
+	end;
+
+	if Debug.ToggleBreakpoint(LLocator, LOuterCall, -1) then
+		raise Error('Clearing the breakpoint for the detach case reported it as set');
+end;
+
+// And so does stopping the debugger: Debugger.Dispose runs, detaches everything it holds and sets both of its signals.
+// Last case, deliberately - there is no debugger left after it, so no breakpoint can be cleared either.
+begin
+	if not(Debug.ToggleBreakpoint(LLocator, LOuterCall, -1)) then
+		raise Error('Debug.ToggleBreakpoint reported the breakpoint for the Debug.Stop case as cleared, not set');
+
+	var LProcessID := StartProcess();
+	Debug.AttachProcess(LProcessID);
+	ExecuteAsync(LProcessID, 'TestDebugStepOuter(1);');
+	TestDebugStepAwait(LProcessID, 'the breakpoint for the Debug.Stop case, at line ' + LOuterCall.ToString());
+
+	Debug.Stop();
+	if exists (Debug.GetDebuggers() where Session_ID = SessionID()) then
+		raise Error('Debug.Stop did not stop the debugger');
+	try
+		StopProcess(LProcessID);
+	except
+		on E : Error do
+			raise Error('Stopping the process the debugger was holding failed, so Debug.Stop did not release it: ' + E.Message);
+	end;
+end;
+
+drop operator TestDebugStepOnce(Integer, Boolean, String);
+drop operator TestDebugStepAwait(Integer, String);
+drop operator TestDebugStepRaiser(Integer);
+drop operator TestDebugStepLoop(Integer);
+drop operator TestDebugStepOuter(Integer);
+drop operator TestDebugStepInner(Integer);
