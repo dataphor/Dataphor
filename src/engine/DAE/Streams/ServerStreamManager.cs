@@ -370,6 +370,12 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 		}
 		
+		// NOTE: this does not consult header.StreamCount, so a stream deallocated while a ManagedStream is still open
+		// on it leaves that stream pointing at a destroyed provider entry: its next use throws ObjectDisposedException
+		// and its Close throws StreamsException, because the header Close goes looking for is gone. Every call site
+		// closes first, so nothing reaches that today; if one ever stops doing so, the exception from its finally
+		// block will mask the original and the open count is the thing to check here. The outcome is pinned by
+		// ServerStreamManagerTest.DeallocatingAStreamThatIsStillOpenLeavesThatStreamUnusable.
 		public override void Deallocate(StreamID streamID)
 		{
 			lock (this)
