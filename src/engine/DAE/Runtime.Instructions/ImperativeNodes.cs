@@ -1865,6 +1865,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// ByReference
 		public bool ByReference;
 
+		/// <summary>By reference, this node hands over the value its slot owns; otherwise a copy the caller owns.</summary>
+		public override bool ReturnsByReference { get { return ByReference; } }
+
+		/// <summary>A slot's value can always be lent: the slot holds it for as long as the slot is in scope.</summary>
+		public override bool SetByReference()
+		{
+			ByReference = true;
+			return true;
+		}
+
 		protected override void InternalClone(PlanNode newNode)
 		{
 			base.InternalClone(newNode);
@@ -1987,6 +1997,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		// ByReference
 		public bool ByReference;
+
+		/// <summary>By reference, this node hands over the column value the row in its slot owns; otherwise a copy.</summary>
+		public override bool ReturnsByReference { get { return ByReference; } }
+
+		/// <summary>The row lives in a slot, so a column of it can always be lent for the length of the call.</summary>
+		public override bool SetByReference()
+		{
+			ByReference = true;
+			return true;
+		}
 
 		protected override void InternalClone(PlanNode newNode)
 		{

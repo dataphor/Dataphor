@@ -66,6 +66,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public bool ByReference;
 		
+		// NOTE: there is deliberately no SetByReference override to go with this. Nothing sets ByReference today, so
+		// this node always copies the element and always answers false; the override is here so that whoever does set
+		// the field meets the ownership rule rather than a silent leak - a borrowed element handed to a const operand
+		// has to be declared, or the call releases a value the list still holds. The lifetime of a list's elements
+		// themselves is bug-a-list-value-never-releases-its-elements, not this node's.
+		public override bool ReturnsByReference { get { return ByReference; } }
+		
 		public override void DetermineDataType(Plan plan)
 		{
 			base.DetermineDataType(plan);

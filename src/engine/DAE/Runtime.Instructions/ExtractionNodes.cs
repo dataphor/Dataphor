@@ -199,6 +199,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private bool _shouldDisposeSource = true;
 		
+		/// <summary>Whether this node hands over the source row's own column value rather than a copy of it.</summary>
+		private bool _byReference;
+		
+		public override bool ReturnsByReference { get { return _byReference; } }
+		
+		/// <summary>
+		/// A column can be lent only out of a source this node leaves alive. A source it disposes on the way out owns
+		/// its column values, so lending one would hand the caller a value released before it could read it;
+		/// _shouldDisposeSource is false exactly when the source is a row-typed StackReferenceNode, which
+		/// DetermineDataType marks by-reference at the same time, so the two stay in step.
+		/// </summary>
+		public override bool SetByReference()
+		{
+			if (!_shouldDisposeSource)
+				_byReference = true;
+			return _byReference;
+		}
+		
 		public override object InternalExecute(Program program)
 		{
 			object objectValue = Nodes[0].Execute(program);
@@ -227,8 +245,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								return null;
 							#else
 							int columnIndex = row.DataType.Columns.IndexOf(Identifier);
+							// NOTE: unreachable from the compiler - Compiler.EmitColumnExtractorNode raises InvalidExtractionTarget
+							// for a source that is not row-typed, so nothing builds a node that gets here. The copy is
+							// unconditional because this row is this node's own (TableValue.Select builds it with ValuesOwned
+							// set) and the finally below disposes it: handing back its column would hand back a released value.
 							if (row.HasValue(columnIndex))
-								return row[columnIndex];
+								return DataValue.CopyValue(program.ValueManager, row[columnIndex]);
 							else
 								return null;
 							#endif
@@ -263,8 +285,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						return null;
 					#else
 					int columnIndex = row.DataType.Columns.IndexOf(Identifier);
+					// The row's own column value only where a consumer asked for it (SetByReference); otherwise a copy,
+					// because whoever receives it - a variable, a row selector, a by-value operand - releases it, and
+					// the row still holds the original. Lending unasked is what left a row's column released while the
+					// row still named it (bug-an-operator-argument-is-released-by-the-wrong-owner).
 					if (!row.IsNil && row.HasValue(columnIndex))
-						return row[columnIndex];
+						return _byReference ? row[columnIndex] : DataValue.CopyValue(program.ValueManager, row[columnIndex]);
 					else
 						return null;
 					#endif
@@ -289,6 +315,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			var newExtractColumnNode = (ExtractColumnNode)newNode;
 			newExtractColumnNode.Identifier = Identifier;
 			newExtractColumnNode._shouldDisposeSource = _shouldDisposeSource;
+			newExtractColumnNode._byReference = _byReference;
 		}
 	}
 	

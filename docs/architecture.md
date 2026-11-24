@@ -39,6 +39,10 @@ Each box above is one or more assemblies; what each assembly holds, which projec
 
 A client connects and gets a session, a session starts processes, and a process prepares statements into plans and opens cursors over them, each with a remote counterpart: [sessions-processes-plans.md](architecture/sessions-processes-plans.md).
 
+## Value lifetime
+
+Which values the garbage collector will not reclaim, who owns each one while it sits in a stack slot, an operand, a row or a list, and what releases it: [value-lifetime.md](architecture/value-lifetime.md).
+
 ## Catalog and catalog store
 
 The catalog is the set of all schema objects, loaded lazily from the catalog store, which also holds the users, rights and settings that exist nowhere else; the store and the transactions that write it are in [catalog-and-store.md](architecture/catalog-and-store.md).

@@ -584,6 +584,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // DetermineDataType
         public virtual void DetermineDataType(Plan plan) {}
 
+		/// <summary>
+		/// Whether Execute returns a value that belongs to something else - a stack slot, or a row in one - rather
+		/// than one the caller owns and must release.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// The engine's large and structured values - a Binary or a Graphic, which live in a stream the server holds,
+		/// and rows, lists and tables - are not reclaimed by the garbage collector: something has to release each one,
+		/// exactly once. Whether the value a node produces is one the consumer must release is a property of the node,
+		/// not of the context it is used in: a node that reads a stack slot can hand over the slot's own value, where a
+		/// node that computes one - a literal, a conversion, another call - produces a value nothing else holds. Only
+		/// the node knows which, which is why a consumer asks here rather than inferring it from the node's type or from
+		/// its own declaration (bug-an-operator-argument-is-released-by-the-wrong-owner).
+		/// </para>
+		/// <para>
+		/// The ownership rule the whole set rests on is in docs/architecture/value-lifetime.md.
+		/// </para>
+		/// </remarks>
+		public virtual bool ReturnsByReference { get { return false; } }
+
+		/// <summary>Asks this node to return its value by reference rather than a copy, and reports whether it will.</summary>
+		/// <remarks>
+		/// A node lends its value only when it is asked to, so a consumer that does not ask owns what it is given. A
+		/// node that can lend overrides this and ReturnsByReference together; one that cannot - or cannot this time,
+		/// because what it would borrow from dies before the caller reads the value - leaves the default, which answers
+		/// false and goes on copying. The only caller today is the const-operand branch of
+		/// InstructionNodeBase.DetermineDataType.
+		/// </remarks>
+		public virtual bool SetByReference() { return false; }
+
 		#endregion
 
 		#region Binding

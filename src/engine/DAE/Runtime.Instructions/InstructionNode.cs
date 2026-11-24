@@ -176,10 +176,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if (Nodes[index] is ParameterNode)
 								Nodes[index] = Nodes[index].Nodes[0];
 							
-							if (Nodes[index] is StackReferenceNode)
-								((StackReferenceNode)Nodes[index]).ByReference = true;
-							else if (Nodes[index] is StackColumnReferenceNode)
-								((StackColumnReferenceNode)Nodes[index]).ByReference = true;
+							// A const operand is the one modifier that can take a value belonging to something else, so it is
+							// the one place that asks. The node answers whether it will lend, and CleanupOperand reads that
+							// answer back off the node; asking rather than type-testing is what lets a node the test did not
+							// know about - ExtractColumnNode, which LR.B compiles to - say so instead of lending unasked.
+							Nodes[index].SetByReference();
 						break;
 					}
 				}
@@ -214,6 +215,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			switch (signatureElement.Modifier)
 			{
 				case Modifier.In :
+					// Released unconditionally, and the invariant that makes that safe is the whole load-bearing claim of
+					// bug-an-operator-argument-is-released-by-the-wrong-owner: a node lends its value only when it was
+					// asked to (PlanNode.SetByReference), and only the const branch of DetermineDataType asks. So a node
+					// that could have handed over a stack slot's value, or a column of a row in one, copied instead, and
+					// the value here is the callee's own. CallNode hands each operand slot's current value back in
+					// argumentValue first, so a body that assigned to this operand released the displaced value itself
+					// (Stack.PokeOwned) and this releases the one that replaced it - never one stream twice.
+					// NOTE: that invariant is held by inspection, not by the type system. StackReferenceNode.ByReference is a
+					// public field, and sites outside the const branch still set it directly: the update and delete targets in
+					// Compiler.cs, which are not instruction operands at all; ExtractColumnNode, for its own source; and the
+					// by-reference nodes built for a generated equality (Compiler.cs, InNodes.cs, TableNode.cs) or for an event
+					// handler's arguments (Compiler.cs), each of which reaches a const or var operand - iEqual declares const,
+					// and an event signature is only ever Var or Const. So nothing lands here today. If a new site ever builds
+					// a by-reference StackReferenceNode for an in operand, this release takes a stack slot's own value: make
+					// that site go through SetByReference, or gate this branch on ReturnsByReference as the const branch is.
 					DataValue.DisposeValue(program.ValueManager, argumentValue);
 				break;
 					
@@ -227,6 +243,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// again here would be a second release of one stream. CallNode's write-back is what makes
 					// argumentValue the slot's current value on both paths.
 					program.Stack.Poke(((StackReferenceNode)argumentNode).Location, argumentValue);
+				break;
+
+				case Modifier.Const :
+					// A const operand is not copied for the call either, and whether the call owns its value is a property
+					// of the node that produced it rather than of the modifier: a stack reference, or a column of a row in
+					// a slot, lends what it already holds, while a literal, a conversion or another call produces a value
+					// nothing else holds. Releasing both leaves a released value in a caller's variable; releasing neither
+					// holds a stream for the life of the session on every call, which is most calls - the compiler promotes
+					// a by-value operand the body never assigns to to const, and every comparison, conversion, selector and
+					// property accessor the engine generates for a scalar type declares const outright.
+					if (!argumentNode.ReturnsByReference)
+						DataValue.DisposeValue(program.ValueManager, argumentValue);
 				break;
 			}
 		}

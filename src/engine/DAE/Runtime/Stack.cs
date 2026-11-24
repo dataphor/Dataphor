@@ -42,6 +42,10 @@ namespace Alphora.Dataphor.DAE.Runtime
 		/// value it is being given. StreamID is a struct, so two boxes can carry one stream identifier and reference
 		/// equality alone would miss that.
 		/// </para>
+		/// <para>
+		/// The whole picture this rule is one rule of - slots, operands of each modifier, rows and lists, and how a plan
+		/// node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md.
+		/// </para>
 		/// </remarks>
 		public void PokeOwned(int offset, object value, IValueManager manager)
 		{

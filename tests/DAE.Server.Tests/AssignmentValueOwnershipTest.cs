@@ -16,12 +16,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference
 	/// through AssigningThroughAScalarProperty are the limits of that rule: slots whose value belongs to something
 	/// else, which an assignment must leave alone, and the two shapes in which a call used to hand one caller value
-	/// to two callee slots. The last six cases are the other half of the same ownership rule: a scope releases the
-	/// values of the variables it declared. That release used to be a statement the compiler appended to the end of
-	/// the block, so only control reaching the end of the block ran it, and a raise, an exit, a break or a continue
-	/// left every value behind (bug-an-error-inside-a-block-leaks-its-binary-values). The last two of those cover
-	/// the one variable such a release can miss: an operator's result, which the paths that do reach the caller hand
-	/// over rather than release.
+	/// to two callee slots. The four cases from AConstOperandReleasesTheValueComputedForIt through
+	/// ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the operand half of the same rule: whether a call owns
+	/// the value it was handed for an operand is a property of the plan node that produced the argument - a node that
+	/// reads a stack slot, or a column of a row in one, can lend the value it already holds, where a literal, a
+	/// conversion or another call produces one nothing else holds - and not of the operand's modifier, which is all
+	/// the call used to look at (bug-an-operator-argument-is-released-by-the-wrong-owner). Reading ownership off the
+	/// modifier held a stream for the life of the session on every call with a const operand, which is most calls,
+	/// and released a row's own column out from under the row whenever one was read. The last six cases are the other
+	/// half of the same ownership rule: a scope releases the values of the variables it declared. That release used to
+	/// be a statement the compiler appended to the end of the block, so only control reaching the end of the block ran
+	/// it, and a raise, an exit, a break or a continue left every value behind
+	/// (bug-an-error-inside-a-block-leaks-its-binary-values). The last two of those cover the one variable such a
+	/// release can miss: an operator's result, which the paths that do reach the caller hand over rather than release.
 	/// </summary>
 	/// <remarks>
 	/// The leak cases assert on Diagnostics.StreamCount(), which reports how many streams the server is holding, read
@@ -146,8 +153,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// the cleanup the call ends with releases the operand value too. Both must name the same value, or the call
 		/// releases the copy twice; the engine turns a second release of one stream into an error, so this case fails
 		/// loudly rather than quietly. An in operand the body never assigns to is promoted to const when the operator
-		/// is compiled, so an operand that is still in by the time the call runs is one the body does assign to: this
-		/// is the only shape in which that cleanup releases anything.
+		/// is compiled, so an operand that is still in by the time the call runs is one the body does assign to. The
+		/// const case AConstOperandReleasesTheValueComputedForIt is the other shape in which that cleanup releases.
 		/// </summary>
 		[Test]
 		public void AnOperatorThatAssignsToAnInParameterReleasesTheValueItReplaces()
@@ -334,6 +341,213 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// A const operand given a value computed for the call - here a Binary selector, the shape every literal large
+		/// value takes. Nothing but the call ever names that value, so the call has to release it; it used to release
+		/// nothing at all for a const operand, holding one stream per call for the life of the session. Both a function
+		/// and a procedure, because the two were different bugs historically - the promotion of a by-value operand to
+		/// const read the wrong operand's symbol for every operator with a result until
+		/// bug-assigning-a-binary-variable-leaks-its-stream - and a regression could reach one and not the other. The
+		/// function's result and the procedure's own raise are the value assertions: a call that stopped seeing its
+		/// argument would fail rather than pass quietly.
+		/// </summary>
+		/// <remarks>
+		/// What makes the case worth its run time beyond the two operators it declares: the compiler promotes a
+		/// by-value operand the body never assigns to to const, and every comparison, conversion, selector and property
+		/// accessor the engine generates for a scalar type declares const outright, so nearly every D4 expression
+		/// reaches this decision.
+		/// </remarks>
+		[Test]
+		public void AConstOperandReleasesTheValueComputedForIt()
+		{
+			ExecuteScript("create operator ZConstSees(const AB : Binary) : Integer begin result := 0; if AB.Value = '0001' then result := 1; end;");
+			ExecuteScript("create operator ZConstChecks(const AB : Binary) begin if AB.Value <> '0001' then raise Error('The procedure did not see the value it was given.'); end;");
+
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"a function",
+						String.Format
+						(
+							@"
+								begin
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										LSeen := LSeen + ZConstSees(Binary('0001'));
+									if LSeen <> {0} then
+										raise Error('A call did not see the value computed for it.');
+								end;
+							",
+							AssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a procedure",
+						String.Format
+						(
+							@"
+								begin
+									for LI : Integer := 1 to {0} do
+										ZConstChecks(Binary('0001'));
+								end;
+							",
+							AssignmentCount
+						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// The other side of the same decision, and the path that must keep working: a const operand given a variable is
+		/// handed the slot's own value rather than a copy, so the call must release nothing. Releasing it would leave the
+		/// caller's variable naming a released stream - which is what reading ownership off the modifier the other way
+		/// round would do - and nothing covered this before. The loop repeats the call so that a per-call release reports
+		/// a full count, and both the result and the variable are read afterwards.
+		/// </summary>
+		[Test]
+		public void AConstOperandGivenAVariableLeavesTheCallersValueAlone()
+		{
+			ExecuteScript("create operator ZConstSeesVariable(const AB : Binary) : Integer begin result := 0; if AB.Value = '0001' then result := 1; end;");
+
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LB : Binary := Binary('0001');
+							var LSeen : Integer := 0;
+							for LI : Integer := 1 to {0} do
+								LSeen := LSeen + ZConstSeesVariable(LB);
+							if LSeen <> {0} then
+								raise Error('A call did not see the variable''''s value.');
+							if LB.Value <> '0001' then
+								raise Error('A call released the caller''''s value.');
+						end;
+					",
+					AssignmentCount
+				)
+			);
+		}
+
+		/// <summary>
+		/// A by-value operand given a row variable's column. The node that reads a column used to hand over the row's own
+		/// value with no way to say otherwise, and by-value cleanup then released it, so the row was left naming a
+		/// released stream and the next read of the column failed. The operand is still by value at run time because the
+		/// body assigns to it; an operand the body leaves alone is promoted to const, which the two cases above cover.
+		/// </summary>
+		[Test]
+		public void AByValueOperandGivenARowsColumnLeavesTheRowsColumnAlone()
+		{
+			ExecuteScript("create operator ZByValueReplaces(AB : Binary) begin AB := Binary('0002'); end;");
+
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LR : row {{ B : Binary }} := row {{ Binary('0001') B }};
+							for LI : Integer := 1 to {0} do
+								ZByValueReplaces(LR.B);
+							if LR.B.Value <> '0001' then
+								raise Error('A by-value call reached the row''''s column.');
+						end;
+					",
+					RowAssignmentCount
+				)
+			);
+		}
+
+		/// <summary>
+		/// Reading a row variable's column into something that takes ownership of what it is given - a new variable, an
+		/// existing variable, a row selector. This is the worst of the three shapes the one missing fact broke, because
+		/// the D4 is entirely ordinary: no operator and no modifier, just reading a field. The read succeeded and then
+		/// the receiver and the row both named one value, so whichever was released first left the other naming a
+		/// released stream. Every shape reads both the copy and the row's own column afterwards, because a read that
+		/// quietly stopped producing a usable value would otherwise balance the count and pass.
+		/// </summary>
+		[Test]
+		public void ARowsColumnReadIntoSomethingThatOwnsItStaysReadable()
+		{
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"into a new variable",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ B : Binary }} := row {{ Binary('0001') B }};
+									for LI : Integer := 1 to {0} do
+									begin
+										var LB : Binary := LR.B;
+										if LB.Value <> '0001' then
+											raise Error('The copy did not carry the column''''s value.');
+									end;
+									if LR.B.Value <> '0001' then
+										raise Error('Reading the column released the row''''s own value.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"over an existing variable",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ B : Binary }} := row {{ Binary('0001') B }};
+									var LB : Binary := Binary('0002');
+									for LI : Integer := 1 to {0} do
+										LB := LR.B;
+									if LB.Value <> '0001' then
+										raise Error('The assignment did not carry the column''''s value.');
+									if LR.B.Value <> '0001' then
+										raise Error('Reading the column released the row''''s own value.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"into a row selector",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ B : Binary }} := row {{ Binary('0001') B }};
+									for LI : Integer := 1 to {0} do
+									begin
+										var LS : row {{ B : Binary }} := row {{ LR.B B }};
+										if LS.B.Value <> '0001' then
+											raise Error('The selected row did not carry the column''''s value.');
+									end;
+									if LR.B.Value <> '0001' then
+										raise Error('Selecting the column released the row''''s own value.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
 		/// A block that declares a Binary and then raises, with nothing inside the engine catching the error. The block
 		/// is left by the raise rather than through its end, which is the one path the compiled release ever covered.
 		/// </summary>
@@ -486,6 +700,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private void AssertForEachSeesBothRows(string form, string script)
 		{
 			Assert.That(() => ExecuteScript(script), Throws.Nothing, form + ": the loop did not survive an assignment to its variable.");
+		}
+
+		/// <summary>
+		/// Runs one shape of a case inside an Assert.Multiple, naming the shape in both assertions. Neither assertion
+		/// throws, so one shape's failure does not hide the shapes after it; each reads its own baseline count, so a
+		/// shape that ran after a failing one is still measured against the count it started from.
+		/// </summary>
+		private void AssertShapeLeavesNoStreams(string shape, string script)
+		{
+			int before = StreamCount();
+			Assert.That(() => ExecuteScript(script), Throws.Nothing, shape + ": the script raised.");
+			Assert.That(StreamCount(), Is.EqualTo(before), shape + ": the script left streams behind.");
 		}
 
 		/// <summary>
