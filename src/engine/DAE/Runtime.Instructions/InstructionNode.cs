@@ -220,6 +220,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				case Modifier.Var :
 					if (argumentNode.DataType is Schema.ScalarType)
 						argumentValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)argumentNode.DataType, argumentValue, _operator);
+					// NOTE: a plain Poke, not Stack.PokeOwned. This is an ownership return, not a replacement: a var
+					// operand is passed by reference, so the callee's slot is an alias of the slot being written here.
+					// Either the callee never assigned, and this stores the value the slot already holds, or it did,
+					// and the value the slot holds was released by that assignment (Stack.PokeOwned) - releasing it
+					// again here would be a second release of one stream. CallNode's write-back is what makes
+					// argumentValue the slot's current value on both paths.
 					program.Stack.Poke(((StackReferenceNode)argumentNode).Location, argumentValue);
 				break;
 			}

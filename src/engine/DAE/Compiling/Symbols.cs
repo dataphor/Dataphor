@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FDataType = ADataType;
 			FIsConstant = AIsConstant;
 			FIsModified = AIsModified;
+			FIsBorrowed = false;
 		}
 		
 		public Symbol(string AName, Schema.IDataType ADataType, bool AIsConstant)
@@ -28,6 +29,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FDataType = ADataType;
 			FIsConstant = AIsConstant;
 			FIsModified = false;
+			FIsBorrowed = false;
 		}
 		
 		public Symbol(string AName, Schema.IDataType ADataType)
@@ -36,6 +38,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FDataType = ADataType;
 			FIsConstant = false;
 			FIsModified = false;
+			FIsBorrowed = false;
 		}
 		
 		public Symbol(Symbol ASymbol)
@@ -44,6 +47,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FDataType = ASymbol.DataType;
 			FIsConstant = ASymbol.IsConstant;
 			FIsModified = ASymbol.IsModified;
+			FIsBorrowed = ASymbol.IsBorrowed;
 		}
 		
 		private string FName;
@@ -58,16 +62,28 @@ namespace Alphora.Dataphor.DAE.Compiling
 		internal bool FIsModified;
 		public bool IsModified { get { return FIsModified; } }
 
+		/// <summary>Whether the value in this symbol's run-time slot belongs to something other than the slot.</summary>
+		/// <remarks>
+		/// A stack slot normally owns the value in it and whatever overwrites the slot releases what it displaced
+		/// (Alphora.Dataphor.DAE.Runtime.Stack.PokeOwned). A foreach loop variable is the exception: the loop lends
+		/// its slot the row or element the iterator owns and goes on using that value, so an assignment to the loop
+		/// variable must not release it. Set where the statement that lends the slot is compiled, and read by the
+		/// assignment node while it compiles, which is why nothing sets it during a binding traversal.
+		/// </remarks>
+		internal bool FIsBorrowed;
+		public bool IsBorrowed { get { return FIsBorrowed; } }
+
 		public override string ToString()
 		{
 			return 
 				String.Format
 				(
-					"{0}{1} : {2}{3}", 
+					"{0}{1} : {2}{3}{4}", 
 					IsConstant ? "const " : "", 
 					Name == null ? "<unnamed>" : Name, 
 					DataType == null ? "<untyped>" : DataType.Name, 
-					IsModified ? " (modified)" : ""
+					IsModified ? " (modified)" : "",
+					IsBorrowed ? " (borrowed)" : ""
 				);
 		}
 		
@@ -97,6 +113,24 @@ namespace Alphora.Dataphor.DAE.Compiling
 			_stack[index].FIsModified = true;
 			#else
 			_stack[_count - 1 - offset].FIsModified = true;
+			#endif
+		}
+
+		/// <summary>Marks the symbol at the given offset as holding a value it does not own; see <see cref="Symbol.IsBorrowed"/>.</summary>
+		/// <remarks>
+		/// There is no call that clears the mark. A foreach over a pre-existing variable lends that variable's slot
+		/// for the loop and, in the list form, leaves the last element in it afterwards, so an assignment to the
+		/// variable after the loop is no safer than one inside it: the mark stands for the rest of the scope.
+		/// </remarks>
+		public void SetIsBorrowed(int offset)
+		{
+			#if DEBUG 
+			int index = _count - 1 - offset;
+			if ((index >= _count) || (!AllowExtraWindowAccess && (index < Base)))
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
+			_stack[index].FIsBorrowed = true;
+			#else
+			_stack[_count - 1 - offset].FIsBorrowed = true;
 			#endif
 		}
 

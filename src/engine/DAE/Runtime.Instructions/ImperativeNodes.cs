@@ -1161,10 +1161,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
+		/// <summary>Whether the operand at the given index references a slot an earlier operand already references.</summary>
+		/// <remarks>
+		/// A by-reference operand - every var operand, and a const one that names a variable - hands the callee the
+		/// caller's own value rather than a copy, so one variable passed twice would give the callee two slots holding
+		/// one value. The body's first assignment to either releases that value (Stack.PokeOwned) and the second would
+		/// release it again, which the stream manager reports as an error. The scan costs a type test per operand and
+		/// runs no comparison at all for the single-operand calls that dominate.
+		/// </remarks>
+		private bool ReferencesAnEarlierOperandsSlot(int index)
+		{
+			StackReferenceNode reference = Nodes[index] as StackReferenceNode;
+			if ((reference == null) || !reference.ByReference)
+				return false;
+
+			for (int earlier = 0; earlier < index; earlier++)
+			{
+				StackReferenceNode earlierReference = Nodes[earlier] as StackReferenceNode;
+				if ((earlierReference != null) && earlierReference.ByReference && (earlierReference.Location == reference.Location))
+					return true;
+			}
+
+			return false;
+		}
+
 		public override object InternalExecute(Program program, object[] arguments)
 		{
 			for (int index = 0; index < Operator.Operands.Count; index++)
-				program.Stack.Push(arguments[index]);
+				// A repeat of a by-reference operand gets its own copy, so that each of the callee's slots owns a
+				// distinct value; the last write-back still wins, which is what such a call did before.
+				program.Stack.Push
+				(
+					ReferencesAnEarlierOperandsSlot(index)
+						? DataValue.CopyValue(program.ValueManager, arguments[index])
+						: arguments[index]
+				);
 
 			// TODO: I am not sure this is necessary, the derived table var does not do this
 			// All rights checking should be being performed at compile-time, so there should
@@ -1189,20 +1220,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						try
 						{
-							Operator.Block.BlockNode.Execute(program);
-						}
-						catch (ExitError){}
-							
-						// Pass any var arguments back out to the instruction
-						for (int index = 0; index < Operator.Operands.Count; index++)
-							if (Operator.Operands[index].Modifier == Modifier.Var)
-								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
-							
-						// Return the result
-						if (_allocateResultNode != null)
-							return program.Stack[program.Stack.Count - stackDepth];
+							try
+							{
+								Operator.Block.BlockNode.Execute(program);
+							}
+							catch (ExitError){}
 
-						return null;
+							// Return the result
+							if (_allocateResultNode != null)
+								return program.Stack[program.Stack.Count - stackDepth];
+
+							return null;
+						}
+						finally
+						{
+							// Hand each operand slot's value back to the instruction, so that InstructionNode's cleanup
+							// sees the value the slot holds now rather than the one the call started with. Every operand,
+							// not just the var ones, and on the way out of a raise as well as a return, because an
+							// assignment in the body released the value it replaced (Stack.PokeOwned) and that value is
+							// what arguments[index] still named: cleanup would release a var operand's value a second
+							// time through the caller's slot, and an in operand's copy a second time directly. It is
+							// also what makes the caller see the callee's last assignment to a var parameter when the
+							// body raises, which it did not before (docs/migration-notes.md). The index arithmetic
+							// takes program.Stack.Count as it is now, so a body that left the stack deeper than it
+							// started still reads its own operands; nothing pops the operands themselves before the
+							// window pops, above this frame.
+							for (int index = 0; index < Operator.Operands.Count; index++)
+								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
+						}
 					}
 					finally
 					{
@@ -1284,6 +1329,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			program.Stack.Push(null);
 			int stackDepth = program.Stack.Count;
 
+			// NOTE: a plain Poke, not Stack.PokeOwned: the slot both branches fill is the null that was just pushed,
+			// so there is never a value in it to release.
 			if (NodeCount > 0)
 			{
 				object tempValue = Nodes[0].Execute(program);
@@ -1386,6 +1433,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
+		/// <summary>Whether the target slot holds a value it does not own, so that this assignment must not release what it replaces; see <see cref="Symbol.IsBorrowed"/>.</summary>
+		private bool _targetIsBorrowed;
+
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			((AssignmentNode)newNode)._targetIsBorrowed = _targetIsBorrowed;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -1393,6 +1450,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Symbol symbol = plan.Symbols[location];
 			if (symbol.IsConstant)
 				throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, plan.CurrentStatement(), symbol.Name);
+			_targetIsBorrowed = symbol.IsBorrowed;
 			plan.Symbols.SetIsModified(location);
 		}
 
@@ -1401,7 +1459,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object objectValue = Nodes[1].Execute(program);
 			if (Nodes[1].DataType is Schema.ScalarType)
 				objectValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)Nodes[1].DataType, objectValue);
-			program.Stack.Poke(((StackReferenceNode)Nodes[0]).Location, objectValue);
+			int location = ((StackReferenceNode)Nodes[0]).Location;
+			if (_targetIsBorrowed)
+				// NOTE: a plain Poke, not Stack.PokeOwned: a foreach lends its loop variable's slot the row or element
+				// the iterator owns and goes on using it, so releasing it here left the next iteration selecting into
+				// a disposed row. What such an assignment displaces is leaked, as everything an assignment displaced
+				// was before PokeOwned existed; it is the foreach nodes that would have to stop lending a slot they
+				// go on reading to fix that, not this site. Assigning to a loop variable is a programming error in
+				// any case - the next iteration overwrites it - so the leak buys nothing but is not worth a copy per
+				// row to close.
+				program.Stack.Poke(location, objectValue);
+			else
+				// The slot owns its value, so the assignment releases the one it replaces; see Stack.PokeOwned.
+				program.Stack.PokeOwned(location, objectValue, program.ValueManager);
 			return null;
 		}
 		

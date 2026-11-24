@@ -1318,6 +1318,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 							}
 						}
 						plan.Symbols.Push(new Symbol(node.Expression.VariableName, node.VariableType));
+						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
+						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						plan.Symbols.SetIsBorrowed(0);
 					}
 					else
 					{
@@ -1331,6 +1334,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 							
 						if (!node.VariableType.Is(plan.Symbols.Peek(node.Location).DataType))
 							throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, node.Expression, node.VariableType.Name, plan.Symbols.Peek(node.Location).DataType.Name);
+
+						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
+						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						plan.Symbols.SetIsBorrowed(node.Location);
 					}
 					try
 					{
@@ -1406,6 +1413,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 							}
 						}
 						plan.Symbols.Push(new Symbol(node.Statement.VariableName, node.VariableType));
+						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
+						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						plan.Symbols.SetIsBorrowed(0);
 					}
 					else
 					{
@@ -1419,6 +1429,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 							
 						if (!node.VariableType.Is(plan.Symbols.Peek(node.Location).DataType))
 							throw new CompilerException(CompilerException.Codes.ExpressionTypeMismatch, node.Statement, node.VariableType.Name, plan.Symbols.Peek(node.Location).DataType.Name);
+
+						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
+						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						plan.Symbols.SetIsBorrowed(node.Location);
 					}
 					try
 					{
