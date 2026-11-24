@@ -195,6 +195,41 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The half of 3.1's three-value assertion that the engine still holds, kept live on its own because the test
+		/// carrying all three of them is ignored until bug-writing-a-large-value-changes-copies-of-it is fixed: a
+		/// source with a reference outstanding still reads back what was written through it. It is the assertion
+		/// either shape of that fix could break - the re-parenting shape hands the provider's stream to one of the
+		/// references, which leaves the source's own open stream to be pointed somewhere - so it is the one worth
+		/// holding while the fix is made rather than parking with the rest.
+		/// </summary>
+		[Test]
+		public void WritingASourceThatHasReferencesLeavesItReadingItsOwnNewValue()
+		{
+			StreamID sourceID = _manager.Allocate();
+			Stream source = _manager.Open(OwnerID, sourceID, LockMode.Exclusive);
+			WriteString(source, SourceOriginal);
+
+			StreamID referenceID = _manager.Reference(sourceID);
+			Stream reference = _manager.Open(OwnerID, referenceID, LockMode.Exclusive);
+
+			try
+			{
+				WriteString(source, SourceChanged);
+
+				Assert.That(ReadString(source), Is.EqualTo(SourceChanged), "a source stream with a reference outstanding did not read back the value written through it");
+			}
+			finally
+			{
+				reference.Close();
+				source.Close();
+			}
+
+			_manager.Deallocate(referenceID);
+			_manager.Deallocate(sourceID);
+			Assert.That(_manager.Count(), Is.Zero, "the manager was still holding a stream after everything it allocated had been deallocated");
+		}
+
+		/// <summary>
 		/// The other direction of the same insulation, and 3.1's assertions for streams 1, 2 and 3 in one case: with
 		/// two references outstanding, writing the source and writing one of the references must leave three distinct
 		/// values - the source with its new value, the untouched reference with the value it was taken from, and the

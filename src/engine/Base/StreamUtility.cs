@@ -119,7 +119,7 @@ namespace Alphora.Dataphor
 		}
 
 		/// <summary> CopyStream optimized for MemoryStream as target. </summary>
-		// NOTE: this and the other call sites flagged by warning CA2022 (Base, DAE Runtime.Data and BinaryNodes, System.Platform, SimpleDevice.LoadTable) assume one Stream.Read fills the buffer; true for the memory, file and engine streams they read today. If any of them is handed a stream that returns partial reads (network, compression, crypto), loop until the count is read or use Stream.ReadExactly.
+		// NOTE: this and the other call sites flagged by warning CA2022 (Base, DAE Runtime.Data and BinaryNodes, DAE Streams.BinaryConveyor, System.Platform, SimpleDevice.LoadTable) assume one Stream.Read fills the buffer; true for the memory, file and engine streams they read today. If any of them is handed a stream that returns partial reads (network, compression, crypto), loop until the count is read or use Stream.ReadExactly.
 		public static void CopyStream(Stream source, MemoryStream target, int count)
 		{
 			target.SetLength(Math.Max(target.Length, count - (target.Length - target.Position) + target.Position)); 
