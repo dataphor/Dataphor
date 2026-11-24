@@ -14,7 +14,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// the value: what the representation reads back afterwards is exactly what was written, at any length. The write
 	/// accessor used to write the new bytes over the existing stream without truncating it first, so a value shorter
 	/// than the one already there kept the tail of the old one on its end and the read-back was longer than what was
-	/// written (bug-binary-write-accessor-keeps-the-old-values-tail).
+	/// written. The accessor node also read the value being written to as a stream identifier without allowing for
+	/// there being no value yet, so a write to a nil variable failed with a NullReferenceException instead of setting
+	/// it; and it - like the selector beside it - took a stream out of the stream manager before reading the base-64 it
+	/// was given, so a value that did not parse held that stream for the life of the session (all
+	/// bug-binary-write-accessor-keeps-the-old-values-tail).
 	/// </summary>
 	/// <remarks>
 	/// Binary and Graphic are the whole of the rule: they are the only two types the engine holds in a stream, each
@@ -40,6 +44,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>Four other bytes - 01 02 03 04 - for the same-length case, which must still replace rather than be a no-op.</summary>
 		private const string FourOtherBytes = "AQIDBA==";
 
+		/// <summary>Not base-64 at all, so the conversion raises before the engine has a value to hold.</summary>
+		private const string NotBase64 = "not base64 at all!";
+
 		[TestCase("Binary")]
 		[TestCase("Graphic")]
 		public void WritingAShorterValueReplacesTheWholeValue(string typeName)
@@ -62,12 +69,24 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// Declares a variable of the given type holding the initial value, writes the new value through its Value
-		/// representation, and raises in D4 unless the read-back is exactly the new value. The error text carries both
-		/// the expected value and what was read, since the failure this is here for reads back as a third string that
-		/// is neither.
+		/// A write to a variable that has no value yet sets it, rather than propagating the nil or failing: there is no
+		/// stream to write into, so the accessor allocates one. This is the case the accessor node used to crash on.
 		/// </summary>
-		private void AssertWriteReplaces(string typeName, string initialValue, string newValue)
+		[TestCase("Binary")]
+		[TestCase("Graphic")]
+		public void WritingToANilValueSetsIt(string typeName)
+		{
+			AssertWriteSets(String.Format("var LV : {0};", typeName), FourBytes);
+		}
+
+		/// <summary>
+		/// A value the engine could not parse never had a stream allocated for it. Both the selector and the write
+		/// accessor used to allocate before parsing the base-64 they were given, so a malformed value held a managed
+		/// stream for the life of the session. StreamCount is the engine's own count of the streams it is holding.
+		/// </summary>
+		[TestCase("Binary")]
+		[TestCase("Graphic")]
+		public void AValueThatDoesNotParseLeavesNoStreamBehind(string typeName)
 		{
 			ExecuteScript
 			(
@@ -75,14 +94,52 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				(
 					@"
 						begin
-							var LV : {0} := {0}('{1}');
-							LV.Value := '{2}';
-							if LV.Value <> '{2}' then
-								raise Error('Expected ''{2}'' but read back ''' + LV.Value + '''.');
+							var LBefore : Integer := StreamCount();
+							begin
+								var LV : {0};
+								try LV.Value := '{1}'; except end;
+							end;
+							if StreamCount() <> LBefore then
+								raise Error('A write of a value that does not parse left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+							begin
+								try var LW : {0} := {0}('{1}'); except end;
+							end;
+							if StreamCount() <> LBefore then
+								raise Error('A selector given a value that does not parse left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
 						end;
 					",
 					typeName,
-					initialValue,
+					NotBase64
+				)
+			);
+		}
+
+		/// <summary>Writes the new value over a variable of the given type that already holds the initial value.</summary>
+		private void AssertWriteReplaces(string typeName, string initialValue, string newValue)
+		{
+			AssertWriteSets(String.Format("var LV : {0} := {0}('{1}');", typeName, initialValue), newValue);
+		}
+
+		/// <summary>
+		/// Runs the given declaration of a variable named LV, writes the new value through its Value representation, and
+		/// raises in D4 unless the read-back is exactly the new value. The error text carries both the expected value and
+		/// what was read, since the failure this is here for reads back as a third string that is neither.
+		/// </summary>
+		private void AssertWriteSets(string declaration, string newValue)
+		{
+			ExecuteScript
+			(
+				String.Format
+				(
+					@"
+						begin
+							{0}
+							LV.Value := '{1}';
+							if LV.Value <> '{1}' then
+								raise Error('Expected ''{1}'' but read back ''' + LV.Value + '''.');
+						end;
+					",
+					declaration,
 					newValue
 				)
 			);

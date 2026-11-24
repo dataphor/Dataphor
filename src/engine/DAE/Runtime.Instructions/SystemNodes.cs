@@ -483,7 +483,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 
-			using (Scalar scalar = new Scalar(program.ValueManager, (Schema.ScalarType)_dataType, program.StreamManager.Allocate()))
+			// StreamID.Null rather than an allocation here: the setter allocates once the base-64 has parsed, where
+			// allocating first held a stream for the life of the session whenever it did not parse
+			// (bug-binary-write-accessor-keeps-the-old-values-tail).
+			using (Scalar scalar = new Scalar(program.ValueManager, (Schema.ScalarType)_dataType, StreamID.Null))
 			{
 				scalar.AsBase64String = (string)argument1;
 				return scalar.StreamID;
@@ -538,7 +541,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			using (Scalar scalar = new Scalar(program.ValueManager, (Schema.ScalarType)_dataType, (StreamID)argument1))
+			// Nil does not propagate from the value being written to: a representation write sets the value, which is what
+			// the native write accessors do with a nil of their own. Reading argument1 as a StreamID regardless threw a
+			// NullReferenceException (bug-binary-write-accessor-keeps-the-old-values-tail). The nil is handed on as
+			// StreamID.Null rather than allocating here, so that the setter allocates only once the base-64 it was given
+			// has parsed - allocating first would leak the stream when it does not.
+			using 
+			(
+				Scalar scalar = 
+					new Scalar
+					(
+						program.ValueManager, 
+						(Schema.ScalarType)_dataType, 
+						argument1 == null ? StreamID.Null : (StreamID)argument1
+					)
+			)
 			{
 				scalar.AsBase64String = (string)argument2;
 				return scalar.StreamID;
