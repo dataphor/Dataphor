@@ -199,6 +199,14 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// are attached to the debugger. In addition, any processes subsequently started
 		/// on that session are automatically attached to the debugger.
 		/// </remarks>
+		// NOTE: the two halves of this - marking the session and attaching the processes it already has - are not atomic with
+		// respect to a process being started on that session at the same moment. ServerSession.StartProcess attaches the new
+		// process from the ServerProcess constructor, which reads DebuggedByID, and only then adds it to the session's list,
+		// so a process constructed just before the mark is set is neither self-attached nor found by the walk below, and one
+		// constructed during DetachSession can attach itself to a session that has just been detached. Fine now: an attach is
+		// a person clicking in the IDE, and the cost of losing the race is one task not debugged. If attaching a session ever
+		// becomes something a program does while that session is working, mark the session under the session's own process
+		// lock, which is the lock StartProcess would have to take to close the window.
 		public void AttachSession(ServerSession session)
 		{
 			lock (_syncHandle)

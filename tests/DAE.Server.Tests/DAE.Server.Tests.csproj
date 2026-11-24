@@ -33,6 +33,7 @@
     <Compile Include="CoverageScripts.cs" />
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
+    <Compile Include="DebuggerSessionTest.cs" />
     <Compile Include="DeferredDeviceStopTest.cs" />
     <Compile Include="DeviceClassAttributeFixture.cs" />
     <Compile Include="DeviceClassAttributeRerunTest.cs" />

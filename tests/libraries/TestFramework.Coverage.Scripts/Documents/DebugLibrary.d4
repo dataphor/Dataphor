@@ -60,6 +60,8 @@ end;
 /*
 // This needs to be run on a separate session...
 // Probably needs to be managed by an NUnit test directly.
+// Done, and left here as it was: these cases are DebuggerSessionTest in tests/DAE.Server.Tests, because no D4
+// operator opens a second session and hands back its identifier, so a script cannot reach them.
 Debug.AttachSession(3);
 begin
 	var LProcessID := StartProcess();
