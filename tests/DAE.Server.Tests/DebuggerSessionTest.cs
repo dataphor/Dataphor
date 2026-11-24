@@ -94,9 +94,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// Stops the debugger before the debugged session goes, whatever the case did.
 		/// </summary>
 		/// <remarks>
-		/// In that order deliberately: a session whose DebuggedByID still points at a debugger is one nothing else detaches,
-		/// and were it disconnected first the debugger would hold a disposed session until its own Dispose walked it. The
-		/// base fixture's TearDown, which stops its process and disconnects its session, runs after this one.
+		/// Either order is safe - the engine detaches a debugged session from its debugger as the session is disposed, which
+		/// is what <see cref="DisconnectingADebuggedSessionDetachesItFromTheDebugger"/> asserts - so this one is simply the
+		/// reverse of the setup, keeping the debugger's lifetime inside the debugged session's and leaving each case to be
+		/// read without it. The base fixture's TearDown, which stops its own process and disconnects its own session, runs
+		/// after this one.
 		/// </remarks>
 		[TearDown]
 		public void StopTheDebuggerAndCloseTheDebuggedSession()
@@ -280,6 +282,98 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				() => CloseTheDebuggedSession(),
 				"Stopping the session's tasks and disconnecting it after the debugger was stopped failed."
 			);
+		}
+
+		/// <summary>
+		/// Disconnecting a debugged session detaches it, and the tasks it was running, from the debugger that holds it: the
+		/// other way round from the case above, and the one direction no code in Debugger.cs performs.
+		/// </summary>
+		/// <remarks>
+		/// Nothing in Debugger.cs does this: the detach comes from ServerChildObjects, whose collections subscribe to each
+		/// child's Disposed event and disown it when it fires, so the debugger's session and process lists empty themselves
+		/// as the session and its processes go. DebugLibrary.d4 asserts the process half of that ("Disposed process did not
+		/// detach"); this is the session half, which needs a second session and so can only be asserted here. What it rules
+		/// out is a debugger left holding a disposed session, which would raise from Debugger.DetachSession the next time
+		/// that debugger was stopped: a disposed session has given up both its process list and its SessionInfo, and
+		/// DetachSession locks the one and SetDebuggedByID reads the other.
+		/// </remarks>
+		[Test]
+		public void DisconnectingADebuggedSessionDetachesItFromTheDebugger()
+		{
+			ExecuteScript("Debug.Start();");
+			AttachTheDebuggedSession();
+			IServerProcess attached = StartProcessOnTheDebuggedSession();
+
+			Assert.That
+			(
+				DebuggerHoldsProcess(attached.ProcessID),
+				Is.True,
+				"The attached session's task is not attached, so this case would not be disconnecting a session the debugger holds anything of."
+			);
+
+			CloseTheDebuggedSession();
+
+			Assert.That
+			(
+				DebuggedSessionCount(),
+				Is.EqualTo(0),
+				"Debug.GetSessions still lists the session after it was disconnected."
+			);
+			Assert.That
+			(
+				DebuggerHoldsProcess(attached.ProcessID),
+				Is.False,
+				"Debug.GetProcesses still lists a task of the session after it was disconnected."
+			);
+			// Where a stale session would show: DetachSession reads the session's process list, which a disposed session no
+			// longer has.
+			Assert.DoesNotThrow
+			(
+				() => ExecuteScript("Debug.Stop();"),
+				"Stopping the debugger after the session it held was disconnected failed, so disconnecting the session left the debugger holding it."
+			);
+		}
+
+		/// <summary>
+		/// A debugger refuses the session it is running on: ServerSession.SetDebuggedByID raises
+		/// CannotAttachToDebuggerSession, since a pause parks every attached process that is running and would therefore
+		/// park the one process that has to resume them.
+		/// </summary>
+		/// <remarks>
+		/// DebugLibrary.d4 has a block that looks like this one, but under the coverage harness its Debug.AttachSession
+		/// trips the earlier guard instead - CannotAttachToAnInProcessSession, since a session opened straight off the engine
+		/// has no catalog cache name - and it asserts only that *some* error was raised, so it passes either way. Reaching
+		/// this refusal needs a session that has a catalog cache name and a debugger of its own, which is the debugged
+		/// session here with a debugger started on it; hence the error code rather than the type is what is asserted.
+		/// </remarks>
+		[Test]
+		public void ADebuggerRefusesToAttachTheSessionItRunsOn()
+		{
+			IServerProcess itsOwnDebugger = StartProcessOnTheDebuggedSession();
+			itsOwnDebugger.ExecuteScript("Debug.Start();");
+
+			Exception refusal =
+				Assert.Catch(() => itsOwnDebugger.ExecuteScript(String.Format("Debug.AttachSession({0});", _debugged.SessionID)));
+
+			Assert.That
+			(
+				RefusalCode(refusal),
+				Is.EqualTo((int)ServerException.Codes.CannotAttachToDebuggerSession),
+				String.Format("Attaching the debugger's own session was refused for the wrong reason: {0}", refusal.Message)
+			);
+		}
+
+		/// <summary>
+		/// The engine error code of a refusal, which arrives wrapped in a RuntimeException naming the statement that raised
+		/// it, so that a case can say which refusal it expected rather than only that something was raised.
+		/// </summary>
+		private static int RefusalCode(Exception exception)
+		{
+			int code = 0;
+			for (Exception wrapped = exception; wrapped != null; wrapped = wrapped.InnerException)
+				if (wrapped is DataphorException dataphorException)
+					code = dataphorException.Code;
+			return code;
 		}
 
 		/// <summary>Attaches the debugged session the way the IDE does, by executing D4 on the debugger session's process.</summary>

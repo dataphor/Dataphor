@@ -45,7 +45,11 @@ begin
 		raise Error("Disposed process did not detach");
 end;
 
-// Cannot attach to debugger session.
+// Attaching your own session fails. Which refusal it is depends on the session: run here, straight off the engine, it is
+// CannotAttachToAnInProcessSession, because a session the client library did not open has no catalog cache name. The
+// refusal this comment used to name, CannotAttachToDebuggerSession, needs a session that has one, and is asserted by
+// ADebuggerRefusesToAttachTheSessionItRunsOn in DebuggerSessionTest. Either way attaching it must fail, which is all
+// this block claims.
 begin
 	var LExceptionHit := false;
 	try
