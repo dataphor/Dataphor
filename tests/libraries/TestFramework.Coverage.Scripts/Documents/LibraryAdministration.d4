@@ -8,17 +8,22 @@
 // table; LibraryLoadingTest (C#) covers loading a library with a real assembly. None of that is repeated here.
 //
 // Every library this script touches is one it creates, and each section drops what it created. The script opens no explicit
-// transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may make DropLibrary refuse inside one.
+// transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may make DropLibrary refuse inside an
+// explicit one. It is not transaction-free, though, and no coverage script is: the harness runs the whole script as a nested
+// ExecuteScript inside one statement of its own, so TransactionCount() is 1 from the first line to the last (measured) and
+// every statement here runs in that one implicit transaction rather than in one of its own.
 //
 // An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the schema
 // code. Assertions below read the inner message out of E.Message, and where a numeric error code matters - error codes are a
 // compatibility surface - they find it in E.GetDetailedErrorDescription(), which flattens the whole chain and prints each
-// link as "Application:<code>".
+// link as "<severity>:<code> ---> <message>". They look for ":<code> --->" rather than for the digits alone: the same text
+// carries source paths and ":line NNN" fragments, which digits alone could match.
 
 // Settings: the rows of the LibrarySettings catalog table, which reach AddLibrarySetting, UpdateLibrarySetting and
 // RemoveLibrarySetting through the catalog device session.
 begin
 	CreateLibrary(LibraryDescriptor('AdminSettings', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('AdminSettingsMoved', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
 
 	insert table { row { 'AdminSettings' Library_Name, 'Alpha' Name, 'One' Value } } into LibrarySettings;
 	if LibrarySetting('AdminSettings', 'Alpha') <> 'One' then
@@ -28,8 +33,9 @@ begin
 	if LibrarySetting('AdminSettings', 'Alpha') <> 'Two' then
 		raise Error('Changing the value of a library setting failed.');
 
-	// Renaming a setting is the arm of UpdateLibrarySetting that removes the old tag and adds a new one rather than updating
-	// the tag's value in place.
+	// An update of this table meets two different pairs of arms, and which pair depends on the column that changed. Renaming
+	// the setting reaches the remove-and-add arm of SystemSetLibraryDescriptorNode.UpdateLibrarySetting, where the update of
+	// the value above reached its update-in-place arm.
 	update LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Alpha' set { Name := 'Beta' };
 	if exists (LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Alpha') then
 		raise Error('Renaming a library setting left the old name behind.');
@@ -37,11 +43,21 @@ begin
 	if LibrarySetting('AdminSettings', 'Beta') <> 'Two' then
 		raise Error('Renaming a library setting did not carry its value across.');
 
-	delete LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Beta';
+	// Both of those arrive through ServerCatalogDeviceSession.UpdateLibrarySetting, which branches on the Library_Name
+	// instead: moving a setting to another library is the only update that reaches that method's own remove-and-add arm.
+	update LibrarySettings where Library_Name = 'AdminSettings' and Name = 'Beta' set { Library_Name := 'AdminSettingsMoved' };
 	if exists (LibrarySettings where Library_Name = 'AdminSettings') then
+		raise Error('Moving a library setting to another library left the row on the old library.');
+
+	if LibrarySetting('AdminSettingsMoved', 'Beta') <> 'Two' then
+		raise Error('Moving a library setting to another library did not carry its value across.');
+
+	delete LibrarySettings where Library_Name = 'AdminSettingsMoved' and Name = 'Beta';
+	if exists (LibrarySettings where Library_Name = 'AdminSettingsMoved') then
 		raise Error('Deleting a library setting failed.');
 
 	DropLibrary('AdminSettings');
+	DropLibrary('AdminSettingsMoved');
 end;
 
 // Resolving a setting by name alone. LibrarySetting(name) walks the current session's library name resolution path and returns
@@ -172,7 +188,7 @@ begin
 	except on E : Error do
 		LCaught := E.GetDetailedErrorDescription();
 	end;
-	if (IndexOf(LCaught, '113196') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be dropped.') < 0) then
+	if (IndexOf(LCaught, ':113196 --->') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be dropped.') < 0) then
 		raise Error('Dropping a registered library did not raise 113196: ' + LCaught);
 
 	LCaught := '';
@@ -181,7 +197,7 @@ begin
 	except on E : Error do
 		LCaught := E.GetDetailedErrorDescription();
 	end;
-	if (IndexOf(LCaught, '113231') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be detached.') < 0) then
+	if (IndexOf(LCaught, ':113231 --->') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be detached.') < 0) then
 		raise Error('Detaching a registered library did not raise 113231: ' + LCaught);
 
 	UnregisterLibrary('AdminErrors');
@@ -192,7 +208,7 @@ begin
 	except on E : Error do
 		LCaught := E.GetDetailedErrorDescription();
 	end;
-	if (IndexOf(LCaught, '113242') < 0) or (IndexOf(LCaught, "Library 'AdminErrors' is not registered.") < 0) then
+	if (IndexOf(LCaught, ':113242 --->') < 0) or (IndexOf(LCaught, "Library 'AdminErrors' is not registered.") < 0) then
 		raise Error('Unregistering a library that is not registered did not raise 113242: ' + LCaught);
 
 	DropLibrary('AdminErrors');
@@ -204,7 +220,7 @@ begin
 	except on E : Error do
 		LCaught := E.GetDetailedErrorDescription();
 	end;
-	if (IndexOf(LCaught, '113104') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
+	if (IndexOf(LCaught, ':113104 --->') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
 		raise Error('Dropping a library that does not exist did not raise 113104: ' + LCaught);
 
 	LCaught := '';
@@ -213,7 +229,7 @@ begin
 	except on E : Error do
 		LCaught := E.GetDetailedErrorDescription();
 	end;
-	if (IndexOf(LCaught, '113104') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
+	if (IndexOf(LCaught, ':113104 --->') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
 		raise Error('Registering a library that does not exist did not raise 113104: ' + LCaught);
 end;
 
@@ -230,6 +246,29 @@ begin
 
 	if GetLibraryDescriptor('AdminFiles') <> LibraryDescriptor('AdminFiles', VersionNumber(1, 0), "", { FileReference('AdminNotes.txt', false) }, list(LibraryReference){}) then
 		raise Error('An inserted library file did not reach the library descriptor.');
+
+	// A file that has an environment defined for it cannot be removed, which is the one refusal RemoveLibraryFile makes. The
+	// environments are rows of a table of their own, keyed by the file.
+	insert table { row { 'AdminFiles' Library_Name, 'AdminNotes.txt' LibraryFile_FileName, 'Common' Environment } } into LibraryFileEnvironments;
+	if not exists (LibraryFileEnvironments where Library_Name = 'AdminFiles' and LibraryFile_FileName = 'AdminNotes.txt' and Environment = 'Common') then
+		raise Error('Inserting a library file environment failed.');
+
+	begin
+		var LCaught : String := '';
+		try
+			delete LibraryFiles where Library_Name = 'AdminFiles' and FileName = 'AdminNotes.txt';
+		except on E : Error do
+			LCaught := E.GetDetailedErrorDescription();
+		end;
+		// The message names the library with the leading dot of its rooted name - see the NOTE at the throw site - so what is
+		// asserted here is the part of it that does not depend on that.
+		if (IndexOf(LCaught, ':104232 --->') < 0) or (IndexOf(LCaught, "File 'AdminNotes.txt' in library") < 0) or (IndexOf(LCaught, 'cannot be removed because it has environments defined.') < 0) then
+			raise Error('Removing a file that has an environment defined did not raise 104232: ' + LCaught);
+	end;
+
+	delete LibraryFileEnvironments where Library_Name = 'AdminFiles' and LibraryFile_FileName = 'AdminNotes.txt';
+	if exists (LibraryFileEnvironments where Library_Name = 'AdminFiles') then
+		raise Error('Deleting a library file environment failed.');
 
 	delete LibraryFiles where Library_Name = 'AdminFiles' and FileName = 'AdminNotes.txt';
 	if exists (LibraryFiles where Library_Name = 'AdminFiles') then
@@ -295,5 +334,5 @@ begin
 	DropLibrary('AdminDepB');
 end;
 
-if exists (Libraries where Name in { 'AdminSettings', 'AdminSetA', 'AdminSetB', 'AdminSetC', 'AdminDetach', 'AdminReRegister', 'AdminErrors', 'AdminFiles', 'AdminDepA', 'AdminDepB', 'AdminDepC', 'AdminDepD' }) then
+if exists (Libraries where Name in { 'AdminSettings', 'AdminSettingsMoved', 'AdminSetA', 'AdminSetB', 'AdminSetC', 'AdminDetach', 'AdminReRegister', 'AdminErrors', 'AdminFiles', 'AdminDepA', 'AdminDepB', 'AdminDepC', 'AdminDepD' }) then
 	raise Error('The script left a library behind.');

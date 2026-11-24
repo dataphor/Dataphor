@@ -214,9 +214,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	// operator RefreshLibraries(const ALibraryName : Name);
-	// NOTE: there is no such signature. SystemCatalog.d4 declares RefreshLibraries() with no arguments and this node ignores
-	// any, so the comment above is what is wrong; the declaration is a compatibility surface and stays as it is.
+	// operator RefreshLibraries();
 	public class SystemRefreshLibrariesNode : InstructionNode
 	{
 		public override object InternalExecute(Program program, object[] arguments)
@@ -485,6 +483,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (Schema.Object.NamesEqual(library.Name, Server.GeneralLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifyGeneralLibrary);
 					
+				// NOTE: libraryName is rooted here (callers pass it through EnsureRooted), so the message below names the library with a
+				// leading dot - ".MyLibrary". Left as it is: error message text is what an application may be matching on, and the only
+				// caller that reaches this is a person removing a file in the IDE. LibraryAdministration.d4 asserts the rest of the message.
 				if (library.Files[file.FileName].Environments.Count > 0)
 					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, String.Format("File '{0}' in library '{1}' cannot be removed because it has environments defined.", file.FileName, libraryName));
 					
