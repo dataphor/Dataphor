@@ -19,6 +19,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// it; and it - like the selector beside it - took a stream out of the stream manager before reading the base-64 it
 	/// was given, so a value that did not parse held that stream for the life of the session (all
 	/// bug-binary-write-accessor-keeps-the-old-values-tail).
+	///
+	/// Setting the value also leaves any copy of it alone: a copy taken before the write keeps the value it was taken
+	/// from. The engine does not copy the bytes of a stream-backed value when it is copied - the copy reads the
+	/// original's stream until one of them is written - and the separation used to happen only when the write went
+	/// through the copy, so writing the original changed every copy outstanding of it
+	/// (bug-writing-a-large-value-changes-copies-of-it).
 	/// </summary>
 	/// <remarks>
 	/// Binary and Graphic are the whole of the rule: they are the only two types the engine holds in a stream, each
@@ -110,6 +116,45 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					",
 					typeName,
 					NotBase64
+				)
+			);
+		}
+
+		/// <summary>
+		/// A copy of a stream-backed value taken before the original is written keeps the value it was taken from,
+		/// rather than following the write through the original. This is the language-layer case for
+		/// bug-writing-a-large-value-changes-copies-of-it; ServerStreamManagerTest carries the same behaviour at the
+		/// stream manager, which is where the fix is.
+		/// </summary>
+		/// <remarks>
+		/// One case covers every shape a copy is taken in - at declaration, as it is here, by a later assignment, and
+		/// into a row column - because all three reach ServerStreamManager.Reference through DataValue.CopyNative and
+		/// DataValue.CopyValue, and all three were confirmed to reproduce and to be fixed by the one change. The
+		/// assertion on the variable that was written is as load-bearing as the one on the copy: a fix that separated
+		/// the copy but lost the original's own write would otherwise pass.
+		/// </remarks>
+		[TestCase("Binary")]
+		[TestCase("Graphic")]
+		public void ACopyTakenBeforeAWriteKeepsTheValueItWasTakenFrom(string typeName)
+		{
+			ExecuteScript
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LV : {0} := {0}('{1}');
+							var LCopy : {0} := LV;
+							LV.Value := '{2}';
+							if LV.Value <> '{2}' then
+								raise Error('Expected the variable written through to read back ''{2}'' but it read back ''' + LV.Value + '''.');
+							if LCopy.Value <> '{1}' then
+								raise Error('Expected a copy taken before the write to keep ''{1}'' but it read back ''' + LCopy.Value + '''.');
+						end;
+					",
+					typeName,
+					EightBytes,
+					FourBytes
 				)
 			);
 		}

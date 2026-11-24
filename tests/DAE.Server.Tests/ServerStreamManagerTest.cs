@@ -195,12 +195,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// The half of 3.1's three-value assertion that the engine still holds, kept live on its own because the test
-		/// carrying all three of them is ignored until bug-writing-a-large-value-changes-copies-of-it is fixed: a
-		/// source with a reference outstanding still reads back what was written through it. It is the assertion
-		/// either shape of that fix could break - the re-parenting shape hands the provider's stream to one of the
-		/// references, which leaves the source's own open stream to be pointed somewhere - so it is the one worth
-		/// holding while the fix is made rather than parking with the rest.
+		/// One half of 3.1's three-value assertion on its own: a source with a reference outstanding still reads back
+		/// what was written through it. It is the assertion either shape of the copy-on-write fix could break - the
+		/// shape that re-parents hands the provider's stream to one of the references, which leaves the source's own
+		/// open stream to be pointed somewhere, and the shape in Change today reads this stream to the end to copy it
+		/// and has to put its position back - so it is worth holding separately from the case below, which would fail
+		/// for either reason.
 		/// </summary>
 		[Test]
 		public void WritingASourceThatHasReferencesLeavesItReadingItsOwnNewValue()
@@ -235,14 +235,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// values - the source with its new value, the untouched reference with the value it was taken from, and the
 		/// written reference with its own.
 		///
-		/// This is the one assertion of 3.1's that the engine no longer holds, and it is left here as 3.1 wrote it
-		/// because it is the reproduction the fix is owed: a write through the source lands in the provider's stream
-		/// that the references are still reading through, so the untouched reference reads the source's new value.
-		/// Ignored rather than left failing so that it does not drown the signal from every other run; turn it back
-		/// on with the fix. See bug-writing-a-large-value-changes-copies-of-it.
+		/// This case is the reproduction of bug-writing-a-large-value-changes-copies-of-it, and it is here as 3.1 wrote
+		/// it. The write through the source used to land in the provider's stream that the references were still reading
+		/// through, so the untouched reference read the source's new value instead of the value it was taken from; what
+		/// it pins now is that Change gives every outstanding reference a stream of its own before that write lands, and
+		/// that the source's own write still reaches the source.
 		/// </summary>
 		[Test]
-		[Ignore("Reproduces bug-writing-a-large-value-changes-copies-of-it: writing a source stream is visible through every outstanding reference to it, so the untouched reference reads the source's new value instead of the value it was taken from.")]
 		public void WritingASourceAndOneOfItsTwoReferencesLeavesThreeDistinctValues()
 		{
 			StreamID sourceID = _manager.Allocate();
