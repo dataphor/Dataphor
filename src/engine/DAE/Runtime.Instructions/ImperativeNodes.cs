@@ -120,8 +120,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		// This is the D4 "begin ... end" statement, and the scope whose variables a raise, an exit, a break or a
+		// continue used to leak: the releases were statements the compiler appended to the end of the block, so only
+		// control reaching that end ran them (bug-an-error-inside-a-block-leaks-its-binary-values). Releasing above the
+		// entry depth in the finally that already pops the frame covers every path out, and needs no agreement with the
+		// compiler about which slots the block declared.
 		public override object InternalExecute(Program program)
 		{
+			int stackDepth = program.Stack.Count;
 			program.Stack.PushFrame();
 			try
 			{
@@ -130,6 +136,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
+				program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
 				program.Stack.PopFrame();
 			}
 		}
@@ -445,6 +452,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
+							// NOTE: unlike the cursor branch above, this one does not null the slot it borrowed, so a loop over
+							// a variable the script declared leaves that variable holding the list's last element - a value the
+							// list owns - and the scope that declared the variable then releases it (Stack.ReleaseAbove, or the
+							// statement the compiler used to append to the end of the block, which did the same on the one path
+							// it covered). Nothing breaks today, because this branch never releases the list it evaluated, so
+							// the element is released once either way; measured over five shapes, all of which ran. Whoever
+							// closes that leak must null the slot here in the same change, or the element is released twice.
 							if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
 								program.Stack.Pop();
 						}
@@ -618,8 +632,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
+		// The same rule as FrameNode, covering the copy of the error this pushes as well as whatever the handler's own
+		// statement declares. The compiler used to wrap this node in a release block, which never ran: TryExceptNode
+		// reaches the handler through GetErrorHandlerNode and executes the handler itself, and the wrapper's releases
+		// would in any case have run after the frame holding their slots was popped.
 		public override object InternalExecute(Program program)
 		{
+			int stackDepth = program.Stack.Count;
 			program.Stack.PushFrame();
 			try
 			{
@@ -630,6 +649,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
+				program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
 				program.Stack.PopFrame();
 			}
 		}
@@ -1279,6 +1299,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							// window pops, above this frame.
 							for (int index = 0; index < Operator.Operands.Count; index++)
 								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
+
+							// Then release whatever the body left above its own entry depth, on every path out. An operator
+							// body is not a FrameNode - the parser hands the body's statement list over directly - so the
+							// body's own locals are leftovers in this call's stack window rather than frame variables, and
+							// this is the site that owns them. stackDepth was recorded just above the operand and result
+							// slots, so neither is touched: the operands belong to the caller or to the instruction's
+							// cleanup, which the hand-back above has just given them to, and the result has already been
+							// read by the return in the try.
+							program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
 						}
 					}
 					finally
@@ -1406,31 +1435,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			program.Stack.Pop();
 			return null;
-		}
-	}
-	
-	public class DeallocateVariableNode : PlanNode
-	{
-		public DeallocateVariableNode() : base()
-		{
-		}
-		
-		public DeallocateVariableNode(int location) : base()
-		{
-			Location = location;
-		}
-		
-		public int Location;
-
-		public override object InternalExecute(Program program)
-		{
-			DataValue.DisposeValue(program.ValueManager, program.Stack[Location]);
-			return null;
-		}
-		
-		public override Statement EmitStatement(EmitMode mode)
-		{
-			return new EmptyStatement();
 		}
 	}
 	

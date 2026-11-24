@@ -194,89 +194,107 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program.Stack.Push(null); // result
 					int stackDepth = program.Stack.Count;
 
-					// Initialization
+					// The three blocks share one scope above the result slot - the initialization block deliberately leaves
+					// its variables for the aggregation and finalization blocks to use - so the release that covers them all
+					// belongs here, above stackDepth, on every path out. The result slot is below stackDepth and is returned
+					// rather than released; the aggregate column slots are above it but are popped by the inner finally
+					// below before this one runs, so they are never released here - they hold values borrowed from the row
+					// the cursor selects into, and releasing one would be a use-after-free.
 					try
 					{
-						Nodes[1].Execute(program);
-					}
-					catch (ExitError){}
-					
-					// Aggregation
-					Row row = null;
-					if (_aggregateColumnIndexes.Length > 0)
-						row = new Row(program.ValueManager, SourceNode.DataType.RowType);
-					//object[] LValues = new object[FAggregateColumnIndexes.Length];
-					for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
-					{
-						Schema.IDataType type = SourceNode.TableVar.Columns[_aggregateColumnIndexes[index]].DataType;
-						//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
-						program.Stack.Push(null);
-					}
-					try
-					{
-						while (true)
+						// Initialization
+						try
 						{
-							#if DEBUG
-							// This AllowExtraWindowAccess call is only necessary debug because the check is not
-							// made in release executables
-							program.Stack.AllowExtraWindowAccess = true;
-							try
+							Nodes[1].Execute(program);
+						}
+						catch (ExitError){}
+						
+						// Aggregation
+						Row row = null;
+						if (_aggregateColumnIndexes.Length > 0)
+							row = new Row(program.ValueManager, SourceNode.DataType.RowType);
+						//object[] LValues = new object[FAggregateColumnIndexes.Length];
+						for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+						{
+							Schema.IDataType type = SourceNode.TableVar.Columns[_aggregateColumnIndexes[index]].DataType;
+							//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
+							program.Stack.Push(null);
+						}
+						try
+						{
+							while (true)
 							{
-							#endif
-								if (table == null)
+								#if DEBUG
+								// This AllowExtraWindowAccess call is only necessary debug because the check is not
+								// made in release executables
+								program.Stack.AllowExtraWindowAccess = true;
+								try
 								{
-									table = (ITable)Nodes[0].Execute(program);
-									table.Open();
-								}
+								#endif
+									if (table == null)
+									{
+										table = (ITable)Nodes[0].Execute(program);
+										table.Open();
+									}
 
-								if (!table.Next())
-									break;
-									
-								if (_aggregateColumnIndexes.Length > 0)
-									table.Select(row);
-							#if DEBUG
-							}
-							finally
-							{
-								program.Stack.AllowExtraWindowAccess = false;
-							}
-							#endif
-							
-							for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
-								if (row.HasValue(_aggregateColumnIndexes[index]))
-									program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, row[_aggregateColumnIndexes[index]]);
-								else
-									program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, null);
-							
-							program.Stack.PushFrame();
-							try
-							{
-								Nodes[2].Execute(program);
-							}
-							catch (ExitError){}
-							finally
-							{
-								program.Stack.PopFrame();
+									if (!table.Next())
+										break;
+										
+									if (_aggregateColumnIndexes.Length > 0)
+										table.Select(row);
+								#if DEBUG
+								}
+								finally
+								{
+									program.Stack.AllowExtraWindowAccess = false;
+								}
+								#endif
+								
+								for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+									if (row.HasValue(_aggregateColumnIndexes[index]))
+										program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, row[_aggregateColumnIndexes[index]]);
+									else
+										program.Stack.Poke(_aggregateColumnIndexes.Length - 1 - index, null);
+								
+								// The aggregation block is a scope of its own, once per row: release what it left above the
+								// depth it was entered at, before the frame pop nulls those slots. The aggregate column slots
+								// poked just above are below this depth and so are not touched.
+								int aggregationDepth = program.Stack.Count;
+								program.Stack.PushFrame();
+								try
+								{
+									Nodes[2].Execute(program);
+								}
+								catch (ExitError){}
+								finally
+								{
+									program.Stack.ReleaseAbove(aggregationDepth, program.ValueManager);
+									program.Stack.PopFrame();
+								}
 							}
 						}
+						finally
+						{
+							for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
+								program.Stack.Pop();
+
+							if (_aggregateColumnIndexes.Length > 0)
+								row.Dispose();
+						}
+						
+						// Finalization
+						try
+						{
+							Nodes[3].Execute(program);
+						}
+						catch (ExitError){}
+						
+						return program.Stack.Peek(program.Stack.Count - stackDepth);
 					}
 					finally
 					{
-						for (int index = 0; index < _aggregateColumnIndexes.Length; index++)
-							program.Stack.Pop();
-
-						if (_aggregateColumnIndexes.Length > 0)
-							row.Dispose();
+						program.Stack.ReleaseAbove(stackDepth, program.ValueManager);
 					}
-					
-					// Finalization
-					try
-					{
-						Nodes[3].Execute(program);
-					}
-					catch (ExitError){}
-					
-					return program.Stack.Peek(program.Stack.Count - stackDepth);
 				}
 				finally
 				{

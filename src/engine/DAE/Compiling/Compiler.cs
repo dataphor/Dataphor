@@ -1076,7 +1076,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				foreach (Statement localStatement in ((DelimitedBlock)statement).Statements)
 					node.Nodes.Add(CompileStatement(plan, localStatement));
 				node.DetermineCharacteristics(plan);
-				frameNode.Nodes.Add(CompileDeallocateFrameVariablesNode(plan, node));
+				frameNode.Nodes.Add(node);
 				return frameNode;
 			}
 			finally
@@ -1570,7 +1570,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						}
 						errorNode.Nodes.Add(CompileStatement(plan, handler.Statement));
 						errorNode.DetermineCharacteristics(plan);
-						node.Nodes.Add(CompileDeallocateFrameVariablesNode(plan, errorNode));
+						node.Nodes.Add(errorNode);
 					}
 					finally
 					{
@@ -4042,50 +4042,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.Symbols.PushFrame();
 			try
 			{
-				node.Nodes.Add(CompileDeallocateFrameVariablesNode(plan, CompileStatement(plan, statement)));
+				node.Nodes.Add(CompileStatement(plan, statement));
 				return node;
 			}
 			finally
 			{
 				plan.Symbols.PopFrame();
 			}
-		}
-		
-		public static PlanNode CompileDeallocateFrameVariablesNode(Plan plan, PlanNode node)
-		{
-			BlockNode blockNode = null;
-			for (int index = 0; index < plan.Symbols.FrameCount; index++)
-				if (plan.Symbols[index].DataType.IsDisposable)
-				{
-					if (blockNode == null)
-					{
-						blockNode = new BlockNode();
-						blockNode.IsBreakable = false;
-						blockNode.Nodes.Add(node);
-					}
-					blockNode.Nodes.Add(new DeallocateVariableNode(index));
-				}
-				
-			return blockNode == null ? node : blockNode;
-		}
-		
-		public static PlanNode CompileDeallocateVariablesNode(Plan plan, PlanNode node, Symbol resultVar)
-		{
-			BlockNode blockNode = null;
-			for (int index = 0; index < plan.Symbols.Count; index++)
-				if ((plan.Symbols[index].Name != resultVar.Name) && plan.Symbols[index].DataType.IsDisposable)
-				{
-					if (blockNode == null)
-					{
-						blockNode = new BlockNode();
-						blockNode.IsBreakable = false;
-						blockNode.Nodes.Add(node);
-						node = blockNode;
-					}
-					blockNode.Nodes.Add(new DeallocateVariableNode(index));
-				}
-				
-			return node;
 		}
 		
 		public static Schema.Device GetDefaultDevice(Plan plan, bool mustResolve)
@@ -6319,22 +6282,16 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 				}
 				
-				int stackDepth = operatorValue.Operands.Count;
-				
 				if (operatorValue.ReturnDataType != null)
-				{
 					plan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
-					stackDepth++;
-				}
 						
 				block = CompileStatement(plan, statement);
 
 				// An operand's offset from the top of the symbol stack counts back over everything above it, which is
-				// the result symbol of a returning operator plus whatever variables the block left behind (the loop
-				// below walks those same leftovers). Taking the offset as Operands.Count - 1 - index read the wrong
-				// symbol for every operator with a return type, so an operand the body does assign to could be
-				// promoted - and a const operand is passed by reference, which makes the body's assignment release
-				// the caller's value out from under it.
+				// the result symbol of a returning operator plus whatever variables the block left behind. Taking the
+				// offset as Operands.Count - 1 - index read the wrong symbol for every operator with a return type, so
+				// an operand the body does assign to could be promoted - and a const operand is passed by reference,
+				// which makes the body's assignment release the caller's value out from under it.
 				for (int index = 0; index < operatorValue.Operands.Count; index++)
 					if (!plan.Symbols[plan.Symbols.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
 					{
@@ -6342,26 +6299,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 						operatorValue.OperandsChanged();
 					}
 				
-				// Dispose variables allocated within the block
-				BlockNode blockNode = null;
-				for (int index = 0; index < plan.Symbols.Count - stackDepth; index++)
-				{
-					if (plan.Symbols[index].DataType.IsDisposable)
-					{
-						if (blockNode == null)
-						{
-							blockNode = new BlockNode();
-							blockNode.IsBreakable = false;
-							blockNode.Nodes.Add(block);
-						}
-
-						blockNode.Nodes.Add(new DeallocateVariableNode(index));
-					}
-				}
-				
-				if (blockNode != null)
-					block = blockNode;
-
+				// The variables the block leaves behind are released at run time by CallNode, which releases above its
+				// own entry depth on every path out of the body - not by statements compiled onto the end of
+				// the block, which only an exit through that end ever reached
+				// (bug-an-error-inside-a-block-leaks-its-binary-values).
 				return block;
 			}
 			finally
@@ -6919,8 +6860,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						plan.Symbols.PushWindow(0);
 						try
 						{
-							Symbol resultVar = new Symbol(Keywords.Result, operatorValue.ReturnDataType);
-							plan.Symbols.Push(resultVar);
+							plan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
 
 							int symbolCount = plan.Symbols.Count;
 							operatorValue.Initialization.SetLineInfo(plan, localStatement.Initialization.LineInfo);
@@ -6952,7 +6892,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									foreach (Schema.Operand operand in operatorValue.Operands)
 										plan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 
-									operatorValue.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(plan, CompileStatement(plan, localStatement.Aggregation.Block));
+									operatorValue.Aggregation.BlockNode = CompileStatement(plan, localStatement.Aggregation.Block);
 								}
 								finally
 								{
@@ -6966,11 +6906,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 								plan.CheckRight(Schema.RightNames.HostImplementation);
 								plan.CheckClassDependency(operatorValue.Library, localStatement.Finalization.ClassDefinition);
 								operatorValue.Finalization.ClassDefinition = localStatement.Finalization.ClassDefinition;
-								operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(plan, new NoOpNode(), resultVar);
+								operatorValue.Finalization.BlockNode = new NoOpNode();
 							}
 							else
 							{
-								operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(plan, CompileStatement(plan, localStatement.Finalization.Block), resultVar);
+								operatorValue.Finalization.BlockNode = CompileStatement(plan, localStatement.Finalization.Block);
 							}
 						}
 						finally
@@ -7106,8 +7046,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 										localPlan.Symbols.PushWindow(0);
 										try
 										{
-											Symbol resultVar = new Symbol(Keywords.Result, operatorValue.ReturnDataType);
-											localPlan.Symbols.Push(resultVar);
+											localPlan.Symbols.Push(new Symbol(Keywords.Result, operatorValue.ReturnDataType));
 												
 											if (operatorValue.Initialization.ClassDefinition == null)
 											{
@@ -7140,7 +7079,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 														foreach (Schema.Operand operand in operatorValue.Operands)
 															localPlan.Symbols.Push(new Symbol(operand.Name, operand.DataType, operand.Modifier == Modifier.Const));
 
-														operatorValue.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
+														operatorValue.Aggregation.BlockNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.AggregationText, null)); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
 													}
 													finally
 													{
@@ -7161,7 +7100,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 												localPlan.CompilingOffset.LinePos = 0;
 												try
 												{
-													operatorValue.Finalization.BlockNode = CompileDeallocateVariablesNode(localPlan, CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)), resultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
+													operatorValue.Finalization.BlockNode = CompileStatement(localPlan, new Parser().ParseStatement(operatorValue.FinalizationText, null)); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
 												}
 												finally
 												{

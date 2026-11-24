@@ -51,6 +51,36 @@ namespace Alphora.Dataphor.DAE.Runtime
 				DataValue.DisposeValue(manager, displaced);
 		}
 
+		/// <summary>Releases the values of the slots above the given depth, leaving each slot null.</summary>
+		/// <remarks>
+		/// <para>
+		/// The rule a scope follows on the way out: it releases what it finds above the depth the stack had when it was
+		/// entered. Count is window-relative and is read the same way at entry and at exit, so the two depths are
+		/// comparable; a scope therefore needs no list of its own variables and no agreement with the compiler about
+		/// where they sit. That is what makes this right for a block that raised before it had declared all of its
+		/// variables, and for an operator body whose compile-time symbol frame does not line up with its run-time frame.
+		/// </para>
+		/// <para>
+		/// Each slot is nulled before its value is disposed, so a dispose that throws cannot leave a disposed value
+		/// reachable from the stack, and a second pass over the same region releases nothing. See PokeOwned for the
+		/// ownership rule this is the other half of: a slot owns its value, and whatever takes a value out of a slot -
+		/// an assignment, or the scope that ends - releases it.
+		/// </para>
+		/// </remarks>
+		public void ReleaseAbove(int depth, IValueManager manager)
+		{
+			int count = Count;
+			for (int offset = 0; offset < count - depth; offset++)
+			{
+				object value = this[offset];
+				if (value != null)
+				{
+					Poke(offset, null);
+					DataValue.DisposeValue(manager, value);
+				}
+			}
+		}
+
 		/// <summary>Whether two slot values name the same underlying value, comparing stream identifiers by value and everything else by reference.</summary>
 		private static bool IsSameValue(object left, object right)
 		{

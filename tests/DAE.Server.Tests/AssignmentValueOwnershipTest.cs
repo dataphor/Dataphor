@@ -13,22 +13,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// A stack slot owns the value in it: whatever overwrites a slot releases what it displaced. Assignment did not,
 	/// so every assignment to a variable of a type the engine keeps in a managed stream - Binary and Graphic - orphaned
 	/// the stream behind the value it replaced, for the life of the session
-	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference on are
-	/// the limits of that rule: slots whose value belongs to something else, which an assignment must leave alone, and
-	/// the two shapes in which a call used to hand one caller value to two callee slots.
+	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference
+	/// through AssigningThroughAScalarProperty are the limits of that rule: slots whose value belongs to something
+	/// else, which an assignment must leave alone, and the two shapes in which a call used to hand one caller value
+	/// to two callee slots. The last four cases are the other half of the same ownership rule: a scope releases the
+	/// values of the variables it declared. That release used to be a statement the compiler appended to the end of
+	/// the block, so only control reaching the end of the block ran it, and a raise, an exit, a break or a continue
+	/// left every value behind (bug-an-error-inside-a-block-leaks-its-binary-values).
 	/// </summary>
 	/// <remarks>
 	/// The leak cases assert on Diagnostics.StreamCount(), which reports how many streams the server is holding, read
-	/// before and after each script: a script that declares its own variables and runs to completion must leave the
-	/// count where it found it. Exact numbers, because the assertion is arithmetic rather than a threshold. The loop
-	/// cases assign many times rather than once, so that a regression reports the full count of orphans instead of one
-	/// and cannot be mistaken for an off-by-one somewhere else.
+	/// before and after each script: a script that declares its own variables must leave the count where it found it,
+	/// whether it ran to completion or raised. Exact numbers, because the assertion is arithmetic rather than a
+	/// threshold. The loop cases assign, or continue, many times rather than once, so that a regression reports the
+	/// full count of orphans instead of one and cannot be mistaken for an off-by-one somewhere else.
 	///
-	/// No script here leaves the block that declared its variables by a raise, and the one case that does raise
-	/// catches the error inside that block. A block left by a raise leaks the values of the variables it declared
-	/// through a different site - the frame pop, which nulls the slots without releasing them, skipping the
-	/// deallocation statements the compiler put at the end of the block. That is
-	/// bug-an-error-inside-a-block-leaks-its-binary-values, which this fixture deliberately does not depend on.
+	/// Every case whose script raises also asserts on the error - that it reached the caller, or that the script's own
+	/// handler saw it - because a case that silently stopped raising would otherwise pass while testing nothing.
 	/// </remarks>
 	[TestFixture]
 	public class AssignmentValueOwnershipTest : InProcessTestFixture
@@ -330,6 +331,97 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			);
 		}
 
+		/// <summary>
+		/// A block that declares a Binary and then raises, with nothing inside the engine catching the error. The block
+		/// is left by the raise rather than through its end, which is the one path the compiled release ever covered.
+		/// </summary>
+		[Test]
+		public void ABlockLeftByARaiseReleasesTheValuesItDeclared()
+		{
+			AssertRaisingScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB : Binary := Binary('0001');
+						raise Error('ZBlockRaise');
+					end;
+				",
+				"ZBlockRaise"
+			);
+		}
+
+		/// <summary>
+		/// The same raise, caught by a D4 try ... except outside the block that declared the variable, so that the claim
+		/// is about the block being left rather than about an error that happens to reach the client.
+		/// </summary>
+		[Test]
+		public void ABlockLeftByARaiseCaughtInD4ReleasesTheValuesItDeclared()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LCaught : Integer := 0;
+						try
+							begin
+								var LB : Binary := Binary('0001');
+								raise Error('ZInnerRaise');
+							end;
+						except
+							on E : Error do
+								LCaught := 1;
+						end;
+						if LCaught <> 1 then
+							raise Error('The inner block did not raise.');
+					end;
+				"
+			);
+		}
+
+		/// <summary>
+		/// A loop body that declares a Binary and leaves itself by continue - ordinary, non-error D4, and the shape a
+		/// filtering loop is naturally written in. This is the exit path that leaks once per iteration, so the loop runs
+		/// three times and the count assertion is arithmetic over all three. LCount asserts that the body ran on every
+		/// element and that the continue fired every time.
+		/// </summary>
+		[Test]
+		public void AForEachBodyLeftByContinueReleasesTheValuesItDeclared()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LCount : Integer := 0;
+						foreach var LI in { 1, 2, 3 } do
+						begin
+							var LB : Binary := Binary('0001');
+							LCount := LCount + 1;
+							if LI < 10 then
+								continue;
+							LCount := LCount + 100;
+						end;
+						if LCount <> 3 then
+							raise Error('The loop did not continue on each of its three elements.');
+					end;
+				"
+			);
+		}
+
+		/// <summary>
+		/// An operator body that declares a Binary and raises. An operator's begin ... end body is not the same thing as
+		/// a begin ... end statement - the parser hands the body's statement list over directly, so the body's variables
+		/// are leftovers in the call's stack window rather than frame variables - and the engine releases them at a
+		/// different site, which none of the cases above reaches. The script calls the operator with no block of its own
+		/// around it, so the operator body is the only scope in play.
+		/// </summary>
+		[Test]
+		public void AnOperatorBodyLeftByARaiseReleasesTheValuesItDeclared()
+		{
+			ExecuteScript("create operator ZBodyRaise() begin var LB : Binary := Binary('0001'); raise Error('ZBodyRaise'); end;");
+
+			AssertRaisingScriptLeavesNoStreams("ZBodyRaise();", "ZBodyRaise");
+		}
+
 		/// <summary>Runs one of the loop forms above, failing with the form's name rather than only the engine's error.</summary>
 		private void AssertForEachSeesBothRows(string form, string script)
 		{
@@ -345,6 +437,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			int before = StreamCount();
 			ExecuteScript(script);
+			Assert.That(StreamCount(), Is.EqualTo(before), "The script left streams behind.");
+		}
+
+		/// <summary>
+		/// The same, for a script that must raise: the error has to carry the given text, and the count has to be back
+		/// in balance afterwards. Asserting the text is what keeps the case honest if the script ever stops raising.
+		/// </summary>
+		private void AssertRaisingScriptLeavesNoStreams(string script, string errorText)
+		{
+			int before = StreamCount();
+			Assert.That(() => ExecuteScript(script), Throws.Exception.With.Message.Contains(errorText), "The script did not raise.");
 			Assert.That(StreamCount(), Is.EqualTo(before), "The script left streams behind.");
 		}
 

@@ -325,9 +325,10 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// NOTE: a DEBUG-only check here that the server is holding the same number of streams as it was when this
 		// program started would catch a whole class of defect - a value the engine leaks because nothing released it -
 		// at the moment it reappeared, and the count is already readable (ServerStreamManager.StreamCount, which the
-		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet: a block left by a raise
-		// still leaks the values of the variables it declared (bug-an-error-inside-a-block-leaks-its-binary-values),
-		// so such a check would fire on that rather than on anything new. Add it once that has landed.
+		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because two leaks would
+		// still fire it rather than anything new: an operator argument released by the wrong owner
+		// (bug-an-operator-argument-is-released-by-the-wrong-owner), and a foreach over a list, which never releases
+		// the list it evaluated. Add it once both have landed.
 		public void Stop(DataParams paramsValue)
 		{
 			try

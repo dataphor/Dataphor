@@ -2600,8 +2600,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					program.Plan.Symbols.PushWindow(0);
 					try
 					{
-						Symbol resultVar = new Symbol(Keywords.Result, aggregateOperator.ReturnDataType);
-						program.Plan.Symbols.Push(resultVar);
+						program.Plan.Symbols.Push(new Symbol(Keywords.Result, aggregateOperator.ReturnDataType));
 						
 						if (_alterAggregateOperatorStatement.Initialization.AlterClassDefinition != null)
 							program.CatalogDeviceSession.AlterClassDefinition(aggregateOperator.Initialization.ClassDefinition, _alterAggregateOperatorStatement.Initialization.AlterClassDefinition);
@@ -2619,7 +2618,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								program.CatalogDeviceSession.AlterClassDefinition(aggregateOperator.Aggregation.ClassDefinition, _alterAggregateOperatorStatement.Aggregation.AlterClassDefinition);
 								
 							if (_alterAggregateOperatorStatement.Aggregation.Block != null)
-								program.CatalogDeviceSession.AlterOperatorBlockNode(aggregateOperator.Aggregation, Compiler.CompileDeallocateFrameVariablesNode(program.Plan, Compiler.CompileStatement(program.Plan, _alterAggregateOperatorStatement.Aggregation.Block)));
+								program.CatalogDeviceSession.AlterOperatorBlockNode(aggregateOperator.Aggregation, Compiler.CompileStatement(program.Plan, _alterAggregateOperatorStatement.Aggregation.Block));
 						}
 						finally
 						{
@@ -2630,7 +2629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							program.CatalogDeviceSession.AlterClassDefinition(aggregateOperator.Finalization.ClassDefinition, _alterAggregateOperatorStatement.Finalization.AlterClassDefinition);
 							
 						if (_alterAggregateOperatorStatement.Finalization.Block != null)
-							program.CatalogDeviceSession.AlterOperatorBlockNode(aggregateOperator.Finalization, Compiler.CompileDeallocateVariablesNode(program.Plan, Compiler.CompileStatement(program.Plan, _alterAggregateOperatorStatement.Finalization.Block), resultVar));
+							program.CatalogDeviceSession.AlterOperatorBlockNode(aggregateOperator.Finalization, Compiler.CompileStatement(program.Plan, _alterAggregateOperatorStatement.Finalization.Block));
 					}
 					finally
 					{
