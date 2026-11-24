@@ -55,6 +55,7 @@
 { "script": "LibraryFilesCoverage", "status": "pass", "note": "no assertions: the file holds only comments" },
 { "script": "LibraryRename", "status": "pass" },
 { "script": "LibraryTypes", "status": "pass" },
+{ "script": "LibraryUpgrades", "status": "pass", "preamble": "SetUseImplicitTransactions(false);", "note": "the library upgrade machinery - the numbered scripts in a library's Upgrades folder and the operators that record, read, apply and delete them. Implicit transactions off, and that is not optional: UpgradeLibrary runs each upgrade on a session of its own, and the one implicit transaction the harness would otherwise wrap the whole document in holds the catalog store's write lock, so the upgrade's session waits for it and the case fails after 30 s with \"The catalog store is locked by another session's open transaction\"" },
 { "script": "ListLibrary", "status": "pass" },
 { "script": "LockAllocation", "status": "pass", "note": "no assertions: the file holds only comments" },
 { "script": "LongAggregates", "status": "pass" },

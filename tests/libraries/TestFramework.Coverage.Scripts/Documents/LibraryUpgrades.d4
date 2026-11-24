@@ -1,0 +1,385 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Library upgrade coverage: the numbered scripts in a library's Upgrades folder and the operators that record, read, apply and
+// delete them. This is the machinery behind the riskiest thing a Dataphor installation does - taking a new version of an
+// installed application. LibraryCoverage covers creating, renaming, dropping, registering and unregistering a library;
+// LibraryAdministration covers settings, files, detaching and the errors an administrator meets; LibraryDependencies covers the
+// requisite tables. None of that is repeated here.
+//
+// Two version numbers matter, and the script keeps them apart throughout:
+//   the DESCRIPTOR version - the Version column of the Libraries catalog table, read from the library's .d4l file - is what the
+//     files on disk claim, and it is the CEILING of an upgrade run;
+//   the RECORDED version - the Version column of the LibraryVersions catalog table, which LibraryView exposes as LoadedVersion
+//     - is the version the catalog believes is applied, and it is the FLOOR.
+// UpgradeLibrary(name) upgrades the library's requisites first, then runs every Upgrades/Upgrade.*.d4 of the library whose
+// version is above the floor and not above the ceiling, in version order, each in its own transaction on a session of its own
+// owned by the library, and records the descriptor version once it finishes. UpgradeLibraries() does that for every registered
+// library. LibraryView.UpgradeRequired is simply descriptor > recorded.
+//
+// THE ONE ARTIFICIAL STEP. The state an upgrade runs in - registered, descriptor ahead of recorded - is the state a customer's
+// server is in once the new library files have been copied in and the server restarted (LibraryUtility.LoadLibrary reads the
+// recorded version before loading and writes the same value back afterwards, deliberately, so that a restart does not swallow a
+// pending upgrade). A coverage script cannot restart its server, so each section below puts the catalog into that state directly
+// with
+//     update LibraryVersions set { Version := ... } where LibraryName = '...';
+// which stands for "the files of a newer version have arrived and the server has been restarted on them". Nothing else here is
+// contrived. In particular InjectUpgrade cannot be used to produce a pending upgrade: it is the operator a developer uses to
+// record a change already made on their own server, so the descriptor bump it makes carries the recorded version with it
+// (SystemSetLibraryDescriptorNode.ChangeLibraryVersion calls SetCurrentLibraryVersion for a registered library) and leaves
+// nothing pending.
+//
+// WHY EACH SECTION'S TRACE IS READ IN A BATCH OF ITS OWN. What an upgrade script did is read from a table it creates in the
+// library it upgrades, named here by its rooted name - .UpgradeOrder.OrderTrace. A rooted name resolves against the whole
+// catalog rather than through the current library's name resolution path, so no SetLibrary is needed; but a script is executed
+// one top-level statement at a time and each is compiled only when it is reached, so the statement that reads the table cannot
+// be the statement that created it. Hence the shape of each section: a block that does the work, then a bare assertion.
+//
+// An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the schema
+// code. The assertions below read E.GetDetailedErrorDescription(), which flattens the whole chain and prints each link as
+// "<severity>:<code> ---> <message>", and look for ":<code> --->" rather than for the digits alone: the same text carries
+// source paths and ":line NNN" fragments, which digits alone could match. Where a message names a library they do not assert
+// the quoting of the name, because some of these messages carry it rooted, with a leading dot.
+//
+// Every library here is one the script creates, and each section drops what it created, which also clears its LibraryVersions
+// row. The script opens no explicit transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may
+// make DropLibrary refuse inside an explicit one. Its manifest entry turns implicit transactions off, and that is not optional
+// - the upgrade runs on a session of its own, and an implicit transaction around this script would hold the catalog store's
+// write lock while that session waited for it and gave up.
+
+// Version arithmetic, and that nothing is applied twice. InjectUpgrade bumps the descriptor's revision by one, writes the
+// script as Upgrades/Upgrade.<major>.<minor>.<revision>.d4 and returns that version; UpgradeVersions lists what the folder
+// holds and LoadUpgrade reads one back.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeArith', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeArith');
+
+	// Registering a library records its descriptor version as the applied version, so nothing is pending on a fresh register.
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeArith')) <> VersionNumber(1, 0, 0) then
+		raise Error('Registering a library did not record its descriptor version in LibraryVersions.');
+
+	var LScript : String := "create table ArithTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, 'arith;' Trace } } into ArithTrace;";
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeArith', LScript);
+	if LInjected <> VersionNumber(1, 0, 1) then
+		raise Error('InjectUpgrade did not return the next revision: ' + LInjected.ToString());
+
+	if (Version from row from (Libraries where Name = 'UpgradeArith')) <> VersionNumber(1, 0, 1) then
+		raise Error('InjectUpgrade did not advance the descriptor version.');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeArith')) <> VersionNumber(1, 0, 1) then
+		raise Error('InjectUpgrade did not carry the recorded version along with the descriptor version.');
+
+	if (Count from row from (UpgradeVersions('UpgradeArith') group add { Count() Count })) <> 1 then
+		raise Error('UpgradeVersions did not list exactly the one injected upgrade.');
+
+	if not exists (UpgradeVersions('UpgradeArith') where Version = VersionNumber(1, 0, 1)) then
+		raise Error('UpgradeVersions did not list the injected upgrade at the version InjectUpgrade returned.');
+
+	if LoadUpgrade('UpgradeArith', VersionNumber(1, 0, 1)) <> LScript then
+		raise Error('LoadUpgrade did not return the text InjectUpgrade wrote.');
+
+	// Stands for: the files of version 1.0.1 have arrived and the server has been restarted on them.
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeArith';
+
+	if (LoadedVersion from row from (LibraryView where Name = 'UpgradeArith')) <> VersionNumber(1, 0, 0) then
+		raise Error('LibraryView did not report the recorded version as the loaded version.');
+
+	if not (UpgradeRequired from row from (LibraryView where Name = 'UpgradeArith')) then
+		raise Error('LibraryView did not report an upgrade as required with the descriptor ahead of the recorded version.');
+
+	UpgradeLibrary('UpgradeArith');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeArith')) <> VersionNumber(1, 0, 1) then
+		raise Error('UpgradeLibrary did not record the descriptor version once it had finished.');
+
+	if (UpgradeRequired from row from (LibraryView where Name = 'UpgradeArith')) then
+		raise Error('LibraryView still reported an upgrade as required after one had been applied.');
+
+	if not exists (CatalogObjects where Name = 'UpgradeArith.ArithTrace') then
+		raise Error('The upgrade script did not create its table.');
+
+	// Neither operator re-runs an upgrade already applied: both compare the descriptor version with the recorded one first. A
+	// second run of this upgrade would fail on its create table, so the silence of these two calls is part of the assertion.
+	UpgradeLibrary('UpgradeArith');
+	UpgradeLibraries();
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeArith')) <> VersionNumber(1, 0, 1) then
+		raise Error('A second upgrade run changed the recorded version.');
+end;
+
+// The row the upgrade inserted, read in a batch of its own - see the note on batches at the head of the file.
+if (Trace from row from .UpgradeArith.ArithTrace) <> 'arith;' then
+	raise Error('The upgrade script did not leave its row, or left it twice: ' + (Trace from row from .UpgradeArith.ArithTrace));
+
+begin
+	UnregisterLibrary('UpgradeArith');
+	DropLibrary('UpgradeArith');
+
+	// DropLibrary clears the library's LibraryVersions row.
+	if exists (LibraryVersions where LibraryName = 'UpgradeArith') then
+		raise Error('DropLibrary left the library version behind.');
+end;
+
+// Upgrade version numbers the engine refuses. UpgradeUtility.CheckValidVersionNumber requires a major, a minor and a revision,
+// and no build, so a library whose version stops at the minor cannot have upgrades tracked for it at all.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeNoRevision', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	var LCaught : String := '';
+	try
+		var LInjected : VersionNumber := InjectUpgrade('UpgradeNoRevision', 'begin end;');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, ':113228 --->') < 0) or (IndexOf(LCaught, 'UpgradeNoRevision') < 0) or (IndexOf(LCaught, 'because the version number "1.0.*" does not have Revision specified.') < 0) then
+		raise Error('Injecting an upgrade into a library whose version has no revision did not raise 113228: ' + LCaught);
+
+	// The refusal is raised before anything is written, so neither the folder nor the descriptor moved.
+	if exists (UpgradeVersions('UpgradeNoRevision')) then
+		raise Error('A refused InjectUpgrade wrote an upgrade file anyway.');
+
+	if (Version from row from (Libraries where Name = 'UpgradeNoRevision')) <> VersionNumber(1, 0) then
+		raise Error('A refused InjectUpgrade advanced the descriptor version anyway.');
+
+	DropLibrary('UpgradeNoRevision');
+end;
+
+// The other refusal, and the one arm of SaveUpgrade that is an inject. SaveUpgrade is given the version outright, so it is
+// where a version carrying a build is caught; and given no version at all it hands over to InjectUpgrade, which is how the
+// IDE's upgrade editor injects. This library is deliberately left unregistered: nothing here needs it registered, and an
+// unregistered library has no recorded version to keep in step.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeBadVersion', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	var LCaught : String := '';
+	try
+		SaveUpgrade('UpgradeBadVersion', VersionNumber(1, 0, 1, 1), 'begin end;');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, ':113227 --->') < 0) or (IndexOf(LCaught, 'Upgrade version number "1.0.1.1" must have Major, Minor and Revision specified, and must not have Build specified.') < 0) then
+		raise Error('Saving an upgrade at a version that carries a build did not raise 113227: ' + LCaught);
+
+	var LScript : String := 'begin end;';
+	SaveUpgrade('UpgradeBadVersion', nil as VersionNumber, LScript);
+
+	if (Version from row from (Libraries where Name = 'UpgradeBadVersion')) <> VersionNumber(1, 0, 1) then
+		raise Error('SaveUpgrade with no version did not advance the descriptor version the way an inject does.');
+
+	if LoadUpgrade('UpgradeBadVersion', VersionNumber(1, 0, 1)) <> LScript then
+		raise Error('SaveUpgrade with no version did not write the script at the next revision.');
+
+	DropLibrary('UpgradeBadVersion');
+end;
+
+// UpgradeLibrary resolves the loaded library before anything else, so a library that exists but is not registered cannot be
+// upgraded. That is a plausible administrator mistake, and this is the message it produces.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeUnregistered', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	var LCaught : String := '';
+	try
+		UpgradeLibrary('UpgradeUnregistered');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, ':113242 --->') < 0) or (IndexOf(LCaught, 'UpgradeUnregistered') < 0) or (IndexOf(LCaught, 'is not registered.') < 0) then
+		raise Error('Upgrading a library that is not registered did not raise 113242: ' + LCaught);
+
+	DropLibrary('UpgradeUnregistered');
+end;
+
+// SaveUpgrade with an explicit version, and version order past revision nine. SaveUpgrade(name, version, script) writes the
+// file and touches neither version number, which is how the IDE's upgrade editor saves an edit. This library's descriptor is
+// 1.0.10 from the start, so the three upgrades saved below are all within the ceiling and the fourth, at 1.0.11, is above it.
+// Order comes from UpgradeVersionsNode keying its result on Version, not from the directory listing: by file name
+// Upgrade.1.0.10.d4 sorts before Upgrade.1.0.2.d4, so the trace would read 1;10;2; if the listing were what decided. The
+// shipped libraries reach these revisions - Frontend's folder holds Upgrade.2.0.2.d4 and Upgrade.2.0.15.d4 - so this is the
+// product's own case and not a contrived one.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeTeens', VersionNumber(1, 0, 10), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeTeens');
+
+	SaveUpgrade('UpgradeTeens', VersionNumber(1, 0, 1), "create table TeensTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, '1;' Trace } } into TeensTrace;");
+	SaveUpgrade('UpgradeTeens', VersionNumber(1, 0, 2), "update TeensTrace set { Trace := Trace + '2;' };");
+	SaveUpgrade('UpgradeTeens', VersionNumber(1, 0, 10), "update TeensTrace set { Trace := Trace + '10;' };");
+	var LAboveCeiling : String := "update TeensTrace set { Trace := Trace + '11;' };";
+	SaveUpgrade('UpgradeTeens', VersionNumber(1, 0, 11), LAboveCeiling);
+
+	if (Version from row from (Libraries where Name = 'UpgradeTeens')) <> VersionNumber(1, 0, 10) then
+		raise Error('SaveUpgrade with an explicit version changed the descriptor version.');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeTeens')) <> VersionNumber(1, 0, 10) then
+		raise Error('SaveUpgrade with an explicit version changed the recorded version.');
+
+	if (Count from row from (UpgradeVersions('UpgradeTeens') group add { Count() Count })) <> 4 then
+		raise Error('UpgradeVersions did not list all four saved upgrades.');
+
+	if LoadUpgrade('UpgradeTeens', VersionNumber(1, 0, 11)) <> LAboveCeiling then
+		raise Error('LoadUpgrade did not return an upgrade saved above the descriptor version.');
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeTeens';
+	UpgradeLibrary('UpgradeTeens');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeTeens')) <> VersionNumber(1, 0, 10) then
+		raise Error('UpgradeLibrary did not stop at the descriptor version.');
+end;
+
+// 1;2;10; rather than 1;10;2;, and without the 11; of the upgrade saved above the descriptor version: the descriptor is the
+// ceiling, which is what keeps an upgrade a release has not shipped yet from running.
+if (Trace from row from .UpgradeTeens.TeensTrace) <> '1;2;10;' then
+	raise Error('The upgrades did not run in version order, or the upgrade above the descriptor version ran: ' + (Trace from row from .UpgradeTeens.TeensTrace));
+
+begin
+	UnregisterLibrary('UpgradeTeens');
+	DropLibrary('UpgradeTeens');
+end;
+
+// A release may skip revisions. The descriptor is 1.0.5 and the only upgrade in the folder is 1.0.1: UpgradeLibraries runs that
+// one and then records 1.0.5, because the recorded version is a statement about which files are applied and not about which
+// upgrade scripts happened to exist. A reader who has not seen this reads it as a bug. UpgradeLibraries() is used here rather
+// than UpgradeLibrary so that the operator which upgrades every registered library is covered doing real work as well as doing
+// nothing.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeSkip', VersionNumber(1, 0, 5), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeSkip');
+	SaveUpgrade('UpgradeSkip', VersionNumber(1, 0, 1), "create table SkipTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, '1.0.1;' Trace } } into SkipTrace;");
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeSkip';
+	UpgradeLibraries();
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeSkip')) <> VersionNumber(1, 0, 5) then
+		raise Error('UpgradeLibraries did not record the descriptor version of a library whose upgrades stop short of it.');
+end;
+
+if (Trace from row from .UpgradeSkip.SkipTrace) <> '1.0.1;' then
+	raise Error('The one upgrade below the descriptor version did not run exactly once: ' + (Trace from row from .UpgradeSkip.SkipTrace));
+
+begin
+	UnregisterLibrary('UpgradeSkip');
+	DropLibrary('UpgradeSkip');
+end;
+
+// Ordering through the operator a developer actually uses. Three upgrades injected one after another and applied by one
+// UpgradeLibrary: each appends its own version to a string the first one creates, so the string pins both the order and that
+// each script ran exactly once. Had 1.0.2 run first its table would not have existed and the failure would have been loud.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeOrder', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeOrder');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeOrder', "create table OrderTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, '1.0.1;' Trace } } into OrderTrace;");
+	LInjected := InjectUpgrade('UpgradeOrder', "update OrderTrace set { Trace := Trace + '1.0.2;' };");
+	LInjected := InjectUpgrade('UpgradeOrder', "update OrderTrace set { Trace := Trace + '1.0.3;' };");
+	if LInjected <> VersionNumber(1, 0, 3) then
+		raise Error('Three injects did not reach revision 3: ' + LInjected.ToString());
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeOrder';
+	UpgradeLibrary('UpgradeOrder');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeOrder')) <> VersionNumber(1, 0, 3) then
+		raise Error('UpgradeLibrary did not record the descriptor version after applying three upgrades.');
+end;
+
+if (Trace from row from .UpgradeOrder.OrderTrace) <> '1.0.1;1.0.2;1.0.3;' then
+	raise Error('The injected upgrades did not run once each in version order: ' + (Trace from row from .UpgradeOrder.OrderTrace));
+
+begin
+	UnregisterLibrary('UpgradeOrder');
+	DropLibrary('UpgradeOrder');
+end;
+
+// Requisites first. UpgradeLibrary gathers the library's requisites transitively and upgrades them before the library itself,
+// which is what lets an upgrade of a dependent library rely on what an upgrade of its requisite has just done.
+// UpgradeDependent's upgrade names a table that UpgradeBase's upgrade creates, and can see it because it requires UpgradeBase.
+// The requisite is pinned at 1.0 rather than at 1.0.0 because a reference that names a revision is not compatible with the
+// revision bump that injecting into the required library makes, and the version change would be refused.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeBase', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('UpgradeDependent', VersionNumber(1, 0, 0), "", list(FileReference){}, { LibraryReference('UpgradeBase', VersionNumber(1, 0)) }));
+	RegisterLibrary('UpgradeDependent');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeBase', "create table BaseTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, 'base;' Trace } } into BaseTrace;");
+	LInjected := InjectUpgrade('UpgradeDependent', "update BaseTrace set { Trace := Trace + 'dependent;' };");
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName in { 'UpgradeBase', 'UpgradeDependent' };
+	UpgradeLibrary('UpgradeDependent');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeBase')) <> VersionNumber(1, 0, 1) then
+		raise Error('UpgradeLibrary did not upgrade the required library.');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeDependent')) <> VersionNumber(1, 0, 1) then
+		raise Error('UpgradeLibrary did not upgrade the library it was given.');
+end;
+
+if (Trace from row from .UpgradeBase.BaseTrace) <> 'base;dependent;' then
+	raise Error('The required library was not upgraded before the library that requires it: ' + (Trace from row from .UpgradeBase.BaseTrace));
+
+begin
+	UnregisterLibrary('UpgradeDependent');
+	UnregisterLibrary('UpgradeBase');
+	DropLibrary('UpgradeDependent');
+	DropLibrary('UpgradeBase');
+end;
+
+// A failing upgrade, and what it leaves behind. This is the case that matters most: an upgrade that stops halfway must leave a
+// server that can be upgraded again once the broken script is fixed, not one that has to be rebuilt. The 1.0.2 upgrade raises
+// on its first statement - deliberately before it changes anything, because whether a half-finished upgrade's own catalog
+// changes roll back is a separate subject with tickets of its own - and the 1.0.3 upgrade after it must not run at all.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeFail', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeFail');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeFail', "create table FailTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, 'one;' Trace } } into FailTrace;");
+	LInjected := InjectUpgrade('UpgradeFail', "raise Error('Deliberate failure from the 1.0.2 upgrade script.'); update FailTrace set { Trace := Trace + 'two;' };");
+	LInjected := InjectUpgrade('UpgradeFail', "update FailTrace set { Trace := Trace + 'three;' };");
+
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeFail';
+
+	var LCaught : String := '';
+	try
+		UpgradeLibrary('UpgradeFail');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, 'Deliberate failure from the 1.0.2 upgrade script.') < 0 then
+		raise Error('A failing upgrade script did not carry its own error out of UpgradeLibrary: ' + LCaught);
+
+	// The recorded version is the last version that actually applied - neither the descriptor version nor the version the run
+	// started from. That is what lets the next run resume rather than start over or skip what it has not applied.
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeFail')) <> VersionNumber(1, 0, 1) then
+		raise Error('A failed upgrade run did not leave the recorded version at the last upgrade that applied.');
+
+	if not exists (LoadedLibraries where Name = 'UpgradeFail') then
+		raise Error('A failed upgrade run left the library unregistered.');
+end;
+
+// The first upgrade's row, and nothing from the two after it.
+if (Trace from row from .UpgradeFail.FailTrace) <> 'one;' then
+	raise Error('A failed upgrade run ran more than the upgrades before the failure: ' + (Trace from row from .UpgradeFail.FailTrace));
+
+// Deleting the broken upgrade and running again resumes from 1.0.1, which is what proves the recorded version was left usable
+// rather than merely unchanged. It is also the only meaningful cover for DeleteUpgrade.
+begin
+	DeleteUpgrade('UpgradeFail', VersionNumber(1, 0, 2));
+
+	if exists (UpgradeVersions('UpgradeFail') where Version = VersionNumber(1, 0, 2)) then
+		raise Error('DeleteUpgrade left the upgrade in the folder.');
+
+	UpgradeLibrary('UpgradeFail');
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeFail')) <> VersionNumber(1, 0, 3) then
+		raise Error('The upgrade run after the broken upgrade had been deleted did not finish.');
+
+	if (Trace from row from .UpgradeFail.FailTrace) <> 'one;three;' then
+		raise Error('The resumed upgrade run did not apply exactly the upgrade left after the failure: ' + (Trace from row from .UpgradeFail.FailTrace));
+
+	UnregisterLibrary('UpgradeFail');
+	DropLibrary('UpgradeFail');
+end;
+
+if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeFail' }) then
+	raise Error('The script left a library behind.');
+
+if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeFail' }) then
+	raise Error('The script left a library version behind.');

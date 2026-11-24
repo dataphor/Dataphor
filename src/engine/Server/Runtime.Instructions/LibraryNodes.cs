@@ -1000,6 +1000,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						rethrow
 		*/
 		
+		// NOTE: nothing calls this but itself. It belongs to the unload-the-dependents-and-reload recovery sketched in the
+		// comment block above, which was never implemented - a failing upgrade simply raises and leaves the library registered,
+		// which LibraryUpgrades.d4 pins - so it cannot be covered. Kept as the remnant of that design, like
+		// UpgradeUtility.GetRequisitesFileNameFromVersion.
 		private static void GatherDependents(Schema.LoadedLibrary library, Schema.LoadedLibraries dependents)
 		{
 			foreach (Schema.LoadedLibrary localLibrary in library.RequiredByLibraries)
@@ -1200,6 +1204,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return String.Format("{0}.{1}.d4", UpgradeFileName, version.ToString().Replace(".*", ""));
 		}
 		
+		// NOTE: no caller reaches this, and none can: it names the .d4r file of the per-upgrade requisite design described in
+		// the comment block above SystemUpgradeLibraryNode, which was never implemented (UpgradeRequisitesNode and the
+		// second UpgradeVersionsNode below are commented out). Its only caller, GetRequisitesFileName, has no caller either,
+		// so neither can be covered. Kept with the commented-out nodes rather than deleted, as the remnant of that design.
 		public static string GetRequisitesFileNameFromVersion(VersionNumber version)
 		{
 			CheckValidVersionNumber(version);
