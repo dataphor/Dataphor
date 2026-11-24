@@ -6329,8 +6329,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 						
 				block = CompileStatement(plan, statement);
 
+				// An operand's offset from the top of the symbol stack counts back over everything above it, which is
+				// the result symbol of a returning operator plus whatever variables the block left behind (the loop
+				// below walks those same leftovers). Taking the offset as Operands.Count - 1 - index read the wrong
+				// symbol for every operator with a return type, so an operand the body does assign to could be
+				// promoted - and a const operand is passed by reference, which makes the body's assignment release
+				// the caller's value out from under it.
 				for (int index = 0; index < operatorValue.Operands.Count; index++)
-					if (!plan.Symbols[operatorValue.Operands.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
+					if (!plan.Symbols[plan.Symbols.Count - 1 - index].IsModified && (operatorValue.Operands[index].Modifier == Modifier.In))
 					{
 						operatorValue.Operands[index].Modifier = Modifier.Const;
 						operatorValue.OperandsChanged();

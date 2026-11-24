@@ -1161,13 +1161,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		/// <summary>Whether the operand at the given index references a slot an earlier operand already references.</summary>
+		/// <summary>Whether the operand at the given index shares a caller slot with an earlier operand that one of the two can release.</summary>
 		/// <remarks>
+		/// <para>
 		/// A by-reference operand - every var operand, and a const one that names a variable - hands the callee the
 		/// caller's own value rather than a copy, so one variable passed twice would give the callee two slots holding
-		/// one value. The body's first assignment to either releases that value (Stack.PokeOwned) and the second would
-		/// release it again, which the stream manager reports as an error. The scan costs a type test per operand and
-		/// runs no comparison at all for the single-operand calls that dominate.
+		/// one value. If the body assigns to either, that assignment releases the value (Stack.PokeOwned) and the other
+		/// slot is left naming a released one: a second assignment releases it again, which the stream manager reports
+		/// as an error, and a read of the other operand reads a disposed value. Giving the later operand its own copy
+		/// keeps each slot's value its own.
+		/// </para>
+		/// <para>
+		/// Only a collision in which one of the two operands is var is worth a copy. A const operand's slot is compiled
+		/// as constant and cannot be assigned to, so two const operands sharing a slot can never release anything - and
+		/// a copy made for one of them would have no owner at all, because the caller takes a const operand's value back
+		/// (InstructionNodeBase.CleanupOperand does nothing for const) and so nothing releases it. Copying there leaked
+		/// one value per call of an ordinary operator called as F(LB, LB).
+		/// </para>
+		/// <para>
+		/// NOTE: such a call still leaks one value, whatever the body does, because every operand bound to the one
+		/// caller slot writes back to it in turn and only the last write survives - the earlier write-back, or the
+		/// untouched copy when the body assigns to neither, is then named by nothing. Measured: the call leaked two
+		/// values before this fix when the body assigned to both and none when it assigned to neither, so it is one
+		/// better in the first shape and one worse in the second. Closing it means CallNode handing every operand in
+		/// such a group the value that survives and releasing the rest here, which needs the same-value test of
+		/// Stack.PokeOwned shared out and leaves a caller slot naming a released value until the write-back reaches
+		/// it. Worth doing only if a real application turns out to pass one variable to two by-reference parameters
+		/// of one call - a call that always loses one of its two writes, so today it is a programming error either way.
+		/// </para>
+		/// <para>
+		/// The scan costs a type test per operand and runs no comparison at all for the single-operand calls that
+		/// dominate.
+		/// </para>
 		/// </remarks>
 		private bool ReferencesAnEarlierOperandsSlot(int index)
 		{
@@ -1175,10 +1200,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((reference == null) || !reference.ByReference)
 				return false;
 
+			bool isVar = Operator.Operands[index].Modifier == Modifier.Var;
 			for (int earlier = 0; earlier < index; earlier++)
 			{
 				StackReferenceNode earlierReference = Nodes[earlier] as StackReferenceNode;
-				if ((earlierReference != null) && earlierReference.ByReference && (earlierReference.Location == reference.Location))
+				if 
+				(
+					(earlierReference != null) 
+						&& earlierReference.ByReference 
+						&& (earlierReference.Location == reference.Location)
+						&& (isVar || (Operator.Operands[earlier].Modifier == Modifier.Var))
+				)
 					return true;
 			}
 

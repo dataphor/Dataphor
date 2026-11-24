@@ -4,6 +4,13 @@ files: src/engine/DAE/Runtime/Stack.cs, src/engine/DAE/Runtime.Instructions/Impe
 repro: verified
 difficulty: hard
 ----
+<!-- resume-note -->
+RESUME: A prior agent run on this ticket did not complete.
+  Prior run: 2026-11-24T07:01:48.223Z (agent: claude)
+  Log file: c:\Projects\DataphorModernized\modernization\tickets\.logs\1-bug-assigning-a-binary-variable-leaks-its-stream.review.2026-11-24T07-01-48-223Z.log
+Read the log to see what was done. Resume where it left off.
+If the prior run hit a timeout or repeated error, be cautious not to rush into the same situation.
+<!-- /resume-note -->
 ## What landed
 
 An assignment now releases the value it replaces. `Diagnostics.StreamCount()` comes back to where it started after any number of assignments to a `Binary`, `Graphic` or row variable, and after calls to an operator that assigns to a parameter - including calls that raise.

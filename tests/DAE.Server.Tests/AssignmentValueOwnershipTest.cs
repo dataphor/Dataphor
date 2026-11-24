@@ -13,8 +13,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// A stack slot owns the value in it: whatever overwrites a slot releases what it displaced. Assignment did not,
 	/// so every assignment to a variable of a type the engine keeps in a managed stream - Binary and Graphic - orphaned
 	/// the stream behind the value it replaced, for the life of the session
-	/// (bug-assigning-a-binary-variable-leaks-its-stream). The last three cases are the limits of that rule: slots
-	/// whose value belongs to something else, which an assignment must leave alone.
+	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference on are
+	/// the limits of that rule: slots whose value belongs to something else, which an assignment must leave alone, and
+	/// the two shapes in which a call used to hand one caller value to two callee slots.
 	/// </summary>
 	/// <remarks>
 	/// The leak cases assert on Diagnostics.StreamCount(), which reports how many streams the server is holding, read
@@ -246,6 +247,59 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						"
 					);
 				}
+			);
+		}
+
+		/// <summary>
+		/// An operator with a return type whose body assigns to one of its own in parameters. The compiler promotes an
+		/// in operand the body never assigns to to const, which is passed by reference rather than copied, and it read
+		/// the wrong operand's symbol to decide that whenever the operator had a result - so an operand the body does
+		/// assign to could be promoted, and the body's assignment then released the caller's value out from under the
+		/// caller. Two operands and a result is the smallest shape that shows it; the arguments are deliberately two
+		/// different variables, because this needs no repeated argument.
+		/// </summary>
+		[Test]
+		public void AnOperatorWithAResultThatAssignsToAnInParameterLeavesTheCallersValueAlone()
+		{
+			ExecuteScript("create operator ZResultAssignsIn(AB : Binary, AC : Binary) : Integer begin AB := Binary('0008'); result := 1; end;");
+
+			AssertScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB : Binary := Binary('0001');
+						var LC : Binary := Binary('0002');
+						var LI : Integer := ZResultAssignsIn(LB, LC);
+						if LB.Value <> '0001' then
+							raise Error('A by-value call reached the caller''s variable.');
+					end;
+				"
+			);
+		}
+
+		/// <summary>
+		/// One variable passed to two const parameters of one call. Neither slot can be assigned to - the compiler makes
+		/// a const operand's symbol constant - so neither can release anything and neither needs a value of its own.
+		/// Giving the second one a copy leaked it: the caller takes a const operand's value back, so nothing released
+		/// the copy. This is an ordinary call - two parameters of the same type, the same variable for both - and it is
+		/// also what every operator whose body assigns to neither parameter compiles to, because those are promoted
+		/// from in to const.
+		/// </summary>
+		[Test]
+		public void TheSameVariablePassedTwiceToConstParametersLeavesNoStreamBehind()
+		{
+			ExecuteScript("create operator ZTwoConst(const AB : Binary, const AC : Binary) : Integer begin result := 0; if AB.Value = AC.Value then result := 1; end;");
+
+			AssertScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB : Binary := Binary('0001');
+						var LI : Integer := ZTwoConst(LB, LB);
+						if LI <> 1 then
+							raise Error('The call did not see the value in both parameters.');
+					end;
+				"
 			);
 		}
 
