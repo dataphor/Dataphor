@@ -1,5 +1,5 @@
 description: The engine holds large values such as pictures and documents in managed streams and counts the holders of each one, and almost nothing checks that bookkeeping; add a language-level test that puts such values through the operations an application performs and asserts the engine is holding nothing extra afterwards.
-prereq: debt-restore-stream-and-conveyor-tests, bug-assigning-a-binary-variable-leaks-its-stream, bug-binary-write-accessor-keeps-the-old-values-tail
+prereq: debt-restore-stream-and-conveyor-tests, bug-assigning-a-binary-variable-leaks-its-stream, bug-binary-write-accessor-keeps-the-old-values-tail, bug-an-operator-argument-is-released-by-the-wrong-owner
 architecture: docs/modernization-plan.md#ws3-test-suite
 files: tests/libraries/TestFramework.Coverage.Scripts/Documents/, tests/DAE.Server.Tests/coverage-manifest.json, tests/DAE.Server.Tests/ParserRoundTripCorpusTest.cs, tests/libraries/TestFramework.Coverage.Base/Documents/DiagnosticsLogic.d4, src/engine/DAE/Streams/ServerStreamManager.cs, src/engine/DAE/Runtime.Instructions/BinaryNodes.cs, src/engine/DAE/Runtime.Data/ScalarValue.cs
 difficulty: medium
@@ -7,6 +7,8 @@ difficulty: medium
 ## What this is
 
 The last arm of the Streams coverage work. `debt-restore-stream-and-conveyor-tests` covers the stream manager and the conveyors from C#, at the level of the classes themselves. This one covers what the **D4 language** reaches: it adds one coverage script that puts stream-backed values through the operations an application performs and asserts that the server is holding no streams it should not be.
+
+The fourth prerequisite, `bug-an-operator-argument-is-released-by-the-wrong-owner`, is the reason to wait rather than write around it: until it lands, calling an operator with a freshly built stream-backed value - `F(Binary('0001'))`, and most declarations end up in the shape that leaks - holds one stream for the life of the session. A script written while that is true either avoids the commonest way an application passes such a value or bakes the leak into its expected counts.
 
 The area read 40.7 % of 1,129 coverable lines on the full instrumented run of 2026-11-21 at commit `f6200026` (`docs/coverage-report.md`). What a script buys on top of the C# fixtures is the engine's own plumbing around the stream manager - the branches in `BinaryNodes.cs` and `SystemNodes.cs` that take a stream identifier rather than a byte array, and the value-ownership path that decides when a stream is referenced and when it is released.
 

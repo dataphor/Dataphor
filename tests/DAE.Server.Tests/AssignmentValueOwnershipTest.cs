@@ -303,6 +303,33 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			);
 		}
 
+		/// <summary>
+		/// Assigning through a property of a scalar type - LB.Value := ... - compiles to the property's write
+		/// accessor applied to the variable and an assignment of its result back to the variable, so the source
+		/// expression reads the value the assignment is about to replace. The written value is a new stream, so
+		/// the replaced one must still be released exactly once.
+		/// </summary>
+		[Test]
+		public void AssigningThroughAScalarPropertyReleasesTheValueItReplaces()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LB : Binary := Binary('0001');
+							for LI : Integer := 1 to {0} do
+								LB.Value := '0002';
+							if LB.Value <> '0002' then
+								raise Error('The last assignment did not reach the variable.');
+						end;
+					",
+					AssignmentCount
+				)
+			);
+		}
+
 		/// <summary>Runs one of the loop forms above, failing with the form's name rather than only the engine's error.</summary>
 		private void AssertForEachSeesBothRows(string form, string script)
 		{
