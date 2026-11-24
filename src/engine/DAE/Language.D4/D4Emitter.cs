@@ -389,6 +389,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				(value != null)
 					&& ((value.Token == TokenType.Integer) || (value.Token == TokenType.Hex) || (value.Token == TokenType.Float)
 						|| (value.Token == TokenType.Decimal) || (value.Token == TokenType.Money));
+			// A qualifier left of a "." also has to be parenthesized: "." is right-associative in the grammar, so
+			// "a.b.c" reads back as a.(b.c) and would lose this tree's grouping. The one qualifier that does not need
+			// it is the form EmitQualifierExpression prints inside its own parentheses, "(A.B from Y)".
+			QualifierExpression qualifier = expression as QualifierExpression;
+			needsGroup = needsGroup || ((qualifier != null) && (TrailingColumnExtractor(qualifier) == null));
 			if (needsGroup)
 				Append(Keywords.BeginGroup);
 			EmitExpression(expression);

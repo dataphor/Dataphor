@@ -115,11 +115,8 @@ begin
 		// every read of them belongs behind the IsPaused test the wait above has already made.
 		if (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator <> LLocator then
 			raise Error('The paused process reports the locator ' + (Debug.GetProcesses() where Process_ID = LProcessID)[].Locator + ', not ' + LLocator);
-		// Read into a local before printing it: ((...)[].Line).ToString() is a construct the D4 emitter cannot print back
-		// unchanged (bug-d4-emitter-drops-qualifier-grouping), which fails this file's ParserRoundTripCorpusTest case.
-		var LPausedLine := (Debug.GetProcesses() where Process_ID = LProcessID)[].Line;
-		if LPausedLine <> LFirstLine then
-			raise Error('The paused process reports line ' + (LPausedLine).ToString() + ', not ' + (LFirstLine).ToString());
+		if (Debug.GetProcesses() where Process_ID = LProcessID)[].Line <> LFirstLine then
+			raise Error('The paused process reports line ' + ((Debug.GetProcesses() where Process_ID = LProcessID)[].Line).ToString() + ', not ' + (LFirstLine).ToString());
 		// DidBreak is what tells a breakpoint hit from a pause the debugger was asked for.
 		if not((Debug.GetProcesses() where Process_ID = LProcessID)[].DidBreak) then
 			raise Error('The paused process does not report DidBreak, so a breakpoint is not what stopped it');
@@ -133,9 +130,8 @@ begin
 			raise Error('The paused process reports ' + (Count(Debug.GetCallStack(LProcessID))).ToString() + ' call stack frame(s), not the 2 expected');
 		if (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator <> LLocator then
 			raise Error('The innermost frame reports the locator ' + (Debug.GetCallStack(LProcessID) where Index = 0)[].Locator + ', not ' + LLocator);
-		var LFrameLine := (Debug.GetCallStack(LProcessID) where Index = 0)[].Line;
-		if LFrameLine <> LFirstLine then
-			raise Error('The innermost frame reports line ' + (LFrameLine).ToString() + ', not ' + (LFirstLine).ToString());
+		if (Debug.GetCallStack(LProcessID) where Index = 0)[].Line <> LFirstLine then
+			raise Error('The innermost frame reports line ' + ((Debug.GetCallStack(LProcessID) where Index = 0)[].Line).ToString() + ', not ' + (LFirstLine).ToString());
 		if IndexOf((Debug.GetCallStack(LProcessID) where Index = 0)[].Statement, 'LTotal') < 0 then
 			raise Error('The innermost frame does not report the statement it is stopped on: ' + (Debug.GetCallStack(LProcessID) where Index = 0)[].Statement);
 		if IndexOf((Debug.GetCallStack(LProcessID) where Index = 1)[].Location, 'program:') <> 0 then

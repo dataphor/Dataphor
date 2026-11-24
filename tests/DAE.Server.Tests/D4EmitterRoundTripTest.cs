@@ -37,6 +37,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// handling a single dot, and no .d4 file in the repository has the shape.
 		[TestCase("var x := (A.B.Name from Y);", TestName = "DoublyQualifiedColumnExtractor_WasQualifiersOutsideParentheses")]
 		[TestCase("var x := (1).Max(50);", TestName = "NumericLiteralLeftOfQualifier_WasUnparenthesized")]
+		// A qualifier left of a "." needs the same parentheses, for the same kind of reason: "." is right-associative,
+		// so an unparenthesized "a.b.c" reads back as a.(b.c). The "from" arm must not get a second pair - the prefix
+		// form of EmitQualifierExpression already prints that shape inside parentheses of its own - and a plain dotted
+		// name must keep getting none, which is what makes the condition worth narrowing.
+		[TestCase("var x := (A.B).C;", TestName = "QualifierLeftOfQualifier_WasUnparenthesized")]
+		[TestCase("var x := ((A.B).C).D;", TestName = "NestedQualifierLeftOfQualifier_WasUnparenthesized")]
+		[TestCase("var x := (A.B from Y).C;", TestName = "QualifiedColumnExtractorLeftOfQualifier_MustNotBeDoublyParenthesized")]
+		[TestCase("var x := A.B.C;", TestName = "DottedName_MustStayUnparenthesized")]
 		// The parser desugars "for" and "try ... commit" as it reads them, so the shape it builds has to be the shape
 		// the equivalent explicit D4 parses to - see the canonical-shape rule on Parser.DelimitedBlock(string[]).
 		// These cases pin the arms of that shape: an empty, one-statement and multi-statement "try ... commit" body, a
