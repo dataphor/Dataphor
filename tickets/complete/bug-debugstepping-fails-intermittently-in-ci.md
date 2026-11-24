@@ -1,0 +1,61 @@
+description: Stopping a task right after it had run a script in the background intermittently failed with a bogus "a nil was encountered" error, because the engine tore the task down while a background thread was still cleaning up after it. Shutting a task down now waits for that cleanup, a new test reproduces the old failure, and the review corrected what the change says about how long that wait can be.
+architecture: docs/modernization-plan.md#ws2-engine-and-server-port
+files: src/engine/DAE/Server/ServerProcess.cs, docs/architecture/sessions-processes-plans.md, docs/migration-notes.md, tests/libraries/TestFramework.Coverage.Scripts/Documents/ProcessStopDuringAsync.d4, tests/DAE.Server.Tests/coverage-manifest.json
+----
+## What landed
+
+`ServerProcess.Dispose(bool)` was the one entry point into a process that never took the process's call latch (`_syncHandle`, taken by `BeginCall` and released by `EndCall` so that only one call from a client runs through a process at a time). Disposal now takes it: the old body moved verbatim into `InternalDispose(bool)` and `Dispose` became `lock (_syncHandle) InternalDispose(disposing);`. That closes the window between an asynchronous script's last call and the worker's cleanup after it, where a `StopProcess` found an idle process and walked its scripts and batches collections beside the worker. The symptom named the wrong thing: `PlanNode.Execute` turns any `NullReferenceException` into `RuntimeException.Codes.NilEncountered`, so the torn collection reached a D4 author as *"A nil was encountered where a value was expected"* against the `StopProcess` statement, and the debugger scripts were only a magnifier - each of their cases ends with `Debug.Run()` releasing the held worker exactly as the script thread goes to stop the process.
+
+With it: a new D4 coverage script `ProcessStopDuringAsync.d4` reproducing the failure, its `coverage-manifest.json` entry, and a migration note. The review corrected the texts that said how long the new wait can be, added the invariant to the architecture page that owns it, and parked one lock-ordering tripwire. See `ticket(implement): bug-debugstepping-fails-intermittently-in-ci` for the implementation and for the sizing measurements, which the review did not re-derive.
+
+Final diff across both stages: 41 added lines in four tracked files, plus the new coverage script.
+
+## Review findings
+
+**Read the implement diff before the handoff summary.** Then verified, rather than took on trust, the three caller claims the implementer's `NOTE:` rests on: `UnprepareScripts` and `UnpreparePlans` are reached only from `InternalDispose` (`ServerProcess.cs:214` and `:230`) and `ServerScript.UnprepareBatches` only from `ServerScript.Dispose` (`ServerScript.cs:70`). "Safe only because the one caller holds the latch" is accurate, and there is no second reachable path, so no ticket - agreed with the implementer's disposition.
+
+**Fixed inline - the change understated how long the new wait can be, in both places a reader would look.** The code comment said the wait is "bounded by `Engine.ProcessWaitTimeout`" and the migration note said the longest case is a process parked on the concurrent-process limit, "at most 30 seconds". That holds only for the callers that abort first: `Engine.TerminateProcess` and `ServerSession.StopProcesses` both call `TerminateProcessThread`, which aborts the executing thread and gives up with `ProcessNotResponding` after half `ProcessTerminationTimeout`. `IServerSession.StopProcess(IServerProcess)` (`ServerSession.cs:448`) disposes with no termination attempt at all, and it is the *only* `StopProcess` on that interface (`CLI.cs:295`) - so it is what the client library uses in nine places (`Frontend.Client/Pipe.cs:103`, `DAE.Client/DAEDataSet.cs:281`, `DAE.Client/Session.cs:309` and others) and what `SystemExecuteAsyncNode.ExecuteResults` uses for its own cleanup. On that path the new wait is as long as whatever call is in flight, with no bound. Both texts now say that, and the migration note says it for the audience that most needs it: the one entry point an application actually calls is the unbounded one.
+
+**Fixed inline - the architecture page that owns the subject was silent on the invariant.** The change establishes a rule about the whole process object graph - exactly one call runs through a process at a time, disposal included, and that is what keeps every teardown loop in the graph safe - and recorded it only in a code comment. `docs/architecture/sessions-processes-plans.md` describes what a process is and how one is stopped, and said nothing about it. One paragraph added there, naming the latch, the teardown loops it protects and the difference between the two stop paths. The page is at 1,454 of its 1,500 words; `python tools/docs-size-check/check_size.py` passes, and `tools/docs-link-check/check_links.py` reports nothing on it (its 203 errors are pre-existing elsewhere under `docs/`, and that checker is not yet gated - `.github/workflows/docs.yml` says so).
+
+**Tripwire, not a ticket - the new lock sits above the session's process collection, and `ServerChildObjects` has the reverse order inside it.** `Dispose` now holds the process latch and then `base.Dispose` fires `Disposed`, which `ServerChildObjects.ObjectDispose` answers by disowning the process under the collection's own lock: process latch, then collection lock. `ServerChildObjects.Removing` is the other order - it disposes an owned child while holding that lock. Not reachable for a process today: the only way a process reaches `Removing` as an owned child is `ServerProcesses.Dispose` to `Clear`, and `ServerSession.Dispose` drains the collection with `StopProcesses` (which disowns each process before disposing it) first. Conditional, so it is a `NOTE:` at the `lock (_syncHandle)` rather than a ticket, and it names the fix if the condition ever trips: disown before disposing at the new removal site, not drop this lock.
+
+**Checked and found nothing, with the reasoning, since "looks fine" is not a finding.**
+
+- *Self-deadlock.* `_syncHandle` is a `Monitor`, so it is reentrant, and `InternalDispose` already re-enters it twice on its own - through `InternalLeaveApplicationTransaction` to `BeginTransactionalCall` to `BeginCall`, and through `RollbackTransaction`. So the fix widens a latch the teardown was already taking in places, and a D4 `StopProcess` naming the process it runs on re-enters rather than hanging.
+- *Mutual deadlock.* Two processes each stopping the other cannot reach the lock: `TerminateProcess` calls `TerminateProcessThread` first, and that *throws* `ProcessNotResponding` when its budget expires rather than returning, so neither thread ever reaches `Dispose`. Read, not measured, which is what the handoff said too. Did not add the two-process probe it offered, for the reason it gave: it would pin engine timeout behaviour rather than this fix.
+- *The thing the handoff asked a reviewer to confirm is "harmless".* It is. When `Dispose` wins the race, the worker's later `BeginCall` dereferences `ServerSession` after `Dispose` nulled it - but the `NullReferenceException` is thrown *inside* `BeginCall`'s try, whose catch exits `_syncHandle` in a `finally` before rethrowing, so the latch is not leaked; and `ExecuteResults` swallows it on the worker. The process has disposed the script itself by then, so nothing is left behind either.
+- *Double disposal, which the fix turns from interleaved into serialized.* The second pass is a walk over nulled fields: every branch is null-guarded, `_debuggedBy` is cleared because `Debugger.Detach` calls `SetDebuggedBy(null)`, `_ownedStreams` is nulled by `ReleaseStreams`, and `DoDispose` fires nothing because `ServerChildObjects.Removing` already unsubscribed the handler. No defect, so no change. `_disposed` is written and never read (`if (!_disposed) _disposed = true;`), which was true before this change and is not this ticket's to tidy.
+- *The implementer's test, reviewed as code rather than treated as a floor.* `ProcessStopDuringAsync.d4` is kept as it stands: it is the reproduction of the bug at the lowest layer that shows it - a D4 script through the in-process harness, which is what this project's testing rule asks for - and its loop and sleeps are sized by stated measurement rather than guessed. Added no test of my own, because nothing I found was a defect that needed one and the two things I corrected are prose. The `pass` rather than `unstable` status is right: it passed five of five with the fix, and a case that cannot fail the run would not be a guard.
+- *The declined optional arm.* Agreed with leaving `ExceptionDispatchInfo` out. Re-measured the sweep the handoff cited: `grep -rn "throw exception;" src/engine/` finds 18 sites across 11 files, so it is a sweep and a `debt-` ticket of its own if anyone wants it, not part of this fix. (The handoff said 10 files; 11 is the count.)
+- *Source hygiene.* `ServerProcess.cs` is unchanged in size terms - the extraction was needed precisely so the body's diff stayed at zero lines. The manifest `note` at 1,194 characters and the script's header comment do tell the measurement story twice, but they are read by different people (a CI triager and someone editing the script) and the manifest already holds a 1,240-character note, so this is within the file's own convention and was left alone.
+
+**No tickets filed, and that is deliberate:** nothing found rose to the filing bar. The one architectural concern is conditional and went to a `NOTE:`; the two real findings were prose in files this change already touched, and were fixed here.
+
+## Tests run
+
+Built first - `dotnet build Dataphor.slnx`, 0 errors, and again after each edit.
+
+One ring wider than the implement stage, in two commands. First the implement stage's own filter, re-run unchanged:
+
+```
+dotnet test tests/DAE.Server.Tests --no-build --filter "Name=ProcessStopDuringAsync|Name=DebugStepping|Name=DebugBreakpoints|Name=DebugLibrary|Name=AsyncExecution|Name=TestProcessExecutes|Name=Transaction.Isolation.Run|FullyQualifiedName~DebuggerSessionTest" --logger "console;verbosity=normal"
+```
+
+13 cases, 12 passed, 1 skipped, 43 s - reproducing the handoff's run exactly, `ProcessStopDuringAsync` at 8 s and `Transaction.Isolation.Run` matching its recorded known failure (`debt-memory-device-transaction-isolation`, the `LostUpdate` assertion), which is the garden report's second symptom and the reason this filter keeps that script.
+
+Then the neighbouring fixtures and coverage scripts a regression in process or session teardown would surface in - a new lock there shows up as a hang, not a failed assertion, so the concurrency fixtures matter more here than the assertion ones:
+
+```
+dotnet test tests/DAE.Server.Tests --no-build --filter "Name=DebugTest|Name=SessionAndProcessScopedTables|Name=SessionTables|Name=ApplicationTransactions|FullyQualifiedName~AbandonedClientProcessTest|FullyQualifiedName~AbandonedSessionCleanupTest|FullyQualifiedName~NativeSessionCleanupTest|FullyQualifiedName~ConcurrentDDLTest|FullyQualifiedName~DeferredDeviceStopTest|FullyQualifiedName~TransactionBeginTest" --logger "console;verbosity=normal"
+```
+
+20 cases, 19 passed, 1 skipped, 1.6 minutes - including `ConcurrentSessionsStoreTheirOwnScripts` (16 sessions x 15 DDL cycles, 34 s), `ASessionWithACallInFlightIsNotReclaimed`, which is the fixture closest to the new wait, and the two abandoned-session reclaim cases that stop processes out from under a call. `DebugTest` matched its recorded known failure (`test-pre-3-1-scripts-policy`, a harness timeout).
+
+After the review's edits, the core set re-run: `ProcessStopDuringAsync`, `DebugStepping`, `AsyncExecution`, `TestProcessExecutes` and the six `DebuggerSessionTest` cases - 10 of 10 passed, 36 s.
+
+Also ran `python tools/docs-size-check/check_size.py` (11 files, 0 over the limit) for the architecture page edit.
+
+Did not run the three full-suite parts: the diff is one engine file and two documents, not the build or test infrastructure, the coverage runner or manifest format, or the lexer, parser or compiler. CI runs the whole suite in Debug and Release on the push.
+
+No pre-existing failures beyond the two recorded known failures above, so `tickets/.pre-existing-error.md` was not written.

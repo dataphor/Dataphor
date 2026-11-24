@@ -89,9 +89,19 @@ namespace Alphora.Dataphor.DAE.Server
 			// finished - SystemExecuteAsyncNode.ExecuteResults, which disposes the ServerScript - holds no executing
 			// thread. A StopProcess landing in that window used to tear the scripts and batches collections apart and
 			// report the resulting null dereference as a nil at the StopProcess statement.
-			// Cost: Dispose now waits for a call in flight on the process, bounded by Engine.ProcessWaitTimeout - a
-			// thread parked in BeginCall on the concurrent-process throttle has not raised the executing-thread count, so
-			// TerminateProcessThread returns at once and leaves the whole wait to this lock.
+			// Cost: Dispose now waits for whatever call is in flight, and how long that can be is the caller's to know.
+			// Engine.TerminateProcess and ServerSession.StopProcesses abort the executing thread first and give up with
+			// ProcessNotResponding after ProcessTerminationTimeout / 2, so the wait they leave this lock is short - except
+			// for a thread parked in BeginCall on the concurrent-process throttle, which has not raised the executing-thread
+			// count, so TerminateProcessThread returns at once and the whole of Engine.ProcessWaitTimeout falls to this lock.
+			// IServerSession.StopProcess(IServerProcess) aborts nothing - it is the only StopProcess on that interface, so it
+			// is the one the client library and SystemExecuteAsyncNode's cleanup use - and waits for as long as the call runs.
+			// NOTE: this takes the process latch before the session's process collection - base.Dispose fires Disposed, which
+			// ServerChildObjects answers by disowning under the collection's lock. The reverse order exists in that class:
+			// Removing disposes an owned child while holding it. Not reachable for a process today, because the only path
+			// there is ServerProcesses.Dispose -> Clear and ServerSession.Dispose drains the collection with StopProcesses
+			// first. If a process is ever removed from its session by Clear, Remove or RemoveAt instead of being disowned,
+			// that is the deadlock, and the fix is to disown before disposing there, not to drop this lock.
 			lock (_syncHandle)
 				InternalDispose(disposing);
 		}
