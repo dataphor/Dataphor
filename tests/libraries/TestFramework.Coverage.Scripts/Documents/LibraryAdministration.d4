@@ -200,6 +200,10 @@ begin
 	if (IndexOf(LCaught, ':113231 --->') < 0) or (IndexOf(LCaught, 'Library "AdminErrors" is registered and cannot be detached.') < 0) then
 		raise Error('Detaching a registered library did not raise 113231: ' + LCaught);
 
+	// The refusal is raised before anything is removed, so a refused detach leaves the catalog as it was.
+	if not exists (Libraries where Name = 'AdminErrors') then
+		raise Error('A refused DetachLibrary removed the library from the catalog anyway.');
+
 	UnregisterLibrary('AdminErrors');
 
 	LCaught := '';

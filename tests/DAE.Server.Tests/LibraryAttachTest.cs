@@ -9,7 +9,6 @@ using System.IO;
 using NUnit.Framework;
 
 using Runtime = Alphora.Dataphor.DAE.Runtime;
-using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
@@ -49,16 +48,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				instance.Server.Start();
 				string folder = DeployLibraryFolder(instance, "AttachOne");
 
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachOne', {0});", Literal(folder)));
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1});", Literal("AttachOne"), Literal(folder)));
 
 				Assert.That(IsAttached(instance, "AttachOne"), Is.True);
 				Assert.That(AttachedDirectory(instance, "AttachOne"), Is.EqualTo(folder));
 
 				// Attached, not copied: the server's own library directory still has no folder for it.
-				Assert.That(Directory.Exists(Path.Combine(instance.Directory, TestServerInstance.LibrariesFolderName, "AttachOne")), Is.False);
+				Assert.That(Directory.Exists(DefaultLibraryFolder(instance, "AttachOne")), Is.False);
 
 				// Attaching is pointless if the library cannot then be registered where it lies.
-				instance.ExecuteScript("RegisterLibrary('AttachOne');");
+				instance.ExecuteScript(String.Format("RegisterLibrary({0});", Literal("AttachOne")));
 				Assert.That(IsRegistered(instance, "AttachOne"), Is.True);
 			}
 		}
@@ -76,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				instance.Server.Start();
 				string folder = DeployLibraryFolder(instance, "AttachRestart");
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachRestart', {0}); RegisterLibrary('AttachRestart');", Literal(folder)));
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1}); RegisterLibrary({0});", Literal("AttachRestart"), Literal(folder)));
 
 				instance.Server.Stop();
 				instance.Server.Start(); // the second start reopens the catalog the first created; see CatalogStoreTest
@@ -100,9 +99,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				instance.Server.Start();
 				string first = DeployLibraryFolder(instance, "AttachScanOne");
 				string second = DeployLibraryFolder(instance, "AttachScanTwo");
-				Assert.That(Path.GetDirectoryName(first), Is.EqualTo(Path.GetDirectoryName(second)), "Both folders must be in the one directory the scan is given.");
 
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachScanOne', {0}); RegisterLibrary('AttachScanOne');", Literal(first)));
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1}); RegisterLibrary({0});", Literal("AttachScanOne"), Literal(first)));
 
 				Assert.DoesNotThrow(() => instance.ExecuteScript(String.Format("AttachLibraries({0});", Literal(DeploymentDirectory(instance)))));
 
@@ -127,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				string empty = Path.Combine(DeploymentDirectory(instance), "AttachNothing");
 				Directory.CreateDirectory(empty);
 
-				Assert.DoesNotThrow(() => instance.ExecuteScript(String.Format("AttachLibrary('AttachNothing', {0});", Literal(empty))));
+				Assert.DoesNotThrow(() => instance.ExecuteScript(String.Format("AttachLibrary({0}, {1});", Literal("AttachNothing"), Literal(empty))));
 				Assert.That(IsAttached(instance, "AttachNothing"), Is.False);
 			}
 		}
@@ -145,28 +143,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				instance.Server.Start();
 				string folder = DeployLibraryFolder(instance, "AttachNamed");
 
-				Assert.DoesNotThrow(() => instance.ExecuteScript(String.Format("AttachLibrary('AttachMisnamed', {0});", Literal(folder))));
+				Assert.DoesNotThrow(() => instance.ExecuteScript(String.Format("AttachLibrary({0}, {1});", Literal("AttachMisnamed"), Literal(folder))));
 				Assert.That(IsAttached(instance, "AttachMisnamed"), Is.False);
 				Assert.That(IsAttached(instance, "AttachNamed"), Is.False);
-			}
-		}
-
-		/// <summary>DetachLibrary refuses a registered library, with CannotDetachRegisteredLibrary (113231).</summary>
-		[Test]
-		public void DetachingARegisteredLibraryIsRefused()
-		{
-			using (TestServerInstance instance = new TestServerInstance(nameof(DetachingARegisteredLibraryIsRefused)))
-			{
-				instance.Server.Start();
-				string folder = DeployLibraryFolder(instance, "AttachRegistered");
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachRegistered', {0}); RegisterLibrary('AttachRegistered');", Literal(folder)));
-
-				Exception exception = Assert.Catch(() => instance.ExecuteScript("DetachLibrary('AttachRegistered');"));
-
-				DataphorException error = FindError(exception, (int)Schema.SchemaException.Codes.CannotDetachRegisteredLibrary);
-				Assert.That(error, Is.Not.Null, exception.ToString());
-				Assert.That(error.Message, Is.EqualTo("Library \"AttachRegistered\" is registered and cannot be detached."));
-				Assert.That(IsAttached(instance, "AttachRegistered"), Is.True);
 			}
 		}
 
@@ -182,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				instance.Server.Start();
 				string folder = DeployLibraryFolder(instance, "AttachForget");
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachForget', {0}); DetachLibrary('AttachForget');", Literal(folder)));
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1}); DetachLibrary({0});", Literal("AttachForget"), Literal(folder)));
 
 				Assert.That(IsAttached(instance, "AttachForget"), Is.False);
 				Assert.That(File.Exists(Path.Combine(folder, "AttachForget.d4l")), Is.True);
@@ -193,8 +172,38 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Assert.That(IsAttached(instance, "AttachForget"), Is.False);
 
 				// The folder is still a deployment the administrator can attach again.
-				instance.ExecuteScript(String.Format("AttachLibrary('AttachForget', {0});", Literal(folder)));
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1});", Literal("AttachForget"), Literal(folder)));
 				Assert.That(AttachedDirectory(instance, "AttachForget"), Is.EqualTo(folder));
+			}
+		}
+
+		/// <summary>
+		/// RefreshLibraries rescans the server's own library directory and removes from the catalog every library it no longer
+		/// finds there - but it only considers a library whose Directory is empty, which is to say one that lives in that
+		/// directory. A library attached from a folder of its own is never reconsidered, so when its deployment folder is
+		/// removed by hand the catalog keeps pointing at the folder that has gone, and only DetachLibrary clears the entry.
+		/// The script in debt-library-administration-coverage covers the re-attaching half and left this half here, because
+		/// deleting a folder behind the server's back needs a path and a script has none.
+		/// </summary>
+		[Test]
+		public void RefreshLibrariesForgetsAMissingDefaultLibraryAndKeepsAnAttachedOne()
+		{
+			using (TestServerInstance instance = new TestServerInstance(nameof(RefreshLibrariesForgetsAMissingDefaultLibraryAndKeepsAnAttachedOne)))
+			{
+				instance.Server.Start();
+				string attached = DeployLibraryFolder(instance, "RefreshAttached");
+				instance.ExecuteScript(String.Format("AttachLibrary({0}, {1});", Literal("RefreshAttached"), Literal(attached)));
+				string inLibraryDirectory = CreateLibraryFolder(instance, "RefreshDefault");
+				Assert.That(IsAttached(instance, "RefreshDefault"), Is.True, "The premise of the removal below: the library is in the catalog to start with.");
+
+				// Both folders go behind the server's back; neither library is registered, so nothing holds them open.
+				Directory.Delete(inLibraryDirectory, true);
+				Directory.Delete(attached, true);
+
+				instance.ExecuteScript("RefreshLibraries();");
+
+				Assert.That(IsAttached(instance, "RefreshDefault"), Is.False, "RefreshLibraries kept a library whose folder in the library directory had gone.");
+				Assert.That(AttachedDirectory(instance, "RefreshAttached"), Is.EqualTo(attached), "RefreshLibraries removed a library that was attached from a folder of its own.");
 			}
 		}
 
@@ -227,6 +236,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return Path.Combine(instance.Directory, "Deployment");
 		}
 
+		/// <summary>Where the server puts a library of this name when it is given no directory of its own.</summary>
+		private static string DefaultLibraryFolder(TestServerInstance instance, string name)
+		{
+			return Path.Combine(instance.Directory, TestServerInstance.LibrariesFolderName, name);
+		}
+
+		/// <summary>
+		/// Has the server create an empty library in its own library directory and returns the folder it wrote the descriptor
+		/// into. Empty by design: a library with a file marked as an assembly would load it on registration.
+		/// </summary>
+		private static string CreateLibraryFolder(TestServerInstance instance, string name)
+		{
+			instance.ExecuteScript
+			(
+				String.Format
+				(
+					"CreateLibrary(LibraryDescriptor({0}, VersionNumber(1, 0, 0), \"\", list(FileReference){{}}, list(LibraryReference){{}}));",
+					Literal(name)
+				)
+			);
+			return DefaultLibraryFolder(instance, name);
+		}
+
 		/// <summary>
 		/// Produces the folder a deployment would present: the server creates the library in its own library directory, the
 		/// library is detached (which leaves the folder), and the folder is moved into <see cref="DeploymentDirectory"/>.
@@ -234,24 +266,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		private static string DeployLibraryFolder(TestServerInstance instance, string name)
 		{
-			instance.ExecuteScript
-			(
-				String.Format
-				(
-					"CreateLibrary(LibraryDescriptor('{0}', VersionNumber(1, 0, 0), \"\", list(FileReference){{}}, list(LibraryReference){{}}));",
-					name
-				)
-			);
+			string created = CreateLibraryFolder(instance, name);
 
 			// The reason this fixture is C# rather than a coverage script: a library in the server's default library directory
 			// has no path in the catalog at all, so a script has nothing to pass to the attach operators.
 			Assert.That(AttachedDirectory(instance, name), Is.Empty, "A library created in the default library directory should have no recorded directory.");
 
-			instance.ExecuteScript(String.Format("DetachLibrary('{0}');", name));
+			instance.ExecuteScript(String.Format("DetachLibrary({0});", Literal(name)));
 
 			string target = Path.Combine(DeploymentDirectory(instance), name);
 			Directory.CreateDirectory(DeploymentDirectory(instance));
-			Directory.Move(Path.Combine(instance.Directory, TestServerInstance.LibrariesFolderName, name), target);
+			Directory.Move(created, target);
 			return target;
 		}
 
