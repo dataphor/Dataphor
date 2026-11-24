@@ -277,6 +277,46 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The same insulation one level deeper. A reference taken from a reference is not in the written stream's own
+		/// reference list - it hangs off the reference that is - so the loop that separates a written source from its
+		/// references never sees it, and what keeps it reading the old value is that the reference above it does. One
+		/// of the two assertions below would hold on its own; together they say the chain moved as a unit.
+		/// </summary>
+		[Test]
+		public void WritingASourceLeavesAReferenceChainBelowItReadingTheValueItWasTakenFrom()
+		{
+			StreamID sourceID = _manager.Allocate();
+			Stream source = _manager.Open(OwnerID, sourceID, LockMode.Exclusive);
+			WriteString(source, SourceOriginal);
+
+			StreamID middleID = _manager.Reference(sourceID);
+			Stream middle = _manager.Open(OwnerID, middleID, LockMode.Exclusive);
+
+			StreamID deepID = _manager.Reference(middleID);
+			Stream deep = _manager.Open(OwnerID, deepID, LockMode.Exclusive);
+
+			try
+			{
+				WriteString(source, SourceChanged);
+
+				Assert.That(ReadString(source), Is.EqualTo(SourceChanged), "a source stream with a reference chain below it did not read back the value written through it");
+				Assert.That(ReadString(middle), Is.EqualTo(SourceOriginal), "writing through a source changed the value a reference to it reads");
+				Assert.That(ReadString(deep), Is.EqualTo(SourceOriginal), "writing through a source changed the value a reference two deep below it reads");
+			}
+			finally
+			{
+				deep.Close();
+				middle.Close();
+				source.Close();
+			}
+
+			_manager.Deallocate(deepID);
+			_manager.Deallocate(middleID);
+			_manager.Deallocate(sourceID);
+			Assert.That(_manager.Count(), Is.Zero, "the manager was still holding a stream after everything it allocated had been deallocated");
+		}
+
+		/// <summary>
 		/// MoveReferences and the re-parenting in Deallocate, which nothing else in the suite reaches. The middle of
 		/// the chain is written through before the chain below it is taken, so that it holds a stream of its own
 		/// rather than its source's - that is the shape Deallocate has to re-parent, because it has to hand the

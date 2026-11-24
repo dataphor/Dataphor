@@ -453,59 +453,71 @@ namespace Alphora.Dataphor.DAE.Streams
 					_referencingHeaders.Remove(stream.StreamID);
 					sourceHeader.References.Remove(stream.StreamID);
 
-					// copy the data from the source stream into this stream
-					_defaultProvider.Create(stream.StreamID);
-					InternalCopy(sourceHeader, header);
-					header.Stream.SourceStream = _defaultProvider.Open(stream.StreamID);
+					GiveOwnCopy(sourceHeader, header);
 
 					// move all references to this stream to the source stream
 					MoveReferences(header, sourceHeader);
 				}
+				// if this stream is the source of one or more reference streams
 				else if (header.References.Count > 0)
-				{
-					// The stream being written is the source of one or more references. Each reference must keep the value
-					// it was taken from, so give each one a provider stream of its own, holding this stream's current
-					// contents, before the write lands. A reference that is not open has no stream to repoint: it is no
-					// longer a referencing header by then, so its next InternalOpen opens the entry made for it here.
-					// NOTE: this costs one copy of the value per outstanding reference on the first write to a source, where
-					// re-parenting - handing the provider entry to the references and giving the source a fresh one, the way
-					// Deallocate does in the middle of a reference chain - would cost one copy however many there are. And a
-					// write through a representation truncates before it writes (ServerStream.SetLength then
-					// ServerStream.Write, each of which calls here), so the separating copy happens on the SetLength and
-					// copies contents the write then replaces in full; Change is idempotent, so the second call costs a
-					// dictionary lookup and nothing else. None of this was measured. If copying a large value many times
-					// before writing the original ever shows up as slow, the re-parenting shape and a check for a SetLength
-					// to zero are the two things to reach for.
-					// NOTE: repointing a reference's SourceStream below drops the cover stream it was holding over this
-					// stream without closing it and without the matching InternalClose, so this header's open count stays one
-					// high per reference separated - the same thing the branch above does, and what the two "Shouldn't this
-					// close the old stream?" comments in MoveReferences and Deallocate are about. It is inert while the
-					// default provider is MemoryStreamProvider, whose Close is a no-op, and Deallocate removes a header
-					// whatever its count. If the file-backed provider is ever switched on (UseFileStreamProvider at the top
-					// of this file), these counts are what decides when a file handle is released, and this becomes real.
-					long savePosition = stream.Position;
-					for (int index = header.References.Count - 1; index >= 0; index--)
-					{
-						StreamID referenceStreamID = header.References[index];
-						StreamHeader referenceHeader = GetStreamHeader(referenceStreamID);
-
-						// dereference this stream
-						header.References.RemoveAt(index);
-						_referencingHeaders.Remove(referenceStreamID);
-
-						// copy the data from this stream into the reference
-						_defaultProvider.Create(referenceStreamID);
-						InternalCopy(header, referenceHeader);
-						if (referenceHeader.Stream != null)
-							referenceHeader.Stream.SourceStream = _defaultProvider.Open(referenceStreamID);
-					}
-
-					// InternalCopy read this stream to the end through a cover over it, and a cover sets its source's
-					// position before every read, so the stream the caller is about to write at is now positioned at its end.
-					// Put it back, or the write appends past the old value instead of landing over it.
-					stream.Position = savePosition;
-				}
+					SeparateReferences(header, stream);
 			}
+		}
+		
+		/// <summary>
+		/// Gives the target stream a provider entry of its own holding the source stream's current contents, and
+		/// points the target's open stream at that entry. The caller has already broken the reference between the
+		/// two, so a target that is not open has no stream to point and needs none: it is no longer a referencing
+		/// header, so its next InternalOpen opens the entry made here.
+		/// </summary>
+		private void GiveOwnCopy(StreamHeader sourceHeader, StreamHeader targetHeader)
+		{
+			_defaultProvider.Create(targetHeader.StreamID);
+			InternalCopy(sourceHeader, targetHeader);
+			if (targetHeader.Stream != null)
+				targetHeader.Stream.SourceStream = _defaultProvider.Open(targetHeader.StreamID);
+		}
+		
+		/// <summary>
+		/// Separates every outstanding reference to a stream that is about to be written from it, so that each
+		/// reference keeps the value it was taken from rather than following the write.
+		/// </summary>
+		private void SeparateReferences(StreamHeader header, ServerStream stream)
+		{
+			// NOTE: this costs one copy of the value per outstanding reference on the first write to a source, where
+			// re-parenting - handing the provider entry to the references and giving the source a fresh one, the way
+			// Deallocate does in the middle of a reference chain - would cost one copy however many there are. And a
+			// write through a representation truncates before it writes (ServerStream.SetLength then
+			// ServerStream.Write, each of which calls Change), so the separating copy happens on the SetLength and
+			// copies contents the write then replaces in full; Change is idempotent, so the second call costs a
+			// dictionary lookup and nothing else. None of this was measured. If copying a large value many times
+			// before writing the original ever shows up as slow, the re-parenting shape and a check for a SetLength
+			// to zero are the two things to reach for.
+			// NOTE: the SourceStream GiveOwnCopy points at the new entry drops the cover stream the reference was
+			// holding over this stream without closing it and without the matching InternalClose, so this header's
+			// open count stays one high per reference separated - the same thing the reference arm of Change does, and
+			// what the two "Shouldn't this close the old stream?" comments in MoveReferences and Deallocate are about.
+			// It is inert while the default provider is MemoryStreamProvider, whose Close is a no-op, and Deallocate
+			// removes a header whatever its count. If the file-backed provider is ever switched on
+			// (UseFileStreamProvider at the top of this file), these counts are what decides when a file handle is
+			// released, and this becomes real.
+			long savePosition = stream.Position;
+			for (int index = header.References.Count - 1; index >= 0; index--)
+			{
+				StreamID referenceStreamID = header.References[index];
+				StreamHeader referenceHeader = GetStreamHeader(referenceStreamID);
+
+				// dereference this stream
+				header.References.RemoveAt(index);
+				_referencingHeaders.Remove(referenceStreamID);
+
+				GiveOwnCopy(header, referenceHeader);
+			}
+
+			// GiveOwnCopy read this stream to the end through a cover over it, and a cover sets its source's position
+			// before every read, so the stream the caller is about to write at is now positioned at its end. Put it
+			// back, or the write appends past the old value instead of landing over it.
+			stream.Position = savePosition;
 		}
 		
 		protected void MoveReferences(StreamHeader fromHeader, StreamHeader toHeader)
