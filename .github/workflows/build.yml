@@ -26,9 +26,14 @@ on:
 permissions:
   contents: read
 
+# A push to a branch never cancels the run in progress: the full suite runs only here (agents run
+# targeted tests, tickets/rules/10-dataphor.md), a run takes about 18 minutes and the ticket runner
+# pushes more often than that, so cancelling meant almost no run finished. GitHub keeps one run going
+# and only the newest waiting one, so each finished run covers the latest commit at its start.
+# A pull request still cancels its superseded run.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DOTNET_NOLOGO: true
