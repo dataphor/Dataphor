@@ -425,9 +425,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							for LI : Integer := 1 to {0} do
 								LSeen := LSeen + ZConstSeesVariable(LB);
 							if LSeen <> {0} then
-								raise Error('A call did not see the variable''''s value.');
+								raise Error('A call did not see the variable''s value.');
 							if LB.Value <> '0001' then
-								raise Error('A call released the caller''''s value.');
+								raise Error('A call released the caller''s value.');
 						end;
 					",
 					AssignmentCount
@@ -456,7 +456,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							for LI : Integer := 1 to {0} do
 								ZByValueReplaces(LR.B);
 							if LR.B.Value <> '0001' then
-								raise Error('A by-value call reached the row''''s column.');
+								raise Error('A by-value call reached the row''s column.');
 						end;
 					",
 					RowAssignmentCount
@@ -491,10 +491,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 									begin
 										var LB : Binary := LR.B;
 										if LB.Value <> '0001' then
-											raise Error('The copy did not carry the column''''s value.');
+											raise Error('The copy did not carry the column''s value.');
 									end;
 									if LR.B.Value <> '0001' then
-										raise Error('Reading the column released the row''''s own value.');
+										raise Error('Reading the column released the row''s own value.');
 								end;
 							",
 							RowAssignmentCount
@@ -513,9 +513,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 									for LI : Integer := 1 to {0} do
 										LB := LR.B;
 									if LB.Value <> '0001' then
-										raise Error('The assignment did not carry the column''''s value.');
+										raise Error('The assignment did not carry the column''s value.');
 									if LR.B.Value <> '0001' then
-										raise Error('Reading the column released the row''''s own value.');
+										raise Error('Reading the column released the row''s own value.');
 								end;
 							",
 							RowAssignmentCount
@@ -534,10 +534,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 									begin
 										var LS : row {{ B : Binary }} := row {{ LR.B B }};
 										if LS.B.Value <> '0001' then
-											raise Error('The selected row did not carry the column''''s value.');
+											raise Error('The selected row did not carry the column''s value.');
 									end;
 									if LR.B.Value <> '0001' then
-										raise Error('Selecting the column released the row''''s own value.');
+										raise Error('Selecting the column released the row''s own value.');
 								end;
 							",
 							RowAssignmentCount

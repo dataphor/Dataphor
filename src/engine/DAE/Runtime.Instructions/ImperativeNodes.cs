@@ -1195,9 +1195,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// <para>
 		/// Only a collision in which one of the two operands is var is worth a copy. A const operand's slot is compiled
 		/// as constant and cannot be assigned to, so two const operands sharing a slot can never release anything - and
-		/// a copy made for one of them would have no owner at all, because the caller takes a const operand's value back
-		/// (InstructionNodeBase.CleanupOperand does nothing for const) and so nothing releases it. Copying there leaked
-		/// one value per call of an ordinary operator called as F(LB, LB).
+		/// a copy made for one of them would have no owner at all: a collision is only ever detected on a by-reference
+		/// StackReferenceNode, which answers PlanNode.ReturnsByReference, so the const branch of
+		/// InstructionNodeBase.CleanupOperand leaves that operand's value to the caller's slot instead of releasing it
+		/// and nothing releases the copy. Copying there leaked one value per call of an ordinary operator called as
+		/// F(LB, LB).
 		/// </para>
 		/// <para>
 		/// NOTE: such a call still leaks one value, whatever the body does, because every operand bound to the one

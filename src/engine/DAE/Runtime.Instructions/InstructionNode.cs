@@ -210,6 +210,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// TODO: This should be compiled and added as cleanup nodes
 		// TODO: Handle var arguments for more than just stack references
+		/// <summary>Releases, writes back or leaves alone the value an operand was given, according to its modifier.</summary>
+		/// <remarks>
+		/// The rule each branch below applies, and the rest of the picture it is part of - stack slots, rows, lists, and
+		/// how a plan node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md,
+		/// whose own table points back here.
+		/// NOTE: an argument evaluated before a later one raises is never cleaned up at all, because the four execute
+		/// shapes below evaluate their arguments before entering the try this runs in the finally of. That orphans the
+		/// earlier argument's value for the life of the session; bug-an-argument-is-orphaned-when-a-later-one-raises
+		/// owns it, and the fix belongs in those shapes rather than here.
+		/// </remarks>
 		protected void CleanupOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
 			switch (signatureElement.Modifier)
