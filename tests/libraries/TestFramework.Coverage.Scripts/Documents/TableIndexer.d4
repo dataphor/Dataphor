@@ -36,13 +36,14 @@
 // Three things are deliberately left out. The empty indexer, MyTable[], is the row extractor every script uses; it takes
 // the same "by"-clause branch with a zero-column key, and nothing here goes near that path, so it stays covered by the rest
 // of the suite. A "by" clause whose columns are not a superset of any key adds InvalidRowExtractorExpression at *warning*
-// level and compiles on; that line is already covered, and every "by" clause below is a superset of a real key, so none of
-// these cases stumbles into it. And the two arms that break a tie between orderings which both match - one where a later
-// ordering has a better narrowing score (Compiler.cs lines 12682-12686 as this script was written), one where it has the
-// same narrowing score but a shorter conversion path (12690-12693) - would each need a chain of user-defined implicit
-// conversions to construct, which would be more intricate than the behaviour they pin; they are left uncovered on
-// purpose, not by oversight. The tie neither of them can break, an equal score and an equal path length, is the 105259
-// case below.
+// level and compiles on - which is what every empty indexer on a keyed table does, a zero-column key being a superset of
+// no key, so the rest of the suite covers that line many times over; every "by" clause below is a superset of a real key,
+// so none of these cases stumbles into it. And the two arms that break a tie between orderings which both match - in
+// CompileIndexerExpression's loop over the resolved permutations, the arm that takes a later ordering because its
+// narrowing score is better, and the one that takes it because the scores are equal and its conversion path is shorter -
+// would each need a chain of user-defined implicit conversions to construct, which would be more intricate than the
+// behaviour they pin; they are left uncovered on purpose, not by oversight. The tie neither of them can break, an equal
+// score and an equal path length, is the 105259 case below.
 
 // Five tables, one per shape the resolution has to tell apart, each with rows chosen so that picking the wrong key, or
 // pairing a term with the wrong column, returns a visibly wrong row rather than the right one by luck. The column types are
@@ -132,7 +133,8 @@ if TableIndexerPairKey[1, 2 by { A, B }].Data <> 'pair one two' then
 if TableIndexerPairKey[2, 1 by { A, B }].Data <> 'pair two one' then
 	raise Error('A by clause on a two-column key did not pair the reversed terms with the columns in the order given.');
 
-// The five errors, each through a dynamic Execute for the reason given in the header.
+// The five error codes, in six cases - 105260 has two arms - each through a dynamic Execute for the reason given in the
+// header.
 begin
 	var LCaught : String := '';
 
