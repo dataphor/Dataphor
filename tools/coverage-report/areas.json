@@ -18,6 +18,7 @@
       "AlphoraMSSQLDevice",
       "Alphora.Dataphor.DAE.Device.Simple",
       "Alphora.Dataphor.DAE.Connection",
+      "Alphora.Dataphor.DAE.Connection.ODBC",
       "System.Platform",
       "System.Internet",
       "System.Integration",
