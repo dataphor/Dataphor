@@ -35,7 +35,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(plan);
+			// base.DetermineDataType rather than DetermineModifiers alone: the const branch of
+			// InstructionNodeBase.DetermineDataType is the only place that asks an argument node to lend the value it
+			// already holds rather than copy it, and iEqual declares both of its operands const
+			// (src/engine/DAE/Schema/SystemCatalog.d4). Asking is half the const-operand rule in
+			// docs/architecture/operand-ownership.md and the release in InternalExecute below is the other half; missing
+			// both held one stream per stream-backed column per side for the life of the session, on every row comparison
+			// (bug-row-equality-leaks-the-rows-it-compares). base guards its own body on Operator != null, which is what
+			// the generic-row branch of InternalCompare below relies on.
+			base.DetermineDataType(plan);
 			_dataType = plan.DataTypes.SystemBoolean;
 			
 			if (!Nodes[0].DataType.IsGeneric && !Nodes[1].DataType.IsGeneric) // Generic row comparison must be done at run-time
@@ -168,11 +176,54 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		public override object InternalExecute(Program program, object[] arguments) { return null; }
+
+		/// <remarks>
+		/// Overriding this shape of InternalExecute puts the node outside InstructionNodeBase.CleanupOperand, so the
+		/// const-operand rule in docs/architecture/operand-ownership.md is applied here by hand: an argument node that was
+		/// asked to lend answers ReturnsByReference true and the value it handed over belongs to something else, where a
+		/// node that computed one - a literal, a conversion, another call - answers false and the value is this node's to
+		/// release. A row's value is a managed stream per stream-backed column, so releasing none of them held that many
+		/// streams per side for the life of the session, on every comparison.
+		/// </remarks>
 		public override object InternalExecute(Program program)
 		{
 			object leftValue = Nodes[0].Execute(program);
-			object rightValue = Nodes[1].Execute(program);
-			
+			object rightValue;
+			try
+			{
+				rightValue = Nodes[1].Execute(program);
+			}
+			catch
+			{
+				// The second argument raised, so the comparison never happens, and the rule for the argument already
+				// evaluated is the one InstructionNodeBase.ReleaseUncalledOperand applies on the shapes' own failure path:
+				// a value this node owns is still this node's to release.
+				if (!Nodes[0].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, leftValue);
+				throw;
+			}
+
+			try
+			{
+				return InternalCompare(program, leftValue, rightValue);
+			}
+			finally
+			{
+				// The answer is read off the node left in Nodes[index] at run time rather than remembered from what
+				// base.DetermineDataType asked at compile time, because the DetermineDataType override above may replace
+				// either argument node afterwards. Compiler.Upcast returns the node unchanged today, but Compiler.ConvertNode
+				// genuinely wraps it - correctly, and for the reason the rule exists: a conversion computes a new value from
+				// the one it was lent, so it answers false and what arrives here is a value this node owns.
+				if (!Nodes[0].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, leftValue);
+				if (!Nodes[1].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, rightValue);
+			}
+		}
+
+		/// <summary>Compares the two row values, whose ownership InternalExecute above has already settled.</summary>
+		private object InternalCompare(Program program, object leftValue, object rightValue)
+		{
 			#if NILPROPOGATION
 			if ((leftValue == null) || (rightValue == null))
 				return null;
@@ -208,12 +259,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
+				// A generic row operand - what an operator declared operator F(const A : row, const B : row) hands its body -
+				// has no column list at plan time, so the comparison is planned here over the two values just evaluated. The
+				// inner node applies the release rule to its own arguments, and these two values are still this node's, so
+				// the argument nodes handed to it have to say they are lending rather than giving.
 				RowEqualNode node = new RowEqualNode();
-				node.Nodes.Add(new ValueNode(((IRow)leftValue).DataType, leftValue));
-				node.Nodes.Add(new ValueNode(((IRow)rightValue).DataType, rightValue));
+				node.Nodes.Add(new BorrowedValueNode(((IRow)leftValue).DataType, leftValue));
+				node.Nodes.Add(new BorrowedValueNode(((IRow)rightValue).DataType, rightValue));
 				node.DetermineDataType(program.Plan);
 				return node.Execute(program);
 			}
+		}
+
+		/// <summary>A ValueNode over a value the node that built it still owns, so the consumer must leave it alone.</summary>
+		/// <remarks>
+		/// NOTE: giving ValueNode itself a SetByReference - so that any const operand handed a plan literal borrows it
+		/// rather than copying it and releasing the copy - is probably the better answer, and a cheaper one than this. It
+		/// is deliberately not taken here: its blast radius is every call in the engine with a literal argument, which is
+		/// not a change to make inside a leak fix. Revisit it when a second site needs the same thing.
+		/// </remarks>
+		private class BorrowedValueNode : ValueNode
+		{
+			public BorrowedValueNode(Schema.IDataType dataType, object tempValue) : base(dataType, tempValue) { }
+
+			public override bool ReturnsByReference { get { return true; } }
+
+			public override bool SetByReference() { return true; }
 		}
 	}
 
@@ -223,7 +294,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(plan);
+			// base.DetermineDataType rather than DetermineModifiers alone, for the reason given in RowEqualNode above:
+			// only the const branch asks an argument node to lend the value it already holds, and the equality generated
+			// for a compound scalar type (Compiler.CompileComparisonOperator) declares both of its operands const.
+			base.DetermineDataType(plan);
 			_dataType = plan.DataTypes.SystemBoolean;
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
@@ -350,42 +424,91 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		public override object InternalExecute(Program program, object[] arguments) { return null; }
+
+		/// <remarks>
+		/// The same const-operand rule by hand as RowEqualNode above, and for the same reason: this shape of
+		/// InternalExecute is outside InstructionNodeBase.CleanupOperand, and the equality generated for a compound
+		/// scalar type declares both of its operands const. See docs/architecture/operand-ownership.md.
+		/// </remarks>
 		public override object InternalExecute(Program program)
 		{
 			object leftVar = Nodes[0].Execute(program);
-			object rightVar = Nodes[1].Execute(program);
-			
-			#if NILPROPOGATION
-			if ((leftVar == null) || (rightVar == null))
-				return null;
-			#endif
-			
-			object leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, leftVar);
-			object rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, rightVar);
-			program.Stack.PushWindow(0);
+			object rightVar;
 			try
 			{
-				program.Stack.Push(leftValue);
+				rightVar = Nodes[1].Execute(program);
+			}
+			catch
+			{
+				if (!Nodes[0].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, leftVar);
+				throw;
+			}
+
+			try
+			{
+				// Inside the try, so that a nil on one side still releases the value evaluated for the other.
+				#if NILPROPOGATION
+				if ((leftVar == null) || (rightVar == null))
+					return null;
+				#endif
+
+				IDataValue leftValue = null;
+				IDataValue rightValue = null;
 				try
 				{
-					program.Stack.Push(rightValue);
+					// ValuesOwned is cleared rather than left as it comes: the wrapper is only a host view of a native value
+					// whose one release belongs to the argument node above, and a wrapper that owned its values would release
+					// the columns of a row this node may only have been lent. Row's by-reference constructor clears the flag
+					// itself today, but it is the flag the dispose below reads, so this says so rather than relying on it.
+					leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, leftVar);
+					leftValue.ValuesOwned = false;
+					rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, rightVar);
+					rightValue.ValuesOwned = false;
+
+					program.Stack.PushWindow(0);
 					try
 					{
-						return _comparisonNode.Execute(program);
+						program.Stack.Push(leftValue);
+						try
+						{
+							program.Stack.Push(rightValue);
+							try
+							{
+								return _comparisonNode.Execute(program);
+							}
+							finally
+							{
+								program.Stack.Pop();
+							}
+						}
+						finally
+						{
+							program.Stack.Pop();
+						}
 					}
 					finally
 					{
-						program.Stack.Pop();
+						program.Stack.PopWindow();
 					}
 				}
 				finally
 				{
-					program.Stack.Pop();
+					if (rightValue != null)
+						rightValue.Dispose();
+					if (leftValue != null)
+						leftValue.Dispose();
 				}
 			}
 			finally
 			{
-				program.Stack.PopWindow();
+				// A compound scalar's native value is a NativeRow, which DataValue.DisposeValue releases by recursing into
+				// its column values. As in RowEqualNode, the lending answer is read off the node left in Nodes[index] at run
+				// time, because the DetermineDataType override above may have replaced it with a conversion.
+				if (!Nodes[0].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, leftVar);
+				if (!Nodes[1].ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, rightVar);
 			}
 		}
 	}

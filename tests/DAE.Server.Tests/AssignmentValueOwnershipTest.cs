@@ -50,6 +50,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// overrides InternalExecute(Program) itself is never reached by CleanupOperand, and IfNil copied the argument it
 	/// chose and released nothing, so every call over a value the call owned held a stream for the life of the session
 	/// (bug-ifnil-leaks-the-value-it-copies); the second of the two is the loan, which that fix must not start releasing.
+	/// The three row-equality cases are the same site again, and the pair of nodes that missed both halves of the rule at
+	/// once: nothing asked either argument node to lend, so both copied the row they were handed, and the execute
+	/// override then released neither copy - a stream per stream-backed column per side on every comparison, whether the
+	/// rows were computed or read out of a variable (bug-row-equality-leaks-the-rows-it-compares). The first case's four
+	/// shapes each reach a different part of that fix, the generic row operand among them, which is the run-time branch
+	/// that plans a second comparison over the values it has just evaluated; the second case is the loan, read rather
+	/// than counted; and the third is the equality the compiler generates for a compound scalar type, which leaked over
+	/// the compound row behind the value for the same two reasons.
 	/// ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated is the error path of that same operand
 	/// cleanup: it used to be skipped altogether when an argument of a call raised, because the execute shapes
 	/// evaluated their arguments before entering the try whose finally cleans them up, so every argument evaluated
@@ -79,11 +87,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Every case whose script raises also asserts on the error - that it reached the caller, or that the script's own
 	/// handler saw it - because a case that silently stopped raising would otherwise pass while testing nothing.
 	/// </remarks>
-	// NOTE: this fixture is the index of one rule and every ownership ticket adds to it - about 1,560 lines and a class
-	// summary of fifty at bug-ifnil-leaks-the-value-it-copies. It is past the roughly 1,500 lines at which it should be
-	// split along the three rules the summary already names - a slot, a call's operands, a scope - rather than growing
-	// the summary; the split is deferred while sibling ownership tickets still have cases in flight against this file,
-	// bug-row-equality-leaks-the-rows-it-compares being the last of them, and is the first thing to do once it lands.
+	// NOTE: this fixture is the index of one rule and every ownership ticket adds to it - about 1,760 lines and a class
+	// summary of sixty at bug-row-equality-leaks-the-rows-it-compares. It is past the roughly 1,500 lines at which it
+	// should be split along the three rules the summary already names - a slot, a call's operands, a scope - rather than
+	// growing the summary. The split is still deferred, and still waiting on sibling ownership tickets with cases in
+	// flight against this file: bug-a-cursor-loop-variable-stays-stale-once-written and
+	// bug-a-loop-over-a-read-only-parameter-orphans-a-computed-argument, both in the backlog, both naming cases here.
+	// Whichever of them is taken first should do the split before adding its cases, as the first of the two already says.
 	[TestFixture]
 	public class AssignmentValueOwnershipTest : InProcessTestFixture
 	{
@@ -1171,6 +1181,205 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					",
 					AssignmentCount
 				)
+			);
+		}
+
+		/// <summary>
+		/// Row equality - the pair of nodes outside that same machinery, and the pair that missed both halves of the rule
+		/// at once: nothing asked either argument node to lend, so both copied the row they were given, and the execute
+		/// override then released neither copy - a managed stream per stream-backed column per side, on every comparison
+		/// (bug-row-equality-leaks-the-rows-it-compares). Row equality is what a transition constraint, a key comparison
+		/// and in over a row-valued list all compile to, so this is ordinary application code rather than a script that
+		/// says = between two rows. All four shapes are here because each reaches a different part of the fix: the
+		/// computed rows are released by the half that releases, the variable's row is left alone by the half that asks,
+		/// the two-column row is the per-column arithmetic, and the generic row operand is the run-time branch, which
+		/// plans a second comparison over the values it has just evaluated and so needs argument nodes that say they are
+		/// lending.
+		/// </summary>
+		[Test]
+		public void RowEqualityReleasesTheRowsItCompares()
+		{
+			ExecuteScript("create operator ZGenericRowsEqual(const ALeft : row, const ARight : row) : Boolean begin result := ALeft = ARight; end;");
+
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"two computed rows",
+						String.Format
+						(
+							@"
+								begin
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if row {{ Binary('0001') X }} = row {{ Binary('0001') X }} then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('Equal computed rows did not compare equal.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a row variable",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ X : Binary }} := row {{ Binary('0001') X }};
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if LR = LR then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('A row variable did not compare equal to itself.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a two-column row",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ X : Binary, Y : Binary }} := row {{ Binary('0001') X, Binary('0002') Y }};
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if LR = LR then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('A two-column row variable did not compare equal to itself.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a generic row operand",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ X : Binary }} := row {{ Binary('0001') X }};
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if ZGenericRowsEqual(LR, LR) then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('A generic row operand did not compare equal to itself.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// The loan side of row equality, which the count alone cannot see: lending without releasing and releasing
+		/// without copying both leave the count in balance, and only a read afterwards tells them apart. So this reads
+		/// both: that the comparison answered true every time, and that the columns of both rows are still there to read
+		/// once the loop has finished. Two variables rather than one, so that each argument node is a separate loan.
+		/// </summary>
+		[Test]
+		public void RowEqualityGivenVariablesLeavesTheCallersRowsAlone()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LLeft : row {{ X : Binary }} := row {{ Binary('0001') X }};
+							var LRight : row {{ X : Binary }} := row {{ Binary('0001') X }};
+							var LSeen : Integer := 0;
+							for LI : Integer := 1 to {0} do
+								if LLeft = LRight then
+									LSeen := LSeen + 1;
+							if LSeen <> {0} then
+								raise Error('Equal rows did not compare equal.');
+							if LLeft.X.Value <> '0001' then
+								raise Error('The comparison released the left row''s column.');
+							if LRight.X.Value <> '0001' then
+								raise Error('The comparison released the right row''s column.');
+						end;
+					",
+					RowAssignmentCount
+				)
+			);
+		}
+
+		/// <summary>
+		/// The equality the compiler generates for a compound scalar type - one whose single representation has more than
+		/// one property - which leaked the same way and for the same two reasons, over the compound row behind the value
+		/// rather than over a row the script wrote. Both shapes are here for the same reason as above, and each reads its
+		/// result; the variable shape also reads the variable's property afterwards, which is the half the count cannot
+		/// see. The existing coverage of this operator
+		/// (tests/libraries/TestFramework.Coverage.Scripts/Documents/Types.CompoundEquality.d4) is all-Integer, so it
+		/// cannot see a leak at all - a stream is what a leak costs, and only a stream-backed property has one.
+		/// </summary>
+		[Test]
+		public void CompoundScalarEqualityReleasesTheValuesItCompares()
+		{
+			ExecuteScript("create type ZCompoundBinary { representation ZCompoundBinary { X : Binary, N : Integer } };");
+
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"two computed compound values",
+						String.Format
+						(
+							@"
+								begin
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if ZCompoundBinary(Binary('0001'), 1) = ZCompoundBinary(Binary('0001'), 1) then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('Equal computed compound values did not compare equal.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a compound variable",
+						String.Format
+						(
+							@"
+								begin
+									var LC : ZCompoundBinary := ZCompoundBinary(Binary('0001'), 1);
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+										if LC = LC then
+											LSeen := LSeen + 1;
+									if LSeen <> {0} then
+										raise Error('A compound variable did not compare equal to itself.');
+									if LC.X.Value <> '0001' then
+										raise Error('The comparison released the caller''s property.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+				}
 			);
 		}
 

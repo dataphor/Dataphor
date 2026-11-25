@@ -61,6 +61,7 @@
     <Compile Include="NativeSessionKeepAliveTest.cs" />
     <Compile Include="ObjectIDGeneratorTest.cs" />
     <Compile Include="ObjectIDPerEngineTest.cs" />
+    <Compile Include="OperandOwnershipShapeTest.cs" />
     <Compile Include="OutOfProcessInstance.cs" />
     <Compile Include="OutOfProcessProtocolTest.cs" />
     <Compile Include="ParserRoundTripCorpusTest.cs" />
