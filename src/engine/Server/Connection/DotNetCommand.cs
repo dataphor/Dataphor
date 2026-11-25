@@ -86,6 +86,10 @@ namespace Alphora.Dataphor.DAE.Connection
 						else
 						{
 							// TODO: Better story for the length of string parameters.  This usage prevents the use of prepared commands in general
+							// NOTE: this growth is a backstop, not where the length of a string parameter is decided. A device declares the
+							// column's width (SQLString.GetSQLType over the Storage.Length tag), so a value that fits the column never reaches
+							// it; the catalog store declares the value's own length, so it is already exact. The plan-cache cost of declaring
+							// a length per value is measured in the NOTE on SQLStoreConnection.NativeToParameter, which is where it arises.
 							IDbDataParameter dataParameter = (IDbDataParameter)ParameterByIndex(index);
 							if ((parameter.Value is string) && (dataParameter.Size < ((string)parameter.Value).Length))
 								dataParameter.Size = ((string)parameter.Value).Length;

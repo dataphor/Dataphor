@@ -511,6 +511,62 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// A string holding characters no single-byte code page has - Chinese, Greek and Cyrillic beside a letter a Latin-1 code page
+		/// does hold - survives an insert, an update, and a key condition that names the row by it. Reproduction of
+		/// device-mssql-string-parameters: MSSQLCommand described every string parameter to the server as varchar, and SQL Server
+		/// converts a varchar value to the database's collation code page on its way in, so each character that code page has no room
+		/// for arrived as a question mark - silently, and with nothing to read back afterwards but the question marks.
+		/// </summary>
+		/// <remarks>
+		/// The column has to be able to hold the characters for the parameter's own type to be what decides this, and it can: the
+		/// contract's T.V is nvarchar(20), as the catalog's own text columns are (41 nvarchar columns in SystemStoreCatalog.sql). The
+		/// accented letters are there to tell two failures apart - a value that comes back with only those intact was converted to a
+		/// Latin-1 code page, where one that comes back garbled throughout was lost for some other reason.
+		/// </remarks>
+		[Test]
+		public void NonASCIIStringRoundTripsThroughWrites()
+		{
+			const string inserted = "中文 αβγ Привет é";
+			const string updated = "Ωμέγα 漢字 Ж ü";
+
+			using (SQLStoreConnection connection = Store.Connect())
+			{
+				CreateGroupedTable(connection);
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+					cursor.Insert(new object[] { 5, 3, inserted });
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the inserted row was not found");
+					Assert.That(cursor[2], Is.EqualTo(inserted), "the value did not survive the insert");
+					cursor[2] = updated;
+					cursor.Update();
+				}
+
+				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the updated row was not found");
+					Assert.That(cursor[2], Is.EqualTo(updated), "the value did not survive the update");
+				}
+
+				// This cursor names rows by V, so the delete's key condition carries the string rather than the integer key: the shape of
+				// every write to a catalog table whose primary key is a name (DAEUsers.ID, DAELoadedLibraries.Library_Name), which is
+				// where a non-ASCII D4 object name would be.
+				using (SQLStoreCursor cursor = OpenCursorKeyedOnValue(connection))
+				{
+					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
+					Assert.That(cursor.Next(), Is.True, "the row was not found by the cursor that names it by V");
+					cursor.Delete();
+				}
+
+				Assert.That(Count(connection, "select count(*) from T where G = 3"), Is.EqualTo(0), "the row named by its non-ASCII string key was not deleted");
+			}
+		}
+
+		/// <summary>
 		/// A boolean written through a store cursor comes back as a boolean, through both the values of an insert and the set list
 		/// of an update. The catalog declares its boolean columns tinyint, so a generated write passes 1 or 0 rather than a .NET
 		/// bool (SQLStoreConnection.NativeToParameter). On SQLite either mapping passes, because the provider stores a bool as an

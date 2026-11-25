@@ -57,7 +57,9 @@ namespace Alphora.Dataphor.DAE.Connection
 
 				if (parameter.Type is SQLStringType)
 				{
-					mSSQLParameter.SqlDbType = SqlDbType.VarChar;
+					// Unicode, not varchar: see the reasoning on GetParamTypeDescriptor, which has to say the same thing for the
+					// server-side cursor path and is where the decision and its measured cost are recorded.
+					mSSQLParameter.SqlDbType = SqlDbType.NVarChar;
 					mSSQLParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
 				else if (parameter.Type is SQLBooleanType)
@@ -108,7 +110,9 @@ namespace Alphora.Dataphor.DAE.Connection
 				}
 				else if (parameter.Type is SQLTextType)
 				{
-					mSSQLParameter.SqlDbType = SqlDbType.Text;
+					// ntext for the same reason as nvarchar above, and with none of the precedence cost: a text column can be
+					// neither compared nor indexed in T-SQL, so no plan can change shape over it.
+					mSSQLParameter.SqlDbType = SqlDbType.NText;
 				}
 				else if (parameter.Type is SQLDateType)
 				{
@@ -268,11 +272,54 @@ namespace Alphora.Dataphor.DAE.Connection
 			((SqlParameter)_command.Parameters["@paramdef"]).Value = result.ToString();
 		}
 
+		/// <summary>The longest nvarchar a type descriptor can name; past it the descriptor has to say max instead.</summary>
+		/// <remarks>
+		/// varchar counts bytes to 8,000 and nvarchar counts characters to 4,000, so a width that was describable as varchar(n)
+		/// is not always describable as nvarchar(n). A parameter past this is nvarchar(max), which has no length to be wrong.
+		/// </remarks>
+		private const int MaxNVarCharLength = 4000;
+
+		/// <summary>The nvarchar descriptor for a declared character length, as max where the length cannot be named.</summary>
+		/// <remarks>A length of zero or less is a caller that did not say how wide the value is; max is the only honest answer.</remarks>
+		private static string NVarCharDescriptor(int length)
+		{
+			return ((length <= 0) || (length > MaxNVarCharLength)) ? "nvarchar(max)" : "nvarchar(" + length.ToString() + ")";
+		}
+
 		/// <summary> Generates a SQL Server type descriptor given a parameter definition. </summary>
+		/// <remarks>
+		/// <para>
+		/// This is the type SQL Server is told the parameter has in the @paramdef string that sp_cursoropen is given, for the
+		/// server-side cursor path. PrepareParameters above says the same thing to the provider for the client-side path, and the
+		/// two must agree: which of the two a statement takes is decided by DetectCursorLocation, so a difference between them
+		/// would be a device whose behaviour depended on whether the statement began with "select".
+		/// </para>
+		/// <para>
+		/// Text goes as Unicode, which is what a varchar descriptor here cost: SQL Server converts a single-byte value to the
+		/// database's collation code page on its way in, and every character that code page has no room for becomes a question
+		/// mark, silently and with nothing left to read back. That fell on a correct schema, because this device accepts nvarchar,
+		/// nchar and ntext columns as D4 strings and SQLText (MSSQLDevice.FindScalarType) and the catalog store's own columns are
+		/// nvarchar throughout. A varchar column still holds only what a varchar column can hold - the server converts the
+		/// parameter on the way into it - so this costs a varchar schema no data, only, sometimes, a query plan.
+		/// </para>
+		/// </remarks>
+		// NOTE: accepted tradeoff - an nvarchar parameter compared against an indexed varchar column in a *SQL* collation
+		// (SQL_Latin1_General_CP1_CI_AS and its siblings) cannot seek, because nvarchar is the higher-precedence type and the
+		// server converts the column rather than the parameter. Measured 2026-11-25 on SQL Server 2016 SP1 Express LocalDB
+		// (13.0.4001.0), database collation SQL_Latin1_General_CP1_CI_AS, 200,000 rows, an index on a varchar(50) column, one
+		// row matched: a varchar parameter gave Index Seek and 3 logical reads, an nvarchar parameter gave Index Scan with
+		// CONVERT_IMPLICIT(nvarchar(50), column) and 625 logical reads - 208 times the reads. The same measurement against a
+		// column in a *Windows* collation (Latin1_General_CI_AS) gave Index Seek through GetRangeThroughConvert and 3 logical
+		// reads, so the regression is specific to SQL collations. Unicode was kept: a character lost on the way in cannot be
+		// recovered, where a slow query can be seen and fixed, and the alternative - sending Unicode only where the receiving
+		// column is nvarchar - means carrying each column's native type down to its parameter, which neither SQLParameter nor
+		// the SQL syntax tree the devices build has any room for today. The two remedies a deployment has are in
+		// docs/migration-notes.md. Revisit if a deployment reports the regression and neither remedy is open to it, and then
+		// look at plumbing the column's type rather than at going back to varchar.
 		private static string GetParamTypeDescriptor(SQLParameter parameter)
 		{
 			if (parameter.Type is SQLStringType)
-				return "varchar(" + ((SQLStringType)parameter.Type).Length.ToString() + ")";
+				return NVarCharDescriptor(((SQLStringType)parameter.Type).Length);
 			else if (parameter.Type is SQLBooleanType)
 				return "bit";
 			else if (parameter.Type is SQLByteArrayType)
@@ -307,7 +354,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			else if (parameter.Type is SQLBinaryType)
 				return "image";
 			else if (parameter.Type is SQLTextType)
-				return "text";		// Q: Should this be NText or text
+				return "ntext";		// ntext for the same reason as nvarchar above; the question this answers had stood here since 2008
 			else if ((parameter.Type is SQLDateType) || (parameter.Type is SQLTimeType) || (parameter.Type is SQLDateTimeType))
 				return "datetime";
 			else if (parameter.Type is SQLGuidType)

@@ -61,6 +61,7 @@
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="MSSQLDeviceTranslationGoldenTests.cs" />
     <Compile Include="MSSQLStoreConnectionStringTest.cs" />
+    <Compile Include="MSSQLTextParameterTest.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
     <Compile Include="NativeSessionCleanupTest.cs" />
     <Compile Include="NativeSessionKeepAliveTest.cs" />

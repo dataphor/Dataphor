@@ -433,9 +433,15 @@ namespace Alphora.Dataphor.DAE.Store
 			if (tempValue is bool)
 				return new SQLParameter(name, new SQLIntegerType(1), (bool)tempValue ? 1 : 0);
 			// NOTE: a string's declared size is that value's own length, so a back end that keys its plan cache on parameter type
-			// sees a separate entry per distinct length. Harmless on SQLite, which ignores the size. A fixed size would also work -
-			// DotNetCommand.SetParameters grows a declared size that is too small for the value - so if a server-backed store's plan
-			// cache ever matters, declare the column's width here rather than the value's.
+			// sees a separate entry per distinct length. Harmless on SQLite, which ignores the size. Measured on SQL Server 2016 SP1
+			// Express LocalDB (13.0.4001.0) on 2026-11-25, by device-mssql-string-parameters: one insert statement executed with
+			// strings of five distinct lengths left 6 cached plans behind, where the same five values with one fixed declared size
+			// left 2. So the churn is real, and bounded by the widest catalog text column, which is nvarchar(500). Left alone: the
+			// fix worth having is to declare the *column's* width, and this method is given a value and a name but no column, so
+			// reaching the width means carrying the table's schema in here. Rounding the declared length up to a bucket would also
+			// collapse the entries, but it would change what every store declares for every string on the strength of a plan-cache
+			// count that no deployment has reported as a cost. Revisit if one does, or when a store carries column metadata for
+			// another reason.
 			if (tempValue is string)
 				return new SQLParameter(name, new SQLStringType(((string)tempValue).Length), tempValue);
 			if (tempValue is int)
