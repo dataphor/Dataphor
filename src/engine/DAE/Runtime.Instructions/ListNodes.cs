@@ -945,11 +945,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		/// <summary>Whether this loop releases the value its loop variable's slot already holds before lending the slot the row or element the iterator owns.</summary>
 		/// <remarks>
-		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's own and
-		/// nothing else would free it. Two slots are not the loop's to release, and the compiler answers for both
-		/// where the loop is compiled - an enclosing loop over the same variable is already lending the slot, and a
-		/// const operand's slot, whose value may have been lent to the call by the argument that produced it and is
-		/// released, or not, at the call site (InstructionNodeBase.CleanupOperand).
+		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's
+		/// own and nothing else would free it. The two slots whose value is not the loop's to release, and why,
+		/// are at Compiler.LendForEachTarget, which is what sets this.
 		/// </remarks>
 		private bool _releaseTargetBeforeLending;
 		public bool ReleaseTargetBeforeLending
@@ -1096,11 +1094,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						stackIndex = Location;
 					try
 					{
-						// The slot is about to be lent a row this node owns, and the value the slot holds now is the slot's
-						// own, so this is where that value is released: once for the loop, because every Poke after this
-						// one displaces the row the loop is lending. The compiler says when the slot's value is not the
-						// loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the allocating form has
-						// just pushed.
+						// The loop's one release: the value the slot holds now is the slot's own, and every Poke after
+						// this one displaces the row the loop is lending. The compiler sets the flag only for a loop
+						// over a variable the enclosing block declared, and only where that slot's value is the loop's
+						// to release; see ReleaseTargetBeforeLending.
 						if (_releaseTargetBeforeLending)
 							program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 						using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
@@ -1171,11 +1168,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						try
 						{
-							// The slot is about to be lent elements the list owns, and the value the slot holds now is the
-							// slot's own, so this is where that value is released: once for the loop, because every Poke
-							// after this one displaces an element the list still owns. The compiler says when the slot's
-							// value is not the loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the
-							// allocating form has just pushed.
+							// The loop's one release: the value the slot holds now is the slot's own, and every Poke after
+							// this one displaces the element the list still owns. The compiler sets the flag only for a loop
+							// over a variable the enclosing block declared, and only where that slot's value is the loop's
+							// to release; see ReleaseTargetBeforeLending.
 							if (_releaseTargetBeforeLending)
 								program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 							for (int index = 0; index < tempValue.Count; index++)
@@ -1333,11 +1329,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		/// <summary>Whether this loop releases the value its loop variable's slot already holds before lending the slot the row or element the iterator owns.</summary>
 		/// <remarks>
-		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's own and
-		/// nothing else would free it. Two slots are not the loop's to release, and the compiler answers for both
-		/// where the loop is compiled - an enclosing loop over the same variable is already lending the slot, and a
-		/// const operand's slot, whose value may have been lent to the call by the argument that produced it and is
-		/// released, or not, at the call site (InstructionNodeBase.CleanupOperand).
+		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's
+		/// own and nothing else would free it. The two slots whose value is not the loop's to release, and why,
+		/// are at Compiler.LendForEachTarget, which is what sets this.
 		/// </remarks>
 		private bool _releaseTargetBeforeLending;
 		public bool ReleaseTargetBeforeLending
@@ -1438,11 +1432,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							stackIndex = Location;
 						try
 						{
-							// The slot is about to be lent a row this node owns, and the value the slot holds now is the
-							// slot's own, so this is where that value is released: once for the loop, because every Poke
-							// after this one displaces the row the loop is lending. The compiler says when the slot's value
-							// is not the loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the
-							// allocating form has just pushed.
+							// The loop's one release: the value the slot holds now is the slot's own, and every Poke after
+							// this one displaces the row the loop is lending. The compiler sets the flag only for a loop
+							// over a variable the enclosing block declared, and only where that slot's value is the loop's
+							// to release; see ReleaseTargetBeforeLending.
 							if (_releaseTargetBeforeLending)
 								program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 							using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
@@ -1497,11 +1490,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 							try
 							{
-								// The slot is about to be lent elements the list owns, and the value the slot holds now is
-								// the slot's own, so this is where that value is released: once for the loop, because
-								// every Poke after this one displaces an element the list still owns. The compiler says
-								// when the slot's value is not the loop's to release; see ReleaseTargetBeforeLending. A
-								// no-op on the null the allocating form has just pushed.
+								// The loop's one release: the value the slot holds now is the slot's own, and every Poke after
+								// this one displaces the element the list still owns. The compiler sets the flag only for a loop
+								// over a variable the enclosing block declared, and only where that slot's value is the loop's
+								// to release; see ReleaseTargetBeforeLending.
 								if (_releaseTargetBeforeLending)
 									program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 								for (int index = 0; index < tempValue.Count; index++)

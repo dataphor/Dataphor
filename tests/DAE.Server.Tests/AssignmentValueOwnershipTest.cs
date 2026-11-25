@@ -23,19 +23,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// loop orphaned whatever the variable already held (bug-a-loop-variable-stays-borrowed-after-the-loop). The
 	/// nested case is the one a fix to the second of those could have broken: two loops over one variable are legal
 	/// D4, and the inner loop displaces an element the outer loop's source still owns, so a release there would be a
-	/// release too many. AForEachOverAnOperandLeavesTheCallersValueAlone is the other case that release could have
-	/// broken, and the one that fixing it turned up: a loop over one of the enclosing operator's own operands, where
-	/// the value displaced may be the caller's. A const operand's value is never the loop's to release - the call site
-	/// settles whether the call owns it - and an in operand's is, because the loop writing the slot is what stops the
-	/// compiler promoting the operand to const and passing it by reference. The four cases from
+	/// release too many. AForEachOverAnOperandLeavesTheCallersValueAlone is the other case that release could have broken,
+	/// and the one that fixing it turned up: a loop over one of the enclosing operator's own operands, where the value
+	/// displaced may be the caller's. A const operand's value is never the loop's to release - the call site settles
+	/// whether the call owns it - and an in operand's is, because the loop writing the slot is what stops the compiler
+	/// promoting the operand to const and passing it by reference. The var shape of that case passes only because the
+	/// caller's slot owns the value it passed: where the caller passes its own loop variable instead, the release is a
+	/// release too many, which a plain assignment to such a parameter has done for longer than this rule has existed
+	/// (bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value). The four cases from
 	/// AConstOperandReleasesTheValueComputedForIt through ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the
-	/// operand half of the same rule: whether a call owns
-	/// the value it was handed for an operand is a property of the plan node that produced the argument - a node that
-	/// reads a stack slot, or a column of a row in one, can lend the value it already holds, where a literal, a
-	/// conversion or another call produces one nothing else holds - and not of the operand's modifier, which is all
-	/// the call used to look at (bug-an-operator-argument-is-released-by-the-wrong-owner). Reading ownership off the
-	/// modifier held a stream for the life of the session on every call with a const operand, which is most calls,
-	/// and released a row's own column out from under the row whenever one was read.
+	/// operand half of the same rule: whether a call owns the value it was handed for an operand is a property of the plan
+	/// node that produced the argument - a node that reads a stack slot, or a column of a row in one, can lend the value
+	/// it already holds, where a literal, a conversion or another call produces one nothing else holds - and not of the
+	/// operand's modifier, which is all the call used to look at
+	/// (bug-an-operator-argument-is-released-by-the-wrong-owner). Reading ownership off the modifier held a stream for the
+	/// life of the session on every call with a const operand, which is most calls, and released a row's own column out
+	/// from under the row whenever one was read.
 	/// ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated is the error path of that same operand
 	/// cleanup: it used to be skipped altogether when an argument of a call raised, because the execute shapes
 	/// evaluated their arguments before entering the try whose finally cleans them up, so every argument evaluated

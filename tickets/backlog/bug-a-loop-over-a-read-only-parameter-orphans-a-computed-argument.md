@@ -46,6 +46,8 @@ The defect is not really about `foreach`. It is that **a call's operand cleanup 
 - A borrowed slot restores what it displaced rather than nilling it, so the cleanup sees the value it expects. This changes what a loop variable holds after the loop, which is D4-visible and recorded in `docs/migration-notes.md`, so it needs a decision rather than a patch.
 - The compiler refuses `foreach` over a `const` parameter outright, which removes this shape rather than fixing the class - and is a D4 language change, so it would have to be routed as one.
 
+`fix/bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value` is the other defect at this seam and points the other way: there the callee releases a value the caller's loop still owns, because a `var` parameter's slot is an alias of the caller's and nothing tells the callee that the caller's slot was borrowed. Neither fix is the other's, but both turn on how a call and its operands agree about ownership.
+
 Whoever takes this should read [architecture/operand-ownership.md](../../docs/architecture/operand-ownership.md), which is where the operand half of the rule is written down, and the `NOTE:` at `CallNode.ReferencesAnEarlierOperandsSlot`, which records a second, unrelated leak in the same hand-back whose fix needs the same decision.
 
 ## What to pin
