@@ -157,18 +157,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public ListValue(IValueManager manager, Schema.IListType dataType) : base(manager, dataType) 
 		{
 			_list = new NativeList();
+			ValuesOwned = true;
 		}
 
+		// The given NativeList is assumed to belong to something else: this is the window every DataValue.FromNative*
+		// builds over a list a row, another list or a device already holds, so disposing it must release nothing. The
+		// three DataValue.Copy* overloads, and NativeMarshal, set the flag back where the list they pass is their own.
 		public ListValue(IValueManager manager, Schema.IListType dataType, NativeList list) : base(manager, dataType)
 		{
 			_list = list;
+			ValuesOwned = false;
 		}
 		
 		public ListValue(IValueManager manager, Schema.IListType dataType, IEnumerable sourceList) : base(manager, dataType)
 		{
 			_list = new NativeList();
+			ValuesOwned = true;
 			foreach (object objectValue in sourceList)
 				Add(objectValue);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (_list != null)
+			{
+				if (ValuesOwned)
+					Clear();
+				_list = null;
+			}
+			base.Dispose(disposing);
 		}
 
 		private NativeList _list;
@@ -676,7 +693,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else
 				{
 					_list.DataTypes[index] = DataType.ElementType;
-					_list.Values[index] = value;
+					_list.Values[index] = DataValue.CopyNative(Manager, DataType.ElementType, value);
 				}
 			}
 		}
@@ -689,6 +706,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
+		// A list owns its elements, so it copies what it is given and the caller keeps owning what it passed - the same
+		// contract Row's column setter has, and the reason both kinds of element are released once and only once.
 		public int Add(object tempValue)
 		{
 			int index = _list.DataTypes.Count;
@@ -701,7 +720,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 			{
 				_list.DataTypes.Add(DataType.ElementType);
-				_list.Values.Add(tempValue);
+				_list.Values.Add(DataValue.CopyNative(Manager, DataType.ElementType, tempValue));
 			}
 			return index;
 		}
@@ -717,7 +736,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 			{
 				_list.DataTypes.Insert(index, DataType.ElementType);
-				_list.Values.Insert(index, tempValue);
+				_list.Values.Insert(index, DataValue.CopyNative(Manager, DataType.ElementType, tempValue));
 			}
 		}
 		

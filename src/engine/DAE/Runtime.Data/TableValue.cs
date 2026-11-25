@@ -15,6 +15,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using System.Collections.Generic;
 	using System.Text;
 
+	// NOTE: this class deliberately has no Dispose(bool), where Row and ListValue release the columns and elements they
+	// hold when ValuesOwned is set. A TableValue is a window onto a NativeTable something else holds - a D4 table
+	// variable's rows live in the memory device and are released when that device drops the native table
+	// (MemoryDevice, nativeTable.Drop) - and the one place this class assumes ownership is the AsNative setter, which
+	// drops the table it replaces. Measured 2026-11-24: a table-valued variable holding stream-backed columns leaks
+	// nothing, so there is no leak here to close. DataValue.CopyAs, Copy() and Copy(manager) do build a TableValue with
+	// ValuesOwned = true over a native table they allocated, and its disposal therefore does nothing; that is the gap a
+	// reader of the ValuesOwned contract will notice, and it is recorded here rather than closed, because dropping a
+	// native table a device owns is a far worse failure than holding one.
 	public class TableValue : DataValue
 	{
 		public TableValue(IValueManager manager, Schema.ITableType tableType, NativeTable table) : base(manager, tableType)

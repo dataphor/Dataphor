@@ -27,6 +27,7 @@
     <Compile Include="ConnectionKeepAliveTest.cs" />
     <Compile Include="ConnectionSecurityModeTest.cs" />
     <Compile Include="ConnectionTransactionLevelTest.cs" />
+    <Compile Include="ContainerValueOwnershipTest.cs" />
     <Compile Include="ContractParityTest.cs" />
     <Compile Include="ConveyorTest.cs" />
     <Compile Include="CorpusLibrary.cs" />

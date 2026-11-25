@@ -325,11 +325,12 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// NOTE: a DEBUG-only check here that the server is holding the same number of streams as it was when this
 		// program started would catch a whole class of defect - a value the engine leaks because nothing released it -
 		// at the moment it reappeared, and the count is already readable (ServerStreamManager.StreamCount, which the
-		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because two leaks would
-		// still fire it rather than anything new: an operator argument released by the wrong owner
-		// (bug-an-operator-argument-is-released-by-the-wrong-owner), and a list value releasing none of its elements,
-		// which costs one stream per element of any list of Binary or Graphic
-		// (bug-a-list-value-never-releases-its-elements). Add it once both have landed.
+		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because three leaks
+		// measured since would still fire it rather than anything new: an argument orphaned when a later one raises
+		// (bug-an-argument-is-orphaned-when-a-later-one-raises), a stream-backed value written into a table and never
+		// given back until the table is dropped (bug-a-stored-binary-is-never-given-back), and a loop variable the
+		// compiler leaves marked borrowed after its loop, so that assignments to it afterwards release nothing
+		// (bug-a-loop-variable-stays-borrowed-after-the-loop). Add it once all three have landed.
 		public void Stop(DataParams paramsValue)
 		{
 			try

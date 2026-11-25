@@ -45,8 +45,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			ListValue list = new ListValue(program.ValueManager, ListType);
-			for (int index = 0; index < NodeCount; index++)
-				list.Add(Nodes[index].Execute(program));
+			try
+			{
+				for (int index = 0; index < NodeCount; index++)
+				{
+					object element = Nodes[index].Execute(program);
+					list.Add(element);
+
+					// The list copied the element, so the value this node produced is ours to release. Nothing asks a
+					// selector's element nodes to lend (only the const operand branch asks), so the guard is here for
+					// whoever changes that rather than for a path that runs today - without it, lending would mean
+					// releasing a value a stack slot still holds.
+					if (!Nodes[index].ReturnsByReference)
+						DataValue.DisposeValue(program.ValueManager, element);
+				}
+			}
+			catch
+			{
+				// An element node that raises leaves the elements already copied in a list nothing else will release.
+				list.Dispose();
+				throw;
+			}
 			return list;
 		}
 		
@@ -69,8 +88,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// NOTE: there is deliberately no SetByReference override to go with this. Nothing sets ByReference today, so
 		// this node always copies the element and always answers false; the override is here so that whoever does set
 		// the field meets the ownership rule rather than a silent leak - a borrowed element handed to a const operand
-		// has to be declared, or the call releases a value the list still holds. The lifetime of a list's elements
-		// themselves is bug-a-list-value-never-releases-its-elements, not this node's.
+		// has to be declared, or the call releases a value the list still holds, which a list now does release.
 		public override bool ReturnsByReference { get { return ByReference; } }
 		
 		public override void DetermineDataType(Plan plan)
@@ -742,7 +760,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						if (!set.Contains(program.ValueManager, sourceList[index]))
 						{
-							set.Insert(program.ValueManager, sourceList[index]);
+							// The set releases every element it holds when it is dropped, so what goes into it is a copy
+							// rather than the source list's own element: the source list still owns that, and the result
+							// takes a copy of its own. Handing the set the element itself released, on the drop below, a
+							// value both lists were still pointing at.
+							set.Insert(program.ValueManager, DataValue.CopyValue(program.ValueManager, sourceList[index]));
 							result.Add(sourceList[index]);
 						}
 					}
@@ -824,7 +846,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
 					while (CursorNext(program, cursor))
-						listValue.Add(CursorSelect(program, cursor));
+					{
+						// The list copies the row, so the row the cursor selected is ours to release.
+						using (IRow row = CursorSelect(program, cursor))
+							listValue.Add(row);
+					}
 
 					return listValue;
 				}
@@ -845,7 +871,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
 					while (sourceTable.Next())
 					{
-						listValue.Add(sourceTable.Select());
+						using (IRow row = sourceTable.Select())
+							listValue.Add(row);
 					}
 					return listValue;
 				}
@@ -1012,23 +1039,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										var returnResult = Nodes[1].Execute(program);
 										if (returnResult != null)
 										{
-											if (returnResult is IList)
+											try
 											{
-												try
-												{
+												// The list copies what it is given, in both shapes: a many-valued return goes in element by
+												// element and a single-valued one whole. Either way the value the return expression produced is
+												// this node's to release - the many-valued shape always released it, and the single-valued one
+												// used to hand it to the list instead, which then released none of it.
+												if (returnResult is IList)
 													for (int resultIndex = 0; resultIndex < ((IList)returnResult).Count; resultIndex++)
-													{
-														listValue.Add(DataValue.CopyValue(program.ValueManager, ((IList)returnResult)[resultIndex]));
-													}
-												}
-												finally
-												{
-													DataValue.DisposeValue(program.ValueManager, returnResult);
-												}
+														listValue.Add(((IList)returnResult)[resultIndex]);
+												else
+													listValue.Add(returnResult);
 											}
-											else
+											finally
 											{
-												listValue.Add(returnResult);
+												DataValue.DisposeValue(program.ValueManager, returnResult);
 											}
 										}
 									}
@@ -1077,23 +1102,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									var returnResult = Nodes[1].Execute(program);
 									if (returnResult != null)
 									{
-										if (returnResult is IList)
+										try
 										{
-											try
-											{
+											// The list copies what it is given, in both shapes: a many-valued return goes in element by
+											// element and a single-valued one whole. Either way the value the return expression produced is
+											// this node's to release - the many-valued shape always released it, and the single-valued one
+											// used to hand it to the list instead, which then released none of it.
+											if (returnResult is IList)
 												for (int resultIndex = 0; resultIndex < ((IList)returnResult).Count; resultIndex++)
-												{
-													listValue.Add(DataValue.CopyValue(program.ValueManager, ((IList)returnResult)[resultIndex]));
-												}
-											}
-											finally
-											{
-												DataValue.DisposeValue(program.ValueManager, returnResult);
-											}
+													listValue.Add(((IList)returnResult)[resultIndex]);
+											else
+												listValue.Add(returnResult);
 										}
-										else
+										finally
 										{
-											listValue.Add(returnResult);
+											DataValue.DisposeValue(program.ValueManager, returnResult);
 										}
 									}
 								}
@@ -1102,11 +1125,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
+							// The slot was lent an element the list owns, so it is nulled rather than released, and nulled on
+							// every path out - which is what the cursor branch above has always done. The release below is the
+							// list's, and the two together release each element once.
+							program.Stack.Poke(stackIndex, null);
 							if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
 								program.Stack.Pop();
 						}
 					}
 					catch (BreakError) {}
+					finally
+					{
+						// This node evaluated the list, so this node releases it. Nothing asks a foreach's source node to
+						// lend - only the const operand branch asks - so reading a list variable here produced a copy; the
+						// guard is for whoever changes that rather than for a path that runs today.
+						if (!Nodes[0].ReturnsByReference)
+							DataValue.DisposeValue(program.ValueManager, tempValue);
+					}
 				}
 			}
 
@@ -1350,11 +1385,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
+								// The slot was lent an element the list owns, so it is nulled rather than released, and nulled
+								// on every path out - which is what the cursor branch above has always done. The release below
+								// is the list's, and the two together release each element once.
+								program.Stack.Poke(stackIndex, null);
 								if ((_expression.VariableName == String.Empty) || _expression.IsAllocation)
 									program.Stack.Pop();
 							}
 						}
 						catch (BreakError) {}
+						finally
+						{
+							// This node evaluated the list, so this node releases it. Nothing asks a foreach's source node
+							// to lend - only the const operand branch asks - so reading a list variable here produced a
+							// copy; the guard is for whoever changes that rather than for a path that runs today.
+							if (!Nodes[0].ReturnsByReference)
+								DataValue.DisposeValue(program.ValueManager, tempValue);
+						}
 					}
 				}
 

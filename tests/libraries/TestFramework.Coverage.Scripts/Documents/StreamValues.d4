@@ -23,6 +23,8 @@
 		- a Binary or Graphic variable with a value holds one stream; one holding nil holds none
 		- a variable initialised from another holds a second stream, which references the first rather than copying
 		  its bytes
+		- a list of Binary or Graphic holds one stream per element, and gives all of them back when it goes out of
+		  scope; so does a list of rows with such a column, a row with a list column and a list of lists
 		- reading a Binary or Graphic *table column* back into a variable takes out no stream of its own, and a stored
 		  value is not changed by a later write through the variable it was inserted from. Variables are where the
 		  sharing and the release happen, which is why every case below is written over variables rather than rows.
@@ -360,6 +362,275 @@ begin
 	if StreamCount() <> LBefore then
 		raise Error('The nil case left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
 end;
+
+/*
+	Lists.
+
+	A list holds one stream per stream-backed element, exactly as a variable of the element type does, and gives every
+	one of them back when it goes out of scope. That release used to be missing altogether - a list value had no
+	disposal of its own, so every element of every list of Binary or Graphic was held for the life of the session, and
+	no loop was needed to provoke it: evaluating a list and throwing it away cost one stream per element
+	(bug-a-list-value-never-releases-its-elements). The blocks below are the shapes that were measured against that
+	defect, each of which left one stream per element behind: a list in a variable, a list evaluated and discarded, the
+	three forms of foreach over a list, a list of rows, a row with a list column, a list of lists, an element read back
+	into a variable, an assignment over a list variable, and a list returned from an operator.
+
+	Add and Insert are here for the other half of the same rule - a list copies what it is given, and the caller keeps
+	owning what it passed. Those two used to take a plain value as it stood while the call that handed it over released
+	it afterwards, so the element was in the list and the list's count said so, but reading it failed with
+	"StreamID (n) not found". Both blocks therefore assert the value read back and not only the count.
+
+	The loop variable of a foreach over a list is nil once the loop has finished, which the block below asserts with
+	IsNil - a comparison with a nil operand yields nil and would not fire. It is lent the list's own element rather than
+	given a copy, so the slot is nulled on the way out, which is what a foreach over a cursor has always done.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour) };
+		if StreamCount() <> LBefore + 2 then
+			raise Error('A list of two Binary values held ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than two.');
+		if LL.Count() <> 2 then
+			raise Error('A list of two Binary values reported ' + ToString(LL.Count()) + ' element(s).');
+		if LL[0].Value <> LEight then
+			raise Error('The first element of a list of Binary did not read back as the value selected.');
+		if LL[1].Value <> LFour then
+			raise Error('The second element of a list of Binary did not read back as the value selected.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list of two Binary values left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// One element rather than two, because a release that ran only for the last element would balance the block above.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight) };
+		if StreamCount() <> LBefore + 1 then
+			raise Error('A list of one Binary value held ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than one.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list of one Binary value left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// A list that is evaluated and thrown away: no list variable is declared at all, so nothing but the list itself can
+// release the elements.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LI : Integer := ({ Binary(LEight), Binary(LFour) }).Count();
+		if LI <> 2 then
+			raise Error('A list selector handed straight to Count() reported ' + ToString(LI) + ' element(s).');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list that was evaluated and discarded left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// foreach over a list variable, with a loop variable the script declared itself - the one form that can see the slot
+// after the loop.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour) };
+		var LB : Binary;
+		var LCount : Integer := 0;
+		foreach LB in LL do
+			LCount := LCount + 1;
+		if LCount <> 2 then
+			raise Error('A foreach over a list of two ran ' + ToString(LCount) + ' time(s).');
+		if not(IsNil(LB)) then
+			raise Error('A foreach over a list left its loop variable holding a value; the variable is lent the list''s own element, so it must be nil once the loop has finished.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A foreach over a list variable left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// The same, with the loop allocating its own variable.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour) };
+		var LCount : Integer := 0;
+		foreach var LB in LL do
+			LCount := LCount + 1;
+		if LCount <> 2 then
+			raise Error('A foreach allocating its own variable ran ' + ToString(LCount) + ' time(s) over a list of two.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A foreach allocating its own variable left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// And over a list selector rather than a variable, so that nothing holds the list but the loop.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LCount : Integer := 0;
+		foreach var LB in { Binary(LEight), Binary(LFour) } do
+			LCount := LCount + 1;
+		if LCount <> 2 then
+			raise Error('A foreach over a list selector ran ' + ToString(LCount) + ' time(s) over a list of two.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A foreach over a list selector left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// A row with a list column, and a list of rows: the two shapes in which one container holds the other, each of which
+// has to release through the one in the middle.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LR : row { L : list(Binary) } := row { { Binary(LEight), Binary(LFour) } L };
+		if (L from LR).Count() <> 2 then
+			raise Error('A list column of a row reported ' + ToString((L from LR).Count()) + ' element(s).');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A row with a list column left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(row { B : Binary }) := { row { Binary(LEight) B }, row { Binary(LFour) B } };
+		if (B from LL[1]).Value <> LFour then
+			raise Error('The second row of a list of rows did not read back as the value selected.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list of rows left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(list(Binary)) := { { Binary(LEight) }, { Binary(LFour) } };
+		if LL[1][0].Value <> LFour then
+			raise Error('The element of the second list of a list of lists did not read back as the value selected.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list of lists left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// Reading an element out into a variable of its own: the variable owns its copy and the list still owns the element.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour) };
+		var LB : Binary := LL[0];
+		if LB.Value <> LEight then
+			raise Error('An element read out of a list was not the value selected.');
+		if LL[0].Value <> LEight then
+			raise Error('Reading an element out of a list changed the element.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Reading an element out of a list left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// Assignment over a list variable: the slot releases the list it displaced, which now means that list's elements too.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight) };
+		LL := { Binary(LFour) };
+		if LL.Count() <> 1 then
+			raise Error('A list assigned over a list of one held ' + ToString(LL.Count()) + ' element(s).');
+		if LL[0].Value <> LFour then
+			raise Error('A list assigned over another did not read back as the value assigned.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Assigning over a list variable left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+/*
+	Add and Insert. Both hand a value to a list that the call then releases, which is what used to leave the list
+	pointing at a released stream: the count said the element was there and reading it raised "StreamID (n) not found".
+	The element already in the list is read back as well, because a copy taken in the wrong place would be as likely to
+	disturb that one.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight) };
+		LL.Add(Binary(LFour));
+		if LL.Count() <> 2 then
+			raise Error('Adding to a list of one left ' + ToString(LL.Count()) + ' element(s).');
+		if LL[1].Value <> LFour then
+			raise Error('An element added to a list did not read back as the value added.');
+		if LL[0].Value <> LEight then
+			raise Error('Adding to a list changed the element it already held.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Adding to a list left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight) };
+		LL.Insert(Binary(LFour), 0);
+		if LL.Count() <> 2 then
+			raise Error('Inserting into a list of one left ' + ToString(LL.Count()) + ' element(s).');
+		if LL[0].Value <> LFour then
+			raise Error('An element inserted into a list did not read back as the value inserted.');
+		if LL[1].Value <> LEight then
+			raise Error('Inserting into a list changed the element it already held.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Inserting into a list left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+/*
+	Distinct over a list of stream-backed values. The operator builds a set to find the duplicates with, and that set
+	releases every element it holds when it is dropped, so what goes into it has to be a copy rather than the source
+	list's own element. Given the element itself, the drop released a value both the source list and the result were
+	still pointing at: before a list released its elements that produced a result whose elements read as released
+	streams, and afterwards a second release of one stream, reported as "StreamID (n) not found". Both lists are read
+	back here for that reason.
+
+	What this block deliberately does not assert is the number of elements the result has. Distinct does not in fact
+	remove the duplicate from a list of Binary or Graphic - the set hashes a value by where it is stored rather than by
+	what it contains, so two equal values never meet to be compared - and that is
+	bug-distinct-leaves-duplicate-pictures-in-a-list, met while writing this block and filed with its measurement. The
+	count is left unasserted rather than pinned to today's wrong answer, so that this block keeps saying something true
+	when that defect is fixed.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour), Binary(LEight) };
+		var LD : list(Binary) := LL.Distinct();
+		if LD.Count() < 2 then
+			raise Error('Distinct over a list of three held ' + ToString(LD.Count()) + ' element(s); the two distinct values must both be in it.');
+		if LD[0].Value <> LEight then
+			raise Error('The first element of a distinct list did not read back as the value selected.');
+		if LD[1].Value <> LFour then
+			raise Error('The second element of a distinct list did not read back as the value selected.');
+		if LL[2].Value <> LEight then
+			raise Error('Distinct released an element of the list it read.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Distinct over a list left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// A list an operator built and returned: the result is handed to the caller rather than released, and the caller's
+// variable is what releases it.
+create operator TestBinaryList(const AValue : String) : list(Binary)
+begin
+	result := { Binary(AValue), Binary(AValue) };
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := TestBinaryList(LEight);
+		if LL.Count() <> 2 then
+			raise Error('A list returned from an operator held ' + ToString(LL.Count()) + ' element(s) rather than two.');
+		if LL[1].Value <> LEight then
+			raise Error('An element of a list returned from an operator did not read back as the value the operator selected.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list returned from an operator left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+drop operator TestBinaryList(String);
 
 /*
 	Graphic. One pass rather than the full set above, and that is not a shortcut: Binary and Graphic are declared side

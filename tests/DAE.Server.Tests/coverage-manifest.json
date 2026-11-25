@@ -106,7 +106,7 @@
 { "script": "SpecificAssignment", "status": "pass" },
 { "script": "SpecifyClause", "status": "pass" },
 { "script": "StreamAllocation", "status": "known-failure", "ticket": "test-pre-3-1-scripts-policy", "error": "Object \"Coverage\" not found" },
-{ "script": "StreamValues", "status": "pass", "note": "the D4-visible half of the Streams area: Binary and Graphic values through select, read-back, copy, copy-on-write in both directions, equality over 21,600-byte values, a rolled-back transaction and nil, each block asserting on Diagnostics.StreamCount() that the server is holding nothing extra afterwards. The answer to StreamAllocation's 2004 request, under a new name because that script is a known failure for an unrelated reason and test-pre-3-1-scripts-policy owns it" },
+{ "script": "StreamValues", "status": "pass", "note": "the D4-visible half of the Streams area: Binary and Graphic values through select, read-back, copy, copy-on-write in both directions, equality over 21,600-byte values, a rolled-back transaction, nil, and the shapes in which a list holds such values - a list of Binary, of rows, of lists, the three forms of foreach over one, Add, Insert and Distinct - each block asserting on Diagnostics.StreamCount() that the server is holding nothing extra afterwards. The answer to StreamAllocation's 2004 request, under a new name because that script is a known failure for an unrelated reason and test-pre-3-1-scripts-policy owns it" },
 { "script": "StringLibrary", "status": "pass" },
 { "script": "SystemCatalog", "status": "pass" },
 { "script": "SystemCatalogOperators", "status": "pass" },

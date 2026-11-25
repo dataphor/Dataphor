@@ -41,6 +41,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return _nativeSet.CompareEqual(_nativeSet._manager, left, right);
 			}
 
+			// NOTE: this hashes a native value by what .NET makes of it, which is its identity rather than its contents
+			// for every value the engine does not keep inline - a StreamID names a stream, and a NativeRow, NativeList
+			// or NativeTable hashes by reference. Two equal values of such a type therefore land in different buckets
+			// and CompareEqual never sees them, so a set of them does not deduplicate at all: measured 2026-11-24 over
+			// Distinct of a list of Binary, which returns the duplicate. That is
+			// bug-distinct-leaves-duplicate-pictures-in-a-list; a set over a native scalar (String, Integer) hashes by
+			// value and is unaffected.
 			public int GetHashCode(object obj)
 			{
 				return obj.GetHashCode();

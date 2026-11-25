@@ -452,19 +452,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							// NOTE: unlike the cursor branch above, this one does not null the slot it borrowed, so a loop over
-							// a variable the script declared leaves that variable holding the list's last element - a value the
-							// list owns - and the scope that declared the variable then releases it (Stack.ReleaseAbove, or the
-							// statement the compiler used to append to the end of the block, which did the same on the one path
-							// it covered). Nothing breaks today, because this branch never releases the list it evaluated and a
-							// list releases none of its elements either, so the element is released once in total; measured over
-							// seven shapes, all of which ran. Both of those are bug-a-list-value-never-releases-its-elements, and
-							// closing either without nulling the slot here releases that element twice.
+							// The slot was lent an element the list owns, so it is nulled rather than released, and nulled on
+							// every path out - which is what the cursor branch above has always done. A loop over a variable
+							// the script declared itself therefore leaves that variable nil, where it used to hold the list's
+							// last element; the release below is the list's, and the two together release each element once.
+							program.Stack.Poke(stackIndex, null);
 							if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
 								program.Stack.Pop();
 						}
 					}
 					catch (BreakError) {}
+					finally
+					{
+						// This node evaluated the list, so this node releases it. Nothing asks a foreach's source node to
+						// lend - only the const operand branch asks - so reading a list variable here produced a copy; the
+						// guard is for whoever changes that rather than for a path that runs today.
+						if (!Nodes[0].ReturnsByReference)
+							DataValue.DisposeValue(program.ValueManager, tempValue);
+					}
 				}
 			}
 			return null;

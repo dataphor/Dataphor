@@ -255,12 +255,18 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			NativeListValue nativeList = nativeValue as NativeListValue;
 			if (nativeList != null)
 			{
-				// Create and fill the list
+				// Create and fill the list. The NativeList is this method's own - the constructor taking one is used only
+				// to get nil-ness from a null Elements - so the list owns its elements, and each element value the list
+				// copies is disposed here rather than handed over.
 				ListValue list = new ListValue(process.ValueManager, (ListType)NativeValueToDataType(process, nativeValue), nativeList.Elements == null ? null : new NativeList());
+				list.ValuesOwned = true;
 				if (nativeList.Elements != null && nativeList.Elements.Length > 0)
 				{
 					for (int index = 0; index < nativeList.Elements.Length; index++)
-						list.Add(NativeValueToDataValue(process, nativeList.Elements[index]));
+					{
+						using (IDataValue element = NativeValueToDataValue(process, nativeList.Elements[index]))
+							list.Add(element);
+					}
 				}
 
 				return list;
