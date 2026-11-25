@@ -315,7 +315,9 @@ namespace Alphora.Dataphor.DAE.Connection
 		// column is nvarchar - means carrying each column's native type down to its parameter, which neither SQLParameter nor
 		// the SQL syntax tree the devices build has any room for today. The two remedies a deployment has are in
 		// docs/migration-notes.md. Revisit if a deployment reports the regression and neither remedy is open to it, and then
-		// look at plumbing the column's type rather than at going back to varchar.
+		// look at plumbing the column's type rather than at going back to varchar. The first remedy is not open to a table the
+		// device itself created: its own DDL for a D4 string column is varchar(n) (SQLString.InternalNativeDomainName), which
+		// is a second half of this defect rather than a schema choice - bug-mssql-device-text-columns-lose-characters owns it.
 		private static string GetParamTypeDescriptor(SQLParameter parameter)
 		{
 			if (parameter.Type is SQLStringType)

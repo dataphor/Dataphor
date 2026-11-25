@@ -464,17 +464,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// A string whose characters would end a quoted literal early - single quotes, a quote beside a statement separator, a
-		/// closing parenthesis and an embedded NUL - survives an insert, an update, a key condition that names the row by it and
-		/// a delete. The generated writes pass values as parameters; the quote-doubled literals they replaced cannot carry a NUL,
-		/// because the provider prepares the statement from text that the NUL ends.
+		/// The sequence both string round-trip cases run: insert a row carrying <paramref name="inserted"/>, read it back,
+		/// update it to <paramref name="updated"/>, read that back, and delete the row through a cursor that names rows by their
+		/// string value rather than by the integer key - so that a generated insert, a generated update's set list and a generated
+		/// key condition each carry the string. What makes a case is the pair of strings; what each pair is for is on the test
+		/// that passes it.
 		/// </summary>
-		[Test]
-		public void AwkwardStringRoundTripsThroughWrites()
+		private void AssertStringRoundTripsThroughWrites(string inserted, string updated)
 		{
-			const string inserted = "a';'b');'c\0d";
-			const string updated = "x'';'y\0z";
-
 			using (SQLStoreConnection connection = Store.Connect())
 			{
 				CreateGroupedTable(connection);
@@ -498,7 +495,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					Assert.That(cursor[2], Is.EqualTo(updated), "the value did not survive the update");
 				}
 
-				// This cursor names rows by V, so the delete's key condition carries the string rather than the integer key.
 				using (SQLStoreCursor cursor = OpenCursorKeyedOnValue(connection))
 				{
 					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
@@ -508,6 +504,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				Assert.That(Count(connection, "select count(*) from T where G = 3"), Is.EqualTo(0), "the row named by its string key was not deleted");
 			}
+		}
+
+		/// <summary>
+		/// A string whose characters would end a quoted literal early - single quotes, a quote beside a statement separator, a
+		/// closing parenthesis and an embedded NUL - survives an insert, an update, a key condition that names the row by it and
+		/// a delete. The generated writes pass values as parameters; the quote-doubled literals they replaced cannot carry a NUL,
+		/// because the provider prepares the statement from text that the NUL ends.
+		/// </summary>
+		[Test]
+		public void AwkwardStringRoundTripsThroughWrites()
+		{
+			AssertStringRoundTripsThroughWrites("a';'b');'c\0d", "x'';'y\0z");
 		}
 
 		/// <summary>
@@ -526,44 +534,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void NonASCIIStringRoundTripsThroughWrites()
 		{
-			const string inserted = "中文 αβγ Привет é";
-			const string updated = "Ωμέγα 漢字 Ж ü";
-
-			using (SQLStoreConnection connection = Store.Connect())
-			{
-				CreateGroupedTable(connection);
-
-				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
-					cursor.Insert(new object[] { 5, 3, inserted });
-
-				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
-				{
-					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
-					Assert.That(cursor.Next(), Is.True, "the inserted row was not found");
-					Assert.That(cursor[2], Is.EqualTo(inserted), "the value did not survive the insert");
-					cursor[2] = updated;
-					cursor.Update();
-				}
-
-				using (SQLStoreCursor cursor = OpenGroupedCursor(connection))
-				{
-					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
-					Assert.That(cursor.Next(), Is.True, "the updated row was not found");
-					Assert.That(cursor[2], Is.EqualTo(updated), "the value did not survive the update");
-				}
-
-				// This cursor names rows by V, so the delete's key condition carries the string rather than the integer key: the shape of
-				// every write to a catalog table whose primary key is a name (DAEUsers.ID, DAELoadedLibraries.Library_Name), which is
-				// where a non-ASCII D4 object name would be.
-				using (SQLStoreCursor cursor = OpenCursorKeyedOnValue(connection))
-				{
-					cursor.SetRange(new object[] { 3 }, new object[] { 3 });
-					Assert.That(cursor.Next(), Is.True, "the row was not found by the cursor that names it by V");
-					cursor.Delete();
-				}
-
-				Assert.That(Count(connection, "select count(*) from T where G = 3"), Is.EqualTo(0), "the row named by its non-ASCII string key was not deleted");
-			}
+			AssertStringRoundTripsThroughWrites("中文 αβγ Привет é", "Ωμέγα 漢字 Ж ü");
 		}
 
 		/// <summary>
