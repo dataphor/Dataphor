@@ -30,7 +30,7 @@ python tools/coverage-report/coverage_report.py artifacts/coverage/part1 artifac
 python -m unittest discover -s tools/coverage-report               # its tests
 ```
 
-One Cobertura file of this repository is about 24 MB whatever the run measured (its bulk is the line list, which does not grow with the number of tests), so a three-part run gives roughly 75 MB of XML. Measured 2026-11-21: 6.6 s and a 199 MB memory peak to read one of them, of which 8 MB is retained - the parse tree of each input is freed before the next is read, so the peak does not grow with the number of parts.
+One Cobertura file of this repository is about 24 MB whatever the run measured (its bulk is the line list, which does not grow with the number of tests), so a run of the whole suite gives roughly 24 MB per part - about 120 MB over the five parts the root `AGENTS.md` lists today. Measured 2026-11-21: 6.6 s and a 199 MB memory peak to read one of them, of which 8 MB is retained - the parse tree of each input is freed before the next is read, so the peak does not grow with the number of parts.
 
 Each positional argument is a Cobertura file or a folder, which is searched recursively for `*.cobertura.xml`. Findings go to standard output, one per line, then a summary line; the report goes to standard output too unless `-o` names a file. A report or JSON file written with `-o`/`--json` is UTF-8 with CRLF line endings, as the repository’s tracked text files have.
 
@@ -59,9 +59,9 @@ Either one exits 1 and **suppresses the report**, because a rollup missing a sub
 
 ## Merging several runs
 
-The suite is run in three parts, so the tool takes several reports and merges them: the union keyed on assembly, class, source file and line number, with a line counted covered if **any** report hit it. Reports of one build agree exactly about which lines are coverable — verified over two independent runs where every class common to both had an identical line set. So a disagreement means the inputs were measured against *different* builds, which is what a stale report mixed with a fresh one looks like, and the tool prints `line sets differ: <assembly>/<class>` and exits 1 rather than produce a number nobody can trust. Delete the old results directory and collect again.
+The suite is run in parts (five today, listed in the root `AGENTS.md`), so the tool takes several reports and merges them: the union keyed on assembly, class, source file and line number, with a line counted covered if **any** report hit it. Reports of one build agree exactly about which lines are coverable — verified over two independent runs where every class common to both had an identical line set. So a disagreement means the inputs were measured against *different* builds, which is what a stale report mixed with a fresh one looks like, and the tool prints `line sets differ: <assembly>/<class>` and exits 1 rather than produce a number nobody can trust. Delete the old results directory and collect again.
 
-An assembly that one part loads and another does not is normal: the union covers it, and the report says how many input files were merged so a reader can tell a one-part run from a three-part one. An assembly on a list that no input measured shows as `not in this run`.
+An assembly that one part loads and another does not is normal: the union covers it, and the report says how many input files were merged so a reader can tell a one-part run from a whole-suite one. An assembly on a list that no input measured shows as `not in this run`.
 
 ## The map: `areas.json`
 
