@@ -895,8 +895,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(plan);
-
 			if (Nodes[1].DataType.Is(Nodes[0].DataType))
 			{
 				_dataType = Nodes[0].DataType;
@@ -928,6 +926,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
+			// base.DetermineDataType last rather than first. The const branch of InstructionNodeBase.DetermineDataType is
+			// the only place that asks an argument node to lend the value it already holds rather than copy it
+			// (docs/architecture/operand-ownership.md), and IfNil declares both of its operands const, so the ask has to
+			// reach whichever node sits in the operand slot once the rewrite above has run. Asked first, the loan was
+			// granted to the node underneath a conversion interposed afterwards, and a row conversion is built out of
+			// RowExtendNode (Compiler.ConvertRowNode through EmitRedefineNode), which disposes the source row it is handed -
+			// so IfNil over two rows whose columns differ by a convertible type destroyed the row in the variable it was
+			// lent, and the next read of that variable failed. It is the same shape, and the same move, as the one in
+			// RowEqualNode (RowComparisonNodes.cs).
+			base.DetermineDataType(plan);
+
 			_dataType = Nodes[0].DataType;
 		}
 		
@@ -941,12 +950,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// </remarks>
 		public override object InternalExecute(Program program)
 		{
-			// The node read is the one left in Nodes[index] at run time, not the one base.DetermineDataType asked to lend:
-			// the DetermineDataType override above may replace either argument node afterwards. Compiler.Upcast returns the
-			// node unchanged today, but Compiler.ConvertNode genuinely wraps it in a conversion call - which is still correct,
-			// and for the reason the rule exists: a conversion computes a new value from the one it was lent, its own const
-			// cleanup leaves the lent value alone, and it answers ReturnsByReference false, so what arrives here is a value
-			// this node owns and must release.
+			// The node read is the one left in Nodes[index], which is also the one base.DetermineDataType asked to lend: the
+			// override above rewrites its arguments before it asks, so the two are the same node whether or not a conversion
+			// was interposed. A conversion answers ReturnsByReference false and what arrives here is then this node's own to
+			// release; a plain stack reference answers true and is left alone.
 			PlanNode chosen = Nodes[0];
 			object result = chosen.Execute(program);
 			if (result == null)

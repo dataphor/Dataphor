@@ -35,8 +35,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(plan);
-			
 			if (!Nodes[0].DataType.IsGeneric && !Nodes[1].DataType.IsGeneric) // Generic row comparison must be done at run-time
 			{
 				if (Nodes[0].DataType.Is(Nodes[1].DataType))
@@ -302,14 +300,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(plan);
-			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
 				Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
 			else if (Nodes[1].DataType.Is(Nodes[0].DataType))
 				Nodes[1] = Compiler.Upcast(plan, Nodes[1], Nodes[0].DataType);
 			else
 			{
+				// NOTE: this arm is defensive, and was measured unreachable at bug-row-equality-change-breaks-implicitconversions:
+				// the equality generated for a compound scalar type is declared over one concrete type, so operator resolution
+				// converts an argument of a different type before this node is built and both operands arrive with one Is the
+				// other. (RowEqualNode's matching arm is reached, because iEqual(const row, const row) is declared over the
+				// generic row type and resolution has nothing to convert.) Measured by throwing here and comparing two compound
+				// scalar types with a widening conversion between them: the throw was never hit. Leave it rather than delete it -
+				// the CheckConversionContext below is where an unconvertible pair would have to report - but do not reason from
+				// it as a live path.
 				ConversionContext context = Compiler.FindConversionPath(plan, Nodes[0].DataType, Nodes[1].DataType);
 				if (context.CanConvert)
 					Nodes[0] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[0], context), Nodes[1].DataType);

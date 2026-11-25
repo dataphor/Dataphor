@@ -1185,6 +1185,48 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The same loan, where the compiler has rewritten IfNil's own arguments. Two rows whose columns differ by a type
+		/// one converts to the other are legal arguments to IfNil, and it gets there by replacing one of its two argument
+		/// nodes with the conversion. The loan is granted to whichever node is in the operand slot when the question is
+		/// asked, so asking before that rewrite granted it to the node underneath the conversion, and a row conversion is
+		/// built out of the row-extend node, which disposes the source row it is handed - destroying the row in the
+		/// caller's variable, so the next read of that variable failed. Found reviewing
+		/// bug-row-equality-change-breaks-implicitconversions, which is the same defect in the two row-comparison nodes.
+		/// The nilable side is left unassigned so that the replacement - the side the conversion wraps - is the one
+		/// actually evaluated; the Binary column is what gives the stream count something to measure, and it is the same
+		/// type on both sides, which is why the conversion touches only the other column.
+		/// </summary>
+		[Test]
+		public void IfNilWithAnImplicitConversionLeavesTheCallersRowAlone()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LNil : row {{ X : Binary, N : Long }};
+							var LReplacement : row {{ X : Binary, N : Byte }} := row {{ Binary('0001') X, ToByte(5) N }};
+							var LResult : row {{ X : Binary, N : Long }};
+							var LSeen : Integer := 0;
+							for LI : Integer := 1 to {0} do
+							begin
+								LResult := IfNil(LNil, LReplacement);
+								if LResult.N = 5 then
+									LSeen := LSeen + 1;
+							end;
+							if LSeen <> {0} then
+								raise Error('IfNil did not return the replacement row.');
+							if LReplacement.X.Value <> '0001' then
+								raise Error('IfNil destroyed the replacement row in the caller''s variable.');
+						end;
+					",
+					RowAssignmentCount
+				)
+			);
+		}
+
+		/// <summary>
 		/// Row equality - the pair of nodes outside that same machinery, and the pair that missed both halves of the rule
 		/// at once: nothing asked either argument node to lend, so both copied the row they were given, and the execute
 		/// override then released neither copy - a managed stream per stream-backed column per side, on every comparison

@@ -328,7 +328,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// bug-row-equality-change-breaks-implicitconversions, where RowEqualNode asked its argument node to lend and then
 				// wrapped that same node in an implicit conversion, which reaches this node through Compiler.EmitRedefineNode. The
 				// grant belongs on whichever node ends up in the operand slot, so fix such a case at the node that asks rather
-				// than by gating this release on Nodes[0].ReturnsByReference.
+				// than by gating this release on Nodes[0].ReturnsByReference. That has now happened twice - IfNilNode
+				// (SystemNodes.cs) had the same shape and was fixed the same way while reviewing that ticket - and every node
+				// that rewrites its own arguments now asks after the rewrite, so no live path reaches here over a lending node.
+				// A third such node is the point at which to weigh gating this release as well, as defence rather than as the fix.
 				sourceRow.Dispose();
 			}
 		}
