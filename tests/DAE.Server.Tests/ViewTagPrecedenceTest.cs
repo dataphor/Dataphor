@@ -16,9 +16,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// fills gaps; where both declare a tag of the same name, the view's value is the one that must survive.
 	/// </summary>
 	/// <remarks>
-	/// This states the rule on two tags; FrontendDerivationGoldenTest is the end-to-end cover, where the same rule shows up as
-	/// the title a derived form carries and as which page type a detail link derives. The second tag is one whose value is read
-	/// as a boolean, because that is the shape of tag the derivation branches on.
+	/// The first case states the rule on two tags; FrontendDerivationGoldenTest is the end-to-end cover, where the same rule
+	/// shows up as the title a derived form carries and as which page type a detail link derives. The second tag is one whose
+	/// value is read as a boolean, because that is the shape of tag the derivation branches on. The second case covers the rule
+	/// inside the create statement rather than at the end of it, which is where the compiler reads the view's tags itself.
 	/// </remarks>
 	[TestFixture]
 	public class ViewTagPrecedenceTest : DeviceClassAttributeFixture
@@ -38,6 +39,21 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			string script = Script("ViewTagView");
 			Assert.That(script, Does.Contain("Frontend.Title = \"View Title\""));
 			Assert.That(script, Does.Contain("Frontend.UseList = \"false\""));
+		}
+
+		/// <summary>
+		/// The message a key violation reports names the table in words, taken from its Frontend.Title; for a key the view
+		/// declares itself that message is built while the view is still compiling, before the tags it inherits have been
+		/// merged back over, so it is where the rule is easiest to lose.
+		/// </summary>
+		[Test]
+		public void TestTheKeyViolationMessageUsesTheViewsOwnTitle()
+		{
+			Process.Execute("create table ViewKeySource { ID : Integer, Name : String, key { ID } } tags { Frontend.Title = \"Source Title\" };", null);
+			Process.Execute("create view ViewKeyView ViewKeySource { key { Name } } tags { Frontend.Title = \"View Title\" };", null);
+
+			Schema.TableVarConstraint constraint = CatalogObject<Schema.DerivedTableVar>("ViewKeyView").Constraints["KeyName"];
+			Assert.That(constraint.GetMetaDataTag("DAE.Message").Value, Does.Contain("View Title"));
 		}
 	}
 }

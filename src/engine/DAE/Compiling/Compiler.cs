@@ -4457,6 +4457,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 					node.View.CopyTableVar(plan, (TableNode)planNode, planNode is TableVarNode);
 					
+					// CopyTableVar has just inherited (or merged) the source's tags over the view's own, and the view's own have to win
+					// back here rather than only at the end of this block, because CompileCreateTableVarStatement below reads the view's
+					// Frontend.Title to build the message a violation of a key the view declares itself reports. The inherit is repeated
+					// after that call, so the merge is repeated with it.
+					node.View.MergeMetaData(localStatement.MetaData);
+					
 					// If we are in an A/T, or we are loading an A/T object
 					if ((plan.ApplicationTransactionID != Guid.Empty) || node.View.IsATObject)
 					{

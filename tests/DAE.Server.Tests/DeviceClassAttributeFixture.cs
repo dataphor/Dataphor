@@ -21,11 +21,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// The in-memory device's row limit is the setting the class-definition fixtures reach for, because nothing outside the
 	/// engine is needed to set it; the SQL devices take class attributes of their own (server name, connection parameters)
-	/// through the same code. SchemaCacheInvalidationTest and CreateStatementTagRerunTest derive from this too, for
-	/// CatalogObject and Script alone: what they have to read after a repeated create statement is the same live object and the
-	/// same emitted create statement, for devices and for the other catalog objects a statement builds. Moving those two
-	/// helpers down to InProcessTestFixture would spare them the mismatched name, and is worth doing when a fourth fixture
-	/// needs them.
+	/// through the same code. CreateStatementTagRerunTest and ViewTagPrecedenceTest derive from this for CatalogObject and
+	/// Script alone, reading no class attribute at all: what they have to read is the same live object and the same emitted
+	/// create statement, for the other catalog objects a statement builds. Moving those two helpers down to
+	/// InProcessTestFixture would spare them the mismatched name, and is worth doing when a third fixture needs them that way.
 	/// </remarks>
 	public abstract class DeviceClassAttributeFixture : InProcessTestFixture
 	{

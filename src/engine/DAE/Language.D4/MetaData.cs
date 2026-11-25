@@ -268,11 +268,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			InternalAdd(tag);
 		}
 		
-		/// <summary>Inherits the given tag into this tag list.</summary>
+		/// <summary>Inherits the given tag into this tag list, replacing any tag of the same name.</summary>
 		/// <remarks>
-		/// If a tag with the same name as the given tag does not exist, the given tag is referenced. If the existing tag with the same name as the given tag
-		/// is a reference, the tag reference is replaced by a call to the Inherit method of the given tag. Otherwise, the value of the existing tag is set
-		/// based on the value of the given tag. Note that changing the value of the tag will cause the IsInherited property to be set to false.
+		/// A tag of that name that is not already here is added as an inherited copy of the given tag. One that is already here is
+		/// replaced by that same inherited copy, whatever its own value was and whether or not it was itself inherited - so the
+		/// given tag wins. A caller whose own value must survive inheriting therefore merges it back afterwards; Schema.Object's
+		/// InheritMetaData says where.
 		/// </remarks>
 		public void Inherit(Tag tag)
 		{
