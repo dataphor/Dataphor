@@ -1,6 +1,6 @@
 # coverage-report — what the test suite actually exercises
 
-Turns the test run's code-coverage output into a Markdown report: line coverage per assembly, then per engine *area* (a named set of source paths), then file by file for the areas with the biggest holes. It exists so that the untested parts of the engine can be found by running a command instead of by reading a 24 MB XML file by hand. It needs nothing beyond Python 3: one module, standard library only, no network.
+Turns the test run's code-coverage output into a Markdown report: line coverage per assembly, then per engine *area* (a named set of source paths), then every file the run never entered at all, then file by file for the areas with the biggest holes. It exists so that the untested parts of the engine can be found by running a command instead of by reading a 24 MB XML file by hand. It needs nothing beyond Python 3: one module, standard library only, no network.
 
 It reports; it never gates. No build or CI step fails on a number from here.
 
@@ -42,6 +42,7 @@ Each positional argument is a Cobertura file or a folder, which is searched recu
 | `--gap-below PCT` | `25` | below this line coverage an area is a **gap** |
 | `--thin-below PCT` | `50` | below this (and not a gap) an area is **thin** |
 | `--min-lines N` | `200` | an area with fewer coverable lines is never a gap, whatever its rate |
+| `--untested-min-lines N` | `20` | a wholly untested file with fewer coverable lines is counted rather than listed under *Wholly untested files* |
 | `--json FILE` | — | also write the rolled-up numbers as JSON, for a later pass to diff against |
 | `--allow-unassigned` | off | print the report even when the map is incomplete (the exit code is still 1) |
 
@@ -84,7 +85,7 @@ Classes whose source file is under `tests/` are dropped wherever they appear: te
 
 - **Line coverage says a line ran. It does not say anything checked the result.** Several of the D4 coverage scripts assert nothing at all, and a script that executes a path without checking what it produced still colours that path green. Read a high rate as *exercised*, never as *verified*; read a low one as a real absence.
 - **Line counts are not statement counts**, and they are not comparable across builds: the collector decides which lines are coverable and that moves with the code. Compare *rates* between runs of the same build. (Each line is listed twice in the file — once under its class and once under its method — so a naive count of `<line>` elements doubles the real figure; this tool counts distinct line numbers.)
-- **An area's rate is a weighted average of its files**, so one large well-covered file can hide a wholly untested neighbour. That is what the per-file table under each gap is for.
+- **An area's rate is a weighted average of its files**, so one large well-covered file can hide a wholly untested neighbour. The per-file table under each gap was not enough for that: a file at exactly 0 % sitting in an area that averages 66 % used to appear in no table in the report at all. **Wholly untested files** is the section that answers it - every file in an engine area with coverable lines and not one of them covered, worst first, each row naming the file's area and that area's rate so a zero inside a healthy area stands out. It searches every area, gaps included, so a file at 0 % in a gap area is printed there and in that gap's own table too; that keeps the section's claim unconditional. Its scope is the **engine areas only**: a file in a `reported` assembly, under an `excluded` path, or under `src/` that no area claims cannot appear in it, and the two boundary checks above are what catch that last case. Files below `--untested-min-lines` are counted in a closing sentence rather than listed, and when nothing qualifies the section says so in as many words rather than going silent.
 - **A gap is a candidate for a ticket, not a ticket.** Some of this code is reachable only from a UI, from a device that needs a database server, or from a deployment path no test can stand up. The areas with the biggest uncovered counts come first because that is where reading is most likely to pay, not because they are automatically wrong.
 
 The companion work item `test-coverage-gap-analysis` runs the whole suite under collection, publishes `docs/coverage-report.md` from it and files one ticket per gap worth one.

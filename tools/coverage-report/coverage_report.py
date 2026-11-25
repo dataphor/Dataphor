@@ -23,8 +23,8 @@ import xml.etree.ElementTree as ElementTree
 DEFAULT_AREAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "areas.json")
 GROUPS = ("engine", "reported", "ignored")
 
-# The classification thresholds, as percentages and a line count.
-Options = collections.namedtuple("Options", "gap_below thin_below min_lines")
+# The classification thresholds, as percentages and line counts.
+Options = collections.namedtuple("Options", "gap_below thin_below min_lines untested_min_lines")
 
 
 class MapError(Exception):
@@ -302,6 +302,26 @@ def classify(totals, options):
     return "covered"
 
 
+def untested_files(analysis):
+    """Every file in an engine area with coverable lines and no covered line.
+
+    [(path, Totals, Area)], worst first by coverable count, ties by path. A file with
+    no coverable lines at all is not untested, it is unmeasurable, and is left out: its
+    rate is None and a row for it would read as a zero.
+
+    Every area is searched, gaps included, so a file at 0 % inside a gap area is printed
+    both here and in that area's own per-file table. That is deliberate: it makes this
+    section's claim unconditional, with no "except the ones already below" caveat for a
+    reader to carry.
+    """
+    found = [(path, totals, area)
+             for area in analysis.areas
+             for path, totals in area.files
+             if totals.coverable and not totals.covered]
+    found.sort(key=lambda item: (-item[1].coverable, item[0]))
+    return found
+
+
 class Area:
     def __init__(self, name):
         self.name = name
@@ -468,6 +488,45 @@ def _incomplete_map_section(out, analysis):
         out.append("")
 
 
+def _untested_files_section(out, analysis, options):
+    """The cross-area index of files nothing executed - the one table an area rate hides.
+
+    An area's rate is a weighted average over its files, so before this section a file at
+    exactly 0 % inside a well-covered area appeared in no table of the report at all. The
+    empty case still prints its heading and a sentence: silence is how that blind spot went
+    unnoticed, because a reader cannot tell "nothing to report" from "not reported here".
+    """
+    out.append("## Wholly untested files")
+    out.append("")
+    listed = untested_files(analysis)
+    if not listed:
+        out.append("No source file in an engine area is wholly untested.")
+        out.append("")
+        return
+    named = [item for item in listed if item[1].coverable >= options.untested_min_lines]
+    counted = [item for item in listed if item[1].coverable < options.untested_min_lines]
+    out.append("Every source file in an engine area that the run never entered, wherever it sits. An area's rate above is a weighted average over its files, so a file at 0 %% inside a well-covered area appears in no other table here. Each row names the file's area and that area's rate: a zero inside an area already marked `gap` is expected, and a zero inside a `covered` one is the finding this section exists for.%s"
+               % ("" if not options.untested_min_lines else
+                  " Files of fewer than %s coverable lines are counted at the end rather than listed."
+                  % _count(options.untested_min_lines)))
+    out.append("")
+    if named:
+        out.append("| File | Coverable | Area | Area rate |")
+        out.append("|---|---:|---|---:|")
+        for path, totals, area in named:
+            out.append("| %s | %s | %s | %s |" % (path, _count(totals.coverable), area.name, _rate(area.totals)))
+        out.append("")
+    if counted:
+        lines_below = sum(totals.coverable for _, totals, _ in counted)
+        if len(counted) == 1:
+            out.append("One further wholly untested file, of %s coverable lines, is below the %s-line floor and is not listed."
+                       % (_count(lines_below), _count(options.untested_min_lines)))
+        else:
+            out.append("Another %d wholly untested files of fewer than %s coverable lines each, %s lines between them, are not listed."
+                       % (len(counted), _count(options.untested_min_lines), _count(lines_below)))
+        out.append("")
+
+
 def render(analysis, area_map, options):
     out = ["# Test coverage report", ""]
     out.append("Merged from %s. Rates of different runs are comparable only when the runs are of the same build: the collector's coverable-line counts move with the code." % _plural(analysis.inputs, "coverage report"))
@@ -476,6 +535,9 @@ def render(analysis, area_map, options):
     out.append("")
     out.append("An area below %g %% line coverage is a **gap** unless it has fewer than %s coverable lines; below %g %% it is **thin**. Areas are listed worst first by uncovered line count, which is what makes the biggest holes the first ones a reader meets."
                % (options.gap_below, _count(options.min_lines), options.thin_below))
+    out.append("")
+    out.append("A file is named under **Wholly untested files** when the run never entered it at all, whatever its area's rate, down to %s coverable lines. That is a different question from an area's verdict and a different threshold: `--min-lines` is about whether a whole area is too small to call a gap, `--untested-min-lines` about whether one file is too small to name."
+               % _count(options.untested_min_lines))
     out.append("")
     _incomplete_map_section(out, analysis)
 
@@ -502,6 +564,8 @@ def render(analysis, area_map, options):
     else:
         out.append("No engine assembly in this run.")
     out.append("")
+
+    _untested_files_section(out, analysis, options)
 
     if analysis.gaps:
         out.append("## Gaps, file by file")
@@ -541,7 +605,8 @@ def to_json(analysis, area_map, options):
     return {
         "inputs": analysis.inputs,
         "thresholds": {"gap_below": options.gap_below, "thin_below": options.thin_below,
-                       "min_lines": options.min_lines},
+                       "min_lines": options.min_lines,
+                       "untested_min_lines": options.untested_min_lines},
         "assemblies": [
             dict(name=name, group=group, covered=totals.covered, coverable=totals.coverable,
                  rate=totals.rate)
@@ -580,6 +645,10 @@ def main(argv=None):
                        help="below this, and not a gap, an area is thin (default: 50)")
     parser.add_argument("--min-lines", metavar="N", type=int, default=200,
                        help="an area with fewer coverable lines is never a gap (default: 200)")
+    parser.add_argument("--untested-min-lines", metavar="N", type=int, default=20,
+                       help="a wholly untested file with fewer coverable lines is counted rather than"
+                            " listed under Wholly untested files; this is about one file, where"
+                            " --min-lines is about a whole area (default: 20)")
     parser.add_argument("--json", metavar="FILE", help="also write the rolled-up numbers as JSON")
     parser.add_argument("--allow-unassigned", action="store_true",
                        help="print the report even when the map is incomplete (the exit code is still 1)")
@@ -592,6 +661,8 @@ def main(argv=None):
         parser.error("thresholds must satisfy 0 <= --gap-below <= --thin-below <= 100")
     if args.min_lines < 0:
         parser.error("--min-lines cannot be negative")
+    if args.untested_min_lines < 0:
+        parser.error("--untested-min-lines cannot be negative")
     if args.repo_root is not None and not os.path.isdir(args.repo_root):
         parser.error("not a directory: %s" % args.repo_root)
     try:
@@ -599,7 +670,7 @@ def main(argv=None):
     except MapError as error:
         parser.error(str(error))
 
-    options = Options(args.gap_below, args.thin_below, args.min_lines)
+    options = Options(args.gap_below, args.thin_below, args.min_lines, args.untested_min_lines)
     repo_root = args.repo_root or find_repo_root(os.path.dirname(os.path.abspath(__file__)))
     files = find_inputs(args.inputs)
     if not files:
