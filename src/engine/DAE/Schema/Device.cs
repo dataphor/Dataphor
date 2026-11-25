@@ -1904,10 +1904,14 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			// NOTE: row.Copy() on a row with a Binary or Graphic column references that column's managed stream rather than
 			// copying its bytes, so this undo entry costs one managed stream per logged insert of a stream-backed value. The
-			// entry - and that reference - is released when the transaction ends, by DeviceTransaction.Dispose on either commit
-			// or rollback, so an ordinary statement (its own transaction) is stream-balanced and only a transaction a caller
-			// deliberately holds open accumulates. Measured 2026-11-24; the memory device needs this log because its own
-			// transaction logging is all inside #if USEMEMORYDEVICETRANSACTIONS, which no project defines.
+			// entry - and that reference - is released by DeviceTransaction.Dispose when the transaction that logged it ends,
+			// on either commit or rollback; a nested transaction that commits hands its entries to its parent instead
+			// (DeviceTransactions.EndTransaction), so there the release waits for the outermost one. An ordinary statement is
+			// its own transaction and so is stream-balanced, and only a transaction a caller deliberately holds open
+			// accumulates. Measured 2026-11-24; the memory device needs this log because its own transaction logging is all
+			// inside #if USEMEMORYDEVICETRANSACTIONS, which no project defines. The same holds for UpdateRow below, which
+			// logs two row copies and so one stream for the new value (the old row comes from the device and holds its value
+			// as bytes), and for DeleteRow, whose copy is of such a device row and so costs none.
 			if (!ServerProcess.NonLogged && ((!Device.SupportsTransactions && (Transactions.Count == 1)) || (!Device.SupportsNestedTransactions && (Transactions.Count > 1))) && !ServerProcess.CurrentTransaction.InRollback)
 				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(table, (IRow)row.Copy()));
         }

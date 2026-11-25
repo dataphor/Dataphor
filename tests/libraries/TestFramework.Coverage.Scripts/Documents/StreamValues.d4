@@ -343,9 +343,16 @@ end;
 
 	This is also why the script's coverage-manifest.json entry carries "batches": true. Run the default way - as one
 	nested ExecuteScript('Coverage.Scripts', 'StreamValues') call - the whole file is a single statement and these
-	statements would all fall inside its open transaction, so the assertions below would fail. If this entry is ever
-	turned back, this section has to move out of the script and into a host test instead.
+	statements would all fall inside its open transaction, so the assertions below would fail - and fail reading exactly
+	like the leak this script's history is about, which is why each of them names the entry in its message. If the entry
+	is ever turned back, this section has to move out of the script and into a host test instead.
 */
+// The three count assertions below carry this, because the way they fail if the manifest entry is ever turned back is
+// indistinguishable, in the message alone, from the leak the original report claimed. TransactionCount() cannot be
+// guarded on instead: it reads 1 here in both modes (measured) - what differs is whether that transaction outlives
+// the statement, which is the very thing these assertions measure.
+var LCommittedHint : String := ' Check that this script''s coverage-manifest.json entry still carries "batches": true before reading this as a leak.';
+
 var LCommittedBefore : Integer := StreamCount();
 create table TStreamCommitted { ID : Integer, B : Binary, key { ID } };
 
@@ -354,19 +361,19 @@ var LCommittedFloor : Integer := StreamCount();
 
 insert table { row { 1 ID, Binary(LEight) B } } into TStreamCommitted;
 if StreamCount() <> LCommittedFloor then
-	raise Error('A committed insert of a Binary left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+	raise Error('A committed insert of a Binary left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.' + LCommittedHint);
 if (B from row from (TStreamCommitted where ID = 1)).Value <> LEight then
 	raise Error('A committed insert of a Binary did not store the value selected.');
 
 update TStreamCommitted set { B := Binary(LFour) } where ID = 1;
 if StreamCount() <> LCommittedFloor then
-	raise Error('A committed update of a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+	raise Error('A committed update of a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.' + LCommittedHint);
 if (B from row from (TStreamCommitted where ID = 1)).Value <> LFour then
 	raise Error('A committed update of a Binary column did not reach the row.');
 
 delete TStreamCommitted where ID = 1;
 if StreamCount() <> LCommittedFloor then
-	raise Error('A committed delete of a row with a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+	raise Error('A committed delete of a row with a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.' + LCommittedHint);
 if exists (TStreamCommitted where ID = 1) then
 	raise Error('A committed delete did not remove the row.');
 
