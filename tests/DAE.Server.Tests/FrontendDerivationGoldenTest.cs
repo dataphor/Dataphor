@@ -341,6 +341,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 			foreach (DerivationCase derivation in Cases())
 			{
+				// Claimed before it is derived, not after: a golden belongs to the case named on it whether or not deriving that
+				// case worked. Claimed afterwards, a case that threw unexpectedly leaves its file unclaimed, and an update run
+				// then deletes it - the one thing these files may never lose, there being no reference runtime to regenerate
+				// them from. An expected failure has no golden to begin with, so claiming its path changes nothing.
+				claimed.Add(derivation.GoldenRelativePath);
+
 				string derived;
 				try
 				{
@@ -352,7 +358,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					continue;
 				}
 
-				claimed.Add(derivation.GoldenRelativePath);
 				string printed = Print(derived);
 
 				if (updating)

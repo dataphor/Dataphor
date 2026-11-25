@@ -490,6 +490,12 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 
 			foreach (TranslationCase translationCase in Cases())
 			{
+				// Claimed before it is generated, not after: a golden belongs to the case named on it whether or not translating
+				// that case worked. Claimed afterwards, a case that threw leaves its file unclaimed - reported a second time as a
+				// golden nobody produces, and in an update run deleted outright, which is the one thing these files may never
+				// lose: there is no reference runtime to regenerate them from.
+				claimed.Add(translationCase.GoldenFileName);
+
 				string generated;
 				try
 				{
@@ -501,7 +507,6 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 					continue;
 				}
 
-				claimed.Add(translationCase.GoldenFileName);
 				string normalized = Normalize(generated);
 
 				if (String.IsNullOrEmpty(normalized))
@@ -570,24 +575,43 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 		}
 
 		/// <summary>
-		/// A read the recorder has no answer for fails rather than coming back empty. This is what makes every golden
-		/// above trustworthy: a recording connection that quietly answered nothing would let a device that generated
-		/// nothing look like a device that generated the right thing.
+		/// A read the recorder has no answer for fails rather than coming back empty, and the statement it refused is the one
+		/// the corresponding query golden holds. The first half is what makes every golden above trustworthy: a recording
+		/// connection that quietly answered nothing would let a device that generated nothing look like a device that
+		/// generated the right thing.
 		/// </summary>
 		/// <remarks>
-		/// Reading a device table is the shape that asks for a cursor and that no case arms, so it is the one used here.
-		/// The D4 goes through the engine for real, which is also why this case is not part of the golden corpus.
+		/// The second half holds the two emitting paths together, and is the only case that reaches the second one. A query
+		/// golden comes from D4ToSQL, which emits the device plan node's statement as the compiler left it. A real read does
+		/// not go that way: SQLDeviceSession.InternalExecute builds an SQLTable, which <i>rebuilds</i> the statement before
+		/// emitting it and can change it on the way - a deferred column becomes a case expression and a cursor restart
+		/// appends a key condition (SQLTable's constructor and its GetMainCursor, in libraries/SQLDevice/Source/SQLDevice.cs).
+		/// Nothing else here goes down that path, so without this a change that touched only it would leave every query
+		/// golden green while what a database server actually receives had moved. Reading a device table is also the shape
+		/// that asks for a cursor and that no case arms, which is why the two halves are one test.
 		/// </remarks>
 		[Test]
 		public void ReadingADeviceTableIsRefusedRatherThanAnsweredWithNothing()
 		{
-			Exception failure = Assert.Catch(() => _deviceProcess.ExecuteScript("if not exists (Employee) then raise Error('unreachable');"));
+			// The Query.Table case's expression, read through the engine for real. A foreach rather than exists: an exists
+			// reaches the device as a scalar select, which is emitted on the same path D4ToSQL uses and would hold nothing
+			// together.
+			const string tableRead = "Employee";
+
+			Exception failure = Assert.Catch(() => Execute(String.Format("foreach row in {0} do begin end;", tableRead)));
 
 			Assert.That
 			(
 				FrontendFixture.FlattenMessages(failure),
 				Does.Contain("has no answer for this cursor"),
 				"Reading a device table through the recording connection must fail, because the recorder has no row to answer with and will not pretend the table is empty."
+			);
+
+			Assert.That
+			(
+				Recorded(),
+				Does.Contain(TranslateQuery(tableRead)),
+				"The statement the device handed the connection for a real read is not the text D4ToSQL emits, so the query goldens pin text no database server is sent. Read both before touching a golden."
 			);
 		}
 
@@ -602,8 +626,12 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 				EvaluateString("SQLRecorderConnections()")
 					.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-			// The recording is cleared before each statement case, so what is here is whatever the device has opened
-			// since the last one; the device opens a connection per device session, so there is at least one.
+			// The recording is cleared before each statement case, so what is here is whatever the device has opened since the
+			// last one.
+			// NOTE: there is one only because SQLDeviceSession.ReleaseConnection disposes an execute-pool connection whenever no
+			// device transaction is open, so each data-definition statement opens a fresh one. If that pooling ever keeps a
+			// connection alive across statements, this assertion fails for a reason that has nothing to do with what it checks;
+			// clear the recording and open a connection here deliberately at that point rather than relaxing it.
 			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so nothing proves the recorder is the connection it uses.");
 			foreach (string connection in connections)
 				Assert.That(connection, Does.Contain(UnreachableServerName), String.Format("The device opened a connection to something other than the unreachable placeholder server: {0}", connection));

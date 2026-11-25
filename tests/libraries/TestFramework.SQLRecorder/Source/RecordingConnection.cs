@@ -55,8 +55,9 @@ namespace Alphora.Dataphor.DAE.SQLRecorder
 	}
 
 	/// <summary>
-	/// Records the statement a device built, with the parameters it bound. Execution records and returns; a cursor is
-	/// answered only from an armed canned row (<see cref="Recorder.ArmCursor"/>) and otherwise refused.
+	/// Records the statement a device built, with the parameters it bound. An execution records and returns; a cursor open
+	/// records too but is only <i>answered</i> from an armed canned row (<see cref="Recorder.ArmCursor"/>), and is refused
+	/// otherwise.
 	/// </summary>
 	public class RecordingCommand : SQLCommand
 	{
@@ -83,6 +84,11 @@ namespace Alphora.Dataphor.DAE.SQLRecorder
 		// multi-column, typed canned row would be added.
 		protected override SQLCursor InternalOpen(SQLCursorType cursorType, SQLIsolationLevel cursorIsolationLevel)
 		{
+			// Recorded before it is decided whether the read can be answered: a refused read is still a read the device asked
+			// for, and the statement it named is the only way a test sees what a real cursor open - rather than the D4ToSQL
+			// operator, which emits the plan node's statement directly - handed the connection.
+			Recorder.RecordStatement(Describe(OpenVerb));
+
 			CannedCursor canned = Recorder.FindCannedCursor(Statement);
 			if (canned == null)
 				throw new InvalidOperationException
@@ -95,7 +101,6 @@ namespace Alphora.Dataphor.DAE.SQLRecorder
 					)
 				);
 
-			Recorder.RecordStatement(Describe(OpenVerb));
 			return new RecordingCursor(this, canned);
 		}
 
