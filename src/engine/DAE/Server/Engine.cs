@@ -135,8 +135,6 @@ namespace Alphora.Dataphor.DAE.Server
 				_catalog = null;
             
 				base.Dispose(disposing);
-
-				System.Data.SqlClient.SqlConnection.ClearAllPools();
 			}
 		}
 

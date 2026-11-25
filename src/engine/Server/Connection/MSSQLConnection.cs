@@ -9,7 +9,7 @@ using System.IO;
 using System.Text;
 using System.Reflection;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data.Common;
 
 /*
@@ -81,9 +81,44 @@ namespace Alphora.Dataphor.DAE.Connection
 			return new MSSQLCommand(this, CreateDbCommand());
 		}
 
+		/// <summary>The name of the client's own flag for a transaction the server has doomed; see the comment under Exception Wrapping below for why it has to be asked.</summary>
+		private const string IsZombiedPropertyName = "IsZombied";
+
+		/// <summary>
+		/// SqlTransaction.IsZombied, which no release of either SQL Server client has ever made public, so reflection is the
+		/// only way to read it. Looked up once here rather than per call, and checked rather than dereferenced: a client release
+		/// that renames or drops the member must fail with a message naming what it looked for, not with a NullReferenceException
+		/// on every commit and rollback. Present as an internal instance Boolean property on Microsoft.Data.SqlClient 7.1.2,
+		/// verified by reflection over the pinned package (device-mssql-port); the documented fallback, had it been absent, is
+		/// that a zombied transaction reports a null Connection.
+		/// </summary>
+		private static readonly PropertyInfo _isZombiedProperty =
+			typeof(SqlTransaction).GetProperty(IsZombiedPropertyName, BindingFlags.Instance | BindingFlags.NonPublic);
+
+		/// <remarks>
+		/// The argument is the base class's transaction field, so its static type is IDbTransaction; it is a SqlTransaction
+		/// because this connection's CreateDbConnection makes a SqlConnection. Both ways that can stop being true - a missing
+		/// member, a transaction from some other client - say so here rather than failing as a null dereference or as
+		/// reflection's own "object does not match target type", neither of which names this connection class.
+		/// </remarks>
 		protected bool IsZombied(IDbTransaction transaction)
 		{
-			return (bool)transaction.GetType().GetProperty("IsZombied", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(transaction, null);
+			if ((_isZombiedProperty == null) || !(transaction is SqlTransaction))
+				throw new DataphorException
+				(
+					ErrorSeverity.System,
+					DataphorException.ApplicationError,
+					String.Format
+					(
+						"The SQL Server device cannot tell whether a transaction has been doomed by the server. It reads the non-public instance property {0} of {1}, as supplied by {2}; this transaction is a {3} and that property is {4}.",
+						IsZombiedPropertyName,
+						typeof(SqlTransaction).FullName,
+						typeof(SqlTransaction).Assembly.GetName().Name,
+						transaction == null ? "nil" : transaction.GetType().FullName,
+						_isZombiedProperty == null ? "not there" : "there"
+					)
+				);
+			return (bool)_isZombiedProperty.GetValue(transaction, null);
 		}
 
 		protected override void InternalCommitTransaction()

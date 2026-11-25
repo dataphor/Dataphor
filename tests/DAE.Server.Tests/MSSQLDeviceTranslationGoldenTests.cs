@@ -28,6 +28,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>A server name no machine resolves, so that a device that connected for real would fail rather than reach something.</summary>
 		protected override string UnreachableServerName => "no.such.server.invalid";
 
+		/// <summary>
+		/// Microsoft.Data.SqlClient encrypts by default and then validates the server's certificate, which
+		/// System.Data.SqlClient - the client this device used through release 3 - did neither of. A device definition
+		/// written then names a server and a database and nothing about encryption, so the device supplies what the old
+		/// client negotiated; without it such a definition stops connecting to any SQL Server whose certificate is
+		/// self-signed or absent. MSSQLADODotNetConnectionStringBuilder sets it and says why at the site;
+		/// docs/architecture/devices.md says where the other half of the same decision lives, in the catalog store.
+		/// </summary>
+		protected override string[] RequiredConnectionStringText => ["Encrypt=False"];
+
 		protected override string CreateDeviceStatement =>
 			@"create device " + DeviceName + @"
 	reconciliation { mode = { command }, master = device }

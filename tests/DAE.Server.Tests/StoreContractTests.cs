@@ -799,7 +799,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			);
 		}
 
-		// Through the store's own connection class rather than SqlConnection directly, which is obsolete on this client package.
+		// Through the store's own connection class rather than SqlConnection directly, so that these housekeeping statements
+		// reach the server the way every statement of the contract does. They do not go through the store, so they do not get
+		// its connection-string defaults: what DATAPHOR_TEST_MSSQL names has to be reachable as it stands, which for a server
+		// whose certificate this machine does not trust means saying so in the variable (see MSSQLStoreConnectionStringTest).
 		private static void Execute(string connectionString, string statement)
 		{
 			using (MSSQLConnection connection = new MSSQLConnection(connectionString))

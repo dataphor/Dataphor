@@ -16,6 +16,8 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 
+using Microsoft.Data.SqlClient;
+
 namespace Alphora.Dataphor.DAE.Server
 {
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
@@ -50,6 +52,26 @@ namespace Alphora.Dataphor.DAE.Server
 			Alphora.Dataphor.Windows.AssemblyUtility.Initialize();
 		}
 		
+		/// <remarks>
+		/// Clearing the SQL Server client's connection pools on the way down is what 3.1 did, and it belongs here rather than
+		/// on Engine: this assembly owns the SQL Server client (Connection\MSSQL*.cs), so a bare Engine cannot have opened a
+		/// SQL Server connection and the engine assembly need not reference a SQL client at all (device-mssql-port). After the
+		/// base call, so that the ordering is the one 3.1 had - the sessions and the catalog go first, and the pools the
+		/// connections they held came from go last - and in a finally, because the call it moved out of was in one: a Stop
+		/// that throws on the way down still cleared the pools before the failure propagated, and still must.
+		/// </remarks>
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				base.Dispose(disposing);
+			}
+			finally
+			{
+				SqlConnection.ClearAllPools();
+			}
+		}
+
 		internal new ServerSessions Sessions { get { return base.Sessions; } }
 		
 		internal new IServerSession ConnectAs(SessionInfo sessionInfo)

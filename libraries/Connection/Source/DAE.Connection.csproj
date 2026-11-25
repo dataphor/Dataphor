@@ -19,10 +19,10 @@
     <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj" />
   </ItemGroup>
 
-  <!-- System.Data.OleDb: OLEDBConnection.cs (Windows only). System.Data.SqlClient: ClearAllPoolsNode in Operators.cs; it follows the SQL Server code to Microsoft.Data.SqlClient (device-mssql-port). -->
+  <!-- System.Data.OleDb: OLEDBConnection.cs (Windows only). Microsoft.Data.SqlClient: ClearAllPoolsNode in Operators.cs, behind the D4 operator Connection.ClearAllPools(). -->
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="System.Data.OleDb" />
-    <PackageReference Include="System.Data.SqlClient" />
   </ItemGroup>
 
   <ItemGroup>

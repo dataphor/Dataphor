@@ -26,8 +26,17 @@
     client stack. CoreWCF.Primitives: the service *implementations* in Service\, which carry CoreWCF's
     ServiceBehavior attribute and throw CoreWCF's FaultException<T>; of each pair CoreWCF recognises only its own,
     while it converts the contract attributes itself (see "CoreWCF proof" under WS5 in docs/modernization-plan.md).
-    Newtonsoft.Json: REST\RESTMarshal.cs. System.Data.SqlClient: Connection\MSSQL*.cs; when the SQL Server code
-    moves to Microsoft.Data.SqlClient (device-mssql-port), these files and this reference follow.
+    Newtonsoft.Json: REST\RESTMarshal.cs. Microsoft.Data.SqlClient: Connection\MSSQL*.cs, and Server\Server.cs, which
+    clears that client's connection pools when a server is disposed. This is the repository's only SQL Server client
+    reference that a shipped assembly needs; the catalog store in src\engine\Store.MSSQL takes it from here.
+    NOTE: that client brings a larger closure than the System.Data.SqlClient it replaced - measured with the two host
+    executables in the layout, bin\ went from 76 to 84 top-level files (142 to 163 in all) - and eight of the added
+    assemblies exist for authentication methods nothing here uses: Microsoft.IdentityModel.JsonWebTokens, .Protocols,
+    .Protocols.OpenIdConnect and System.IdentityModel.Tokens.Jwt are the Microsoft Entra ID path, which no Dataphor
+    connection string asks for. They ship because they are in the package's dependency graph, not because anything
+    loads them. If the installer's size or a deployment's dependency audit ever objects, the question to ask then is
+    whether this client can be restored without them (NuGet has no supported way to prune a package's own dependencies,
+    so the answer would be a trimming step in WS9's installer rather than a change here).
     The framework reference substitutes the in-box ASP.NET Core 10 assemblies for the Microsoft.AspNetCore.* 2.3.10
     packages CoreWCF.Primitives depends on, through NuGet's package-override mechanism. Without it both sets of those
     assemblies landed in the runtime layout's bin\, where a host would ship the unused 2.3.10 ones; measured
@@ -41,8 +50,8 @@
   -->
   <ItemGroup>
     <PackageReference Include="CoreWCF.Primitives" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="System.Data.SqlClient" />
     <PackageReference Include="System.ServiceModel.Primitives" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

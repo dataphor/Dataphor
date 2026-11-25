@@ -12,16 +12,28 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
+  <!--
+    NOTE: no reference to src\engine\Server: nothing here uses that assembly, and referencing it would pull
+    Microsoft.Data.SqlClient - and with it the SNI runtime package below - into this project's closure, at which point the
+    layout would stop treating that package as private to this library (Directory.Build.targets marks a package file
+    private only when no project this one references has the package), the native dll would land in bin\ instead of flat
+    in this library's folder, and the native arm of LibraryLoadingTest would fail. Only the server assembly carries a SQL
+    Server client (device-mssql-port); the engine carries none, which is what leaves this project a closure with no SQL
+    client in it.
+  -->
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\engine\Base\Base.csproj" />
     <ProjectReference Include="..\..\..\..\src\engine\DAE\DAE.csproj" />
-    <ProjectReference Include="..\..\..\..\src\engine\Server\Server.csproj" />
   </ItemGroup>
 
   <!--
-    Private test dependencies. Neither is in the host's bin: Newtonsoft.Json.Bson exercises the managed resolver (its
-    private dll lands flat in this library's folder and the probe node loads a type from it); Microsoft.Data.SqlClient.SNI
-    is a real native dll for the unmanaged resolver (the Windows RID file is flattened into the folder by the layout).
+    Private test dependencies, flattened into this library's folder by the layout: Newtonsoft.Json.Bson exercises the
+    managed resolver (the probe node loads a type from it) and Microsoft.Data.SqlClient.SNI is a real native dll for the
+    unmanaged resolver (its Windows RID file is the one flattened). Newtonsoft.Json itself lands there too, as Bson's own
+    dependency, and is never the file the resolver finds - the host's bin has that one, and the resolver hook runs only
+    when ordinary probing has already missed. The SNI package is here for its native dll alone - nothing in this library
+    speaks to SQL Server - so any version that restores will do; it tracks the client's version only because central
+    package management allows one version per package id.
   -->
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json.Bson" />

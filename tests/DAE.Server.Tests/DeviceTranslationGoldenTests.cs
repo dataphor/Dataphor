@@ -156,6 +156,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The expressions this device refuses to translate, with the error code each refusal must carry.</summary>
 		protected abstract UnsupportedCase[] UnsupportedCases { get; }
 
+		/// <summary>
+		/// Connection-string text every connection this device opens must carry, whatever the device definition asked for -
+		/// a setting the device defaults because a definition written for an earlier release does not name it and would
+		/// otherwise stop connecting. Empty for a device that defaults nothing.
+		/// </summary>
+		protected virtual string[] RequiredConnectionStringText => [];
+
 		protected override string[] Libraries => ["Connection", "SQLDevice", DeviceLibraryName, RecorderLibraryName];
 
 		// The device's library pulls SQLDevice and Connection in as requisites; the recorder is registered for its
@@ -635,6 +642,38 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so nothing proves the recorder is the connection it uses.");
 			foreach (string connection in connections)
 				Assert.That(connection, Does.Contain(UnreachableServerName), String.Format("The device opened a connection to something other than the unreachable placeholder server: {0}", connection));
+		}
+
+		/// <summary>
+		/// Every connection string the device built carries the settings it defaults for compatibility with the release
+		/// before this one. The create device statement names a server, a database and integrated security and nothing
+		/// else - the shape of nearly every device definition a customer has - so whatever a default has to supply for
+		/// such a definition to keep connecting has to be in the string the device handed its connection class.
+		/// </summary>
+		/// <remarks>
+		/// The device's own ConnectionParameters setting still overrides these: SQLDevice.GetConnectionParameters applies
+		/// it after the connection-string builder has run. That precedence is not asserted here because this fixture's
+		/// device is created once and shared by every case; it is stated where the default is set.
+		/// </remarks>
+		[Test]
+		public void EveryConnectionCarriesTheDevicesCompatibilityDefaults()
+		{
+			if (RequiredConnectionStringText.Length == 0)
+				Assert.Pass("This device defaults nothing into the connection strings it builds.");
+
+			string[] connections =
+				EvaluateString("SQLRecorderConnections()")
+					.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so there is no connection string to read.");
+			foreach (string connection in connections)
+				foreach (string required in RequiredConnectionStringText)
+					Assert.That
+					(
+						connection,
+						Does.Contain(required),
+						String.Format("A device definition that names nothing but its server, database and security must still get {0}, and this connection string has not got it: {1}", required, connection)
+					);
 		}
 
 		/// <summary>At most this many of the problems are listed; a failure that names every file of the corpus is unreadable.</summary>

@@ -12,7 +12,7 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
-  <!-- No SQL client package of its own: MSSQLStore's using of System.Data.SqlClient comes transitively from Server.csproj, which references that package for the SQL Server connection classes in src\engine\Server\Connection\. The move to Microsoft.Data.SqlClient is device-mssql-port's, and this store follows it because it shares the client. -->
+  <!-- No SQL client package of its own: MSSQLStore's using of Microsoft.Data.SqlClient comes transitively from Server.csproj, which references that package for the SQL Server connection classes in src\engine\Server\Connection\. The store shares that client deliberately, so a device and the catalog store on one server talk to SQL Server through one driver. -->
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.csproj" />
     <ProjectReference Include="..\DAE\DAE.csproj" />

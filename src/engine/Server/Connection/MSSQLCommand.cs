@@ -9,7 +9,7 @@ using System.IO;
 using System.Text;
 using System.Reflection;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Alphora.Dataphor.DAE.Connection
 {

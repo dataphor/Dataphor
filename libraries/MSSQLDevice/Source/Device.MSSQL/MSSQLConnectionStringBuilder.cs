@@ -54,8 +54,20 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
 	public class MSSQLADODotNetConnectionStringBuilder : ConnectionStringBuilder
 	{
+		/// <remarks>
+		/// Microsoft.Data.SqlClient, which replaced System.Data.SqlClient in release 4 (device-mssql-port), defaults Encrypt
+		/// to on and then validates the server's certificate; System.Data.SqlClient did neither. So a device definition that
+		/// named a server and a database and nothing else - which is most of them - would stop connecting to a SQL Server with
+		/// a self-signed or absent certificate, which is the ordinary state of an internal one. Encrypt=False rather than
+		/// TrustServerCertificate=True because the two are not the same thing and only the first is what 3.1 did: the second
+		/// encrypts and accepts any certificate, which is a *new* behaviour, and choosing it would quietly change what every
+		/// existing deployment negotiates. A deployment that wants encryption sets it on the device or the device session
+		/// rather than losing it here: 'ConnectionParameters' = 'Encrypt=True' (or Strict, or TrustServerCertificate=False) is
+		/// applied by SQLDevice.GetConnectionParameters after this builder has run, so the device's own setting wins.
+		/// </remarks>
 		public MSSQLADODotNetConnectionStringBuilder()
 		{
+			_parameters.AddOrUpdate("Encrypt", "False");
 			_legend.AddOrUpdate("ServerName", "server");
 			_legend.AddOrUpdate("DatabaseName", "database");
 			_legend.AddOrUpdate("UserName", "user id");

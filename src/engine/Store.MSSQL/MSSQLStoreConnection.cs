@@ -16,7 +16,7 @@ using Alphora.Dataphor.DAE.Connection;
 #else
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 #endif
 
 namespace Alphora.Dataphor.DAE.Store.MSSQL

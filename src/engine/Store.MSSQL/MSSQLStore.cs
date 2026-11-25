@@ -12,7 +12,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -36,6 +36,18 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 			// The base's ConnectionString setter allows this because InternalInitialize runs before the store is initialized,
 			// and every store connection, the catalog device's own included, is built from ConnectionString.
 			builder["MultipleActiveResultSets"] = "True";
+
+			// Microsoft.Data.SqlClient, which replaced System.Data.SqlClient in release 4 (device-mssql-port), defaults Encrypt to
+			// on and then validates the server's certificate; System.Data.SqlClient did neither. A catalogstoreconnectionstring a
+			// deployment wrote for release 3 names a server, a database and its credentials and nothing else, so it would stop
+			// connecting to a SQL Server with a self-signed or absent certificate - the ordinary state of an internal one - and the
+			// server would fail to start. Encrypt=False is what release 3 negotiated, so that is the default; unlike the option
+			// above it is only a default, because a deployment that has chosen either of these two settings has chosen how this
+			// connection is protected and must be left alone. TrustServerCertificate counts as having chosen: it is the other way
+			// to let an untrusted certificate through, and defaulting Encrypt beside it would contradict it.
+			if (!builder.ContainsKey("Encrypt") && !builder.ContainsKey("TrustServerCertificate"))
+				builder["Encrypt"] = "False";
+
 			ConnectionString = builder.ConnectionString;
 			_supportsMARS = true;
 

@@ -23,11 +23,6 @@
     <ProjectReference Include="..\Base\Base.csproj" />
   </ItemGroup>
 
-  <!-- NOTE: only for Engine.Dispose (Server\Engine.cs), which clears the SqlClient connection pools as 3.1 did; when the SQL Server code moves to Microsoft.Data.SqlClient (device-mssql-port), that call and this reference must follow it. -->
-  <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" />
-  </ItemGroup>
-
   <ItemGroup>
     <Compile Include="Compiling\Normalizer.cs" />
     <Compile Include="Compiling\Visitors\DetermineAccessPathVisitor.cs" />

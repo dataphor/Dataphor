@@ -12,7 +12,9 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.9.1" />
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
-    <PackageVersion Include="Microsoft.Data.SqlClient.SNI.runtime" Version="4.0.0" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.1.2" />
+    <!-- The native SQL Server network interface, which Microsoft.Data.SqlClient 7.1.2 depends on; one version per package id, so it tracks that client. -->
+    <PackageVersion Include="Microsoft.Data.SqlClient.SNI.runtime" Version="7.1.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.15" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
@@ -21,7 +23,6 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
     <PackageVersion Include="System.Data.Odbc" Version="10.0.15" />
     <PackageVersion Include="System.Data.OleDb" Version="10.0.15" />
-    <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
     <PackageVersion Include="System.Data.SQLite.Core" Version="1.0.119" />
     <PackageVersion Include="System.ServiceModel.Http" Version="10.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="10.1.0" />
