@@ -884,7 +884,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	// operator IfNil(AValue : generic, AValue : generic) : generic;
+	// operator IfNil(const ANilableValue : generic, const AReplacementValue : generic) : generic;
     public class IfNilNode : InstructionNodeBase
     {
 		public override void DetermineCharacteristics(Plan plan)
@@ -942,9 +942,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			// The node read is the one left in Nodes[index] at run time, not the one base.DetermineDataType asked to lend:
-			// DetermineDataType below may replace either argument node afterwards. Compiler.Upcast returns the node
-			// unchanged today, but Compiler.ConvertNode genuinely wraps it in a conversion call - which is still correct, and
-			// for the reason the rule exists: a conversion computes a new value from the one it was lent, its own const
+			// the DetermineDataType override above may replace either argument node afterwards. Compiler.Upcast returns the
+			// node unchanged today, but Compiler.ConvertNode genuinely wraps it in a conversion call - which is still correct,
+			// and for the reason the rule exists: a conversion computes a new value from the one it was lent, its own const
 			// cleanup leaves the lent value alone, and it answers ReturnsByReference false, so what arrives here is a value
 			// this node owns and must release.
 			PlanNode chosen = Nodes[0];
@@ -955,19 +955,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				result = chosen.Execute(program);
 			}
 
-			// Copy before release, never the other way round: releasing the original first would leave the copy reading a
-			// stream the manager no longer knows about, which reports as StreamID (n) not found. Both calls fall through to
-			// nothing for a null, so IfNil(nil, nil) needs no special case.
-			object copy = DataValue.CopyValue(program.ValueManager, result);
-			// NOTE: handing back a lent value as it stands, and copying only where the node gave rather than lent, would save
-			// one allocation and one copy per call on the computed path. It is not done because this node would then sometimes
-			// be lending its own result, so it would have to answer ReturnsByReference for its own consumer - and which of the
-			// two arguments it chose is known per execution, where ReturnsByReference is settled once at compile time. Revisit
-			// if a second node ever needs to express a per-execution ownership, which would be the point at which the engine
-			// needs a way to say it.
-			if (!chosen.ReturnsByReference)
-				DataValue.DisposeValue(program.ValueManager, result);
-			return copy;
+			try
+			{
+				// Copy before release, never the other way round: releasing the original first would leave the copy reading a
+				// stream the manager no longer knows about, which reports as StreamID (n) not found. Both calls fall through to
+				// nothing for a null, so IfNil(nil, nil) needs no special case.
+				return DataValue.CopyValue(program.ValueManager, result);
+			}
+			finally
+			{
+				// The release is in a finally so that a copy which raises part way through does not orphan the value this node
+				// owns either: the same rule on the error path, as InstructionNodeBase.ReleaseUncalledOperand is for a call whose
+				// argument raised.
+				// NOTE: handing back a lent value as it stands, and copying only where the node gave rather than lent, would save
+				// one allocation and one copy per call on the computed path. It is not done because this node would then sometimes
+				// be lending its own result, so it would have to answer ReturnsByReference for its own consumer - and which of the
+				// two arguments it chose is known per execution, where ReturnsByReference is settled once at compile time. Revisit
+				// if a second node ever needs to express a per-execution ownership, which would be the point at which the engine
+				// needs a way to say it.
+				if (!chosen.ReturnsByReference)
+					DataValue.DisposeValue(program.ValueManager, result);
+			}
 		}
     }
     

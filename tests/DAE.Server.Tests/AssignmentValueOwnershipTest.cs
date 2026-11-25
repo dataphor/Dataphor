@@ -67,6 +67,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Every case whose script raises also asserts on the error - that it reached the caller, or that the script's own
 	/// handler saw it - because a case that silently stopped raising would otherwise pass while testing nothing.
 	/// </remarks>
+	// NOTE: this fixture is the index of one rule and every ownership ticket adds to it - about 1,330 lines and a class
+	// summary of fifty at bug-ifnil-leaks-the-value-it-copies. If it outgrows roughly 1,500 lines, split it along the
+	// three rules the summary already names - a slot, a call's operands, a scope - rather than growing the summary;
+	// the split is deferred while sibling ownership tickets still have cases in flight against this file.
 	[TestFixture]
 	public class AssignmentValueOwnershipTest : InProcessTestFixture
 	{
