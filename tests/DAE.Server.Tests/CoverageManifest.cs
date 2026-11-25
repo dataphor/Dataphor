@@ -217,6 +217,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (entry.PartOf != null)
 					Problem("\"partOf\" is allowed only on a fragment entry.");
 
+				// NOTE: a needs-database-server entry cannot also record a known failure - neither "ticket" nor "error" is
+				// allowed on it - so a script that needs a server and fails for a cause a ticket owns has no status today.
+				// Nothing needs one: all three such scripts pass. If a fourth arrives failing, prefer a field orthogonal to
+				// the status ("needs a server" beside pass/known-failure) over letting this status carry ticket and error,
+				// which would make four of the five statuses mean two things at once.
 				if (status == CoverageStatus.Pass || status == CoverageStatus.NeedsDatabaseServer)
 				{
 					if (entry.Ticket != null)

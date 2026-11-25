@@ -3,8 +3,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-using System;
-
 using NUnit.Framework;
 
 using Alphora.Dataphor.DAE.Connection;
@@ -42,17 +40,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	[TestFixture]
 	public class MSSQLTextParameterTest
 	{
-		/// <summary>Names a SQL Server; nothing here needs a database of its own, so whatever database the login defaults to serves.</summary>
-		private const string ServerVariableName = "DATAPHOR_TEST_MSSQL";
-
-		private static string _serverConnectionString;
+		/// <summary>Whatever the variable holds: nothing here needs a database of its own, so the database the login defaults to serves.</summary>
+		private static string ServerConnectionString => TestEnvironment.MSSQLConnectionString;
 
 		[OneTimeSetUp]
 		public void RequireServer()
 		{
-			_serverConnectionString = Environment.GetEnvironmentVariable(ServerVariableName);
-			if (String.IsNullOrEmpty(_serverConnectionString))
-				Assert.Ignore(String.Format("Set {0} to a SQL Server connection string to run the text parameter cases against SQL Server; MSSQLStoreContractTests reads the same variable and its own message says what one looks like.", ServerVariableName));
+			if (!TestEnvironment.MSSQLConfigured)
+				Assert.Ignore(TestEnvironment.MSSQLNotConfigured("run the text parameter cases"));
 		}
 
 		/// <summary>
@@ -76,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			// accented letter intact was converted to a code page, rather than lost for some other reason.
 			const string probe = "中文 αβγ Привет é";
 
-			using (MSSQLConnection connection = new MSSQLConnection(_serverConnectionString))
+			using (MSSQLConnection connection = new MSSQLConnection(ServerConnectionString))
 			using (SQLCommand command = connection.CreateCommand(true))
 			{
 				command.CursorLocation = location;
@@ -110,7 +105,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			const int declaredLength = 5000;
 			const string probe = "中文 αβγ Привет é";
 
-			using (MSSQLConnection connection = new MSSQLConnection(_serverConnectionString))
+			using (MSSQLConnection connection = new MSSQLConnection(ServerConnectionString))
 			using (SQLCommand command = connection.CreateCommand(true))
 			{
 				command.CursorLocation = location;

@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Text.RegularExpressions;
 
 using NUnit.Framework;
 
@@ -75,8 +76,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// owns that question (it has a third arm for this script, with the evidence and the proposed change).
 		/// </para>
 		/// <para>
-		/// The substring stops at the name: the rest of the message is the operator's generated name, which carries an object
-		/// id that changes between runs.
+		/// A pattern rather than a substring, and it requires the object id: what the broken statement prints is a row of
+		/// Objects.Name, which is the operator's name with its object id appended, and only the catalog spells an operator
+		/// that way - an error raised anywhere inside the corpus names the operator by its signature or names a table. So a
+		/// regression in the corpus cannot be mistaken for this known failure, where "contains TestDevice" could be.
 		/// </para>
 		/// <para>
 		/// What this fixture therefore proves today, and it is not nothing: the three libraries register, both SQL Server
@@ -89,7 +92,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </para>
 		/// </remarks>
 		private const string KnownFailureTicket = "test-pre-3-1-scripts-policy";
-		private const string KnownFailureError = "TestFramework.Coverage.Devices.TestDevice";
+		private static readonly Regex KnownFailureError =
+			new Regex(@"TestFramework\.Coverage\.Devices\.TestDevice[0-9]+", RegexOptions.CultureInvariant);
 
 		/// <summary>
 		/// The library folders the server carries. Frontend first in the registration below, because System.Internet's
@@ -156,14 +160,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// declares it has been registered.
 		/// </para>
 		/// </remarks>
-		// NOTE: the device under test is started here, in a statement of its own, and not left to the script's own
-		// EnsureDeviceStarted. Measured 2026-11-25: a device first started inside the script - which the coverage harness runs
-		// nested in one statement, so one transaction - has no rows in DeviceOperators for the rest of that transaction,
-		// although starting a device is what creates its operator maps, and the script's next statement asks for exactly
-		// those. Started here instead, in its own statement and so its own transaction, the maps are there. That the maps are
-		// invisible to the transaction that created them looks like a defect rather than a rule, but it is not this ticket's:
-		// every other caller starts a device from a statement of its own, which is why nothing else in the suite sees it. If a
-		// script ever has to create and first use a SQL device inside one transaction, this is the behaviour to chase.
+		// The device under test is started here, in a statement of its own, rather than being left to the script's own
+		// EnsureDeviceStarted. Measured 2026-11-25: started inside the script - which this fixture runs nested in one
+		// statement, so one transaction - its operator maps are written but the script's next statement,
+		// "if not exists (DeviceOperators where Device_Name = ObjectName('TestDevice')) then raise Error('WTF')", still
+		// fires. That is the catalog read rule rather than a defect: a D4 query over a catalog table the store answers
+		// (CatalogDeviceTable) opens a connection of its own and sees committed data only, never the calling transaction's
+		// uncommitted store writes - docs/architecture/catalog-and-store.md, "Store transactions". Started here, in its own
+		// statement and so its own transaction, the maps are committed before the script reads for them.
 		private static string Registration()
 		{
 			return
@@ -215,8 +219,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			string error = RunTheScript();
 			if (error == null)
 				Assert.Fail(String.Format("{0} now runs to the end. Its known failure ({1}) has gone: record what it does now here, which is what this fixture is for.", ScriptName, KnownFailureTicket));
-			if (!error.Contains(KnownFailureError, StringComparison.Ordinal))
-				Assert.Fail(String.Format("known-failure ({0}): expected the error to contain \"{1}\", but {2} failed with: {3}", KnownFailureTicket, KnownFailureError, ScriptName, error));
+			if (!KnownFailureError.IsMatch(error))
+				Assert.Fail(String.Format("known-failure ({0}): expected the error to match \"{1}\", but {2} failed with: {3}", KnownFailureTicket, KnownFailureError, ScriptName, error));
 			Assert.Warn(String.Format("known-failure ({0}): {1} failed with: {2}", KnownFailureTicket, ScriptName, error));
 		}
 

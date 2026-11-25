@@ -373,6 +373,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// not connect at all. They are carried as the device's ConnectionParameters, which SQLDevice.GetConnectionParameters
 		/// applies after the builder has run and which is therefore what overrides the builder's Encrypt=False default.</para>
 		/// </remarks>
+		// NOTE: a password in the variable reaches the test server's catalog in clear text - it becomes an attribute of the
+		// device definition below - and the catalog of a run kept with DATAPHOR_TEST_LOGGING=1 stays on disk afterwards. That
+		// is acceptable for the integrated-security and LocalDB values these passes are pointed at. If a pass ever has to
+		// reach a server through a SQL login whose password matters, create the device with integrated security off and give
+		// it a device user instead, so that the password is not in the definition.
 		public static string MSSQLDeviceAttributes(string databaseName)
 		{
 			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
@@ -439,8 +444,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// as the run directory above is named after the process, and accept that a crashed run then leaves one behind per run.
 		public static void EmptyMSSQLDatabase(string databaseName)
 		{
-			Execute(MSSQLConnectionStringFor("master"), String.Format("if db_id('{0}') is null create database [{0}];", databaseName));
-			Execute
+			ExecuteOnMSSQL(MSSQLConnectionStringFor("master"), String.Format("if db_id('{0}') is null create database [{0}];", databaseName));
+			ExecuteOnMSSQL
 			(
 				MSSQLConnectionStringFor(databaseName),
 				"declare @statements nvarchar(max) = N'';" +
@@ -450,9 +455,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			);
 		}
 
+		/// <summary>Runs one statement on the configured server, for a pass's own housekeeping.</summary>
 		// Through the connection class the device and the store share, so that these housekeeping statements reach the server
-		// the way the passes they prepare for do.
-		private static void Execute(string connectionString, string statement)
+		// the way the passes they prepare for do. Public because MSSQLStoreContractTests prepares its own database with it:
+		// one place reads the variable, and one place reaches the server to prepare for a pass.
+		public static void ExecuteOnMSSQL(string connectionString, string statement)
 		{
 			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
 				connection.Execute(statement);

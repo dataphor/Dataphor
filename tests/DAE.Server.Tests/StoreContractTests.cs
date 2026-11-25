@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 
 using NUnit.Framework;
@@ -736,13 +735,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	[TestFixture]
 	public class MSSQLStoreContractTests : StoreContractTests
 	{
-		/// <summary>Names a SQL Server, not a database: the fixture puts its own database into whatever is set here.</summary>
-		/// <remarks>"Data Source=(localdb)\MSSQLLocalDB;Integrated Security=SSPI" is what this was proved against.</remarks>
-		private const string ServerVariableName = "DATAPHOR_TEST_MSSQL";
-
 		private const string DatabaseName = "DataphorStoreContract";
-
-		private static string _serverConnectionString;
 
 		/// <summary>The test directory the fixture's one database was last emptied for; see <see cref="CreateStore"/>.</summary>
 		private static string _emptiedForDirectory;
@@ -750,9 +743,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[OneTimeSetUp]
 		public void RequireServer()
 		{
-			_serverConnectionString = Environment.GetEnvironmentVariable(ServerVariableName);
-			if (String.IsNullOrEmpty(_serverConnectionString))
-				Assert.Ignore(String.Format("Set {0} to a SQL Server connection string to run the store contract against SQL Server, for example \"Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=SSPI\".", ServerVariableName));
+			if (!TestEnvironment.MSSQLConfigured)
+				Assert.Ignore(TestEnvironment.MSSQLNotConfigured("run the catalog store contract against SQL Server"));
 
 			// A run that crashed before its teardown, or one kept with DATAPHOR_TEST_LOGGING=1, leaves the database behind;
 			// dropping it outright here starts this run on a database with nothing of another run's in it. The first
@@ -764,7 +756,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[OneTimeTearDown]
 		public void DropDatabaseAfterFixture()
 		{
-			if (!String.IsNullOrEmpty(_serverConnectionString) && !TestEnvironment.KeepFiles)
+			if (TestEnvironment.MSSQLConfigured && !TestEnvironment.KeepFiles)
 				DropDatabase();
 		}
 
@@ -772,7 +764,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		protected override SQLStore CreateStore(string directory)
 		{
 			MSSQLStore store = new MSSQLStore();
-			store.ConnectionString = ConnectionStringFor(DatabaseName);
+			store.ConnectionString = TestEnvironment.MSSQLConnectionStringFor(DatabaseName);
 			store.Initialize();
 			EmptyDatabaseForNewTest(directory);
 			return store;
@@ -788,23 +780,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			_emptiedForDirectory = directory;
 		}
 
-		// The supplied string with <paramref name="databaseName"/> named in it. Either spelling of the keyword may be in what
-		// the developer set, so Database is removed and Initial Catalog set.
-		private static string ConnectionStringFor(string databaseName)
-		{
-			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-			builder.ConnectionString = _serverConnectionString;
-			builder.Remove("Database");
-			builder["Initial Catalog"] = databaseName;
-			return builder.ConnectionString;
-		}
-
 		// Single user first: a pooled connection left over from an earlier run blocks DROP DATABASE otherwise.
 		private static void DropDatabase()
 		{
-			Execute
+			TestEnvironment.ExecuteOnMSSQL
 			(
-				ConnectionStringFor("master"),
+				TestEnvironment.MSSQLConnectionStringFor("master"),
 				String.Format
 				(
 					"if db_id('{0}') is not null begin alter database [{0}] set single_user with rollback immediate; drop database [{0}]; end",
@@ -819,21 +800,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// teardown rather than itself: drop the constraints first, or order the drops, if that day comes.
 		private static void DropTables()
 		{
-			Execute
+			TestEnvironment.ExecuteOnMSSQL
 			(
-				ConnectionStringFor(DatabaseName),
+				TestEnvironment.MSSQLConnectionStringFor(DatabaseName),
 				"declare @statements nvarchar(max) = N''; select @statements = @statements + N'drop table [' + name + N'];' from sys.tables; exec sp_executesql @statements;"
 			);
-		}
-
-		// Through the store's own connection class rather than SqlConnection directly, so that these housekeeping statements
-		// reach the server the way every statement of the contract does. They do not go through the store, so they do not get
-		// its connection-string defaults: what DATAPHOR_TEST_MSSQL names has to be reachable as it stands, which for a server
-		// whose certificate this machine does not trust means saying so in the variable (see MSSQLStoreConnectionStringTest).
-		private static void Execute(string connectionString, string statement)
-		{
-			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
-				connection.Execute(statement);
 		}
 	}
 }
