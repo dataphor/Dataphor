@@ -508,7 +508,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		/// <summary>References each dynamic tag in the given metadata, if the metadata for this object does not already contain it.</summary>
+		/// <summary>Inherits each dynamic tag in the given metadata into the metadata for this object, replacing any tag of the same name.</summary>
+		/// <remarks>
+		/// Static tags are skipped. A dynamic tag this object does not have is referenced; a tag it <i>does</i> have is
+		/// <b>replaced</b> by the inherited one, so the given metadata wins every name the two have in common. A caller whose
+		/// own values must survive therefore merges them back afterwards, over metadata of its own rather than a collection
+		/// shared with whatever it inherited from - which is what the create-view and create-scalar-type sites in
+		/// <c>Compiler</c> do.
+		/// </remarks>
 		public void InheritMetaData(MetaData metaData)
 		{
 			if (metaData != null && metaData.HasTags())

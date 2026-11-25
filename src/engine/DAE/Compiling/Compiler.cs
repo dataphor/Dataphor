@@ -4422,7 +4422,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			node.View.IsGenerated = localStatement.IsSession || (sourceTableName != null);
 			node.View.Owner = plan.User;
 			node.View.Library = node.View.IsGenerated ? null : plan.CurrentLibrary;
-			node.View.MetaData = localStatement.MetaData;
+			// A copy, as at the other create statements: the view owns its metadata, the inherit and merge below write into
+			// it, and an alteration edits it in place. Sharing the statement's collection would also defeat the merge-back at
+			// the end of this block, which is what makes the view's own tags win over the ones it inherits from its source.
+			node.View.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 			if (!plan.IsEngine) // if this is a repository, a view could be parameterized, because it will never be executed
 				plan.Symbols.PushWindow(0); // make sure the view expression is evaluated in a private context
 			try

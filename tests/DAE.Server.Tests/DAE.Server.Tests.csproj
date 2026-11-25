@@ -91,6 +91,7 @@
     <Compile Include="TestServerInstance.cs" />
     <Compile Include="TransactionBeginTest.cs" />
     <Compile Include="TypeChangeSummaryTest.cs" />
+    <Compile Include="ViewTagPrecedenceTest.cs" />
   </ItemGroup>
 
   <!-- The coverage manifest (see CoverageManifest.cs), read from the assembly so that an edit to it rebuilds the tests and nothing reads a stale copy. -->
