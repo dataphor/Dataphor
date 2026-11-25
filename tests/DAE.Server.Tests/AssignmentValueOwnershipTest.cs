@@ -39,6 +39,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// (bug-an-operator-argument-is-released-by-the-wrong-owner). Reading ownership off the modifier held a stream for the
 	/// life of the session on every call with a const operand, which is most calls, and released a row's own column out
 	/// from under the row whenever one was read.
+	/// The two IfNil cases are the same rule at the one site that sits outside the machinery enforcing it: a node that
+	/// overrides InternalExecute(Program) itself is never reached by CleanupOperand, and IfNil copied the argument it
+	/// chose and released nothing, so every call over a value the call owned held a stream for the life of the session
+	/// (bug-ifnil-leaks-the-value-it-copies); the second of the two is the loan, which that fix must not start releasing.
 	/// ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated is the error path of that same operand
 	/// cleanup: it used to be skipped altogether when an argument of a call raised, because the execute shapes
 	/// evaluated their arguments before entering the try whose finally cleans them up, so every argument evaluated
@@ -873,6 +877,108 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						)
 					);
 				}
+			);
+		}
+
+		/// <summary>
+		/// IfNil, the one node with a const operand that is outside the rule's own machinery: it overrides
+		/// InternalExecute(Program) itself, so InstructionNodeBase.CleanupOperand never runs for it, and it copied the
+		/// argument it chose and released nothing - one stream for the life of the session per call over a value the
+		/// call owned (bug-ifnil-leaks-the-value-it-copies). Both shapes that leaked are here: the first argument
+		/// computed, and a nil first argument with a computed replacement, because the two paths read different nodes
+		/// and a fix that reached one need not reach the other. Each reads the result afterwards, which is the half
+		/// the count cannot see: releasing the chosen value without an independent copy of it would hand back a
+		/// released stream and balance the count all the same.
+		/// </summary>
+		[Test]
+		public void IfNilReleasesTheValueComputedForIt()
+		{
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"a computed first argument",
+						String.Format
+						(
+							@"
+								begin
+									var LB : Binary;
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+									begin
+										LB := IfNil(Binary('0001'), Binary('0002'));
+										if LB.Value = '0001' then
+											LSeen := LSeen + 1;
+									end;
+									if LSeen <> {0} then
+										raise Error('IfNil did not return the value computed for it.');
+								end;
+							",
+							AssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a nil first argument",
+						String.Format
+						(
+							@"
+								begin
+									var LNil : Binary;
+									var LB : Binary;
+									var LSeen : Integer := 0;
+									for LI : Integer := 1 to {0} do
+									begin
+										LB := IfNil(LNil, Binary('0002'));
+										if LB.Value = '0002' then
+											LSeen := LSeen + 1;
+									end;
+									if LSeen <> {0} then
+										raise Error('IfNil did not return the replacement computed for it.');
+								end;
+							",
+							AssignmentCount
+						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// The other side of IfNil's decision, and the path a fix the other way round breaks: given a variable, IfNil
+		/// is lent the slot's own value, so it must release nothing. This one passed before the fix and is here to keep
+		/// passing - a release here would leave the caller's variable naming a released stream, and the count would
+		/// balance either way, so the assertion that matters is that the variable is still readable afterwards.
+		/// </summary>
+		[Test]
+		public void IfNilGivenAVariableLeavesTheCallersValueAlone()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LS : Binary := Binary('0001');
+							var LB : Binary;
+							var LSeen : Integer := 0;
+							for LI : Integer := 1 to {0} do
+							begin
+								LB := IfNil(LS, Binary('0002'));
+								if LB.Value = '0001' then
+									LSeen := LSeen + 1;
+							end;
+							if LSeen <> {0} then
+								raise Error('IfNil did not return the variable''s value.');
+							if LS.Value <> '0001' then
+								raise Error('IfNil released the caller''s value.');
+						end;
+					",
+					AssignmentCount
+				)
 			);
 		}
 
