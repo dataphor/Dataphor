@@ -31,7 +31,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string Explode = "iExplode";
         public const string On = "iOn";
         public const string Adorn = "iAdorn";
-        public const string Redefine = "iRedefine";
         public const string Union = "iUnion";
         public const string Intersect = "iIntersect";
         public const string Difference = "iDifference";

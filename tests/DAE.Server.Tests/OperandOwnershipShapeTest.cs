@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	///
 	/// Nothing used to check the set. It was counted by hand into that page, counted wrong, and the two nodes the
 	/// count missed were leaking a managed stream per stream-backed column per side on every row comparison
-	/// (bug-row-equality-leaks-the-rows-it-compares). The ten that re-override the entry point from one of the five
+	/// (bug-row-equality-leaks-the-rows-it-compares). The nine that re-override the entry point from one of the five
 	/// shapes are the dangerous ones: they read as ordinary instruction nodes while skipping their own shape's call to
 	/// the cleanup. So the set is reflected over the engine assembly and compared with the list below, and a node that
 	/// joins or leaves it has to say which here.
@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// Every non-table node that declares InternalExecute(Program) itself, reviewed against the const-operand rule.
 		/// The five argument shapes are on it because the entry point is theirs to declare - they are where the cleanup
-		/// is called from - and the thirteen after them because each was read and found to honour the rule or to have no
+		/// is called from - and the twelve after them because each was read and found to honour the rule or to have no
 		/// operand modifiers in play.
 		/// </summary>
 		private static readonly string[] ReviewedNodes =
@@ -62,7 +62,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"NilaryInstructionNode",
 			"RowEqualNode",
 			"RowExtendNode",
-			"RowRedefineNode",
 			"TableEqualNode",
 			"TableGreaterNode",
 			"TableInclusiveGreaterNode",
@@ -99,7 +98,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							+ " ReviewedNodes in this fixture and to that page."
 					);
 
-					// The list is of simple names, so that it reads as the set rather than as eighteen namespace-qualified
+					// The list is of simple names, so that it reads as the set rather than as seventeen namespace-qualified
 					// strings. Two engine nodes sharing one simple name would then match the list while only one of them had
 					// been reviewed, which is what this catches.
 					Assert.That

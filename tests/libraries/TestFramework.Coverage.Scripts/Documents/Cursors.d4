@@ -247,7 +247,6 @@ drop table UpRepro;
 		QuotaTable -> Navigable
 		ExplodeTable -> Navgiable
 		ExtendTable -> Navigable
-		RedefineTable -> Navigable
 		RenameTable -> Navigable, (BackwardsNavigable, Searchable if Source supported)
 		UnionTable -> Navigable, BackwardsNavigable
 		SearchedDifferenceTable -> Navigable, (BackwardsNavigable if left supported)

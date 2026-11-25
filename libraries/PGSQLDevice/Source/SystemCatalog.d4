@@ -539,7 +539,6 @@ begin
 		create operator System.iOrder(table) class "SQLDevice.SQLOrder" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iRename(table) class "SQLDevice.SQLRename" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iRename(row) class "SQLDevice.SQLRename" static tags {{ DAE.IsSystem = "true" }},
-		create operator System.iRedefine(table) class "SQLDevice.SQLRedefine" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iAdorn(table) class "SQLDevice.SQLAdorn" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iExtend(table) class "SQLDevice.SQLExtend" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iAggregate(table) class "SQLDevice.SQLAggregate" static tags {{ DAE.IsSystem = "true" }}, 

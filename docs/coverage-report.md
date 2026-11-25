@@ -93,27 +93,25 @@ It also found a fourth file of the dead compiled kind, `src/engine/Server/Connec
 
 ## Wholly untested files the area rates hide
 
-The generated tables print a per-file breakdown only for an area marked `gap`. Twenty-one source files in areas marked `covered` are themselves at **0 %**, 1,300 coverable lines between them, and nothing below names one. They are listed here because that is the report's whole subject. The tool now prints this list itself, under `## Wholly untested files`, but the generated half of this page was collected before that change and has not been re-collected, so this hand-written section is what stands in. When a later pass carries in a fresh generated half, delete this section: the generated one replaces the table. The investigation paragraphs below it - the `redefine` finding, and the note that nine of the files have not been looked at - are the part worth keeping.
+The generated tables print a per-file breakdown only for an area marked `gap`. Twenty-one source files in areas marked `covered` were themselves at **0 %** on this run, 1,300 coverable lines between them, and nothing below names one. Two of the twenty-one have since been deleted as unreachable (the paragraph below the table says so), leaving the nineteen listed here and 978 lines; the figures are this run's minus those two files, not a fresh measurement. They are listed here because that is the report's whole subject. The tool now prints this list itself, under `## Wholly untested files`, but the generated half of this page was collected before that change and has not been re-collected, so this hand-written section is what stands in. When a later pass carries in a fresh generated half, delete this section: the generated one replaces the table. The investigation paragraphs below it - the `redefine` finding, and the note that nine of the files have not been looked at - are the part worth keeping.
 
-The eleven of 20 lines or more:
+The nine of 20 lines or more:
 
 | File | Coverable | Area, and that area's rate |
 |---|---:|---|
-| src/engine/DAE/Runtime.Instructions/RedefineNode.cs | 257 | Plan nodes, 66.6 % |
 | src/engine/DAE/Runtime.Data/ObjectMarshal.cs | 183 | Runtime values, 60.4 % |
 | src/engine/DAE/Runtime.Data/NativeMap.cs | 159 | Runtime values, 60.4 % |
 | src/engine/DAE/Runtime.Data/NativeRowMap.cs | 130 | Runtime values, 60.4 % |
 | src/engine/Server/Server/RemoteServerBatch.cs | 111 | Server and sessions, 65.7 % |
 | src/engine/DAE/Runtime.Instructions/BinaryNodes.cs | 96 | Plan nodes, 66.6 % |
 | src/engine/DAE/Runtime.Data/NativeSet.cs | 84 | Runtime values, 60.4 % |
-| src/engine/DAE/Runtime.Data/RedefineTable.cs | 65 | Runtime values, 60.4 % |
 | src/engine/DAE/Runtime.Instructions/ObjectNodes.cs | 48 | Plan nodes, 66.6 % |
 | src/engine/Server/Server/RemoteServerScript.cs | 41 | Server and sessions, 65.7 % |
 | src/engine/DAE/Utility.cs | 21 | Engine errors and registration, 60.6 % |
 
 The remaining ten are exception classes and small helpers of 17 lines or fewer.
 
-**The largest of them is not untested, it is unreachable.** `RedefineNode.cs` (257) and `RedefineTable.cs` (65), with the class `RowRedefineNode` inside the covered file `Runtime.Instructions/RowNodes.cs` (124), are the three implementations of the D4 `redefine` operator, 446 lines at exactly zero hits - while `redefine` itself is executed by `Exists`, `RowLibrary`, `Cursors` and `DML`, four scripts that all pass. The reason is in `src/engine/DAE/Compiling/Compiler.cs`: `EmitRedefineNode` puts the whole node-emitting branch behind `#if USEREDEFINENODE`, a symbol defined nowhere in the repository, and the live `#else` branch rewrites `T redefine { A := ... }` into `T add { ... Temp } remove { A } rename { Temp A }`. So the compiler cannot produce these nodes. They are nevertheless the registered D4 classes of `iRedefine(row)` and `iRedefine(table)` in `src/engine/DAE/Schema/SystemCatalog.d4`, which makes removing them a compatibility question rather than a sweep: `debt-unreachable-redefine-nodes` carries it.
+**The largest of them was not untested, it was unreachable - and it has been retired.** `RedefineNode.cs` (257) and `RedefineTable.cs` (65), with the class `RowRedefineNode` inside the covered file `Runtime.Instructions/RowNodes.cs` (124), were the three implementations of the D4 `redefine` operator, 446 coverable lines at exactly zero hits - while `redefine` itself was executed by `Exists`, `RowLibrary`, `Cursors` and `DML`, four scripts that all passed. The reason was in `src/engine/DAE/Compiling/Compiler.cs`: `EmitRedefineNode` kept the whole node-emitting branch behind `#if USEREDEFINENODE`, a symbol defined nowhere in the repository, and the live `#else` branch rewrote `T redefine { A := ... }` into `T add { ... Temp } remove { A } rename { Temp A }`, so the compiler could not produce these nodes. They were nevertheless the registered D4 classes of `iRedefine(row)` and `iRedefine(table)` in `src/engine/DAE/Schema/SystemCatalog.d4`, and calling either by name reached them only to fail at compile time on a null field the disabled branch was the sole thing that set - confirmed by running both. `debt-unreachable-redefine-nodes` retired all three classes, the two catalog declarations, the SQL devices' translation of `iRedefine(table)` and the dead conditional; `redefine` still runs through the rewrite, which is now its only implementation.
 
 None of the other nine has been investigated. Whether each is live code nothing exercises, or more code the engine can no longer reach, is the first question for whoever picks one up - this run says only that no test touched it.
 

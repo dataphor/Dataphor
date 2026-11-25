@@ -140,7 +140,6 @@
     <Compile Include="Runtime.Data\OrderTables.cs" />
     <Compile Include="Runtime.Data\ProjectTable.cs" />
     <Compile Include="Runtime.Data\QuotaTable.cs" />
-    <Compile Include="Runtime.Data\RedefineTable.cs" />
     <Compile Include="Runtime.Data\RenameTable.cs" />
     <Compile Include="Runtime.Data\RestrictTables.cs" />
     <Compile Include="Runtime.Data\RowManager.cs" />
@@ -184,7 +183,6 @@
     <Compile Include="Runtime.Instructions\PlanNode.cs" />
     <Compile Include="Runtime.Instructions\ProjectNode.cs" />
     <Compile Include="Runtime.Instructions\QuotaNode.cs" />
-    <Compile Include="Runtime.Instructions\RedefineNode.cs" />
     <Compile Include="Runtime.Instructions\RenameNode.cs" />
     <Compile Include="Runtime.Instructions\RestrictNode.cs" />
     <Compile Include="Runtime.Instructions\RowComparisonNodes.cs" />

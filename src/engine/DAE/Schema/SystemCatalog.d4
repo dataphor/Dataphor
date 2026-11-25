@@ -352,7 +352,6 @@ begin
 	create operator iRemove(const ARow : row) : row class "System.RowRemoveNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iRename(const ARow : row) : row class "System.RowRenameNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iExtend(const ARow : row) : row class "System.RowExtendNode" static tags { DAE.IsBuiltin = "True" };
-	create operator iRedefine(const ARow : row) : row class "System.RowRedefineNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iJoin(const ALeftRow : row, const ARightRow : row) : row class "System.RowJoinNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iRestrict(ATable : table, const ACondition : Boolean) : table class "System.RestrictNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iProject(ATable : table) : table class "System.ProjectNode" static tags { DAE.IsBuiltin = "True" };
@@ -366,7 +365,6 @@ begin
 	create operator iExtend(ATable : table) : table class "System.ExtendNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iRename(ATable : table) : table class "System.RenameNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iAdorn(ATable : table) : table class "System.AdornNode" static tags { DAE.IsBuiltin = "True" };
-	create operator iRedefine(ATable : table) : table class "System.RedefineNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iUnion(ALeftTable : table, ARightTable : table) : table class "System.UnionNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iDifference(ALeftTable : table, ARightTable : table) : table class "System.DifferenceNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iJoin(ALeftTable : table, ARightTable : table) : table class "System.JoinNode" static tags { DAE.IsBuiltin = "True" };
@@ -2395,8 +2393,6 @@ begin
 	grant usage on iProject(row) to role User;                                                                                                  
 	grant usage on iProject(table) to role User;                                                                                                
 	grant usage on iQuota(table, Integer) to role User;                                                                                  
-	grant usage on iRedefine(row) to role User;                                                                                                 
-	grant usage on iRedefine(table) to role User;                                                                                               
 	grant usage on iRemove(row) to role User;                                                                                                   
 	grant usage on iRemove(table) to role User;                                                                                                 
 	grant usage on iRename(row) to role User;                                                                                                   

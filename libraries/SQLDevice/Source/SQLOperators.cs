@@ -386,62 +386,6 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return statement;
 		}
     }
-
-	/*
-		select A redefine { ID := <expression> } ::=
-			select <column list>, ID from (select <column list>, <expression> as ID from A);
-	*/    
-    public class SQLRedefine : SQLDeviceOperator
-    {
-		public SQLRedefine(int iD, string name) : base(iD, name) {}
-		
-		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
-		{
-			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
-			RedefineNode redefineNode = (RedefineNode)planNode;
-			TableVar tableVar = redefineNode.TableVar;
-			Statement statement = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
-			if (localDevicePlan.IsSupported)
-			{
-				SelectExpression selectExpression = localDevicePlan.Device.EnsureUnarySelectExpression(localDevicePlan, ((TableNode)planNode.Nodes[0]).TableVar, statement, true);
-				statement = selectExpression;
-
-				localDevicePlan.Stack.Push(new Symbol(String.Empty, redefineNode.DataType.RowType));
-				try
-				{
-					localDevicePlan.CurrentQueryContext().IsExtension = true;
-					localDevicePlan.PushScalarContext();
-					try
-					{
-						localDevicePlan.CurrentQueryContext().IsSelectClause = true;
-						for (int columnIndex = 0; columnIndex < tableVar.Columns.Count; columnIndex++)
-						{
-							int redefineIndex = ((IList)redefineNode.RedefineColumnOffsets).IndexOf(columnIndex);
-							if (redefineIndex >= 0)
-							{
-								SQLRangeVarColumn rangeVarColumn = localDevicePlan.GetRangeVarColumn(tableVar.Columns[columnIndex].Name, true);
-								localDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-								rangeVarColumn.Expression = localDevicePlan.Device.TranslateExpression(localDevicePlan, redefineNode.Nodes[redefineIndex + 1], false);
-								rangeVarColumn.ReferenceFlags = localDevicePlan.CurrentQueryContext().ReferenceFlags;
-								localDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= rangeVarColumn.ReferenceFlags;
-								selectExpression.SelectClause.Columns[columnIndex].Expression = rangeVarColumn.Expression;
-							}
-						}
-					}
-					finally
-					{
-						localDevicePlan.PopScalarContext();
-					}
-				}
-				finally
-				{
-					localDevicePlan.Stack.Pop();
-				}
-			}
-
-			return statement;
-		}
-    }
     
 	/*
 		<expression> group [by <column list>] add { <aggregate expression list> };

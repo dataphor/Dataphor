@@ -15083,22 +15083,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return EmitRedefineNode(plan, new EmptyStatement(), sourceNode, expressions);
 		}
 		
+		// NOTE: this rewrite is the only implementation of redefine. A dedicated node form (RedefineNode,
+		// RowRedefineNode, RedefineTable) existed behind a USEREDEFINENODE conditional that was never defined, and was
+		// retired by debt-unreachable-redefine-nodes. The rewrite spends three plan nodes (extend, project, rename)
+		// where one would do; nothing has been measured, so if redefine plans ever show up as slow in a profile, a node
+		// form is the known alternative and this is where it went.
 		// T redefine { A := A + A } ::= 
 		//	T add { A + A Temp } remove { A } rename { Temp A }
 		public static PlanNode EmitRedefineNode(Plan plan, Statement statement, PlanNode sourceNode, NamedColumnExpressions expressions)
 		{
-			#if USEREDEFINENODE
-			PlanNode node = FindCallNode(APlan, AStatement, Instructions.Redefine, new PlanNode[]{ASourceNode});
-			if (node is RedefineNode)
-				((RedefineNode)node).Expressions = AExpressions;
-			else
-				((RowRedefineNode)node).Expressions = AExpressions;
-			node.DetermineDataType(APlan);
-			node.DetermineCharacteristics(APlan);
-			if ((node is RedefineNode) && ((RedefineNode)node).DistinctRequired)
-				return EmitProjectNode(APlan, node, FindClusteringKey(APlan, ((TableNode)node).TableVar));
-			return node;
-			#else
 			NamedColumnExpressions addExpressions = new NamedColumnExpressions();
 			RenameColumnExpressions renameExpressions = new RenameColumnExpressions();
 			string[] removeColumns = new string[expressions.Count];
@@ -15132,7 +15125,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 					), 
 					renameExpressions
 				);
-			#endif
 		}
 		
 		public static PlanNode CompileRedefineExpression(Plan plan, RedefineExpression expression)
