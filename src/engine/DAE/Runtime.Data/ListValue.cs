@@ -698,6 +698,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
+		// NOTE: this releases the element whether or not the list owns it, where Row.ClearValue checks ValuesOwned
+		// first. Every caller here - Clear, RemoveAt, the element setter and the AsNative setter - also takes the
+		// element out of the NativeList, which on a window would strip a list another owner holds, so these are
+		// mutators of an owned list and a guard would only make the wrong call quieter. Disposal itself is guarded:
+		// Dispose checks the flag before calling Clear. No D4 path reaches them on a window - Clear, RemoveAt, Add,
+		// Insert and the element setter all take a var operand, which only a stack reference satisfies, and a slot owns
+		// its list. Should a window ever reach one, refusing the mutation is the fix rather than skipping the release.
 		private void DisposeValueAt(int index)
 		{
 			if (_list.Values[index] != null)

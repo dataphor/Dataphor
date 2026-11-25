@@ -92,5 +92,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			FProcess.ExecuteScript(String.Format("ExecuteScript('{0}', '{1}');", ALibraryName, AScriptName));
 		}
+
+		/// <summary>How many streams the server is holding, from Diagnostics.StreamCount(), which resolves unqualified.</summary>
+		/// <remarks>The instrument every ownership case reads either side of itself: a scope that declares and releases
+		/// its own values must leave this where it found it, so any difference is a value nothing gave back.</remarks>
+		protected int StreamCount()
+		{
+			return (int)FProcess.Evaluate("StreamCount()", null).AsNative;
+		}
 	}
 }

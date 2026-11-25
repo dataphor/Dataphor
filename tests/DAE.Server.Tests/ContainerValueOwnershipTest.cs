@@ -202,11 +202,5 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		private IValueManager Manager { get { return Process.ValueManager; } }
-
-		/// <summary>How many streams the server is holding, from Diagnostics.StreamCount(), which resolves unqualified.</summary>
-		private int StreamCount()
-		{
-			return (int)Process.Evaluate("StreamCount()", null).AsNative;
-		}
 	}
 }

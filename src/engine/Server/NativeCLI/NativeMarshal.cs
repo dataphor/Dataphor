@@ -272,6 +272,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				return list;
 			}
 			
+			// NOTE: the row branch below, and the table branch after it, hand each value they build straight to a setter
+			// that copies it and never dispose the intermediate, where the list above does. That is sound only because a
+			// value arriving over the native call interface is never stream-backed - a Binary comes over as a byte array,
+			// so the Scalar built for it is native - which leaves each discarded intermediate plain managed memory the
+			// garbage collector reclaims. Marshal a value as a stream here and both become leaks of one stream per value;
+			// dispose the intermediates then, as the list branch does.
 			NativeRowValue nativeRow = nativeValue as NativeRowValue;
 			if (nativeRow != null)
 			{

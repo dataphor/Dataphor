@@ -845,11 +845,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
-					while (CursorNext(program, cursor))
+					try
 					{
-						// The list copies the row, so the row the cursor selected is ours to release.
-						using (IRow row = CursorSelect(program, cursor))
-							listValue.Add(row);
+						while (CursorNext(program, cursor))
+						{
+							// The list copies the row, so the row the cursor selected is ours to release.
+							using (IRow row = CursorSelect(program, cursor))
+								listValue.Add(row);
+						}
+					}
+					catch
+					{
+						// The rows already copied in are the list's, so a raise part way through releases them here rather
+						// than leaving a list nothing will dispose.
+						listValue.Dispose();
+						throw;
 					}
 
 					return listValue;
@@ -869,11 +879,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
-					while (sourceTable.Next())
+					try
 					{
-						using (IRow row = sourceTable.Select())
-							listValue.Add(row);
+						while (sourceTable.Next())
+						{
+							using (IRow row = sourceTable.Select())
+								listValue.Add(row);
+						}
 					}
+					catch
+					{
+						listValue.Dispose();
+						throw;
+					}
+
 					return listValue;
 				}
 				finally
@@ -1012,6 +1031,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			ListValue listValue = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+			try
+			{
+				Iterate(program, listValue);
+			}
+			catch
+			{
+				// The elements already copied in are the list's, so a raise part way through the iteration releases them
+				// here rather than leaving a list nothing will dispose - the same reason the list selector disposes its
+				// partial list.
+				listValue.Dispose();
+				throw;
+			}
+
+			return listValue;
+		}
+
+		/// <summary>Runs the iteration, adding to the given list what the return expression produces each time.</summary>
+		private void Iterate(Program program, ListValue listValue)
+		{
 			if (Nodes[0].DataType is Schema.ICursorType)
 			{
 				CursorValue cursorValue = (CursorValue)Nodes[0].Execute(program);
@@ -1144,8 +1182,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 			}
-
-			return listValue;
 		}
 		
 		public override Statement EmitStatement(EmitMode mode)

@@ -736,11 +736,5 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(() => ExecuteScript(script), Throws.Exception.With.Message.Contains(errorText), "The script did not raise.");
 			Assert.That(StreamCount(), Is.EqualTo(before), "The script left streams behind.");
 		}
-
-		/// <summary>How many streams the server is holding, from Diagnostics.StreamCount(), which resolves unqualified.</summary>
-		private int StreamCount()
-		{
-			return (int)Process.Evaluate("StreamCount()", null).AsNative;
-		}
 	}
 }

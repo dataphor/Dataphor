@@ -578,6 +578,68 @@ begin
 end;
 
 /*
+	A list part way built when something raises. The elements already copied into a partial list are the list's, so
+	whoever is building it has to release it on the way out rather than leave a list nothing holds - and that is the one
+	path none of the blocks above measures, because all of them run to completion. Two shapes have it: an element of a
+	list selector raising after an earlier element is in, and the return expression of a foreach raising on a later
+	element. ToList has the same shape in both of its branches and is not covered here: a cursor that raises part way
+	through its own iteration is not something a D4 script can arrange.
+
+	The operator raises on one given value rather than counting its calls, so that which iteration raises is readable
+	from the block itself; it takes the value to raise on as a parameter because an operator body cannot see this
+	script's variables.
+*/
+create operator TestRaiseOn(const AValue : Binary, const ARaiseOn : String) : Binary
+begin
+	if AValue.Value = ARaiseOn then
+		raise Error('TestRaiseOn');
+	result := AValue;
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary);
+		var LCaught : Integer := 0;
+		try
+			LL := { Binary(LEight), TestRaiseOn(Binary(LFour), LFour) };
+		except
+			on E : Error do
+				LCaught := 1;
+		end;
+		if LCaught <> 1 then
+			raise Error('The second element of the list selector did not raise.');
+		if not(IsNil(LL)) then
+			raise Error('The assignment completed even though the list selector raised.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A list selector whose element raised left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LL : list(Binary) := { Binary(LEight), Binary(LFour) };
+		var LD : list(Binary);
+		var LCaught : Integer := 0;
+		try
+			LD := foreach var LB in LL do TestRaiseOn(LB, LFour);
+		except
+			on E : Error do
+				LCaught := 1;
+		end;
+		if LCaught <> 1 then
+			raise Error('The return expression of the foreach did not raise on the second element.');
+		if LL[0].Value <> LEight then
+			raise Error('A foreach that raised released an element of the list it was reading.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A foreach whose return expression raised left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+drop operator TestRaiseOn(Binary, String);
+
+/*
 	Distinct over a list of stream-backed values. The operator builds a set to find the duplicates with, and that set
 	releases every element it holds when it is dropped, so what goes into it has to be a copy rather than the source
 	list's own element. Given the element itself, the drop released a value both the source list and the result were
