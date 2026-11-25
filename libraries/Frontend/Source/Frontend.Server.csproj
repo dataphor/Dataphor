@@ -19,7 +19,6 @@
     <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj" />
   </ItemGroup>
 
-  <!-- The other .cs files in this folder (the ASP.NET leftovers) are not compiled; library-frontend-web-leftovers deals with them. -->
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Derivation\Derivation.cs" />
