@@ -75,6 +75,30 @@ namespace Alphora.Dataphor.DAE.Server
 		// PlanCacheTimeStamp
 		public long PlanCacheTimeStamp; // Server.PlanCacheTimeStamp when the plan was compiled
 
+		// SourceStatement
+		/// <summary>The parsed statement this plan was compiled from; null for a plan whose node tree was assigned directly.</summary>
+		/// <remarks>
+		/// Kept so that a plan whose statement changes the catalog can be compiled afresh before it is executed again (see
+		/// ServerStatementPlan.Execute). The parsed statement and not the source text: a plan prepared through
+		/// ServerBatch.PrepareStatement is given the whole script's source context rather than that one batch's text, so
+		/// recompiling such a plan from its text would compile the entire script.
+		/// </remarks>
+		private Statement _sourceStatement;
+		public Statement SourceStatement
+		{
+			get { return _sourceStatement; }
+			set { _sourceStatement = value; }
+		}
+
+		// SourceContext
+		/// <summary>The source context the plan's program was last given, so a recompilation can give the new program the same one.</summary>
+		private SourceContext _sourceContext;
+		public SourceContext SourceContext
+		{
+			get { return _sourceContext; }
+			set { _sourceContext = value; }
+		}
+
 		// Plan		
 		protected Plan _plan;
 		public Plan Plan { get { return _plan; } }
@@ -82,6 +106,22 @@ namespace Alphora.Dataphor.DAE.Server
 		// Program
 		protected Program _program;
 		public Program Program { get { return _program; } }
+		
+		/// <summary>Replaces this plan's compilation with the given one and disposes the compilation it had.</summary>
+		/// <remarks>
+		/// Only called with a pair that has compiled without errors, so that a failed recompilation leaves the plan as
+		/// executable as it was. The plan's ID, Header and source context stay as they are: a remote client holds a
+		/// PlanDescriptor carrying the ID, and the statement text, library, context and application-transaction flag the
+		/// header records belong to the same statement. What the caller does see afterwards is the new compilation's
+		/// Messages, PlanStatistics and ProgramStatistics, which are this plan's by way of the pair.
+		/// </remarks>
+		protected internal void SwapCompilation(Plan plan, Program program)
+		{
+			Plan oldPlan = _plan;
+			_plan = plan;
+			_program = program;
+			oldPlan.Dispose();
+		}
 		
 		// Statistics
 		public PlanStatistics PlanStatistics { get { return _plan.Statistics; } }
@@ -212,6 +252,28 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 		public ServerStatementPlan(ServerProcess process) : base(process) {}
 		
+		/// <summary>True once this compilation has been executed; a compilation that changes the catalog is good for one execution.</summary>
+		private bool _compilationExecuted;
+		
+		// Null until the first execution asks, and then kept: a recompilation compiles the same statement, so a tree that
+		// holds a statement changing the catalog holds one again.
+		private bool? _needsRecompilation;
+		
+		/// <summary>True if executing this plan again has to compile its statement afresh first.</summary>
+		/// <remarks>
+		/// DDLNode is the engine's own name for the set of statements that change the catalog - what InternalBeforeExecute
+		/// already relies on - so no list of node kinds has to be drawn up here and no statement added later can be left off
+		/// one. A plan with no statement keeps the single-compilation behaviour it has always had: the only plans built that
+		/// way assign Program.Code and execute the program directly (ServerSession.DropSessionObjects), never through here,
+		/// and refusing such a plan would be a new error for no caller.
+		/// </remarks>
+		private bool NeedsRecompilation()
+		{
+			if (_needsRecompilation == null)
+				_needsRecompilation = (SourceStatement != null) && (_program.Code != null) && DDLNode.ContainsDDL(_program.Code);
+			return _needsRecompilation.Value;
+		}
+		
 		public void Execute(DataParams paramsValue)
 		{
 			Exception exception = null;
@@ -219,6 +281,21 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				CheckCompiled();
+				
+				// A compiled statement that changes the catalog is good for one execution. The compiled form of a create
+				// statement does not hold the statement: the compiler builds the catalog object while compiling and the node
+				// keeps it, so executing that node again would put the same object back - same identity, same object id, and
+				// carrying whatever an alter had made of it since - rather than building what the statement describes. A
+				// compiled drop holds the object the compiler resolved, with the same consequence once that object has been
+				// dropped and created afresh. Compiling the statement again is what makes the second and later executions
+				// mean what the statement says. The recompilation runs inside the transactional call, which is ordinary:
+				// every ExecuteScript and every library registration compiles inside a running program.
+				if (_compilationExecuted && NeedsRecompilation())
+					_process.RecompileStatementPlan(this, paramsValue);
+				
+				// Marked before the execution and not after: a statement that threw half-way may already have registered its
+				// object, and the next execution must not reuse the node that built it.
+				_compilationExecuted = true;
 				_program.Execute(paramsValue);
 			}
 			catch (Exception E)

@@ -860,6 +860,8 @@ namespace Alphora.Dataphor.DAE.Server
 				if (messages != null)
 					plan.Plan.Messages.AddRange(messages);
 				Compile(plan.Plan, plan.Program, statement, paramsValue, false, sourceContext);
+				plan.SourceStatement = statement;
+				plan.SourceContext = sourceContext;
 				_plans.Add(plan);
 				return plan;
 			}
@@ -867,6 +869,49 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				plan.Dispose();
 				throw;
+			}
+		}
+
+		/// <summary>Compiles the given plan's statement afresh and swaps the new compilation in for the one the plan holds.</summary>
+		/// <remarks>
+		/// <para>
+		/// For a plan whose statement changes the catalog, which is good for one execution (ServerStatementPlan.Execute says
+		/// why). The new pair is compiled first and swapped in only once it has compiled without errors, so a compilation
+		/// error executes nothing and leaves the plan as executable as it was. Compiling collects its errors rather than
+		/// throwing them (Compiler.Compile), which is why the check is here and explicit; the error the caller is given is the
+		/// one preparing the statement again would have given.
+		/// </para>
+		/// <para>
+		/// The parameters are the ones this execution was given rather than any kept from prepare time, because Compile folds
+		/// the process locals and the parameters into the compilation and these are what the execution will bind. The new
+		/// program is given the plan's own ID: a remote client holds a PlanDescriptor carrying it, the debugger's program
+		/// locator is built from it, and an expression plan names its plan catalog's table variable after it. Parser messages
+		/// are not carried over and none can be lost: every parser message is an error (ParserMessages.HasErrors is a count),
+		/// and a plan with errors never executes.
+		/// </para>
+		/// </remarks>
+		internal void RecompileStatementPlan(ServerStatementPlan serverPlan, DataParams paramsValue)
+		{
+			Plan plan = new Plan(this);
+			bool swapped = false;
+			try
+			{
+				Program program = new Program(this, serverPlan.ID);
+				program.ShouldPushLocals = true;
+				program.IsCached = serverPlan.Program.IsCached;
+				Compile(plan, program, serverPlan.SourceStatement, paramsValue, false, serverPlan.SourceContext);
+				plan.CheckCompiled();
+				serverPlan.SwapCompilation(plan, program);
+				swapped = true;
+
+				// Re-stamped so the plan cache's staleness check stays truthful for what the plan now holds: this compilation
+				// is against the catalog as it is now, whatever has bumped the timestamp since the plan was first compiled.
+				serverPlan.PlanCacheTimeStamp = Catalog.PlanCacheTimeStamp;
+			}
+			finally
+			{
+				if (!swapped)
+					plan.Dispose();
 			}
 		}
 
@@ -918,7 +963,9 @@ namespace Alphora.Dataphor.DAE.Server
 				if (plan != null)
 				{
 					_plans.Add(plan);
-					((ServerPlan)plan).Program.SetSourceContext(new SourceContext(statement, locator));
+					ServerPlan cachedPlan = (ServerPlan)plan;
+					cachedPlan.SourceContext = new SourceContext(statement, locator);
+					cachedPlan.Program.SetSourceContext(cachedPlan.SourceContext);
 				}
 				else
 				{
@@ -1062,6 +1109,8 @@ namespace Alphora.Dataphor.DAE.Server
 				if (messages != null)
 					plan.Plan.Messages.AddRange(messages);
 				Compile(plan.Plan, plan.Program, expression, paramsValue, true, sourceContext);
+				plan.SourceStatement = expression;
+				plan.SourceContext = sourceContext;
 				_plans.Add(plan);
 				return plan;
 			}
@@ -1088,7 +1137,9 @@ namespace Alphora.Dataphor.DAE.Server
 				if (plan != null)
 				{
 					_plans.Add(plan);
-					((ServerPlan)plan).Program.SetSourceContext(new SourceContext(expression, locator));
+					ServerPlan cachedPlan = (ServerPlan)plan;
+					cachedPlan.SourceContext = new SourceContext(expression, locator);
+					cachedPlan.Program.SetSourceContext(cachedPlan.SourceContext);
 				}
 				else
 				{

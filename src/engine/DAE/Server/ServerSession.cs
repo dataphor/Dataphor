@@ -141,6 +141,11 @@ namespace Alphora.Dataphor.DAE.Server
 		public SessionInfo SessionInfo { get { return _sessionInfo; } }
 
 		// Plan Cache		
+		// NOTE: a plan whose statement changes the catalog is recompiled whenever it is executed again
+		// (ServerStatementPlan.Execute), so the slot it takes here buys nothing but the header it is keyed by. Admitting it
+		// anyway, deliberately: DeviceClassAttributeRerunTest's plan-cache case is the only one over what a client sees through
+		// this path and refusing such plans would take its premise away. If plan-cache pressure is ever measured, "stop
+		// admitting plans whose node tree contains a DDL node" (DDLNode.ContainsDDL answers that) is the thing to reach for.
 		public void AddCachedPlan(ServerProcess process, string statement, int contextHashCode, ServerPlan plan)
 		{
 			if (_sessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())

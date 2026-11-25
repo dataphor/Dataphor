@@ -20,6 +20,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public abstract class DDLNode : PlanNode 
 	{
+		/// <summary>True if the given node tree contains a statement that changes the catalog.</summary>
+		/// <remarks>
+		/// What a caller needs this for is that such a statement's compiled form holds catalog state the compiler built or
+		/// resolved - a create node holds the object it built, a drop node the object it resolved - so the compilation is good
+		/// for one execution (ServerStatementPlan.Execute). This class is the engine's own name for that set, which
+		/// InternalBeforeExecute below already relies on, so the answer needs no list of node kinds that a statement added
+		/// later could be left off. The whole tree is walked, so a statement nested inside a block, an if or a loop counts.
+		/// </remarks>
+		public static bool ContainsDDL(PlanNode node)
+		{
+			if (node is DDLNode)
+				return true;
+			// NodeCount rather than Nodes.Count: reading Nodes allocates the collection for a node that has none.
+			for (int index = 0; index < node.NodeCount; index++)
+				if (ContainsDDL(node.Nodes[index]))
+					return true;
+			return false;
+		}
+
 		// Takes the catalog store's write lock before the node takes the catalog's lock (many drops and alters write the store
 		// inside lock (program.Catalog)): waiting for it inside would deadlock with a session that holds the store's write lock
 		// and waits for the catalog's lock, until the store's busy timeout. Loading an object runs its DDL without writing the
