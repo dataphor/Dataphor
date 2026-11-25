@@ -36,8 +36,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// callee's slot owns what it releases
 	/// (bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value). Two of that case's shapes are
 	/// measured against the equivalent direct assignment to a loop variable rather than against nought, because the
-	/// write-back hands the caller's loop variable the operator's output and the next iteration overwrites it with a
-	/// plain store - the same accepted tradeoff as the direct assignment, and now the same size. The four cases from
+	/// write-back hands the caller's loop variable the operator's output and the next plain store into that slot
+	/// displaces it without releasing it - the same accepted tradeoff as the direct assignment, and now the same size. The four cases from
 	/// AConstOperandReleasesTheValueComputedForIt through ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the
 	/// operand half of the same rule: whether a call owns the value it was handed for an operand is a property of the plan
 	/// node that produced the argument - a node that reads a stack slot, or a column of a row in one, can lend the value
@@ -79,10 +79,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Every case whose script raises also asserts on the error - that it reached the caller, or that the script's own
 	/// handler saw it - because a case that silently stopped raising would otherwise pass while testing nothing.
 	/// </remarks>
-	// NOTE: this fixture is the index of one rule and every ownership ticket adds to it - about 1,330 lines and a class
-	// summary of fifty at bug-ifnil-leaks-the-value-it-copies. If it outgrows roughly 1,500 lines, split it along the
-	// three rules the summary already names - a slot, a call's operands, a scope - rather than growing the summary;
-	// the split is deferred while sibling ownership tickets still have cases in flight against this file.
+	// NOTE: this fixture is the index of one rule and every ownership ticket adds to it - about 1,560 lines and a class
+	// summary of fifty at bug-ifnil-leaks-the-value-it-copies. It is past the roughly 1,500 lines at which it should be
+	// split along the three rules the summary already names - a slot, a call's operands, a scope - rather than growing
+	// the summary; the split is deferred while sibling ownership tickets still have cases in flight against this file,
+	// bug-row-equality-leaks-the-rows-it-compares being the last of them, and is the first thing to do once it lands.
 	[TestFixture]
 	public class AssignmentValueOwnershipTest : InProcessTestFixture
 	{
@@ -622,8 +623,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <remarks>
 		/// The two shapes whose body assigns are measured against the equivalent direct assignment to a loop variable
 		/// rather than against nought, because the write-back into the loop variable's slot leaks the value it hands
-		/// over exactly as that assignment does - the next iteration overwrites the slot with a plain store, the
-		/// accepted tradeoff recorded on the borrowed branch of AssignmentNode. What this case pins is that the two now
+		/// over exactly as that assignment does - the next plain store into the slot displaces it without releasing it,
+		/// the accepted tradeoff recorded on the borrowed branch of AssignmentNode. What this case pins is that the two now
 		/// leak equally: what went was the double release, not that leak. The read-only and inner-foreach shapes
 		/// balance outright, and are what would catch a fix that paid a copy per call on the read path.
 		/// </remarks>

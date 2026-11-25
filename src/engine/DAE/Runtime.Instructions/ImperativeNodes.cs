@@ -1318,6 +1318,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// The copies pushed for operands whose caller slot holds a value it does not own, by operand index, so that
 			// the reconcile in the finally below can tell a copy the body never wrote over from the value that replaced
 			// it. Allocated only for a call that has such an operand, which is the rare shape.
+			// NOTE: the push loop below has no failure path of its own. If DataValue.CopyValue threw part way through it,
+			// on either arm, a copy already pushed would be nulled by the window pop rather than released - one leaked
+			// stream on a path that is already unwinding. Nothing guards it because a stream copy fails only where the
+			// stream is already gone, which is the defect this arm exists to prevent; if either arm is ever seen to
+			// throw here, the fix is a try around the loop that releases what borrowedCopies already holds.
 			object[] borrowedCopies = null;
 
 			for (int index = 0; index < Operator.Operands.Count; index++)
@@ -1329,6 +1334,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// A slot of the callee's own rather than an alias of a slot whose value belongs to something else;
 					// see ReferencesABorrowedSlot. Checked before the repeat below, so that an operand that is both -
 					// one borrowed variable passed twice - is reconciled rather than left to the last write-back.
+					// Measured in that shape, F(var LB, var LB) over a list of two Binary: a body assigning both leaves
+					// two streams per iteration, the same as the two direct assignments to the loop variable it stands
+					// in for, and a body assigning neither leaves none while the loop still reads its own element. The
+					// two orders are indistinguishable when the body assigns; the read-only shape is what they differ
+					// on, because the repeat arm's copy is not reconciled - the write-back would hand the caller's loop
+					// variable that copy and orphan the element the loop lent. Hence this order.
 					operandValue = DataValue.CopyValue(program.ValueManager, operandValue);
 					if (borrowedCopies == null)
 						borrowedCopies = new object[Operator.Operands.Count];
@@ -1412,10 +1423,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								// the unchanged non-borrowed path. Where the body did write, it released the copy itself
 								// (Stack.PokeOwned) and the slot's final value is the operator's output, which the caller
 								// must see, so this reads like every other operand.
-								// NOTE: that write-back leaks the value it hands over, because the loop lending the slot
-								// overwrites it on the next iteration with a plain store. Same accepted tradeoff as a
-								// direct assignment to a loop variable, and measured equal to it; it is recorded on the
-								// borrowed branch of AssignmentNode.
+								// NOTE: that write-back leaks the value it hands over, because whatever stores into the slot
+								// next displaces it without releasing it - the next iteration over a list, and over a cursor
+								// the next write to the loop variable or, failing that, the loop nulling the slot on the way
+								// out. Same accepted tradeoff as a direct assignment to a loop variable, and measured equal
+								// to it; it is recorded on the borrowed branch of AssignmentNode, which also records what a
+								// cursor loop's variable reads once such a store has happened.
 								if ((borrowedCopies != null) && ReferencesABorrowedSlot(index) && Stack.IsSameValue(slotValue, borrowedCopies[index]))
 									DataValue.DisposeValue(program.ValueManager, borrowedCopies[index]);
 								else
@@ -1625,15 +1638,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// the iterator owns and goes on using it, so releasing it here would leave the next iteration selecting
 				// into a disposed row. What such an assignment displaces is leaked. That is harmless for the row or
 				// element the loop lent - the loop's own row, or the source list, releases that - and leaks the value a
-				// previous assignment in the same body put there. Assigning to a loop variable is an error in any case,
-				// since the next iteration overwrites it. The mark reaches only the body of the loop that lends the
-				// slot, so an assignment after the loop takes the owned branch below; see Symbol.IsBorrowed.
+				// previous assignment in the same body put there, which the next plain store into the slot, or the loop
+				// nulling it on the way out, displaces in turn. Assigning to a loop variable is an error in any case, and
+				// what follows the assignment differs by loop: over a list the next iteration overwrites the slot with
+				// the next element, while over a cursor it does not - ForEachNode fills its one row before the iteration
+				// rather than inside it, so the slot keeps what was stored here and every later iteration reads that
+				// instead of its own row (bug-a-cursor-loop-variable-stays-stale-once-written). The mark reaches only the
+				// body of the loop that lends the slot, so an assignment after the loop takes the owned branch below; see
+				// Symbol.IsBorrowed.
 				// The var operand write-back reaches this slot the same way and leaks the same one value: a call that
 				// takes the caller's loop variable by reference is given a copy of it (CallNode.ReferencesABorrowedSlot),
 				// and where the body replaced that copy, InstructionNodeBase.CleanupOperand pokes the replacement in
-				// here - which the next iteration then overwrites with a plain store. Measured equal to this branch's
-				// own leak, which is why collecting either means the loop releasing what its slot holds whenever that
-				// is not the value it lent, a design deliberately not taken.
+				// here - a plain store like this one, with the same leak and the same two outcomes by loop. Measured equal
+				// to this branch's own leak, which is why collecting either means the loop releasing what its slot holds
+				// whenever that is not the value it lent, a design deliberately not taken.
 				program.Stack.Poke(location, objectValue);
 			else
 				// The slot owns its value, so the assignment releases the one it replaces; see Stack.PokeOwned.
