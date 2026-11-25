@@ -91,10 +91,12 @@ namespace Alphora.Dataphor.DAE.Connection
 		/// on every commit and rollback. Present as an internal instance Boolean property on Microsoft.Data.SqlClient 7.1.2,
 		/// verified by reflection over the pinned package (device-mssql-port); the documented fallback, had it been absent, is
 		/// that a zombied transaction reports a null Connection.
-		/// NOTE: nothing CI runs exercises this. The only cases that commit or roll back through this class are
-		/// MSSQLStoreContractTests, which are skipped unless DATAPHOR_TEST_MSSQL names a server, and CI configures none
-		/// today - so a client upgrade that drops the member would build and pass, and the throw below would first be seen
-		/// on a live run. test-device-live is the ticket that would put a server in CI.
+		/// NOTE: CI reaches this only while the runner image still has SQL Server Express LocalDB. test-device-live put a
+		/// step in .github/workflows/build.yml that starts it and sets DATAPHOR_TEST_MSSQL, but deliberately lets the job
+		/// stay green if the image has dropped it - and then nothing CI runs commits or rolls back through this class, so a
+		/// client upgrade that drops the member would build and pass and the throw below would first be seen on a
+		/// developer's live run. The cases that reach it are MSSQLStoreContractTests and, since test-device-live, the live
+		/// device passes; all are skipped where the variable is unset.
 		/// </summary>
 		private static readonly PropertyInfo _isZombiedProperty =
 			typeof(SqlTransaction).GetProperty(IsZombiedPropertyName, BindingFlags.Instance | BindingFlags.NonPublic);

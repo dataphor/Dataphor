@@ -4,19 +4,12 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 	
 	Runs device coverage for the MSSQLDevice.
-*/
 
-SafeDrop('TestDevice');
-create device TestDevice
-	reconciliation { mode = { command }, master = device }
-class "MSSQLDevice.MSSQLDevice"
-	attributes
-	{
-		"ServerName" = ".",
-		"DatabaseName" = "DataphorTests",
-		"ConnectionClass" = "Connection.MSSQLConnection",
-		"UseIntegratedSecurity" = "True"
-	};
+	TestDevice is created by whoever runs this script, not here: it used to be created here against the server "." and the
+	database "DataphorTests", which only one machine ever had. LiveDeviceTest (tests/DAE.Server.Tests) creates it in
+	TestFramework.Coverage.Base from the server the environment variable DATAPHOR_TEST_MSSQL names, and D4 has no way to read
+	an environment variable. Nothing else in this script changed.
+*/
 
 // Make sure the device is functional and connected
 EnsureDeviceStarted('TestDevice');

@@ -74,7 +74,29 @@ jobs:
       - name: Build
         run: dotnet build Dataphor.slnx -c ${{ matrix.configuration }} --no-restore -p:DataphorBuildNumber=${{ github.run_number }}
 
+      # The passes that need a live SQL Server - the catalog store contract, the text parameter cases, the three
+      # transaction-atomicity coverage scripts that run on a SQL Server device, the device-coverage corpus, and the
+      # three sample libraries that create a SQL Server device - read DATAPHOR_TEST_MSSQL and skip themselves where it
+      # is unset. SQL Server Express LocalDB is on this image as the Visual Studio component
+      # Microsoft.VisualStudio.Component.SQL.LocalDB.Runtime (18.12.12405.243 on windows-2025, read 2026-11-25); the
+      # image's own "Databases" section lists only PostgreSQL and MongoDB, so this step does not assume it: it prints
+      # what it finds and continue-on-error keeps the job green if a later image has dropped it. The Test step below
+      # then sets the variable only if this step succeeded, so the live cases go back to reporting Inconclusive rather
+      # than failing - a red run because a runner image changed would be worse than a documented gap.
+      - name: Start SQL Server LocalDB
+        id: localdb
+        continue-on-error: true
+        run: |
+          sqllocaldb info
+          sqllocaldb start MSSQLLocalDB
+          $info = sqllocaldb info MSSQLLocalDB
+          $info
+          if (($info -join "`n") -notmatch 'State:\s+Running') { throw 'MSSQLLocalDB is not running; the live SQL Server passes will report Inconclusive.' }
+
       - name: Test
+        env:
+          # Empty where the step above failed; TestEnvironment reads an empty value as "no server configured".
+          DATAPHOR_TEST_MSSQL: ${{ steps.localdb.outcome == 'success' && 'Data Source=(localdb)\MSSQLLocalDB;Integrated Security=SSPI' || '' }}
         run: dotnet test Dataphor.slnx -c ${{ matrix.configuration }} --no-build --logger trx --results-directory artifacts/TestResults/${{ matrix.configuration }}
 
       - name: Upload test results

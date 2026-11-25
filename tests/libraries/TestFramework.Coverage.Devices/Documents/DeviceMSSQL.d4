@@ -3,16 +3,11 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-create device TestingDevice
-	reconciliation {mode={command}, master=device}
-class "MSSQLDevice.MSSQLDevice"
-	attributes
-{
-	"ServerName" = "localhost",
-	"DatabaseName" = "DataphorTests",
-	"ConnectionClass" = "Connection.MSSQLConnection",
-	"UseIntegratedSecurity" = "True"
-};
+
+// TestingDevice is created by whoever registers this library, not here: it used to be created here against the server
+// "localhost" and the database "DataphorTests", which only one machine ever had. LiveDeviceTest (tests/DAE.Server.Tests)
+// creates it in TestFramework.Coverage.Base from the server the environment variable DATAPHOR_TEST_MSSQL names, before it
+// registers this library, and D4 has no way to read an environment variable. Nothing else in this script changed.
 
 //CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
 //CreateDeviceUser("System", "TestingDevice", "sa", "welcome");

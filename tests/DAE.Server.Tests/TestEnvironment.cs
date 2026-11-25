@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -12,6 +13,10 @@ using System.Security.Cryptography;
 using System.Threading;
 
 using NUnit.Framework;
+
+using Microsoft.Data.SqlClient;
+
+using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
@@ -35,6 +40,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>Set to 1 to turn on the engine's logging and keep every test directory; see AGENTS.md "Build and test".</summary>
 		public const string LoggingVariable = "DATAPHOR_TEST_LOGGING";
+
+		/// <summary>
+		/// Set to a connection string naming a <em>SQL Server</em> - not a database - to run the passes that need a live one;
+		/// see AGENTS.md "Build and test". Every pass that reads it puts its own database on whatever is set.
+		/// </summary>
+		public const string MSSQLVariable = "DATAPHOR_TEST_MSSQL";
 
 		public const string RunRootName = "Dataphor.Tests";
 
@@ -298,5 +309,155 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			foreach (string directory in Directory.GetDirectories(source))
 				CopyDirectory(directory, Path.Combine(target, Path.GetFileName(directory)));
 		}
+
+		#region The configured SQL Server
+
+		/// <summary>What <see cref="MSSQLVariable"/> holds, or null where it is unset or empty.</summary>
+		public static string MSSQLConnectionString
+		{
+			get
+			{
+				string result = Environment.GetEnvironmentVariable(MSSQLVariable);
+				return String.IsNullOrEmpty(result) ? null : result;
+			}
+		}
+
+		/// <summary>Whether this machine has been given a SQL Server to test against.</summary>
+		/// <remarks>
+		/// The variable being set is the only test, and every pass that needs a server asks this before it does anything that
+		/// could connect. Nothing may connect in order to decide whether to connect: reaching for a server that is not there
+		/// costs the driver's whole timeout - measured 2026-11-22 at 33.6 s and 21.0 s for two sample libraries - which is
+		/// more than the live passes take when a server is there.
+		/// </remarks>
+		public static bool MSSQLConfigured => MSSQLConnectionString != null;
+
+		/// <summary>
+		/// What a case says when it is skipped for want of a server. <paramref name="whatWouldRun"/> completes the sentence
+		/// "Set DATAPHOR_TEST_MSSQL ... to &lt;whatWouldRun&gt;."
+		/// </summary>
+		public static string MSSQLNotConfigured(string whatWouldRun)
+		{
+			return
+				String.Format
+				(
+					"Set {0} to a SQL Server connection string - a server, not a database, for example \"Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=SSPI\" - to {1}.",
+					MSSQLVariable,
+					whatWouldRun
+				);
+		}
+
+		/// <summary>The configured server's connection string with <paramref name="databaseName"/> as its database.</summary>
+		/// <remarks>
+		/// Everything else is carried through as the variable holds it, as MSSQLStoreContractTests' own housekeeping
+		/// connections are: what is set has to be reachable as it stands, so a server whose certificate this machine does not
+		/// trust needs Encrypt=False said in the variable. Only the device goes through a connection-string builder that
+		/// defaults that away for itself (MSSQLADODotNetConnectionStringBuilder).
+		/// </remarks>
+		public static string MSSQLConnectionStringFor(string databaseName)
+		{
+			SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(MSSQLConnectionString);
+			builder.InitialCatalog = databaseName;
+			return builder.ConnectionString;
+		}
+
+		/// <summary>
+		/// The attribute list of a D4 SQL Server device definition against the configured server, for a device holding its
+		/// tables in <paramref name="databaseName"/>: the server name, the database name and whatever the variable says about
+		/// authentication and encryption, and nothing else.
+		/// </summary>
+		/// <remarks>
+		/// <para>Deliberately minimal - no ConnectionClass and no ConnectionStringBuilderClass - because a definition naming
+		/// only its server and database is what most deployments have, so that is the one worth proving connects.</para>
+		/// <para>Encrypt and TrustServerCertificate have no device tag of their own and would be dropped on the way through
+		/// the device's connection-string builder, which for a server that requires encryption would mean the device could
+		/// not connect at all. They are carried as the device's ConnectionParameters, which SQLDevice.GetConnectionParameters
+		/// applies after the builder has run and which is therefore what overrides the builder's Encrypt=False default.</para>
+		/// </remarks>
+		public static string MSSQLDeviceAttributes(string databaseName)
+		{
+			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
+			List<string> attributes = new List<string>();
+			attributes.Add(DeviceAttribute("ServerName", server.DataSource));
+			attributes.Add(DeviceAttribute("DatabaseName", databaseName));
+			if (server.IntegratedSecurity)
+				attributes.Add(DeviceAttribute("UseIntegratedSecurity", "True"));
+			else
+			{
+				attributes.Add(DeviceAttribute("UserName", server.UserID));
+				attributes.Add(DeviceAttribute("Password", server.Password));
+			}
+
+			string connectionParameters = MSSQLConnectionParameters();
+			if (connectionParameters.Length > 0)
+				attributes.Add(DeviceAttribute("ConnectionParameters", connectionParameters));
+
+			return String.Join(", ", attributes);
+		}
+
+		/// <summary>One D4 device attribute; a double quote in the value is doubled, which is the only escape a D4 string literal has.</summary>
+		private static string DeviceAttribute(string name, string value)
+		{
+			return String.Format("\"{0}\" = \"{1}\"", name, (value ?? String.Empty).Replace("\"", "\"\""));
+		}
+
+		/// <summary>
+		/// The device ConnectionParameters the variable calls for: its Encrypt and TrustServerCertificate settings, if it
+		/// names them, in the name=value;name=value form SQLDevice.StringToTags reads. Empty when it names neither.
+		/// </summary>
+		/// <remarks>
+		/// Read off the string the variable holds rather than off the parsed builder, so that the device gets what the
+		/// developer wrote: the builder answers Encrypt=False for a variable that says nothing about encryption, which is the
+		/// client's default rather than a request, and spelling it on the device would hide the device's own default from the
+		/// one pass that can prove it.
+		/// </remarks>
+		private static string MSSQLConnectionParameters()
+		{
+			DbConnectionStringBuilder asWritten = new DbConnectionStringBuilder();
+			asWritten.ConnectionString = MSSQLConnectionString;
+			List<string> parameters = new List<string>();
+			foreach (string keyword in new string[] { "Encrypt", "TrustServerCertificate" })
+				if (asWritten.ContainsKey(keyword))
+					parameters.Add(String.Format("{0}={1}", keyword, asWritten[keyword]));
+			return String.Join(";", parameters);
+		}
+
+		/// <summary>
+		/// Makes <paramref name="databaseName"/> exist on the configured server and empties it - every foreign key and every
+		/// table dropped - so that the case about to run starts on a database with nothing of an earlier run's in it.
+		/// </summary>
+		/// <remarks>
+		/// At the start of a case rather than at the end, which is the rule MSSQLStoreContractTests established for its own
+		/// database: a run kept with DATAPHOR_TEST_LOGGING=1, or one that crashed, then leaves its database to be looked at
+		/// and the next run is still not poisoned by it. Nothing drops these databases afterwards - unlike the store
+		/// contract's, which its own teardown drops - because what a device left in one is the evidence of what the device
+		/// did, which is the whole point of running against a real server. So a machine that has run the live passes keeps
+		/// one empty database per pass on whatever server was configured.
+		/// </remarks>
+		// NOTE: the database name is a shared resource with a fixed name, as the store contract's is. Two runs against one
+		// server at the same time - two developers, or a developer and a CI agent, with DATAPHOR_TEST_MSSQL pointed at one
+		// shared instance - would empty each other's database mid-case. If that day comes, name the database after the run,
+		// as the run directory above is named after the process, and accept that a crashed run then leaves one behind per run.
+		public static void EmptyMSSQLDatabase(string databaseName)
+		{
+			Execute(MSSQLConnectionStringFor("master"), String.Format("if db_id('{0}') is null create database [{0}];", databaseName));
+			Execute
+			(
+				MSSQLConnectionStringFor(databaseName),
+				"declare @statements nvarchar(max) = N'';" +
+					" select @statements = @statements + N'alter table [' + object_name(parent_object_id) + N'] drop constraint [' + name + N'];' from sys.foreign_keys;" +
+					" select @statements = @statements + N'drop table [' + name + N'];' from sys.tables;" +
+					" exec sp_executesql @statements;"
+			);
+		}
+
+		// Through the connection class the device and the store share, so that these housekeeping statements reach the server
+		// the way the passes they prepare for do.
+		private static void Execute(string connectionString, string statement)
+		{
+			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
+				connection.Execute(statement);
+		}
+
+		#endregion
 	}
 }

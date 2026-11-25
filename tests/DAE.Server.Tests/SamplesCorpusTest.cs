@@ -69,25 +69,53 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private static readonly string[] SqlDeviceLibraries = ["MSSQLDevice", "PGSQLDevice"];
 
 		/// <summary>
-		/// The samples whose registration needs a running SQL Server, with the reason each does. Their cases report
-		/// Inconclusive and start no server.
+		/// The samples whose registration needs a running SQL Server, with the reason each does. Where none is configured
+		/// their cases report Inconclusive and start no server; where one is, they are attempted and checked against
+		/// <see cref="FailsWithADatabaseServer"/>.
 		/// </summary>
-		// NOTE: accepted tradeoff - these entries are not attempted at all, although a fresh server would show whether
-		// they still register. Measured 2026-11-22 on a machine with no SQL Server reachable: failing to reach one costs
-		// 33.6 s for Sample.Forum and 21.0 s for Sample.Pubs - 54.6 s, more than the whole rest of this pass put
-		// together, for the driver's connect timeout twice over against a server that is not there; Sample.Shipping,
-		// which joined the list when library-sample-shipping-convert built its assembly, would add a third such wait
-		// (not measured). What makes it acceptable: no device here can connect from any machine as written (Sample.Pubs
+		// NOTE: accepted tradeoff - with no server configured these entries are not attempted at all, although a fresh
+		// server would show whether they still register. Measured 2026-11-22 on a machine with no SQL Server reachable:
+		// failing to reach one costs 33.6 s for Sample.Forum and 21.0 s for Sample.Pubs - 54.6 s, more than the whole
+		// rest of this pass put together, for the driver's connect timeout twice over against a server that is not
+		// there; Sample.Shipping, which joined the list when library-sample-shipping-convert built its assembly, adds a
+		// third such wait. What makes it acceptable: no device here can connect from any machine as written (Sample.Pubs
 		// names a developer's own machine, Sample.Shipping a database that no machine has), the samples may not be
 		// edited to shorten the timeout, and every .d4 file in the tree is already parsed by ParserRoundTripCorpusTest.
-		// The cost is that a regression breaking these samples' registration in some other way is invisible here.
-		// Revisit when test-device-live lands: it owns running anything against a real SQL Server, and the name of the
-		// variable that selects one, and these entries then become "attempt when a database server is configured".
+		// test-device-live, which owns running anything against a real SQL Server, made the other half of this real:
+		// where DATAPHOR_TEST_MSSQL names a server the three are attempted, so a regression that broke their
+		// registration in some other way shows up as a failure that does not match the recorded text.
 		private static readonly Dictionary<string, string> NeedsADatabaseServer = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
-			{ "Sample.Forum", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
-			{ "Sample.Pubs", "creates a SQL Server device naming a developer's own machine, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
-			{ "Sample.Shipping", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
+			{ "Sample.Forum", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server." },
+			{ "Sample.Pubs", "creates a SQL Server device naming a developer's own machine, so registering it needs a running SQL Server." },
+			{ "Sample.Shipping", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server." },
+		};
+
+		/// <summary>
+		/// For each sample above, an ordinal substring of the error its registration still fails with when a server IS
+		/// configured. Every one of the three names a server of its own in its own script rather than the one
+		/// DATAPHOR_TEST_MSSQL points at, and a sample may not be edited to change that, so none of them can reach the
+		/// configured server: the useful thing a configured run adds is that the failure is the recorded one and not some
+		/// new breakage. Reported as a warning, the way a known-failure coverage script is; a sample that registers, or
+		/// fails differently, fails the run.
+		/// </summary>
+		/// <remarks>
+		/// Never the whole text and never a part that changes between runs, which is the coverage manifest's rule for the
+		/// same thing (see CoverageManifest). So each entry is the engine's own "device did not start" sentence, which names
+		/// the sample's device, and not the SQL client's message under it: measured 2026-11-25, the three failed with three
+		/// different driver messages (SQL Network Interfaces error 26, Named Pipes error 40) for the same cause, and that
+		/// text depends on how the machine resolves the name each sample happens to have written.
+		/// </remarks>
+		// NOTE: attempting these three is the slowest thing a configured run does - measured 2026-11-25 against SQL Server
+		// 2016 LocalDB at 19 s, 20 s and 19 s, 58 s of the pass's 1 m 40 s, all of it the driver's connect timeout against
+		// the server each sample names rather than the configured one. CI runs the suite twice, so it is about two minutes
+		// per push. If CI wall clock ever has to come down, this is the first place to look: the information the attempt
+		// adds is only that the failure is still the recorded one.
+		private static readonly Dictionary<string, string> FailsWithADatabaseServer = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			{ "Sample.Forum", "An exception occurred during startup of device \"Sample.Forum.Forums\"." },
+			{ "Sample.Pubs", "An exception occurred during startup of device \"Sample.Pubs.Pubs\"." },
+			{ "Sample.Shipping", "An exception occurred during startup of device \"Sample.Shipping.Shipping\"." },
 		};
 
 		/// <summary>
@@ -166,7 +194,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			if (NotInTheRuntimeLayout.TryGetValue(sample.Name, out string notAssembled))
 				Assert.Inconclusive(String.Format("{0} {1}", sample.Name, notAssembled));
 			if (NeedsADatabaseServer.TryGetValue(sample.Name, out string needsADatabaseServer))
-				Assert.Inconclusive(String.Format("{0} {1}", sample.Name, needsADatabaseServer));
+			{
+				if (!TestEnvironment.MSSQLConfigured)
+					Assert.Inconclusive(String.Format("{0} {1} {2}", sample.Name, needsADatabaseServer, TestEnvironment.MSSQLNotConfigured("attempt it")));
+				AttemptTheSampleThatNamesItsOwnServer(sample);
+				return;
+			}
 
 			// The closure is resolved in the layout, so the folders copied are the ones the build assembled, and a sample
 			// the layout has no folder for is caught by the list above rather than by a copy that finds nothing.
@@ -178,6 +211,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				Register(instance, sample.Name, closure);
 				DeriveEverySurface(instance, sample);
 			}
+		}
+
+		/// <summary>
+		/// Registers one of the three samples that name a server of their own against the configured server, and checks the
+		/// failure against <see cref="FailsWithADatabaseServer"/>. No derivation follows: the sample never registers.
+		/// </summary>
+		private static void AttemptTheSampleThatNamesItsOwnServer(CorpusLibrary sample)
+		{
+			string expected = FailsWithADatabaseServer[sample.Name];
+			IReadOnlyList<CorpusLibrary> closure = CorpusLibrary.RequisiteClosure(TestEnvironment.LibrariesDirectory, sample.Name);
+
+			string error = null;
+			using (TestServerInstance instance = new TestServerInstance("corpus-" + sample.Name, closure.Select(library => library.Directory).ToList()))
+			{
+				instance.Server.Start();
+				try
+				{
+					Register(instance, sample.Name, closure);
+				}
+				catch (Exception exception)
+				{
+					error = FrontendFixture.FlattenMessages(exception);
+				}
+			}
+
+			if (error == null)
+				Assert.Fail(String.Format("{0} now registers against the server {1} names, so its entries in {2} and {3} have to go and it becomes an ordinary case.", sample.Name, TestEnvironment.MSSQLVariable, nameof(NeedsADatabaseServer), nameof(FailsWithADatabaseServer)));
+			if (!error.Contains(expected, StringComparison.Ordinal))
+				Assert.Fail(String.Format("{0}: expected its registration to fail with an error containing \"{1}\", but it failed with: {2}", sample.Name, expected, error));
+			Assert.Warn(String.Format("{0} {1} It was attempted and failed as recorded: {2}", sample.Name, NeedsADatabaseServer[sample.Name], error));
 		}
 
 		/// <summary>
@@ -377,6 +440,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					NeedsADatabaseServer.Keys.Where(name => LayoutHasTheLibrary(name) && !RequiresASqlDeviceLibrary(name)),
 					Is.Empty,
 					String.Format("These samples require no SQL device library ({0}), so the premise of their {1} entries has gone: delete the entry and let them run as ordinary cases.", String.Join(" or ", SqlDeviceLibraries), nameof(NeedsADatabaseServer))
+				);
+
+				// One entry in each list per sample: the first says why the case is skipped without a server, the second what
+				// the attempt fails with when there is one, and a sample with only one of them would leave a configured run
+				// (or an unconfigured one) with nothing to read.
+				Assert.That
+				(
+					NeedsADatabaseServer.Keys.Where(name => !FailsWithADatabaseServer.ContainsKey(name)).Concat(FailsWithADatabaseServer.Keys.Where(name => !NeedsADatabaseServer.ContainsKey(name))),
+					Is.Empty,
+					String.Format("These samples are in one of {0} and {1} but not the other; every sample that needs a database server also has the text its attempt fails with.", nameof(NeedsADatabaseServer), nameof(FailsWithADatabaseServer))
 				);
 			});
 		}

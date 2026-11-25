@@ -76,3 +76,15 @@ begin var LT : table { B : Binary } := table { row { Binary('0001') B }, row { B
 fails with `Runtime error: Internal Index Error: "Duplicate key violation."`. The literal's inferred key is its only column, so the index has to order two `Binary` values and the comparison it reaches reports them equal. The same literal with an `Integer` column beside the `Binary` (so the key is not the `Binary` alone) inserts all its rows and reads back correctly, which is what points at the key comparison rather than at the values.
 
 Measured 2026-11-24 on `modernization` at `6518e4a6`, while probing `bug-a-list-value-never-releases-its-elements` - recorded here as evidence rather than as its own ticket because the cause is the one this ticket already states: `System` declares only `iEqual` for `Binary` and no ordering at all. Whoever triages the shapes above should weigh this arm too: it says the gap is visible without any SQL device in the picture, and the last shape listed (declaring the engine's own `Binary` comparisons) is the only one that closes it.
+
+## A third instance of the same gap: the SQL Server device's own coverage corpus, live
+
+Verified 2026-11-25 on `modernization`, against SQL Server 2016 LocalDB. `test-device-live` ran the device-coverage corpus of `TestFramework.Coverage.Devices` against a real SQL Server device for the first time (1180 cases). One of the failures is this ticket's cause again, from the other direction:
+
+```
+Device Case 70 failed: Violation of insert transition for constraint "Key" defined on table "TestFramework.Coverage.Devices.ListBinaryTestTable".
+```
+
+The case creates a table whose only column is a `System.Binary` and whose key is that column, inserts one value, and asserts that inserting the *same* value again is refused; it then does the same with a second, different value. The key check refuses the second, different value as a duplicate - the same "two different `Binary` values compare equal because `System` declares no ordering for `Binary`" that the previous arm reached on a bare in-process server with a table literal. What this instance adds is that it happens with a SQL device in the picture and through the device's own key-check select, so the gap is not confined to the in-memory index; and that it is a recorded assertion in a corpus, so whichever shape is chosen above has a live test waiting for it.
+
+Reproducing it needs the one statement that `test-pre-3-1-scripts-policy`'s third arm asks the owner to rule on; until then `LiveDeviceTest` does not reach this case. Recorded here as evidence, not as a new ticket: the cause is the one this ticket already states.

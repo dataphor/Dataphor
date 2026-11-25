@@ -20,9 +20,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// </summary>
 	/// <remarks>
 	/// Sample set: General (auto-registered), System.Platform, SimpleDevice, Frontend, Sample.Common and Sample.DetailAdd.
-	/// Everything that needs a SQL Server or PostgreSQL (Sample.Demo, Sample.Forum, Sample.Pubs, Sample.Shipping) stays out of
-	/// this test; feat-ws7-devices-and-libraries owns that arm. Frontend's Register.d4 creates the built-in User and Developer
-	/// roles; Sample.Common's creates the SampleDevice on SimpleDevice; Sample.DetailAdd's creates Master, Category and Detail.
+	/// Frontend's Register.d4 creates the built-in User and Developer roles; Sample.Common's creates the SampleDevice on
+	/// SimpleDevice; Sample.DetailAdd's creates Master, Category and Detail.
+	///
+	/// The libraries that need a SQL Server (Sample.Forum, Sample.Pubs, Sample.Shipping) stay out of this test deliberately,
+	/// decided by test-device-live when it made the live passes configurable: each of the three names a server of its own in
+	/// its own registration script, which no machine but its author's has, so none of them can be registered against the
+	/// server DATAPHOR_TEST_MSSQL names - SamplesCorpusTest attempts all three where one is configured and records the
+	/// "device did not start" failure each gives. Adding them here would therefore make this test need a database server in
+	/// order to assert nothing new. What a SQL device would add that SimpleDevice does not - a device's own catalog entries,
+	/// its scalar type and operator maps among them, surviving a restart - is not covered by anything today; the place to add
+	/// it is here, with a device this test creates itself from the configured server rather than with one of those samples.
 	///
 	/// The device user's Data column stores whatever Schema.SecurityUtility.EncryptPassword puts there; this test asserts the
 	/// store round-trips the stored form, not that the form is secure (security-password-storage-design owns changing it).

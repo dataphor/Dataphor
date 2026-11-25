@@ -31,9 +31,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	{
 		/// <summary>
 		/// The library folders copied for every script's server: a fixed list rather than all of Libraries, so that the libraries
-		/// a script can see stay the same. The set the spike measured, without MSSQLDevice: nothing the template registers needs
-		/// a SQL Server (K14), plus TestFramework.Perf, which is two text files and is registered only by the entries that name
-		/// it in <c>register</c> (the timing scripts' BenchmarkExecute operator; test-perf-timing-scripts).
+		/// a script can see stay the same. The set the spike measured, plus TestFramework.Perf, which is two text files, and
+		/// MSSQLDevice; neither is registered unless an entry asks for it (TestFramework.Perf by naming it in <c>register</c>
+		/// for the timing scripts' BenchmarkExecute operator, test-perf-timing-scripts; MSSQLDevice by the status
+		/// needs-database-server). Carrying a folder costs a copy per server and registers nothing: what the template
+		/// registers still needs no SQL Server (K14), which <see cref="CheckNoExternalDevice"/> holds it to.
 		/// </summary>
 		public static readonly string[] Libraries =
 		[
@@ -42,6 +44,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"TestFramework.Coverage.Base",
 			"SQLDevice",
 			"Connection",
+			"MSSQLDevice",
 			"TestFramework",
 			"TestFramework.Coverage.Scripts",
 			"TestFramework.Perf",
@@ -50,6 +53,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		public const string ScriptsLibrary = "TestFramework.Coverage.Scripts";
 		public const string ScriptExtension = ".d4";
+
+		/// <summary>The library the SQL Server device of a needs-database-server entry is created in; see <see cref="LiveDevicePreamble"/>.</summary>
+		public const string LiveDeviceLibrary = "TestFramework.Coverage.Base";
+
+		/// <summary>The device name those scripts ask for, which they spell Coverage.Base.CoverageDevice.</summary>
+		public const string LiveDeviceName = "CoverageDevice";
+
+		/// <summary>The library registered for a needs-database-server entry, so that the device's class name resolves.</summary>
+		public const string LiveDeviceClassLibrary = "MSSQLDevice";
+
+		/// <summary>The database this pass puts that device's tables in, on the server DATAPHOR_TEST_MSSQL names.</summary>
+		public const string LiveDeviceDatabase = "DataphorCoverageScripts";
 
 		/// <summary>
 		/// The instance name a linkedServer entry's child server is started on: <see cref="Engine.DefaultServerName"/>, not
@@ -271,6 +286,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				return;
 			}
 
+			if (coverageCase.Entry.Status == CoverageStatus.NeedsDatabaseServer)
+			{
+				if (!TestEnvironment.MSSQLConfigured)
+				{
+					_summary.NotConfigured++;
+					Assert.Inconclusive(TestEnvironment.MSSQLNotConfigured(String.Format("run {0}, which needs a SQL Server device", coverageCase.Name)));
+					return;
+				}
+
+				// Before the server starts, so that a case whose variable names an unreachable server says so here rather than
+				// inside the script, and so that nothing an earlier run left in the database is in it when the device starts.
+				TestEnvironment.EmptyMSSQLDatabase(LiveDeviceDatabase);
+			}
+
 			Evaluate(coverageCase.Entry, Execute(coverageCase.Entry));
 		}
 
@@ -402,7 +431,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				process = session.StartProcess(new ProcessInfo(session.SessionInfo));
 				worker.Process = process;
 
-				foreach (string library in entry.Register ?? [])
+				foreach (string library in LibrariesToRegister(entry))
 				{
 					try
 					{
@@ -415,9 +444,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					}
 				}
 
-				if (entry.Preamble != null)
+				string preamble = PreambleFor(entry);
+				if (preamble != null)
 				{
-					process.ExecuteScript(entry.Preamble);
+					process.ExecuteScript(preamble);
 
 					// A preamble of SetUseImplicitTransactions(false) runs inside the implicit transaction of its own call, which the
 					// engine then leaves open (it ends implicit transactions only while they are on), so the script would run inside it
@@ -462,6 +492,51 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The D4 a needs-database-server entry runs before its own preamble: the SQL Server device its script asks for,
+		/// created in the helper library from the configured server. The class name is the registered alias
+		/// MSSQLDevice.MSSQLDevice - "MSSQLDevice" alone, as the commented-out definition in the helper library's Device.d4
+		/// spells it, is not an alias of anything.
+		/// </summary>
+		/// <remarks>
+		/// The current library is set to the helper library and left there, which is the one place these three scripts differ
+		/// from the 144 others: a script's objects are created in the current library, and the engine refuses a reference from
+		/// an object in one library to an object in a library the first does not require. Every other script runs in General,
+		/// which requires nothing, so a table created there could not name a device in the helper library - "Object
+		/// &quot;General.ListIntegerTestTableOne&quot; ... cannot reference object
+		/// &quot;TestFramework.Coverage.Base.CoverageDevice&quot; ... because the referenced library is not required by the
+		/// referencing library" (seen, before this was moved). The device cannot move to General instead: the scripts spell it
+		/// Coverage.Base.CoverageDevice, and a name resolves only as a suffix of what the object is really called.
+		/// </remarks>
+		private static string LiveDevicePreamble()
+		{
+			return
+				String.Format
+				(
+					"SetLibrary('{0}');\r\ncreate device {1} reconciliation {{ mode = {{ command }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n",
+					LiveDeviceLibrary,
+					LiveDeviceName,
+					TestEnvironment.MSSQLDeviceAttributes(LiveDeviceDatabase)
+				);
+		}
+
+		/// <summary>The libraries registered on the script's server before it runs: the entry's own, after MSSQLDevice for a live entry.</summary>
+		private static IEnumerable<string> LibrariesToRegister(CoverageEntry entry)
+		{
+			if (entry.Status == CoverageStatus.NeedsDatabaseServer)
+				yield return LiveDeviceClassLibrary;
+			foreach (string library in entry.Register ?? [])
+				yield return library;
+		}
+
+		/// <summary>The D4 run before the script: the entry's own preamble, after the device creation for a live entry.</summary>
+		private static string PreambleFor(CoverageEntry entry)
+		{
+			if (entry.Status != CoverageStatus.NeedsDatabaseServer)
+				return entry.Preamble;
+			return LiveDevicePreamble() + (entry.Preamble ?? String.Empty);
+		}
+
+		/// <summary>
 		/// The script's file in the server's own copy of the scripts library, so that a batches entry runs the text that the
 		/// nested ExecuteScript('Coverage.Scripts', name) would load.
 		/// </summary>
@@ -474,7 +549,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			switch (entry.Status)
 			{
+				// A live entry must succeed exactly as a pass entry must; the only difference is the Inconclusive path above.
 				case CoverageStatus.Pass:
+				case CoverageStatus.NeedsDatabaseServer:
 					if (error == null)
 					{
 						_summary.PassPassed++;
@@ -537,6 +614,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			public int DiscoveryProblems;
 			public int TemplateFailures;
 			public int Fragments;
+			public int NotConfigured;
 			public readonly SortedDictionary<string, int> KnownMatched = new SortedDictionary<string, int>(StringComparer.Ordinal);
 			public readonly SortedDictionary<string, int> KnownMismatched = new SortedDictionary<string, int>(StringComparer.Ordinal);
 			public readonly SortedDictionary<string, int> KnownPassing = new SortedDictionary<string, int>(StringComparer.Ordinal);
@@ -560,6 +638,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				foreach (string ticket in UnstablePassed.Keys.Union(UnstableFailed.Keys).OrderBy(ticket => ticket, StringComparer.Ordinal))
 					text.AppendLine(String.Format("    {0}: {1} passed, {2} failed", ticket, UnstablePassed.GetValueOrDefault(ticket), UnstableFailed.GetValueOrDefault(ticket)));
 				text.AppendLine(String.Format("  fragment: {0} (run only as part of other scripts)", Fragments));
+				text.AppendLine(String.Format("  needs-database-server: {0} not run, no server configured", NotConfigured));
 				text.Append(String.Format("  discovery problems: {0}", DiscoveryProblems));
 				if (TemplateFailures > 0)
 					text.Append(String.Format(Environment.NewLine + "  not run, template instance failed: {0}", TemplateFailures));

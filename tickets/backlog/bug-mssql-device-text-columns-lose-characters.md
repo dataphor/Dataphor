@@ -29,3 +29,20 @@ Whichever is chosen, the byte-count arm wants the character width recorded inste
 ## What would confirm it
 
 Nothing in the test suite writes a row to a SQL Server table **through the device** and reads it back, so this was read out of the code and the goldens rather than observed: `repro: static`. What would settle it is one D4 script against a live SQL Server device - create a table with a string column, insert a value holding Chinese or Cyrillic characters, select it back - which is the harness `test-device-live` is building. The byte-count arm is already measured (`sys.columns.max_length` above) and needs no further proof.
+
+## A third arm, from the same place: a D4 String column compares case-insensitively on SQL Server
+
+Verified 2026-11-25 on `modernization`, against SQL Server 2016 LocalDB with its default (case-insensitive) collation. `test-device-live` ran the device-coverage corpus of `TestFramework.Coverage.Devices` against a real SQL Server device for the first time (1180 cases), and two of the failures are this one defect:
+
+```
+Device Case 761 failed: System.String compared insensitively.
+Device Case 762 failed: System.String compared insensitively.
+```
+
+Those two cases put `"TEST CASE"` in a `System.String` column of a table on the device, read it back and assert it does **not** equal `"test case"`, and the reverse. The device answers that it does. D4's `System.String` is case-sensitive - that is what these assertions record - while the `varchar(n)` the device emits carries the database's collation, which on a default SQL Server install is case-insensitive, so a restriction, a key check or a join on a `String` column that the device pushes down gives a different answer from the same expression evaluated in the engine. The corpus has the parallel cases for `SQLDevice.SQLIText` (which is *meant* to compare insensitively) and for `SQLDevice.SQLText` beside them, so the distinction the device has to keep is already written down.
+
+This is the same site as the two arms above - what the SQL Server device thinks a D4 text column is, `SQLString.InternalNativeDomainName` and the SQL Server device's own type mapping - and the same kind of answer: the column the device creates has to carry the semantics the D4 type promises, which for `String` means a case-sensitive (binary or `_CS_AS`) collation on the column as well as a Unicode one. Hence an arm here rather than a ticket of its own. It is a change a deployment can notice in the same way, and more sharply: adding `COLLATE` to a column changes which indexes a query can use and makes the device's emitted DDL differ from every existing table, so the alternative - declaring that a Dataphor-created `String` column inherits the database's collation, and saying so where the user's guide describes the device - has to be weighed against it.
+
+Worth noting for whoever triages: the device already has an `IsCaseSensitive` property, but `MSSQLDevice.RegisterSystemObjectMaps` hard-codes `"false"` into the `SystemCatalog.d4` it runs (the `USEISTRING` branch beside it is compiled out), and the one definition of a `CoverageDevice` kept in the test tree has `//"IsCaseSensitive" = "true"` commented out - so the question was already open in 2008 and nothing in the tree answers it.
+
+Reproducing it needs the one statement that `test-pre-3-1-scripts-policy`'s third arm asks the owner to rule on; until then `LiveDeviceTest` does not reach these cases.

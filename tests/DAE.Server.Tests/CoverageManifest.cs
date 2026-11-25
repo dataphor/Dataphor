@@ -21,7 +21,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The script's result was observed to vary between identical runs: it runs, and never fails the run.</summary>
 		Unstable,
 		/// <summary>The script is a step that other scripts run (its entry's partOf); it is not run on its own.</summary>
-		Fragment
+		Fragment,
+		/// <summary>
+		/// The script needs a configured database server (<see cref="TestEnvironment.MSSQLVariable"/>): without one its case
+		/// reports Inconclusive and nothing connects; with one the script must succeed, as a <see cref="Pass"/> entry must.
+		/// </summary>
+		NeedsDatabaseServer
 	}
 
 	/// <summary>One manifest entry: what running one coverage script must do. The fields are described on <see cref="CoverageManifest"/>.</summary>
@@ -52,6 +57,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				case "known-failure": return CoverageStatus.KnownFailure;
 				case "unstable": return CoverageStatus.Unstable;
 				case "fragment": return CoverageStatus.Fragment;
+				case "needs-database-server": return CoverageStatus.NeedsDatabaseServer;
 				default: return null;
 			}
 		}
@@ -68,10 +74,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// ordinal order. Fields, and nothing else:</para>
 	/// <list type="bullet">
 	/// <item><c>script</c> (always): the file name in Documents/ without ".d4", exact case.</item>
-	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c>, <c>unstable</c> or <c>fragment</c> (see
-	/// <see cref="CoverageStatus"/>). Use <c>unstable</c> only with evidence that the result varies between identical runs, and
-	/// <c>fragment</c> only for a script that fails on its own because it needs what other scripts run before it; a helper
-	/// script that passes on its own stays <c>pass</c>.</item>
+	/// <item><c>status</c> (always): <c>pass</c>, <c>known-failure</c>, <c>unstable</c>, <c>fragment</c> or
+	/// <c>needs-database-server</c> (see <see cref="CoverageStatus"/>). Use <c>unstable</c> only with evidence that the result
+	/// varies between identical runs, and <c>fragment</c> only for a script that fails on its own because it needs what other
+	/// scripts run before it; a helper script that passes on its own stays <c>pass</c>.</item>
+	/// <item><c>needs-database-server</c>: the script needs the SQL Server that <c>DATAPHOR_TEST_MSSQL</c> names. Where the
+	/// variable is unset the case reports Inconclusive with that reason and nothing connects; where it is set, the runner
+	/// empties this pass's own database on that server, registers <c>MSSQLDevice</c> and creates the SQL Server device
+	/// <c>CoverageDevice</c> in <c>TestFramework.Coverage.Base</c> before the entry's own <c>preamble</c>, and the script must
+	/// then succeed. The device is made here rather than in the helper library on purpose: the library registers before all
+	/// 147 script cases, so a device in it would make the whole pass need a database server (defect K14).</item>
 	/// <item><c>partOf</c> (<c>fragment</c> only, required there): a non-empty array of the scripts that run the fragment.
 	/// Each must have an entry, not be the fragment itself and not be a <c>fragment</c>; discovery also fails the fragment's
 	/// case unless each one's file text mentions the fragment's name as a D4 string literal.</item>
@@ -194,7 +206,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 				CoverageStatus? status = CoverageEntry.ParseStatus(entry.StatusText);
 				if (status == null)
-					Problem(entry.StatusText == null ? "\"status\" is missing." : String.Format("unknown status \"{0}\"; expected pass, known-failure, unstable or fragment.", entry.StatusText));
+					Problem(entry.StatusText == null ? "\"status\" is missing." : String.Format("unknown status \"{0}\"; expected pass, known-failure, unstable, fragment or needs-database-server.", entry.StatusText));
 
 				if (status == CoverageStatus.Fragment)
 				{
@@ -205,15 +217,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (entry.PartOf != null)
 					Problem("\"partOf\" is allowed only on a fragment entry.");
 
-				if (status == CoverageStatus.Pass)
+				if (status == CoverageStatus.Pass || status == CoverageStatus.NeedsDatabaseServer)
 				{
 					if (entry.Ticket != null)
-						Problem("\"ticket\" is not allowed on a pass entry.");
+						Problem(String.Format("\"ticket\" is not allowed on a {0} entry, which must succeed.", entry.StatusText));
 				}
 				else if (status != null)
 				{
 					if (entry.Ticket == null)
-						Problem("\"ticket\" is required unless the status is pass.");
+						Problem("\"ticket\" is required unless the status is pass or needs-database-server.");
 					else if (!TicketSlug.IsMatch(entry.Ticket))
 						Problem(String.Format("\"ticket\" \"{0}\" is not a ticket slug (lower-case words joined by hyphens, no sequence prefix or .md).", entry.Ticket));
 				}
