@@ -45,6 +45,7 @@
     <Project Path="tests/TestHarness/DAE.Test.Harness.csproj" />
     <Project Path="tests/libraries/TestFramework.Coverage.Base/Source/DAE.Diagnostics.csproj" />
     <Project Path="tests/libraries/LibraryLoadingProbe/Source/LibraryLoadingProbe.csproj" />
+    <Project Path="tests/libraries/TestFramework.SQLRecorder/Source/DAE.SQLRecorder.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/layout/Layout.csproj" />

@@ -1,0 +1,12 @@
+// TestFramework.SQLRecorder
+// A connection class that records the SQL a device generates instead of sending it to a database server, and the
+// operators a test reads the recording back through. See Source/Recorder.cs; the fixture that uses it is
+// DeviceTranslationGoldenTests in tests/DAE.Server.Tests.
+//
+// The connection class itself is registered by the assembly (Source/Register.cs) under the name
+// "SQLRecorder.RecordingConnection", which is what a create device statement's ConnectionClass attribute carries.
+
+create operator SQLRecorderStatements() : String class "Alphora.Dataphor.DAE.SQLRecorder.SQLRecorderStatementsNode,Alphora.Dataphor.DAE.SQLRecorder" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLRecorderConnections() : String class "Alphora.Dataphor.DAE.SQLRecorder.SQLRecorderConnectionsNode,Alphora.Dataphor.DAE.SQLRecorder" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLRecorderClear() class "Alphora.Dataphor.DAE.SQLRecorder.SQLRecorderClearNode,Alphora.Dataphor.DAE.SQLRecorder" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLRecorderArmCursor(const AFragment : String, const AColumnName : String, const AValue : Integer) class "Alphora.Dataphor.DAE.SQLRecorder.SQLRecorderArmCursorNode,Alphora.Dataphor.DAE.SQLRecorder" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };

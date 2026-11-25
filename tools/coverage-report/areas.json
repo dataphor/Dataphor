@@ -32,6 +32,7 @@
       "DAE.Test.Harness",
       "Alphora.Dataphor.Diagnostics.LibraryLoadingProbe",
       "Alphora.Dataphor.DAE.Diagnostics",
+      "Alphora.Dataphor.DAE.SQLRecorder",
       "Layout",
       "CoreWCF.Dispatcher"
     ]

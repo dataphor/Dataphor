@@ -3970,6 +3970,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			else if (planNode is DDLNode)
 			{
+				// NOTE: the connection is requested before the reconcile mode is tested, so a device whose mode leaves out
+				// "command" still opens a connection here and then does nothing with it. Nothing today wants otherwise, and
+				// DeviceTranslationGoldenTests works around it with a connection class that records instead of connecting.
+				// If a device defined offline with reconciliation { mode = { none } } should be able to create its D4 tables
+				// with no server at all, this is the request to move inside the guard below - and the catch below reads
+				// header.Connection, so it has to move too.
 				SQLConnectionHeader header = RequestConnection(false);
 				try
 				{

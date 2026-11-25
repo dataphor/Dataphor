@@ -42,6 +42,7 @@
     <Compile Include="DeviceClassAttributeFixture.cs" />
     <Compile Include="DeviceClassAttributeRerunTest.cs" />
     <Compile Include="DeviceClassAttributeRollbackTest.cs" />
+    <Compile Include="DeviceTranslationGoldenTests.cs" />
     <Compile Include="FormCustomizationTest.cs" />
     <Compile Include="FormDocumentCorpusTest.cs" />
     <Compile Include="FrontendDerivationGoldenTest.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="LibraryAttachTest.cs" />
     <Compile Include="LibraryDropTransactionTest.cs" />
     <Compile Include="LibraryLoadingTest.cs" />
+    <Compile Include="MSSQLDeviceTranslationGoldenTests.cs" />
     <Compile Include="MemoryDeviceConcurrencyTest.cs" />
     <Compile Include="NativeSessionCleanupTest.cs" />
     <Compile Include="NativeSessionKeepAliveTest.cs" />

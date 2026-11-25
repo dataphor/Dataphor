@@ -69,6 +69,7 @@
     <ProjectReference Include="..\..\samples\Sample.Shipping\Source\Shipping.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\tests\libraries\LibraryLoadingProbe\Source\LibraryLoadingProbe.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\tests\libraries\TestFramework.SQLRecorder\Source\DAE.SQLRecorder.csproj" DataphorLayoutRole="Library" />
   </ItemGroup>
 
   <!-- The D4 libraries in the layout, one item per library: its .d4l file. -->

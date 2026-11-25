@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Alphora.Dataphor.DAE.SQLRecorder</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE.SQLRecorder</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+    Base and DAE only. The connection, command and cursor base classes are in src\engine\DAE\Connection, the plan node
+    base in src\engine\DAE\Runtime.Instructions and the DAERegister assembly attribute in src\engine\DAE\Server, so
+    nothing here needs the server assembly or a database client package. Nothing here may reference a SQL Server or
+    PostgreSQL client either: this library replaces the client, and device-mssql-port swaps the one the device uses.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\engine\Base\Base.csproj" />
+    <ProjectReference Include="..\..\..\..\src\engine\DAE\DAE.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Recorder.cs" />
+    <Compile Include="RecorderNodes.cs" />
+    <Compile Include="RecordingConnection.cs" />
+    <Compile Include="Register.cs" />
+  </ItemGroup>
+
+</Project>
