@@ -286,6 +286,28 @@ class UntestedFilesTest(unittest.TestCase):
         self.assertIn("Another 2 wholly untested files of fewer than 20 coverable lines each,"
                       " 24 lines between them, are not listed.", section)
 
+    def test_a_floor_that_holds_nothing_back_is_not_described_as_a_rule(self):
+        """--untested-min-lines 0 lists everything, so no sentence may promise a floor.
+
+        The report used to say "down to 0 coverable lines" in its preamble while leaving a
+        file of no coverable lines out, and at 1 it read "fewer than 1 coverable lines".
+        """
+        tree = Tree()
+        self.addCleanup(tree.close)
+        tree.report("run", {"Engine": {self.CATALOG_COVERED: lines(100, 0),
+                                       self.PLAN: lines(0, 30),
+                                       ("Tiny", "src/engine/DAE/Schema/Tiny.cs"): lines(0, 7),
+                                       self.EMPTY: {}}})
+        code, output = tree.run("--untested-min-lines", "0")
+        self.assertEqual(code, 0)
+        report = output[output.index("# Test coverage report"):]
+        # Nothing is held back, so both the smallest file and the whole report say so.
+        self.assertIn("| src/engine/DAE/Schema/Tiny.cs | 7 |", self.section(report))
+        self.assertNotIn("coverable lines are counted at the end", report)
+        self.assertNotIn("down to 0 coverable lines", report)
+        # A file with no coverable line is still not a finding, at any floor.
+        self.assertNotIn("Empty.cs", report)
+
     def test_the_section_prints_a_positive_line_when_nothing_qualifies(self):
         tree = Tree()
         self.addCleanup(tree.close)

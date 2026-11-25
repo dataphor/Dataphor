@@ -488,6 +488,16 @@ def _incomplete_map_section(out, analysis):
         out.append("")
 
 
+def _floor_can_hold_a_file_back(options):
+    """Whether --untested-min-lines can keep any file out of the untested-file table.
+
+    A file reaches that table only with at least one coverable line, so a floor of 0 or 1
+    excludes nothing and the report must not describe one: the sentence would read as a
+    rule the run does not follow, and at 1 it would read "fewer than 1 coverable lines".
+    """
+    return options.untested_min_lines > 1
+
+
 def _untested_files_section(out, analysis, options):
     """The cross-area index of files nothing executed - the one table an area rate hides.
 
@@ -503,12 +513,22 @@ def _untested_files_section(out, analysis, options):
         out.append("No source file in an engine area is wholly untested.")
         out.append("")
         return
-    named = [item for item in listed if item[1].coverable >= options.untested_min_lines]
-    counted = [item for item in listed if item[1].coverable < options.untested_min_lines]
-    out.append("Every source file in an engine area that the run never entered, wherever it sits. An area's rate above is a weighted average over its files, so a file at 0 %% inside a well-covered area appears in no other table here. Each row names the file's area and that area's rate: a zero inside an area already marked `gap` is expected, and a zero inside a `covered` one is the finding this section exists for.%s"
-               % ("" if not options.untested_min_lines else
-                  " Files of fewer than %s coverable lines are counted at the end rather than listed."
-                  % _count(options.untested_min_lines)))
+    named = [entry for entry in listed if entry[1].coverable >= options.untested_min_lines]
+    counted = [entry for entry in listed if entry[1].coverable < options.untested_min_lines]
+    # Each sentence is here only when it is true of this run: a floor of 0 or 1 can hold no
+    # file back (a file with no coverable line never reaches `listed`), and a floor above
+    # every listed file leaves no table for the column sentence to describe.
+    intro = ["Every source file in an engine area that the run never entered, wherever it sits."
+             " An area's rate above is a weighted average over its files, so a file at 0 % inside"
+             " a well-covered area appears in no other table here."]
+    if named:
+        intro.append("Each row names the file's area and that area's rate: a zero inside an area"
+                     " already marked `gap` is expected, and a zero inside a `covered` one is the"
+                     " finding this section exists for.")
+    if _floor_can_hold_a_file_back(options):
+        intro.append("Files of fewer than %s coverable lines are counted at the end rather than listed."
+                     % _count(options.untested_min_lines))
+    out.append(" ".join(intro))
     out.append("")
     if named:
         out.append("| File | Coverable | Area | Area rate |")
@@ -536,8 +556,9 @@ def render(analysis, area_map, options):
     out.append("An area below %g %% line coverage is a **gap** unless it has fewer than %s coverable lines; below %g %% it is **thin**. Areas are listed worst first by uncovered line count, which is what makes the biggest holes the first ones a reader meets."
                % (options.gap_below, _count(options.min_lines), options.thin_below))
     out.append("")
-    out.append("A file is named under **Wholly untested files** when the run never entered it at all, whatever its area's rate, down to %s coverable lines. That is a different question from an area's verdict and a different threshold: `--min-lines` is about whether a whole area is too small to call a gap, `--untested-min-lines` about whether one file is too small to name."
-               % _count(options.untested_min_lines))
+    out.append("A file is named under **Wholly untested files** when the run never entered it at all, whatever its area's rate%s. That is a different question from an area's verdict and a different threshold: `--min-lines` is about whether a whole area is too small to call a gap, `--untested-min-lines` about whether one file is too small to name."
+               % (", down to %s coverable lines" % _count(options.untested_min_lines)
+                  if _floor_can_hold_a_file_back(options) else ""))
     out.append("")
     _incomplete_map_section(out, analysis)
 
