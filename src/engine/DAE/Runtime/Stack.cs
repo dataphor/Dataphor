@@ -93,7 +93,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 
 		/// <summary>Whether two slot values name the same underlying value, comparing stream identifiers by value and everything else by reference.</summary>
-		private static bool IsSameValue(object left, object right)
+		/// <remarks>
+		/// Public because the question is asked away from the stack as well: CallNode asks whether a slot it pushed a
+		/// copy into still holds that copy, to tell a callee that never wrote to the slot from one that did.
+		/// </remarks>
+		public static bool IsSameValue(object left, object right)
 		{
 			if ((left is StreamID) && (right is StreamID))
 				return ((StreamID)left).Value == ((StreamID)right).Value;

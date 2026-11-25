@@ -28,9 +28,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// displaced may be the caller's. A const operand's value is never the loop's to release - the call site settles
 	/// whether the call owns it - and an in operand's is, because the loop writing the slot is what stops the compiler
 	/// promoting the operand to const and passing it by reference. The var shape of that case passes only because the
-	/// caller's slot owns the value it passed: where the caller passes its own loop variable instead, the release is a
-	/// release too many, which a plain assignment to such a parameter has done for longer than this rule has existed
-	/// (bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value). The four cases from
+	/// caller's slot owns the value it passed, and AVarOperandGivenTheCallersLoopVariableLeavesTheLoopsValueAlone is
+	/// the shape where it does not: the caller's own loop variable as the argument, holding a row or element the
+	/// iterator owns and the loop goes on reading. A var operand's slot used to be an alias of the caller's whatever
+	/// the caller passed, so an assignment in the body - or a foreach inside it - released a value the caller's loop
+	/// was still using and the loop then read a released one; such an operand is now copied for the call, so the
+	/// callee's slot owns what it releases
+	/// (bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value). Two of that case's shapes are
+	/// measured against the equivalent direct assignment to a loop variable rather than against nought, because the
+	/// write-back hands the caller's loop variable the operator's output and the next iteration overwrites it with a
+	/// plain store - the same accepted tradeoff as the direct assignment, and now the same size. The four cases from
 	/// AConstOperandReleasesTheValueComputedForIt through ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the
 	/// operand half of the same rule: whether a call owns the value it was handed for an operand is a property of the plan
 	/// node that produced the argument - a node that reads a stack slot, or a column of a row in one, can lend the value
@@ -599,6 +606,180 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							end;
 						"
 					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// A var operand whose argument is the caller's own loop variable, which is the one shape where the slot the
+		/// callee writes to holds a value the slot does not own. A var operand's slot is an alias of the caller's, so an
+		/// assignment in the body - or a foreach inside it - released whatever that slot held; where the caller passed
+		/// its loop variable, the value released is the row or element the iterator owns and the loop goes on reading,
+		/// so the loop read a released value one iteration later. The callee cannot tell which it was given: an
+		/// operator is compiled once, independently of its call sites. The call site can, and now copies the value for
+		/// the callee's slot, so the callee owns what it releases and the caller's loop keeps what the iterator lent it.
+		/// </summary>
+		/// <remarks>
+		/// The two shapes whose body assigns are measured against the equivalent direct assignment to a loop variable
+		/// rather than against nought, because the write-back into the loop variable's slot leaks the value it hands
+		/// over exactly as that assignment does - the next iteration overwrites the slot with a plain store, the
+		/// accepted tradeoff recorded on the borrowed branch of AssignmentNode. What this case pins is that the two now
+		/// leak equally: what went was the double release, not that leak. The read-only and inner-foreach shapes
+		/// balance outright, and are what would catch a fix that paid a copy per call on the read path.
+		/// </remarks>
+		[Test]
+		public void AVarOperandGivenTheCallersLoopVariableLeavesTheLoopsValueAlone()
+		{
+			ExecuteScript("create operator ZVarLoopRowAssigns(var ARow : row { ID : Integer, B : Binary }) begin ARow := row { 9 ID, Binary('0009') B }; end;");
+			ExecuteScript("create operator ZVarLoopAssigns(var AB : Binary) begin AB := Binary('0009'); end;");
+			ExecuteScript("create operator ZVarLoopRowReads(var ARow : row { ID : Integer, B : Binary }) : String begin result := ARow.B.Value; end;");
+			ExecuteScript("create operator ZVarLoopReads(var AB : Binary) : String begin result := AB.Value; end;");
+			ExecuteScript("create operator ZVarLoopInnerForEach(var AB : Binary) : Integer begin var LCount : Integer := 0; foreach AB in { Binary('0001'), Binary('0002') } do LCount := LCount + 1; result := LCount; end;");
+
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"over a cursor, the operator only reading the row",
+						@"
+							begin
+								var LR : row { ID : Integer, B : Binary };
+								var LCount : Integer := 0;
+								foreach LR in cursor(table { row { 1 ID, Binary('00F1') B }, row { 2 ID, Binary('00F2') B }, key { ID } }) do
+								begin
+									if ZVarLoopRowReads(var LR) <> LR.B.Value then
+										raise Error('The operator did not read the row it was given, or the call left it unreadable.');
+									LCount := LCount + 1;
+								end;
+								if LCount <> 2 then
+									raise Error('The loop did not see both rows.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"over a list, the operator only reading the element",
+						@"
+							begin
+								var LB : Binary;
+								var LCount : Integer := 0;
+								foreach LB in { Binary('00F1'), Binary('00F2') } do
+								begin
+									if ZVarLoopReads(var LB) <> LB.Value then
+										raise Error('The operator did not read the element it was given, or the call left it unreadable.');
+									LCount := LCount + 1;
+								end;
+								if LCount <> 2 then
+									raise Error('The loop did not see both elements.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"over a list, with a foreach inside the operator",
+						@"
+							begin
+								var LB : Binary;
+								var LCount : Integer := 0;
+								foreach LB in { Binary('00F1'), Binary('00F2') } do
+								begin
+									if ZVarLoopInnerForEach(var LB) <> 2 then
+										raise Error('The loop inside the operator did not see both of its elements.');
+									LCount := LCount + 1;
+								end;
+								if LCount <> 2 then
+									raise Error('The outer loop did not see both elements.');
+							end;
+						"
+					);
+
+					int throughTheCallOverACursor =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LR : row { ID : Integer, B : Binary };
+									var LCount : Integer := 0;
+									foreach LR in cursor(table { row { 1 ID, Binary('00F1') B }, row { 2 ID, Binary('00F2') B }, key { ID } }) do
+									begin
+										ZVarLoopRowAssigns(var LR);
+										if LR.B.Value <> '0009' then
+											raise Error('The operator''s assignment did not reach the caller''s variable.');
+										LCount := LCount + 1;
+									end;
+									if LCount <> 2 then
+										raise Error('The loop did not see both rows.');
+								end;
+							"
+						);
+
+					int directlyOverACursor =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LR : row { ID : Integer, B : Binary };
+									var LCount : Integer := 0;
+									foreach LR in cursor(table { row { 1 ID, Binary('00F1') B }, row { 2 ID, Binary('00F2') B }, key { ID } }) do
+									begin
+										LR := row { 9 ID, Binary('0009') B };
+										if LR.B.Value <> '0009' then
+											raise Error('The assignment did not reach the variable.');
+										LCount := LCount + 1;
+									end;
+									if LCount <> 2 then
+										raise Error('The loop did not see both rows.');
+								end;
+							"
+						);
+
+					Assert.That(throughTheCallOverACursor, Is.EqualTo(directlyOverACursor), "over a cursor, the operator assigning: the call left behind more than the same assignment made directly.");
+
+					int throughTheCallOverAList =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LB : Binary;
+									var LCount : Integer := 0;
+									foreach LB in { Binary('00F1'), Binary('00F2') } do
+									begin
+										ZVarLoopAssigns(var LB);
+										if LB.Value <> '0009' then
+											raise Error('The operator''s assignment did not reach the caller''s variable.');
+										LCount := LCount + 1;
+									end;
+									if LCount <> 2 then
+										raise Error('The loop did not see both elements.');
+								end;
+							"
+						);
+
+					int directlyOverAList =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LB : Binary;
+									var LCount : Integer := 0;
+									foreach LB in { Binary('00F1'), Binary('00F2') } do
+									begin
+										LB := Binary('0009');
+										if LB.Value <> '0009' then
+											raise Error('The assignment did not reach the variable.');
+										LCount := LCount + 1;
+									end;
+									if LCount <> 2 then
+										raise Error('The loop did not see both elements.');
+								end;
+							"
+						);
+
+					Assert.That(throughTheCallOverAList, Is.EqualTo(directlyOverAList), "over a list, the operator assigning: the call left behind more than the same assignment made directly.");
 				}
 			);
 		}

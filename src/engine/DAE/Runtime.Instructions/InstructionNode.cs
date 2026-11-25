@@ -170,6 +170,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, plan.CurrentStatement(), Operator.Operands[index].Name);
 
 							((StackReferenceNode)Nodes[index]).ByReference = true;
+
+							// Whether the caller's slot owns the value it is lending is a compile-time fact of the call site, and this
+							// is the only place that can see it: the callee is compiled once, independently of its call sites, so its
+							// own parameter symbol carries no such mark however the caller passes its argument. CallNode reads this to
+							// copy the value rather than alias a slot whose value belongs to something else; see Symbol.IsBorrowed.
+							((StackReferenceNode)Nodes[index]).ReferencesBorrowedSlot = plan.Symbols[((StackReferenceNode)Nodes[index]).Location].IsBorrowed;
 						break;
 
 						case Modifier.Const :

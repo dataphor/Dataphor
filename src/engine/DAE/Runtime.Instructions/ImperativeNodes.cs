@@ -1254,10 +1254,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// untouched copy when the body assigns to neither, is then named by nothing. Measured: the call leaked two
 		/// values before this fix when the body assigned to both and none when it assigned to neither, so it is one
 		/// better in the first shape and one worse in the second. Closing it means CallNode handing every operand in
-		/// such a group the value that survives and releasing the rest here, which needs the same-value test of
-		/// Stack.PokeOwned shared out and leaves a caller slot naming a released value until the write-back reaches
-		/// it. Worth doing only if a real application turns out to pass one variable to two by-reference parameters
-		/// of one call - a call that always loses one of its two writes, so today it is a programming error either way.
+		/// such a group the value that survives and releasing the rest here, which leaves a caller slot naming a
+		/// released value until the write-back reaches it. Worth doing only if a real application turns out to pass one
+		/// variable to two by-reference parameters of one call - a call that always loses one of its two writes, so
+		/// today it is a programming error either way.
 		/// </para>
 		/// <para>
 		/// The scan costs a type test per operand and runs no comparison at all for the single-operand calls that
@@ -1287,17 +1287,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 
+		/// <summary>Whether the operand at the given index names a caller slot that holds a value it does not own.</summary>
+		/// <remarks>
+		/// <para>
+		/// A var operand's slot is an alias of the caller's: nothing is copied, an assignment in the body releases what
+		/// the slot held, and the cleanup writes the slot's final value back to the caller. That is right while the
+		/// caller's slot owns the value it passed - the ordinary case - and wrong where it does not. A foreach lends its
+		/// loop variable the row or element the iterator owns and goes on reading it, so a body that assigned to such a
+		/// parameter released a value the caller's loop was still using and the loop then read a released one
+		/// (bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value). Handing the callee a copy it
+		/// really owns restores the invariant the rest of the design rests on - everything that receives a value owns
+		/// what it is given - rather than adding a second kind of slot at run time; see
+		/// docs/architecture/operand-ownership.md.
+		/// </para>
+		/// <para>
+		/// NOTE: only CallNode acts on the mark. That is enough today because a built-in C# instruction node with a var
+		/// operand never pushes a slot and never releases the value it was handed - it returns a replacement, which
+		/// CleanupOperand writes back - so there is nothing there to make safe. A new built-in that did release its var
+		/// operand's input would need this copy too, and would meet this rule rather than a silent double release.
+		/// </para>
+		/// </remarks>
+		private bool ReferencesABorrowedSlot(int index)
+		{
+			StackReferenceNode reference = Nodes[index] as StackReferenceNode;
+			return (reference != null) && reference.ByReference && reference.ReferencesBorrowedSlot;
+		}
+
 		public override object InternalExecute(Program program, object[] arguments)
 		{
+			// The copies pushed for operands whose caller slot holds a value it does not own, by operand index, so that
+			// the reconcile in the finally below can tell a copy the body never wrote over from the value that replaced
+			// it. Allocated only for a call that has such an operand, which is the rare shape.
+			object[] borrowedCopies = null;
+
 			for (int index = 0; index < Operator.Operands.Count; index++)
-				// A repeat of a by-reference operand gets its own copy, so that each of the callee's slots owns a
-				// distinct value; the last write-back still wins, which is what such a call did before.
-				program.Stack.Push
-				(
-					ReferencesAnEarlierOperandsSlot(index)
-						? DataValue.CopyValue(program.ValueManager, arguments[index])
-						: arguments[index]
-				);
+			{
+				object operandValue = arguments[index];
+
+				if (ReferencesABorrowedSlot(index))
+				{
+					// A slot of the callee's own rather than an alias of a slot whose value belongs to something else;
+					// see ReferencesABorrowedSlot. Checked before the repeat below, so that an operand that is both -
+					// one borrowed variable passed twice - is reconciled rather than left to the last write-back.
+					operandValue = DataValue.CopyValue(program.ValueManager, operandValue);
+					if (borrowedCopies == null)
+						borrowedCopies = new object[Operator.Operands.Count];
+					borrowedCopies[index] = operandValue;
+				}
+				else if (ReferencesAnEarlierOperandsSlot(index))
+					// A repeat of a by-reference operand gets its own copy, so that each of the callee's slots owns a
+					// distinct value; the last write-back still wins, which is what such a call did before.
+					operandValue = DataValue.CopyValue(program.ValueManager, operandValue);
+
+				program.Stack.Push(operandValue);
+			}
 
 			// TODO: I am not sure this is necessary, the derived table var does not do this
 			// All rights checking should be being performed at compile-time, so there should
@@ -1358,7 +1401,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							// started still reads its own operands; nothing pops the operands themselves before the
 							// window pops, above this frame.
 							for (int index = 0; index < Operator.Operands.Count; index++)
-								arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
+							{
+								object slotValue = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
+
+								// An operand given a copy because the caller's slot holds a value it does not own is
+								// reconciled rather than handed back. Where the slot still holds that copy, nothing in the
+								// body wrote to this operand, so the copy is this call's to release and arguments[index]
+								// goes on naming the caller's own value: the cleanup's write-back then stores the caller's
+								// value back into the caller's slot, which is a no-op and exactly what the cleanup does on
+								// the unchanged non-borrowed path. Where the body did write, it released the copy itself
+								// (Stack.PokeOwned) and the slot's final value is the operator's output, which the caller
+								// must see, so this reads like every other operand.
+								// NOTE: that write-back leaks the value it hands over, because the loop lending the slot
+								// overwrites it on the next iteration with a plain store. Same accepted tradeoff as a
+								// direct assignment to a loop variable, and measured equal to it; it is recorded on the
+								// borrowed branch of AssignmentNode.
+								if ((borrowedCopies != null) && ReferencesABorrowedSlot(index) && Stack.IsSameValue(slotValue, borrowedCopies[index]))
+									DataValue.DisposeValue(program.ValueManager, borrowedCopies[index]);
+								else
+									arguments[index] = slotValue;
+							}
 
 							// Then release whatever the body left above the operand slots, on every path out. An operator
 							// body is not a FrameNode - the parser hands the body's statement list over directly - so the
@@ -1566,13 +1628,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// previous assignment in the same body put there. Assigning to a loop variable is an error in any case,
 				// since the next iteration overwrites it. The mark reaches only the body of the loop that lends the
 				// slot, so an assignment after the loop takes the owned branch below; see Symbol.IsBorrowed.
+				// The var operand write-back reaches this slot the same way and leaks the same one value: a call that
+				// takes the caller's loop variable by reference is given a copy of it (CallNode.ReferencesABorrowedSlot),
+				// and where the body replaced that copy, InstructionNodeBase.CleanupOperand pokes the replacement in
+				// here - which the next iteration then overwrites with a plain store. Measured equal to this branch's
+				// own leak, which is why collecting either means the loop releasing what its slot holds whenever that
+				// is not the value it lent, a design deliberately not taken.
 				program.Stack.Poke(location, objectValue);
 			else
 				// The slot owns its value, so the assignment releases the one it replaces; see Stack.PokeOwned.
-				// NOTE: the mark is compiled per plan, so it cannot see a value that reached this slot from a borrowed
-				// slot one frame up: a var operand's slot is an alias of the caller's, and where the caller passed its
-				// own loop variable, this release takes the loop's row or element and the loop then reads a released
-				// value. Measured and filed as bug-a-var-parameter-written-in-the-body-can-release-a-callers-loop-value.
 				program.Stack.PokeOwned(location, objectValue, program.ValueManager);
 			return null;
 		}
@@ -1918,6 +1982,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// ByReference
 		public bool ByReference;
 
+		/// <summary>Whether the slot this node reads holds a value it does not own; see <see cref="Symbol.IsBorrowed"/>.</summary>
+		/// <remarks>
+		/// Set only on the var branch of InstructionNodeBase.DetermineDataType, which is where a node is bound to an
+		/// operand that will alias this slot, and read only by CallNode, which copies the value for the callee rather
+		/// than letting the callee's slot alias a slot whose value belongs to something else. The node is built per
+		/// call site, which is the granularity the fact needs: one operator may be called with a borrowed argument
+		/// from one site and an owned one from another.
+		/// </remarks>
+		public bool ReferencesBorrowedSlot;
+
 		/// <summary>By reference, this node hands over the value its slot owns; otherwise a copy the caller owns.</summary>
 		public override bool ReturnsByReference { get { return ByReference; } }
 
@@ -1936,6 +2010,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			newStackReferenceNode.Identifier = _identifier;
 			newStackReferenceNode.Location = Location;
 			newStackReferenceNode.ByReference = ByReference;
+			newStackReferenceNode.ReferencesBorrowedSlot = ReferencesBorrowedSlot;
 		}
 		
 		// Statement
