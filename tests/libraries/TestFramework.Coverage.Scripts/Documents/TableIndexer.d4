@@ -1,0 +1,209 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Table indexer coverage: the MyTable[...] expression that picks one row out of a table by a key. It has two forms - an
+// explicit one, where a "by" clause names the key columns (MyTable[1 by { ID }]), and an implicit one, where the terms are
+// positional and the compiler works out which key is meant from their types (MyTable[1], MyTable[1, 'Alpha']). Both are
+// compiled by CompileIndexerExpression in Compiler.cs. Ordinary scripts index tables by key constantly, so the working
+// paths are covered many times over; what no script reached before this one is any of the five errors the form raises, and
+// that is what this script is for:
+//
+//	105264	more than five terms in an implicit indexer
+//	105275	two keys of the same width whose column types are also the same, so no term could tell them apart
+//	105259	two orderings of the terms match one key equally well
+//	105260	no key matches the terms, either because none has that many columns or because none has those types
+//	105261	a "by" clause naming a different number of columns than there are terms
+//
+// Error codes are a compatibility surface - an application can match on one - so each error case below asserts the code and
+// leaves the wording alone.
+//
+// All five are raised by the compiler, not at run time, and the harness compiles each batch of a script immediately before
+// executing it: a try ... except written in the same batch as a bad expression would never run, because the batch fails
+// while compiling. Every error case therefore goes through Execute('...'), which compiles its argument as a fresh script at
+// run time - ServerBatch.Execute prepares the statement and ServerPlan.Execute calls CheckCompiled, which throws the first
+// compile message - so the error arrives in this script's except handler like any other. The nested script runs on the same
+// process inside the same transaction and sees the tables this script creates. Each bad expression is wrapped in
+// 'var LRow := <expression>;' rather than in a select: a var declaration is unambiguously a statement, and it parses
+// whatever the expression's type turns out to be, because compilation fails before the declaration means anything.
+//
+// An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the
+// compiler code. The assertions below read E.GetDetailedErrorDescription(), which flattens the whole chain and prints each
+// link as "<severity>:<code> ---> <message>", and they look for ":<code> --->" rather than for the digits alone: the same
+// text carries source paths and ":line NNN" fragments, which digits alone could match. This is the convention
+// LibraryAdministration.d4 documents and uses.
+//
+// Three things are deliberately left out. The empty indexer, MyTable[], is the row extractor every script uses; it takes
+// the same "by"-clause branch with a zero-column key, and nothing here goes near that path, so it stays covered by the rest
+// of the suite. A "by" clause whose columns are not a superset of any key adds InvalidRowExtractorExpression at *warning*
+// level and compiles on; that line is already covered, and every "by" clause below is a superset of a real key, so none of
+// these cases stumbles into it. And the two arms that break a tie between orderings which both match - one where a later
+// ordering has a better narrowing score (Compiler.cs lines 12682-12686 as this script was written), one where it has the
+// same narrowing score but a shorter conversion path (12690-12693) - would each need a chain of user-defined implicit
+// conversions to construct, which would be more intricate than the behaviour they pin; they are left uncovered on
+// purpose, not by oversight. The tie neither of them can break, an equal score and an equal path length, is the 105259
+// case below.
+
+// Five tables, one per shape the resolution has to tell apart, each with rows chosen so that picking the wrong key, or
+// pairing a term with the wrong column, returns a visibly wrong row rather than the right one by luck. The column types are
+// what matters: candidate keys are compared by signature, and the only implicit conversions in the system are between the
+// numeric types, Date to DateTime, and String to and from Name. There is no String to Integer, which is what makes the
+// type-mismatch case below resolve to nothing rather than quietly converting.
+SafeDrop('TableIndexerSingle');
+SafeDrop('TableIndexerTwoKeys');
+SafeDrop('TableIndexerSameTypeKeys');
+SafeDrop('TableIndexerPairKey');
+SafeDrop('TableIndexerWidths');
+
+create table TableIndexerSingle { ID : Integer, Data : String, key { ID } };
+insert row { 1 ID, 'single one' Data } into TableIndexerSingle;
+insert row { 2 ID, 'single two' Data } into TableIndexerSingle;
+
+// Two keys of the same width whose types differ, so a term's type is what decides which key is meant. The two orderings
+// deliberately disagree - ID 1 carries Name 'Beta' - so resolving to the wrong key returns the other row, not the right one.
+create table TableIndexerTwoKeys { ID : Integer, Name : String, Data : String, key { ID }, key { Name } };
+insert row { 1 ID, 'Beta' Name, 'two keys first' Data } into TableIndexerTwoKeys;
+insert row { 2 ID, 'Alpha' Name, 'two keys second' Data } into TableIndexerTwoKeys;
+
+// Two keys of the same width *and* the same column types. Key signatures compare by type and modifier only, never by
+// column name, so these two collide where TableIndexerTwoKeys' ID and Name do not. That makes this a table which can never
+// be indexed implicitly at all: 105275 is raised while the candidate keys are being collected, before any term's type is
+// considered, so the explicit form is the only way in. The Alpha and Beta values overlap so that the by clause is shown to
+// pick the key it names rather than merely to compile.
+create table TableIndexerSameTypeKeys { Alpha : Integer, Beta : Integer, Data : String, key { Alpha }, key { Beta } };
+insert row { 1 Alpha, 2 Beta, 'same type first' Data } into TableIndexerSameTypeKeys;
+insert row { 2 Alpha, 1 Beta, 'same type second' Data } into TableIndexerSameTypeKeys;
+
+// One key of two same-typed columns: both orderings of two Integer terms match it equally well, with the same narrowing
+// score and the same conversion path length, which is the ambiguity 105259 reports. The rows are each other's reverse, so
+// the explicit form's term order is pinned as well.
+create table TableIndexerPairKey { A : Integer, B : Integer, Data : String, key { A, B } };
+insert row { 1 A, 2 B, 'pair one two' Data } into TableIndexerPairKey;
+insert row { 2 A, 1 B, 'pair two one' Data } into TableIndexerPairKey;
+
+// Keys of different widths, so the number of terms alone picks the key, and a two-column key of differing types, so the
+// terms can be given in either order. All four combinations of A and B are present: a resolution that kept one term and
+// lost the other, or paired a term with the wrong key column, lands on a different row rather than on nothing.
+create table TableIndexerWidths { ID : Integer, A : Integer, B : String, Data : String, key { ID }, key { A, B } };
+insert row { 1 ID, 10 A, 'x' B, 'widths A10 Bx' Data } into TableIndexerWidths;
+insert row { 2 ID, 20 A, 'y' B, 'widths A20 By' Data } into TableIndexerWidths;
+insert row { 3 ID, 10 A, 'y' B, 'widths A10 By' Data } into TableIndexerWidths;
+insert row { 4 ID, 20 A, 'x' B, 'widths A20 Bx' Data } into TableIndexerWidths;
+
+// The explicit form. No coverage script used the indexer's by clause before this one.
+if TableIndexerSingle[1 by { ID }].Data <> 'single one' then
+	raise Error('Indexing a table by an explicitly named key returned the wrong row.');
+
+// The implicit form on the same table and the same key: one key, one term, and the term's type fits it.
+if TableIndexerSingle[1].Data <> 'single one' then
+	raise Error('Indexing a table by an implicit single-column key returned the wrong row.');
+
+// Two keys of the same width: the term's type decides, and a wrong choice here returns the other row.
+if TableIndexerTwoKeys[1].Data <> 'two keys first' then
+	raise Error('An implicit indexer with two same-width keys did not resolve the Integer term to the ID key.');
+
+if TableIndexerTwoKeys['Alpha'].Data <> 'two keys second' then
+	raise Error('An implicit indexer with two same-width keys did not resolve the String term to the Name key.');
+
+// Keys of different widths: the number of terms decides.
+if TableIndexerWidths[2].Data <> 'widths A20 By' then
+	raise Error('An implicit indexer with one term did not resolve to the one-column key.');
+
+if TableIndexerWidths[20, 'x'].ID <> 4 then
+	raise Error('An implicit indexer with two terms did not resolve to the two-column key.');
+
+// The same two terms in the other order. The compiler tries every ordering of the terms and, for the ordering that matches,
+// rebuilds the key column by column - so this must find B = 'x' and A = 20, the same row as above. Nothing covered that
+// permutation machinery end to end before this assertion.
+if TableIndexerWidths['x', 20].ID <> 4 then
+	raise Error('An implicit indexer did not match terms given in the other order to the same key columns.');
+
+// The explicit form is the way out of both ambiguities below: neither of these two tables can be indexed implicitly at all,
+// and this is the answer a developer who meets 105275 or 105259 needs.
+if TableIndexerSameTypeKeys[1 by { Alpha }].Data <> 'same type first' then
+	raise Error('A by clause naming one of two same-typed keys did not pick the key it named.');
+
+if TableIndexerSameTypeKeys[1 by { Beta }].Data <> 'same type second' then
+	raise Error('A by clause naming the other of two same-typed keys did not pick the key it named.');
+
+if TableIndexerPairKey[1, 2 by { A, B }].Data <> 'pair one two' then
+	raise Error('A by clause on a two-column key did not pair the terms with the columns in the order given.');
+
+if TableIndexerPairKey[2, 1 by { A, B }].Data <> 'pair two one' then
+	raise Error('A by clause on a two-column key did not pair the reversed terms with the columns in the order given.');
+
+// The five errors, each through a dynamic Execute for the reason given in the header.
+begin
+	var LCaught : String := '';
+
+	// Six terms. The ceiling is checked before any key is looked at, so the table's own keys are beside the point here.
+	try
+		Execute('var LRow := TableIndexerSingle[1, 2, 3, 4, 5, 6];');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105264 --->') < 0 then
+		raise Error('An implicit indexer with six terms did not raise 105264: ' + LCaught);
+
+	// Two keys the terms could never tell apart, caught while the candidate keys are being collected.
+	LCaught := '';
+	try
+		Execute('var LRow := TableIndexerSameTypeKeys[1];');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105275 --->') < 0 then
+		raise Error('An implicit indexer on a table with two same-typed keys did not raise 105275: ' + LCaught);
+
+	// One key, and both orderings of the terms match it equally well.
+	LCaught := '';
+	try
+		Execute('var LRow := TableIndexerPairKey[1, 2];');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105259 --->') < 0 then
+		raise Error('An implicit indexer whose terms match one key in either order did not raise 105259: ' + LCaught);
+
+	// No key of that width exists, so there is nothing to match the terms against.
+	LCaught := '';
+	try
+		Execute('var LRow := TableIndexerSingle[1, 2];');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105260 --->') < 0 then
+		raise Error('An implicit indexer with more terms than any key has columns did not raise 105260: ' + LCaught);
+
+	// The other arm of the same throw: a key of that width exists, but no ordering of the terms matches its types. There is
+	// no implicit String to Integer conversion, so the term cannot be quietly converted into a match.
+	LCaught := '';
+	try
+		Execute("var LRow := TableIndexerSingle['One'];");
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105260 --->') < 0 then
+		raise Error('An implicit indexer whose term does not match the key type did not raise 105260: ' + LCaught);
+
+	// A by clause naming two columns where one term was given. Only the explicit form can produce this: the implicit form
+	// builds the resolved key from the terms themselves, so its column count always equals the term count.
+	LCaught := '';
+	try
+		Execute('var LRow := TableIndexerSingle[1 by { ID, Data }];');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':105261 --->') < 0 then
+		raise Error('A by clause naming more columns than there are terms did not raise 105261: ' + LCaught);
+end;
+
+// The caught compile errors above leave the enclosing transaction usable, which this read proves before the drops do.
+if TableIndexerSingle[2].Data <> 'single two' then
+	raise Error('The table is not readable after the caught compile errors.');
+
+drop table TableIndexerWidths;
+drop table TableIndexerPairKey;
+drop table TableIndexerSameTypeKeys;
+drop table TableIndexerTwoKeys;
+drop table TableIndexerSingle;

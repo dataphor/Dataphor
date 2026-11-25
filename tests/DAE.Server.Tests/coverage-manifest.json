@@ -112,6 +112,7 @@
 { "script": "SystemCatalogOperators", "status": "pass" },
 { "script": "TableAndRowValuedAttributes", "status": "pass" },
 { "script": "TableCallsWithStackReferences", "status": "pass" },
+{ "script": "TableIndexer", "status": "pass" },
 { "script": "TableLibrary", "status": "pass" },
 { "script": "Tables", "status": "pass" },
 { "script": "TestAdornedConstraints", "status": "pass" },

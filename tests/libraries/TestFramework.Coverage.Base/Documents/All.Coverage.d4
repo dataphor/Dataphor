@@ -81,6 +81,6 @@ ExecuteScript("Coverage.Scripts", "NodeOptimization"); // verified BTR 3/5/2007
 ExecuteScript("Coverage.Scripts", "SemiTables"); // verified BTR 3/5/2007 // TODO: Ambiguous column names with common columns???
 ExecuteScript("Coverage.Scripts", "ScanTable"); // TODO: Needs to be rewritten (still uses old style type specifier in table selector expressions)
 ExecuteScript("Coverage.Scripts", "SpecifyClause"); // verified BTR 3/5/2007
-ExecuteScript("Coverage.Scripts", "TableIndexer"); // TODO: Build this coverage
+ExecuteScript("Coverage.Scripts", "TableIndexer");
 
 
