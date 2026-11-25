@@ -7,11 +7,14 @@
 // registering and unregistering a library and the descriptor round trip; LibraryDependencies covers the LibraryRequisites
 // table; LibraryLoadingTest (C#) covers loading a library with a real assembly. None of that is repeated here.
 //
-// Every library this script touches is one it creates, and each section drops what it created. The script opens no explicit
-// transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may make DropLibrary refuse inside an
-// explicit one. It is not transaction-free, though, and no coverage script is: the harness runs the whole script as a nested
-// ExecuteScript inside one statement of its own, so TransactionCount() is 1 from the first line to the last (measured) and
-// every statement here runs in that one implicit transaction rather than in one of its own.
+// Every library this script touches is one it creates, and each section drops what it created. Library DDL is not transactional:
+// the library's directory and its .d4l file are written as the statement runs and no rollback undoes them, and DropLibrary alone
+// refuses inside a transaction the session opened itself, because it deletes the directory and a rollback cannot restore it (the
+// "Library DDL is not transactional" section of docs/architecture/libraries-and-class-loading.md). One section below opens such
+// a transaction, to pin that refusal, and is the only one that does. The script is not transaction-free, though, and no coverage script is: the
+// harness runs the whole script as a nested ExecuteScript inside one statement of its own, so TransactionCount() is 1 from the
+// first line to the last (measured) and every statement here runs in that one implicit transaction rather than in one of its own
+// - which is the shape every DropLibrary below but one still runs in, and must keep running in.
 //
 // An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the schema
 // code. Assertions below read the inner message out of E.Message, and where a numeric error code matters - error codes are a
@@ -235,6 +238,34 @@ begin
 	end;
 	if (IndexOf(LCaught, ':113104 --->') < 0) or (IndexOf(LCaught, 'Object "AdminNoSuchLibrary" not found.') < 0) then
 		raise Error('Registering a library that does not exist did not raise 113104: ' + LCaught);
+end;
+
+// Dropping a library inside an explicit transaction is refused: a drop deletes the library's directory and a rollback cannot put a
+// directory back, so DropLibrary is the one library operator that will not run there. Explicit means a transaction the session
+// opened itself, which here is the one BeginTransaction() opens inside this block - not the implicit transaction the harness's
+// statement is running in, which every other DropLibrary in this script and in the other library scripts drops inside. The
+// transaction has to be opened inside a block: a standalone BeginTransaction() statement does not outlive its own statement.
+begin
+	CreateLibrary(LibraryDescriptor('AdminDropInTransaction', VersionNumber(1, 0), "", list(FileReference){}, list(LibraryReference){}));
+
+	var LCaught : String := '';
+	BeginTransaction();
+	try
+		DropLibrary('AdminDropInTransaction');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, ':113251 --->') < 0) or (IndexOf(LCaught, 'Library "AdminDropInTransaction" cannot be dropped inside an explicit transaction') < 0) then
+		raise Error('Dropping a library inside an explicit transaction did not raise 113251: ' + LCaught);
+
+	// The refusal is raised before anything is removed, so the library is still there to drop once the transaction is gone.
+	if not exists (Libraries where Name = 'AdminDropInTransaction') then
+		raise Error('A refused DropLibrary removed the library from the catalog anyway.');
+
+	RollbackTransaction();
+	DropLibrary('AdminDropInTransaction');
+	if exists (Libraries where Name = 'AdminDropInTransaction') then
+		raise Error('Dropping the library once the explicit transaction had been rolled back did not remove it.');
 end;
 
 // File references, on a library that is deliberately left unregistered: on a registered library both arms call

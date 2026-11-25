@@ -567,4 +567,7 @@
   <data name="113250" xml:space="preserve">
     <value>The object identifiers of this catalog have been exhausted.</value>
   </data>
+  <data name="113251" xml:space="preserve">
+    <value>Library "{0}" cannot be dropped inside an explicit transaction, because dropping a library deletes its directory and a rollback cannot restore it.</value>
+  </data>
 </root>

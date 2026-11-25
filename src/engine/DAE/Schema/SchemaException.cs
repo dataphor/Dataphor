@@ -460,6 +460,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			/// <summary>Error code 113250: "The object identifiers of this catalog have been exhausted."</summary>
 			ObjectIDsExhausted = 113250,
+			
+			/// <summary>Error code 113251: "Library "{0}" cannot be dropped inside an explicit transaction, because dropping a library deletes its directory and a rollback cannot restore it."</summary>
+			CannotDropLibraryInExplicitTransaction = 113251,
 		}		
 
 		// Resource manager for this exception class

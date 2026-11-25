@@ -43,8 +43,11 @@
 // the quoting of the name, because some of these messages carry it rooted, with a leading dot.
 //
 // Every library here is one the script creates, and each section drops what it created, which also clears its LibraryVersions
-// row. The script opens no explicit transaction: library DDL is not transactional, and library-ddl-inside-a-transaction may
-// make DropLibrary refuse inside an explicit one. Its manifest entry turns implicit transactions off, and that is not optional
+// row. The script opens no explicit transaction, and must not: library DDL is not transactional, and DropLibrary refuses inside
+// a transaction the session opened itself, because dropping a library deletes its directory and a rollback cannot restore it
+// (the "Library DDL is not transactional" section of docs/architecture/libraries-and-class-loading.md). That refusal reaches an
+// upgrade script too, which runs inside the transaction the upgrade machinery opened for it: no upgrade script here drops a
+// library, and none may. Its manifest entry turns implicit transactions off, and that is not optional
 // - the upgrade runs on a session of its own, and an implicit transaction around this script would hold the catalog store's
 // write lock while that session waited for it and gave up.
 
@@ -418,8 +421,43 @@ begin
 	DropLibrary('UpgradeFail');
 end;
 
-if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail' }) then
+// The one caller the DropLibrary refusal takes away, pinned so that it stays a decision rather than a surprise: an upgrade script
+// runs inside the transaction the machinery opened for it (the BeginTransaction() in InternalUpgradeLibrary's statement), which is
+// a transaction that can roll back after the library's directory has already been deleted, so a DropLibrary there is refused with
+// 113251. No shipped upgrade script drops a library and none may; docs/migration-notes.md carries this as a change a customer's
+// upgrade script could notice. The library the script tries to drop is left unregistered, so that nothing but the refusal stops it.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeDropVictim', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('UpgradeDropper', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeDropper');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeDropper', "DropLibrary('UpgradeDropVictim');");
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName = 'UpgradeDropper';
+
+	var LCaught : String := '';
+	try
+		UpgradeLibrary('UpgradeDropper');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if (IndexOf(LCaught, ':113251 --->') < 0) or (IndexOf(LCaught, 'cannot be dropped inside an explicit transaction') < 0) then
+		raise Error('DropLibrary inside an upgrade script was not refused with 113251: ' + LCaught);
+
+	if not exists (Libraries where Name = 'UpgradeDropVictim') then
+		raise Error('The refused drop inside an upgrade script removed the library anyway.');
+
+	// The refused upgrade leaves the recorded version where the failing-upgrade section above leaves it: at the last version that
+	// applied, which here is the version the run started from.
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeDropper')) <> VersionNumber(1, 0, 0) then
+		raise Error('The refused upgrade did not leave the recorded version at the version the run started from.');
+
+	UnregisterLibrary('UpgradeDropper');
+	DropLibrary('UpgradeDropper');
+	DropLibrary('UpgradeDropVictim');
+end;
+
+if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeDropper', 'UpgradeDropVictim' }) then
 	raise Error('The script left a library behind.');
 
-if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail' }) then
+if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeDropper' }) then
 	raise Error('The script left a library version behind.');

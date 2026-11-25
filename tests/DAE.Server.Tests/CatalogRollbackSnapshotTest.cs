@@ -38,8 +38,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Library descriptors (<c>Catalog.Libraries</c>) are deliberately left out of the snapshot, and the four library
 	/// operators (<c>CreateLibrary</c>, <c>DropLibrary</c>, <c>SetDefaultDeviceName</c>, <c>SetLibraryDescriptor</c>)
 	/// out of the matrix. Those write the library folder and its <c>.d4l</c> file as they go and a rollback undoes
-	/// neither memory nor disk, so memory and disk agree and a difference there is not this family. Whether library
-	/// DDL should be transactional at all is a decision, filed as <c>blocked/library-ddl-inside-a-transaction</c>.
+	/// neither memory nor disk, so memory and disk agree and a difference there is not this family. Library DDL is
+	/// deliberately not transactional, and only <c>DropLibrary</c> refuses inside a transaction the session opened
+	/// itself (error 113251), because it deletes the library's directory and a rollback cannot restore it; see the
+	/// "Library DDL is not transactional" section of docs/architecture/libraries-and-class-loading.md.
 	/// </item>
 	/// <item>
 	/// Anything fifteen of the cases change. Users, rights, the assignments between them and roles, a right's owner and

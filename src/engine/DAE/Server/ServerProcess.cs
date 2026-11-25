@@ -1269,6 +1269,25 @@ namespace Alphora.Dataphor.DAE.Server
 		// InTransaction
 		public bool InTransaction { get { return _transactions.Count > 0; } }
 
+		/// <summary>Whether a transaction open on this process was begun explicitly - by BeginTransaction rather than by the engine for a statement - counting an implicit transaction the engine has left open because implicit transactions were switched off during its call.</summary>
+		/// <remarks>
+		/// Reads <see cref="ServerTransaction.ImplicitCallDepth"/>, which is 0 for exactly those two shapes, and not the nesting
+		/// count: a statement several transactional calls deep still runs in the one implicit transaction the outermost call began,
+		/// so a predicate built on the count - or on <see cref="InTransactionBeyondCurrentCall"/>, which compares the stamp against
+		/// the current call depth - would read that as explicit. Public rather than internal because <c>LibraryUtility</c>, in the
+		/// server assembly, asks it.
+		/// </remarks>
+		public bool InExplicitTransaction
+		{
+			get
+			{
+				for (int index = 0; index < _transactions.Count; index++)
+					if (_transactions[index].ImplicitCallDepth == 0)
+						return true;
+				return false;
+			}
+		}
+
 		private void CheckInTransaction()
 		{
 			if (!InTransaction)

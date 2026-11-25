@@ -254,6 +254,15 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public static void DropLibrary(Program program, string libraryName, bool updateCatalogTimeStamp)
 		{
+			// The one library operator that refuses inside a transaction the session opened itself: it deletes the library's
+			// directory, and a rollback cannot put a directory back. The others write the directory and the descriptor as they run
+			// and are equally un-rolled-back, but each is repaired by running its inverse - see the "Library DDL is not
+			// transactional" section of docs/architecture/libraries-and-class-loading.md. Asked before the lock, so that both
+			// callers - the DropLibrary operator and a delete against the System.Libraries catalog table - are covered by the one
+			// check, and before the library is resolved, so that the refusal is a property of the statement and not of the catalog.
+			if (program.ServerProcess.InExplicitTransaction)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDropLibraryInExplicitTransaction, libraryName);
+
 			lock (program.Catalog.Libraries)
 			{
 				Schema.Library library = program.Catalog.Libraries[libraryName];
