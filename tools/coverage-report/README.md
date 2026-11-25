@@ -68,7 +68,7 @@ An assembly that one part loads and another does not is normal: the union covers
 Three assembly lists and the area table.
 
 - `engine` — the assemblies the area map covers: the engine proper.
-- `reported` — libraries, the client stack and the hosts. Rolled up per assembly only; they need no area and are never "unassigned".
+- `reported` — libraries, the client stack and the hosts. A sample library with an assembly of its own belongs here too (`Alphora.Shipping` is the one today): its source is under `samples/`, not `tests/`, so the tool does not drop it, and a run that loads it would otherwise find it on no list. Rolled up per assembly only; they need no area and are never "unassigned".
 - `ignored` — dropped entirely: the test assemblies, the test harness, the two test-support libraries (`TestFramework.Coverage.Base`, `LibraryLoadingProbe`) and the layout tool. Anything whose source is under `tests/` belongs here rather than in `reported`: the tool drops `tests/` source before the assembly rollup, so a `reported` entry for it could only ever read `not in this run`.
 
 The names are **assembly names as the collector prints them**, not project file names, so the server assembly is `AlphoraDataphorServer` with no dots and the MSSQL device library is `AlphoraMSSQLDevice`. Never guess one from its project or folder name: read it off the built output (`artifacts/bin/<project file name>/<config>/`, or the layout's `bin/` and `Libraries/`), or off the project's `<AssemblyName>`, which is where every name in these lists was checked. A name that is wrong anyway announces itself as an `unlisted assembly` finding, and `--allow-unassigned` is how you see the report while sorting it out.
