@@ -58,6 +58,7 @@
   <!-- Library: every converted library project (in <Name>\Source\, next to <Name>.d4l). The .d4l check below fails the build when one is missing here. -->
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\Connection\Source\DAE.Connection.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\ODBCConnection\Source\DAE.Connection.ODBC.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SimpleDevice\Source\DAE.Device.Simple.csproj" DataphorLayoutRole="Library" />
@@ -75,7 +76,6 @@
     <!-- Left out while their C# projects are not converted: registering them would fail on the missing assembly. Remove the line when the project joins the Library list. -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLConnection\PGSQLConnection.d4l" /><!-- device-pgsql-port -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-port -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\ODBCConnection\ODBCConnection.d4l" /><!-- device-connection-cleanup -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)samples\Sample.Shipping\Sample.Shipping.d4l" /><!-- library-sample-shipping-convert -->
   </ItemGroup>
 

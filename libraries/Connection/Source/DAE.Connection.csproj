@@ -25,7 +25,6 @@
     <PackageReference Include="System.Data.SqlClient" />
   </ItemGroup>
 
-  <!-- The other .cs and .resx files in this folder are uncompiled leftovers (device-connection-cleanup deletes them). -->
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConnectionStringBuilder.cs" />

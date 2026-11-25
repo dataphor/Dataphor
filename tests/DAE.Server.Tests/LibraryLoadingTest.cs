@@ -22,11 +22,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	///
 	/// The Connection arm is a regression guard: that library's own four private managed packages have been copied flat into
 	/// its folder since <c>build-runtime-layout</c>, and registering it must still work once the resolver is installed.
+	///
+	/// The ODBCConnection arm is the same guard for the library device-connection-cleanup brought back into the build: its
+	/// folder holds one private managed package, System.Data.Odbc, and registering the library must not need an ODBC driver
+	/// manager on the machine - the connection class is constructed only when a device names it as its ConnectionClass.
 	/// </remarks>
 	[TestFixture]
 	public class LibraryLoadingTest : InProcessTestFixture
 	{
-		protected override string[] Libraries => new[] { "LibraryLoadingProbe", "Connection" };
+		protected override string[] Libraries => new[] { "LibraryLoadingProbe", "Connection", "ODBCConnection" };
 
 		protected override string[] LibrariesToRegister => new[] { "LibraryLoadingProbe" };
 
@@ -48,6 +52,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public void ConnectionLibraryStillRegistersWithFlatPrivatePackages()
 		{
 			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('Connection');"));
+		}
+
+		[Test]
+		public void ODBCConnectionLibraryRegistersWithoutADriverManager()
+		{
+			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('ODBCConnection');"));
 		}
 	}
 }
