@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -91,6 +91,10 @@ namespace Alphora.Dataphor.DAE.Connection
 		/// on every commit and rollback. Present as an internal instance Boolean property on Microsoft.Data.SqlClient 7.1.2,
 		/// verified by reflection over the pinned package (device-mssql-port); the documented fallback, had it been absent, is
 		/// that a zombied transaction reports a null Connection.
+		/// NOTE: nothing CI runs exercises this. The only cases that commit or roll back through this class are
+		/// MSSQLStoreContractTests, which are skipped unless DATAPHOR_TEST_MSSQL names a server, and CI configures none
+		/// today - so a client upgrade that drops the member would build and pass, and the throw below would first be seen
+		/// on a live run. test-device-live is the ticket that would put a server in CI.
 		/// </summary>
 		private static readonly PropertyInfo _isZombiedProperty =
 			typeof(SqlTransaction).GetProperty(IsZombiedPropertyName, BindingFlags.Instance | BindingFlags.NonPublic);

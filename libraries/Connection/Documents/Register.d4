@@ -6,7 +6,7 @@
 
 //*
 // Operator: ClearAllPools
-// Calls the ClearAllPools() static method of the System.Data.SqlClient.SqlConnection class,
+// Calls the ClearAllPools() static method of the Microsoft.Data.SqlClient.SqlConnection class,
 // clearing all connections from the pool. Any connections from the pool that are active are
 // marked to be discarded when closed rather than returned to the pool.
 // See the SqlClient documentation for more information.

@@ -62,8 +62,11 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		/// TrustServerCertificate=True because the two are not the same thing and only the first is what 3.1 did: the second
 		/// encrypts and accepts any certificate, which is a *new* behaviour, and choosing it would quietly change what every
 		/// existing deployment negotiates. A deployment that wants encryption sets it on the device or the device session
-		/// rather than losing it here: 'ConnectionParameters' = 'Encrypt=True' (or Strict, or TrustServerCertificate=False) is
-		/// applied by SQLDevice.GetConnectionParameters after this builder has run, so the device's own setting wins.
+		/// rather than losing it here: 'ConnectionParameters' = 'Encrypt=True' - or 'Encrypt=Strict', or
+		/// 'Encrypt=True;TrustServerCertificate=True' to encrypt without checking the certificate - is applied by
+		/// SQLDevice.GetConnectionParameters after this builder has run, so the device's own setting wins. Setting
+		/// TrustServerCertificate alone changes nothing: the Encrypt=False below still stands beside it, and an
+		/// unencrypted connection presents no certificate to trust.
 		/// </remarks>
 		public MSSQLADODotNetConnectionStringBuilder()
 		{

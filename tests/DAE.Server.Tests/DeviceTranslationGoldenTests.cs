@@ -399,6 +399,25 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 			return EvaluateString("SQLRecorderStatements()");
 		}
 
+		/// <summary>The connection strings the device has opened through the recorder since the last clear, of which there is at least one.</summary>
+		/// <remarks>
+		/// The recording is cleared before each statement case of the set-up, so what is here is whatever the device has
+		/// opened since the last one.
+		/// NOTE: there is one only because SQLDeviceSession.ReleaseConnection disposes an execute-pool connection whenever
+		/// no device transaction is open, so each data-definition statement opens a fresh one. If that pooling ever keeps a
+		/// connection alive across statements, every case that reads this fails for a reason that has nothing to do with
+		/// what it checks; clear the recording and open a connection deliberately at that point rather than relaxing it.
+		/// </remarks>
+		private string[] RecordedConnections()
+		{
+			string[] connections =
+				EvaluateString("SQLRecorderConnections()")
+					.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so there is no connection string to read.");
+			return connections;
+		}
+
 		/// <summary>
 		/// The device's translation of a D4 expression, through the SQLDevice operator that compiles it and emits the
 		/// device statement without executing anything. The expression goes in as a parameter rather than as a literal:
@@ -629,18 +648,7 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 		[Test]
 		public void TheDeviceConnectedOnlyThroughTheRecorder()
 		{
-			string[] connections =
-				EvaluateString("SQLRecorderConnections()")
-					.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
-			// The recording is cleared before each statement case, so what is here is whatever the device has opened since the
-			// last one.
-			// NOTE: there is one only because SQLDeviceSession.ReleaseConnection disposes an execute-pool connection whenever no
-			// device transaction is open, so each data-definition statement opens a fresh one. If that pooling ever keeps a
-			// connection alive across statements, this assertion fails for a reason that has nothing to do with what it checks;
-			// clear the recording and open a connection here deliberately at that point rather than relaxing it.
-			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so nothing proves the recorder is the connection it uses.");
-			foreach (string connection in connections)
+			foreach (string connection in RecordedConnections())
 				Assert.That(connection, Does.Contain(UnreachableServerName), String.Format("The device opened a connection to something other than the unreachable placeholder server: {0}", connection));
 		}
 
@@ -661,12 +669,7 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 			if (RequiredConnectionStringText.Length == 0)
 				Assert.Pass("This device defaults nothing into the connection strings it builds.");
 
-			string[] connections =
-				EvaluateString("SQLRecorderConnections()")
-					.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
-			Assert.That(connections, Is.Not.Empty, "The device opened no connection through the recorder, so there is no connection string to read.");
-			foreach (string connection in connections)
+			foreach (string connection in RecordedConnections())
 				foreach (string required in RequiredConnectionStringText)
 					Assert.That
 					(
