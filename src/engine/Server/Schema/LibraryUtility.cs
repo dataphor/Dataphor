@@ -260,6 +260,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			// transactional" section of docs/architecture/libraries-and-class-loading.md. Asked before the lock, so that both
 			// callers - the DropLibrary operator and a delete against the System.Libraries catalog table - are covered by the one
 			// check, and before the library is resolved, so that the refusal is a property of the statement and not of the catalog.
+			// NOTE: extending this refusal to the other library operators would break the IDE's library Add and Edit forms, which
+			// reach CreateLibrary and RenameLibrary through the System.Libraries insert and update handlers from inside an
+			// explicit transaction that the client data set opens around every post (DAE.Client/DAEDataSet.cs InternalPost). The
+			// IDE's Delete is unaffected because a data set delete opens no transaction of its own.
 			if (program.ServerProcess.InExplicitTransaction)
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDropLibraryInExplicitTransaction, libraryName);
 

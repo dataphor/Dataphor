@@ -10,11 +10,12 @@
 // Every library this script touches is one it creates, and each section drops what it created. Library DDL is not transactional:
 // the library's directory and its .d4l file are written as the statement runs and no rollback undoes them, and DropLibrary alone
 // refuses inside a transaction the session opened itself, because it deletes the directory and a rollback cannot restore it (the
-// "Library DDL is not transactional" section of docs/architecture/libraries-and-class-loading.md). One section below opens such
-// a transaction, to pin that refusal, and is the only one that does. The script is not transaction-free, though, and no coverage script is: the
-// harness runs the whole script as a nested ExecuteScript inside one statement of its own, so TransactionCount() is 1 from the
-// first line to the last (measured) and every statement here runs in that one implicit transaction rather than in one of its own
-// - which is the shape every DropLibrary below but one still runs in, and must keep running in.
+// "Library DDL is not transactional" section of docs/architecture/libraries-and-class-loading.md). One section below opens
+// such a transaction, to pin that refusal, and is the only one that does. The script is not transaction-free, though, and no
+// coverage script is: the harness runs the whole script as a nested ExecuteScript inside one statement of its own, so
+// TransactionCount() is 1 from the first line to the last (measured) and every statement here runs in that one implicit
+// transaction rather than in one of its own - which is the shape every DropLibrary below but one still runs in, and must
+// keep running in.
 //
 // An error raised inside a plan arrives wrapped in RuntimeException 104229, so E.Code is always 104229 and never the schema
 // code. Assertions below read the inner message out of E.Message, and where a numeric error code matters - error codes are a
@@ -261,6 +262,30 @@ begin
 	// The refusal is raised before anything is removed, so the library is still there to drop once the transaction is gone.
 	if not exists (Libraries where Name = 'AdminDropInTransaction') then
 		raise Error('A refused DropLibrary removed the library from the catalog anyway.');
+
+	// Being a property of the statement rather than of the catalog, the refusal displaces whatever the drop would otherwise
+	// have reported first: 113104 for a library the catalog has never heard of, which the error section above pins outside a
+	// transaction, and 113196 for a registered library. docs/migration-notes.md records both as changes an application could
+	// notice.
+	LCaught := '';
+	try
+		DropLibrary('AdminNoSuchLibrary');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':113251 --->') < 0 then
+		raise Error('Dropping a library the catalog has never heard of inside an explicit transaction did not raise 113251 ahead of 113104: ' + LCaught);
+
+	RegisterLibrary('AdminDropInTransaction');
+	LCaught := '';
+	try
+		DropLibrary('AdminDropInTransaction');
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, ':113251 --->') < 0 then
+		raise Error('Dropping a registered library inside an explicit transaction did not raise 113251 ahead of 113196: ' + LCaught);
+	UnregisterLibrary('AdminDropInTransaction');
 
 	RollbackTransaction();
 	DropLibrary('AdminDropInTransaction');
