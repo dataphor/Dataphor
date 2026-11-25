@@ -100,5 +100,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			return (int)FProcess.Evaluate("StreamCount()", null).AsNative;
 		}
+
+		/// <summary>The DataphorException of the given code in the exception and its inner exception chain, or null if there is none.</summary>
+		/// <remarks>
+		/// Looked for down the chain rather than taken off the top: the engine wraps an error in the statement and script errors
+		/// around it, and one raised inside a plan node arrives inside RuntimeException 104229 "Runtime error" as well, so matching
+		/// the top of the chain would pin the wrapping rather than the behaviour.
+		/// </remarks>
+		protected static DataphorException FindError(Exception exception, int code)
+		{
+			for (; exception != null; exception = exception.InnerException)
+				if (exception is DataphorException dataphorException && dataphorException.Code == code)
+					return dataphorException;
+			return null;
+		}
 	}
 }

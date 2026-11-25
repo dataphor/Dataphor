@@ -341,15 +341,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return (int)Process.Evaluate("Count(RemoteSessions where Process_ID = ProcessID())", null).AsNative;
 		}
 
-		/// <summary>The engine wraps an error in the statement and script errors around it, so the code is looked for down the chain.</summary>
-		private static DataphorException FindError(Exception exception, int code)
-		{
-			for (; exception != null; exception = exception.InnerException)
-				if (exception is DataphorException dataphorException && dataphorException.Code == code)
-					return dataphorException;
-			return null;
-		}
-
 		/// <summary>The device of the given unqualified name, from the running server's catalog; the name D4 gave it carries the library it was created in.</summary>
 		private Schema.Device DeviceNamed(string name)
 		{

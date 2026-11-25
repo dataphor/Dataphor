@@ -304,19 +304,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>The DataphorException of the given code in the exception and its inner exception chain, or null if there is none.</summary>
-		/// <remarks>
-		/// Looked for down the chain rather than taken off the top: the failure now comes out of a D4 statement, so the engine
-		/// has wrapped it in RuntimeException 104229 "Runtime error" by the time a caller sees it.
-		/// </remarks>
-		private static DataphorException FindError(Exception exception, int code)
-		{
-			for (; exception != null; exception = exception.InnerException)
-				if (exception is DataphorException dataphorException && dataphorException.Code == code)
-					return dataphorException;
-			return null;
-		}
-
 		/// <summary>A link naming the shared child server; the overload says what the tags are.</summary>
 		private string CreateLink(string name, int? defaultMaxCallDepth)
 		{

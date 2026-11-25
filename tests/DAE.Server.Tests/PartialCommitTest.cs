@@ -367,15 +367,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return (int)Process.Evaluate(String.Format("Count({0})", tableExpression), null).AsNative;
 		}
 
-		/// <summary>The engine wraps an error in the statement and script errors around it, so the code is looked for down the chain.</summary>
-		private static DataphorException FindError(Exception exception, int code)
-		{
-			for (; exception != null; exception = exception.InnerException)
-				if (exception is DataphorException dataphorException && dataphorException.Code == code)
-					return dataphorException;
-			return null;
-		}
-
 		/// <summary>
 		/// A device whose commit of a transaction level can be made to fail, as a back-end database that fails part-way through a
 		/// commit does. An ordinary in-memory device in every other respect, so a transaction spanning it and another device
