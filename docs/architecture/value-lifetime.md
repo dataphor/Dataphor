@@ -1,5 +1,10 @@
 # Value lifetime
 
+<!-- NOTE: this page is within a few words of the 1,500-word cap that tools/docs-size-check enforces
+     (`python tools/docs-size-check/check_size.py --limit 1497` reports it over). The next addition of any
+     size has to split it rather than tighten it again - the ownership rules, the hand-over protocol and the
+     table of sites are the natural seams. HTML comment text is not counted, so this note costs nothing. -->
+
 Who owns a value the garbage collector will not reclaim, and what releases it. Part of the [Dataphor architecture](../architecture.md).
 
 Most values the engine moves around are ordinary .NET values - an integer, a string, a `DateTime` - and nothing has to be done about them. Some are not. A `Binary` or a `Graphic` is held as a **stream**, a numbered buffer the server owns (`StreamID`, allocated and deallocated through the process's stream manager); a row, a list or a table is held as a structure (`Row`, `ListValue`, `TableValue`, or the native `NativeRow`, `NativeList`, `NativeTable` behind them) whose own columns or elements can themselves be streams. None of that is reclaimed by the garbage collector. Something has to release each one, **exactly once**: release it never and the server holds the memory until the session ends, release it twice and the second release fails - a stream the manager no longer knows about is reported as `StreamID (n) not found`, which is how most of these defects were found.

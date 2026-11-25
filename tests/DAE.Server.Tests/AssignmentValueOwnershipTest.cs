@@ -27,7 +27,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated is the error path of that same operand
 	/// cleanup: it used to be skipped altogether when an argument of a call raised, because the execute shapes
 	/// evaluated their arguments before entering the try whose finally cleans them up, so every argument evaluated
-	/// before the one that raised was orphaned (bug-an-argument-is-orphaned-when-a-later-one-raises). The last six
+	/// before the one that raised was orphaned (bug-an-argument-is-orphaned-when-a-later-one-raises).
+	/// AFailedCallLeavesAVarOperandEvaluatedBeforeTheRaiseAlone is the limit of that release, and the reason the
+	/// failure path cannot reuse the cleanup that runs after a call: a var operand has no callee value to write back
+	/// when the call never happened, and writing one runs the type's validate handlers - user D4 - while the
+	/// argument's error is unwinding. The last six
 	/// cases are the other half of the same ownership rule: a scope releases the values of the variables it declared.
 	/// That release used to be a statement the compiler appended to the end of the block, so only control reaching the
 	/// end of the block ran it, and a raise, an exit, a break or a continue left every value behind
@@ -645,6 +649,56 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						"
 					);
 				}
+			);
+		}
+
+		/// <summary>
+		/// The half of a failed call's rule that a stream count cannot see: a var operand evaluated before the argument
+		/// that raised is left exactly as the caller left it. The cleanup that runs after a call writes a var operand's
+		/// value back to the caller through the type's constraints and validate handlers, which is user D4; a failed
+		/// call has no callee value to write back, so running that cleanup on this path would re-validate a value
+		/// nothing assigned to - and could raise from inside a handler while the argument's own error was unwinding.
+		/// </summary>
+		/// <remarks>
+		/// The handler counts its own runs in a table rather than changing the value it is given, because a validate
+		/// handler that assigns to its operand is validated again and only a handler that stops changing the value
+		/// terminates. The count is read once after the variable is assigned and compared with itself after the failed
+		/// call, rather than against a literal, so the case does not also encode how many times assigning a variable
+		/// validates it. Reusing the after-the-call cleanup on this path makes this case fail with one extra run; the
+		/// stream-count case above passes under that same change, which is why this one is here.
+		/// </remarks>
+		[Test]
+		public void AFailedCallLeavesAVarOperandEvaluatedBeforeTheRaiseAlone()
+		{
+			ExecuteScript("create type ZCounted like String;");
+			ExecuteScript("create table ZValidateRuns { Runs : Integer, key { } };");
+			ExecuteScript("insert row { 0 Runs } into ZValidateRuns;");
+			ExecuteScript("create operator ZCounted_Validate(var AValue : ZCounted) : Boolean begin update ZValidateRuns set { Runs := Runs + 1 }; result := false; end;");
+			ExecuteScript("attach operator ZCounted_Validate to ZCounted on { validate };");
+			ExecuteScript("create operator ZCountedRaises() : Binary begin raise Error('ZCountedRaises'); end;");
+			ExecuteScript("create operator ZCountedVarFirst(var AV : ZCounted, const AB : Binary) : Integer begin result := 1; end;");
+
+			ExecuteScript
+			(
+				@"
+					begin
+						update ZValidateRuns set { Runs := 0 };
+						var LV : ZCounted := 'a';
+						var LAssigned : Integer := ZValidateRuns[].Runs;
+						var LCaught : Integer := 0;
+						var LI : Integer := 0;
+						try
+							LI := ZCountedVarFirst(var LV, ZCountedRaises());
+						except
+							on E : Error do
+								LCaught := 1;
+						end;
+						if LCaught <> 1 then
+							raise Error('The call did not raise.');
+						if ZValidateRuns[].Runs <> LAssigned then
+							raise Error('The failed call ran the type''s validate handler ' + (ZValidateRuns[].Runs - LAssigned).ToString() + ' more time(s).');
+					end;
+				"
 			);
 		}
 

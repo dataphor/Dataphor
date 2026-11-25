@@ -216,7 +216,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// how a plan node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md,
 		/// whose own table points back here.
 		/// This is the cleanup that runs after the call. An argument evaluated before a later argument raised never
-		/// reaches a call at all, and is released by ReleaseUncalledOperand below under a different rule.
+		/// reaches a call at all; ReleaseUncalledOperand below is that path's entry point, and it calls this for every
+		/// modifier but var, whose write-back is the one rule the two paths do not share.
 		/// </remarks>
 		protected void CleanupOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
@@ -269,29 +270,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		/// <summary>Releases the value evaluated for an operand of a call that never happened, because a later argument raised.</summary>
 		/// <remarks>
-		/// The in and const branches are CleanupOperand's own rule, for the reasons recorded there, and should stay
-		/// readable as the same rule: one modifier is handled differently here and the rest are identical.
+		/// Var is the only modifier whose rule differs when the call did not happen, so it is the only one stated here and
+		/// the rest are read from CleanupOperand rather than copied: a change to the in or const rule - the NOTE on
+		/// CleanupOperand's in branch anticipates one - then applies to both paths without having to be made twice.
 		/// </remarks>
 		protected void ReleaseUncalledOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
-			switch (signatureElement.Modifier)
-			{
-				case Modifier.Var :
-					// Nothing, deliberately. No callee slot was ever pushed, so there is no callee value to hand back and the
-					// caller's slot still holds and owns what it held before the call. CleanupOperand's write-back would poke
-					// the value of an operand that may never have been evaluated - null - into the caller's variable, and would
-					// run the type's constraints and validate handlers (ValueUtility.ValidateValue) while an error unwinds.
-				break;
+			// A var operand is left alone, deliberately. No callee slot was ever pushed, so there is no callee value to hand
+			// back and the caller's slot still holds and owns what it held before the call. CleanupOperand's write-back would
+			// poke the value of an operand that may never have been evaluated - null - into the caller's variable, and would
+			// run the type's constraints and validate handlers (ValueUtility.ValidateValue) while an error unwinds.
+			if (signatureElement.Modifier == Modifier.Var)
+				return;
 
-				case Modifier.In :
-					DataValue.DisposeValue(program.ValueManager, argumentValue);
-				break;
-
-				case Modifier.Const :
-					if (!argumentNode.ReturnsByReference)
-						DataValue.DisposeValue(program.ValueManager, argumentValue);
-				break;
-			}
+			CleanupOperand(program, signatureElement, argumentNode, argumentValue);
 		}
 		
 		public override string Category

@@ -1,4 +1,4 @@
-description: The largest of the three chunks the automated test suite is run in now takes nearly nine minutes, and the tooling that runs it gives up at ten, so it needs to be cut into smaller chunks before it crosses the line.
+description: The largest of the three chunks the automated test suite is run in now takes nearly ten minutes, and the tooling that runs it gives up at ten, so it needs to be cut into smaller chunks before it crosses the line.
 architecture: docs/modernization-plan.md#ws3-test-suite
 files: AGENTS.md
 tradeoffs: Nothing is broken today and the figure moves around by a minute or more between identical runs, so a maintainer may reasonably wait for a run that actually hits the limit - at the cost of that run being a lost ticket rather than a measurement.
@@ -14,8 +14,9 @@ It has now repeated, on the same machine:
 | 2026-11-21 | 5 m 35 s best, 7 m 32 s worst over several runs | the figures recorded in `AGENTS.md` |
 | 2026-11-23 | 8 m 43 s | `debt-rollback-leaves-catalog-as-it-was`, implement |
 | 2026-11-23 | 8 m 40 s | `debt-rollback-leaves-catalog-as-it-was`, review, with 22 more cases worth about 4 s |
+| 2026-11-24 | 9 m 48 s | `bug-an-argument-is-orphaned-when-a-later-one-raises`, review, with one more case worth under a second |
 
-Two runs a day apart agree within three seconds, so this is growth rather than one slow afternoon: about a minute and twenty seconds of the ten-minute allowance is left. Parts 2 and 3 are not close - both 3 m 4 s in the same review run.
+The three runs are growth rather than one slow afternoon, and the newest leaves **twelve seconds** of the ten-minute allowance. It was run twice in that review - 9 m 54 s and 9 m 48 s - so it is not a single slow run; part 1's case count is unchanged from 2026-11-23 bar one, so the jump of over a minute is not new tests. Parts 2 and 3 are still not close - 3 m 29 s and 3 m 11 s in the same review run.
 
 ## What is being asked for
 
