@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{ "Sample.Forum", "requires a SQL Server device" },
 			// The tutorial's tables are created by running its scripts by hand, not by registering the library.
 			{ "Sample.Rental", "cannot be registered into a usable state" },
-			{ "Sample.Shipping", "is not in the runtime layout (its C# project is not converted)" },
+			{ "Sample.Shipping", "requires a SQL Server device" },
 			{ "TestFramework.Coverage", "requires TestFramework.Coverage.Devices, which requires a SQL Server" },
 		};
 

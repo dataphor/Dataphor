@@ -66,6 +66,7 @@
     <ProjectReference Include="..\..\libraries\System.Platform\Source\System.Platform.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\System.Internet\Source\System.Internet.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\System.Integration\Source\System.Integration.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\samples\Sample.Shipping\Source\Shipping.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\tests\libraries\TestFramework.Coverage.Base\Source\DAE.Diagnostics.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\tests\libraries\LibraryLoadingProbe\Source\LibraryLoadingProbe.csproj" DataphorLayoutRole="Library" />
   </ItemGroup>
@@ -76,7 +77,6 @@
     <!-- Left out while their C# projects are not converted: registering them would fail on the missing assembly. Remove the line when the project joins the Library list. -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLConnection\PGSQLConnection.d4l" /><!-- device-pgsql-port -->
     <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-port -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)samples\Sample.Shipping\Sample.Shipping.d4l" /><!-- library-sample-shipping-convert -->
   </ItemGroup>
 
   <!-- Every write and delete below goes through _DataphorLayoutDirFull, which this target confines to artifacts\layout\<something>\. -->

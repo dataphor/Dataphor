@@ -23,7 +23,8 @@
       "System.Internet",
       "System.Integration",
       "DAEServer",
-      "DAEService"
+      "DAEService",
+      "Alphora.Shipping"
     ],
     "ignored": [
       "DAE.Server.Tests",

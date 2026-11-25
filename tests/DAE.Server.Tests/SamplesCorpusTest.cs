@@ -72,20 +72,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// The samples whose registration needs a running SQL Server, with the reason each does. Their cases report
 		/// Inconclusive and start no server.
 		/// </summary>
-		// NOTE: accepted tradeoff - these two are not attempted at all, although a fresh server would show whether they
-		// still register. Measured 2026-11-22 on a machine with no SQL Server reachable: failing to reach one costs
+		// NOTE: accepted tradeoff - these entries are not attempted at all, although a fresh server would show whether
+		// they still register. Measured 2026-11-22 on a machine with no SQL Server reachable: failing to reach one costs
 		// 33.6 s for Sample.Forum and 21.0 s for Sample.Pubs - 54.6 s, more than the whole rest of this pass put
-		// together, for the driver's connect timeout twice over against a server that is not there. What makes it
-		// acceptable: neither device can connect from any machine as written (Sample.Pubs names a developer's own
-		// machine), the samples may not be edited to shorten the timeout, and every .d4 file in the tree is already
-		// parsed by ParserRoundTripCorpusTest. The cost is that a regression breaking these two samples' registration in
-		// some other way is invisible here. Revisit when test-device-live lands: it owns running anything against a real
-		// SQL Server, and the name of the variable that selects one, and these entries then become "attempt when a
-		// database server is configured".
+		// together, for the driver's connect timeout twice over against a server that is not there; Sample.Shipping,
+		// which joined the list when library-sample-shipping-convert built its assembly, would add a third such wait
+		// (not measured). What makes it acceptable: no device here can connect from any machine as written (Sample.Pubs
+		// names a developer's own machine, Sample.Shipping a database that no machine has), the samples may not be
+		// edited to shorten the timeout, and every .d4 file in the tree is already parsed by ParserRoundTripCorpusTest.
+		// The cost is that a regression breaking these samples' registration in some other way is invisible here.
+		// Revisit when test-device-live lands: it owns running anything against a real SQL Server, and the name of the
+		// variable that selects one, and these entries then become "attempt when a database server is configured".
 		private static readonly Dictionary<string, string> NeedsADatabaseServer = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
 			{ "Sample.Forum", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
 			{ "Sample.Pubs", "creates a SQL Server device naming a developer's own machine, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
+			{ "Sample.Shipping", "creates a SQL Server device in its registration script, so registering it needs a running SQL Server; test-device-live owns running anything against a real one." },
 		};
 
 		/// <summary>
@@ -104,9 +106,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// The samples the build does not assemble into the runtime layout, with the reason. Their cases report
 		/// Inconclusive and start no server: there is no library folder for a server to carry.
 		/// </summary>
+		/// <remarks>
+		/// Empty since library-sample-shipping-convert built the last unconverted sample's assembly. The list stays: it is
+		/// asserted against the tree in both directions, so a sample the build cannot assemble (a new one arriving with an
+		/// unconverted C# project) belongs here rather than failing its case with a copy that finds nothing.
+		/// </remarks>
 		private static readonly Dictionary<string, string> NotInTheRuntimeLayout = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
-			{ "Sample.Shipping", "has a C# project that is not converted to the SDK format, so the build leaves its library folder out of the runtime layout (registering it would fail on the missing assembly) and no server can carry it. library-sample-shipping-convert, a feat-ws7-devices-and-libraries work item, owns converting it, and even once converted the sample needs a SQL Server, so its entry moves to NeedsADatabaseServer rather than becoming an ordinary case." },
 		};
 
 		/// <summary>The three lists above, for the assertions that hold each of them against the tree.</summary>

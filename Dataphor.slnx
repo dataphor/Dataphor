@@ -35,6 +35,9 @@
     <Project Path="libraries/System.Internet/Source/System.Internet.csproj" />
     <Project Path="libraries/System.Integration/Source/System.Integration.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Sample.Shipping/Source/Shipping.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Common.Tests/Common.Tests.csproj" />
     <Project Path="tests/DAE.Server.Tests/DAE.Server.Tests.csproj" />
