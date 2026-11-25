@@ -325,12 +325,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// NOTE: a DEBUG-only check here that the server is holding the same number of streams as it was when this
 		// program started would catch a whole class of defect - a value the engine leaks because nothing released it -
 		// at the moment it reappeared, and the count is already readable (ServerStreamManager.StreamCount, which the
-		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because three leaks
-		// measured since would still fire it rather than anything new: an argument orphaned when a later one raises
-		// (bug-an-argument-is-orphaned-when-a-later-one-raises), a stream-backed value written into a table and never
-		// given back until the table is dropped (bug-a-stored-binary-is-never-given-back), and a loop variable the
-		// compiler leaves marked borrowed after its loop, so that assignments to it afterwards release nothing
-		// (bug-a-loop-variable-stays-borrowed-after-the-loop). Add it once all three have landed.
+		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because two leaks measured
+		// since would still fire it rather than anything new: a loop variable the compiler leaves marked borrowed after
+		// its loop, so that assignments to it afterwards release nothing (bug-a-loop-variable-stays-borrowed-after-the-
+		// loop), and IfNil releasing nothing for the value it copies (bug-ifnil-leaks-the-value-it-copies). Add it once
+		// both have landed. A third candidate, a stream-backed value written into a table column, was measured and is
+		// not a leak: the holder is the device session's undo log, and it is released when the transaction ends, so an
+		// ordinary statement is already balanced (see Schema.DeviceSession.InsertRow and the Documents/StreamValues.d4
+		// coverage script).
 		public void Stop(DataParams paramsValue)
 		{
 			try

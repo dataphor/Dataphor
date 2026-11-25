@@ -27,11 +27,13 @@
 		  scope; so does a list of rows with such a column, a row with a list column and a list of lists
 		- reading a Binary or Graphic *table column* back into a variable takes out no stream of its own, and a stored
 		  value is not changed by a later write through the variable it was inserted from. Variables are where the
-		  sharing and the release happen, which is why every case below is written over variables rather than rows.
-		  Writing a value into a column does, however, leave one stream held until the table is dropped - that is
-		  bug-a-stored-binary-is-never-given-back, found while writing this script, and what the engine is holding it
-		  for is not yet established, so do not read an explanation into these lines beyond what they measure. The row
-		  section below says what it does and does not assert about it.
+		  sharing and the release happen, which is why most cases below are written over variables rather than rows.
+		- a write of a stream-backed value into a table column costs no stream once the statement that made it has
+		  finished. While a transaction is open the device session's undo log holds one managed stream per logged write -
+		  one for an insert, one for an update, none for a delete - and gives all of them back when that transaction
+		  commits or rolls back. An ordinary statement is its own transaction, so an ordinary insert, update or delete is
+		  balanced; only a transaction a caller deliberately holds open accumulates, and it too gives everything back
+		  when it ends. The top-level section after the row section asserts this.
 
 	Counts and read-back values are what is asserted on, never stream identifiers: an identifier is allocation order,
 	so a script that asserted on one would break the moment an earlier statement allocated one more stream. Each case
@@ -266,13 +268,19 @@ end;
 	inside a rolled-back transaction, of a value held in a variable that outlives the rollback, leaves the value intact
 	and the count exactly where it was.
 
-	What is not asserted, and why. A *committed* insert of a stream-backed value raises the count by one per row and
-	keeps it until the table is dropped - deleting the row does not give it back, and an update of the column takes out
-	another one. That is bug-a-stored-binary-is-never-given-back, found while writing this script and reproduced in its
-	ticket; the balance assertion for a committed insert belongs there, at the lowest layer that shows it, rather than
-	here, where it would either fail the whole script or have to be written as the leak it is. Dropping the table does
-	give those streams back, which is why the section balances at its end and why the script's closing assertion is
-	still worth something: this section cannot quietly raise the floor under the cases after it.
+	What is not asserted, and why. This whole section is one statement, so it runs inside one transaction, and while
+	that transaction is open the device session's undo log legitimately holds one managed stream for each write it has
+	logged - one for the insert, one for the update, none for the delete, since the row a delete copies holds its value
+	as plain bytes. That is correct: the memory device keeps no undo information of its own, so the engine's log is the
+	only thing that could roll these statements back. It is also incidental bookkeeping, so the exact within-statement
+	counts are deliberately not pinned here - an ordinary change to how the log copies a row would then fail a coverage
+	script for no benefit. The log is released when the transaction ends, which is why this section balances at its end
+	and why the script's closing assertion is still worth something: this section cannot quietly raise the floor under
+	the cases after it.
+
+	The balance that does matter - a committed insert, update or delete, each as its own statement, costing no stream -
+	cannot be asserted from in here for the same reason, and is asserted at the script's top level in the section that
+	follows this one.
 */
 begin
 	var LBefore : Integer := StreamCount();
@@ -298,7 +306,11 @@ begin
 
 	// The rolled-back transaction. Note the form: transactions in D4 are the operators BeginTransaction(),
 	// CommitTransaction() and RollbackTransaction(); there is no "begin transaction" statement, and a block containing
-	// one is a syntax error.
+	// one is a syntax error. A standalone BeginTransaction() statement has no effect that outlives itself - the engine
+	// wraps each statement in an implicit transaction and commits back down to the depth it started at - so it has to
+	// be written inside a block, as it is here, or held open from the host through IServerProcess.BeginTransaction.
+	// Rollback is not a special release: it disposes the undo log, which is exactly what a commit does, reached sooner.
+	// So the balance asserted below says the same thing the committed cases in the next section say.
 	begin
 		var LB : Binary := Binary(LEight);
 		var LHeld : Integer := StreamCount();
@@ -317,6 +329,52 @@ begin
 	if StreamCount() <> LBefore then
 		raise Error('The row section left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind once its table was dropped.');
 end;
+
+/*
+	A committed write of a stream-backed value, each statement its own transaction. This section is written at the
+	script's top level rather than inside a block, and that is the whole point of it: the engine wraps each top-level
+	statement in its own transaction and commits it, so the undo log that holds a managed stream for the life of a
+	transaction has released it again by the time the next statement runs. Written inside a block, as the row section
+	above is, these assertions would be measuring one open transaction's bookkeeping instead, which is what the
+	original reading of this behaviour as a leak was measuring.
+
+	Top-level var declarations persist across the statements after them - the script already relies on this for
+	LScriptStart - which is what lets a count be recorded in one statement and asserted against in a later one.
+
+	This is also why the script's coverage-manifest.json entry carries "batches": true. Run the default way - as one
+	nested ExecuteScript('Coverage.Scripts', 'StreamValues') call - the whole file is a single statement and these
+	statements would all fall inside its open transaction, so the assertions below would fail. If this entry is ever
+	turned back, this section has to move out of the script and into a host test instead.
+*/
+var LCommittedBefore : Integer := StreamCount();
+create table TStreamCommitted { ID : Integer, B : Binary, key { ID } };
+
+// The floor the write assertions are measured against, taken after the table exists and before anything is in it.
+var LCommittedFloor : Integer := StreamCount();
+
+insert table { row { 1 ID, Binary(LEight) B } } into TStreamCommitted;
+if StreamCount() <> LCommittedFloor then
+	raise Error('A committed insert of a Binary left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+if (B from row from (TStreamCommitted where ID = 1)).Value <> LEight then
+	raise Error('A committed insert of a Binary did not store the value selected.');
+
+update TStreamCommitted set { B := Binary(LFour) } where ID = 1;
+if StreamCount() <> LCommittedFloor then
+	raise Error('A committed update of a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+if (B from row from (TStreamCommitted where ID = 1)).Value <> LFour then
+	raise Error('A committed update of a Binary column did not reach the row.');
+
+delete TStreamCommitted where ID = 1;
+if StreamCount() <> LCommittedFloor then
+	raise Error('A committed delete of a row with a Binary column left ' + ToString(StreamCount() - LCommittedFloor) + ' stream(s) held.');
+if exists (TStreamCommitted where ID = 1) then
+	raise Error('A committed delete did not remove the row.');
+
+// Dropping the table releases the undo entries of any transaction still holding some. Here there are none left to
+// release, which is the assertion: the count was already back at its floor before the drop, not because of it.
+drop table TStreamCommitted;
+if StreamCount() <> LCommittedBefore then
+	raise Error('The committed-write section left ' + ToString(StreamCount() - LCommittedBefore) + ' stream(s) behind.');
 
 /*
 	Equality over large values. iEqual(Binary, Binary) has a byte-array fast path and, below it, the branch that opens
