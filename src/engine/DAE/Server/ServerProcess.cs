@@ -154,6 +154,15 @@ namespace Alphora.Dataphor.DAE.Server
 														if (plan.ActiveCursor != null)
 															plan.ActiveCursor.Dispose();
 													}
+														
+												// A D4 cursor the script never closed belongs to the session's cursor manager, which is
+												// disposed after the session's processes are - but the cursor holds a table bound to a program
+												// on this process and a copy of this process's stack values, and releases them through this
+												// process's managers, so by then it is holding a process that has already nulled them. Closing
+												// it here, while the process is still usable and before CloseDeviceSessions, is what makes
+												// releasing that copy safe, and closes the cursor's table against device sessions still open.
+												if (_serverSession != null)
+													_serverSession.CloseProcessCursors(this);
 											}
 										}
 										finally

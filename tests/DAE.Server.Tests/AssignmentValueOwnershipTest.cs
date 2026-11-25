@@ -56,6 +56,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// end of the block ran it, and a raise, an exit, a break or a continue left every value behind
 	/// (bug-an-error-inside-a-block-leaks-its-binary-values). The last two of those cover the one variable such a
 	/// release can miss: an operator's result, which the paths that do reach the caller hand over rather than release.
+	/// AForEachOverACursorReleasesTheStackItCopied is a fourth owner of values on the stack, beside a slot, a call and a
+	/// scope: a cursor, which takes a private copy of the whole stack window it is opened over so that its plan can read
+	/// the variables it was compiled against after the scope that opened it has gone. Closing the cursor threw that copy
+	/// away without releasing it, so every cursor a script opened held one stream per stream-backed variable then in
+	/// scope, for the life of the session (bug-a-cursor-copies-the-stack-and-never-gives-it-back).
 	/// </summary>
 	/// <remarks>
 	/// The leak cases assert on Diagnostics.StreamCount(), which reports how many streams the server is holding, read
@@ -409,11 +414,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// the loop itself lent.
 		/// </summary>
 		/// <remarks>
-		/// The cursor arm asserts that two shapes leave the same number of streams behind rather than asserting a
-		/// count, because opening a cursor copies every stream-backed value on the stack and never releases the copies
-		/// (bug-a-cursor-copies-the-stack-and-never-gives-it-back, open). Both shapes pay that cost equally - one row
-		/// with one Binary column is on the stack when the cursor opens either way - so the difference between them is
-		/// this defect alone, and the case keeps passing once that one is fixed and both numbers are nought.
+		/// The cursor arm asserts that two shapes leave the same number of streams behind rather than asserting a count,
+		/// because opening a cursor used to copy every stream-backed value on the stack and never release the copies
+		/// (bug-a-cursor-copies-the-stack-and-never-gives-it-back). Both shapes paid that cost equally - one row with one
+		/// Binary column is on the stack when the cursor opens either way - so the difference between them was this
+		/// defect alone. That is fixed and both numbers are now nought; the comparison is kept because what this case is
+		/// about is the difference between the two shapes, which is still the thing being measured.
 		/// </remarks>
 		[Test]
 		public void AForEachOverAVariableThatAlreadyHasAValueReleasesIt()
@@ -1279,6 +1285,41 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					end;
 				",
 				"ZAggResultRaise"
+			);
+		}
+
+		/// <summary>
+		/// Opening a cursor copies every value on the stack into a stack of the cursor's own, and those copies are the
+		/// cursor's to release: closing it threw them away unreleased, holding one stream per stream-backed variable in
+		/// scope, per cursor opened, for the life of the session
+		/// (bug-a-cursor-copies-the-stack-and-never-gives-it-back).
+		/// </summary>
+		/// <remarks>
+		/// Three Binary variables and two loops, so that a regression reports a count of six rather than something that
+		/// could be mistaken for an off-by-one. The source has no stream-backed column of its own, so every stream the
+		/// case could count is one the snapshot copied, and the variables are declared before the loops, which is what
+		/// puts them in the window the snapshot copies - one declared after the cursor opened was never on the stack to
+		/// be copied and never cost anything.
+		/// </remarks>
+		[Test]
+		public void AForEachOverACursorReleasesTheStackItCopied()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				@"
+					begin
+						var LB1 : Binary := Binary('0001');
+						var LB2 : Binary := Binary('0002');
+						var LB3 : Binary := Binary('0003');
+						var LCount : Integer := 0;
+						foreach var LRow in cursor(table { row { 1 ID } }) do
+							LCount := LCount + 1;
+						foreach var LOtherRow in cursor(table { row { 2 ID } }) do
+							LCount := LCount + 1;
+						if LCount <> 2 then
+							raise Error('The loops did not see their rows.');
+					end;
+				"
 			);
 		}
 

@@ -324,6 +324,17 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		/// <summary>Disposes the cursors this session is holding that were opened by the given process.</summary>
+		/// <remarks>
+		/// Not through the CursorManager property, which creates a manager when there is none: a process being disposed
+		/// must not create one. See CursorManager.CloseProcessCursors for why a cursor cannot outlive its process.
+		/// </remarks>
+		internal void CloseProcessCursors(ServerProcess process)
+		{
+			if (_cursorManager != null)
+				_cursorManager.CloseProcessCursors(process);
+		}
+		
 		// Debug
 		private Debugger _debugger;
 		public Debugger Debugger { get { return _debugger; } }

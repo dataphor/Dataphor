@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
-	/// <summary>Deleting the last or the first row of a browse cursor, and recovering from the crack it leaves.</summary>
+	/// <summary>Deleting the last or the first row of a browse cursor, recovering from the crack it leaves, and leaving a cursor open at the end of a process.</summary>
 	/// <remarks>
 	/// The same two cases, against the same expressions and with the same assertions, were also in
 	/// tests/DAE.Client.Tests/CLI/CLITest.cs, over a connection to a server in another program. That project was deleted
@@ -84,6 +84,33 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				Process.CloseCursor(LCursor);
 			}
+		}
+
+		/// <summary>
+		/// A script that opens a D4 cursor and never closes it. The cursor belongs to the session's cursor manager,
+		/// which the session disposes after its processes, so the cursor used to be disposed with the process that
+		/// opened it already torn down - and a cursor holds a copy of that process's stack values, which it releases
+		/// through that process's managers, so releasing them there dereferenced the process's nulled session. The
+		/// process now closes its own cursors while it is still usable
+		/// (bug-a-cursor-copies-the-stack-and-never-gives-it-back).
+		/// </summary>
+		/// <remarks>
+		/// The assertion is the fixture's teardown, which stops the process and disconnects the session: an exception
+		/// from either fails the test. The body asserts nothing itself, and the Binary is what gives the cursor's
+		/// snapshot a value to release.
+		/// </remarks>
+		[Test]
+		public void ACursorLeftOpenAtTheEndOfAProcessDoesNotFailTheTeardown()
+		{
+			ExecuteScript
+			(
+				@"
+					begin
+						var LB : Binary := Binary('00FF');
+						var LC : cursor(table { ID : Integer }) := cursor(table { row { 1 ID } });
+					end;
+				"
+			);
 		}
 	}
 }

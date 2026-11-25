@@ -4,7 +4,7 @@ Who owns a value the garbage collector will not reclaim, and what releases it. P
 
 Most values the engine moves around are ordinary .NET values - an integer, a string, a `DateTime` - and nothing has to be done about them. Some are not. A `Binary` or a `Graphic` is held as a **stream**, a numbered buffer the server owns (`StreamID`, allocated and deallocated through the process's stream manager); a row, a list or a table is held as a structure (`Row`, `ListValue`, `TableValue`, or the native `NativeRow`, `NativeList`, `NativeTable` behind them) whose own columns or elements can themselves be streams. None of that is reclaimed by the garbage collector. Something has to release each one, **exactly once**: release it never and the server holds the memory until the session ends, release it twice and the second release fails - a stream the manager no longer knows about is reported as `StreamID (n) not found`, which is how most of these defects were found.
 
-So every such value has, at every moment, exactly one owner. The rest of this page says who that owner is in each place a value sits - a stack slot, a row, a list - and what releases it there. Who owns the value handed to a call's operand, and how the two sides of that hand-over agree about which of them it was, is [operand-ownership.md](operand-ownership.md).
+So every such value has, at every moment, exactly one owner. The rest of this page says who that owner is in each place a value sits - a stack slot, a row, a list, a cursor's copy of a stack - and what releases it there. Who owns the value handed to a call's operand, and how the two sides of that hand-over agree about which of them it was, is [operand-ownership.md](operand-ownership.md).
 
 ## A stack slot owns the value in it
 
@@ -23,6 +23,12 @@ Two consequences for the code that fills a container. A node that evaluates a li
 
 `TableValue` is the exception to the paragraph above and deliberately so: it has no disposal of its own, because a D4 table variable's rows live in the memory device and are released when that device drops the native table, and a `TableValue` built by `DataValue.Copy` therefore releases nothing when it is disposed. The `NOTE:` at the class records the measurement behind that and why closing the gap would be worse than leaving it.
 
+## A cursor owns a copy of the stack it was opened over
+
+Opening a cursor takes a private copy of the whole current stack window (`Cursor.SnapshotContext`), and swaps that copy in as the program's stack around every cursor operation (`Cursor.SwitchContext`, called in matched pairs by the cursor, `foreach` and list nodes). The reason is that a cursor outlives the scope that opened it - `var LC : cursor(...) := cursor(...)` holds only an integer id, and nothing closes the cursor when the block ends - while the cursor's plan still reads the variables it was compiled against, at the offsets it was compiled with. A snapshot of the live values would therefore leave the cursor reading values the scope had already released, so the copy is the isolation, and the cursor owns it: closing the cursor releases the snapshot with `ReleaseAbove`, through the value manager captured when the snapshot was taken.
+
+That ownership is also why a cursor cannot outlive the process that opened it. The snapshot's releases run through the process's value and stream managers, and the cursors belong to a `CursorManager` on the *session*, which the session disposes after its processes. So a process closes its own cursors on the way out (`CursorManager.CloseProcessCursors`, called from `ServerProcess.InternalDispose` before the device sessions are closed), and a cursor the script never closed is closed there rather than at disconnect, while the managers it needs are still alive.
+
 ## Where to look
 
 | Concern | Code |
@@ -32,3 +38,4 @@ Two consequences for the code that fills a container. A node that evaluates a li
 | The loan a foreach takes, and the loop that pays for it | `src/engine/DAE/Runtime.Instructions/ImperativeNodes.cs` (`ForEachNode`), `ListNodes.cs` (`ListForEachNode`) |
 | Copying and releasing a value of any shape | `src/engine/DAE/Runtime.Data/DataValue.cs` (`CopyValue`, `DisposeValue`) |
 | Streams themselves | `src/engine/DAE/Streams/` |
+| The stack copy a cursor owns, and closing a cursor with its process | `src/engine/DAE/Runtime.Data/CursorValue.cs` (`Cursor.SnapshotContext`, `Cursor.Dispose`, `CursorManager.CloseProcessCursors`) |

@@ -325,14 +325,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// NOTE: a DEBUG-only check here that the server is holding the same number of streams as it was when this
 		// program started would catch a whole class of defect - a value the engine leaks because nothing released it -
 		// at the moment it reappeared, and the count is already readable (ServerStreamManager.StreamCount, which the
-		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because two leaks measured
-		// since would still fire it rather than anything new: IfNil releasing nothing for the value it copies
-		// (bug-ifnil-leaks-the-value-it-copies), and a cursor copying every stream-backed value on the stack when it
-		// opens and never giving the copies back (bug-a-cursor-copies-the-stack-and-never-gives-it-back). Add it once
-		// both have landed. A third would fire only for a foreach over a const parameter, which no ordinary program
+		// D4 operator Diagnostics.StreamCount() reports). It is deliberately not here yet, because one leak measured
+		// since would still fire it rather than anything new: row equality copying both of its rows and releasing
+		// neither (bug-row-equality-leaks-the-rows-it-compares), which a transition constraint or a key comparison
+		// reaches, so an ordinary program hits it. Add the check once that has landed. A second would fire only for a
+		// foreach over a const parameter, which no ordinary program
 		// contains (bug-a-loop-over-a-read-only-parameter-orphans-a-computed-argument), so it need not block the check
-		// unless a coverage script grows such a loop. The loop variable left marked borrowed after its loop, which used
-		// to be on that list, is fixed (bug-a-loop-variable-stays-borrowed-after-the-loop). Another candidate, a
+		// unless a coverage script grows such a loop. Three that used to be on that list are fixed: the loop variable
+		// left marked borrowed after its loop (bug-a-loop-variable-stays-borrowed-after-the-loop), IfNil releasing
+		// nothing for the value it copies (bug-ifnil-leaks-the-value-it-copies), and a cursor never giving back its
+		// copy of the stack (bug-a-cursor-copies-the-stack-and-never-gives-it-back). Another candidate, a
 		// stream-backed value written into a table column, was measured and is not a leak: the holder is the device
 		// session's undo log, and it is released when the transaction ends, so an ordinary statement is already
 		// balanced (see Schema.DeviceSession.InsertRow and the Documents/StreamValues.d4 coverage script).

@@ -95,8 +95,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
+					// The snapshot is the cursor's own copy of the stack it was opened over, and nothing else will give
+					// those values back: one stream per stream-backed value in scope, per cursor opened, was held for the
+					// life of the session (bug-a-cursor-copies-the-stack-and-never-gives-it-back). ReleaseAbove rather
+					// than a loop, so that a dispose that throws cannot leave a disposed value reachable. The manager is
+					// the one captured when the snapshot was taken, which is what frees this of the dispose order above:
+					// _table is already gone by the time control reaches here, so _table.Program is not reachable for it.
 					if (_context != null)
+					{
+						_context.ReleaseAbove(0, _contextValueManager);
 						_context = null;
+					}
 				}
 			}
 			finally
@@ -107,10 +116,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Stack _context;
 		
-		public void SnapshotContext(Program program)
+		/// <summary>The value manager the snapshot's copies were made with, so that Dispose can release them.</summary>
+		private IValueManager _contextValueManager;
+		
+		/// <summary>Takes the cursor's private copy of the stack window it is being opened over.</summary>
+		/// <remarks>
+		/// The copy is the isolation: SwitchContext installs this stack as the program's for the duration of each cursor
+		/// operation, so the cursor's plan reads the variables it was compiled against at the offsets it was compiled
+		/// with - and a cursor outlives the scope that opened it, which releases its own variables on the way out, so a
+		/// snapshot of live values would leave the cursor reading released streams. Dispose is the other half.
+		/// Called once, from the constructor: a second call would orphan the first snapshot outright.
+		/// </remarks>
+		private void SnapshotContext(Program program)
 		{
 			if (program != null)
 			{
+				_contextValueManager = program.ValueManager;
 				_context = new Stack(program.Stack.MaxStackDepth, program.Stack.MaxCallDepth);
 				_context.PushWindow(0);
 				for (int index = program.Stack.Count - 1; index >= 0; index--)
@@ -157,6 +178,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected int _nextCursorID = -1;
 		protected Cursors _cursors = new Cursors();
 		
+		// NOTE: this is the session-end fallback, and it releases each cursor's snapshot through the value manager that
+		// cursor captured - so it is only safe while every cursor left here belongs to a process that is still alive.
+		// CloseProcessCursors, called from ServerProcess.InternalDispose, is what keeps that true: a process takes its
+		// own cursors with it. A future path that disposes a process without reaching InternalDispose would leave one
+		// here holding a torn-down process, and the symptom is a null dereference inside the release at disconnect.
 		protected override void Dispose(bool disposing)
 		{
 			try
@@ -200,6 +226,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public void CloseCursor(int cursorID)
 		{
 			GetCursor(cursorID).Dispose();
+		}
+		
+		/// <summary>Disposes the cursors opened by the given process.</summary>
+		/// <remarks>
+		/// A Cursor holds an ITable bound to a program on a process, and a copy of that process's stack values which it
+		/// releases through that process's managers, so it is unusable the moment the process is gone. The manager lives
+		/// on the session and is disposed after the session's processes are, so a cursor the script never closed used to
+		/// be disposed with its process already torn down; closing it with the process is what makes releasing the
+		/// snapshot safe. Backwards through the list, because Cursors disowns a member that disposes itself.
+		/// </remarks>
+		public void CloseProcessCursors(Alphora.Dataphor.DAE.Server.ServerProcess process)
+		{
+			if (_cursors != null)
+				for (int index = _cursors.Count - 1; index >= 0; index--)
+				{
+					Cursor cursor = _cursors[index];
+					if ((cursor.Table != null) && (cursor.Table.Program != null) && (cursor.Table.Program.ServerProcess == process))
+						cursor.Dispose();
+				}
 		}
 	}
 }
