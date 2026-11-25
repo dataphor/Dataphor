@@ -23,10 +23,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// conversion or another call produces one nothing else holds - and not of the operand's modifier, which is all
 	/// the call used to look at (bug-an-operator-argument-is-released-by-the-wrong-owner). Reading ownership off the
 	/// modifier held a stream for the life of the session on every call with a const operand, which is most calls,
-	/// and released a row's own column out from under the row whenever one was read. The last six cases are the other
-	/// half of the same ownership rule: a scope releases the values of the variables it declared. That release used to
-	/// be a statement the compiler appended to the end of the block, so only control reaching the end of the block ran
-	/// it, and a raise, an exit, a break or a continue left every value behind
+	/// and released a row's own column out from under the row whenever one was read.
+	/// ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated is the error path of that same operand
+	/// cleanup: it used to be skipped altogether when an argument of a call raised, because the execute shapes
+	/// evaluated their arguments before entering the try whose finally cleans them up, so every argument evaluated
+	/// before the one that raised was orphaned (bug-an-argument-is-orphaned-when-a-later-one-raises). The last six
+	/// cases are the other half of the same ownership rule: a scope releases the values of the variables it declared.
+	/// That release used to be a statement the compiler appended to the end of the block, so only control reaching the
+	/// end of the block ran it, and a raise, an exit, a break or a continue left every value behind
 	/// (bug-an-error-inside-a-block-leaks-its-binary-values). The last two of those cover the one variable such a
 	/// release can miss: an operator's result, which the paths that do reach the caller hand over rather than release.
 	/// </summary>
@@ -542,6 +546,103 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							",
 							RowAssignmentCount
 						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// A call one of whose arguments raises, with an earlier argument that produced a value the call owns. The
+		/// arguments used to be evaluated outside the try whose finally cleans them up, so nothing released what the
+		/// earlier argument produced and the call orphaned it. All three of the execute shapes that can have an
+		/// argument before another one are covered, because each evaluates its arguments in its own code and a fix
+		/// applied to one is no evidence about the others: the general shape of a declared operator's call, the
+		/// two-argument shape of a generated comparison, and the three-argument shape of a list insert. The
+		/// one-argument shape needs nothing - there is no argument before the one that raises.
+		/// </summary>
+		/// <remarks>
+		/// The first shape puts its var operand after the raising argument and asserts that the caller's variable is
+		/// neither nil nor changed, which is the half of the rule the count cannot see: the cleanup that runs after a
+		/// call writes a var operand's value back to the caller, and there is no such value when the call never
+		/// happened. Reusing that cleanup on this path would poke null into the caller's variable - a leak turned into
+		/// data loss - so this case fails on the value under that fix and on the count without any fix. Each script
+		/// catches its own error in D4 and asserts that it caught one, so a shape that silently stopped raising cannot
+		/// pass while testing nothing.
+		/// </remarks>
+		[Test]
+		public void ACallWhoseLaterArgumentRaisesReleasesTheArgumentsAlreadyEvaluated()
+		{
+			ExecuteScript("create operator ZProbeRaises() : Binary begin raise Error('ZProbeRaises'); end;");
+			ExecuteScript("create operator ZProbeRaisesInt() : Integer begin raise Error('ZProbeRaisesInt'); end;");
+			ExecuteScript("create operator ZProbeVarLast(const AB : Binary, const AC : Binary, var AD : Binary) : Integer begin AD := Binary('0003'); result := 1; end;");
+
+			// One Assert.Multiple over the three shapes, so that a shape-specific regression is not hidden by another shape's failure.
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"a declared operator's call",
+						@"
+							begin
+								var LB : Binary := Binary('0001');
+								var LCaught : Integer := 0;
+								var LI : Integer := 0;
+								try
+									LI := ZProbeVarLast(Binary('0002'), ZProbeRaises(), var LB);
+								except
+									on E : Error do
+										LCaught := 1;
+								end;
+								if LCaught <> 1 then
+									raise Error('The call did not raise.');
+								if IsNil(LB) then
+									raise Error('The failed call nilled the caller''s variable.');
+								if LB.Value <> '0001' then
+									raise Error('The failed call changed the caller''s variable.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a generated comparison",
+						@"
+							begin
+								var LEqual : Boolean;
+								var LCaught : Integer := 0;
+								try
+									LEqual := Binary('0001') = ZProbeRaises();
+								except
+									on E : Error do
+										LCaught := 1;
+								end;
+								if LCaught <> 1 then
+									raise Error('The comparison did not raise.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a list insert",
+						@"
+							begin
+								var LList : list(Binary) := { Binary('0001') };
+								var LCaught : Integer := 0;
+								try
+									Insert(var LList, Binary('0002'), ZProbeRaisesInt());
+								except
+									on E : Error do
+										LCaught := 1;
+								end;
+								if LCaught <> 1 then
+									raise Error('The insert did not raise.');
+								if LList.Count() <> 1 then
+									raise Error('The failed insert changed the list.');
+							end;
+						"
 					);
 				}
 			);

@@ -17,13 +17,15 @@ A slot can also hold a value it does **not** own: a `foreach` loop lends its loo
 
 ## An operand's owner depends on its modifier and on its argument
 
-A call's arguments are evaluated by the caller, pushed into the callee's slots by `CallNode`, and cleaned up afterwards by `InstructionNodeBase.CleanupOperand`. What that cleanup does depends on the operand's modifier:
+A call's arguments are evaluated by the caller, pushed into the callee's slots by `CallNode`, then cleaned up by `InstructionNodeBase.CleanupOperand`, which reads the operand's modifier:
 
-- `var` - the callee's slot is an alias of a caller variable's slot. Nothing is copied and nothing is released; the cleanup writes the slot's final value back to the caller's slot with a plain `Poke`, because the caller's slot already owned it. The write-back runs on every exit path, including a `raise`, so the caller sees the callee's last assignment either way.
-- `in` - the callee's slot holds a value of its own, and the cleanup releases it. `CallNode` hands each operand slot's current value back to the instruction first, so a body that assigned to the operand released the displaced value itself and the cleanup releases the one that replaced it.
-- `const` - the callee's slot cannot be assigned to (the compiler makes a const operand's symbol constant), and whether the call owns the value is **not** a property of the modifier. It is a property of the plan node that produced the argument.
+- `var` - the callee's slot is an alias of a caller's slot. Nothing is copied and nothing is released; the cleanup writes the slot's final value back with a plain `Poke`, because the caller's slot already owned it. That write-back runs on every exit path, including a `raise`, so the caller sees the callee's last assignment either way.
+- `in` - the callee's slot holds a value of its own, and the cleanup releases it. `CallNode` hands the slot's current value back first, so a body that assigned to the operand released the displaced value itself and the cleanup releases its replacement.
+- `const` - the callee's slot cannot be assigned to (the compiler makes a const operand's symbol constant), and whether the call owns the value is **not** a property of the modifier but of the plan node that produced the argument.
 
-That last point is the one the engine used to be unable to express. A node that reads a stack slot, or a column of a row in a slot, can hand over the value it already holds rather than a copy of it; a node that *computes* a value - a literal, a conversion, another call - produces one nothing else holds. Only the node knows which, and the difference matters on nearly every call, because the compiler promotes a by-value operand the body never assigns to to `const` (`Compiler.CompileOperatorBlock`) and every comparison, conversion, selector and property accessor the engine generates for a scalar type declares `const` outright.
+That last point is the one the engine used to be unable to express. A node that reads a stack slot, or a column of a row in one, can hand over the value it already holds rather than a copy; a node that *computes* a value - a literal, a conversion, another call - produces one nothing else holds. Only the node knows which, and the difference matters on nearly every call: the compiler promotes a by-value operand the body never assigns to to `const` (`Compiler.CompileOperatorBlock`), and every comparison, conversion, selector and property accessor generated for a scalar type declares `const` outright.
+
+An argument that raises leaves the call unmade, and `ReleaseUncalledOperand` is that path's own rule: release the values the call owns among the arguments already evaluated, and leave every `var` operand alone - there is no callee value to write back, and writing one would run the type's constraints while an error unwinds.
 
 ## How a node says it is lending
 

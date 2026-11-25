@@ -215,10 +215,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// The rule each branch below applies, and the rest of the picture it is part of - stack slots, rows, lists, and
 		/// how a plan node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md,
 		/// whose own table points back here.
-		/// NOTE: an argument evaluated before a later one raises is never cleaned up at all, because the four execute
-		/// shapes below evaluate their arguments before entering the try this runs in the finally of. That orphans the
-		/// earlier argument's value for the life of the session; bug-an-argument-is-orphaned-when-a-later-one-raises
-		/// owns it, and the fix belongs in those shapes rather than here.
+		/// This is the cleanup that runs after the call. An argument evaluated before a later argument raised never
+		/// reaches a call at all, and is released by ReleaseUncalledOperand below under a different rule.
 		/// </remarks>
 		protected void CleanupOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
 		{
@@ -263,6 +261,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// holds a stream for the life of the session on every call, which is most calls - the compiler promotes
 					// a by-value operand the body never assigns to to const, and every comparison, conversion, selector and
 					// property accessor the engine generates for a scalar type declares const outright.
+					if (!argumentNode.ReturnsByReference)
+						DataValue.DisposeValue(program.ValueManager, argumentValue);
+				break;
+			}
+		}
+		
+		/// <summary>Releases the value evaluated for an operand of a call that never happened, because a later argument raised.</summary>
+		/// <remarks>
+		/// The in and const branches are CleanupOperand's own rule, for the reasons recorded there, and should stay
+		/// readable as the same rule: one modifier is handled differently here and the rest are identical.
+		/// </remarks>
+		protected void ReleaseUncalledOperand(Program program, Schema.SignatureElement signatureElement, PlanNode argumentNode, object argumentValue)
+		{
+			switch (signatureElement.Modifier)
+			{
+				case Modifier.Var :
+					// Nothing, deliberately. No callee slot was ever pushed, so there is no callee value to hand back and the
+					// caller's slot still holds and owns what it held before the call. CleanupOperand's write-back would poke
+					// the value of an operand that may never have been evaluated - null - into the caller's variable, and would
+					// run the type's constraints and validate handlers (ValueUtility.ValidateValue) while an error unwinds.
+				break;
+
+				case Modifier.In :
+					DataValue.DisposeValue(program.ValueManager, argumentValue);
+				break;
+
+				case Modifier.Const :
 					if (!argumentNode.ReturnsByReference)
 						DataValue.DisposeValue(program.ValueManager, argumentValue);
 				break;
@@ -321,6 +346,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program program)
 		{
+			// No failure path around this evaluation, unlike the shapes below: there is nothing before the one argument,
+			// so an argument that raises leaves no earlier argument's value to release.
 			object argument = Nodes[0].Execute(program);
 			try
 			{
@@ -362,7 +389,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			object argument1 = Nodes[0].Execute(program);
-			object argument2 = Nodes[1].Execute(program);
+			object argument2;
+			try
+			{
+				argument2 = Nodes[1].Execute(program);
+			}
+			catch
+			{
+				if (Operator != null)
+					ReleaseUncalledOperand(program, Operator.Signature[0], Nodes[0], argument1);
+				throw;
+			}
 			try
 			{
 				if (IsBreakable)
@@ -406,8 +443,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			object argument1 = Nodes[0].Execute(program);
-			object argument2 = Nodes[1].Execute(program);
-			object argument3 = Nodes[2].Execute(program);
+			object argument2 = null;
+			object argument3;
+			try
+			{
+				argument2 = Nodes[1].Execute(program);
+				argument3 = Nodes[2].Execute(program);
+			}
+			catch
+			{
+				if (Operator != null)
+				{
+					ReleaseUncalledOperand(program, Operator.Signature[0], Nodes[0], argument1);
+					// null when argument 2 was the argument that raised, which releases nothing.
+					ReleaseUncalledOperand(program, Operator.Signature[1], Nodes[1], argument2);
+				}
+				throw;
+			}
 			try
 			{
 				if (IsBreakable)
@@ -452,8 +504,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program program)
 		{
 			object[] arguments = new object[NodeCount];
-			for (int index = 0; index < arguments.Length; index++)
-				arguments[index] = Nodes[index].Execute(program);
+			int evaluated = 0;
+			try
+			{
+				for (; evaluated < arguments.Length; evaluated++)
+					arguments[evaluated] = Nodes[evaluated].Execute(program);
+			}
+			catch
+			{
+				if (Operator != null)
+					// The second bound mirrors the finally below, which iterates the operand count rather than NodeCount:
+					// the failure path must release no more than the normal path cleans up.
+					for (int index = 0; (index < evaluated) && (index < Operator.Operands.Count); index++)
+						ReleaseUncalledOperand(program, Operator.Signature[index], Nodes[index], arguments[index]);
+				throw;
+			}
 			try
 			{
 				if (IsBreakable)
