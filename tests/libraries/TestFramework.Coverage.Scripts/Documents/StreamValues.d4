@@ -1,0 +1,414 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Stream-Backed Values
+
+	Binary and Graphic are the two D4 types the engine does not carry inline: a value of either lives in a stream the
+	server owns, and the server counts the holders of each stream so that it can give one back once its last holder is
+	done with it. This script puts such values through what an application does with them - select one, read it back,
+	copy it, write through the copy, write through the original, compare two, hold one across a rolled-back transaction
+	- and asserts after each that the server is holding no stream it should not be.
+
+	Diagnostics.StreamCount() is the instrument: the number of managed streams the server is holding, which is 0 in a
+	server with nothing running. It is also the whole of the D4-visible surface. The engine has a
+	SystemStreamsOpenNode, but SystemCatalog.d4 registers no operator over it, and adding one would be a change to the
+	system catalog, which is a compatibility surface.
+
+	What holds a stream, and what does not. Measured on 2026-11-23 and again on 2026-11-24, and re-asserted by the
+	cases below, because it is not what one would guess:
+
+		- a Binary or Graphic variable with a value holds one stream; one holding nil holds none
+		- a variable initialised from another holds a second stream, which references the first rather than copying
+		  its bytes
+		- a Binary or Graphic *table column* stores its bytes natively, so reading one back into a variable takes out no
+		  stream of its own and no row operation ever shares a stream between two holders. Variables are where the
+		  sharing and the release happen, which is why every case below is written over variables rather than rows. (A
+		  committed insert does hold on to the stream the value arrived in until its table is dropped, which is
+		  bug-a-stored-binary-is-never-given-back, found while writing this script; the row section below says what it
+		  does and does not assert about that.)
+
+	Counts and read-back values are what is asserted on, never stream identifiers: an identifier is allocation order,
+	so a script that asserted on one would break the moment an earlier statement allocated one more stream. Each case
+	records the count it starts from rather than assuming 0, so that the script still says something true if the
+	coverage template ever registers something that holds a stream of its own.
+
+	StreamAllocation.d4 is the 2004 script this one answers - All.Coverage.d4 still carries its "// TODO: Doesn't run
+	1/17/2004" line - and it is left exactly as it is: it loads documents out of a Coverage library the coverage
+	template does not register, and test-pre-3-1-scripts-policy owns its fate. Its three siblings cannot be answered
+	this way at all: Diagnostics.LockCount(), RowCount() and UsedRowCount() all return a hard-coded 0 today, because
+	the lock manager and row manager the 3.1 engine had are gone, so LockAllocation, RowAllocation and ScalarAllocation
+	have no instrument to assert against.
+*/
+
+// The count the whole script is measured against, asserted at the very end once every block has gone out of scope.
+var LScriptStart : Integer := StreamCount();
+
+// The values the cases are built from, as base-64: that is what the Binary and Graphic selectors take and what their
+// Value representation gives back.
+
+// Four bytes - AA BB CC DD.
+var LFour : String := 'qrvM3Q==';
+
+// Eight bytes - 00 11 22 33 44 55 66 77 - twice the length of LFour and nothing like it, so a write of one over the
+// other cannot read back right by accident, and a surviving tail of the longer one is unmistakable.
+var LEight : String := 'ABEiM0RVZnc=';
+
+// Eighteen bytes - 00 01 .. 11 - and, being a whole number of three-byte groups, carrying no base-64 padding. That is
+// what lets it be concatenated with itself to build a larger value: padding is only valid at the end of a value.
+var LFragment : String := 'AAECAwQFBgcICQoLDA0ODxAR';
+
+// The same eighteen bytes with the last one changed from 11 to 12, for the large value that must compare unequal.
+var LFragmentLastByteChanged : String := 'AAECAwQFBgcICQoLDA0ODxAS';
+
+// 1200 fragments of 18 bytes make 21,600 bytes: large enough to be worth streaming and to be read in more than one
+// buffer, small enough that building it by string concatenation in D4 costs well under a second. Keep it in that range
+// rather than reaching for megabytes - the coverage run's wall clock is shared with every other script.
+var LLargeFragments : Integer := 1200;
+
+// 200 fragments make 3,600 bytes, the middle size.
+var LMediumFragments : Integer := 200;
+
+var LLarge : String := '';
+var LLargeLastByteChanged : String := '';
+var LMedium : String := '';
+
+// The two large values are built from one loop so that they cannot drift apart anywhere but in that last fragment.
+begin
+	for LIndex : Integer := 1 to LLargeFragments - 1 do
+		LLarge := LLarge + LFragment;
+	LLargeLastByteChanged := LLarge + LFragmentLastByteChanged;
+	LLarge := LLarge + LFragment;
+
+	for LIndex : Integer := 1 to LMediumFragments do
+		LMedium := LMedium + LFragment;
+end;
+
+/*
+	Round trip, at three sizes. A value put into a variable reads back as itself through both the Value representation
+	and ToBase64String, and Length reports the byte count it was given.
+
+	Length is asserted as well as the base-64, and not for symmetry: a stream read that stopped early would give a
+	shorter value rather than an error, and ToBase64String alone could miss that if the prefix it did read was all the
+	assertion compared. The three sizes are here to catch a path that only runs for one of them.
+*/
+create operator TestBinaryValue(const AValue : String, const AByteCount : Integer)
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LB : Binary := Binary(AValue);
+		if StreamCount() <> LBefore + 1 then
+			raise Error('A Binary variable of ' + ToString(AByteCount) + ' byte(s) took out ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than one.');
+		if LB.Value <> AValue then
+			raise Error('A Binary of ' + ToString(AByteCount) + ' byte(s) did not read back through Value as the value selected.');
+		if ToBase64String(LB) <> AValue then
+			raise Error('A Binary of ' + ToString(AByteCount) + ' byte(s) did not read back through ToBase64String as the value selected.');
+		if Length(LB) <> ToLong(AByteCount) then
+			raise Error('A Binary of ' + ToString(AByteCount) + ' byte(s) reported a length of ' + ToString(Length(LB)) + '.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A Binary of ' + ToString(AByteCount) + ' byte(s) left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+TestBinaryValue(LFour, 4);
+TestBinaryValue(LEight, 8);
+TestBinaryValue(LMedium, LMediumFragments * 18);
+TestBinaryValue(LLarge, LLargeFragments * 18);
+
+// Sharing. A variable initialised from another takes out a second stream, which references the first rather than
+// copying its bytes (DataValue.CopyValue turns a stream identifier into a StreamManager.Reference), and the two
+// compare equal.
+// Every value comparison below is written "not(A = B)" rather than "A <> B", and that is deliberate rather than
+// stylistic: a server with SQLDevice registered but MSSQLDevice unregistered cannot compile "<>" over two Binary
+// values at all - it resolves to the iNotEqual(MSSQLBinary, MSSQLBinary) that SQLDevice's Register.d4 declares over a
+// class in the MSSQLDevice assembly, and raises "Class alias not found" at run time. That is
+// bug-binary-comparison-needs-the-mssql-device, met while writing this script; "=" is unaffected, because
+// iEqual(Binary, Binary) is an exact match in the system catalog.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LB : Binary := Binary(LEight);
+		var LCopy : Binary := LB;
+		if StreamCount() <> LBefore + 2 then
+			raise Error('A Binary and a copy of it held ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than two.');
+		if not(LCopy = LB) then
+			raise Error('A copy of a Binary did not compare equal to it.');
+		if LCopy.Value <> LEight then
+			raise Error('A copy of a Binary did not read back as the value it was taken from.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('A Binary and a copy of it left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// Three distinct values held at once, so that the count is shown to be per value rather than per type or per scope.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LOne : Binary := Binary(LFour);
+		var LTwo : Binary := Binary(LEight);
+		var LThree : Binary := Binary(LFragment);
+		if StreamCount() <> LBefore + 3 then
+			raise Error('Three Binary variables held ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than three.');
+		if (LOne = LTwo) or (LTwo = LThree) or (LOne = LThree) then
+			raise Error('Three Binary variables with distinct values did not compare unequal.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Three Binary variables left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+/*
+	Copy-on-write, through the copy. Writing a copy's Value gives that copy contents of its own: the copy reads back
+	what was written, the variable it was taken from still reads what it had, and the count does not move. The count
+	staying put is not an oversight in the assertion - separating a copy gives it a stream in the provider but no new
+	header, and StreamCount counts headers.
+
+	The written value is shorter than the one it replaces, which is the direction that used to leave the tail of the
+	old value on the end of the new one (bug-binary-write-accessor-keeps-the-old-values-tail).
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LB : Binary := Binary(LEight);
+		var LCopy : Binary := LB;
+		var LHeld : Integer := StreamCount();
+		LCopy.Value := LFour;
+		if StreamCount() <> LHeld then
+			raise Error('Writing through a copy changed the count by ' + ToString(StreamCount() - LHeld) + '.');
+		if LCopy.Value <> LFour then
+			raise Error('Writing through a copy did not reach the copy.');
+		if LB.Value <> LEight then
+			raise Error('Writing through a copy changed the value it was taken from.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Writing through a copy left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// The same, over a chain of three, writing to the middle. A copy of a copy is not a sibling of the first copy - it
+// hangs off the copy it was taken from - so the middle of a chain is a different structure from a pair.
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LFirst : Binary := Binary(LEight);
+		var LSecond : Binary := LFirst;
+		var LThird : Binary := LSecond;
+		var LHeld : Integer := StreamCount();
+		LSecond.Value := LFour;
+		if StreamCount() <> LHeld then
+			raise Error('Writing through the middle of a chain of three changed the count by ' + ToString(StreamCount() - LHeld) + '.');
+		if LSecond.Value <> LFour then
+			raise Error('Writing through the middle of a chain of three did not reach it.');
+		if LFirst.Value <> LEight then
+			raise Error('Writing through the middle of a chain of three changed the value above it.');
+		if LThird.Value <> LEight then
+			raise Error('Writing through the middle of a chain of three changed the value below it.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Writing through the middle of a chain of three left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+/*
+	Copy-on-write, through the original. This is the direction worth having in a script: it did nothing at all until
+	bug-writing-a-large-value-changes-copies-of-it landed, because the write went into the one stream every copy was
+	still reading through, so every copy silently followed it. A chain of two copies, so that the copy below the
+	written variable and the copy below that one are both read back.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LB : Binary := Binary(LEight);
+		var LCopy : Binary := LB;
+		var LCopyOfCopy : Binary := LCopy;
+		var LHeld : Integer := StreamCount();
+		LB.Value := LFour;
+		if StreamCount() <> LHeld then
+			raise Error('Writing through the original changed the count by ' + ToString(StreamCount() - LHeld) + '.');
+		if LB.Value <> LFour then
+			raise Error('Writing through the original did not reach it.');
+		if LCopy.Value <> LEight then
+			raise Error('Writing through the original changed a copy taken from it.');
+		if LCopyOfCopy.Value <> LEight then
+			raise Error('Writing through the original changed a copy of a copy taken from it.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('Writing through the original left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// Release, through the helper TestFramework.Coverage.Base carries for exactly this: TestStreamCount records the count,
+// executes the statement text it is given and raises if the count moved. One whole statement that declares, copies and
+// writes, so that the helper is exercised over the same shapes the blocks above take apart assertion by assertion.
+begin
+	var LStatement : String :=
+		'begin '
+			+ 'var LB : Binary := Binary("' + LEight + '"); '
+			+ 'var LCopy : Binary := LB; '
+			+ 'LCopy.Value := "' + LFour + '"; '
+			+ 'if LB.Value <> "' + LEight + '" then raise Error("The value written through a copy reached the original."); '
+			+ 'if LCopy.Value <> "' + LFour + '" then raise Error("The value written through a copy did not reach it."); '
+		+ 'end;';
+	TestStreamCount(LStatement);
+end;
+
+/*
+	Rows, and a rolled-back transaction. One table, created and dropped inside this section so that the section as a
+	whole can be asserted to balance.
+
+	What is settled here, and asserted: a Binary read back out of a table column into a variable takes out no stream of
+	its own, because the value in the column is stored natively; an update and a delete reach the row; and an insert
+	inside a rolled-back transaction, of a value held in a variable that outlives the rollback, leaves the value intact
+	and the count exactly where it was.
+
+	What is not asserted, and why. A *committed* insert of a stream-backed value raises the count by one per row and
+	keeps it until the table is dropped - deleting the row does not give it back, and an update of the column takes out
+	another one. That is bug-a-stored-binary-is-never-given-back, found while writing this script and reproduced in its
+	ticket; the balance assertion for a committed insert belongs there, at the lowest layer that shows it, rather than
+	here, where it would either fail the whole script or have to be written as the leak it is. Dropping the table does
+	give those streams back, which is why the section balances at its end and why the script's closing assertion is
+	still worth something: this section cannot quietly raise the floor under the cases after it.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	create table TStreamValues { ID : Integer, B : Binary, key { ID } };
+
+	insert table { row { 1 ID, Binary(LEight) B } } into TStreamValues;
+	begin
+		var LHeld : Integer := StreamCount();
+		var LRead : Binary := (B from row from (TStreamValues where ID = 1));
+		if LRead.Value <> LEight then
+			raise Error('A Binary read out of a table column was not the value inserted.');
+		if StreamCount() <> LHeld then
+			raise Error('Reading a Binary out of a table column into a variable took out ' + ToString(StreamCount() - LHeld) + ' stream(s).');
+	end;
+
+	update TStreamValues set { B := Binary(LFour) } where ID = 1;
+	if (B from row from (TStreamValues where ID = 1)).Value <> LFour then
+		raise Error('An update of a Binary column did not reach the row.');
+
+	delete TStreamValues where ID = 1;
+	if exists (TStreamValues where ID = 1) then
+		raise Error('A delete did not remove the row.');
+
+	// The rolled-back transaction. Note the form: transactions in D4 are the operators BeginTransaction(),
+	// CommitTransaction() and RollbackTransaction(); there is no "begin transaction" statement, and a block containing
+	// one is a syntax error.
+	begin
+		var LB : Binary := Binary(LEight);
+		var LHeld : Integer := StreamCount();
+		BeginTransaction();
+		insert table { row { 2 ID, LB B } } into TStreamValues;
+		RollbackTransaction();
+		if exists (TStreamValues where ID = 2) then
+			raise Error('A rolled-back insert left its row behind.');
+		if LB.Value <> LEight then
+			raise Error('A value held in a variable across a rolled-back transaction did not survive it.');
+		if StreamCount() <> LHeld then
+			raise Error('A rolled-back transaction changed the count by ' + ToString(StreamCount() - LHeld) + '.');
+	end;
+
+	drop table TStreamValues;
+	if StreamCount() <> LBefore then
+		raise Error('The row section left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind once its table was dropped.');
+end;
+
+/*
+	Equality over large values. iEqual(Binary, Binary) has a byte-array fast path and, below it, the branch that opens
+	both streams and walks them a byte at a time; a selected value is never a byte array, so these comparisons take the
+	streaming branch. Two values differing only in their last byte must compare unequal - a comparison that stopped
+	early, or one that only compared lengths, would call them equal - and a value must compare equal to itself, which
+	is the case that opens one stream twice at once.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LLeft : Binary := Binary(LLarge);
+		var LRight : Binary := Binary(LLargeLastByteChanged);
+		if Length(LLeft) <> Length(LRight) then
+			raise Error('The two large values were not the same length.');
+		if LLeft = LRight then
+			raise Error('Two large values differing only in their last byte compared equal.');
+		if not(LLeft = LLeft) then
+			raise Error('A large value did not compare equal to itself.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('The equality case left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+// Nil. A variable of a stream-backed type with no value holds no stream, and IsNil says so; giving it a value takes
+// one out. (Against a table column this would be a different question - inserting nil into a column declared
+// "B : Binary" is refused with "Value required for column", so a nilable column of that type would have to be
+// declared some other way - and the variable is where the stream assertion lives anyway.)
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LB : Binary;
+		if StreamCount() <> LBefore then
+			raise Error('A Binary variable with no value took out ' + ToString(StreamCount() - LBefore) + ' stream(s).');
+		if not(IsNil(LB)) then
+			raise Error('A Binary variable with no value was not nil.');
+		LB := Binary(LFour);
+		if StreamCount() <> LBefore + 1 then
+			raise Error('Giving a nil Binary variable a value took out ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than one.');
+		if IsNil(LB) then
+			raise Error('A Binary variable given a value was still nil.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('The nil case left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+/*
+	Graphic. One pass rather than the full set above, and that is not a shortcut: Binary and Graphic are declared side
+	by side in DataTypes.d4 over the same selector node, the same Value read and write accessor nodes, the same
+	conveyor and the same equality operator class, and differ only in their AsDisplayString representation and their
+	Frontend tags. So what this pass is for is the declaration itself - that Graphic really is registered that way -
+	rather than a second copy of the stream behaviour.
+*/
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LG : Graphic := Graphic(LEight);
+		if StreamCount() <> LBefore + 1 then
+			raise Error('A Graphic variable took out ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than one.');
+		if LG.Value <> LEight then
+			raise Error('A Graphic did not read back through Value as the value selected.');
+		if ToBase64String(LG) <> LEight then
+			raise Error('A Graphic did not read back through ToBase64String as the value selected.');
+		if Length(LG) <> ToLong(8) then
+			raise Error('A Graphic of 8 bytes reported a length of ' + ToString(Length(LG)) + '.');
+
+		var LCopy : Graphic := LG;
+		if StreamCount() <> LBefore + 2 then
+			raise Error('A Graphic and a copy of it held ' + ToString(StreamCount() - LBefore) + ' stream(s) rather than two.');
+		if not(LCopy = LG) then
+			raise Error('A copy of a Graphic did not compare equal to it.');
+
+		LG.Value := LFour;
+		if LG.Value <> LFour then
+			raise Error('Writing through a Graphic did not reach it.');
+		if LCopy.Value <> LEight then
+			raise Error('Writing through a Graphic changed a copy taken from it.');
+		if StreamCount() <> LBefore + 2 then
+			raise Error('Writing through a Graphic changed the count to ' + ToString(StreamCount() - LBefore) + ' stream(s) held rather than two.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('The Graphic case left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+begin
+	var LBefore : Integer := StreamCount();
+	begin
+		var LG : Graphic;
+		if StreamCount() <> LBefore then
+			raise Error('A Graphic variable with no value took out ' + ToString(StreamCount() - LBefore) + ' stream(s).');
+		if not(IsNil(LG)) then
+			raise Error('A Graphic variable with no value was not nil.');
+	end;
+	if StreamCount() <> LBefore then
+		raise Error('The nil Graphic case left ' + ToString(StreamCount() - LBefore) + ' stream(s) behind.');
+end;
+
+drop operator TestBinaryValue(String, Integer);
+
+// Everything the script declared has gone out of scope, so the server is holding exactly what it held at the start.
+if StreamCount() <> LScriptStart then
+	raise Error('The script as a whole left ' + ToString(StreamCount() - LScriptStart) + ' stream(s) behind.');
