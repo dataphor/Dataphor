@@ -23,12 +23,13 @@
 		- a Binary or Graphic variable with a value holds one stream; one holding nil holds none
 		- a variable initialised from another holds a second stream, which references the first rather than copying
 		  its bytes
-		- a Binary or Graphic *table column* stores its bytes natively, so reading one back into a variable takes out no
-		  stream of its own and no row operation ever shares a stream between two holders. Variables are where the
-		  sharing and the release happen, which is why every case below is written over variables rather than rows. (A
-		  committed insert does hold on to the stream the value arrived in until its table is dropped, which is
-		  bug-a-stored-binary-is-never-given-back, found while writing this script; the row section below says what it
-		  does and does not assert about that.)
+		- reading a Binary or Graphic *table column* back into a variable takes out no stream of its own, and a stored
+		  value is not changed by a later write through the variable it was inserted from. Variables are where the
+		  sharing and the release happen, which is why every case below is written over variables rather than rows.
+		  Writing a value into a column does, however, leave one stream held until the table is dropped - that is
+		  bug-a-stored-binary-is-never-given-back, found while writing this script, and what the engine is holding it
+		  for is not yet established, so do not read an explanation into these lines beyond what they measure. The row
+		  section below says what it does and does not assert about it.
 
 	Counts and read-back values are what is asserted on, never stream identifiers: an identifier is allocation order,
 	so a script that asserted on one would break the moment an earlier statement allocated one more stream. Each case
@@ -66,6 +67,9 @@ var LFragmentLastByteChanged : String := 'AAECAwQFBgcICQoLDA0ODxAS';
 // 1200 fragments of 18 bytes make 21,600 bytes: large enough to be worth streaming and to be read in more than one
 // buffer, small enough that building it by string concatenation in D4 costs well under a second. Keep it in that range
 // rather than reaching for megabytes - the coverage run's wall clock is shared with every other script.
+// NOTE: the loop below concatenates onto one growing string, so the cost of building these values is quadratic in the
+// fragment count; the whole script runs in about 2 s today. If a larger value is ever wanted here, build it by doubling
+// (LLarge := LLarge + LLarge) rather than by raising this count.
 var LLargeFragments : Integer := 1200;
 
 // 200 fragments make 3,600 bytes, the middle size.
@@ -87,12 +91,13 @@ begin
 end;
 
 /*
-	Round trip, at three sizes. A value put into a variable reads back as itself through both the Value representation
-	and ToBase64String, and Length reports the byte count it was given.
+	Round trip, at four sizes - 4, 8, 3,600 and 21,600 bytes. A value put into a variable reads back as itself through
+	both the Value representation and ToBase64String, and Length reports the byte count it was given.
 
 	Length is asserted as well as the base-64, and not for symmetry: a stream read that stopped early would give a
 	shorter value rather than an error, and ToBase64String alone could miss that if the prefix it did read was all the
-	assertion compared. The three sizes are here to catch a path that only runs for one of them.
+	assertion compared. The range of sizes is here to catch a path that only runs for one of them; 4 and 8 bytes are
+	both in it because they are also the pair the copy-on-write cases below write one over the other.
 */
 create operator TestBinaryValue(const AValue : String, const AByteCount : Integer)
 begin
