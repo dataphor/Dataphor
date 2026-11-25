@@ -75,6 +75,9 @@ namespace Alphora.Dataphor.DAE.Server
 		// PlanCacheTimeStamp
 		public long PlanCacheTimeStamp; // Server.PlanCacheTimeStamp when the plan was compiled
 
+		// NOTE: both setters below are internal because nothing outside this assembly sets either one, and a plan is a type a
+		// custom extension can see; widen them if an extension ever needs to build a plan of its own.
+
 		// SourceStatement
 		/// <summary>The parsed statement this plan was compiled from; null for a plan whose node tree was assigned directly.</summary>
 		/// <remarks>
@@ -87,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public Statement SourceStatement
 		{
 			get { return _sourceStatement; }
-			set { _sourceStatement = value; }
+			internal set { _sourceStatement = value; }
 		}
 
 		// SourceContext
@@ -96,10 +99,10 @@ namespace Alphora.Dataphor.DAE.Server
 		public SourceContext SourceContext
 		{
 			get { return _sourceContext; }
-			set { _sourceContext = value; }
+			internal set { _sourceContext = value; }
 		}
 
-		// Plan		
+		// Plan
 		protected Plan _plan;
 		public Plan Plan { get { return _plan; } }
 		
@@ -107,20 +110,22 @@ namespace Alphora.Dataphor.DAE.Server
 		protected Program _program;
 		public Program Program { get { return _program; } }
 		
-		/// <summary>Replaces this plan's compilation with the given one and disposes the compilation it had.</summary>
+		/// <summary>Replaces this plan's compilation with the given one, and hands the Plan it displaced to the caller to dispose.</summary>
 		/// <remarks>
 		/// Only called with a pair that has compiled without errors, so that a failed recompilation leaves the plan as
-		/// executable as it was. The plan's ID, Header and source context stay as they are: a remote client holds a
-		/// PlanDescriptor carrying the ID, and the statement text, library, context and application-transaction flag the
-		/// header records belong to the same statement. What the caller does see afterwards is the new compilation's
+		/// executable as it was. Nothing here can throw, which is what lets the caller own the disposal of whichever
+		/// compilation is left over (ServerProcess.RecompileStatementPlan); the old Program needs no disposal, it is not
+		/// IDisposable and goes with the reference. The plan's ID, Header and source context stay as they are: a remote client
+		/// holds a PlanDescriptor carrying the ID, and the statement text, library, context and application-transaction flag
+		/// the header records belong to the same statement. What the caller does see afterwards is the new compilation's
 		/// Messages, PlanStatistics and ProgramStatistics, which are this plan's by way of the pair.
 		/// </remarks>
-		protected internal void SwapCompilation(Plan plan, Program program)
+		protected internal Plan SwapCompilation(Plan plan, Program program)
 		{
-			Plan oldPlan = _plan;
+			Plan displacedPlan = _plan;
 			_plan = plan;
 			_program = program;
-			oldPlan.Dispose();
+			return displacedPlan;
 		}
 		
 		// Statistics

@@ -893,16 +893,29 @@ namespace Alphora.Dataphor.DAE.Server
 		internal void RecompileStatementPlan(ServerStatementPlan serverPlan, DataParams paramsValue)
 		{
 			Plan plan = new Plan(this);
-			bool swapped = false;
+
+			// The compilation to dispose on the way out: the new one until the swap goes through, the one the swap displaces
+			// afterwards. Disposing is kept out of SwapCompilation, which only assigns, so that nothing between the assignment
+			// and here can leave this block disposing the compilation the plan is now holding.
+			Plan abandonedPlan = plan;
 			try
 			{
 				Program program = new Program(this, serverPlan.ID);
 				program.ShouldPushLocals = true;
 				program.IsCached = serverPlan.Program.IsCached;
+
+				// NOTE: this binds the execution's context and not the prepare's - the process locals, the session's current
+				// library, an open application transaction - which is what compiling the statement now means. So a session that
+				// calls System.SetLibrary between two executions of a held create plan builds into the library it has now.
+				// NOTE: compiling writes into the statement it compiles at a few sites - a metadata tag the compiler computes,
+				// an indexer expression's resolved by-clause, a class type's inherited conveyor - and each one found writes back
+				// a value the next compilation computes the same way, so compiling one statement twice yields the same program
+				// (measured for metadata tags on 2026-11-25). A compiler change that wrote something a recompilation read
+				// differently would make a re-executed plan diverge in silence; the answer then is to compile from a copy of
+				// the statement, which needs a deep clone of the D4 syntax tree, and there is none.
 				Compile(plan, program, serverPlan.SourceStatement, paramsValue, false, serverPlan.SourceContext);
 				plan.CheckCompiled();
-				serverPlan.SwapCompilation(plan, program);
-				swapped = true;
+				abandonedPlan = serverPlan.SwapCompilation(plan, program);
 
 				// Re-stamped so the plan cache's staleness check stays truthful for what the plan now holds: this compilation
 				// is against the catalog as it is now, whatever has bumped the timestamp since the plan was first compiled.
@@ -910,8 +923,8 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				if (!swapped)
-					plan.Dispose();
+				if (abandonedPlan != null)
+					abandonedPlan.Dispose();
 			}
 		}
 
