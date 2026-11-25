@@ -3525,9 +3525,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <remarks>
 		/// <para>
 		/// Deferred inside a transaction because this process's remote session may be a participant in it (ServerProcess
-		/// enlists its remote sessions in its own commits and rollbacks): closing it at once would roll the remote work
+		/// may hold open transaction levels on its remote sessions): closing it at once would roll the remote work
 		/// back under a transaction that is still running, and the eventual commit would prepare a session that no
-		/// longer exists.
+		/// longer exists. Asked of the process's own depth rather than of the connection's level count, which since
+		/// debt-remote-session-lazy-enlistment may be 0 on a connection inside an open transaction: conservative, and it keeps
+		/// the close waiting for the outermost commit either way.
 		/// </para>
 		/// <para>
 		/// This process's connection only. Another process that already holds one to the same link keeps it until that

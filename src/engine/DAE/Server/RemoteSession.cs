@@ -45,14 +45,31 @@ namespace Alphora.Dataphor.DAE.Server
 		/// Counted here rather than asked of the other server. Asking was a network round trip on every begin, and on a
 		/// connection whose server has gone it is a question that cannot be answered at all - which is the one question the
 		/// process has to answer to decide whether a dead connection is a participant in a transaction it still has open
-		/// (see <see cref="ServerProcess.InternalBeginTransaction"/>).
+		/// (see <c>ServerProcess.RemoteConnect</c>).
 		/// </para>
 		/// <para>
 		/// The count is exact because of this invariant: <b>every remote session in a process's
-		/// <see cref="ServerProcess.RemoteSessions"/> list has begun exactly as many transaction levels as the process has
-		/// open.</b> <c>ServerProcess.RemoteConnect</c> catches a new connection up to the process's depth before adding it
-		/// to the list; <c>ServerProcess.InternalBeginTransaction</c> either begins a level on a connection, lets the
-		/// connection go, or fails the whole begin; and the unwind decrements the count on every path, failures included.
+		/// <see cref="ServerProcess.RemoteSessions"/> list has open exactly that process's transaction levels 0 through
+		/// <c>TransactionCount - 1</c>, and the count is never greater than the process's depth.</b> A connection's open levels
+		/// are therefore always a contiguous <i>prefix</i> of the process's level stack, and the connection holds the level a
+		/// prepare, a commit or a rollback is ending exactly when its count equals the process's depth - which is what
+		/// <c>ServerProcess.HoldsEndingLevel</c> reads.
+		/// </para>
+		/// <para>
+		/// Why the prefix holds: the only code that begins a level on a connection is <c>ServerProcess.EnlistRemoteSession</c>,
+		/// which begins levels in ascending index order starting at the connection's own count, so the connection's level
+		/// <i>j</i> is always the process's level <i>j</i>; the only code that ends one is the prepare, the commit and the
+		/// rollback, each of which ends the innermost level and only on a connection that holds it; and
+		/// <see cref="CommitTransaction"/> and <see cref="RollbackTransaction"/> count the level down in a finally on every path,
+		/// so a connection can never be left deeper than the process.
+		/// </para>
+		/// <para>
+		/// Why a prefix is enough for correctness: work only ever reaches a connection through
+		/// <c>ServerProcess.RemoteConnect</c>, which enlists it to the process's full depth before returning it. So every remote
+		/// operation is performed at a remote level corresponding to the process's innermost level, and a connection holding
+		/// fewer levels than the process has had no work done on it at the levels it is missing. There is nothing at those levels
+		/// for a prepare, a commit or a rollback to say anything about, which is why skipping such a connection is right rather
+		/// than merely cheap.
 		/// </para>
 		/// </remarks>
 		public int TransactionCount { get { return _transactionCount; } }
@@ -92,8 +109,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Commits the innermost transaction level on the connection.</summary>
 		/// <remarks>
 		/// The count comes down whatever the other server did with the commit: the level is being abandoned locally either
-		/// way, and a count left high would make the next begin treat a dead connection as a participant and so never let
-		/// it go.
+		/// way, and a count left high would make the next use of the link treat a dead connection as a participant and so never
+		/// let it go.
 		/// </remarks>
 		public void CommitTransaction()
 		{

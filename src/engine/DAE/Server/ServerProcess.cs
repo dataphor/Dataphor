@@ -667,38 +667,87 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,AlphoraDataphorServer";
 		
-		/// <summary>This process's connection to another Dataphor server through the given link, opened and caught up to the process's transaction depth on first use.</summary>
+		/// <summary>Brings a connection to another Dataphor server up to this process's transaction depth, beginning each level it is missing at the isolation level that level was begun at.</summary>
+		/// <remarks>
+		/// The one place a connection is enlisted in a transaction, and the guarantee the rest of the transaction code rests on:
+		/// work only ever reaches a connection through <see cref="RemoteConnect"/>, which calls this before returning it, so
+		/// every remote operation runs at a remote level corresponding to this process's innermost level and the levels a
+		/// connection is missing are ones no work was done at. See the invariant on <see cref="RemoteSession.TransactionCount"/>.
+		/// </remarks>
+		// NOTE: a site that reached Execute, Evaluate or PrepareTableVar on a RemoteSession without coming through RemoteConnect
+		// would break that argument rather than merely skip an optimisation - its work would land at whatever level the
+		// connection last held. Verified by grep over src and libraries: Plan.RemoteConnect and Program.RemoteConnect both
+		// delegate here and are the only ways a plan node reaches a connection (SystemNodes.cs for ExecuteOn and EvaluateOn,
+		// TableNodes.cs for select … on <link>), no site holds a RemoteSession across statements, and the one other caller, in
+		// Runtime.Data/SystemTableValues.cs, is inside #if OnExpression and is not compiled.
+		private void EnlistRemoteSession(RemoteSession session)
+		{
+			// Indexed by the connection's own depth, as DeviceConnect's catch-up is: the levels being caught up on are the
+			// outer ones, each with the isolation level it was begun at.
+			while (session.TransactionCount < _transactions.Count)
+				session.BeginTransaction(_transactions[session.TransactionCount].IsolationLevel);
+
+			// The guarantee above, asserted at the one seam that gives it.
+			Error.AssertFail
+			(
+				session.TransactionCount == _transactions.Count,
+				"The connection for server link \"{0}\" has {1} transaction level(s) open where this process has {2}.",
+				session.ServerLink.Name,
+				session.TransactionCount,
+				_transactions.Count
+			);
+		}
+
+		/// <summary>This process's connection to another Dataphor server through the given link, opened on first use and brought up to the process's transaction depth on every use.</summary>
 		/// <remarks>
 		/// The funnel for every use of a link - <c>Program.RemoteConnect</c> for the three runtime sites (<c>ExecuteOn</c>,
 		/// <c>EvaluateOn</c> and <c>select … on &lt;link&gt;</c>) and <c>Plan.RemoteConnect</c> for the compile-time one that
-		/// describes a remote table - which is why the refusal of work on a half-committed level is asked here. Refusing the
-		/// compile-time path too is harmless: it only happens as part of a statement that would be refused anyway.
+		/// describes a remote table - which is why the refusal of work on a half-committed level is asked here, and why the
+		/// enlistment is. Refusing the compile-time path too is harmless: it only happens as part of a statement that would be
+		/// refused anyway.
 		/// </remarks>
 		internal RemoteSession RemoteConnect(Schema.ServerLink serverLink)
 		{
 			CheckNotHalfCommitted();
 
 			int index = RemoteSessions.IndexOf(serverLink);
-			if (index < 0)
+			if (index >= 0)
 			{
-				RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName, true), this, serverLink);
+				RemoteSession heldSession = RemoteSessions[index];
 				try
 				{
-					// Indexed by the connection's own depth, for the reason given in DeviceConnect: the levels being caught
-					// up on are the outer ones, each with the isolation level it was begun at.
-					while (session.TransactionCount < _transactions.Count)
-						session.BeginTransaction(_transactions[session.TransactionCount].IsolationLevel);
-					RemoteSessions.Add(session);
-					return session;
+					EnlistRemoteSession(heldSession);
+					return heldSession;
 				}
-				catch
+				catch (Exception exception)
 				{
-					session.Dispose();
-					throw;
+					// The same rule the transaction begin applied before this reclaim moved here: a connection with no level of
+					// its own open is a participant in no transaction this process still has open, so nothing has been done on
+					// it that this process's transaction protocol still owes an answer for, and it may be let go and this use
+					// connect again. One that does hold a level may not be - work has been done on it at a level that is still
+					// open, and forgetting it would let the local commit believe the remote half committed - so its failure is
+					// the caller's. A connection whose catch-up failed part-way keeps the levels it did open, which is a legal
+					// state under the invariant on RemoteSession.TransactionCount and needs no unwinding.
+					if (heldSession.InTransaction)
+						throw;
+
+					DiscardRemoteSession(heldSession, exception);
 				}
 			}
-			else
-				return RemoteSessions[index];
+
+			// Exactly one retry: a discarded connection falls through to here, and a failure here reaches the caller.
+			RemoteSession session = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName, true), this, serverLink);
+			try
+			{
+				EnlistRemoteSession(session);
+				RemoteSessions.Add(session);
+				return session;
+			}
+			catch
+			{
+				session.Dispose();
+				throw;
+			}
 		}
 		
 		internal void RemoteDisconnect(Schema.ServerLink serverLink)
@@ -1381,45 +1430,20 @@ namespace Alphora.Dataphor.DAE.Server
 			if (UseDTC)
 				throw new ServerException(ServerException.Codes.DTCNotSupported);
 
-			// A level begun on top of a half-committed one would be begun on every participant, so the participants the failed
-			// commit left shallow would stay one level behind the others at every depth above and a participant's level count
+			// A level begun on top of a half-committed one would be begun on every device session, so the ones the failed commit
+			// left shallow would stay one level behind the others at every depth above and a device session's level count
 			// would no longer say which of this process's levels it holds - which is what HoldsEndingLevel reads, and what the
 			// rollback of any of those levels then depends on. Beside the check above, before any transaction state changes.
 			if (InTransaction && _transactions.CurrentTransaction().CommitBegun)
 				throw new ServerException(ServerException.Codes.TransactionCanOnlyBeRolledBack);
 
 			ServerTransaction transaction = _transactions.BeginTransaction(this, isolationLevel);
-			List<RemoteSession> remoteSessionsBegun = new List<RemoteSession>();
 			int deviceSessionsBegun = 0;
 			try
 			{
-				// Begin a transaction on all remote sessions. A snapshot of the list rather than the list itself:
-				// DiscardRemoteSession takes the session it is given out of RemoteSessions, which would invalidate an
-				// enumerator over the list.
-				foreach (RemoteSession remoteSession in new List<RemoteSession>(RemoteSessions))
-				{
-					try
-					{
-						remoteSession.BeginTransaction(isolationLevel);
-					}
-					catch (Exception exception)
-					{
-						// A connection with no level of its own open is a participant in no transaction this process still
-						// has open: nothing has been done on it that this process's transaction protocol still owes an answer
-						// for, so it may be let go and this begin carries on without it. A connection that does have a level
-						// open may not be - work has been done on it at a level that is still open, and forgetting it would
-						// let the local commit believe the remote half committed - so its failure fails the whole begin.
-						if (remoteSession.InTransaction)
-							throw;
-
-						DiscardRemoteSession(remoteSession, exception);
-						continue;
-					}
-
-					remoteSessionsBegun.Add(remoteSession);
-				}
-
-				// Begin a transaction on all device sessions
+				// Begin a transaction on all device sessions. Nothing here speaks to a connection to another Dataphor server:
+				// such a connection joins this level when a statement next uses that link, through EnlistRemoteSession, which is
+				// what keeps a statement that has nothing to do with a link from paying three network round trips on it.
 				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
 				{
 					deviceSession.BeginTransaction(isolationLevel);
@@ -1435,7 +1459,7 @@ namespace Alphora.Dataphor.DAE.Server
 				transaction.InRollback = true;
 				try
 				{
-					RollbackBegunParticipants(remoteSessionsBegun, deviceSessionsBegun);
+					RollbackBegunParticipants(deviceSessionsBegun);
 				}
 				finally
 				{
@@ -1453,11 +1477,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// below: this one says the connection was released, that one says the far server could not be told. Both are per
 		/// connection let go, so the volume is bounded by connections rather than by statements.
 		/// </remarks>
-		// NOTE: the reclaim is at the transaction begin because that is the one call this process makes on every connection
-		// it holds whether the statement uses that connection or not, and the one point at which the far server has provably
-		// done nothing yet at the level being begun. A failed Execute or Evaluate is not a reclaim point - the call may have
-		// been delivered and run - and a process that holds a dead connection and begins no transaction on it keeps it,
-		// which with UseImplicitTransactions on (the default) cannot outlast one statement.
+		// NOTE: the reclaim is at RemoteConnect because that is the one call this process makes on a connection it is about to do
+		// work on, and the one point at which the far server has provably done nothing yet at the level being begun. A failed
+		// Execute or Evaluate is still not a reclaim point - that call may have been delivered and run. It used to sit at the
+		// transaction begin, which spoke to every connection the process held whether the statement used it or not; since
+		// debt-remote-session-lazy-enlistment a statement that does not use a link never speaks to its connection at all, so a
+		// dead connection no longer fails such a statement by construction, and what is left for the reclaim is the narrower
+		// case of a statement that does use the link. With UseImplicitTransactions on (the default) a connection stands at depth
+		// 0 between statements, so that statement finds it there and lets it go.
 		private void DiscardRemoteSession(RemoteSession session, Exception cause)
 		{
 			// Before the disposal so that the log reads in causal order: this warning, then whatever the disposal writes about
@@ -1468,7 +1495,7 @@ namespace Alphora.Dataphor.DAE.Server
 				LogEntryType.Warning,
 				String.Format
 				(
-					"The connection the server link \"{0}\" held to instance \"{1}\" on host \"{2}\" has been released by this server, because a transaction operation on it failed and it was a participant in no transaction this process still has open; the next use of the link connects again. The error was: {3}",
+					"The connection the server link \"{0}\" held to instance \"{1}\" on host \"{2}\" has been released by this server, because a transaction operation on it failed and it was a participant in no transaction this process still has open; this use of the link connects again. The error was: {3}",
 					session.ServerLink.Name,
 					session.ServerLink.InstanceName,
 					session.ServerLink.HostName,
@@ -1493,20 +1520,20 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary>
-		/// Rolls back the level a failed InternalBeginTransaction began on its first remote and device sessions: the device sessions
-		/// in reverse with the catalog device session last, as InternalRollbackTransaction orders it, then the remote sessions in reverse.
-		/// Rollback errors are logged and not thrown, so that the begin's own error reaches the caller.
+		/// Rolls back the level a failed InternalBeginTransaction began on its first device sessions: in reverse with the catalog
+		/// device session last, as InternalRollbackTransaction orders it. Rollback errors are logged and not thrown, so that the
+		/// begin's own error reaches the caller.
 		/// </summary>
 		/// <remarks>
-		/// The remote sessions are named rather than counted, because the begin may have let a connection go, which takes it
-		/// out of RemoteSessions and shifts the index of every entry after it.
+		/// Device sessions only, because the begin itself is: a connection to another Dataphor server is enlisted by the
+		/// statement that uses the link rather than by the begin, and an enlistment that fails part-way is left where it failed
+		/// (see <see cref="RemoteConnect"/>).
 		/// </remarks>
 		// Deliberately not HoldsEndingLevel, and not to be "helpfully" converted to it: this undoes a *partial* begin, where
-		// naming the participants that began the level is more precise than any level count - the ones after the failure never
-		// began it and must not be rolled back - and where the remote list the count would be read from may have changed under
-		// the begin anyway. HoldsEndingLevel belongs to InternalRollbackTransaction, which ends a level every participant was
-		// asked to begin.
-		private void RollbackBegunParticipants(List<RemoteSession> remoteSessionsBegun, int deviceSessionCount)
+		// counting the device sessions that began the level is more precise than any level count - the ones after the failure
+		// never began it and must not be rolled back. HoldsEndingLevel belongs to InternalRollbackTransaction, which ends a level
+		// on the participants that hold it.
+		private void RollbackBegunParticipants(int deviceSessionCount)
 		{
 			Schema.DeviceSession catalogDeviceSession = null;
 			for (int index = deviceSessionCount - 1; index >= 0; index--)
@@ -1520,9 +1547,6 @@ namespace Alphora.Dataphor.DAE.Server
 
 			if (catalogDeviceSession != null)
 				RollbackBegunParticipant(catalogDeviceSession.RollbackTransaction);
-
-			for (int index = remoteSessionsBegun.Count - 1; index >= 0; index--)
-				RollbackBegunParticipant(remoteSessionsBegun[index].RollbackTransaction);
 		}
 
 		private void RollbackBegunParticipant(Action rollback)
@@ -1551,28 +1575,26 @@ namespace Alphora.Dataphor.DAE.Server
 
 			if (!transaction.Prepared)
 			{
+				// Only the connections that hold the level being prepared. A connection joins a level when a statement uses its
+				// link, so one may hold fewer levels than this process by design, and no work was done on it at the levels it is
+				// missing - there is nothing there for a prepare to say anything about. See the invariant on
+				// RemoteSession.TransactionCount.
 				foreach (RemoteSession remoteSession in RemoteSessions)
-				{
-					// The invariant recorded on RemoteSession.TransactionCount, asserted where it is load-bearing: prepare is
-					// the first of the three ending operations to run and a commit reaches it, so this covers both. The one way
-					// a correct engine could reach it was a commit retried after a partial one, which the refusal above now
-					// rejects, so it is back to meaning what an assertion should mean: the engine has lost count. A count that
-					// disagreed would otherwise reach the far server as a "no transaction in progress" error from there.
-					Error.AssertFail
-					(
-						remoteSession.TransactionCount == _transactions.Count,
-						"The connection for server link \"{0}\" has {1} transaction level(s) open where this process has {2}.",
-						remoteSession.ServerLink.Name,
-						remoteSession.TransactionCount,
-						_transactions.Count
-					);
-
-					remoteSession.PrepareTransaction();
-				}
+					if (HoldsEndingLevel(remoteSession))
+						remoteSession.PrepareTransaction();
 					
 				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
 					deviceSession.PrepareTransaction();
 					
+				// NOTE: the deferred handlers and the deferred constraint validation below run after the participant loops, so a
+				// handler or a constraint expression that uses a server link enlists that connection in the level being prepared -
+				// after the prepare has passed it by. The commit then commits a level this process never prepared on it. Nothing is
+				// lost, because a Dataphor server's own CommitTransaction prepares first; what is lost is the chance to learn of the
+				// failure before any participant has committed. Pre-existing in kind - a handler that opened a *new* connection has
+				// always done this - and lazy enlistment widens it to connections the process already held. Looping the prepare until
+				// no participant appears would close it; not done here, because it makes the prepare's cost unbounded in the handlers'
+				// own work for a window nothing in the suite has been seen to reach.
+
 				// Create a new program to perform the deferred validation
 				Program program = new Program(this);
 				program.Start(null);
@@ -1610,11 +1632,13 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				// Commit
+				// Guarded as the prepare above is: a connection that does not hold this level had no work done on it here.
 				// NOTE: every remote session commits before any device session, and that order is load-bearing: it is what makes
 				// a commit on a connection whose server has gone fail (at the remote prepare above, in fact) before anything
 				// local has committed. Do not reorder these two loops.
 				foreach (RemoteSession remoteSession in RemoteSessions)
-					remoteSession.CommitTransaction();
+					if (HoldsEndingLevel(remoteSession))
+						remoteSession.CommitTransaction();
 
 				Schema.DeviceSession catalogDeviceSession = null;
 				foreach (Schema.DeviceSession deviceSession in DeviceSessions)
@@ -1662,12 +1686,16 @@ namespace Alphora.Dataphor.DAE.Server
 		/// them, silently, while the local half of the same transaction stayed live and committable.
 		/// </para>
 		/// <para>
-		/// Equality rather than a lower bound because a participant can never be deeper than this process: every level is begun
-		/// on every participant and only by this process - the three callers of <see cref="InternalBeginTransaction"/> and the
-		/// catch-up loops in <see cref="DeviceConnect"/> and RemoteConnect are all of them - and both kinds count the level down
-		/// in a finally on every path, failures included. Skipping the shallower participants restores that invariant rather than
-		/// deferring it, since the rollback pops this process to the depth they are already at. Asserted rather than assumed, as
-		/// <c>ServerCatalogDeviceSession.CheckStoreTransactionLevels</c> asserts it one layer down.
+		/// Equality rather than a lower bound because a participant can never be deeper than this process: the only code that
+		/// begins a level on one is this process - the three callers of <see cref="InternalBeginTransaction"/>, the catch-up in
+		/// <see cref="DeviceConnect"/> and <c>EnlistRemoteSession</c> - and both kinds count the level down in a finally on every
+		/// path, failures included. A participant *shallower* than this process means different things on the two arms. On a
+		/// connection to another Dataphor server it is ordinary: a connection joins a level only when a statement uses its link,
+		/// so its open levels are a prefix of this process's level stack and equality is exactly "holds the level being ended"
+		/// (see the invariant on <see cref="RemoteSession.TransactionCount"/>). On a device session, which is enlisted in every
+		/// level, it still means a commit that failed part-way. Either way skipping the shallower participants restores the
+		/// depths rather than deferring the question, since the rollback pops this process to the depth they are already at.
+		/// Asserted rather than assumed, as <c>ServerCatalogDeviceSession.CheckStoreTransactionLevels</c> asserts it one layer down.
 		/// </para>
 		/// <para>
 		/// One body, asked at every site that ends a level, so that a loop added later asks this question instead of re-deriving
@@ -1675,12 +1703,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// after a partial commit is true of a committed participant for the level *outside* the one being ended.
 		/// </para>
 		/// <para>
-		/// NOTE: comparing a participant's level count against this process's depth is sound only while every participant is
-		/// enlisted at every level. If <c>debt-remote-session-lazy-enlistment</c> lands, a connection to another Dataphor server
-		/// may hold fewer levels by design, and this has to ask which transaction each of its levels was begun for instead. The
-		/// same landing changes what <see cref="CheckNotHalfCommitted"/> means on the remote arm: a connection enlisted lazily is
-		/// not a participant in the half-committed level until a statement uses it, so the question there becomes whether this
-		/// use would enlist it in that level rather than whether the level is half-committed at all.
+		/// <c>debt-remote-session-lazy-enlistment</c> has landed, and the two questions this used to leave open are settled. A
+		/// connection's open levels are a contiguous prefix of this process's level stack, so comparing counts still answers
+		/// which level it holds and needs no record of which transaction each remote level was begun for. And
+		/// <see cref="CheckNotHalfCommitted"/> stays unconditional at <see cref="RemoteConnect"/>: a connection that holds fewer
+		/// levels would otherwise be caught up *into* a level that can only be rolled back, and one that holds the level is doing
+		/// work on a half-committed level, which is refused on every participant, reads included.
 		/// </para>
 		/// </remarks>
 		private bool HoldsEndingLevel(int participantLevels, string participantKind, string participantName)

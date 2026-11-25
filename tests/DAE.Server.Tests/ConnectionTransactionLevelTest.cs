@@ -21,6 +21,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// Dataphor server it has queried (a remote session); both are opened on first use and then caught up to the process's
 	/// transaction depth. Each level the catch-up opens has to be begun at the isolation level the client asked for at that
 	/// level rather than at the innermost level's, and a rollback has to end a level only on the connections that still hold it.
+	/// The catch-up is also the only way a connection to another Dataphor server joins a level: it joins one when a statement
+	/// uses that link and not when the process begins the level, so it holds a prefix of the process's level stack and the
+	/// prepare, the commit and the rollback ask it only about the levels in that prefix.
 	/// </summary>
 	/// <remarks>
 	/// No second Dataphor server is needed: RecordingRemoteSession stands in for the connection and never connects, so a link
@@ -55,6 +58,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			RecordingRemoteSession.Log = new List<string>();
 			RecordingRemoteSession.Connection = null;
 			RecordingRemoteSession.FailNextCommit = false;
+			RecordingRemoteSession.FailNextBegin = false;
+			RecordingRemoteSession.ConstructionCount = 0;
 
 			// Reflection reaches RemoteSessionClassName deliberately: it is the one seam at which a connection to another
 			// Dataphor server can be stood in for, and widening it to make these cases reachable would be worse, as
@@ -132,6 +137,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				ExecuteScript("ExecuteOn('FailedCommitLink', 'select 1;');");
 				Process.BeginTransaction(IsolationLevel.Isolated);
 
+				// Used again inside the inner level, which is what enlists the connection in it: a commit only ever reaches a
+				// connection that holds the level being committed.
+				ExecuteScript("ExecuteOn('FailedCommitLink', 'select 1;');");
+
 				// The far server stops between the commit's prepare and its commit, so the inner level is ended on the connection
 				// and not on this process.
 				RecordingRemoteSession.FailNextCommit = true;
@@ -156,10 +165,189 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(0));
 		}
 
+		/// <summary>
+		/// A statement that has nothing to do with a link makes no call at all on the connection the process holds to it. Every
+		/// transaction the process began used to begin one on every connection it held, whether the statement used it or not, so
+		/// a session that had queried another server once paid a begin, a prepare and a commit on that connection - three network
+		/// round trips - on every statement afterwards, and a begin and a rollback on every statement that failed.
+		/// </summary>
+		[Test]
+		public void TestAStatementThatDoesNotUseALinkMakesNoCallOnItsConnection()
+		{
+			ExecuteScript(CreateLink("UnusedLink"));
+			ExecuteScript("ExecuteOn('UnusedLink', 'select 1;');");
+
+			RecordingRemoteSession.Log.Clear();
+			ExecuteScript("select 1;");
+			List<string> afterASuccessfulStatement = new List<string>(RecordingRemoteSession.Log);
+
+			RecordingRemoteSession.Log.Clear();
+			// Failing at run time rather than at compile time, because a statement the compiler rejects has not begun its
+			// implicit transaction yet and so never cost anything on a connection.
+			Assert.Catch(() => ExecuteScript("raise Error('A statement that fails after its implicit transaction has begun.');"));
+			List<string> afterAFailedStatement = new List<string>(RecordingRemoteSession.Log);
+
+			// One Assert.Multiple over both, so that the count for one path is not hidden by the other path's failure: this is
+			// where the saving is measured, and the two paths cost different numbers of calls.
+			Assert.Multiple
+			(
+				() =>
+				{
+					Assert.That(afterASuccessfulStatement, Is.Empty, "A statement that does not use the link spoke to its connection.");
+					Assert.That(afterAFailedStatement, Is.Empty, "A failing statement that does not use the link spoke to its connection.");
+				}
+			);
+
+			Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(0));
+
+			// Kept rather than released: nothing spoke to it, so nothing found anything wrong with it.
+			Assert.That(ConnectionCount(), Is.EqualTo(1));
+		}
+
+		/// <summary>
+		/// A connection joins each of the process's open levels as the statement that uses the link reaches it, at that level's
+		/// own isolation level, rather than being brought to the process's depth by the begin.
+		/// </summary>
+		[Test]
+		public void TestALinkUsedAtTwoLevelsIsEnlistedAtEachAsItIsReached()
+		{
+			ExecuteScript(CreateLink("IncrementalLink"));
+
+			Process.BeginTransaction(IsolationLevel.Isolated);
+			try
+			{
+				ExecuteScript("ExecuteOn('IncrementalLink', 'select 1;');");
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(1));
+
+				// The begin does not reach the connection, which then holds the outer level only - a legal prefix of this
+				// process's level stack.
+				Process.BeginTransaction(IsolationLevel.Browse);
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(1));
+
+				ExecuteScript("ExecuteOn('IncrementalLink', 'select 1;');");
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(2));
+				Assert.That(RecordingRemoteSession.Log, Is.EqualTo(new[] { "begin Isolated at level 1", "execute", "begin Browse at level 2", "execute" }));
+			}
+			finally
+			{
+				Process.RollbackTransaction();
+				Process.RollbackTransaction();
+			}
+		}
+
+		/// <summary>
+		/// Ending a level the connection does not hold skips it: no work reached it at that level, so there is nothing there for
+		/// a prepare or a commit to say anything about. The prepare used to assert that every connection stood at the process's
+		/// depth, which lazy enlistment makes false by design.
+		/// </summary>
+		[Test]
+		public void TestACommitOfALevelTheConnectionDoesNotHoldSkipsIt()
+		{
+			ExecuteScript(CreateLink("SkippedLink"));
+
+			Process.BeginTransaction(IsolationLevel.Isolated);
+			try
+			{
+				ExecuteScript("ExecuteOn('SkippedLink', 'select 1;');");
+				Process.BeginTransaction(IsolationLevel.Isolated);
+				RecordingRemoteSession.Log.Clear();
+
+				Process.CommitTransaction();
+				Assert.That(RecordingRemoteSession.Log, Is.Empty);
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(1));
+
+				// The outer level is one the connection does hold, so ending that one does reach it.
+				Process.CommitTransaction();
+				Assert.That(RecordingRemoteSession.Log, Is.EqualTo(new[] { "prepare level 1", "commit level 1" }));
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(0));
+			}
+			finally
+			{
+				while (Process.InTransaction)
+					Process.RollbackTransaction();
+			}
+		}
+
+		/// <summary>
+		/// A connection whose server has gone while this process holds no level on it is let go by the next statement that uses
+		/// the link, which then connects afresh and runs. The release used to happen at the transaction begin, which is what made
+		/// a statement with nothing to do with the link notice a dead connection at all.
+		/// </summary>
+		[Test]
+		public void TestADeadConnectionHoldingNoLevelIsLetGoWhenTheLinkIsUsedAgain()
+		{
+			ExecuteScript(CreateLink("ReconnectLink"));
+			ExecuteScript("ExecuteOn('ReconnectLink', 'select 1;');");
+			Assert.That(RecordingRemoteSession.ConstructionCount, Is.EqualTo(1));
+
+			// Dead from here on. A statement that does not use the link neither notices it nor releases it.
+			RecordingRemoteSession.FailNextBegin = true;
+			RecordingRemoteSession.Log.Clear();
+			ExecuteScript("select 1;");
+			Assert.That(RecordingRemoteSession.Log, Is.Empty);
+			Assert.That(RecordingRemoteSession.ConstructionCount, Is.EqualTo(1));
+
+			// The use finds it dead, lets it go and connects again - exactly one retry, so the statement runs.
+			ExecuteScript("ExecuteOn('ReconnectLink', 'select 1;');");
+			Assert.That(RecordingRemoteSession.ConstructionCount, Is.EqualTo(2));
+			string implicitBegin = String.Format("begin {0} at level 1", ((ServerProcess)Process).DefaultIsolationLevel);
+			Assert.That(RecordingRemoteSession.Log, Is.EqualTo(new[] { implicitBegin, implicitBegin, "execute", "prepare level 1", "commit level 1" }));
+			Assert.That(ConnectionCount(), Is.EqualTo(1));
+		}
+
+		/// <summary>
+		/// A connection whose server has gone while this process holds a level on it may not be let go - work has been done on it
+		/// at a level that is still open - so the use that found it dead fails naming the link, and the connection is kept with
+		/// the levels it had.
+		/// </summary>
+		[Test]
+		public void TestADeadConnectionHoldingALevelFailsTheUseAndIsKept()
+		{
+			ExecuteScript(CreateLink("ParticipantLink"));
+
+			Process.BeginTransaction(IsolationLevel.Isolated);
+			try
+			{
+				ExecuteScript("ExecuteOn('ParticipantLink', 'select 1;');");
+				Process.BeginTransaction(IsolationLevel.Isolated);
+
+				// The catch-up of the inner level is the first call this process makes on the connection since the far server
+				// went, and the connection holds the outer level, so the use fails instead of reconnecting.
+				RecordingRemoteSession.FailNextBegin = true;
+				Exception failedUse = Assert.Catch(() => ExecuteScript("ExecuteOn('ParticipantLink', 'select 1;');"));
+				Assert.That(FindError(failedUse, (int)ServerException.Codes.RemoteSessionTransactionFailed), Is.Not.Null, "The failed use did not report the server link.");
+
+				// A catch-up that failed part-way keeps the levels it did open, which is a legal prefix; nothing is unwound.
+				Assert.That(RecordingRemoteSession.Connection.TransactionCount, Is.EqualTo(1));
+				Assert.That(RecordingRemoteSession.ConstructionCount, Is.EqualTo(1));
+				Assert.That(ConnectionCount(), Is.EqualTo(1));
+			}
+			finally
+			{
+				while (Process.InTransaction)
+					Process.RollbackTransaction();
+			}
+		}
+
 		/// <summary>A link to a host that does not answer; nothing here connects, because RecordingRemoteSession stands in for the connection.</summary>
 		private static string CreateLink(string name)
 		{
 			return String.Format("create server {0} tags {{ HostName = \"localhost\", InstanceName = \"Nowhere\", OverridePortNumber = \"1\" }};", name);
+		}
+
+		/// <summary>How many connections to other servers this process holds, read the way a client would.</summary>
+		private int ConnectionCount()
+		{
+			return (int)Process.Evaluate("Count(RemoteSessions where Process_ID = ProcessID())", null).AsNative;
+		}
+
+		/// <summary>The engine wraps an error in the statement and script errors around it, so the code is looked for down the chain.</summary>
+		private static DataphorException FindError(Exception exception, int code)
+		{
+			for (; exception != null; exception = exception.InnerException)
+				if (exception is DataphorException dataphorException && dataphorException.Code == code)
+					return dataphorException;
+			return null;
 		}
 
 		/// <summary>The device of the given unqualified name, from the running server's catalog; the name D4 gave it carries the library it was created in.</summary>
@@ -188,15 +376,27 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			/// <summary>Set to make the next commit fail, as a far server that has gone makes it.</summary>
 			public static bool FailNextCommit;
 
+			/// <summary>Set to make the next begin fail, as a far server that has gone makes it.</summary>
+			public static bool FailNextBegin;
+
+			/// <summary>How many connections the engine has built for the running case, so that a case can tell a reconnect from a kept connection.</summary>
+			public static int ConstructionCount;
+
 			public RecordingRemoteSession(ServerProcess process, Schema.ServerLink serverLink) : base(process, serverLink)
 			{
 				Connection = this;
+				ConstructionCount++;
 			}
 
 			// TransactionCount is the count before the operation, so a begin names the level it opens and the others the level they end.
 			protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 			{
 				Log.Add(String.Format("begin {0} at level {1}", isolationLevel, TransactionCount + 1));
+				if (FailNextBegin)
+				{
+					FailNextBegin = false;
+					throw new InvalidOperationException("The far server has gone.");
+				}
 			}
 
 			protected override void InternalPrepareTransaction()

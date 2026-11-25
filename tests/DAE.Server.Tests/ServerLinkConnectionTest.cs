@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// What a process's connection to another Dataphor server does when the server link naming that server is dropped,
 	/// re-created or altered, and when that server itself goes away: a link is followed by its identity rather than by its
 	/// name, a drop or an alter ends the issuing process's connection to it, and a connection whose server has gone is let
-	/// go at the next transaction begin unless it is a participant in a transaction the process still has open.
+	/// go by the next statement that uses the link, unless it is a participant in a transaction the process still has open.
 	/// </summary>
 	/// <remarks>
 	/// The other server is a separate program rather than a second server in this process, for the reason given on
@@ -180,14 +180,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>A connection whose server has gone stops failing the process's statements: the next transaction begin lets it go and the statement runs.</summary>
+		/// <summary>A connection whose server has gone stops failing the process's statements: a statement that does not use the link never speaks to it, and the next statement that does use the link lets it go.</summary>
 		/// <remarks>
-		/// Every transaction a process begins begins one on every connection to another server it holds, whether the
-		/// statement uses that connection or not, so a dead connection used to fail every statement the process issued -
-		/// including <c>drop server</c>, the one statement that would have cleared it. Both are asserted here.
+		/// Every transaction a process began used to begin one on every connection to another server it held, whether the
+		/// statement used that connection or not, so a dead connection failed every statement the process issued - including
+		/// <c>drop server</c>, the one statement that would have cleared it. Since lazy enlistment such a statement never reaches
+		/// the connection at all, so it is also not what releases it: the connection is kept until a statement uses the link, and
+		/// that use lets it go and then fails on the reconnect while the far server is still down.
 		/// </remarks>
 		[Test]
-		public void TestADeadConnectionIsLetGoAndTheStatementRuns()
+		public void TestADeadConnectionStopsFailingStatementsAndIsLetGoAtTheNextUse()
 		{
 			using (OutOfProcessInstance doomedServer = new OutOfProcessInstance(DoomedTargetInstanceName))
 			{
@@ -203,7 +205,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					doomedServer.Stop();
 
 					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("A statement with nothing to do with the link failed because the server the link named was down."));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(1), "A statement that never spoke to the connection released it.");
+
+					// The use finds the connection dead and lets it go; the reconnect it then makes fails, because the far server
+					// is still down.
+					Assert.Catch(() => { RemoteCallDepth(holder, "ReclaimedLink"); }, doomedServer.Diagnostic("Using a link whose server was down succeeded."));
 					Assert.That(ConnectionCount(holder), Is.EqualTo(0));
+
 					Assert.DoesNotThrow(() => holder.ExecuteScript("drop server ReclaimedLink;"), doomedServer.Diagnostic("Dropping the link failed because the server it named was down."));
 				}
 				finally
@@ -232,6 +240,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					doomedServer.Stop();
 
 					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("A statement with nothing to do with either link failed because the server one of them named was down."));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(2), "A statement that spoke to neither connection released one of them.");
+
+					// Only the dead one is let go, and only by the use that found it dead; the live one is untouched by that use.
+					Assert.Catch(() => { RemoteCallDepth(holder, "DyingLink"); }, doomedServer.Diagnostic("Using the link whose server was down succeeded."));
 					Assert.That(ConnectionCount(holder), Is.EqualTo(1));
 					Assert.That(RemoteCallDepth(holder, "SurvivingLink"), Is.EqualTo(DefaultCallDepth));
 				}
@@ -242,15 +254,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>A connection that is a participant in a transaction the process still has open may not be let go: the begin fails naming the link, and the session recovers once the transaction is rolled back.</summary>
+		/// <summary>A connection that is a participant in a transaction the process still has open may not be let go: the use that finds it dead fails naming the link, and the session recovers once the transaction is rolled back.</summary>
 		/// <remarks>
 		/// Work has been done on such a connection at a level that is still open, so forgetting it would let the local
-		/// commit believe the remote half committed. The failure is asserted by error code rather than by message: a
-		/// failure from this layer can arrive wrapped, as the remark on TestLinkUserChangeClosesTheChangingProcessConnection
-		/// records, and matching the message would pin the wrapping rather than the behaviour.
+		/// commit believe the remote half committed. The failure was at a nested begin until lazy enlistment stopped the begin
+		/// speaking to connections at all; it is now at the use, which is where the connection is brought up to the process's
+		/// depth. The failure is asserted by error code rather than by message: a failure from this layer can arrive wrapped, as
+		/// the remark on TestLinkUserChangeClosesTheChangingProcessConnection records, and matching the message would pin the
+		/// wrapping rather than the behaviour.
 		/// </remarks>
 		[Test]
-		public void TestABeginOnADeadParticipantFailsNamingTheLink()
+		public void TestAUseOfADeadParticipantFailsNamingTheLink()
 		{
 			using (OutOfProcessInstance doomedServer = new OutOfProcessInstance(DoomedTargetInstanceName))
 			{
@@ -259,21 +273,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				IServerProcess holder = Session.StartProcess(new ProcessInfo(Session.SessionInfo));
 				try
 				{
-					Assert.That(RemoteCallDepth(holder, "ParticipantLink"), Is.EqualTo(DefaultCallDepth));
-
-					// Begun while the child is alive, so the connection is a participant at depth 1 when the child goes.
+					// Used inside the transaction while the child is alive, so the connection is a participant at depth 1 when
+					// the child goes. Enlistment is by use, so a connection opened outside the transaction would hold no level.
 					holder.BeginTransaction(IsolationLevel.Isolated);
+					Assert.That(RemoteCallDepth(holder, "ParticipantLink"), Is.EqualTo(DefaultCallDepth));
 					doomedServer.Stop();
 
-					Exception failedBegin = Assert.Catch(() => holder.BeginTransaction(IsolationLevel.Isolated), doomedServer.Diagnostic("Beginning a nested transaction succeeded on a connection whose server was down and which was a participant in the open transaction."));
-					Assert.That(DataphorErrorCode(failedBegin), Is.EqualTo((int)ServerException.Codes.RemoteSessionTransactionFailed));
-					Assert.That(holder.TransactionCount, Is.EqualTo(1));
+					// The nested begin speaks to no connection, so it now succeeds where it used to fail.
+					Assert.DoesNotThrow(() => holder.BeginTransaction(IsolationLevel.Isolated), doomedServer.Diagnostic("Beginning a nested transaction spoke to a connection the begin has nothing to do with."));
 
+					Exception failedUse = Assert.Catch(() => { RemoteCallDepth(holder, "ParticipantLink"); }, doomedServer.Diagnostic("Using a link whose server was down, and whose connection was a participant in the open transaction, succeeded."));
+					Assert.That(FindError(failedUse, (int)ServerException.Codes.RemoteSessionTransactionFailed), Is.Not.Null, "The failed use did not report the server link.");
+					Assert.That(holder.TransactionCount, Is.EqualTo(2));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(1));
+
+					// The inner level is one the connection does not hold, so ending it reaches nothing and is quiet; the outer
+					// level is one it does hold, so that rollback is the one that reports the remote half could not be rolled back.
+					Assert.DoesNotThrow(() => holder.RollbackTransaction(), doomedServer.Diagnostic("Rolling back a level the dead connection did not hold spoke to it anyway."));
 					Assert.Catch(() => holder.RollbackTransaction(), doomedServer.Diagnostic("Rolling back a transaction whose remote half could not be rolled back reported nothing."));
 					Assert.That(holder.InTransaction, Is.False);
 
+					// The session works again, and the connection is kept until a statement uses the link and lets it go.
 					Assert.That(Evaluate(holder, "1 + 1"), Is.EqualTo(2), doomedServer.Diagnostic("The session did not recover after the transaction holding the dead connection was rolled back."));
-					Assert.That(ConnectionCount(holder), Is.EqualTo(0));
+					Assert.That(ConnectionCount(holder), Is.EqualTo(1));
 				}
 				finally
 				{
@@ -282,17 +304,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 		}
 
-		/// <summary>The Dataphor error code of the first DataphorException in the exception and its inner exception chain, or 0 if there is none.</summary>
-		private static int DataphorErrorCode(Exception exception)
+		/// <summary>The DataphorException of the given code in the exception and its inner exception chain, or null if there is none.</summary>
+		/// <remarks>
+		/// Looked for down the chain rather than taken off the top: the failure now comes out of a D4 statement, so the engine
+		/// has wrapped it in RuntimeException 104229 "Runtime error" by the time a caller sees it.
+		/// </remarks>
+		private static DataphorException FindError(Exception exception, int code)
 		{
-			for (Exception current = exception; current != null; current = current.InnerException)
-			{
-				DataphorException dataphorException = current as DataphorException;
-				if (dataphorException != null)
-					return dataphorException.Code;
-			}
-
-			return 0;
+			for (; exception != null; exception = exception.InnerException)
+				if (exception is DataphorException dataphorException && dataphorException.Code == code)
+					return dataphorException;
+			return null;
 		}
 
 		/// <summary>A link naming the shared child server; the overload says what the tags are.</summary>
