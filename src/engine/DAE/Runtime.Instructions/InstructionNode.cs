@@ -212,9 +212,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// TODO: Handle var arguments for more than just stack references
 		/// <summary>Releases, writes back or leaves alone the value an operand was given, according to its modifier.</summary>
 		/// <remarks>
-		/// The rule each branch below applies, and the rest of the picture it is part of - stack slots, rows, lists, and
-		/// how a plan node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md,
-		/// whose own table points back here.
+		/// The rule each branch below applies, and how a plan node says it is lending a value rather than giving it, are
+		/// in docs/architecture/operand-ownership.md, whose own table points back here; the rest of the picture it is
+		/// part of - stack slots, rows, lists - is in docs/architecture/value-lifetime.md.
 		/// This is the cleanup that runs after the call. An argument evaluated before a later argument raised never
 		/// reaches a call at all; ReleaseUncalledOperand below is that path's entry point, and it calls this for every
 		/// modifier but var, whose write-back is the one rule the two paths do not share.

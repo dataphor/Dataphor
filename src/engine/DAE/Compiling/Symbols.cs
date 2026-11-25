@@ -67,8 +67,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// A stack slot normally owns the value in it and whatever overwrites the slot releases what it displaced
 		/// (Alphora.Dataphor.DAE.Runtime.Stack.PokeOwned). A foreach loop variable is the exception: the loop lends
 		/// its slot the row or element the iterator owns and goes on using that value, so an assignment to the loop
-		/// variable must not release it. Set where the statement that lends the slot is compiled, and read by the
-		/// assignment node while it compiles, which is why nothing sets it during a binding traversal.
+		/// variable must not release it. The mark covers the body of the statement that lends the slot and nothing
+		/// after it: it is set where that statement is compiled and restored to what it was once the body has been
+		/// compiled. It is read by the assignment node while that node compiles, which is why nothing sets it during
+		/// a binding traversal.
 		/// </remarks>
 		internal bool FIsBorrowed;
 		public bool IsBorrowed { get { return FIsBorrowed; } }
@@ -117,20 +119,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 
 		/// <summary>Marks the symbol at the given offset as holding a value it does not own; see <see cref="Symbol.IsBorrowed"/>.</summary>
-		/// <remarks>
-		/// There is no call that clears the mark. A foreach over a pre-existing variable lends that variable's slot
-		/// for the loop and, in the list form, leaves the last element in it afterwards, so an assignment to the
-		/// variable after the loop is no safer than one inside it: the mark stands for the rest of the scope.
-		/// </remarks>
 		public void SetIsBorrowed(int offset)
+		{
+			SetIsBorrowed(offset, true);
+		}
+
+		/// <summary>Sets or clears the mark on the symbol at the given offset; see <see cref="Symbol.IsBorrowed"/>.</summary>
+		/// <remarks>
+		/// A foreach over a variable the enclosing block declared lends that variable's slot for the loop and leaves
+		/// the slot nil on the way out, so the slot owns its value again once the loop has finished and an assignment
+		/// after the loop must release what it replaces. The foreach sites therefore save the mark they found and
+		/// restore it through this overload once the body has been compiled - restore rather than clear, because the
+		/// inner of two loops over one variable has to leave the outer loop's mark standing over the rest of the
+		/// outer body.
+		/// </remarks>
+		public void SetIsBorrowed(int offset, bool value)
 		{
 			#if DEBUG 
 			int index = _count - 1 - offset;
 			if ((index >= _count) || (!AllowExtraWindowAccess && (index < Base)))
 				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
-			_stack[index].FIsBorrowed = true;
+			_stack[index].FIsBorrowed = value;
 			#else
-			_stack[_count - 1 - offset].FIsBorrowed = true;
+			_stack[_count - 1 - offset].FIsBorrowed = value;
 			#endif
 		}
 

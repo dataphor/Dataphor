@@ -41,7 +41,7 @@ A client connects and gets a session, a session starts processes, and a process 
 
 ## Value lifetime
 
-Which values the garbage collector will not reclaim, who owns each one while it sits in a stack slot, an operand, a row or a list, and what releases it: [value-lifetime.md](architecture/value-lifetime.md).
+Which values the garbage collector will not reclaim, who owns each one while it sits in a stack slot, a row or a list, and what releases it: [value-lifetime.md](architecture/value-lifetime.md). Who owns the value handed to a call's operand, which turns on the operand's modifier and on the node that produced the argument: [operand-ownership.md](architecture/operand-ownership.md).
 
 ## Catalog and catalog store
 

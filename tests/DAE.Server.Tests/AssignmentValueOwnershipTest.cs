@@ -16,8 +16,20 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// (bug-assigning-a-binary-variable-leaks-its-stream). The cases from TheSameVariablePassedTwiceByReference
 	/// through AssigningThroughAScalarProperty are the limits of that rule: slots whose value belongs to something
 	/// else, which an assignment must leave alone, and the two shapes in which a call used to hand one caller value
-	/// to two callee slots. The four cases from AConstOperandReleasesTheValueComputedForIt through
-	/// ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the operand half of the same rule: whether a call owns
+	/// to two callee slots. The three cases from AssigningAfterAForEachReleasesTheValueItReplaces are the two ends of
+	/// that loan, each of which the engine got wrong: the mark on the slot was set and never cleared, so once a loop
+	/// over a variable the script had declared itself had finished, every assignment to that variable for the rest of
+	/// the scope released nothing; and the loop lent the slot with a store that releases nothing, so starting such a
+	/// loop orphaned whatever the variable already held (bug-a-loop-variable-stays-borrowed-after-the-loop). The
+	/// nested case is the one a fix to the second of those could have broken: two loops over one variable are legal
+	/// D4, and the inner loop displaces an element the outer loop's source still owns, so a release there would be a
+	/// release too many. AForEachOverAnOperandLeavesTheCallersValueAlone is the other case that release could have
+	/// broken, and the one that fixing it turned up: a loop over one of the enclosing operator's own operands, where
+	/// the value displaced may be the caller's. A const operand's value is never the loop's to release - the call site
+	/// settles whether the call owns it - and an in operand's is, because the loop writing the slot is what stops the
+	/// compiler promoting the operand to const and passing it by reference. The four cases from
+	/// AConstOperandReleasesTheValueComputedForIt through ARowsColumnReadIntoSomethingThatOwnsItStaysReadable are the
+	/// operand half of the same rule: whether a call owns
 	/// the value it was handed for an operand is a property of the plan node that produced the argument - a node that
 	/// reads a stack slot, or a column of a row in one, can lend the value it already holds, where a literal, a
 	/// conversion or another call produces one nothing else holds - and not of the operand's modifier, which is all
@@ -261,6 +273,312 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 								end;
 								if LCount <> 2 then
 									raise Error('The loop did not see both rows.');
+							end;
+						"
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// A foreach lends its loop variable's slot for the loop and leaves the slot nil on the way out, so the slot
+		/// owns its value again once the loop has finished and an assignment after the loop has to release what it
+		/// replaces. All four forms the compiler can produce are covered, because the mark that says a slot is lent
+		/// belongs to the variable's symbol rather than to the statement: the statement and the expression shape of
+		/// foreach, each over a list and over a cursor.
+		/// </summary>
+		/// <remarks>
+		/// Each form assigns many times over, so that a regression reports a count rather than an off-by-one. The
+		/// slot is nil coming out of the loop, so the first assignment displaces nothing and a per-assignment
+		/// regression leaks one fewer value than it assigns. One Assert.Multiple over the four forms, so that one
+		/// form's failure does not hide the forms after it.
+		/// </remarks>
+		[Test]
+		public void AssigningAfterAForEachReleasesTheValueItReplaces()
+		{
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"the statement form over a list",
+						String.Format
+						(
+							@"
+								begin
+									var LB : Binary;
+									var LCount : Integer := 0;
+									foreach LB in {{ Binary('0001'), Binary('0002') }} do
+										LCount := LCount + 1;
+									if LCount <> 2 then
+										raise Error('The loop did not see both elements.');
+									for LI : Integer := 1 to {0} do
+										LB := Binary('0003');
+									if LB.Value <> '0003' then
+										raise Error('The last assignment did not reach the variable.');
+								end;
+							",
+							AssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"the statement form over a cursor",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ B : Binary }};
+									var LCount : Integer := 0;
+									foreach LR in cursor(table {{ row {{ Binary('0001') B }} }}) do
+										LCount := LCount + 1;
+									if LCount <> 1 then
+										raise Error('The loop did not see the row.');
+									for LI : Integer := 1 to {0} do
+										LR := row {{ Binary('0002') B }};
+									if LR.B.Value <> '0002' then
+										raise Error('The last assignment did not reach the variable.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"the expression form over a list",
+						String.Format
+						(
+							@"
+								begin
+									var LB : Binary;
+									var LL : list(Integer) := foreach LB in {{ Binary('0001'), Binary('0002') }} do 1;
+									if LL.Count() <> 2 then
+										raise Error('The loop did not see both elements.');
+									for LI : Integer := 1 to {0} do
+										LB := Binary('0003');
+									if LB.Value <> '0003' then
+										raise Error('The last assignment did not reach the variable.');
+								end;
+							",
+							AssignmentCount
+						)
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"the expression form over a cursor",
+						String.Format
+						(
+							@"
+								begin
+									var LR : row {{ B : Binary }};
+									var LL : list(Integer) := foreach LR in cursor(table {{ row {{ Binary('0001') B }} }}) do 1;
+									if LL.Count() <> 1 then
+										raise Error('The loop did not see the row.');
+									for LI : Integer := 1 to {0} do
+										LR := row {{ Binary('0002') B }};
+									if LR.B.Value <> '0002' then
+										raise Error('The last assignment did not reach the variable.');
+								end;
+							",
+							RowAssignmentCount
+						)
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// The other end of the same loan: a foreach over a variable that already holds a value displaces that value,
+		/// which is the slot's own, so the loop has to release it. One release per loop rather than one per iteration,
+		/// because only the first lend displaces a value the slot owns - every later one displaces the row or element
+		/// the loop itself lent.
+		/// </summary>
+		/// <remarks>
+		/// The cursor arm asserts that two shapes leave the same number of streams behind rather than asserting a
+		/// count, because opening a cursor copies every stream-backed value on the stack and never releases the copies
+		/// (bug-a-cursor-copies-the-stack-and-never-gives-it-back, open). Both shapes pay that cost equally - one row
+		/// with one Binary column is on the stack when the cursor opens either way - so the difference between them is
+		/// this defect alone, and the case keeps passing once that one is fixed and both numbers are nought.
+		/// </remarks>
+		[Test]
+		public void AForEachOverAVariableThatAlreadyHasAValueReleasesIt()
+		{
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"over a list",
+						@"
+							begin
+								var LB : Binary := Binary('00FF');
+								var LCount : Integer := 0;
+								foreach LB in { Binary('0001'), Binary('0002'), Binary('0003') } do
+									LCount := LCount + 1;
+								if LCount <> 3 then
+									raise Error('The loop did not see every element.');
+							end;
+						"
+					);
+
+					int inTheLoopVariable =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LR : row { B : Binary } := row { Binary('00FF') B };
+									var LCount : Integer := 0;
+									foreach LR in cursor(table { row { Binary('0001') B } }) do
+										LCount := LCount + 1;
+									if LCount <> 1 then
+										raise Error('The loop did not see the row.');
+								end;
+							"
+						);
+
+					int inAnotherVariable =
+						StreamsLeftBy
+						(
+							@"
+								begin
+									var LR : row { B : Binary };
+									var LOther : row { B : Binary } := row { Binary('00FF') B };
+									var LCount : Integer := 0;
+									foreach LR in cursor(table { row { Binary('0001') B } }) do
+										LCount := LCount + 1;
+									if LCount <> 1 then
+										raise Error('The loop did not see the row.');
+								end;
+							"
+						);
+
+					Assert.That(inTheLoopVariable, Is.EqualTo(inAnotherVariable), "over a cursor: the loop left behind the value its variable already held.");
+				}
+			);
+		}
+
+		/// <summary>
+		/// Two foreach loops over one variable, which is legal D4 and runs correctly. The inner loop lends a slot the
+		/// outer loop is already lending, and the value it displaces is the row or element the outer loop's source
+		/// still owns, so the inner loop must release nothing: this is the case that a release without the compiler's
+		/// already-lent answer turns into a release too many.
+		/// </summary>
+		[Test]
+		public void NestedForEachesOverOneVariableLeaveTheOuterLoopsValueAlone()
+		{
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"over two lists",
+						@"
+							begin
+								var LB : Binary;
+								var LCount : Integer := 0;
+								foreach LB in { Binary('0001'), Binary('0002') } do
+									foreach LB in { Binary('0003'), Binary('0004') } do
+										LCount := LCount + 1;
+								if LCount <> 4 then
+									raise Error('The nested loops did not run four times.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"over two cursors",
+						@"
+							begin
+								var LR : row { ID : Integer, B : Binary };
+								var LCount : Integer := 0;
+								foreach LR in cursor(table { row { 1 ID, Binary('0001') B }, row { 2 ID, Binary('0002') B }, key { ID } }) do
+									foreach LR in cursor(table { row { 3 ID, Binary('0003') B }, row { 4 ID, Binary('0004') B }, key { ID } }) do
+										LCount := LCount + 1;
+								if LCount <> 4 then
+									raise Error('The nested loops did not run four times.');
+							end;
+						"
+					);
+				}
+			);
+		}
+
+		/// <summary>
+		/// A foreach over one of the enclosing operator's own operands, which is legal D4 and the one shape where the
+		/// value the loop displaces may belong to the caller rather than to the slot. Three modifiers, three answers.
+		/// A const operand is not the loop's to release at all: its value may have been lent to the call by the
+		/// argument that produced it, and the call site settles whether the call owns it. An in operand's slot holds a
+		/// value of its own, so the loop releases it - and the loop writing the slot is what keeps the compiler from
+		/// promoting the operand to const and passing it by reference, which is how an in operand came to be holding
+		/// the caller's own value here. A var operand's slot is an alias of the caller's, which the caller's slot owns
+		/// until the write-back after the call, so the loop releases it exactly as an assignment to a var parameter
+		/// does.
+		/// </summary>
+		/// <remarks>
+		/// Each shape asserts the caller's value as well as the count, because the failure this guards against is a
+		/// release of a value someone else still names: the count balances in that case and the caller's next read
+		/// fails with "StreamID (n) not found". The var shape reads nil instead, the loop having nulled the slot whose
+		/// final value the write-back hands back.
+		/// </remarks>
+		[Test]
+		public void AForEachOverAnOperandLeavesTheCallersValueAlone()
+		{
+			ExecuteScript("create operator ZForEachIn(AB : Binary) : Integer begin var LCount : Integer := 0; foreach AB in { Binary('0001'), Binary('0002') } do LCount := LCount + 1; result := LCount; end;");
+			ExecuteScript("create operator ZForEachConst(const AB : Binary) : Integer begin var LCount : Integer := 0; foreach AB in { Binary('0001'), Binary('0002') } do LCount := LCount + 1; result := LCount; end;");
+			ExecuteScript("create operator ZForEachVar(var AB : Binary) : Integer begin var LCount : Integer := 0; foreach AB in { Binary('0001'), Binary('0002') } do LCount := LCount + 1; result := LCount; end;");
+
+			Assert.Multiple
+			(
+				() =>
+				{
+					AssertShapeLeavesNoStreams
+					(
+						"an in operand",
+						@"
+							begin
+								var LB : Binary := Binary('00FF');
+								var LI : Integer := ZForEachIn(LB);
+								if LI <> 2 then
+									raise Error('The loop did not see both elements.');
+								if LB.Value <> '00FF' then
+									raise Error('The call did not leave the caller''s value alone.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a const operand",
+						@"
+							begin
+								var LB : Binary := Binary('00FF');
+								var LI : Integer := ZForEachConst(LB);
+								if LI <> 2 then
+									raise Error('The loop did not see both elements.');
+								if LB.Value <> '00FF' then
+									raise Error('The call did not leave the caller''s value alone.');
+							end;
+						"
+					);
+
+					AssertShapeLeavesNoStreams
+					(
+						"a var operand",
+						@"
+							begin
+								var LB : Binary := Binary('00FF');
+								var LI : Integer := ZForEachVar(var LB);
+								if LI <> 2 then
+									raise Error('The loop did not see both elements.');
+								if not(IsNil(LB)) then
+									raise Error('A loop over a var parameter must hand the caller back the nil the slot holds once the loop has finished.');
 							end;
 						"
 					);
@@ -867,6 +1185,17 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			int before = StreamCount();
 			Assert.That(() => ExecuteScript(script), Throws.Nothing, shape + ": the script raised.");
 			Assert.That(StreamCount(), Is.EqualTo(before), shape + ": the script left streams behind.");
+		}
+
+		/// <summary>
+		/// How many streams the script left behind, for a case that compares two shapes against each other rather
+		/// than against nought - the shape to reach for when another, open defect makes both shapes leak equally.
+		/// </summary>
+		private int StreamsLeftBy(string script)
+		{
+			int before = StreamCount();
+			ExecuteScript(script);
+			return StreamCount() - before;
 		}
 
 		/// <summary>

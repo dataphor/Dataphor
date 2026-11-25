@@ -43,8 +43,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		/// equality alone would miss that.
 		/// </para>
 		/// <para>
-		/// The whole picture this rule is one rule of - slots, operands of each modifier, rows and lists, and how a plan
-		/// node says it is lending a value rather than giving it - is in docs/architecture/value-lifetime.md.
+		/// The whole picture this rule is one rule of - slots, rows and lists - is in docs/architecture/value-lifetime.md;
+		/// operands of each modifier, and how a plan node says it is lending a value rather than giving it, are in
+		/// docs/architecture/operand-ownership.md.
 		/// </para>
 		/// </remarks>
 		public void PokeOwned(int offset, object value, IValueManager manager)

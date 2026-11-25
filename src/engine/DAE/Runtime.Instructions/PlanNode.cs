@@ -599,7 +599,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// its own declaration (bug-an-operator-argument-is-released-by-the-wrong-owner).
 		/// </para>
 		/// <para>
-		/// The ownership rule the whole set rests on is in docs/architecture/value-lifetime.md.
+		/// The ownership rule the whole set rests on is in docs/architecture/operand-ownership.md.
 		/// </para>
 		/// </remarks>
 		public virtual bool ReturnsByReference { get { return false; } }

@@ -942,6 +942,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return _isMany; }
 			set { _isMany = value; }
 		}
+
+		/// <summary>Whether this loop releases the value its loop variable's slot already holds before lending the slot the row or element the iterator owns.</summary>
+		/// <remarks>
+		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's own and
+		/// nothing else would free it. Two slots are not the loop's to release, and the compiler answers for both
+		/// where the loop is compiled - an enclosing loop over the same variable is already lending the slot, and a
+		/// const operand's slot, whose value may have been lent to the call by the argument that produced it and is
+		/// released, or not, at the call site (InstructionNodeBase.CleanupOperand).
+		/// </remarks>
+		private bool _releaseTargetBeforeLending;
+		public bool ReleaseTargetBeforeLending
+		{
+			get { return _releaseTargetBeforeLending; }
+			set { _releaseTargetBeforeLending = value; }
+		}
+
+		/// <remarks>
+		/// Everything the compiler puts on this node, not only the borrowed flag: a copy that lost the expression, the
+		/// variable's type or the stack location would bind to the wrong slot. Nothing clones a foreach today - Clone
+		/// is reached only from the nodes that copy a comparison or a call's result allocation, neither of which can
+		/// hold one - so this is for whoever makes it reachable.
+		/// </remarks>
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newListForEachNode = (ListForEachNode)newNode;
+			newListForEachNode._expression = _expression;
+			newListForEachNode._variableType = _variableType;
+			newListForEachNode._location = _location;
+			newListForEachNode._isMany = _isMany;
+			newListForEachNode._releaseTargetBeforeLending = _releaseTargetBeforeLending;
+		}
 		
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
@@ -1063,6 +1096,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						stackIndex = Location;
 					try
 					{
+						// The slot is about to be lent a row this node owns, and the value the slot holds now is the slot's
+						// own, so this is where that value is released: once for the loop, because every Poke after this
+						// one displaces the row the loop is lending. The compiler says when the slot's value is not the
+						// loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the allocating form has
+						// just pushed.
+						if (_releaseTargetBeforeLending)
+							program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 						using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
 						{
 							program.Stack.Poke(stackIndex, row);
@@ -1131,6 +1171,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						try
 						{
+							// The slot is about to be lent elements the list owns, and the value the slot holds now is the
+							// slot's own, so this is where that value is released: once for the loop, because every Poke
+							// after this one displaces an element the list still owns. The compiler says when the slot's
+							// value is not the loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the
+							// allocating form has just pushed.
+							if (_releaseTargetBeforeLending)
+								program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 							for (int index = 0; index < tempValue.Count; index++)
 							{
 								try
@@ -1206,6 +1253,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// TableForEachNode -- Used when the source is a table and the return is a row
 	//	Nodes[0] - Iteration Expression
 	//	Nodes[1] - Return Expression
+	// NOTE: the compiler cannot reach this class. Compiler.CompileForEachExpression always builds a ListForEachNode -
+	// its own TODO is the decision that was never made - and nothing in the engine, the libraries or the tests names
+	// this type. It is kept in step with ListForEachNode and ForEachNode by hand anyway, because the three hold one
+	// copy each of the same lending code and a fix applied to two of the three is the thing to prevent;
+	// debt-ws12-hygiene-remainder is the sweep that owns deciding whether dead code like this goes.
 	public class TableForEachNode : TableNode
 	{
 		public TableForEachNode() : base()
@@ -1279,6 +1331,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		/// <summary>Whether this loop releases the value its loop variable's slot already holds before lending the slot the row or element the iterator owns.</summary>
+		/// <remarks>
+		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's own and
+		/// nothing else would free it. Two slots are not the loop's to release, and the compiler answers for both
+		/// where the loop is compiled - an enclosing loop over the same variable is already lending the slot, and a
+		/// const operand's slot, whose value may have been lent to the call by the argument that produced it and is
+		/// released, or not, at the call site (InstructionNodeBase.CleanupOperand).
+		/// </remarks>
+		private bool _releaseTargetBeforeLending;
+		public bool ReleaseTargetBeforeLending
+		{
+			get { return _releaseTargetBeforeLending; }
+			set { _releaseTargetBeforeLending = value; }
+		}
+
+		/// <remarks>
+		/// Everything the compiler puts on this node, not only the borrowed flag: a copy that lost the expression, the
+		/// variable's type or the stack location would bind to the wrong slot. Nothing clones a foreach today - Clone
+		/// is reached only from the nodes that copy a comparison or a call's result allocation, neither of which can
+		/// hold one - so this is for whoever makes it reachable.
+		/// </remarks>
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newTableForEachNode = (TableForEachNode)newNode;
+			newTableForEachNode._expression = _expression;
+			newTableForEachNode._variableType = _variableType;
+			newTableForEachNode._location = _location;
+			newTableForEachNode._releaseTargetBeforeLending = _releaseTargetBeforeLending;
+		}
+
 		public override void DetermineDataType(Plan plan)
 		{
 			DetermineModifiers(plan);
@@ -1354,6 +1438,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							stackIndex = Location;
 						try
 						{
+							// The slot is about to be lent a row this node owns, and the value the slot holds now is the
+							// slot's own, so this is where that value is released: once for the loop, because every Poke
+							// after this one displaces the row the loop is lending. The compiler says when the slot's value
+							// is not the loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the
+							// allocating form has just pushed.
+							if (_releaseTargetBeforeLending)
+								program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 							using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
 							{
 								program.Stack.Poke(stackIndex, row);
@@ -1406,6 +1497,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 							try
 							{
+								// The slot is about to be lent elements the list owns, and the value the slot holds now is
+								// the slot's own, so this is where that value is released: once for the loop, because
+								// every Poke after this one displaces an element the list still owns. The compiler says
+								// when the slot's value is not the loop's to release; see ReleaseTargetBeforeLending. A
+								// no-op on the null the allocating form has just pushed.
+								if (_releaseTargetBeforeLending)
+									program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 								for (int index = 0; index < tempValue.Count; index++)
 								{
 									try

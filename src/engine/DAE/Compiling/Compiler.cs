@@ -1297,6 +1297,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.EnterRowContext();
 				try
 				{
+					bool targetWasBorrowed = false;
 					if ((node.Expression.VariableName == String.Empty) || node.Expression.IsAllocation)
 					{
 						if (node.Expression.VariableName != String.Empty)
@@ -1337,6 +1338,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
 						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						Symbol targetSymbol = plan.Symbols.Peek(node.Location);
+						targetWasBorrowed = targetSymbol.IsBorrowed;
+						// Whether the loop pays for the loan. Two slots hold a value that is not the loop's to release: one
+						// an enclosing loop over the same variable is already lending, whose value is that loop's, and a
+						// const operand's slot, whose value may have been lent to the call by the argument that produced it
+						// and is released - or left to the caller that lent it - at the call site, by
+						// InstructionNodeBase.CleanupOperand. Releasing either here leaves a caller naming a released value.
+						node.ReleaseTargetBeforeLending = !targetWasBorrowed && !targetSymbol.IsConstant;
+						// The loop writes this slot - that is what lending is - so an in operand used as a loop variable
+						// must not be promoted to const and passed by reference (CompileOperatorBlock reads IsModified
+						// after the body is compiled). Before, such an operand was promoted and the loop wrote into the
+						// slot holding the caller's own value, which the release above would then have freed.
+						plan.Symbols.SetIsModified(node.Location);
 						plan.Symbols.SetIsBorrowed(node.Location);
 					}
 					try
@@ -1347,6 +1361,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						if ((node.Expression.VariableName == String.Empty) || node.Expression.IsAllocation)
 							plan.Symbols.Pop();
+						else
+							// The loan ends with the loop: the loop leaves the slot nil, so the slot owns whatever is
+							// assigned to it next and that assignment has to release what it replaces. Restored to what it
+							// was rather than cleared, so that the inner of two loops over one variable leaves the outer
+							// loop's mark standing over the rest of the outer body.
+							plan.Symbols.SetIsBorrowed(node.Location, targetWasBorrowed);
 					}
 				}
 				finally
@@ -1392,6 +1412,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					plan.EnterRowContext();
 				try
 				{
+					bool targetWasBorrowed = false;
 					if ((node.Statement.VariableName == String.Empty) || node.Statement.IsAllocation)
 					{
 						if (node.Statement.VariableName != String.Empty)
@@ -1432,6 +1453,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 						// A foreach lends this slot the row or element the iterator owns for the life of the loop, so an
 						// assignment to the loop variable must not release what it replaces; see Symbol.IsBorrowed.
+						Symbol targetSymbol = plan.Symbols.Peek(node.Location);
+						targetWasBorrowed = targetSymbol.IsBorrowed;
+						// Whether the loop pays for the loan. Two slots hold a value that is not the loop's to release: one
+						// an enclosing loop over the same variable is already lending, whose value is that loop's, and a
+						// const operand's slot, whose value may have been lent to the call by the argument that produced it
+						// and is released - or left to the caller that lent it - at the call site, by
+						// InstructionNodeBase.CleanupOperand. Releasing either here leaves a caller naming a released value.
+						node.ReleaseTargetBeforeLending = !targetWasBorrowed && !targetSymbol.IsConstant;
+						// The loop writes this slot - that is what lending is - so an in operand used as a loop variable
+						// must not be promoted to const and passed by reference (CompileOperatorBlock reads IsModified
+						// after the body is compiled). Before, such an operand was promoted and the loop wrote into the
+						// slot holding the caller's own value, which the release above would then have freed.
+						plan.Symbols.SetIsModified(node.Location);
 						plan.Symbols.SetIsBorrowed(node.Location);
 					}
 					try
@@ -1442,6 +1476,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						if ((node.Statement.VariableName == String.Empty) || node.Statement.IsAllocation)
 							plan.Symbols.Pop();
+						else
+							// The loan ends with the loop: the loop leaves the slot nil, so the slot owns whatever is
+							// assigned to it next and that assignment has to release what it replaces. Restored to what it
+							// was rather than cleared, so that the inner of two loops over one variable leaves the outer
+							// loop's mark standing over the rest of the outer body.
+							plan.Symbols.SetIsBorrowed(node.Location, targetWasBorrowed);
 					}
 				}
 				finally

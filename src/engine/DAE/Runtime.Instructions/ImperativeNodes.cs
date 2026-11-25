@@ -304,6 +304,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _location = value; }
 		}
 		
+		/// <summary>Whether this loop releases the value its loop variable's slot already holds before lending the slot the row or element the iterator owns.</summary>
+		/// <remarks>
+		/// A slot normally owns its value, so the loan has to be paid for: the displaced value is the slot's own and
+		/// nothing else would free it. Two slots are not the loop's to release, and the compiler answers for both
+		/// where the loop is compiled - an enclosing loop over the same variable is already lending the slot, and a
+		/// const operand's slot, whose value may have been lent to the call by the argument that produced it and is
+		/// released, or not, at the call site (InstructionNodeBase.CleanupOperand).
+		/// </remarks>
+		private bool _releaseTargetBeforeLending;
+		public bool ReleaseTargetBeforeLending
+		{
+			get { return _releaseTargetBeforeLending; }
+			set { _releaseTargetBeforeLending = value; }
+		}
+
+		/// <remarks>
+		/// Everything the compiler puts on this node, not only the borrowed flag: a copy that lost the statement, the
+		/// variable's type or the stack location would bind to the wrong slot. Nothing clones a foreach today - Clone
+		/// is reached only from the nodes that copy a comparison or a call's result allocation, neither of which can
+		/// hold one - so this is for whoever makes it reachable.
+		/// </remarks>
+		protected override void InternalClone(PlanNode newNode)
+		{
+			base.InternalClone(newNode);
+
+			var newForEachNode = (ForEachNode)newNode;
+			newForEachNode._statement = _statement;
+			newForEachNode._variableType = _variableType;
+			newForEachNode._location = _location;
+			newForEachNode._releaseTargetBeforeLending = _releaseTargetBeforeLending;
+		}
+
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
 		{
 			#if USEVISIT
@@ -390,6 +422,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						stackIndex = Location;
 					try
 					{
+						// The slot is about to be lent a row this node owns, and the value the slot holds now is the slot's
+						// own, so this is where that value is released: once for the loop, because every Poke after this
+						// one displaces the row the loop is lending. The compiler says when the slot's value is not the
+						// loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the allocating form has
+						// just pushed.
+						if (_releaseTargetBeforeLending)
+							program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 						using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
 						{
 							program.Stack.Poke(stackIndex, row);
@@ -439,6 +478,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						try
 						{
+							// The slot is about to be lent elements the list owns, and the value the slot holds now is the
+							// slot's own, so this is where that value is released: once for the loop, because every Poke
+							// after this one displaces an element the list still owns. The compiler says when the slot's
+							// value is not the loop's to release; see ReleaseTargetBeforeLending. A no-op on the null the
+							// allocating form has just pushed.
+							if (_releaseTargetBeforeLending)
+								program.Stack.PokeOwned(stackIndex, null, program.ValueManager);
 							for (int index = 0; index < tempValue.Count; index++)
 							{
 								try
@@ -1518,12 +1564,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int location = ((StackReferenceNode)Nodes[0]).Location;
 			if (_targetIsBorrowed)
 				// NOTE: a plain Poke, not Stack.PokeOwned: a foreach lends its loop variable's slot the row or element
-				// the iterator owns and goes on using it, so releasing it here left the next iteration selecting into
-				// a disposed row. What such an assignment displaces is leaked, as everything an assignment displaced
-				// was before PokeOwned existed; it is the foreach nodes that would have to stop lending a slot they
-				// go on reading to fix that, not this site. Assigning to a loop variable is a programming error in
-				// any case - the next iteration overwrites it - so the leak buys nothing but is not worth a copy per
-				// row to close.
+				// the iterator owns and goes on using it, so releasing it here would leave the next iteration selecting
+				// into a disposed row. What such an assignment displaces is leaked. That is harmless for the row or
+				// element the loop lent - the loop's own row, or the source list, releases that - and leaks the value a
+				// previous assignment in the same body put there. Assigning to a loop variable is an error in any case,
+				// since the next
+				// iteration overwrites it. The mark reaches only the body of the loop that lends the slot, so an
+				// assignment after the loop takes the owned branch below; see Symbol.IsBorrowed.
 				program.Stack.Poke(location, objectValue);
 			else
 				// The slot owns its value, so the assignment releases the one it replaces; see Stack.PokeOwned.
