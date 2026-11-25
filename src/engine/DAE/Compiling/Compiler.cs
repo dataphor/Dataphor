@@ -4039,7 +4039,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				defaultValue.IsGenerated = defaultDefinition.IsGenerated;
-				defaultValue.MetaData = defaultDefinition.MetaData;
+				defaultValue.MetaData = defaultDefinition.MetaData == null ? null : defaultDefinition.MetaData.Copy();
 				plan.PushCreationObject(defaultValue);
 				try
 				{
@@ -4212,7 +4212,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				node.Table.IsGenerated = localStatement.IsSession || (sourceTableName != null);
 				node.Table.Owner = plan.User;
 				node.Table.Library = node.Table.IsGenerated ? null : plan.CurrentLibrary;
-				node.Table.MetaData = localStatement.MetaData;
+				// A copy, here and at the other ten create statements that give an object the tags they were written with: the
+				// object owns its metadata and an alteration edits that collection in place, so sharing it would write the new
+				// value into this statement and the next run of the statement would create the table with the altered tag.
+				// See Schema.Object.MetaData.
+				node.Table.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				plan.PlanCatalog.Add(node.Table);
 				try
 				{
@@ -6492,7 +6496,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				node.CreateOperator = new Schema.Operator(plan.GetObjectID(localStatement.MetaData), operatorName);
-				node.CreateOperator.MetaData = localStatement.MetaData;
+				node.CreateOperator.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				node.CreateOperator.SessionObjectName = sessionOperatorName;
 				node.CreateOperator.SessionID = plan.SessionID;
 				node.CreateOperator.SourceOperatorName = sourceOperatorName;
@@ -6859,7 +6863,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				Schema.AggregateOperator operatorValue = new Schema.AggregateOperator(plan.GetObjectID(localStatement.MetaData), operatorName);
-				operatorValue.MetaData = localStatement.MetaData;
+				operatorValue.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				operatorValue.IsOrderDependent = Convert.ToBoolean(MetaData.GetTag(operatorValue.MetaData, "DAE.IsOrderDependent", "false"));
 				operatorValue.SessionObjectName = sessionOperatorName;
 				operatorValue.SessionID = plan.SessionID;
@@ -7289,7 +7293,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				node.Constraint.Owner = plan.User;
 				node.Constraint.Library = node.Constraint.IsGenerated ? null : plan.CurrentLibrary;
 				node.Constraint.ConstraintType = Schema.ConstraintType.Database;
-				node.Constraint.MetaData = localStatement.MetaData;
+				node.Constraint.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				node.Constraint.Enforced = GetEnforced(plan, node.Constraint.MetaData);
 				plan.PlanCatalog.Add(node.Constraint);
 				try
@@ -8687,7 +8691,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				node.Reference.IsGenerated = localStatement.IsSession;
 				node.Reference.Owner = plan.User;
 				node.Reference.Library = node.Reference.IsGenerated ? null : plan.CurrentLibrary;
-				node.Reference.MetaData = localStatement.MetaData;
+				node.Reference.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				node.Reference.Enforced = GetEnforced(plan, node.Reference.MetaData);
 				plan.PlanCatalog.Add(node.Reference);
 				try
@@ -9136,7 +9140,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					deviceScalarType.IsDefaultClassDefinition = true;
 				}
 				deviceScalarType.ClassDefinition = classDefinition;
-				deviceScalarType.MetaData = deviceScalarTypeMap.MetaData;
+				deviceScalarType.MetaData = deviceScalarTypeMap.MetaData == null ? null : deviceScalarTypeMap.MetaData.Copy();
 				return deviceScalarType;
 			}
 			finally
@@ -9189,7 +9193,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				plan.CheckClassDependency(deviceOperator.Library, deviceOperatorMap.ClassDefinition);
 				deviceOperator.ClassDefinition = deviceOperatorMap.ClassDefinition;
-				deviceOperator.MetaData = deviceOperatorMap.MetaData;
+				deviceOperator.MetaData = deviceOperatorMap.MetaData == null ? null : deviceOperatorMap.MetaData.Copy();
 				return deviceOperator;
 			}
 			finally
@@ -9326,7 +9330,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			node.ServerLink.Owner = plan.User;
 			node.ServerLink.Library = plan.CurrentLibrary;
 			// TODO: Set ServerLink attributes from MetaData
-			node.ServerLink.MetaData = localStatement.MetaData;
+			node.ServerLink.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 			node.ServerLink.IsRemotable = false;
 			plan.PushCreationObject(node.ServerLink);
 			try
@@ -9377,7 +9381,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			plan.PushCreationObject(node.NewDevice);
 			try
 			{
-				node.NewDevice.MetaData = localStatement.MetaData;
+				node.NewDevice.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 				node.NewDevice.ClassDefinition = localStatement.ClassDefinition;
 				node.NewDevice.IsRemotable = false;
 				node.NewDevice.LoadRegistered();
@@ -9922,7 +9926,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			CheckValidCatalogObjectName(plan, statement, roleName);
 
 			node.Role = new Schema.Role(plan.GetObjectID(localStatement.MetaData), roleName);
-			node.Role.MetaData = localStatement.MetaData;
+			node.Role.MetaData = localStatement.MetaData == null ? null : localStatement.MetaData.Copy();
 			node.Role.Owner = plan.User;
 			node.Role.Library = plan.CurrentLibrary;
 			plan.PlanCatalog.Add(node.Role);

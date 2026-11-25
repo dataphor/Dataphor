@@ -34,6 +34,7 @@
     <Compile Include="CoreWcfProtocolTest.cs" />
     <Compile Include="CoverageManifest.cs" />
     <Compile Include="CoverageScripts.cs" />
+    <Compile Include="CreateStatementTagRerunTest.cs" />
     <Compile Include="CursorTest.cs" />
     <Compile Include="D4EmitterRoundTripTest.cs" />
     <Compile Include="DebuggerSessionTest.cs" />

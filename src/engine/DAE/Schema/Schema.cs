@@ -452,6 +452,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		// MetaData
 		private MetaData _metaData;
 		/// <summary>The MetaData for this object.</summary>
+		/// <remarks>
+		/// An object owns its metadata: altering a tag edits this collection in place, and <c>SaveObjectID</c>,
+		/// <c>SaveGeneratorID</c> and <c>SaveIsGenerated</c> write into it as well. So the collection must not be shared with
+		/// the statement that created the object - a statement the caller may run again must still carry the tags it is written
+		/// with - and a create statement therefore assigns <c>MetaData.Copy()</c> rather than the collection it parsed. The
+		/// setter does not copy for you: this is the metadata of every schema object, assigned from one object to another in
+		/// most of its call sites, where sharing has never been shown to be wrong, and it is public, so a copying setter would
+		/// itself be a behaviour change for a custom extension that assigns it.
+		/// </remarks>
 		public MetaData MetaData
 		{
 			get { return _metaData; }
