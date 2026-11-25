@@ -273,10 +273,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		/// <summary>A ValueNode over a value the node that built it still owns, so the consumer must leave it alone.</summary>
 		/// <remarks>
-		/// NOTE: giving ValueNode itself a SetByReference - so that any const operand handed a plan literal borrows it
-		/// rather than copying it and releasing the copy - is probably the better answer, and a cheaper one than this. It
-		/// is deliberately not taken here: its blast radius is every call in the engine with a literal argument, which is
-		/// not a change to make inside a leak fix. Revisit it when a second site needs the same thing.
+		/// The wider answer - giving ValueNode itself a SetByReference, so that no consumer has to know not to release
+		/// what a literal lent it - is deliberately not taken inside a leak fix, because its blast radius is every call
+		/// in the engine with a literal argument. The NOTE at ValueNode (ImperativeNodes.cs) records that, and what to
+		/// check before relying on a plain ValueNode over a value with a stream behind it.
 		/// </remarks>
 		private class BorrowedValueNode : ValueNode
 		{

@@ -1000,6 +1000,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
+	/// <summary>A value settled while the plan was compiled, handed back on every execution of it.</summary>
+	/// <remarks>
+	/// NOTE: this hands back the value it holds without copying it, yet answers ReturnsByReference false - so a const
+	/// operand releases a value this node still holds and will hand back again on the next execution (the const branch
+	/// of InstructionNodeBase.CleanupOperand, and the nodes that apply the same rule by hand; see
+	/// docs/architecture/operand-ownership.md). Nothing is broken by it today, because no site builds a ValueNode over
+	/// a value with a stream behind it: the literals the compiler folds are natives the garbage collector reclaims;
+	/// RestrictTables.cs builds one over an order column's value, and a stream-backed type has no comparison operator
+	/// so it cannot be an order column; CatalogNodes.cs builds one over a compound value whose properties are all
+	/// parser literals, which DataValue.DisposeValue walks without releasing anything; and the one place that did need
+	/// to lend a row uses its own subclass (RowEqualNode.BorrowedValueNode). The answer is a SetByReference here, so
+	/// that the node lends what it holds rather than having each consumer know not to release it. It is not taken yet
+	/// because its blast radius is every call in the engine with a literal argument. Take it before building a
+	/// ValueNode over a Binary or a Graphic, or over a row or list holding one.
+	/// </remarks>
 	public class ValueNode : PlanNode
     {		
 		// constructor

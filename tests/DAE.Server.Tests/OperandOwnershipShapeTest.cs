@@ -28,10 +28,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	///
 	/// Nothing used to check the set. It was counted by hand into that page, counted wrong, and the two nodes the
 	/// count missed were leaking a managed stream per stream-backed column per side on every row comparison
-	/// (bug-row-equality-leaks-the-rows-it-compares). The nine that re-override the entry point from one of the five
+	/// (bug-row-equality-leaks-the-rows-it-compares). The ten that re-override the entry point from one of the five
 	/// shapes are the dangerous ones: they read as ordinary instruction nodes while skipping their own shape's call to
 	/// the cleanup. So the set is reflected over the engine assembly and compared with the list below, and a node that
 	/// joins or leaves it has to say which here.
+	///
+	/// NOTE: the engine assembly is all this reaches, and a library's nodes are compiled into their own assembly, which
+	/// the engine loads only when that library is registered. Three nodes of this shape live outside it today -
+	/// InsertNode, CopyNode and CopyTablesNode in libraries/System.Integration/Source/IntegrationNodes.cs - and none of
+	/// them has anything stream-backed to release: their operands are tables the node never evaluates as values, plus
+	/// String and Boolean arguments, whose natives the garbage collector reclaims. Widen this to the library assemblies
+	/// when one of those nodes takes an operand of a type with a stream behind it - a Binary or a Graphic, or a row or
+	/// list holding one.
 	///
 	/// No server and no base class: this reads types, not behaviour.
 	/// </remarks>
@@ -69,10 +77,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TheNodesOutsideOperandCleanupAreTheOnesReviewedForIt()
 		{
-			var found = NodesDeclaringTheExecuteEntryPoint().Select(AType => AType.Name).ToList();
+			var found = NodesDeclaringTheExecuteEntryPoint().Select(type => type.Name).ToList();
 
-			var unlisted = found.Where(AName => !ReviewedNodes.Contains(AName)).OrderBy(AName => AName).ToList();
-			var stale = ReviewedNodes.Where(AName => !found.Contains(AName)).OrderBy(AName => AName).ToList();
+			var unlisted = found.Where(name => !ReviewedNodes.Contains(name)).OrderBy(name => name).ToList();
+			var stale = ReviewedNodes.Where(name => !found.Contains(name)).OrderBy(name => name).ToList();
+			var shared = found.GroupBy(name => name).Where(group => group.Count() > 1).Select(group => group.Key).OrderBy(name => name).ToList();
 
 			Assert.Multiple
 			(
@@ -88,6 +97,18 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 							+ " value an argument node lent it, and reach base.DetermineDataType so the question is asked at all."
 							+ " The rule is in docs/architecture/operand-ownership.md. Apply it, then add the node to"
 							+ " ReviewedNodes in this fixture and to that page."
+					);
+
+					// The list is of simple names, so that it reads as the set rather than as eighteen namespace-qualified
+					// strings. Two engine nodes sharing one simple name would then match the list while only one of them had
+					// been reviewed, which is what this catches.
+					Assert.That
+					(
+						shared,
+						Is.Empty,
+						String.Join(", ", shared)
+							+ ": named twice among the nodes declaring InternalExecute(Program), so this fixture's list of simple"
+							+ " names cannot say which of them was reviewed. Compare full names instead."
 					);
 
 					Assert.That
@@ -114,10 +135,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				typeof(InstructionNodeBase).Assembly.GetTypes()
 					.Where
 					(
-						AType =>
-							typeof(InstructionNodeBase).IsAssignableFrom(AType)
-								&& !typeof(TableNode).IsAssignableFrom(AType)
-								&& AType.GetMethod
+						type =>
+							typeof(InstructionNodeBase).IsAssignableFrom(type)
+								&& !typeof(TableNode).IsAssignableFrom(type)
+								&& type.GetMethod
 									(
 										"InternalExecute",
 										BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly,
