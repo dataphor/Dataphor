@@ -27,3 +27,7 @@ Whoever does it should re-measure before and after on the slow machine and recor
 ## Why it matters even though everything passes
 
 A part that crosses the limit does not report a test failure - the ticket running it is killed, and its work is lost. That cost falls on whichever unrelated ticket happens to be running when the line is crossed, which is the worst moment to discover it.
+
+## Gardener note, 2026-11-25
+
+The limit has now been crossed: the gardener's board-drain run at `15a617f0` took **10 m 9 s** for part 1 (DAE.Server.Tests 956 passed / 33 skipped, 10 m 9 s; Common.Tests 2 s), against 3 m 29 s and 3 m 13 s for parts 2 and 3, all green. Run by hand from the shell, so nothing killed it, but an agent running it would have been. The tradeoff's condition (wait for a run that hits the limit) is met; promoted ahead of WS7 so its tickets get a part 1 that fits.
