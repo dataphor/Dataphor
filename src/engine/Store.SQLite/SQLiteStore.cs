@@ -18,6 +18,10 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 	public class SQLiteStore : SQLStore
 	{
 		/// <summary>How long, in milliseconds, a store connection waits for another session's write lock when the connection string sets no BusyTimeout.</summary>
+		// NOTE: this bounds an unfair wait, not a long transaction: SQLite's busy wait is sleep-and-retry rather than a queue, so under
+		// sustained concurrent DDL a session can be passed over repeatedly and see 130103 with no transaction held long (docs/architecture/catalog-and-store.md,
+		// the 130103 bullet). If applications are ever seen taking spurious store-lock timeouts, the fix is a fair gate in front of the store
+		// write transaction, not a bigger timeout.
 		public const int DefaultBusyTimeout = 30000;
 
 		protected override void InternalInitialize()

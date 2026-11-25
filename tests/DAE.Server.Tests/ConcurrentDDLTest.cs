@@ -58,6 +58,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			using (TestServerInstance instance = new TestServerInstance(nameof(ConcurrentDDLTest)))
 			{
+				// This test keeps the one catalog-store write lock busy about two thirds of the concurrent phase, and SQLite's busy wait is a
+				// sleep-and-retry rather than a queue, so a session can be passed over repeatedly: the longest single hold measured here is
+				// under half a second, but the longest wait is nearly four, and on a CI machine six times slower the default 30 s bounds that
+				// starvation tail rather than any long transaction (130103, seen once in CI). A wait this long means a genuine store-lock
+				// deadlock introduced later would hang here for two minutes per statement instead of failing in thirty seconds; the Debug
+				// lock-order assertion in ServerCatalogDeviceSession.BeginStoreTransactions is what catches that shape early.
+				instance.Server.CatalogStoreConnectionString = TestServerInstance.CatalogStoreConnectionString + ";BusyTimeout=120000";
 				instance.Server.Start();
 
 				ConcurrentBag<string> created = new ConcurrentBag<string>();
