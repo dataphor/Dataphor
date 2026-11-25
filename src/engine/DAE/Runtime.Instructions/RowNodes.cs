@@ -320,6 +320,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
+				// NOTE: this releases the source row unconditionally, which is right only because nothing asks Nodes[0] to lend
+				// the row it already holds: this node is compiled from an expression rather than resolved as an operator call,
+				// and the const branch of InstructionNodeBase.DetermineDataType is the only place that asks
+				// (docs/architecture/operand-ownership.md), so the source hands over a copy that is this node's to release. A
+				// rewrite that interposes this node above a node that has already been asked releases a row it was only lent -
+				// bug-row-equality-change-breaks-implicitconversions, where RowEqualNode asked its argument node to lend and then
+				// wrapped that same node in an implicit conversion, which reaches this node through Compiler.EmitRedefineNode. The
+				// grant belongs on whichever node ends up in the operand slot, so fix such a case at the node that asks rather
+				// than by gating this release on Nodes[0].ReturnsByReference.
 				sourceRow.Dispose();
 			}
 		}

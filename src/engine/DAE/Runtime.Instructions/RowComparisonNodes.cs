@@ -35,16 +35,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			// base.DetermineDataType rather than DetermineModifiers alone: the const branch of
-			// InstructionNodeBase.DetermineDataType is the only place that asks an argument node to lend the value it
-			// already holds rather than copy it, and iEqual declares both of its operands const
-			// (src/engine/DAE/Schema/SystemCatalog.d4). Asking is half the const-operand rule in
-			// docs/architecture/operand-ownership.md and the release in InternalExecute below is the other half; missing
-			// both held one stream per stream-backed column per side for the life of the session, on every row comparison
-			// (bug-row-equality-leaks-the-rows-it-compares). base guards its own body on Operator != null, which is what
-			// the generic-row branch of InternalCompare below relies on.
-			base.DetermineDataType(plan);
-			_dataType = plan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
 			
 			if (!Nodes[0].DataType.IsGeneric && !Nodes[1].DataType.IsGeneric) // Generic row comparison must be done at run-time
 			{
@@ -114,6 +105,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					plan.Symbols.PopWindow();
 				}
 			}
+
+			// base.DetermineDataType rather than DetermineModifiers alone, and last rather than first. The const branch of
+			// InstructionNodeBase.DetermineDataType is the only place that asks an argument node to lend the value it
+			// already holds rather than copy it, and iEqual declares both of its operands const
+			// (src/engine/DAE/Schema/SystemCatalog.d4). Asking is half the const-operand rule in
+			// docs/architecture/operand-ownership.md and the release in InternalExecute below is the other half; missing
+			// both held one stream per stream-backed column per side for the life of the session, on every row comparison
+			// (bug-row-equality-leaks-the-rows-it-compares). It is asked here rather than before the rewrite above because
+			// the lend is granted to whichever node sits in the operand slot at the time: ask first, and a conversion
+			// interposed afterwards leaves the grant on the node underneath it, whose innermost consumer - RowExtendNode,
+			// which Compiler.ConvertNode reaches through EmitRedefineNode - disposes the source row it is handed, so
+			// comparing two rows whose columns differ by a convertible type destroyed the row in the variable on the side the
+			// conversion wraps (bug-row-equality-change-breaks-implicitconversions). base guards its own body on Operator != null,
+			// which is what the generic-row branch of InternalCompare below relies on, and sets _dataType from
+			// Operator.ReturnDataType, which is why the assignment follows rather than precedes it.
+			base.DetermineDataType(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 		}
 
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)
@@ -294,11 +302,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan plan)
 		{
-			// base.DetermineDataType rather than DetermineModifiers alone, for the reason given in RowEqualNode above:
-			// only the const branch asks an argument node to lend the value it already holds, and the equality generated
-			// for a compound scalar type (Compiler.CompileComparisonOperator) declares both of its operands const.
-			base.DetermineDataType(plan);
-			_dataType = plan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
 				Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
@@ -365,6 +369,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				plan.Symbols.PopWindow();
 			}
+
+			// base.DetermineDataType rather than DetermineModifiers alone, and last rather than first, for the reasons
+			// given in RowEqualNode above: only the const branch asks an argument node to lend the value it already holds,
+			// the equality generated for a compound scalar type (Compiler.CompileComparisonOperator) declares both of its
+			// operands const, and the rewrite above may replace either argument node with a conversion, so the question has
+			// to reach whichever node ends up in the operand slot rather than the one underneath it.
+			base.DetermineDataType(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 		}
 
 		protected override void InternalBindingTraversal(Plan plan, PlanNodeVisitor visitor)

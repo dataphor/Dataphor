@@ -1322,6 +1322,52 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The same loan, where the compiler has rewritten the comparison's own arguments. Two rows whose columns differ
+		/// by a type one converts to the other compare as equal in D4, and the comparison gets there by replacing one of
+		/// its two argument nodes with the conversion. The loan is granted to whichever node is in the operand slot when
+		/// the question is asked, so asking before that rewrite grants it to the node underneath the conversion, and the
+		/// row-extend node the conversion is built from disposes the source row it is handed - destroying the row in the
+		/// variable's slot, so the next read of that variable failed
+		/// (bug-row-equality-change-breaks-implicitconversions). Both directions, because the compiler rewrites whichever
+		/// side it finds a conversion path for and only one of the two is rewritten, and both variables are read after the
+		/// loop, which is the half the stream count cannot see. The Binary column is what gives the count something to
+		/// measure at all - a row of number columns has no stream to lose - so the release half stays pinned in the same
+		/// case; it is the same type on both sides, which is why the conversion touches only the other column.
+		/// </summary>
+		[Test]
+		public void RowEqualityWithAnImplicitConversionLeavesTheCallersRowsAlone()
+		{
+			AssertScriptLeavesNoStreams
+			(
+				String.Format
+				(
+					@"
+						begin
+							var LLeft : row {{ X : Binary, N : Long }} := row {{ Binary('0001') X, 5 N }};
+							var LRight : row {{ X : Binary, N : Byte }} := row {{ Binary('0001') X, ToByte(5) N }};
+							var LSeen : Integer := 0;
+							for LI : Integer := 1 to {0} do
+							begin
+								if LLeft = LRight then
+									LSeen := LSeen + 1;
+								if LRight = LLeft then
+									LSeen := LSeen + 1;
+							end;
+							if LSeen <> {1} then
+								raise Error('Rows whose columns differ by a convertible type did not compare equal.');
+							if LLeft.X.Value <> '0001' then
+								raise Error('The comparison destroyed the left row.');
+							if LRight.X.Value <> '0001' then
+								raise Error('The comparison destroyed the right row.');
+						end;
+					",
+					RowAssignmentCount,
+					RowAssignmentCount * 2
+				)
+			);
+		}
+
+		/// <summary>
 		/// The equality the compiler generates for a compound scalar type - one whose single representation has more than
 		/// one property - which leaked the same way and for the same two reasons, over the compound row behind the value
 		/// rather than over a row the script wrote. Both shapes are here for the same reason as above, and each reads its
