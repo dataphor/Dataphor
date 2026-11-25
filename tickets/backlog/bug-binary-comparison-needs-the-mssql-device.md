@@ -63,3 +63,16 @@ Each of these is a change an application could notice, which is why this is a tr
 Nothing, for a deployment that registers the SQL Server device - which the shipped runtime layout provides, and which is the configuration the modernization's test suite and sample libraries use for SQL work. The configurations that break are a PostgreSQL-only server and one that registers the shared library for its SQL text or device-mapping operators alone. PostgreSQL support is not built yet (its C# project is not converted), so the first of those is not reachable today either; this becomes real when it is.
 
 Worth noting for whoever triages it: the same `Register.d4` declares an `iNotEqual` for its own `SQLText` type over a `System.` class, which is fine, and keeps the parallel `SQLIText` block commented out. Only the `MSSQLBinary` block reaches into another library's assembly.
+
+
+## A second consequence of the same gap: a table keyed on a Binary column
+
+The missing ordering operators are not only reachable through the `MSSQLBinary` aliases. On a **bare** in-process server - no libraries registered, nothing from `SQLDevice` in the catalog - a table value whose only column is a `Binary` treats two different values as one key:
+
+```
+begin var LT : table { B : Binary } := table { row { Binary('0001') B }, row { Binary('0002') B } }; end;
+```
+
+fails with `Runtime error: Internal Index Error: "Duplicate key violation."`. The literal's inferred key is its only column, so the index has to order two `Binary` values and the comparison it reaches reports them equal. The same literal with an `Integer` column beside the `Binary` (so the key is not the `Binary` alone) inserts all its rows and reads back correctly, which is what points at the key comparison rather than at the values.
+
+Measured 2026-11-24 on `modernization` at `6518e4a6`, while probing `bug-a-list-value-never-releases-its-elements` - recorded here as evidence rather than as its own ticket because the cause is the one this ticket already states: `System` declares only `iEqual` for `Binary` and no ordering at all. Whoever triages the shapes above should weigh this arm too: it says the gap is visible without any SQL device in the picture, and the last shape listed (declaring the engine's own `Binary` comparisons) is the only one that closes it.
