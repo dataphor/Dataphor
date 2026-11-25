@@ -329,8 +329,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		// since would still fire it rather than anything new: row equality copying both of its rows and releasing
 		// neither (bug-row-equality-leaks-the-rows-it-compares), which a transition constraint or a key comparison
 		// reaches, so an ordinary program hits it. Add the check once that has landed. A second would fire only for a
-		// foreach over a const parameter, which no ordinary program
-		// contains (bug-a-loop-over-a-read-only-parameter-orphans-a-computed-argument), so it need not block the check
+		// foreach over a const parameter, which no ordinary program contains
+		// (bug-a-loop-over-a-read-only-parameter-orphans-a-computed-argument), so it need not block the check
 		// unless a coverage script grows such a loop. Three that used to be on that list are fixed: the loop variable
 		// left marked borrowed after its loop (bug-a-loop-variable-stays-borrowed-after-the-loop), IfNil releasing
 		// nothing for the value it copies (bug-ifnil-leaks-the-value-it-copies), and a cursor never giving back its

@@ -119,12 +119,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>The value manager the snapshot's copies were made with, so that Dispose can release them.</summary>
 		private IValueManager _contextValueManager;
 		
+		/// <summary>The process whose managers the snapshot was copied with, and whose disposal therefore closes this cursor.</summary>
+		/// <remarks>
+		/// Recorded here rather than read back from Table.Program when it is needed, so that it cannot disagree with
+		/// _contextValueManager: the two come from the same program at the same moment, and the process that has to close
+		/// the cursor is by definition the one whose managers the release will run through. Program.ServerProcess is not
+		/// a fixed answer - ServerPlan.BindToProcess re-points a cached plan's program at whichever process next takes
+		/// that plan out of the server's plan cache - so a filter reading it could miss a cursor whose plan had been
+		/// reused, and that cursor would reach CursorManager.Dispose holding a process already torn down.
+		/// </remarks>
+		private Server.ServerProcess _contextProcess;
+		
+		/// <summary>Whether this cursor's snapshot was copied with the given process's managers.</summary>
+		internal bool BelongsTo(Server.ServerProcess process)
+		{
+			return (_contextProcess != null) && (_contextProcess == process);
+		}
+		
 		/// <summary>Takes the cursor's private copy of the stack window it is being opened over.</summary>
 		/// <remarks>
 		/// The copy is the isolation: SwitchContext installs this stack as the program's for the duration of each cursor
 		/// operation, so the cursor's plan reads the variables it was compiled against at the offsets it was compiled
-		/// with - and a cursor outlives the scope that opened it, which releases its own variables on the way out, so a
-		/// snapshot of live values would leave the cursor reading released streams. Dispose is the other half.
+		/// with - and a cursor outlives the scope that opened it, which releases its own variables on the way out, so
+		/// sharing the live stack would leave the cursor reading released streams. Dispose is the other half.
 		/// Called once, from the constructor: a second call would orphan the first snapshot outright.
 		/// </remarks>
 		private void SnapshotContext(Program program)
@@ -132,6 +149,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (program != null)
 			{
 				_contextValueManager = program.ValueManager;
+				_contextProcess = program.ServerProcess;
 				_context = new Stack(program.Stack.MaxStackDepth, program.Stack.MaxCallDepth);
 				_context.PushWindow(0);
 				for (int index = program.Stack.Count - 1; index >= 0; index--)
@@ -176,6 +194,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public CursorManager() : base(){}
 		
 		protected int _nextCursorID = -1;
+		
+		// NOTE: nothing in this class is synchronised, and one manager is shared by every process in the session, so
+		// two processes creating, closing or walking cursors at once race on this list. Pre-existing - CreateCursor and
+		// CloseCursor have always been reachable from any process of the session - and CloseProcessCursors is one more
+		// unsynchronised walk, not a new exposure. If a client is ever seen using cursors from two processes of one
+		// session concurrently, the lock belongs here rather than at each caller.
 		protected Cursors _cursors = new Cursors();
 		
 		// NOTE: this is the session-end fallback, and it releases each cursor's snapshot through the value manager that
@@ -234,15 +258,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// releases through that process's managers, so it is unusable the moment the process is gone. The manager lives
 		/// on the session and is disposed after the session's processes are, so a cursor the script never closed used to
 		/// be disposed with its process already torn down; closing it with the process is what makes releasing the
-		/// snapshot safe. Backwards through the list, because Cursors disowns a member that disposes itself.
+		/// snapshot safe. Which process that is comes from the cursor itself (Cursor.BelongsTo), recorded when the
+		/// snapshot was taken, for the reason given there. Backwards through the list, because Cursors disowns a member
+		/// that disposes itself.
 		/// </remarks>
-		public void CloseProcessCursors(Alphora.Dataphor.DAE.Server.ServerProcess process)
+		public void CloseProcessCursors(Server.ServerProcess process)
 		{
 			if (_cursors != null)
 				for (int index = _cursors.Count - 1; index >= 0; index--)
 				{
 					Cursor cursor = _cursors[index];
-					if ((cursor.Table != null) && (cursor.Table.Program != null) && (cursor.Table.Program.ServerProcess == process))
+					if (cursor.BelongsTo(process))
 						cursor.Dispose();
 				}
 		}
