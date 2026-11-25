@@ -56,6 +56,8 @@ Three tickets have now fixed the same defect class in three other places, and ea
 - `bug-altered-tags-rewrite-the-create-statement` - the *tags of a catalog object* (a table, an operator, a constraint, a reference, a role, a server, a device), fixed at the eleven compiler create sites that assign them, and the one that documented the invariant: a catalog object owns its metadata and never shares it with the statement that created it. The invariant is written down at `Schema.Object.MetaData` and in `docs/architecture/catalog-and-store.md`.
 - `bug-view-tags-lose-to-tags-inherited-from-the-source` - a view's own tags against the ones it inherits.
 
+`debt-compiling-a-statement-must-not-change-the-statement` is the guard for the whole class these four share, filed by the review of the second ticket: it names the rule, the two further instances found by reading (a device operator map's default class definition, and what a `create type ... like` copies out of the type it is like), and the one edit the compiler is allowed to make. It is independent of this ticket - either can land first - but whichever lands second should check the other off.
+
 Keys and orders were out of the second ticket's scope: its measurement was taken with exactly its eleven lines changed and nothing else, so that the 416 checked-in derived forms could be shown not to move, and keys and orders feed form derivation. This ticket is the remainder, found while implementing that one. There is no new reasoning to settle about *where* the invariant lives - these two sites hand a statement's collection to an object, which is the shape the second ticket's root cause names.
 
 ## What whoever works it should know

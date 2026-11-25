@@ -12,16 +12,20 @@ using Alphora.Dataphor.DAE.Device.Memory;
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
 	/// <summary>
-	/// What the fixtures over class definitions need to see, and no test cases of its own. Some D4 objects are backed by a
-	/// .NET class, and the attributes of their class definition are applied to the live object as properties; so a test over
-	/// one has to read both the running object's property and the class definition the catalog holds, which it reads back as
-	/// the create statement the catalog emits.
+	/// What a fixture over what a create or alter statement built needs to see, and no test cases of its own: the running
+	/// object as the catalog holds it, and the create statement the catalog emits for it. Named after the first of those
+	/// fixtures. Some D4 objects are backed by a .NET class, and the attributes of their class definition are applied to the
+	/// live object as properties; so a test over one has to read both the running object's property and the class definition
+	/// the catalog holds, which it reads back as the emitted create statement.
 	/// </summary>
 	/// <remarks>
-	/// The in-memory device's row limit is the setting these fixtures reach for, because nothing outside the engine is needed
-	/// to set it; the SQL devices take class attributes of their own (server name, connection parameters) through the same code.
-	/// SchemaCacheInvalidationTest derives from this too: what it has to read after a repeated create statement is the same
-	/// live object and the same emitted create statement, for devices and for the other catalog objects a statement builds.
+	/// The in-memory device's row limit is the setting the class-definition fixtures reach for, because nothing outside the
+	/// engine is needed to set it; the SQL devices take class attributes of their own (server name, connection parameters)
+	/// through the same code. SchemaCacheInvalidationTest and CreateStatementTagRerunTest derive from this too, for
+	/// CatalogObject and Script alone: what they have to read after a repeated create statement is the same live object and the
+	/// same emitted create statement, for devices and for the other catalog objects a statement builds. Moving those two
+	/// helpers down to InProcessTestFixture would spare them the mismatched name, and is worth doing when a fourth fixture
+	/// needs them.
 	/// </remarks>
 	public abstract class DeviceClassAttributeFixture : InProcessTestFixture
 	{

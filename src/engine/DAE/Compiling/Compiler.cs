@@ -3140,6 +3140,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return GetEnforced(plan, metaData, true);
 		}
 		
+		// NOTE: accepted tradeoff - this and the two helpers below rewrite a deprecated tag spelling in the collection they are
+		// handed, which at a create statement is now the object's copy rather than the statement's own tags. So the statement
+		// keeps the old spelling and warns again on each compile of it, where before the first compile edited the statement and
+		// silenced the rest; weighed and kept, because the statement really does still contain the deprecated tag and the object
+		// it builds is unaffected. Revisit if a caller needs a deprecation warning reported once per statement rather than once
+		// per compile.
 		public static bool GetEnforced(Plan plan, MetaData metaData, bool defaultEnforced)
 		{
 			Tag tag = MetaData.GetTag(metaData, "Storage.Enforced");
