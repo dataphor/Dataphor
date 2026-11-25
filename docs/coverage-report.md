@@ -13,7 +13,7 @@ What the test suite reaches in the engine, and what it does not, measured on one
 | Suite | one full three-part run: 582 tests passed, 0 failed, 24 coverage scripts skipped - the 21 the manifest records as known failures and the 3 it records as fragments, which only run inside another script |
 | Collector | Microsoft's `Code Coverage` collector through `dotnet test --collect`, three Cobertura reports merged into one |
 
-The three parts are the ones the root `AGENTS.md` describes under *Agents run the suite in parts*, so between them every test in the repository ran once. That matters for reading the areas below: several engine subsystems are reached only by the NUnit fixtures in part 1 (application transactions, server links, connection security, library loading) and several others only by the D4 coverage scripts in parts 2 and 3, so a report built from fewer than three parts would understate whichever it left out.
+The three parts are the ones the root `AGENTS.md` described under *Agents run the suite in parts* when this was collected - that section now splits the first of them three ways, so it lists five parts rather than three - and between them every test in the repository ran once. That matters for reading the areas below: several engine subsystems are reached only by the NUnit fixtures in part 1 (application transactions, server links, connection security, library loading) and several others only by the D4 coverage scripts in parts 2 and 3, so a report built from fewer than three parts would understate whichever it left out.
 
 ## What these numbers mean, and what they do not
 
@@ -27,11 +27,13 @@ An area below 25 % line coverage is a **gap** unless it has fewer than 200 cover
 
 ## Reproducing it
 
-Build once, then run the three parts with the collector added and merge them. Each `dotnet test` is its own command; the collector's arguments go before the `--`, which stays last.
+Build once, then run the parts with the collector added and merge them. Each `dotnet test` is its own command; the collector's arguments go before the `--`, which stays last.
 
 ```
 dotnet build Dataphor.slnx
-dotnet test Dataphor.slnx --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part1 -- "NUnit.Where=class != Alphora.Dataphor.DAE.Server.Tests.CoverageScripts"
+dotnet test Dataphor.slnx --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part1a -- "NUnit.Where=class !~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.' || class =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.[^A-N]'"
+dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part1b -- "NUnit.Where=class =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.[ABD-N]'"
+dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part1c -- "NUnit.Where=class =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.C' && class != Alphora.Dataphor.DAE.Server.Tests.CoverageScripts"
 dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part2 -- "NUnit.Where=test =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.CoverageScripts\.(Script\.)?(?!Script$)[A-Ra-r]'"
 dotnet test tests/DAE.Server.Tests --no-build --collect:"Code Coverage;Format=cobertura" --results-directory artifacts/coverage/part3 -- "NUnit.Where=test =~ '^Alphora\.Dataphor\.DAE\.Server\.Tests\.CoverageScripts\.(Script\.)?(?!Script$)[^A-Ra-r]'"
 python tools/coverage-report/coverage_report.py artifacts/coverage -o artifacts/coverage/report.md
