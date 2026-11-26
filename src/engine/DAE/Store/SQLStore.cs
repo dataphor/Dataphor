@@ -9,6 +9,9 @@
 	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
 
+// NOTE: no #if tests this name. The timing blocks below read SQLSTORETIMING, whose define lines live in
+// SQLStoreConnection.cs and SQLStoreCursor.cs, so uncommenting those two leaves this file's blocks dark;
+// add the line here under that name if you need them. Catalogued in docs/reference/compiler-defines.md.
 //#define STORETIMING
 
 using System;

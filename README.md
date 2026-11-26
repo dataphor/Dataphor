@@ -105,7 +105,7 @@ The existing guides are thorough and still accurate about the language and the m
 
 ## Contributing
 
-Work is planned and tracked as tickets under [tickets/](tickets/); [AGENTS.md](AGENTS.md) is the orientation for anyone — human or AI agent — working in the code. The rule that matters most: existing applications are D4 libraries and form documents, and their behaviour is the specification.
+Start with the [contributing guide](docs/contributing/README.md): what you need installed, which solution to open, [how to build and test](docs/contributing/build-and-test.md), and [how the documentation is written](docs/contributing/writing-docs.md). Work is planned and tracked as tickets under [tickets/](tickets/); [AGENTS.md](AGENTS.md) is the fuller orientation for anyone — human or AI agent — working in the code. The rule that matters most: existing applications are D4 libraries and form documents, and their behaviour is the specification.
 
 ## License
 

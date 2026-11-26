@@ -4,7 +4,7 @@
 
 Dataphor carries a set of named *behaviour switches*: C# preprocessor symbols that pick between two implementations of something, or turn a diagnostic on. There are two kinds, and this page is the index to the first.
 
-- **Per-file `#define`s** — a `#define` at the top of one source file, in effect for that file only. The 51 names below are of this kind. Several appear in more than one file, because the code they guard does.
+- **Per-file `#define`s** — a `#define` at the top of one source file, in effect for that file only. The 55 names below are of this kind: the 51 the inherited index listed, and four it never did. Several appear in more than one file, because the code they guard does.
 - **Project-level constants** — each project file sets `DefineConstants` outright, so the symbol is in effect for every file the project compiles. The engine's set is `USENATIVE;NATIVEROW;USEOBJECTVALIDATE;NILPROPOGATION`, with `DEBUG;TRACE` added in Debug; the Frontend server's is `USEINCLUDETAG`. The paragraph *Non-default compiler constants to preserve* in [Appendix B of the modernization plan](../modernization-plan.md#appendix-b-inventory) records that set, which 3.1 configuration each constant came from, and why the 4.0 build uses the set it does.
 
 `NILPROPOGATION` is of both kinds: it is an engine project constant *and* a `#define` in the engine files that test it. The misspelling is deliberate here — it is the identifier in the source, and renaming it would change behaviour.
@@ -16,7 +16,7 @@ Two things to know before changing any of these:
 
 ## The switches
 
-**The *State* column is measured from the source tree, not carried over from the inherited index.** The file this page replaces (`CompilerDefines.txt`, in the repository's history) marked 33 of the 51 switches as enabled: 25 of those have an active `#define` in the tree, 6 have no `#define` line at all and 2 appear in no source file. No commit in this repository's history ever added or removed a `#define` for any of those eight, so on them the inherited file was recording an intention rather than the code. Its disabled list of 18 agrees with the tree in effect: 15 are commented out, 2 have no define line and 1 is gone.
+**The *State* column is measured from the source tree, not carried over from the inherited index.** The file this page replaces (`CompilerDefines.txt`, in the repository's history) marked 33 of the 51 switches as enabled: 26 of those have an active `#define` in the tree, 6 have no `#define` line at all and 1 appears in no source file. No commit in this repository's history ever added or removed a `#define` for any of those seven, so on them the inherited file was recording an intention rather than the code. Its disabled list of 18 agrees with the tree in effect: 15 are commented out, 2 have no define line and 1 is gone.
 
 The four states:
 
@@ -27,12 +27,14 @@ The four states:
 
 The order is the inherited file's, so that this page can be read against it.
 
+**The measurement has a date.** *State* and *Where* were measured on 2026-11-26, by looking for `#define <name>` and `#if <name>` lines in every `.cs` file under `src/`, `libraries/`, `samples/`, `tests/` and `tools/`. The names are case-sensitive, as the C# preprocessor is, so a mixed-case one (`UseElaborable`, `UseFileStreamProvider`, `UseReferenceDerivation`) has to be searched as the source spells it and not as the inherited index does. Two kinds of pending work will move rows: `build-globbing-cleanup` deletes the source files no project compiles, `src/client/DAE.Client/View-263.cs` among them, and the port deletes a dead switch when it is otherwise editing the file that holds it. Re-measure rather than trust the columns once this date is old.
+
 | Define | State | Where | What it does |
 |---|---|---|---|
 | `ALTERNATIVEOPERATORPRECEDENCE` | on | `src/engine/DAE/Language.D4/Parser.cs` | Selects the newer operator precedence: `not` and `exists` bind after comparison, and `in`, `like`, `matches`, `between`, `is` and `as` before it. |
 | `ALLOWARBITRARYAGGREGATEEXPRESSIONS` | on | `src/engine/DAE/Language.D4` (`Parser.cs`, `Language.cs`) | Allows arbitrary expressions in the `by` and `compute` clauses of an aggregate expression. |
 | `CHECKCLASSDEPENDENCY` | off | `src/engine/DAE/Compiling/Plan.cs` | Checks class dependencies. Guards a `[Conditional]` method rather than an `#if` block. |
-| `DATAVIEWBOOKMARKS` | not defined | tested in `src/client/DAE.Client/View-263.cs` | Would enable the bookmark capabilities of the `DataView`. |
+| `DATAVIEWBOOKMARKS` | not defined | tested only in `src/client/DAE.Client/View-263.cs`, which `DAE.Client.csproj` does not compile | Would enable the bookmark capabilities of the `DataView`. |
 | `DISALLOWAMBIGUOUSNAMES` | off | `src/engine/DAE/Compiling/Compiler.cs` | Stops the compiler allowing ambiguous names to be defined. |
 | `DISALLOWMANYTOMANYOUTERJOINS` | off | `src/engine/DAE/Runtime.Instructions/JoinNodes.cs` | Disables support for many-to-many outer joins. |
 | `ENFORCERESTRICTIONPREDICATE` | off | `src/engine/DAE/Runtime.Instructions/RestrictNode.cs` | Performs restriction predicate checking by default. |
@@ -43,22 +45,22 @@ The order is the inherited file's, so that this page can be read against it.
 | `LOGCACHEEVENTS` | off | `src/engine/DAE/Server/Engine.cs` | Logs catalog-cache events. No description in the inherited index. The code that tests it is in `src/engine/Server/Server` and `src/protocol/Client`, not in the file holding the commented-out line. |
 | `NILPROPOGATION` | on | `src/engine/DAE` (22 files), `src/engine/Server` (2 files), `libraries/System.Internet`; also an engine project constant | Enables nil propagation, so that `1 + nil` is `nil` rather than an error. |
 | `ORDERREFERENCESBYPRIORITYONLY` | on | `libraries/Frontend/Source/Elaboration/Elaboration.cs` | Orders references by priority in derived documents. |
-| `RELYONCURSORFLAGSAFTERUPDATE` | not defined | tested in `src/client/DAE.Client` (`DataSet.cs`, `View-263.cs`) | Would have the client trust the cursor's beginning- and end-of-file flags after an update instead of navigating to establish them. |
+| `RELYONCURSORFLAGSAFTERUPDATE` | not defined | tested in `src/client/DAE.Client/DataSet.cs`, and in `View-263.cs`, which is not compiled | Would have the client trust the cursor's beginning- and end-of-file flags after an update instead of navigating to establish them. |
 | `REMOVESUPERKEYS` | on | `src/engine/DAE/Runtime.Instructions/TableNode.cs` | Enables superkey removal in the compiler's key inference. |
 | `REPORTNARROWINGCONVERSIONWARNINGS` | not defined | tested in `src/engine/DAE/Compiling/Compiler.cs` | Would have the compiler warn when an implicit narrowing conversion is used. |
 | `REQUIRECASEMATCHONRESOLVE` | on | `src/engine/DAE/Device.Catalog/CatalogStore.cs` | Requires a case match when resolving identifiers. Introduced for an internal proposal, numbered 26889 in the inherited index. |
 | `REQUIRESAMEDATATYPESFORREFERENCECOLUMNS` | not defined | tested in `src/engine/DAE/Compiling/Compiler.cs` | Would disallow implicit conversions in compiler-generated reference constraint expressions. |
 | `RESPECTREADONLY` | not defined | tested in `src/engine/Server` (2 files), `libraries/Frontend/Source/Device/FrontendDevice.cs` | Would have the library and document subsystems respect the read-only flag on files. |
 | `SKIPBETACHECK` | not in the tree | — | Skipped a beta expiry check. Neither the switch nor the check it guarded is in the source. |
-| `SQLSTORETIMING` | off | `src/engine/DAE/Store` (2 files) | Tracks timings on the SQL catalog stores, readable through the `GetStoreCounters()` system operator. |
+| `SQLSTORETIMING` | off | define line in `src/engine/DAE/Store` (`SQLStoreConnection.cs`, `SQLStoreCursor.cs`); also tested in `SQLStore.cs`, which has no line of its own | Tracks timings on the SQL catalog stores, readable through the `GetStoreCounters()` system operator. `SQLStore.cs` carries a commented-out `//#define STORETIMING` instead — the wrong name — so uncommenting the two real lines leaves that file's timing blocks dark. |
 | `TRACKCALLDEPTH` | off | `src/engine/DAE/Runtime.Instructions` (`PlanNode.cs`, `TableNode.cs`) | Enables call-depth tracking. |
 | `USEADOCONNECTION` | off | `libraries/MSSQLDevice` (4 files) | Makes `ADOConnection` the SQL Server device's default connectivity implementation. |
-| `USEASYNCSTOPPROCESS` | not defined | tested in `src/client/DAE.Client` (`DAEDataSet.cs`, `View-263.cs`) | Would issue the stop-process call asynchronously. |
+| `USEASYNCSTOPPROCESS` | not defined | tested in `src/client/DAE.Client/DAEDataSet.cs`, and in `View-263.cs`, which is not compiled | Would issue the stop-process call asynchronously. |
 | `USECLEANUPNODES` | off | `src/engine/DAE/Runtime.Instructions/InstructionNode.cs` | Part of cleanup processing. Off because cleanup is done by `InstructionNodeBase.CleanupOperand` instead. |
 | `USECONNECTIONPOOLING` | on | `libraries/MSSQLDevice` (4 files) | Enables connection pooling in the SQL Server device. |
 | `USECONVERSIONPATHCACHE` | on | `src/engine/DAE/Compiling/Compiler.cs` | Enables the conversion path cache. |
 | `USEDATATYPESINNATIVEROW` | on | `src/engine/DAE/Runtime.Data` (3 files) | Has the native row track the data type of each value it holds. |
-| `USEELABORABLE` | not in the tree | — | Was to control whether the `ShouldElaborate` setting steers reference inference in the compiler. The name appears in no source file. |
+| `UseElaborable` | on | `src/engine/DAE/Runtime.Instructions` (13 files) | Makes reference inference conditional on the plan's cursor carrying the `Elaborable` capability, which a session gets from its `ShouldElaborate` setting; nested inside `#if UseReferenceDerivation` at every site. The inherited index spells the name in capitals, the source does not, and the preprocessor is case-sensitive. |
 | `UseFileStreamProvider` | off | `src/engine/DAE/Streams/ServerStreamManager.cs` | Makes the server stream manager's default provider a `FileStreamProvider` rather than a `MemoryStreamProvider`. No description in the inherited index. |
 | `USEINCLUDENILSWITHBROWSE` | on | `src/engine/DAE/Runtime.Instructions/OrderNodes.cs` | Enables the `include nil` clause in the `order by` statement. |
 | `USEINTERNALID` | on | `src/engine/DAE/Runtime.Data/NativeTable.cs` | Lets the internal index store duplicates of logical values for non-unique indexes. |
@@ -76,10 +78,23 @@ The order is the inherited file's, so that this page can be read against it.
 | `USESQLOLEDB` | on | `libraries/MSSQLDevice` (4 files) | Uses the SQLOLEDB provider when the SQL Server device connects over ADO. |
 | `USESTRICTNAMERESOLUTIONCACHECLEARING` | off | `src/engine/DAE/Device.Catalog/NameResolutionCache.cs` | Clears the name resolution cache only for potentially affected names instead of clearing it whole. See the notes below. |
 | `USETAGNAMECACHE` | off | `src/engine/DAE/Language.D4/MetaData.cs` | Shares one string reference for every tag of a given name, to reduce the memory tags use. See the notes below. |
-| `USETYPEDLIST` | not defined | tested in `src/engine/DAE` (24 files), `src/client/DAE.Client` (2 files), `libraries/Frontend` (2 files) and four other files | Would use the `TypedList` descendent instead of `BaseList<T>` and the related generics for basic list support. |
+| `USETYPEDLIST` | not defined | tested in `src/engine/DAE` (24 files), `src/client/DAE.Client` (2 files), `libraries/Frontend` (2 files) and three other files | Would use the `TypedList` descendent instead of `BaseList<T>` and the related generics for basic list support. |
 | `USEUNIFIEDJOINKEYINFERENCE` | on | `src/engine/DAE/Runtime.Instructions/JoinNodes.cs` | Uses one key-inference algorithm for every kind of join; see `InferJoinKeys`. |
 | `USEUPDATEVALUEFLAGS` | on | `src/engine/DAE/Runtime.Instructions/TableNodes.cs` | Passes a per-column value-flag array with an update, built from `UpdateColumnNames`, so that a device is told which columns changed. No description in the inherited index. |
 | `WRAPRUNTIMEEXCEPTIONS` | on | `src/engine/DAE/Runtime.Instructions` (`PlanNode.cs`, `TableNode.cs`) | Wraps a runtime exception that does not descend from the Dataphor exception in one that does. |
+
+## Switches the inherited index did not list
+
+Measured the same way. They are per-file `#define`s like the rest; the inherited index simply never carried a row for them.
+
+| Define | State | Where | What it does |
+|---|---|---|---|
+| `PROCESSSTREAMSOWNED` | on | `src/engine/DAE/Server/ServerProcess.cs` | Has a process deallocate every stream it allocated when it goes away. |
+| `STORETIMING` | off | `src/engine/DAE/Store/SQLStore.cs` | Nothing: no `#if` anywhere tests this name. The line was meant to read `SQLSTORETIMING`; see that row above. |
+| `USEINCLUSIVEMULTIPLEX` | off | `libraries/SQLDevice/Source/SQLDeviceCursor.cs` | Repositions a multiplexed cursor with an inclusive rather than an exclusive restriction, where several cursors share one connection. |
+| `USESTRUCTTAG` | on | `src/engine/DAE/Language.D4/MetaData.cs` | Declares a metadata `Tag` as a struct; the other branch of the same file declares it as a class. Both branches read `USETAGNAMECACHE`. |
+
+One further `#define` in the tree is not a behaviour switch at all: `src/engine/Base/IndexList.cs` defines `DEBUG` at the top of itself, so that file's consistency assertions are compiled into Release as well as Debug. No other file does that.
 
 ## Notes on four of the switches
 
