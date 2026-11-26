@@ -67,7 +67,6 @@
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
     <Compile Include="Connection\DotNetCursor.cs" />
-    <Compile Include="Connection\GenericDotNetConnection.cs" />
     <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />

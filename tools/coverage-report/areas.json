@@ -49,8 +49,7 @@
       "paths": [
         "src/engine/DAE/Streams/",
         "src/engine/Server/Streams/",
-        "src/engine/Base/StreamUtility.cs",
-        "src/engine/Base/TemporaryStream.cs"
+        "src/engine/Base/StreamUtility.cs"
       ]
     },
     {
@@ -180,15 +179,6 @@
     {
       "paths": ["artifacts/"],
       "reason": "generated source; the CoreWCF operation-invoker generator writes into artifacts/obj/"
-    },
-    {
-      "paths": [
-        "src/engine/Base/IndexList.cs",
-        "src/engine/Base/TemporaryStream.cs",
-        "src/engine/DAE/Streams/CopyOnWriteStream.cs"
-      ],
-      "reason": "compiled public classes that nothing in the repository references: outside each file itself the only mention of IndexList, TemporaryStream or CopyOnWriteStream anywhere is its own Compile entry in Base.csproj or DAE.csproj (verified 2026-11-21 by test-coverage-gap-analysis), and removal is an arm on the hygiene umbrella",
-      "ticket": "debt-ws12-hygiene-remainder"
     }
   ]
 }

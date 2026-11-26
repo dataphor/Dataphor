@@ -42,8 +42,6 @@
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
     <Compile Include="NotifyingBaseList.cs" />
-    <Compile Include="TemporaryStream.cs" />
-    <Compile Include="IndexList.cs" />
     <Compile Include="ReflectionUtility.cs" />
     <Compile Include="StreamUtility.cs" />
     <Compile Include="ThreadUtility.cs" />

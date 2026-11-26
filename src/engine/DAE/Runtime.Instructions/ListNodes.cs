@@ -1249,11 +1249,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// TableForEachNode -- Used when the source is a table and the return is a row
 	//	Nodes[0] - Iteration Expression
 	//	Nodes[1] - Return Expression
-	// NOTE: the compiler cannot reach this class. Compiler.CompileForEachExpression always builds a ListForEachNode -
-	// its own TODO is the decision that was never made - and nothing in the engine, the libraries or the tests names
-	// this type. It is kept in step with ListForEachNode and ForEachNode by hand anyway, because the three hold one
-	// copy each of the same lending code and a fix applied to two of the three is the thing to prevent;
-	// debt-ws12-hygiene-remainder is the sweep that owns deciding whether dead code like this goes.
+	// NOTE: accepted tradeoff - the compiler cannot reach this class. Compiler.CompileForEachExpression always builds
+	// a ListForEachNode and its own TODO is the decision that was never made, and nothing in the engine, the libraries
+	// or the tests names this type. Deleting it was weighed along with the other dead compiled files and declined,
+	// because DAERegister.GetClasses() in Register.cs registers every PlanNode subclass under a D4 class name, so this
+	// class is published as System.TableForEachNode and removing it would retire a name from a compatibility surface
+	// this project does not change without a ticket that says so. Revisit when a ticket deliberately retires that class
+	// name - as the unreachable redefine implementation was retired - or when that compiler TODO is settled.
+	// It is kept in step with ListForEachNode and ForEachNode by hand meanwhile, because the three hold one copy each
+	// of the same lending code and a fix applied to only two of the three is the thing to prevent.
 	public class TableForEachNode : TableNode
 	{
 		public TableForEachNode() : base()

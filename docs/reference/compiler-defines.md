@@ -94,7 +94,6 @@ Measured the same way. They are per-file `#define`s like the rest; the inherited
 | `USEINCLUSIVEMULTIPLEX` | off | `libraries/SQLDevice/Source/SQLDeviceCursor.cs` | Repositions a multiplexed cursor with an inclusive rather than an exclusive restriction, where several cursors share one connection. |
 | `USESTRUCTTAG` | on | `src/engine/DAE/Language.D4/MetaData.cs` | Declares a metadata `Tag` as a struct; the other branch of the same file declares it as a class. Both branches read `USETAGNAMECACHE`. |
 
-One further `#define` in the tree is not a behaviour switch at all: `src/engine/Base/IndexList.cs` defines `DEBUG` at the top of itself, so that file's consistency assertions are compiled into Release as well as Debug. No other file does that.
 
 ## Notes on four of the switches
 
