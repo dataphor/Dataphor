@@ -331,6 +331,7 @@ SECTION_TITLES = {
     "images-missing": "Images not found",
     "images-unreferenced": "Images no converted page references",
     "headings": "Heading adjustments",
+    "code-phrase-with-a-link": "Code phrases holding a link, unwrapped instead of made inline code",
     "html-tables": "HTML tables per page",
     "raw-html": "Raw HTML other than tables and sized images, per page",
     "nested-alerts": "Admonitions inside lists or quotes (GitHub shows these as plain quotes)",
@@ -460,6 +461,8 @@ def transform_blocks(blocks, page, report):
         kind = item["t"]
         if kind == "Span" and "indexterm" in item["c"][0][1]:
             return item["c"][1]
+        if kind == "Span" and "code" in item["c"][0][1]:
+            return code_phrase(item, page, report)
         if kind == "Div":
             classes = item["c"][0][1]
             content = item["c"][1]
@@ -514,6 +517,22 @@ def transform_blocks(blocks, page, report):
         return item
 
     return rewrite(blocks, visit)
+
+
+def code_phrase(item, page, report):
+    """DocBook's `<phrase role="code">` as inline code.
+
+    pandoc keeps the role as a class, and its gfm writer then emits a raw `<span class="code">`,
+    which GitHub renders as ordinary prose - the one thing the phrase was there to say is lost.
+    A code span cannot hold a link, so a phrase that has one is unwrapped and listed instead;
+    the reference sources have none, and nesting anything else (they nest only bold, marking a
+    keyword) says nothing a code span does not already say."""
+    inlines = item["c"][1]
+    if any(inline["t"] == "Link" for inline in iter_nodes(inlines)):
+        report.add("code-phrase-with-a-link", "%s: %s" % (page.output, stringify(inlines)[:60]))
+        return inlines
+    report.counts["code phrases as inline code"] += 1
+    return node("Code", [empty_attr(), stringify(inlines)])
 
 
 def bold_term(inlines):

@@ -148,6 +148,19 @@ class SplitTest(unittest.TestCase):
         self.assertTrue(any("O-Lib.Version" in line for line in harness.report.errors), harness.report.errors)
         self.assertFalse(os.path.isdir(harness.out))
 
+    def test_two_pages_that_flatten_to_one_work_file_is_an_error(self):
+        # The work file name is the output path with its separators folded to "-", so two outputs
+        # can collide; the second would overwrite the first and the page would be lost without a
+        # word, because convert.py keeps one output per source in pages.tsv.
+        pages = [dict(row) for row in PAGES]
+        pages[1]["output"] = "ref/operators/Lib.Abs.md"
+        pages[2]["output"] = "ref-operators/Lib.Abs.md"
+        harness = self.harness(pages=pages)
+        self.assertEqual(harness.run(), 1)
+        self.assertTrue(any("both flatten to" in line for line in harness.report.errors),
+                        harness.report.errors)
+        self.assertFalse(os.path.isdir(harness.out))
+
     def test_a_surviving_placeholder_is_an_error(self):
         # Nothing in the split leaves one behind today; this is the guard that says so, because
         # a placeholder rendered as literal text would read as published documentation.

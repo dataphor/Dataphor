@@ -73,9 +73,15 @@ def xml_parser():
 def read_xml(path):
     """The parsed root of a reference source, with its DOCTYPE dropped.
 
-    Seven sources declare a DOCTYPE naming a DTD path that no longer exists. None of them needs
-    it - every source parses as it stands and only the predefined entities appear - and a
-    DOCTYPE copied into the split output would be followed by pandoc."""
+    Seven of the reference sources declare a DOCTYPE naming a DTD path that no longer exists.
+    None of them needs it - each parses as it stands and uses only the predefined entities - and
+    a DOCTYPE copied into the split output would be followed by pandoc.
+
+    That is not true of every file in `Docs2.0/`: four of the book parts use `&nbsp;`, and
+    `DataphorSet.xml` and `DataphorSet2.xml` declare the set's file includes in their own
+    internal subset, so all six fail to parse here. None of them is a reference source, so
+    nothing this script converts needs an entity; a later ticket that wants one of those files
+    would have to keep the internal subset or predefine the entity."""
     with open(path, "rb") as stream:
         raw = stream.read().decode("utf-8")
     raw = re.sub(r"<!DOCTYPE[^>\[]*(?:\[.*?\])?\s*>", "", raw, count=1, flags=re.S)
@@ -226,8 +232,6 @@ def extract_declarations(folder, out_path, report):
         if unescape_declaration(cell) != declaration:
             convert.fail("the declaration of %s does not round-trip through the table" % identifier)
         rows.append({"id": identifier, "declaration": cell})
-    if report.errors:
-        return 1
     rows.sort(key=lambda row: row["id"])
     convert.write_tsv(out_path, DECLARATIONS_COLUMNS, rows)
     report.summary.append("read %d O-*/T-* help page(s); wrote %d declaration(s) to %s"
@@ -273,8 +277,8 @@ def link_names(pages):
         output = row["output"]
         if not output:
             continue
-        better = rule_output(identifier) == output and rule_output(chosen.get(output, "")) != output
-        if output not in chosen or better:
+        held = chosen.get(output)
+        if held is None or (rule_output(identifier) == output and rule_output(held) != output):
             chosen[output] = identifier
     return {output: (legacy_name(identifier), pages[identifier]["title"] or identifier)
             for output, identifier in chosen.items()}
@@ -490,7 +494,9 @@ class Report:
 
 def work_name(output):
     """The split's file name for a page: the output path flattened, so the work folder reads
-    like the page map and two pages can never collide."""
+    like the page map. Flattening can in principle bring two outputs to one name, which would
+    lose a page silently - `convert.py docbook --pages` keeps the last row for a repeated
+    source - so `split` checks the names it has built before writing any of them."""
     return re.sub(r"\.md$", "", re.sub(r"[\\/]+", "-", output)) + ".xml"
 
 
@@ -618,6 +624,30 @@ def holders_of(found, enclosing, has_page, source, report):
     return holder
 
 
+def check_work_names(written, report):
+    """No two pages may flatten to the same work file name; the second would overwrite the
+    first and `pages.tsv` would name only one of them."""
+    taken = {}
+    for name, output, _ in written:
+        if name in taken:
+            report.error("%s and %s both flatten to %s" % (taken[name], output, name))
+        taken[name] = output
+
+
+def check_stale_documents(out_dir, written, report):
+    """Documents a previous run left in the work folder that this one does not rewrite.
+
+    `convert.py docbook` is given the folder's `*.xml`, and a source missing from `pages.tsv`
+    gets an output from its file name instead - so a stale document from an earlier page map
+    quietly becomes a page. Reported rather than deleted: the folder is the caller's."""
+    if not os.path.isdir(out_dir):
+        return
+    fresh = {name for name, _, _ in written}
+    for name in sorted(os.listdir(out_dir)):
+        if name.lower().endswith(".xml") and name not in fresh:
+            report.add("stale-documents-in-the-out-folder", name)
+
+
 def split(files, pages_path, declarations_path, out_dir, report):
     pages = read_pages(pages_path)
     declarations = read_declarations(declarations_path)
@@ -677,6 +707,8 @@ def split(files, pages_path, declarations_path, out_dir, report):
         group.sort(key=lambda item: item.order)
     written = [(work_name(output), output, build_page(output, items[output], report))
                for output in sorted(items, key=lambda output: items[output][0].order)]
+    check_work_names(written, report)
+    check_stale_documents(out_dir, written, report)
     if report.errors:
         return 1
     for name, _, xml in written:

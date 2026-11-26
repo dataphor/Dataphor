@@ -90,6 +90,32 @@ class FragmentTest(unittest.TestCase):
                          ["no such page; candidates: A.adoc#Summary"])
 
 
+class CodePhraseTest(unittest.TestCase):
+    """`<phrase role="code">` reaches pandoc as a Span with a `code` class, which the gfm writer
+    would emit as a raw `<span>`: GitHub shows it as prose, losing the one thing it said."""
+
+    def transform(self, inlines):
+        page = make_page("A.adoc", "a.md", [("", "A", "a")])
+        self.report = convert.Report()
+        blocks = convert.transform_blocks([convert.node("Para", inlines)], page, self.report)
+        return blocks[0]["c"]
+
+    def span(self, content):
+        return convert.node("Span", [["", ["code"], [["role", "code"]]], content])
+
+    def test_a_code_phrase_becomes_inline_code(self):
+        # Bold inside it marks a D4 keyword; a code span already says that, so it is dropped.
+        out = self.transform([self.span([convert.node("Strong", convert.text_inlines("div"))])])
+        self.assertEqual(out, [convert.node("Code", [convert.empty_attr(), "div"])])
+
+    def test_a_code_phrase_holding_a_link_is_unwrapped_and_listed(self):
+        # A code span cannot hold a link, and the link is worth more than the styling.
+        inner = link("B.adoc", "there")
+        out = self.transform([self.span([inner])])
+        self.assertEqual(out, [inner])
+        self.assertEqual(self.report.sections["code-phrase-with-a-link"], ["a.md: there"])
+
+
 class LegacyMapTest(unittest.TestCase):
     """--legacy-map supplies the target of a legacy page the built-in rules do not place, and
     overrides them for one they place wrongly; a miss falls through to the rules."""
