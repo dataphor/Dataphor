@@ -106,7 +106,6 @@
     <Compile Include="Language\ParserException.cs" />
     <Compile Include="Language\SyntaxException.cs" />
     <Compile Include="Register.cs" />
-    <Compile Include="REST\RESTResult.cs" />
     <Compile Include="Runtime.Data\AdornTable.cs" />
     <Compile Include="Runtime.Data\AggregateTable.cs" />
     <Compile Include="Runtime.Data\CursorValue.cs" />

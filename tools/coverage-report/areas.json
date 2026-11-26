@@ -182,11 +182,6 @@
       "reason": "generated source; the CoreWCF operation-invoker generator writes into artifacts/obj/"
     },
     {
-      "paths": ["src/engine/DAE/REST/", "src/engine/Server/REST/"],
-      "reason": "RESTResult and RESTMarshal are compiled but nothing in the repository calls them: their only consumer was the web prototype now parked in legacy/, and removal is an arm on the hygiene umbrella",
-      "ticket": "debt-ws12-hygiene-remainder"
-    },
-    {
       "paths": [
         "src/engine/Base/IndexList.cs",
         "src/engine/Base/TemporaryStream.cs",

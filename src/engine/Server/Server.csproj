@@ -26,7 +26,7 @@
     client stack. CoreWCF.Primitives: the service *implementations* in Service\, which carry CoreWCF's
     ServiceBehavior attribute and throw CoreWCF's FaultException<T>; of each pair CoreWCF recognises only its own,
     while it converts the contract attributes itself (see "CoreWCF proof" under WS5 in docs/modernization-plan.md).
-    Newtonsoft.Json: REST\RESTMarshal.cs. Microsoft.Data.SqlClient: Connection\MSSQL*.cs, and Server\Server.cs, which
+    Microsoft.Data.SqlClient: Connection\MSSQL*.cs, and Server\Server.cs, which
     clears that client's connection pools when a server is disposed. This is the repository's only SQL Server client
     reference that a shipped assembly needs; the catalog store in src\engine\Store.MSSQL takes it from here.
     NOTE: that client brings a larger closure than the System.Data.SqlClient it replaced - measured with the two host
@@ -51,7 +51,6 @@
   <ItemGroup>
     <PackageReference Include="CoreWCF.Primitives" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
-    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.ServiceModel.Primitives" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
@@ -79,7 +78,6 @@
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDeviceSession.cs" />
     <Compile Include="Register.cs" />
-    <Compile Include="REST\RESTMarshal.cs" />
     <Compile Include="Runtime.Instructions\CatalogNodes.cs" />
     <Compile Include="Runtime.Instructions\LibraryNodes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
