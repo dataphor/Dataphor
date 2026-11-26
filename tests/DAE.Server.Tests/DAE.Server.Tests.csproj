@@ -75,6 +75,7 @@
     <Compile Include="OutOfProcessInstance.cs" />
     <Compile Include="OutOfProcessProtocolTest.cs" />
     <Compile Include="PGSQLDeviceTranslationGoldenTests.cs" />
+    <Compile Include="PGSQLStoreEnsureDatabaseTest.cs" />
     <Compile Include="ParserRoundTripCorpusTest.cs" />
     <Compile Include="PartialCommitTest.cs" />
     <Compile Include="PerfBaselineTest.cs" />

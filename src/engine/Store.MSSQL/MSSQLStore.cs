@@ -27,12 +27,16 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
 			builder.ConnectionString = ConnectionString;
 
-			// The catalog opens a second store cursor while a first one is still open (CatalogStore reads PK_DAECatalogObjects
-			// and opens PK_DAEBaseCatalogObjects inside the loop, and does the same around the two name tables), and SQL Server
-			// refuses a second reader on one connection unless the connection asked for multiple active result sets. The error
-			// it gives then - "There is already an open DataReader associated with this Command which must be closed first." -
-			// names nothing a deployment could act on, so the option is forced rather than defaulted, and a configured False is
-			// ignored: the store cannot work under it. Same reasoning as SQLiteStore.NormalizeConnectionString forcing WAL.
+			// The catalog opens a second store cursor while a first one is still open, and SQL Server refuses a second reader
+			// on one connection unless the connection asked for multiple active result sets. What holds the first one open is
+			// _supportsMARS below: it is what turns on CatalogStore.UseCursorCache, which keeps a finished cursor's reader open
+			// past CloseCursor inside a transaction so that a later open of the same index reuses it. No method of
+			// CatalogStore nests two cursor opens - each reads its rows into a list, closes, and opens the next - so a store
+			// that reports no multiple active result sets gets no cache and needs none of this; PostgreSQLStore is that store,
+			// and its InternalInitialize sets out the other side of the trade. Here the cache is wanted, so the option it
+			// needs is forced rather than defaulted, and a configured False is ignored: the error SQL Server gives otherwise -
+			// "There is already an open DataReader associated with this Command which must be closed first." - names nothing a
+			// deployment could act on. Same reasoning as SQLiteStore.NormalizeConnectionString forcing WAL.
 			// The base's ConnectionString setter allows this because InternalInitialize runs before the store is initialized,
 			// and every store connection, the catalog device's own included, is built from ConnectionString.
 			builder["MultipleActiveResultSets"] = "True";

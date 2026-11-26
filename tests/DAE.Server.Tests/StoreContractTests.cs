@@ -862,12 +862,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <remarks>
 	/// The same shape as <see cref="MSSQLStoreContractTests"/> in every particular, for the same measured reasons: one
 	/// database with a fixed name for the whole fixture, dropped before the run and after it, made by the store's own
-	/// create-database probe, and emptied at the start of each test rather than at the end of the one before. The two
-	/// things that differ are this store's dialect, which the two column-type hooks carry, and that dropping the database
-	/// takes <c>with (force)</c> - PostgreSQL has no single-user mode, and a pooled connection of an earlier run would
-	/// otherwise hold the database open. <c>with (force)</c> needs PostgreSQL 13 or later, which is below the documented
-	/// floor of 14 (docs/users-guide/dataphor-service.md).
+	/// create-database probe, and emptied at the start of each test rather than at the end of the one before. The one
+	/// thing that differs is this store's dialect, which the two column-type hooks carry; what dropping a PostgreSQL
+	/// database takes is in <see cref="TestEnvironment.DropPGSQLDatabase"/>.
 	/// </remarks>
+	// NOTE: this fixture and the SQL Server one above are the same forty lines around a different server, which is
+	// cheaper to read than a shared base with a hook for each of the seven things they vary. A third server-backed
+	// store would change that answer: extract the base then rather than copying this a second time.
 	// NOTE: that fixed name is the fixture's one shared resource, as the SQL Server fixture's is; two runs against one
 	// server at the same time would empty each other's database mid-test. If that day comes, name the database after the
 	// run, as TestEnvironment's run directory is named after the process.
@@ -876,9 +877,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	{
 		/// <summary>Lower case, because PostgreSQL folds an unquoted identifier and a mixed-case database then has to be quoted everywhere.</summary>
 		private const string DatabaseName = "dataphorstorecontract";
-
-		/// <summary>The stock database every PostgreSQL installation has, which the drop below is executed from.</summary>
-		private const string StockDatabaseName = "postgres";
 
 		/// <summary>The test directory the fixture's one database was last emptied for; see <see cref="CreateStore"/>.</summary>
 		private static string _emptiedForDirectory;
@@ -935,14 +933,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			_emptiedForDirectory = directory;
 		}
 
-		// From the stock database, because PostgreSQL cannot drop the database a connection is open on.
 		private static void DropDatabase()
 		{
-			TestEnvironment.ExecuteOnPGSQL
-			(
-				TestEnvironment.PGSQLConnectionStringFor(StockDatabaseName),
-				String.Format("drop database if exists \"{0}\" with (force)", DatabaseName)
-			);
+			TestEnvironment.DropPGSQLDatabase(DatabaseName);
 		}
 	}
 }

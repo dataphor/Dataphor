@@ -17,6 +17,19 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 		/// <summary>The stock database every PostgreSQL installation has, which a connection that is about to create the store's own database is pointed at.</summary>
 		private const string StockDatabaseName = "postgres";
 
+		/// <summary>
+		/// Every keyword the driver accepts for the database to connect to, canonical name first.
+		/// </summary>
+		/// <remarks>
+		/// Both spellings have to be read, as MSSQLStore reads both of SQL Server's ("Initial Catalog" and "Database"): the
+		/// alias is not an unknown keyword the driver would reject, it connects to the named database just as the canonical
+		/// spelling does, so a probe that looked only for the canonical one would skip the create silently and leave a first
+		/// start failing with PostgreSQL 3D000 on a database it was supposed to make. Measured against Npgsql 10.0.4 by
+		/// starting a server whose catalogstoreconnectionstring spelled it DB. DbConnectionStringBuilder matches a key
+		/// case-insensitively, so each spelling is one entry.
+		/// </remarks>
+		private static readonly string[] DatabaseKeywords = new string[] { "Database", "DB" };
+
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
         {
@@ -53,14 +66,17 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
 			builder.ConnectionString = ConnectionString;
 
-			if (!builder.ContainsKey("Database"))
+			// Replaced under the spelling the connection string used, rather than added under the canonical one: setting both
+			// keywords would hand the driver two names for one database.
+			string databaseKeyword = Array.Find(DatabaseKeywords, keyword => builder.ContainsKey(keyword));
+			if (databaseKeyword == null)
 				return;
 
-			string databaseName = Convert.ToString(builder["Database"]);
+			string databaseName = Convert.ToString(builder[databaseKeyword]);
 			if (String.IsNullOrEmpty(databaseName))
 				return;
 
-			builder["Database"] = StockDatabaseName;
+			builder[databaseKeyword] = StockDatabaseName;
 
 			// Both statements carry the name as text the server parses, so both quote it the way that position needs: doubled
 			// single quotes inside the probe's string literal, doubled double quotes inside the create statement's quoted

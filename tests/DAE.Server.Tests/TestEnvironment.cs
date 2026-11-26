@@ -664,6 +664,25 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				connection.Execute(statement);
 		}
 
+		/// <summary>The stock database every PostgreSQL installation has, which the housekeeping below connects to.</summary>
+		public const string PGSQLStockDatabaseName = "postgres";
+
+		/// <summary>Drops <paramref name="databaseName"/> on the configured server if it is there, so that the pass about to run makes it itself.</summary>
+		/// <remarks>
+		/// From the stock database, because PostgreSQL cannot drop the database a connection is open on, and
+		/// <c>with (force)</c> because it has no single-user mode: a pooled connection of an earlier run would otherwise hold
+		/// the database open. <c>with (force)</c> needs PostgreSQL 13 or later, which is below the documented floor of 14
+		/// (docs/users-guide/dataphor-service.md).
+		/// </remarks>
+		public static void DropPGSQLDatabase(string databaseName)
+		{
+			ExecuteOnPGSQL
+			(
+				PGSQLConnectionStringFor(PGSQLStockDatabaseName),
+				String.Format("drop database if exists \"{0}\" with (force)", databaseName)
+			);
+		}
+
 		/// <summary>The configured server's host, defaulted as the driver defaults it.</summary>
 		public static string PGSQLHost => PGSQLSetting("localhost", "Host", "Server");
 
