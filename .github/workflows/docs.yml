@@ -1,27 +1,28 @@
-# Gates the documentation under docs/. Today that is one check: no architecture page may grow past the
-# word limit in tools/docs-size-check/check_size.py, so that the architecture documentation stays a short
-# root page plus one page per subsystem (the rule is in AGENTS.md, under "Rules that are easy to break").
-# This is where the link checker's step belongs too, when docs-link-check-ci adds it: a separate workflow
-# from build.yml because that one ignores docs/** on purpose, so a docs job in it would be skipped for
-# exactly the changes it checks.
+# Gates the documentation under docs/. Two checks: no architecture page may grow past the word limit in
+# tools/docs-size-check/check_size.py, so that the architecture documentation stays a short root page plus
+# one page per subsystem (the rule is in AGENTS.md, under "Rules that are easy to break"); and no link or
+# image reference under docs/ may point at nothing. A separate workflow from build.yml because that one
+# ignores docs/** on purpose, so a docs job in it would be skipped for exactly the changes it checks.
 name: Docs
 
 on:
   push:
     branches: [master, modernization]
-    # The tool's own path is here so that a change to the checker runs its tests.
+    # The tools' own paths are here so that a change to a checker runs it.
     # NOTE: this is an inclusion filter, so a pull request touching none of these paths gets no run at
     # all. If branch protection ever requires this check, it would wait for a run that never happens;
     # add a no-op job for the other paths or drop the filter then (build.yml carries the same note).
     paths:
       - 'docs/**'
       - 'tools/docs-size-check/**'
+      - 'tools/docs-link-check/**'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [master, modernization]
     paths:
       - 'docs/**'
       - 'tools/docs-size-check/**'
+      - 'tools/docs-link-check/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -50,3 +51,9 @@ jobs:
 
       - name: Architecture page size checker tests
         run: python3 -m unittest discover -s tools/docs-size-check
+
+      # --pending exempts the links into the reference pages that have not been converted yet (defect K17
+      # in docs/modernization-plan.md); everything else is gated. docs-remove-old-sources deletes
+      # tools/docs-convert/, this list with it, and drops the argument in the same commit.
+      - name: Documentation links
+        run: python3 tools/docs-link-check/check_links.py docs --pending tools/docs-convert/legacy-links.tsv

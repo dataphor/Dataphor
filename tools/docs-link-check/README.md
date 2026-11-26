@@ -1,6 +1,6 @@
 # docs-link-check — broken-link checker for the Markdown docs
 
-Checks every link and image reference in the Markdown files under `docs/` (or any folder you name) and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a missing heading anchor, a path that leaves the repository. It is the acceptance check for the documentation conversion (`docs-convert-asciidoc`) and the check that CI runs later (`docs-link-check-ci`): that step belongs in `.github/workflows/docs.yml`, the docs workflow that already gates the architecture page size, because `build.yml` ignores `docs/**` on purpose. It needs nothing beyond Python 3: one file, standard library only, no network.
+Checks every link and image reference in the Markdown files under `docs/` (or any folder you name) and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a missing heading anchor, a path that leaves the repository. It was the acceptance check for the documentation conversion (`docs-convert-asciidoc`), and CI runs it: the *Documentation links* step of `.github/workflows/docs.yml`, the docs workflow that also gates the architecture page size, because `build.yml` ignores `docs/**` on purpose. That step passes `--pending tools/docs-convert/legacy-links.tsv` so that the not-yet-converted reference links do not fail the build; `docs-remove-old-sources` deletes that list and drops the argument in the same commit. It needs nothing beyond Python 3: one file, standard library only, no network.
 
 ## Run it
 
