@@ -57,7 +57,7 @@ MAP = {
         {"name": "Security", "paths": ["src/engine/DAE/Schema/Security.cs"]},
         {"name": "Debugger", "paths": ["src/engine/DAE/Debug/"]},
     ],
-    "excluded": [{"paths": ["src/engine/DAE/REST/"], "reason": "nothing calls it"}],
+    "excluded": [{"paths": ["artifacts/"], "reason": "generated source"}],
 }
 
 OPTIONS = coverage_report.Options(25.0, 50.0, 200, 20)
@@ -146,7 +146,7 @@ class AreaMapTest(unittest.TestCase):
 
     def test_excluded_and_test_code_belong_to_no_area(self):
         analysis = self.analysis({"Engine": {
-            ("Marshal", "src/engine/DAE/REST/RESTMarshal.cs"): lines(0, 40),
+            ("Generated", "artifacts/obj/Generated.cs"): lines(0, 40),
             ("Fixture", "tests/DAE.Server.Tests/CursorTest.cs"): lines(30, 0),
             CATALOG: lines(2, 3)}})
         self.assertEqual([area.name for area in analysis.areas], ["Schema"])

@@ -26,9 +26,9 @@
     client stack. CoreWCF.Primitives: the service *implementations* in Service\, which carry CoreWCF's
     ServiceBehavior attribute and throw CoreWCF's FaultException<T>; of each pair CoreWCF recognises only its own,
     while it converts the contract attributes itself (see "CoreWCF proof" under WS5 in docs/modernization-plan.md).
-    Microsoft.Data.SqlClient: Connection\MSSQL*.cs, and Server\Server.cs, which
-    clears that client's connection pools when a server is disposed. This is the repository's only SQL Server client
-    reference that a shipped assembly needs; the catalog store in src\engine\Store.MSSQL takes it from here.
+    Microsoft.Data.SqlClient: Connection\MSSQL*.cs, and Server\Server.cs, which clears that client's connection
+    pools when a server is disposed. This is the repository's only SQL Server client reference that a shipped
+    assembly needs; the catalog store in src\engine\Store.MSSQL takes it from here.
     NOTE: that client brings a larger closure than the System.Data.SqlClient it replaced - measured with the two host
     executables in the layout, bin\ went from 76 to 84 top-level files (142 to 163 in all) - and eight of the added
     assemblies exist for authentication methods nothing here uses: Microsoft.IdentityModel.JsonWebTokens, .Protocols,
