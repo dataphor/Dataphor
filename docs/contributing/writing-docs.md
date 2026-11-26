@@ -2,7 +2,7 @@
 
 The documentation is GitHub-flavoured Markdown under `docs/`, and it is checked. This page says what the conventions are, where a new page goes, and how to run the two checks before you push.
 
-It replaces the old *Authoring Documentation* appendix, which described editing AsciiDoc sources through GitBook. Those sources were converted to Markdown and the editing workflow with them: there is no build step, no generator and no toolchain to install. A page is a file; you edit it and commit it.
+It replaces the old *Authoring Documentation* appendix, which described editing AsciiDoc sources through GitBook. Those sources were converted to Markdown and the editing workflow with them: there is no build step and no toolchain to install. A page is a file; you edit it and commit it — except in [one generated folder](#one-folder-is-generated-and-must-not-be-edited-by-hand).
 
 ## File conventions
 
@@ -24,6 +24,12 @@ It replaces the old *Authoring Documentation* appendix, which described editing 
 | `images/` | Every image, for every page. |
 
 Some documents sit at the top of `docs/` because they belong to no book: the [modernization plan](../modernization-plan.md), [architecture.md](../architecture.md), the [migration notes](../migration-notes.md), the measured [coverage](../coverage-report.md) and [performance](../perf-baseline.md) records, and the books' shared [glossary](../glossary.md) and [bibliography](../bibliography.md). [docs/README.md](../README.md) indexes everything; add a new page to it, and to its folder's own `README.md` where there is one.
+
+## One folder is generated, and must not be edited by hand
+
+`docs/reference/system-library/tables/` is the one exception to the rule that a page under `docs/` is a file you edit. Its 56 pages — one for each table variable the System library defines, plus the section index — are **generated from a running server and compared whole**: `ReferenceSignatureGoldenTest` in `tests/DAE.Server.Tests` fails the test run on any hand edit there, and `DATAPHOR_UPDATE_REFERENCE_GOLDENS=1` reverts one. To change what those pages say, change what that fixture writes. [The index](../reference/system-library/tables/README.md) says why they are generated and [build-and-test.md](build-and-test.md#rewriting-the-checked-in-comparison-files) says how they are written.
+
+Every other page under `docs/` is hand-maintained, the rest of `reference/` included.
 
 ## The architecture pages have a shape, and it is enforced
 

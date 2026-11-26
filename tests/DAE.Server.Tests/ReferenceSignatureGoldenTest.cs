@@ -179,7 +179,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <summary>
 	/// The reference half of WS8: every signature the 3.x documentation publishes is compared with the one a running
 	/// 4.0 catalog reports, so that a disagreement is a reviewable file and a recorded verdict rather than a wrong page
-	/// a customer finds.
+	/// a customer finds. It also <em>writes</em> the one part of that reference the 3.x documentation never
+	/// published - the system tables - which is a different job from comparing one, and
+	/// <see cref="EverySystemTableHasAGeneratedPage"/> carries its own account of it.
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -241,6 +243,10 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// OverloadsAddedAfterPublication entries are what to revisit, and the goldens are the text to revisit them with.
 	/// </para>
 	/// </remarks>
+	// NOTE: two passes with different comparison rules live here - block-scoped against the published pages, whole-file
+	// against the generated ones - in about 1,500 lines (wc -l). One coherent subject, what the reference says against
+	// what the catalog says, so it was left whole; a third pass is the point at which to move the generated-page
+	// machinery into its own fixture, taking Rows, Trim, Report, FirstDifference and the update variable with it.
 	// Not [Parallelizable]: this fixture starts a server, and two engines in one process share the engine's static state
 	// (see the note on TestServerInstance).
 	[TestFixture]
@@ -1064,7 +1070,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				yield return String.Format("{0} is recorded as an undocumented scalar type, but it is documented now, or the catalog no longer has it. Remove the entry from CatalogTypesWithNoPage.", name);
 		}
 
-
 		#region Table pages
 
 		/// <summary>
@@ -1083,6 +1088,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// where a reader who wants to ask their own server the question these pages answer will look.
 		/// </summary>
 		private const string GeneratorTableName = "System.TableVars";
+
+		/// <summary>
+		/// The reference the generated index tells a reader to script, chosen because it is declared on the table
+		/// these pages are generated from. Held against the catalog in <see cref="EverySystemTableHasAGeneratedPage"/>:
+		/// the index is published documentation naming a catalog object, so a renamed reference would leave it
+		/// telling a reader to run something that fails, with nothing else to catch it.
+		/// </summary>
+		private const string ExampleReferenceName = "System.TableVars_CatalogObjects";
 
 		private const string GeneratorTableSentence =
 			" This is also the table this reference is generated from: `select TableVars` lists every table variable a"
@@ -1154,7 +1167,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			text.Append(String.Format("The System library defines {0} table variables - {1} tables and {2} views - and they are the catalog itself, readable as data: an ordinary `select` against any of them answers a question about the server's own objects, and `select TableVars` is the list below. There is a page here for each one, carrying the definition a running server reports.\n\n", tables.Count + views.Count, tables.Count, views.Count));
 			text.Append("**These pages are generated, and every one of them is compared whole.** `ReferenceSignatureGoldenTest` in `tests/DAE.Server.Tests` starts a server carrying nothing but the built-in System library, asks it for each table's definition through the `Script` operator any script can call, and holds the result against the whole of the matching page - this index included. So a hand edit in this folder fails the test run, and is reverted the next time the pages are written. Change what the generator writes, not the page.\n\n");
 			text.Append("**There are no descriptions here, and none were invented.** The 3.x reference meant to carry a sentence about each table and each column; it never did - its `SystemTables` chapter was a four-line placeholder saying the section was generated, and the published help file listed the table names with nothing under them. The catalog has nothing to report either: no table or column of `src/engine/DAE/Schema/SystemCatalog.d4` carries a `Catalog.Comment` tag, where the scalar types in `DataTypes.d4` carry seventeen. A sentence per table written from a reading of the engine's source would be a new claim in the place of a converted record, so each page gives the definition and stops. For what the catalog holds and how a script uses it, read [Table Variables](" + CatalogChapterPath + "#table-variables) and the rest of the [Catalog Elements](" + CatalogChapterPath + ") chapter of the Developer's Guide.\n\n");
-			text.Append(String.Format("**What a definition does not carry: the references.** `Script` emits a table's columns, keys, orders, constraints and tags, and not the references declared beside it - in this release a reference is a catalog object in its own right, and the [System.References](System.References.md) table carries each one's name, library and owner rather than the two tables it connects. There are {0} of them in the System library. `Script('System.TableVars_CatalogObjects')` on a live server gives any one of them in full.\n\n", referenceCount));
+			text.Append(String.Format("**What a definition does not carry: the references.** `Script` emits a table's columns, keys, orders, constraints and tags, and not the references declared beside it - in this release a reference is a catalog object in its own right, and the [System.References](System.References.md) table carries each one's name, library and owner rather than the two tables it connects. There are {0} of them in the System library. `Script('" + ExampleReferenceName + "')` on a live server gives any one of them in full.\n\n", referenceCount));
 			text.Append("## Tables\n\n");
 			foreach (string name in tables)
 				text.Append("- ").Append(TablePageLink(name)).Append("\n");
@@ -1190,6 +1203,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// A generated page as committed, with its line endings made LF before the comparison, so that a checkout or an
 		/// editor that changed them is not reported as a difference in the generated text. Null if the page is missing.
 		/// </summary>
+		/// <remarks>
+		/// NOTE: ReadAllText drops a UTF-8 byte-order mark without saying so, so a page that acquired one would compare
+		/// equal and keep it, where the write path below always writes none. That needs a hand edit in a folder whose every
+		/// page says not to edit it, and ReadGolden has had the same blind spot since this fixture was written; if a mark
+		/// ever does arrive here, read the first bytes rather than the text.
+		/// </remarks>
 		private static string ReadTablePage(string fileName)
 		{
 			string path = Path.Combine(TablesDirectory, fileName);
@@ -1250,7 +1269,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			var problems = new List<string>();
 			var views = new HashSet<string>(_viewNames, StringComparer.Ordinal);
 			var tableVarNames = new HashSet<string>(_tableVarDefinitions.Keys, StringComparer.Ordinal);
-			int referenceCount = Rows(Process, "select References where Library_Name = 'System' over { Name }", "Name").Count;
+			List<string> referenceNames = Rows(Process, "select References where Library_Name = 'System' over { Name }", "Name").Select(row => row[0]).ToList();
+			if (!referenceNames.Contains(ExampleReferenceName))
+				problems.Add(String.Format("the generated index tells a reader to script {0} and the System library has no reference of that name. Point ExampleReferenceName at one the catalog has.", ExampleReferenceName));
 
 			problems.AddRange(TableSetProblems(views));
 
@@ -1276,7 +1297,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			}
 
 			claimed.Add(TablesIndexFileName);
-			problems.AddRange(TablePageProblems(updating, TablesIndexFileName, TablesIndex(tables, viewList, referenceCount), ref written));
+			problems.AddRange(TablePageProblems(updating, TablesIndexFileName, TablesIndex(tables, viewList, referenceNames.Count), ref written));
 
 			foreach (string existing in ExistingTablePages())
 			{
@@ -1370,7 +1391,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return result.ToString();
 		}
 
-		/// <summary>Where two texts first differ, as a line number and the two lines, so that a failure says what changed.</summary>
+		/// <summary>Where two texts first differ, as a line and column and a window of each side, so that a failure says what changed.</summary>
 		private static string FirstDifference(string expected, string actual)
 		{
 			string[] expectedLines = expected.Replace("\r\n", "\n").Split('\n');
@@ -1380,16 +1401,37 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				string expectedLine = index < expectedLines.Length ? expectedLines[index] : "<end of text>";
 				string actualLine = index < actualLines.Length ? actualLines[index] : "<end of text>";
 				if (expectedLine != actualLine)
-					return String.Format("First difference at line {0}:\n    published or golden: {1}\n    generated:           {2}", index + 1, Excerpt(expectedLine), Excerpt(actualLine));
+				{
+					int column = 0;
+					while (column < expectedLine.Length && column < actualLine.Length && expectedLine[column] == actualLine[column])
+						column++;
+					return String.Format("First difference at line {0}, column {1}:\n    published or golden: {2}\n    generated:           {3}", index + 1, column + 1, Excerpt(expectedLine, column), Excerpt(actualLine, column));
+				}
 			}
 			return "The two texts differ although no line does, so the difference is in the line endings.";
 		}
 
 		private const int ExcerptLength = 200;
 
-		private static string Excerpt(string line)
+		/// <summary>The part of a line around the column that differs, with an ellipsis where it is cut.</summary>
+		/// <remarks>
+		/// A window around the difference rather than the start of the line: the generated system table pages carry
+		/// paragraphs of several hundred characters on one line, and a window taken from the start of such a line reports
+		/// the same text for both sides and says nothing about what changed. Measured on the generated index.
+		/// </remarks>
+		/// <remarks>
+		/// NOTE: FrontendDerivationGoldenTest and DeviceTranslationGoldenTests carry their own copies of this and of
+		/// FirstDifference, and theirs are still the start-of-line form. That is adequate for what they compare - D4 and
+		/// XML, which the emitters break into short lines - so the three were left as three. A third caller that needs the
+		/// column is the point at which to unify them.
+		/// </remarks>
+		private static string Excerpt(string line, int column)
 		{
-			return line.Length <= ExcerptLength ? line : line.Substring(0, ExcerptLength) + "...";
+			if (line.Length <= ExcerptLength)
+				return line;
+			int from = Math.Max(0, Math.Min(column - (ExcerptLength / 2), line.Length - ExcerptLength));
+			int length = Math.Min(ExcerptLength, line.Length - from);
+			return (from > 0 ? "..." : "") + line.Substring(from, length) + (from + length < line.Length ? "..." : "");
 		}
 
 		/// <summary>Removes the directories an update emptied, so that a folder that stops contributing leaves none behind.</summary>
