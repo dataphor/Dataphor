@@ -94,7 +94,6 @@ Measured the same way. They are per-file `#define`s like the rest; the inherited
 | `USEINCLUSIVEMULTIPLEX` | off | `libraries/SQLDevice/Source/SQLDeviceCursor.cs` | Repositions a multiplexed cursor with an inclusive rather than an exclusive restriction, where several cursors share one connection. |
 | `USESTRUCTTAG` | on | `src/engine/DAE/Language.D4/MetaData.cs` | Declares a metadata `Tag` as a struct; the other branch of the same file declares it as a class. Both branches read `USETAGNAMECACHE`. |
 
-
 ## Notes on four of the switches
 
 The inherited index carried a longer comment on four entries. They are the original author's, kept because each records a judgement that is written down nowhere else.

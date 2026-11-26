@@ -320,5 +320,29 @@ class UntestedFilesTest(unittest.TestCase):
                       self.section(output[output.index("# Test coverage report"):]))
 
 
+class ShippedMapTest(unittest.TestCase):
+    """The checked-in areas.json, read against the tree it describes.
+
+    Every other test here runs on fixtures. This one is about the shipped map going stale:
+    a ticket that deletes a source file has to remember to take its path out of the map by
+    hand, and a path left behind silently claims nothing, which moves an area's rate without
+    anyone noticing. Generated roots are exempt because a clean clone has not built them yet.
+    """
+
+    SOURCE_ROOTS = ("src/", "libraries/", "samples/", "tests/", "tools/")
+
+    def test_every_source_path_in_the_shipped_map_is_in_the_tree(self):
+        area_map = json.load(open(coverage_report.DEFAULT_AREAS, encoding="utf-8-sig"))
+        root = coverage_report.find_repo_root(os.path.dirname(os.path.abspath(coverage_report.__file__)))
+        self.assertIsNotNone(root, "the test needs the repository it describes")
+        named = [("area " + area["name"], path) for area in area_map["areas"] for path in area["paths"]]
+        named += [("exclusion " + exclusion["reason"][:40], path)
+                  for exclusion in area_map.get("excluded", []) for path in exclusion["paths"]]
+        for who, path in named:
+            if path.startswith(self.SOURCE_ROOTS):
+                self.assertTrue(os.path.exists(os.path.join(root, *path.split("/"))),
+                                "%s names %s, which is not in the tree" % (who, path))
+
+
 if __name__ == "__main__":
     unittest.main()
