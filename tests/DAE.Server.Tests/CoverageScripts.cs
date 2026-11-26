@@ -493,9 +493,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// The D4 a needs-database-server entry runs before its own preamble: the SQL Server device its script asks for,
-		/// created in the helper library from the configured server. The class name is the registered alias
-		/// MSSQLDevice.MSSQLDevice - "MSSQLDevice" alone, as the commented-out definition in the helper library's Device.d4
-		/// spells it, is not an alias of anything.
+		/// created in the helper library from the configured server (TestEnvironment.MSSQLDeviceDefinition, which spells the
+		/// registered class name and carries the device user a SQL login needs).
 		/// </summary>
 		/// <remarks>
 		/// The current library is set to the helper library and left there, which is the one place these three scripts differ
@@ -512,11 +511,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return
 				String.Format
 				(
-					"SetLibrary('{0}');\r\ncreate device {1} reconciliation {{ mode = {{ command }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n{3}",
+					"SetLibrary('{0}');\r\n{1}",
 					LiveDeviceLibrary,
-					LiveDeviceName,
-					TestEnvironment.MSSQLDeviceAttributes(LiveDeviceDatabase),
-					TestEnvironment.MSSQLDeviceUser(LiveDeviceName)
+					TestEnvironment.MSSQLDeviceDefinition(LiveDeviceName, LiveDeviceDatabase, "command")
 				);
 		}
 

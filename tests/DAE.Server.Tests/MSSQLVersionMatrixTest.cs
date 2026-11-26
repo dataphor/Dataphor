@@ -173,13 +173,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					(
 						"EnsureLibraryRegistered('{0}');\r\n" +
 							"SetLibrary('{0}');\r\n" +
-							"create device {1} reconciliation {{ mode = {{ none }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n" +
-							"{3}\r\n" +
+							"{2}" +
 							"Diagnostics.EnsureDeviceStarted('{1}');\r\n",
 						LibraryName,
 						DeviceName,
-						TestEnvironment.MSSQLDeviceAttributes(DatabaseName),
-						TestEnvironment.MSSQLDeviceUser(DeviceName)
+						// Reconciliation mode none: this pass reconciles once, by the Reconcile call below, so that what the
+						// device made of the schema is read at a point of this fixture's choosing rather than as a side effect.
+						TestEnvironment.MSSQLDeviceDefinition(DeviceName, DatabaseName, "none")
 					)
 				);
 
@@ -225,32 +225,23 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
 				try
 				{
-					// In a transaction of its own and committed explicitly: reconciling writes the table variables it found
-					// into the catalog, and those writes belong to the statement that opened the cursor, which closing the
-					// cursor would otherwise roll back - so without this the reconciliation would appear to succeed and leave
-					// nothing behind.
-					process.BeginTransaction(IsolationLevel.Isolated);
+					// No transaction of this pass's own, which is how a deployment reconciles: the whole reconciliation runs in
+					// SystemReconcileNode.InternalExecute while the cursor is opened, so it is the open call's own implicit
+					// transaction that carries the table variables into the catalog, and ServerProcess.EndTransactionalCall
+					// commits that at the end of the call.
+					//
+					// Reconcile returns its failures rather than raising them - one row per object it could not reconcile - so a
+					// pass that only executed it would report a silent partial reconciliation as a success.
+					IServerCursor cursor = process.OpenCursor(String.Format("Reconcile('{0}')", QualifiedDeviceName), null);
 					try
 					{
-						// Reconcile returns its failures rather than raising them - one row per object it could not reconcile -
-						// so a pass that only executed it would report a silent partial reconciliation as a success.
-						IServerCursor cursor = process.OpenCursor(String.Format("Reconcile('{0}')", QualifiedDeviceName), null);
-						try
-						{
-							while (cursor.Next())
-								using (IRow row = cursor.Select())
-									errors.Add(Convert.ToString(row["Error"]));
-						}
-						finally
-						{
-							process.CloseCursor(cursor);
-						}
-						process.CommitTransaction();
+						while (cursor.Next())
+							using (IRow row = cursor.Select())
+								errors.Add(Convert.ToString(row["Error"]));
 					}
-					catch
+					finally
 					{
-						process.RollbackTransaction();
-						throw;
+						process.CloseCursor(cursor);
 					}
 				}
 				finally

@@ -193,19 +193,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>
 		/// One SQL Server device against the configured server, in the reconciliation mode the library's own scripts defined
 		/// both of these in: the device is the master and data-definition commands reach it, which is what lets the corpus
-		/// create and drop its tables there. Followed by the device user where the configured server needs a SQL login, which
-		/// is not something a device definition can carry (TestEnvironment.MSSQLDeviceUser).
+		/// create and drop its tables there.
 		/// </summary>
 		private static string DeviceDefinition(string deviceName)
 		{
-			return
-				String.Format
-				(
-					"create device {0} reconciliation {{ mode = {{ command }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {1} }};\r\n{2}",
-					deviceName,
-					TestEnvironment.MSSQLDeviceAttributes(DatabaseName),
-					TestEnvironment.MSSQLDeviceUser(deviceName)
-				);
+			return TestEnvironment.MSSQLDeviceDefinition(deviceName, DatabaseName, "command");
 		}
 
 		/// <summary>

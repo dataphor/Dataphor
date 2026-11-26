@@ -361,6 +361,34 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
+		/// The whole of the D4 that gives a server a SQL Server device named <paramref name="deviceName"/> against the
+		/// configured server, holding its tables in <paramref name="databaseName"/> and reconciling in
+		/// <paramref name="reconciliationMode"/> ("command" for a device that data-definition commands reach, "none" for one
+		/// that is only read): the create-device statement, and after it the device user where the variable names a SQL login.
+		/// Ends in a line break, so a caller can concatenate it into a script.
+		/// </summary>
+		/// <remarks>
+		/// One operation rather than two, because the two statements are not separable: a device created from these attributes
+		/// against a server that needs a SQL login carries no credentials of its own (see MSSQLDeviceUser), so a site that
+		/// emitted the definition and forgot the device user would pass on integrated security and fail against a login - which
+		/// is the shape of the defect that put the device user here in the first place. It is also the one place the device's
+		/// registered class name is spelled: the alias is "MSSQLDevice.MSSQLDevice" - "MSSQLDevice" alone, as the
+		/// commented-out definition in TestFramework.Coverage.Base's Device.d4 spells it, is not an alias of anything.
+		/// </remarks>
+		public static string MSSQLDeviceDefinition(string deviceName, string databaseName, string reconciliationMode)
+		{
+			return
+				String.Format
+				(
+					"create device {0} reconciliation {{ mode = {{ {1} }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n{3}",
+					deviceName,
+					reconciliationMode,
+					MSSQLDeviceAttributes(databaseName),
+					MSSQLDeviceUser(deviceName)
+				);
+		}
+
+		/// <summary>
 		/// The attribute list of a D4 SQL Server device definition against the configured server, for a device holding its
 		/// tables in <paramref name="databaseName"/>: the server name, the database name and whatever the variable says about
 		/// authentication and encryption, and nothing else.
@@ -376,7 +404,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// A SQL login is not among them: it goes to a device user instead (MSSQLDeviceUser below), so that no password is
 		// stored as the literal text of a device definition - which is where one in the variable used to land, and where the
 		// catalog of a run kept with DATAPHOR_TEST_LOGGING=1 would leave it on disk.
-		public static string MSSQLDeviceAttributes(string databaseName)
+		private static string MSSQLDeviceAttributes(string databaseName)
 		{
 			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
 			List<string> attributes = new List<string>();
@@ -410,7 +438,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// credentials (Device.GetDeviceSessionInfo), so a device user is the spelling that works whichever it is given.
 		/// </para>
 		/// </remarks>
-		public static string MSSQLDeviceUser(string deviceName)
+		private static string MSSQLDeviceUser(string deviceName)
 		{
 			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
 			if (server.IntegratedSecurity)
@@ -508,12 +536,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// The first column of the first row <paramref name="expression"/> returns on the configured server, as a string, or null
-		/// where it returns no row.
+		/// where it returns no row or that column is null.
 		/// </summary>
 		// Beside ExecuteOnMSSQL and for the same reason: one place reads the variable and one place reaches the server, through
 		// the connection class the device and the store share. The client-side cursor explicitly, because these expressions have
 		// no from clause and sp_cursoropen - which DetectCursorLocation would choose for a statement starting with select - needs
 		// something to range over.
+		// IsNull is asked rather than letting Convert.ToString answer, because the cursor hands a null column back as
+		// DBNull.Value and Convert.ToString turns that into the empty string - which a caller testing the result for null to
+		// mean "the server had no answer" would read as an answer. The functions these expressions call return null for an
+		// object that is not there (databasepropertyex of an absent database), so that distinction is the whole point.
 		public static string QueryMSSQL(string connectionString, string expression)
 		{
 			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
@@ -524,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				command.LockType = SQLLockType.ReadOnly;
 				command.Statement = expression;
 				using (SQLCursor cursor = command.Open(SQLCursorType.Dynamic, SQLIsolationLevel.ReadCommitted))
-					return cursor.Next() ? Convert.ToString(cursor[0]) : null;
+					return cursor.Next() && !cursor.IsNull(0) ? Convert.ToString(cursor[0]) : null;
 			}
 		}
 
