@@ -287,9 +287,7 @@ if not exists (ClientTypes) then
 	insert
 		table
 		{
-			row { "Windows" ID, "Dataphor Windows Client" Description, "WindowsClient" Environment },
-			row { "Web" ID, "Dataphor Web Client" Description, "WebClient" Environment },
-			row { "Silverlight" ID, "Silverlight Client" Description, "SilverlightClient" Environment }
+			row { "Windows" ID, "Dataphor Windows Client" Description, "WindowsClient" Environment }
 		}
 		into ClientTypes;
 
