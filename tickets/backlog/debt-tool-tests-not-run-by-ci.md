@@ -36,4 +36,6 @@ Two details whoever does this will meet:
 
 ## What this ticket is not
 
-`docs-link-check-ci` (an arm of `feat-ws8-documentation-remainder`) puts the *link checker itself* into CI - running it over `docs/` to gate the links. That is a different thing from running that checker's unit tests, and the two can land in either order. Neither one makes the other unnecessary.
+`docs-link-check-ci`, now a ticket of its own, puts the *link checker itself* into CI - running it over `docs/` to gate the links. That is a different thing from running that checker's unit tests, and the two can land in either order. Neither one makes the other unnecessary.
+
+One interaction to expect: `tools/docs-convert/` and its `test_convert.py` are deleted by `docs-remove-old-sources`, because the converter has nothing left to convert once the AsciiDoc and DocBook sources go. A step that **discovers** tool folders with tests, which is the shape this ticket asks for, needs no change when that happens; a hard-coded list or a path filter naming that folder would be left pointing at nothing. One more reason not to spell the folders out.
