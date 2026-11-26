@@ -21,7 +21,7 @@ Discusses the declarative approach employed in Dataphor as a solution to many of
 It is primarily intended to be read by software engineers; however, much of the material is pertinent for application and database administrators as well.
 
 **[Dataphor Reference](reference/README.md)**  
-Dataphor Reference documents the Dataphor product, including the Call-Level Interface (CLI), Dataphor Frontend, Tags, documentation for all the libraries that ship with the Dataphor product, as well as class references for using Dataphor’s Data Access Layers (DAL) from a Microsoft .NET language such as C#.
+Dataphor Reference is the material for looking something up: the D4 language’s grammar and the System library that is its vocabulary, the libraries this release ships, the metadata tags, the error-code ranges and the compiler defines, plus overviews of the two .NET layers a program reaches the server through - the Call-level Interface and the Data Access Components. The generated .NET class reference the 3.x documentation carried for those two layers is not here: the tool that produced it is gone, and each page says where to read instead.
 
 ## Contents
 
@@ -104,8 +104,9 @@ Dataphor Reference documents the Dataphor product, including the Call-Level Inte
     4.  [Data Access Components (DAC)](reference/data-access-components.md)
     5.  [Error Message Prefix Codes](reference/error-codes.md)
     6.  [Tags](reference/tags.md)
-    7.  [Libraries](reference/libraries/README.md)
-    8.  [Compiler Defines](reference/compiler-defines.md)
+    7.  [System Library](reference/system-library/README.md)
+    8.  [Libraries](reference/libraries/README.md)
+    9.  [Compiler Defines](reference/compiler-defines.md)
 
 ### Misc
 

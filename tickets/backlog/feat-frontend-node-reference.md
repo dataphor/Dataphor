@@ -1,6 +1,6 @@
 description: The product has no reference describing the elements an application author can put in a user-interface description - that reference used to be produced automatically from the client and no copy of it survives, so authors currently have to read the source.
 architecture: docs/modernization-plan.md#ws8-documentation
-files: docs/reference/frontend-nodes/README.md, src/client/Frontend.Client/ElementInterfaces.cs, src/client/Frontend.Client/ActionInterfaces.cs, src/client/Frontend.Client/DataInterfaces.cs, src/windows/Frontend.Client.Windows/, libraries/Frontend/Documents/Windows.NodeTypes.dnt, docs/developers-guide/presentation-layer.md, docs/developers-guide/form-automation.md
+files: docs/reference/frontend-nodes/README.md, src/client/Frontend.Client/ElementInterfaces.cs, src/client/Frontend.Client/ActionInterfaces.cs, src/client/Frontend.Client/DataInterfaces.cs, src/client/Frontend.Client/Interfaces.cs, src/windows/Frontend.Client.Windows/, libraries/Frontend/Documents/Windows.NodeTypes.dnt, docs/developers-guide/presentation-layer.md, docs/developers-guide/form-automation.md
 tradeoffs: Writing it by hand duplicates what the source already states and goes stale the first time a node changes, and generating it means a second documentation generator beside the one WS8 already plans for the operator reference - a maintainer may reasonably decide that application authors reading the node classes is good enough.
 ----
 ## What this is
@@ -13,7 +13,7 @@ Applications in this product are built from user-interface descriptions - a docu
 
 ## Why someone would want it
 
-An application author writing or customising a form document chooses elements and sets their properties. Today the way to find out what elements exist and what properties each takes is to read the node interfaces in `src/client/Frontend.Client/` (`ElementInterfaces.cs`, `ActionInterfaces.cs`, `DataInterfaces.cs`) and the Windows client's implementations of them in `src/windows/Frontend.Client.Windows/`. That is fine for the people porting the product and poor for the people the product is for, and it is the only part of the reference that has no pages at all.
+An application author writing or customising a form document chooses elements and sets their properties. Today the way to find out what elements exist and what properties each takes is to read the node interfaces in `src/client/Frontend.Client/` (`ElementInterfaces.cs`, `ActionInterfaces.cs`, `DataInterfaces.cs` and `Interfaces.cs`, which holds the menu, toolbar, timer and grid-column nodes) and the Windows client's implementations of them in `src/windows/Frontend.Client.Windows/`. That is fine for the people porting the product and poor for the people the product is for, and it is the only part of the reference that has no pages at all.
 
 ## What it would have to cover
 

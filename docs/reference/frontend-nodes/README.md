@@ -6,7 +6,7 @@ A Dataphor user interface is described by a document, not by compiled code: a fo
 
 **There is no element reference in this documentation set, and there is no source for one.** The published 3.x documentation had one - a page per element, listing its properties with their types and defaults - but it was generated from the client's own node interfaces when the help file was built, and no copy of that output survives. Both DocBook sources that would hold it are placeholders saying the section is produced by automation, and the published help file has no such pages at all. So the element reference is not missing from this conversion; it was never a document.
 
-What the client's interfaces still carry is the material it was generated from: the published properties of the node interfaces in `src/client/Frontend.Client/` carry XML documentation comments giving the type, the default and the remarks, each marked with a `<doc/>` element for the publishing tool to pick up - 292 of them across the three interface files. Reading those files is the authoritative answer about any particular element today. `feat-frontend-node-reference` is the work item that would turn them back into a reference.
+What the client's interfaces still carry is the material it was generated from: the published properties of the node interfaces in `src/client/Frontend.Client/` carry XML documentation comments giving the type, the default and the remarks, each marked with a `<doc/>` element for the publishing tool to pick up. There are 335 of those marks across the four interface files: 56 sit on an interface - an element, an action or a data node - and 279 on their members. Reading those files is the authoritative answer about any particular element today. `feat-frontend-node-reference` is the work item that would turn them back into a reference.
 
 ## Where to read instead
 
@@ -18,7 +18,7 @@ What the client's interfaces still carry is the material it was generated from: 
 | How documents and customizations are stored, and how the designer edits them | [Documents and Designers](../../users-guide/documents-and-designers.md) |
 | The D4 operators that load, save, derive and customize documents | [the Frontend library reference](../libraries/Frontend.md) |
 | How the pieces fit in this repository | [Frontend: from schema to screen](../../architecture/frontend.md) |
-| The elements themselves, with their properties | the node interfaces in `src/client/Frontend.Client/` (`ElementInterfaces.cs`, `ActionInterfaces.cs`, `DataInterfaces.cs`), and the Windows client's implementations of them in `src/windows/Frontend.Client.Windows/` |
+| The elements themselves, with their properties | the node interfaces in `src/client/Frontend.Client/` - `ElementInterfaces.cs`, `ActionInterfaces.cs`, `DataInterfaces.cs` and `Interfaces.cs`, the last of which holds the menu, toolbar, timer and grid-column nodes - and the Windows client's implementations of them in `src/windows/Frontend.Client.Windows/` |
 
 ## What a document looks like
 
@@ -38,7 +38,7 @@ An empty interface:
 </interface>
 ```
 
-An `interface` may contain exactly one element node, plus any number of actions, sources and other non-visual nodes. The designer in the IDE enforces which node may appear where, so trying it there is quicker than reasoning about it.
+An `interface` may contain at most one element node - the empty one above has none - plus any number of actions, sources and other non-visual nodes. The designer in the IDE enforces which node may appear where, so trying it there is quicker than reasoning about it.
 
 - **`xmlns:bop`** declares the namespace of the serializer that reads the document (`www.alphora.com/schemas/bop`, implemented in `src/engine/Base/BOP`). It is what makes the attributes below meaningful rather than ordinary XML attributes.
 - **`bop:name`** names an element so that other elements can refer to it - a control naming its source, an action naming the action it calls. Nearly every element carries one. It is also the identity a customization matches on when its delta is merged onto an ancestor document.

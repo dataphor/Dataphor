@@ -157,6 +157,14 @@ class LegacyMapTest(unittest.TestCase):
         self.assertEqual(self.resolver.unresolved, [])
 
 
+class LegacyRuleTest(unittest.TestCase):
+    def test_an_element_reference_link_goes_to_the_section_index(self):
+        # The one rule with a fixed target rather than a captured name: the element reference was
+        # generated and no copy survives, so no per-element page will ever exist to link to.
+        self.assertEqual(convert.legacy_target("dilrefAlphora.Dataphor.Frontend.Client.IFrame.html"),
+                         "reference/frontend-nodes/README.md")
+
+
 class LegacyLinkTest(unittest.TestCase):
     def test_no_rule_link_with_folder_is_listed(self):
         # Regression: legacy_rows looked for the bare file name, not the link as written, and
