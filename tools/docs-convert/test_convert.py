@@ -90,6 +90,47 @@ class FragmentTest(unittest.TestCase):
                          ["no such page; candidates: A.adoc#Summary"])
 
 
+class LegacyMapTest(unittest.TestCase):
+    """--legacy-map supplies the target of a legacy page the built-in rules do not place, and
+    overrides them for one they place wrongly; a miss falls through to the rules."""
+
+    def setUp(self):
+        self.page = make_page("A.adoc", "guide/a.md", [("", "A", "a")])
+        self.resolver = make_resolver([self.page])
+        self.resolver.settings.legacy_map = {
+            "d4lgcatalogelements-devices.html": {
+                "legacy_page": "D4LGCatalogElements-Devices.html",
+                "target": "developers-guide/d4-catalog.md#device", "reason": "by title", "_line": 2},
+            "dfrtagreference.html": {
+                "legacy_page": "DFRTagReference.HTML", "target": "reference/tags.md",
+                "reason": "the chapter", "_line": 3},
+            "droracledevice.html": {
+                "legacy_page": "DROracleDevice.html", "target": "",
+                "reason": "not shipped", "_line": 4},
+        }
+
+    def href(self, url):
+        item = link(url)
+        result = self.resolver.link(self.page, self.page.source, item)
+        return item["c"][2][0] if result is item else result
+
+    def test_hit_with_a_fragment(self):
+        # Only the path is made relative to the current page; the fragment is appended.
+        self.assertEqual(self.href("D4LGCatalogElements-Devices.html"),
+                         "../developers-guide/d4-catalog.md#device")
+
+    def test_hit_matches_the_page_name_in_any_case(self):
+        self.assertEqual(self.href("DFRTagReference.HTML"), "../reference/tags.md")
+
+    def test_empty_target_unlinks_and_keeps_the_text(self):
+        self.assertEqual(convert.stringify(self.href("DROracleDevice.html")), "label")
+
+    def test_miss_falls_through_to_the_built_in_rules(self):
+        self.assertEqual(self.href("O-System.Abs.html"),
+                         "../reference/system-library/operators/System.Abs.md")
+        self.assertEqual(self.resolver.unresolved, [])
+
+
 class LegacyLinkTest(unittest.TestCase):
     def test_no_rule_link_with_folder_is_listed(self):
         # Regression: legacy_rows looked for the bare file name, not the link as written, and

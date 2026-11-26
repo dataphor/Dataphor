@@ -95,6 +95,11 @@ def legacy_target(file_name):
     return None
 
 
+# A legacy page name, in any letter case: one source link is spelled `DFRTagReference.HTML` and
+# another `DDGP2BasicConnectivity.htm`.
+LEGACY_PAGE = re.compile(r"\.html?$", re.IGNORECASE)
+
+
 # ---------------------------------------------------------------------------
 # Tab-separated tables (header row, no quoting, UTF-8, LF)
 
@@ -319,6 +324,9 @@ SECTION_TITLES = {
     "fixes": "References settled by xref-fixes.tsv",
     "fixes-unused": "xref-fixes.tsv rows that matched no reference",
     "legacy-unresolved": "Legacy .html links with no rule, or with a folder",
+    "legacy-map": "Legacy links settled by --legacy-map",
+    "legacy-map-overrides": "--legacy-map rows that override a built-in rule",
+    "legacy-map-unused": "--legacy-map rows that matched no link",
     "external": "External links",
     "images-missing": "Images not found",
     "images-unreferenced": "Images no converted page references",
@@ -373,6 +381,7 @@ class Settings:
         self.global_ids = False          # a fragment-only reference may name an id in any page
         self.legacy_links = False        # rewrite legacy *.html reference links by LEGACY_RULES
         self.xref_fixes = {}             # (source, ref) -> row
+        self.legacy_map = {}             # folded legacy page name -> row; consulted before LEGACY_RULES
         self.code_table = None           # path of the code-block table, or None for heuristic tags
         self.seed_code_table = False
         self.require_reviewed = False
@@ -639,6 +648,7 @@ class Resolver:
                     if heading.id:
                         self.ids.setdefault(heading.id, []).append((page, heading))
         self.used_fixes = set()
+        self.used_legacy_rows = set()
         self.images = {}          # output name -> absolute source path
         self.image_sources = {}   # absolute source path -> output name
         self.external = []
@@ -723,7 +733,7 @@ class Resolver:
                 return item
             return self.fail(current, source, url, text, "unsupported scheme")
         path = url.partition("#")[0]
-        if path.endswith(".html") and self.settings.legacy_links:
+        if LEGACY_PAGE.search(path) and self.settings.legacy_links:
             return self.legacy(current, source, item, path, text)
         ref = self.normalise_ref(url)
         page, heading, problem, note = self.locate(source, ref)
@@ -758,10 +768,24 @@ class Resolver:
             self.report.add("legacy-unresolved", "%s: %s has a folder; rule applied to %s" % (source, path, name))
         if url != path:
             self.report.add("legacy-unresolved", "%s: %s; the fragment is dropped" % (source, url))
-        target = legacy_target(name)
+        # A --legacy-map row wins over the built-in rules: the map is where a page that no rule
+        # describes, or one whose rule names the wrong page, is settled.
+        row = self.settings.legacy_map.get(name.casefold())
+        fragment = ""
+        if row is not None:
+            self.used_legacy_rows.add(name.casefold())
+            target, _, fragment = row["target"].partition("#")
+            if not target:
+                self.report.add("legacy-map", "%s: %s -> unlinked (%s)" % (source, name, row["reason"]))
+                return item["c"][1]
+            self.report.add("legacy-map", "%s -> %s (%s)" % (name, row["target"], row["reason"]))
+        else:
+            target = legacy_target(name)
         if target is not None:
-            item["c"][2][0] = posixpath.relpath(target, posixpath.dirname(current.output) or ".")
-        # The destination as written, which legacy_rows looks for in the rendered page.
+            relative = posixpath.relpath(target, posixpath.dirname(current.output) or ".")
+            item["c"][2][0] = relative + ("#" + fragment if fragment else "")
+        # The destination as written, which legacy_rows looks for in the rendered page; its
+        # target column is a path, which is what the link checker's --pending compares.
         current.legacy.append((text, name, target or "", source, item["c"][2][0]))
         if target is None:
             self.report.add("legacy-unresolved", "%s: %s" % (source, path))
@@ -1150,6 +1174,14 @@ def finish(pages, api, settings, report):
     for key in sorted(set(settings.xref_fixes) - resolver.used_fixes):
         row = settings.xref_fixes[key]
         report.add("fixes-unused", "line %d: %s %s" % (row["_line"], key[0], key[1]))
+    for key in sorted(settings.legacy_map):
+        row = settings.legacy_map[key]
+        rule = legacy_target(row["legacy_page"].strip())
+        if rule is not None:
+            report.add("legacy-map-overrides", "line %d: %s -> %s, not the rule's %s"
+                       % (row["_line"], row["legacy_page"], row["target"] or "(unlinked)", rule))
+        if key not in resolver.used_legacy_rows:
+            report.add("legacy-map-unused", "line %d: %s" % (row["_line"], row["legacy_page"]))
     for line in sorted(resolver.external):
         report.add("external", line)
     referenced = set(resolver.images.values())
@@ -1301,6 +1333,26 @@ def convert_asciidoc(args):
     return status
 
 
+LEGACY_MAP_COLUMNS = ("legacy_page", "target", "reason")
+
+
+def read_legacy_map(path):
+    """Legacy page name -> row, keyed case-insensitively because the sources spell the suffix
+    three ways. A row whose key a built-in rule already handles is reported, not refused: that
+    is how a merged or renamed reference page is retargeted."""
+    rows = {}
+    if not path:
+        return rows
+    for row in read_tsv(path, LEGACY_MAP_COLUMNS):
+        key = row["legacy_page"].strip().casefold()
+        if not key:
+            fail("%s line %d has no legacy page name" % (os.path.basename(path), row["_line"]))
+        if key in rows:
+            fail("%s line %d repeats %s" % (os.path.basename(path), row["_line"], row["legacy_page"]))
+        rows[key] = row
+    return rows
+
+
 def read_xref_fixes(path):
     fixes = {}
     if not path or not os.path.exists(path):
@@ -1336,6 +1388,7 @@ def convert_docbook(args):
         settings.allow_unresolved = args.allow_unresolved
         settings.legacy_table = os.path.abspath(args.legacy_table) if args.legacy_table else None
         settings.xref_fixes = read_xref_fixes(args.xref_fixes)
+        settings.legacy_map = read_legacy_map(args.legacy_map)
         settings.pandoc = find_pandoc(args.pandoc, args.allow_tool_versions, report)
         sources = {}
         for path in files:
@@ -1398,6 +1451,7 @@ def main(argv=None):
         parser.add_argument("--match-heading-text", action="store_true", help="also resolve a fragment by heading text, '_' read as space")
         parser.add_argument("--global-ids", action="store_true", help="resolve a fragment-only reference by a heading id in any page")
         parser.add_argument("--legacy-html", action="store_true", help="rewrite links to legacy *.html reference pages by the built-in rule")
+        parser.add_argument("--legacy-map", metavar="TSV", help="targets for legacy pages the built-in rule does not place, consulted first")
         parser.add_argument("--legacy-table", metavar="TSV", help="write the legacy link list here (with --legacy-html)")
         return convert_docbook(parser.parse_args(argv[1:]))
 

@@ -80,7 +80,9 @@ Links to the reference pages of the old DocBook build go to the page `docs-conve
 | `Alphora.Dataphor.DAE.Client.<Name>.html` | `reference/data-access-components.md` (this conversion's placeholder page) |
 | anything else | no target; listed and reported as unresolved |
 
-Names keep the legacy spelling and case. To retarget, edit `LEGACY_RULES` in `convert.py` and rerun. Until those pages exist, the link checker's `--pending legacy-links.tsv` reports these links as pending instead of broken.
+Names keep the legacy spelling and case, and the suffix is matched as `.html` or `.htm` in any letter case, because the sources spell it three ways (`DFRTagReference.HTML`, `DDGP2BasicConnectivity.htm`). To retarget, edit `LEGACY_RULES` in `convert.py` and rerun. Until those pages exist, the link checker's `--pending legacy-links.tsv` reports these links as pending instead of broken.
+
+The DocBook stage's `--legacy-map TSV` is consulted **before** these rules, and is how the legacy reference conversion resolves the 600-odd links its sources carry into the converted guides. A row supplies the target of a page no rule describes, overrides a rule that names the wrong page (a merged operator page, say), or unlinks the reference and keeps its text when the page has no counterpart under `docs/`. A target may carry a `#fragment`; only the path part is made relative to the current page. Rows that match nothing, and rows that override a built-in rule, are both listed in the report - the second because it silently retargets a link that would otherwise have resolved. See `reference-links.tsv` below.
 
 ## The report
 
@@ -96,8 +98,55 @@ All files are tab-separated text with a header row, UTF-8, LF line endings, no q
 | `xref-fixes.tsv` | `source` (the `.adoc` the reference is in), `ref` (the reference as the report prints it, `path#fragment`), `replacement` (a corrected reference in the same form, resolved normally; empty: unlink, keeping the text), `reason` | by hand, from the report's unresolved and ambiguous lists. Consulted only for references that do not resolve otherwise or that match several same-named headings; a row for a reference that resolves cleanly is ignored (and listed as matching nothing). |
 | `code-blocks.tsv` | `page` (output path), `n` (1-based position of the block in the page), `sha` (first 12 hex digits of the SHA-1 of the block text after character clean-up), `lang` (`d4`, `sql`, `xml`, `bnf`, `csharp` or `text`), `reviewed` (`yes` or empty), `first_line` (first non-blank line, 60 characters, for the reviewer) | seeded by `--seed-code-table` from a heuristic (`::=` → `bnf`; an XML declaration or a tag with a closing tag → `xml`; a line starting with an upper-case SQL statement → `sql`; `;`, `:=`, `{` or a D4 keyword → `d4`; else `text`), then reviewed by hand (`docs-convert-asciidoc`), setting `lang` and `reviewed`. A row is matched by page and position and trusted only while its `sha` matches. |
 | `legacy-links.tsv` | `page`, `line` (1-based, in the output page), `text`, `legacy_page`, `target` (relative to the docs root), `source` | generated on every run; do not edit. Sorted by page, then line. Its `target` column is what the link checker's `--pending` reads, relative to whichever root it checks, so it serves `docs/` and a scratch folder alike. |
+| `reference-pages.tsv` | `id` (a DocBook section id of the reference sources), `output` (relative to `docs/`; empty: not a page of its own), `title` (the section's heading; on a page's first row, the page title), `reason` (for the reader - why a row was moved, merged or left unconverted - not used by the script) | by hand, after `reference_split.py split --seed-pages` writes a row per section. Seeded `output` is what the built-in legacy rule gives that section's help page, so the seeded map already agrees with the links under `docs/` that point there; seeded `title` is the section's own title. Edited for the merges (several sections on one operator's page), for the few titles the sources get wrong, and for index sections that are not pages. See *The legacy reference* below. |
+| `reference-links.tsv` | `legacy_page` (a help-file page name, matched case-insensitively), `target` (relative to `docs/`, optionally `#anchor`; empty: unlink and keep the text), `reason` | by hand; passed to the DocBook stage as `--legacy-map`. It resolves the links the reference sources carry into the converted guides, which the built-in rule knows nothing about, and retargets the handful of reference pages the rule would place wrongly. A target was found by reading the help page of that name - its `<title>` and its `rel="up"` chain name the section - and then finding that heading under `docs/`; the `bk0*` names have no help page left and were resolved from their link text. Every anchor in it was checked against `heading_slugs` for that page. |
+| `declarations.tsv` | `id` (a DocBook section id), `declaration` (a D4 script; `\`, `	`, `` and `
+` escaped, because the tables are tab-separated with no quoting) | generated by `reference_split.py declarations` from the decompiled help file and then committed, so a rerun of the conversion needs neither the help file nor Windows' `hh.exe`. Review it as a table rather than trusting it: it is the published signature of every operator and type, and it is the only part of a reference page that does not come from the DocBook sources. |
 | `index-extra.md` | Markdown | by hand: the `## Project documents` section appended to `docs/README.md` (its links are relative to `docs/`, so in a scratch folder the link checker reports them missing). It is behind the section it generates - `docs/README.md` has gained bullets and the nested list of architecture pages since - so a run overwrites that section with a shorter one; read the diff before committing it. `docs-remove-old-sources` deletes this file. |
 
+## The legacy reference: reference_split.py
+
+`legacy/Documentation/Docs2.0/` is the DocBook 4.3 source of the published help collection, and the only source for the operator, type and library reference. It cannot go straight through the DocBook stage: that stage writes **one page per input file** and fails when two files resolve to the same output, while `SystemOperators.xml` alone holds 339 sections that become 321 pages, 13 of which merge several sections. `reference_split.py` reshapes the input first, so the one-file-one-page invariant stays as it is.
+
+It is the tooling behind the `docs-convert-legacy-reference` chain ([plan WS8](../../docs/modernization-plan.md#ws8-documentation)), whose design notes record why the prose comes from `Docs2.0`, why the signatures come from the published help file, why library facts do not, and what the page layout is. It needs only Python; its output is then converted by `convert.py docbook`.
+
+### declarations: the signature blocks
+
+```
+hh.exe -decompile C:\temp\chm legacy\Documentation\Dataphor.chm
+python tools/docs-convert/reference_split.py declarations C:\temp\chm --out tools/docs-convert/declarations.tsv
+```
+
+Every operator and type section in the DocBook has its *Declarations* block replaced by a placeholder that the old publishing tool filled from a live catalog, so the signatures are not in the sources at all. `legacy/Documentation/Dataphor.chm` is those same sources already published and carries the filled blocks; this mode reads its `O-*.html` and `T-*.html` pages and writes one row per section. The decompile writes 3,330 files, so **send it to a scratch folder outside the repository and do not commit the dump** - `declarations.tsv` is committed instead, which is what keeps a rerun free of the help file and of Windows' `hh.exe`. The mode decodes every row it has escaped and compares it against what it extracted, and stops if any row does not round-trip.
+
+A help page with no *Declarations* block (a category page, or one of the short cross-reference sections) contributes no row and is listed. Six operators and one type were added to the DocBook after the help file was published and so have no page in it at all; their documentation pages carry no *Declarations* heading rather than an empty one.
+
+### split: one document per page
+
+```
+python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml --seed-pages tools/docs-convert/reference-pages.tsv
+
+python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml legacy/Documentation/Docs2.0/SystemTypes.xml ^
+    --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --out C:\temp\refwork
+
+python tools/docs-convert/convert.py docbook C:\temp\refwork\*.xml --out C:\temp\refout --pages C:\temp\refwork\pages.tsv ^
+    --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text
+```
+
+`--seed-pages` writes a `reference-pages.tsv` row per section instead of splitting, so the 360 rows get reviewed rather than typed. The second command writes one DocBook document per page into `--out`, plus the `pages.tsv` that `convert.py docbook --pages` then reads; a page's file is named after its output path, flattened. Running either command twice over the same inputs gives byte-identical output.
+
+What the split does, each point a rule rather than a heuristic:
+
+- **The page map decides the layout.** A row's `output` names the page a section goes to, and **every** section id in the input must have a row, so nothing is dropped by omission. Rows sharing an `output` land on one page **in the table's row order** - which is why moving a row is how a merged page is given its primary section. An empty `output` means the section is not a page of its own: it stays inside the page of its nearest enclosing section that is one, or, having none, is not converted and is listed.
+- **One document per page, rooted at `<article>`.** It carries the id and title of the page's first section and that section's children as its body, so that title is the page's single `#` heading; the page's further sections follow as body sections and become `##`. The `<article>` wrapper is what makes pandoc's DocBook reader take the title as the document title. Titles come from the map's `title` column, so merged sections can be told apart; where the map repeats the source title the source element is used, so the few titles with inline markup keep it. Index terms are stripped from titles, and the `*info` blocks (a per-section editing date) are dropped, as the old publishing tool did.
+- **Placeholders are filled in or removed.** A `<?DocLib D4Field Declaration?>` inside a formalpara titled *Declarations* is replaced by that section's row from `declarations.tsv`; with no row, the whole formalpara goes, heading and all. Every other `<?DocLib ?>` and every `<?xm-replace_text ?>` is removed, and then so is any block it leaves with nothing to render - including a generated table whose only row was a placeholder, since its hand-written column headings are not content on their own. Only the ancestors of a removed placeholder are pruned, so hand-written content is never touched. A placeholder that survived into the output is an error: rendered as literal text it would read as published documentation.
+- **Category pages get their index.** A category section's own paragraph is an unwritten placeholder in the sources, so such a page is its title plus a list of links to the pages cut out of it - one link per page, written as a link to the help page the built-in legacy rule sends there, so it resolves like every other reference link. No prose is invented for it. A page the rule cannot reach that way is listed under *pages-needing-a-legacy-map-row*, which names exactly the `reference-links.tsv` rows to add.
+- **The sources are repaired where they are plainly wrong.** The DOCTYPE is dropped: seven sources declare one naming a DTD path that no longer exists, none of them needs it, and a DOCTYPE copied into the output would be followed by pandoc. A `url` attribute is stripped of the whitespace some of them carry, and a legacy page name that lost its suffix gets `.html` back; both are listed.
+- **Processing instructions survive parsing.** `ElementTree` discards them unless its parser is built with `insert_pis=True`; losing them would look like success and would drop every signature. The surviving-placeholder check runs on the tree, not on the markup, because 50 of the sources' comments quote a `DocLib` instruction in prose.
+
+The report lists, each only when it has entries: sections with no published declaration, sections with no id (they cannot be mapped, and stay inside their parent's page), sections not converted, sections moved off the page their help-page rule names (the merges, so a reviewer sees them), pages needing a `--legacy-map` row, page-map rows that matched nothing, and urls normalised. Errors - a section id with no row, one id in two files, a surviving placeholder - are printed last and **nothing is written**.
+
+**NOTE: pandoc drops the root element's id**, so a `#<id>` reference to a page's own title cannot resolve through `--global-ids`. The reference sources contain no such reference - every link in them names a help page, which the legacy rules and `--legacy-map` resolve - and references to ids *within* a page do work, because those ids land on body headings. A later source that cross-references a page by its root id would need the id carried onto the title heading in `convert.py`.
 ## The DocBook stage on its own
 
 ```
@@ -115,5 +164,6 @@ Runs the same pipeline from pandoc's DocBook reader onwards (characters, heading
 | `--match-heading-text` | enable fragment rules (b) and (c); without it a fragment must be a heading's id |
 | `--global-ids` | a fragment-only reference (`#id`, what `<xref linkend>` and `<link linkend>` become) whose id is not in the current page is looked up in every page; DocBook ids span the files of a set |
 | `--legacy-html`, `--legacy-table TSV` | apply the legacy `*.html` rule, and write the list |
+| `--legacy-map TSV` | targets for legacy pages, consulted before the built-in rule; columns `legacy_page`, `target`, `reason` (see `reference-links.tsv`) |
 
 Only heading ids are anchors: an id on a table, figure or paragraph is not one GitHub keeps, so a reference to it stays unresolved unless `xref-fixes.tsv` redirects it. From Python, `import convert` and drive `Settings`, `Page`, `docbook_to_trees`, `load_page` and `finish` directly to supply a different resolver.

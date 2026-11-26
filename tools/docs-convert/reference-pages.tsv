@@ -1,0 +1,361 @@
+id	output	title	reason
+O-System.AggregateOperators	reference/system-library/operators/System.AggregateOperators.md	Aggregate Operators	
+O-System.All	reference/system-library/operators/System.All.md	System.All	
+O-System.Any	reference/system-library/operators/System.Any.md	System.Any	
+O-System.Avg	reference/system-library/operators/System.Avg.md	System.Avg	
+O-System.Concat	reference/system-library/operators/System.Concat.md	System.Concat	
+O-System.ConcatAggregate	reference/system-library/operators/System.Concat.md	System.Concat	the printed reference listed this operator under another category too
+O-System.Count	reference/system-library/operators/System.Count.md	System.Count	
+O-System.iAggregate	reference/system-library/operators/System.iAggregate.md	System.iAggregate	
+O-System.Max	reference/system-library/operators/System.Max.md	System.Max	
+O-System.Min	reference/system-library/operators/System.Min.md	System.Min	
+O-System.Sum	reference/system-library/operators/System.Sum.md	System.Sum	
+O-System.ArithmeticOperators	reference/system-library/operators/System.ArithmeticOperators.md	Arithmetic Operators	
+O-System.iAddition	reference/system-library/operators/System.iAddition.md	System.iAddition	
+O-System.iAdditionString	reference/system-library/operators/System.iAddition.md	System.iAddition	the printed reference listed this operator under another category too
+O-System.iDiv	reference/system-library/operators/System.iDiv.md	System.iDiv	
+O-System.iDivision	reference/system-library/operators/System.iDivision.md	System.iDivision	
+O-System.iMultiplication	reference/system-library/operators/System.iMultiplication.md	System.iMultiplication	
+O-System.iNegate	reference/system-library/operators/System.iNegate.md	System.iNegate	
+O-System.iPower	reference/system-library/operators/System.iPower.md	System.iPower	
+O-System.iSubtraction	reference/system-library/operators/System.iSubtraction.md	System.iSubtraction	
+O-System.BitwiseOperators	reference/system-library/operators/System.BitwiseOperators.md	Bitwise Operators	
+O-System.iBitwiseAnd	reference/system-library/operators/System.iBitwiseAnd.md	System.iBitwiseAnd	
+O-System.iBitwiseNot	reference/system-library/operators/System.iBitwiseNot.md	System.iBitwiseNot	
+O-System.iBitwiseOr	reference/system-library/operators/System.iBitwiseOr.md	System.iBitwiseOr	
+O-System.iBitwiseXor	reference/system-library/operators/System.iBitwiseXor.md	System.iBitwiseXor	
+O-System.iShiftLeft	reference/system-library/operators/System.iShiftLeft.md	System.iShiftLeft	
+O-System.iShiftRight	reference/system-library/operators/System.iShiftRight.md	System.iShiftRight	
+O-System.CatalogOperators	reference/system-library/operators/System.CatalogOperators.md	Catalog Operators	
+O-System.CacheTimeStamp	reference/system-library/operators/System.CacheTimeStamp.md	System.CacheTimeStamp	
+O-System.DependentObjects	reference/system-library/operators/System.DependentObjects.md	System.DependentObjects	
+O-System.IsGenerated	reference/system-library/operators/System.IsGenerated.md	System.IsGenerated	
+O-System.IsSystem	reference/system-library/operators/System.IsSystem.md	System.IsSystem	
+O-System.ObjectDescription	reference/system-library/operators/System.ObjectDescription.md	System.ObjectDescription	
+O-System.ObjectDisplayName	reference/system-library/operators/System.ObjectDisplayName.md	System.ObjectDisplayName	
+O-System.ObjectExists	reference/system-library/operators/System.ObjectExists.md	System.ObjectExists	
+O-System.ObjectID	reference/system-library/operators/System.ObjectID.md	System.ObjectID	
+O-System.ObjectMetaData	reference/system-library/operators/System.ObjectMetaData.md	System.ObjectMetaData	
+O-System.ObjectName	reference/system-library/operators/System.ObjectName.md	System.ObjectName	
+O-System.Reconcile	reference/system-library/operators/System.Reconcile.md	System.Reconcile	
+O-System.RequiredObjects	reference/system-library/operators/System.RequiredObjects.md	System.RequiredObjects	
+O-System.SafeDrop	reference/system-library/operators/System.SafeDrop.md	System.SafeDrop	
+O-System.SaveLibraryCatalog	reference/system-library/operators/System.SaveLibraryCatalog.md	System.SaveLibraryCatalog	
+O-System.Script	reference/system-library/operators/System.Script.md	System.Script	
+O-System.ScriptCatalog	reference/system-library/operators/System.ScriptCatalog.md	System.ScriptCatalog	
+O-System.ScriptData	reference/system-library/operators/System.ScriptData.md	System.ScriptData	
+O-System.ScriptDrop	reference/system-library/operators/System.ScriptDrop.md	System.ScriptDrop	
+O-System.ScriptDropCatalog	reference/system-library/operators/System.ScriptDropCatalog.md	System.ScriptDropCatalog	
+O-System.ScriptDropLibrary	reference/system-library/operators/System.ScriptDropLibrary.md	System.ScriptDropLibrary	
+O-System.ScriptLibrary	reference/system-library/operators/System.ScriptLibrary.md	System.ScriptLibrary	
+O-System.ComparisonOperators	reference/system-library/operators/System.ComparisonOperators.md	Comparison Operators	
+O-System.iCompare	reference/system-library/operators/System.iCompare.md	System.iCompare	
+O-System.iEqual	reference/system-library/operators/System.iEqual.md	System.iEqual	
+O-System.iGreater	reference/system-library/operators/System.iGreater.md	System.iGreater	
+O-System.iInclusiveGreater	reference/system-library/operators/System.iInclusiveGreater.md	System.iInclusiveGreater	
+O-System.iInclusiveLess	reference/system-library/operators/System.iInclusiveLess.md	System.iInclusiveLess	
+O-System.iLess	reference/system-library/operators/System.iLess.md	System.iLess	
+O-System.iNotEqual	reference/system-library/operators/System.iNotEqual.md	System.iNotEqual	
+O-System.ConversionOperators	reference/system-library/operators/System.ConversionOperators.md	Conversion Operators	
+O-System.ToBoolean	reference/system-library/operators/System.ToBoolean.md	System.ToBoolean	
+O-System.ToByte	reference/system-library/operators/System.ToByte.md	System.ToByte	
+O-System.ToDate	reference/system-library/operators/System.ToDate.md	System.ToDate	
+O-System.ToDateTime	reference/system-library/operators/System.ToDateTime.md	System.ToDateTime	
+O-System.ToDecimal	reference/system-library/operators/System.ToDecimal.md	System.ToDecimal	
+O-System.ToGuid	reference/system-library/operators/System.ToGuid.md	System.ToGuid	
+O-System.ToInteger	reference/system-library/operators/System.ToInteger.md	System.ToInteger	
+O-System.ToList	reference/system-library/operators/System.ToList.md	System.ToList	
+O-System.ToLong	reference/system-library/operators/System.ToLong.md	System.ToLong	
+O-System.ToMoney	reference/system-library/operators/System.ToMoney.md	System.ToMoney	
+O-System.ToShort	reference/system-library/operators/System.ToShort.md	System.ToShort	
+O-System.ToString	reference/system-library/operators/System.ToString.md	System.ToString	
+O-System.ToTable	reference/system-library/operators/System.ToTable.md	System.ToTable	
+O-System.ToTime	reference/system-library/operators/System.ToTime.md	System.ToTime	
+O-System.ToTimeSpan	reference/system-library/operators/System.ToTimeSpan.md	System.ToTimeSpan	
+O-System.ToVersionNumber	reference/system-library/operators/System.ToVersionNumber.md	System.ToVersionNumber	
+O-System.CursorOperators	reference/system-library/operators/System.CursorOperators.md	Cursor Operators	
+O-System.BOF	reference/system-library/operators/System.BOF.md	System.BOF	
+O-System.Change	reference/system-library/operators/System.Change.md	System.Change	
+O-System.Close	reference/system-library/operators/System.Close.md	System.Close	
+O-System.CompareBookmarks	reference/system-library/operators/System.CompareBookmarks.md	System.CompareBookmarks	
+O-System.Default	reference/system-library/operators/System.Default.md	System.Default	
+O-System.Delete	reference/system-library/operators/System.Delete.md	System.Delete	
+O-System.EOF	reference/system-library/operators/System.EOF.md	System.EOF	
+O-System.FindKey	reference/system-library/operators/System.FindKey.md	System.FindKey	
+O-System.FindNearest	reference/system-library/operators/System.FindNearest.md	System.FindNearest	
+O-System.First	reference/system-library/operators/System.First.md	System.First	
+O-System.GetBookmark	reference/system-library/operators/System.GetBookmark.md	System.GetBookmark	
+O-System.GetKey	reference/system-library/operators/System.GetKey.md	System.GetKey	
+O-System.GotoBookmark	reference/system-library/operators/System.GotoBookmark.md	System.GotoBookmark	
+O-System.Insert	reference/system-library/operators/System.Insert.md	System.Insert	
+O-System.InsertListOperator	reference/system-library/operators/System.Insert.md	System.Insert (List)	the printed reference listed this operator under another category too
+O-System.InsertStringOperator	reference/system-library/operators/System.Insert.md	System.Insert (String)	the printed reference listed this operator under another category too
+O-System.iOrder	reference/system-library/operators/System.iOrder.md	System.iOrder	
+O-System.Last	reference/system-library/operators/System.Last.md	System.Last	
+O-System.Next	reference/system-library/operators/System.Next.md	System.Next	
+O-System.Open	reference/system-library/operators/System.Open.md	System.Open	
+O-System.Prior	reference/system-library/operators/System.Prior.md	System.Prior	
+O-System.Refresh	reference/system-library/operators/System.Refresh.md	System.Refresh	
+O-System.Reset	reference/system-library/operators/System.Reset.md	System.Reset	
+O-System.Select	reference/system-library/operators/System.Select.md	System.Select	
+O-System.Update	reference/system-library/operators/System.Update.md	System.Update	
+O-System.Validate	reference/system-library/operators/System.Validate.md	System.Validate	
+O-System.DateTimeOperators	reference/system-library/operators/System.DateTimeOperators.md	Date-Time Operators	
+O-System.ActualDate	reference/system-library/operators/System.ActualDate.md	System.ActualDate	
+O-System.ActualDateTime	reference/system-library/operators/System.ActualDateTime.md	System.ActualDateTime	
+O-System.ActualTime	reference/system-library/operators/System.ActualTime.md	System.ActualTime	
+O-System.AddMonths	reference/system-library/operators/System.AddMonths.md	System.AddMonths	
+O-System.AddYears	reference/system-library/operators/System.AddYears.md	System.AddYears	
+O-System.Date	reference/system-library/operators/System.Date.md	System.Date	
+O-System.DatePart	reference/system-library/operators/System.DatePart.md	System.DatePart	
+O-System.DateTime	reference/system-library/operators/System.DateTime.md	System.DateTime	
+O-System.DayOfWeek	reference/system-library/operators/System.DayOfWeek.md	System.DayOfWeek	
+O-System.DayOfYear	reference/system-library/operators/System.DayOfYear.md	System.DayOfYear	
+O-System.DaysInMonth	reference/system-library/operators/System.DaysInMonth.md	System.DaysInMonth	
+O-System.Duration	reference/system-library/operators/System.Duration.md	System.Duration	
+O-System.IsLeapYear	reference/system-library/operators/System.IsLeapYear.md	System.IsLeapYear	
+O-System.MonthsBetween	reference/system-library/operators/System.MonthsBetween.md	System.MonthsBetween	
+O-System.Time	reference/system-library/operators/System.Time.md	System.Time	
+O-System.TimePart	reference/system-library/operators/System.TimePart.md	System.TimePart	
+O-System.YearsBetween	reference/system-library/operators/System.YearsBetween.md	System.YearsBetween	
+O-System.DiagnosticsOperators	reference/system-library/operators/System.DiagnosticsOperators.md	Diagnostics Operators	
+O-System.Diagnostics.DisableErrorLogging	reference/system-library/operators/System.Diagnostics.DisableErrorLogging.md	System.Diagnostics.DisableErrorLogging	
+O-System.Diagnostics.EnableErrorLogging	reference/system-library/operators/System.Diagnostics.EnableErrorLogging.md	System.Diagnostics.EnableErrorLogging	
+O-System.Diagnostics.GetDetailedErrorDescription	reference/system-library/operators/System.Diagnostics.GetDetailedErrorDescription.md	System.Diagnostics.GetDetailedErrorDescription	
+O-System.Diagnostics.GetErrorDescription	reference/system-library/operators/System.Diagnostics.GetErrorDescription.md	System.Diagnostics.GetErrorDescription	
+O-System.Diagnostics.IsSupported	reference/system-library/operators/System.Diagnostics.IsSupported.md	System.Diagnostics.IsSupported	
+O-System.Diagnostics.LogError	reference/system-library/operators/System.Diagnostics.LogError.md	System.Diagnostics.LogError	
+O-System.Diagnostics.LogMessage	reference/system-library/operators/System.Diagnostics.LogMessage.md	System.Diagnostics.LogMessage	
+O-System.Diagnostics.ShowPlan	reference/system-library/operators/System.Diagnostics.ShowPlan.md	System.Diagnostics.ShowPlan	
+O-System.DynamicExecutionOperators	reference/system-library/operators/System.DynamicExecutionOperators.md	Dynamic-Execution Operators	
+O-System.Evaluate	reference/system-library/operators/System.Evaluate.md	System.Evaluate	
+O-System.Execute	reference/system-library/operators/System.Execute.md	System.Execute	
+O-System.ExecuteAs	reference/system-library/operators/System.ExecuteAs.md	System.ExecuteAs	
+O-System.ExecuteAsync	reference/system-library/operators/System.ExecuteAsync.md	System.ExecuteAsync	
+O-System.ExecuteMultiple	reference/system-library/operators/System.ExecuteMultiple.md	System.ExecuteMultiple	
+O-System.ExecuteWithTimeout	reference/system-library/operators/System.ExecuteWithTimeout.md	System.ExecuteWithTimeout	
+O-System.ExtractorOperators	reference/system-library/operators/System.ExtractorOperators.md	Extractor Operators	
+O-System.iIndexer	reference/system-library/operators/System.iIndexer.md	System.iIndexer	
+O-System.iIndexerListOperator	reference/system-library/operators/System.iIndexer.md	System.iIndexer (List)	the source title repeats the operator name ahead of itself
+O-System.iIndexerStringOperator	reference/system-library/operators/System.iIndexer.md	System.iIndexer (String)	the source title repeats the operator name ahead of itself
+O-System.iIndexerTableOperator	reference/system-library/operators/System.iIndexer.md	System.iIndexer (Table)	the source title repeats the operator name ahead of itself
+O-System.GeneratorOperators	reference/system-library/operators/System.GeneratorOperators.md	Generator Operators	
+O-System.CreateGenerators	reference/system-library/operators/System.CreateGenerators.md	System.CreateGenerators	
+O-System.EnsureGenerators	reference/system-library/operators/System.EnsureGenerators.md	System.EnsureGenerators	
+O-System.GuidOperators	reference/system-library/operators/System.GuidOperators.md	GUID Operators	
+O-System.NameFromGuid	reference/system-library/operators/System.NameFromGuid.md	System.NameFromGuid	
+O-System.NewGuid	reference/system-library/operators/System.NewGuid.md	System.NewGuid	
+O-System.ListOperators	reference/system-library/operators/System.ListOperators.md	List Operators	
+O-System.Add	reference/system-library/operators/System.Add.md	System.Add	
+O-System.Clear	reference/system-library/operators/System.Clear.md	System.Clear	
+O-System.iIn	reference/system-library/operators/System.iIn.md	System.iIn	
+O-System.iInListOperator.html	reference/system-library/operators/System.iIn.md	System.iIn	the printed reference listed this operator under another category too
+O-System.iInRowOperator.html	reference/system-library/operators/System.iIn.md	System.iIn	the printed reference listed this operator under another category too
+O-System.ListIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (List)	the printed reference listed this operator under another category too
+O-System.IndexOfListOperator	reference/system-library/operators/System.IndexOf.md	System.IndexOf	the printed reference listed this operator under another category too
+O-System.StringIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (String)	the printed reference listed this operator under another category too
+O-System.Remove	reference/system-library/operators/System.Remove.md	System.Remove	
+O-System.RemoveStringOperator	reference/system-library/operators/System.Remove.md	System.Remove (String)	the printed reference listed this operator under another category too
+O-System.RemoveAt	reference/system-library/operators/System.RemoveAt.md	System.RemoveAt	
+O-System.LibraryOperators	reference/system-library/operators/System.LibraryOperators.md	Library Operators	
+O-System.AttachLibrary	reference/system-library/operators/System.AttachLibrary.md	System.AttachLibrary	
+O-System.Compatible	reference/system-library/operators/System.Compatible.md	System.Compatible	
+O-System.CreateLibrary	reference/system-library/operators/System.CreateLibrary.md	System.CreateLibrary	
+O-System.DependentLibraries	reference/system-library/operators/System.DependentLibraries.md	System.DependentLibraries	
+O-System.DetachLibrary	reference/system-library/operators/System.DetachLibrary.md	System.DetachLibrary	
+O-System.DropLibrary	reference/system-library/operators/System.DropLibrary.md	System.DropLibrary	
+O-System.GetDefaultDeviceName	reference/system-library/operators/System.GetDefaultDeviceName.md	System.GetDefaultDeviceName	
+O-System.GetLibraryDescriptor	reference/system-library/operators/System.GetLibraryDescriptor.md	System.GetLibraryDescriptor	
+O-System.IsUndefined	reference/system-library/operators/System.IsUndefined.md	System.IsUndefined	
+O-System.LibraryName	reference/system-library/operators/System.LibraryName.md	System.LibraryName	
+O-System.LibrarySetting	reference/system-library/operators/System.LibrarySetting.md	System.LibrarySetting	
+O-System.RefreshLibraries	reference/system-library/operators/System.RefreshLibraries.md	System.RefreshLibraries	
+O-System.RegisterLibrary	reference/system-library/operators/System.RegisterLibrary.md	System.RegisterLibrary	
+O-System.RenameLibrary	reference/system-library/operators/System.RenameLibrary.md	System.RenameLibrary	
+O-System.RequiredLibraries	reference/system-library/operators/System.RequiredLibraries.md	System.RequiredLibraries	
+O-System.SetDefaultDeviceName	reference/system-library/operators/System.SetDefaultDeviceName.md	System.SetDefaultDeviceName	
+O-System.SetLibrary	reference/system-library/operators/System.SetLibrary.md	System.SetLibrary	
+O-System.SetLibraryDescriptor	reference/system-library/operators/System.SetLibraryDescriptor.md	System.SetLibraryDescriptor	
+O-System.UnregisterLibrary	reference/system-library/operators/System.UnregisterLibrary.md	System.UnregisterLibrary	
+O-System.LogicalOperators	reference/system-library/operators/System.LogicalOperators.md	Logical Operators	
+O-System.iAnd	reference/system-library/operators/System.iAnd.md	System.iAnd	
+O-System.iNot	reference/system-library/operators/System.iNot.md	System.iNot	
+O-System.iOr	reference/system-library/operators/System.iOr.md	System.iOr	
+O-System.ManagementOperators	reference/system-library/operators/System.ManagementOperators.md	Management Operators	
+O-System.CloseSession	reference/system-library/operators/System.CloseSession.md	System.CloseSession	
+O-System.Error	reference/system-library/operators/System.Error.md	System.Error	
+O-System.GC.Collect	reference/system-library/operators/System.GC.Collect.md	System.GC.Collect	
+O-System.HostName	reference/system-library/operators/System.HostName.md	System.HostName	
+O-System.MachineName	reference/system-library/operators/System.MachineName.md	System.MachineName	
+O-System.ProcessID	reference/system-library/operators/System.ProcessID.md	System.ProcessID	
+O-System.ServerName	reference/system-library/operators/System.ServerName.md	System.ServerName	
+O-System.SessionID	reference/system-library/operators/System.SessionID.md	System.SessionID	
+O-System.SetDefaultIsolationLevel	reference/system-library/operators/System.SetDefaultIsolationLevel.md	System.SetDefaultIsolationLevel	
+O-System.SetDefaultMaxCallDepth	reference/system-library/operators/System.SetDefaultMaxCallDepth.md	System.SetDefaultMaxCallDepth	
+O-System.SetDefaultMaxStackDepth	reference/system-library/operators/System.SetDefaultMaxStackDepth.md	System.SetDefaultMaxStackDepth	
+O-System.SetDefaultUseImplicitTransactions	reference/system-library/operators/System.SetDefaultUseImplicitTransactions.md	System.SetDefaultUseImplicitTransactions	
+O-System.SettIsolationLevel	reference/system-library/operators/System.SetIsolationLevel.md	System.SetIsolationLevel	the section id misspells the operator
+O-System.SetMaxCallDepth	reference/system-library/operators/System.SetMaxCallDepth.md	System.SetMaxCallDepth	
+O-System.SetMaxConcurrentProcesses	reference/system-library/operators/System.SetMaxConcurrentProcesses.md	System.SetMaxConcurrentProcesses	
+O-System.SetMaxStackDepth	reference/system-library/operators/System.SetMaxStackDepth.md	System.SetMaxStackDepth	
+O-System.SetProcessWaitTimeout	reference/system-library/operators/System.SetProcessWaitTimeout.md	System.SetProcessWaitTimeout	
+O-System.SetUseImplicitTransactions	reference/system-library/operators/System.SetUseImplicitTransactions.md	System.SetUseImplicitTransactions	
+O-System.Sleep	reference/system-library/operators/System.Sleep.md	System.Sleep	
+O-System.StartProcess	reference/system-library/operators/System.StartProcess.md	System.StartProcess	
+O-System.StopProcess	reference/system-library/operators/System.StopProcess.md	System.StopProcess	
+O-System.UpdateTimeStamps	reference/system-library/operators/System.UpdateTimeStamps.md	System.UpdateTimeStamps	
+O-System.MathOperators	reference/system-library/operators/System.MathOperators.md	Math Operators	
+O-System.Abs	reference/system-library/operators/System.Abs.md	System.Abs	
+O-System.Ceiling	reference/system-library/operators/System.Ceiling.md	System.Ceiling	
+O-System.Floor	reference/system-library/operators/System.Floor.md	System.Floor	
+O-System.Frac	reference/system-library/operators/System.Frac.md	System.Frac	
+O-System.iMod	reference/system-library/operators/System.iMod.md	System.iMod	
+O-System.Math.Exp	reference/system-library/operators/System.Math.Exp.md	System.Math.Exp	
+O-System.Math.Factorial	reference/system-library/operators/System.Math.Factorial.md	System.Math.Factorial	
+O-System.Math.Ln	reference/system-library/operators/System.Math.Ln.md	System.Math.Ln	
+O-System.Math.Log	reference/system-library/operators/System.Math.Log.md	System.Math.Log	
+O-System.Math.Log10	reference/system-library/operators/System.Math.Log10.md	System.Math.Log10	
+O-System.Math.Random	reference/system-library/operators/System.Math.Random.md	System.Math.Random	
+O-System.Math.Seed	reference/system-library/operators/System.Math.Seed.md	System.Math.Seed	
+O-System.Round	reference/system-library/operators/System.Round.md	System.Round	
+O-System.Truncate	reference/system-library/operators/System.Truncate.md	System.Truncate	
+O-System.NilHandlingOperators	reference/system-library/operators/System.NilHandlingOperators.md	Nil-Handling Operators	
+O-System.IfNil	reference/system-library/operators/System.IfNil.md	System.IfNil	
+O-System.IsNil	reference/system-library/operators/System.IsNil.md	System.IsNil	
+O-System.IsNotNil	reference/system-library/operators/System.IsNotNil.md	System.IsNotNil	
+O-System.IsSpecial	reference/system-library/operators/System.IsSpecial.md	System.IsSpecial	
+O-System.RowOperators	reference/system-library/operators/System.RowOperators.md	Row Operators	
+O-System.iExtend	reference/system-library/operators/System.iExtend.md	System.iExtend	
+O-System.iExtendRowOperator	reference/system-library/operators/System.iExtend.md	System.iExtend	the printed reference listed this operator under another category too
+O-System.iJoin	reference/system-library/operators/System.iJoin.md	System.iJoin	
+O-System.iJoinRowOperator	reference/system-library/operators/System.iJoin.md	System.iJoin (row)	the printed reference listed this operator under another category too
+O-System.iProject	reference/system-library/operators/System.iProject.md	System.iProject	
+O-System.iProjectRowOperator	reference/system-library/operators/System.iProject.md	System.iProject (Row)	the printed reference listed this operator under another category too
+O-System.iRemove	reference/system-library/operators/System.iRemove.md	System.iRemove	
+O-System.iRemoveRowOperator	reference/system-library/operators/System.iRemove.md	System.iRemove	the printed reference listed this operator under another category too
+O-System.iRename	reference/system-library/operators/System.iRename.md	System.iRename	
+O-System.iRenameRowOperator	reference/system-library/operators/System.iRename.md	System.iRename	the printed reference listed this operator under another category too
+O-System.SecurityOperators	reference/system-library/operators/System.SecurityOperators.md	Security Operators	
+O-System.AddUserToRole	reference/system-library/operators/System.AddUserToRole.md	System.AddUserToRole	
+O-System.ChangeDeviceUserPassword	reference/system-library/operators/System.ChangeDeviceUserPassword.md	System.ChangeDeviceUserPassword	
+O-System.ChangePassword	reference/system-library/operators/System.ChangePassword.md	System.ChangePassword	
+O-System.CreateDeviceUser	reference/system-library/operators/System.CreateDeviceUser.md	System.CreateDeviceUser	
+O-System.CreateDeviceUserWithEncryptedPassword	reference/system-library/operators/System.CreateDeviceUserWithEncryptedPassword.md	System.CreateDeviceUserWithEncryptedPassword	
+O-System.CreateRight	reference/system-library/operators/System.CreateRight.md	System.CreateRight	
+O-System.CreateRole	reference/system-library/operators/System.CreateRole.md	System.CreateRole	
+O-System.CreateUser	reference/system-library/operators/System.CreateUser.md	System.CreateUser	
+O-System.CreateUserWithEncryptedPassword	reference/system-library/operators/System.CreateUserWithEncryptedPassword.md	System.CreateUserWithEncryptedPassword	
+O-System.DecryptString	reference/system-library/operators/System.DecryptString.md	System.DecryptString	
+O-System.DeviceUserExists	reference/system-library/operators/System.DeviceUserExists.md	System.DeviceUserExists	
+O-System.DropDeviceUser	reference/system-library/operators/System.DropDeviceUser.md	System.DropDeviceUser	
+O-System.DropRight	reference/system-library/operators/System.DropRight.md	System.DropRight	
+O-System.DropRole	reference/system-library/operators/System.DropRole.md	System.DropRole	
+O-System.DropUser	reference/system-library/operators/System.DropUser.md	System.DropUser	
+O-System.EncryptPassword	reference/system-library/operators/System.EncryptPassword.md	System.EncryptPassword	
+O-System.EncryptString	reference/system-library/operators/System.EncryptString.md	System.EncryptString	
+O-System.GrantRightToRole	reference/system-library/operators/System.GrantRightToRole.md	System.GrantRightToRole	
+O-System.GrantRightToUser	reference/system-library/operators/System.GrantRightToUser.md	System.GrantRightToUser	
+O-System.RemoveUserFromRole	reference/system-library/operators/System.RemoveUserFromRole.md	System.RemoveUserFromRole	
+O-System.RevertRightForRole	reference/system-library/operators/System.RevertRightForRole.md	System.RevertRightForRole	
+O-System.RevertRightForUser	reference/system-library/operators/System.RevertRightForUser.md	System.RevertRightForUser	
+O-System.RevokeRightFromRole	reference/system-library/operators/System.RevokeRightFromRole.md	System.RevokeRightFromRole	
+O-System.RevokeRightFromUser	reference/system-library/operators/System.RevokeRightFromUser.md	System.RevokeRightFromUser	
+O-System.RightExists	reference/system-library/operators/System.RightExists.md	System.RightExists	
+O-System.RoleExists	reference/system-library/operators/System.RoleExists.md	System.RoleExists	
+O-System.RoleHasRight	reference/system-library/operators/System.RoleHasRight.md	System.RoleHasRight	
+O-System.SetDeviceUserConnectionParameters	reference/system-library/operators/System.SetDeviceUserConnectionParameters.md	System.SetDeviceUserConnectionParameters	
+O-System.SetDeviceUserID	reference/system-library/operators/System.SetDeviceUserID.md	System.SetDeviceUserID	
+O-System.SetDeviceUserPassword	reference/system-library/operators/System.SetDeviceUserPassword.md	System.SetDeviceUserPassword	
+O-System.SetEncryptedPassword	reference/system-library/operators/System.SetEncryptedPassword.md	System.SetEncryptedPassword	
+O-System.SetObjectOwner	reference/system-library/operators/System.SetObjectOwner.md	System.SetObjectOwner	
+O-System.SetPassword	reference/system-library/operators/System.SetPassword.md	System.SetPassword	
+O-System.SetRightOwner	reference/system-library/operators/System.SetRightOwner.md	System.SetRightOwner	
+O-System.SetUserName	reference/system-library/operators/System.SetUserName.md	System.SetUserName	
+O-System.UserExists	reference/system-library/operators/System.UserExists.md	System.UserExists	
+O-System.UserHasRight	reference/system-library/operators/System.UserHasRight.md	System.UserHasRight	
+O-System.UserID	reference/system-library/operators/System.UserID.md	System.UserID	
+O-System.UserName	reference/system-library/operators/System.UserName.md	System.UserName	
+O-System.StringOperators	reference/system-library/operators/System.StringOperators.md	String Operators	
+O-System.CompareText	reference/system-library/operators/System.CompareText.md	System.CompareText	
+O-System.EndsWith	reference/system-library/operators/System.EndsWith.md	System.EndsWith	
+O-System.iLike	reference/system-library/operators/System.iLike.md	System.iLike	
+O-System.iMatches	reference/system-library/operators/System.iMatches.md	System.iMatches	
+O-System.IndexOfAny	reference/system-library/operators/System.IndexOfAny.md	System.IndexOfAny	
+O-System.IsDigit	reference/system-library/operators/System.IsDigit.md	System.IsDigit	
+O-System.IsLetter	reference/system-library/operators/System.IsLetter.md	System.IsLetter	
+O-System.IsLetterOrDigit	reference/system-library/operators/System.IsLetterOrDigit.md	System.IsLetterOrDigit	
+O-System.IsLower	reference/system-library/operators/System.IsLower.md	System.IsLower	
+O-System.IsUpper	reference/system-library/operators/System.IsUpper.md	System.IsUpper	
+O-System.ListLastIndexOf	reference/system-library/operators/System.LastIndexOf.md	System.LastIndexOf (List)	the printed reference listed this operator under another category too
+O-System.StringLastIndexOf	reference/system-library/operators/System.LastIndexOf.md	System.LastIndexOf (String)	the printed reference listed this operator under another category too
+O-System.LastIndexOfAny	reference/system-library/operators/System.LastIndexOfAny.md	System.LastIndexOfAny	
+O-System.LastPos	reference/system-library/operators/System.LastPos.md	System.LastPos	
+O-System.Length	reference/system-library/operators/System.Length.md	System.Length	
+O-System.Lower	reference/system-library/operators/System.Lower.md	System.Lower	
+O-System.PadLeft	reference/system-library/operators/System.PadLeft.md	System.PadLeft	
+O-System.PadRight	reference/system-library/operators/System.PadRight.md	System.PadRight	
+O-System.Pos	reference/system-library/operators/System.Pos.md	System.Pos	
+O-System.Replace	reference/system-library/operators/System.Replace.md	System.Replace	
+O-System.Split	reference/system-library/operators/System.Split.md	System.Split	
+O-System.StartsWith	reference/system-library/operators/System.StartsWith.md	System.StartsWith	
+O-System.SubString	reference/system-library/operators/System.SubString.md	System.SubString	
+O-System.Trim	reference/system-library/operators/System.Trim.md	System.Trim	
+O-System.TrimLeft	reference/system-library/operators/System.TrimLeft.md	System.TrimLeft	
+O-System.TrimRight	reference/system-library/operators/System.TrimRight.md	System.TrimRight	
+O-System.Upper	reference/system-library/operators/System.Upper.md	System.Upper	
+O-System.TableOperators	reference/system-library/operators/System.TableOperators.md	Table Operators	
+O-System.iAdorn	reference/system-library/operators/System.iAdorn.md	System.iAdorn	
+O-System.iBrowse	reference/system-library/operators/System.iBrowse.md	System.iBrowse	
+O-System.iDifference	reference/system-library/operators/System.iDifference.md	System.iDifference	
+O-System.iExists	reference/system-library/operators/System.iExists.md	System.iExists	
+O-System.iExplode	reference/system-library/operators/System.iExplode.md	System.iExplode	
+O-System.iHaving	reference/system-library/operators/System.iHaving.md	System.iHaving	
+O-System.iLeftJoin	reference/system-library/operators/System.iLeftJoin.md	System.iLeftJoin	
+O-System.iQuota	reference/system-library/operators/System.iQuota.md	System.iQuota	
+O-System.iRestrict	reference/system-library/operators/System.iRestrict.md	System.iRestrict	
+O-System.iRetrieve	reference/system-library/operators/System.iRetrieve.md	System.iRetrieve	
+O-System.iRightJoin	reference/system-library/operators/System.iRightJoin.md	System.iRightJoin	
+O-System.iUnion	reference/system-library/operators/System.iUnion.md	System.iUnion	
+O-System.iWithout	reference/system-library/operators/System.iWithout.md	System.iWithout	
+O-System.TransactionOperators	reference/system-library/operators/System.TransactionOperators.md	Transaction Operators	
+O-System.BeginApplicationTransaction	reference/system-library/operators/System.BeginApplicationTransaction.md	System.BeginApplicationTransaction	
+O-System.BeginTransaction	reference/system-library/operators/System.BeginTransaction.md	System.BeginTransaction	
+O-System.CommitApplicationTransaction	reference/system-library/operators/System.CommitApplicationTransaction.md	System.CommitApplicationTransaction	
+O-System.CommitTransaction	reference/system-library/operators/System.CommitTransaction.md	System.CommitTransaction	
+O-System.InTransaction	reference/system-library/operators/System.InTransaction.md	System.InTransaction	
+O-System.JoinApplicationTransaction	reference/system-library/operators/System.JoinApplicationTransaction.md	System.JoinApplicationTransaction	
+O-System.LeaveApplicationTransaction	reference/system-library/operators/System.LeaveApplicationTransaction.md	System.LeaveApplicationTransaction	
+O-System.PrepareApplicationTransaction	reference/system-library/operators/System.PrepareApplicationTransaction.md	System.PrepareApplicationTransaction	
+O-System.PrepareTransaction	reference/system-library/operators/System.PrepareTransaction.md	System.PrepareTransaction	
+O-System.RollbackApplicationTransaction	reference/system-library/operators/System.RollbackApplicationTransaction.md	System.RollbackApplicationTransaction	
+O-System.RollbackTransaction	reference/system-library/operators/System.RollbackTransaction.md	System.RollbackTransaction	
+O-System.TransactionCount	reference/system-library/operators/System.TransactionCount.md	System.TransactionCount	
+O-System.UpgradeOperators	reference/system-library/operators/System.UpgradeOperators.md	Upgrade Operators	
+O-System.DeleteUpgrade	reference/system-library/operators/System.DeleteUpgrade.md	System.DeleteUpgrade	
+O-System.InjectUpgrade	reference/system-library/operators/System.InjectUpgrade.md	System.InjectUpgrade	
+O-System.LoadUpgrade	reference/system-library/operators/System.LoadUpgrade.md	System.LoadUpgrade	
+O-System.SaveUpgrade	reference/system-library/operators/System.SaveUpgrade.md	System.SaveUpgrade	
+O-System.UpgradeLibraries	reference/system-library/operators/System.UpgradeLibraries.md	System.UpgradeLibraries	
+O-System.UpgradeLibrary	reference/system-library/operators/System.UpgradeLibrary.md	System.UpgradeLibrary	
+O-System.UpgradeVersions	reference/system-library/operators/System.UpgradeVersions.md	System.UpgradeVersions	
+DRSystemLibrary-ScalarTypes		Scalar Types	an index section: its 20 type sections are pages, and its own text is one sentence
+T-System.Binary	reference/system-library/types/System.Binary.md	System.Binary	
+T-System.Boolean	reference/system-library/types/System.Boolean.md	System.Boolean	
+T-System.Byte	reference/system-library/types/System.Byte.md	System.Byte	
+T-System.Date	reference/system-library/types/System.Date.md	System.Date	
+T-System.DateTime	reference/system-library/types/System.DateTime.md	System.DateTime	
+T-System.Decimal	reference/system-library/types/System.Decimal.md	System.Decimal	
+T-System.Error	reference/system-library/types/System.Error.md	System.Error	
+T-System.Graphic	reference/system-library/types/System.Graphic.md	System.Graphic	
+T-System.GroupName	reference/system-library/types/System.GroupName.md	System.GroupName	
+T-System.Guid	reference/system-library/types/System.Guid.md	System.Guid	
+T-System.Integer	reference/system-library/types/System.Integer.md	System.Integer	
+T-System.Long	reference/system-library/types/System.Long.md	System.Long	
+T-System.Money	reference/system-library/types/System.Money.md	System.Money	
+T-System.Name	reference/system-library/types/System.Name.md	System.Name	
+T-System.Short	reference/system-library/types/System.Short.md	System.Short	
+T-System.String	reference/system-library/types/System.String.md	System.String	
+T-System.Time	reference/system-library/types/System.Time.md	System.Time	
+T-System.TimeSpan	reference/system-library/types/System.TimeSpan.md	System.TimeSpan	
+T-System.UserID	reference/system-library/types/System.UserID.md	System.UserID	
+T-System.VersionNumber	reference/system-library/types/System.VersionNumber.md	System.VersionNumber	
