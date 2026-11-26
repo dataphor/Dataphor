@@ -158,10 +158,15 @@ def append_text(element, text):
 
 
 def collapse_title(title):
-    """Whitespace inside a title collapsed to single spaces and trimmed at both ends.
+    """The title's own runs of whitespace collapsed to single spaces and trimmed at both ends.
 
     The sources lay a title out over several indented lines around its index terms, so a title
-    taken straight from one reaches the page as a heading with leading spaces."""
+    taken straight from one reaches the page as a heading with leading spaces.
+
+    NOTE: only the title's own text and the text between its children are collapsed, not the text
+    *inside* a child element. No section title in the reference sources has inline markup carrying
+    a line break (checked over every file of `Docs2.0/` and `OperatorDocs/`), so there is nothing
+    to collapse there; if a later source set brings one, walk the child's descendants too."""
     nodes = [(title, "text")] + [(child, "tail") for child in title]
     for node, field in nodes:
         value = getattr(node, field)

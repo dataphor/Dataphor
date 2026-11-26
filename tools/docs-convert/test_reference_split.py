@@ -329,7 +329,8 @@ class LibraryChapterTest(unittest.TestCase):
         # A page inside a dropped section would be lost without a word, so the row asking for
         # that is an error rather than a surprise.
         pages = [dict(row) for row in LIBRARY_PAGES]
-        pages[5]["output"] = "reference/libraries/Lib.Forms.md"
+        forms = next(row for row in pages if row["id"] == "DRLibLibrary-Schema-Forms")
+        forms["output"] = "reference/libraries/Lib.Forms.md"
         inside = self.harness(pages=pages)
         self.assertEqual(inside.run(), 1)
         self.assertTrue(any("inside the dropped section" in line for line in inside.report.errors),
