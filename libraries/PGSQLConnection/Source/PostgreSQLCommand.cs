@@ -12,6 +12,23 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
             _parameterDelimiter = ":";
         }
 
+        /// <remarks>
+        /// Three things the current driver does that the Npgsql 2.0.4 this was written against did not, each read off the
+        /// pinned version (10.0.4):
+        ///
+        /// Size is acted on. NpgsqlParameter truncates a string, char array or byte array longer than Size for a text or
+        /// bytea parameter, where 2.0.4 only recorded the number. Nothing is truncated here: the truncation is skipped
+        /// while Size is 0, and DotNetCommand.SetParameters raises Size to the value's own length before each execution.
+        ///
+        /// Precision and Scale are still present and not obsolete, but the driver stores them and never reads them. A
+        /// numeric parameter is sent with the value's own precision and scale, so the two set below say what is intended
+        /// and decide nothing.
+        ///
+        /// Timestamp is timestamp without time zone, which refuses a DateTime whose Kind is Utc (timestamptz is the one
+        /// that demands Utc). That is the right target for D4's DateTime, which carries no time zone, and no engine value
+        /// can trip the check: DateTimeConveyor rebuilds every DateTime from its ticks, so Kind is Unspecified, and the one
+        /// place that does not (DateTime.Today, behind the Date and ActualDate operators) gives Local, which it accepts.
+        /// </remarks>
         protected override void PrepareParameters()
         {
             // Prepare parameters
@@ -78,6 +95,10 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
                 }
                 else if (parameter.Type is SQLTimeType)
                 {
+                    // NOTE: the current driver accepts only TimeOnly, TimeSpan and long for a time parameter, where 2.0.4 took
+                    // a DateTime - and PostgreSQLTime.FromScalar, in PGSQLDevice, hands one over, so a D4 Time parameter is
+                    // refused when the driver binds it. Not changed here: what to send is the device scalar type's decision, and
+                    // device-pgsql-port is the first ticket that runs a device against a server and sees it.
                     npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Time;
                 }
                 else if (parameter.Type is SQLGuidType)

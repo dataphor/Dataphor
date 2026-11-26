@@ -26,11 +26,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// The ODBCConnection arm is the same guard for the library device-connection-cleanup brought back into the build: its
 	/// folder holds one private managed package, System.Data.Odbc, and registering the library must not need an ODBC driver
 	/// manager on the machine - the connection class is constructed only when a device names it as its ConnectionClass.
+	///
+	/// The PGSQLConnection arm is that guard again for the library device-pgsql-connection-port brought back: its folder
+	/// holds one private managed package, the Npgsql driver, and its .d4l lists Npgsql.dll, so the server loads the
+	/// driver while registering the library - which must need no PostgreSQL server, the driver connecting only when a
+	/// device or a catalog store asks it to.
 	/// </remarks>
 	[TestFixture]
 	public class LibraryLoadingTest : InProcessTestFixture
 	{
-		protected override string[] Libraries => new[] { "LibraryLoadingProbe", "Connection", "ODBCConnection" };
+		protected override string[] Libraries => new[] { "LibraryLoadingProbe", "Connection", "ODBCConnection", "PGSQLConnection" };
 
 		protected override string[] LibrariesToRegister => new[] { "LibraryLoadingProbe" };
 
@@ -58,6 +63,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public void ODBCConnectionLibraryRegistersWithoutADriverManager()
 		{
 			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('ODBCConnection');"));
+		}
+
+		[Test]
+		public void PGSQLConnectionLibraryRegistersWithoutAPostgreSQLServer()
+		{
+			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('PGSQLConnection');"));
 		}
 	}
 }

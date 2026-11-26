@@ -19,6 +19,7 @@
       "Alphora.Dataphor.DAE.Device.Simple",
       "Alphora.Dataphor.DAE.Connection",
       "Alphora.Dataphor.DAE.Connection.ODBC",
+      "Alphora.Dataphor.DAE.Connection.PGSQL",
       "System.Platform",
       "System.Internet",
       "System.Integration",

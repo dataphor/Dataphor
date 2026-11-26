@@ -15,6 +15,11 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 	{
         public PostgreSQLConnection(string connection) : base(connection) { }
 		
+		// NOTE: the current driver rejects a connection-string keyword it does not know, where 2.0.4 ignored one, and it
+		// spells the schema search path "Search Path" with a space. PostgreSQLDeviceSession builds a string carrying
+		// "SearchPath=", so a device connection fails here on the keyword before it ever reaches a server. The mapping is
+		// PostgreSQLConnectionStringBuilder's, in PGSQLDevice; device-pgsql-device-golden is the first ticket to create a
+		// device and device-pgsql-port the first to connect one.
 		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
 			try
@@ -48,6 +53,10 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 
 		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
+			// NOTE: flattening loses PostgresException.SqlState, which is the only thing that tells a constraint violation
+			// from a connection failure - the distinction MSSQLConnection.IsUserCorrectableError makes. Left as 3.1 had it:
+			// the reason below predates the current serialization rules, so the flattening may not be needed at all, and
+			// nothing can see the difference until a device runs. device-pgsql-port is the first ticket that would.
 			// Wrap all exceptions coming back with a simple Exception so that it crosses the boundary.
 			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, new Exception(exception.Message), statement);
 		}

@@ -1,124 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7887C79A-4A65-4F31-95C0-67C3558ADB6B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor.DAE.Connection.PGSQL</RootNamespace>
     <AssemblyName>Alphora.Dataphor.DAE.Connection.PGSQL</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <RootNamespace>Alphora.Dataphor.DAE.Connection.PGSQL</RootNamespace>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <!-- Constants: the legacy Release set without SIGNASSEMBLIES (signing is set in Directory.Build.props) in both configurations, plus DEBUG;TRACE in Debug. Set outright; see Directory.Build.props. -->
+  <PropertyGroup>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\</OutputPath>
-    <DefineConstants>TRACE;SIGNASSEMBLIES</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\..\..\external\Mono.Security.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Npgsql, Version=2.0.4.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\..\..\external\Npgsql.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\..\..\src\engine\Base\Base.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\DAE\DAE.csproj" />
+    <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj" />
+    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj" />
   </ItemGroup>
+
+  <!--
+    Npgsql: PostgreSQLConnection.cs and PostgreSQLCommand.cs. 3.1 compiled against the checked-in Npgsql 2.0.4 and
+    Mono.Security 2.0; the driver has carried its own TLS since 3.x, so nothing references Mono.Security any more.
+    The package is private to this library (no project it references has it), so its runtime file lands flat in the
+    library folder - Npgsql.dll alone: the two Microsoft.Extensions abstractions it depends on are the versions the
+    host's shared frameworks provide, so conflict resolution leaves them out and the framework's copies load. The
+    version pin in Directory.Packages.props says why that has to stay true. At run time the driver opens a connection
+    only when a device or a catalog store asks it to, so registering the library needs no PostgreSQL server.
+  -->
   <ItemGroup>
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <!-- Default items are off (Directory.Build.props), so the compiled files are listed. -->
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PostgreSQLCommand.cs" />
     <Compile Include="PostgreSQLConnection.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\src\engine\Base\Base.csproj">
-      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
-      <Name>Base</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\src\engine\DAE\DAE.csproj">
-      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
-      <Name>Engine</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj">
-      <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
-      <Name>Server %28Server\Server%29</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
-      <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
-      <Name>DAE.Connection</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

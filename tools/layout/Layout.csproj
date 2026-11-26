@@ -59,6 +59,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\Connection\Source\DAE.Connection.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\ODBCConnection\Source\DAE.Connection.ODBC.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SimpleDevice\Source\DAE.Device.Simple.csproj" DataphorLayoutRole="Library" />
@@ -76,8 +77,7 @@
   <ItemGroup>
     <DataphorD4Library Include="$(_DataphorRepositoryRoot)libraries\*\*.d4l;$(_DataphorRepositoryRoot)samples\*\*.d4l;$(_DataphorRepositoryRoot)tests\libraries\*\*.d4l" />
     <!-- Left out while their C# projects are not converted: registering them would fail on the missing assembly. Remove the line when the project joins the Library list. -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLConnection\PGSQLConnection.d4l" /><!-- device-pgsql-port -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-port -->
+    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-device-golden -->
   </ItemGroup>
 
   <!-- Every write and delete below goes through _DataphorLayoutDirFull, which this target confines to artifacts\layout\<something>\. -->
@@ -140,6 +140,19 @@
     NOTE: only the RID names win-x64 and win are ranked; a private package that ships its Windows file under an older name
     (win7-x64, win10-x64) loses it here and the library folder gets the generic stub, which the .d4l check does not catch unless
     the .d4l lists that file. If such a package appears, rank those names too (or resolve through the RID graph).
+
+    NOTE: a library folder cannot carry a *different version* of an assembly one of the host's shared frameworks already
+    provides - so a private package whose dependencies are a generation ahead of the host's frameworks is unusable from a
+    library folder, however well it works in an ordinary application that has a .deps.json. Two things combine. Conflict
+    resolution leaves such a file out of the folder when the version matches what a framework provides (which is right: the
+    framework's copy is what loads), so nothing in the folder is missing. But when the version is higher, the file is copied
+    in and still does not load: the default load context already holds the framework's copy under that simple name, and
+    Assembly.LoadFrom's resolve handler - the only route to the folder, since a flat folder has no .deps.json - then fails
+    with FileLoadException ("the located assembly's manifest definition does not match the assembly reference"). Measured on
+    Npgsql 11.0.0, whose Microsoft.Extensions.Logging.Abstractions and System.Diagnostics.DiagnosticSource dependencies are
+    version 11.0.0 against the 10.0.0 that Microsoft.AspNetCore.App and Microsoft.NETCore.App provide: the driver threw on
+    its first data source, before connecting to anything. Directory.Packages.props pins the 10.x line for that reason. Check
+    a new package's transitive versions against the host's frameworks before giving it to a library.
   -->
   <Target Name="_DataphorComputeLayout" DependsOnTargets="_DataphorCheckLayoutDir;_DataphorGetLayoutItems;_DataphorListLibraries">
     <ItemGroup>
