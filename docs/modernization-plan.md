@@ -627,6 +627,7 @@ docs/
 | `docs-admin-guide` | New: installation, instance configuration, running as a service, ports and firewall, backup, rebuilding a catalog from scripts, moving an application from 3.x. | `store-rebuild-workflow`, `installer-msi` | medium |
 | `docs-contributing` | Build, test, layout, release checklist; fold `CompilerDefines.txt` and the error prefix list into `reference/`. | `build-core-sdk-projects` | easy |
 | `docs-reference-generator` | Markdown emitter for the catalog documentation operator; regenerate and diff. | `docs-convert-legacy-reference`, `test-harness-inprocess` | medium |
+| `docs-retire-removed-client-text` | Remove the removed browser clients from the converted guides; one historical note on `users-guide/frontend-clients.md`. **Done.** | — | easy |
 | `docs-link-check-ci` | Link checker in CI. | `build-ci`, `docs-convert-asciidoc` | easy |
 | `docs-architecture-hierarchy` | Split `docs/architecture.md` into a short root page plus one page per subsystem under `docs/architecture/`, and gate every page of that set at 1,500 words with `tools/docs-size-check`, run by `.github/workflows/docs.yml`; the rule in `AGENTS.md` and the ticket rules. **Done** as two chained tickets (`docs-architecture-split`, then `docs-architecture-hierarchy`). | — | medium |
 | `docs-migration-guide-custom-code` | Turn the accumulated migration notes into a guide for moving an application and recompiling custom C# extensions against 4.0. | `ui-windows-client-runs` | medium |

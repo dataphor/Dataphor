@@ -31,7 +31,7 @@ A visible Dataphor form component. e.g., TextBox
 
 This tutorial will show how to create a Database application designed to run a video rental store.
 
-The tutorial is divided up into three major sections: Developing the Database, Developing the Frontend Application, and running the application from a Windows client and a Web client.
+The tutorial is divided up into three major sections: Developing the Database, Developing the Frontend Application, and running the application from the Windows client.
 
 All of the tables, forms, and scripts are included in the Sample.Rental library. You may type them yourself or use the ones that are included.
 
@@ -1425,9 +1425,9 @@ Now save the customized AddSale form before anything is changed. Close the Desig
 
 You have designed a database and developed an application.
 
-### Running the Rental Application with the Windows or Web Client
+### Running the Rental Application with the Windows Client
 
-Everything to this point has been done in Dataphoria. To make the application available to the Windows or Web clients it must be published. You do this by dragging the MainForm to Applications in the Dataphor Explorer as follows:
+Everything to this point has been done in Dataphoria. To make the application available to the Windows client it must be published. You do this by dragging the MainForm to Applications in the Dataphor Explorer as follows:
 
 - Click and hold the left mouse button on MainForm \[dfd\]. While holding the left mouse button doen, slowly move the mouse to the top of the DataphorExplorer pane so that the libraries scroll down until you see the Applications entry at the top.
 
@@ -1441,22 +1441,16 @@ Everything to this point has been done in Dataphoria. To make the application av
 
   ![Rental Tutorial - 24b](../images/rental-tut024b.png)
 
-  - Add the Web Client Type and the Windows Client Type.
+  - Add the Windows Client Type.
 
 - Click Accept
 
   ![Rental Tutorial - 25](../images/rental-tut025.png)
 
-This gives the Windows Client and the Web Client an entry point. Now when someone connects to the Dataphor Server using the correct port, 8061 in the example above, the Video application will be available to them.
+This gives the Windows Client an entry point. Now when someone connects to the Dataphor Server using the correct port, 8061 in the example above, the Video application will be available to them.
 
 With the Windows Client:
 
 ![Rental Tutorial - 26](../images/rental-tut026.png)
 
 The user selects the desired application and clicks OK.
-
-With the Web Client:
-
-![Rental Tutorial - 27](../images/rental-tut027.png)
-
-The user just clicks on the desired application.

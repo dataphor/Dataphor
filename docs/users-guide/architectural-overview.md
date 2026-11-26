@@ -8,7 +8,7 @@ The following diagram depicts these layers:
 
 ![Dataphor Logo](../images/dataphor-overall-simplified.svg)
 
-This diagram shows the components of the Dataphor architecture, and the interactions between them. At the center of the architecture is the Dataphor Data Access Engine (DAE), or Dataphor Server. The Dataphor Server exposes application schemas that are consumed by Windows-based, Web-based and other clients, and manages the coordination of the presentation layer data retrieval and manipulation requests with the various storage devices in the physical layer.
+This diagram shows the components of the Dataphor architecture, and the interactions between them. At the center of the architecture is the Dataphor Data Access Engine (DAE), or Dataphor Server. The Dataphor Server exposes application schemas that are consumed by Windows-based and other clients, and manages the coordination of the presentation layer data retrieval and manipulation requests with the various storage devices in the physical layer.
 
 The concrete components of the Dataphor product are then:
 
@@ -22,7 +22,7 @@ A library of routines and services deployed within a Dataphor Server enabling th
 An Integrated Development Environment (IDE) for developing, testing, and administering Dataphor Applications.
 
 **Frontend Clients**  
-A set of "thin-client" software components that manage the presentation layer for their respective platforms. The Dataphor product ships with a Microsoft Windows-based client, and a Web client. Additional clients can be developed as necessary.
+A set of "thin-client" software components that manage the presentation layer for their respective platforms. The Dataphor product ships with a Microsoft Windows-based client. Additional clients can be developed as necessary.
 
 These components together provide the services and functionality required by the Dataphor platform to enable the declarative approach. The resulting paradigm is called *Automated Application Development (AAD)*. Each of these components are introduced in the following sections. Complete information on using each component is then provided in the subsequent chapters of this manual.
 

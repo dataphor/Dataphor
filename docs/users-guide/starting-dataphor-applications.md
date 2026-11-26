@@ -2,7 +2,7 @@
 
 ## Summary
 
-The first step in running a Dataphor Application is to start the desired Frontend Client. This can be accomplished in a variety of ways, depending on the client to be started, and the way it is installed. A typical Windows Client installation will add the Windows Client icon to the Start \| Programs menu in the Microsoft Windows environment. For the Web Client, the most common scenario will simply be entering the appropriate URL into the Address window of a Web Browser.
+The first step in running a Dataphor Application is to start the desired Frontend Client. This can be accomplished in a variety of ways, depending on the client to be started, and the way it is installed. A typical Windows Client installation will add the Windows Client icon to the Start \| Programs menu in the Microsoft Windows environment.
 
 For more information on what client should be used, and how it should be started, consult your Dataphor Application Administrator.
 
@@ -12,7 +12,7 @@ Running a Dataphor Application begins with connecting to a Dataphor Server. The 
 
 ![Remote logging into Dataphor Server](../images/dataphor-server-login-remote.png)
 
-Once the appropriate alias has been selected and login information supplied, click the Login button to connect to the Dataphor Server. Although this screen capture shows the Windows Client login form, the process for connecting with the Web Client is the same.
+Once the appropriate alias has been selected and login information supplied, click the Login button to connect to the Dataphor Server.
 
 For more information on configuring aliases, see the [Aliases](aliases.md) section of the Dataphoria chapter in the Using Dataphor part of the Dataphor User’s Guide.
 
@@ -22,7 +22,7 @@ The Dataphor Server is capable of hosting multiple applications, so the next ste
 
 ![Choosing an Application in Windows Client](../images/windows-client-choose-application.png)
 
-Select the desired application by clicking it, or using the up and down arrow keys to highlight the application in the list. Clicking OK or pressing Enter will launch the application. Again, this screen capture shows the Windows Client Choose Application form, but the process is the same for the Web Client.
+Select the desired application by clicking it, or using the up and down arrow keys to highlight the application in the list. Clicking OK or pressing Enter will launch the application.
 
 ## Bypassing Login and Application Selection
 

@@ -28,7 +28,7 @@ Note that the Frontend.Form operator does not interpret the form definition, it 
 
 During the process of deserialization, as component types are encountered, the system must be able to determine what class of component to create. This decision is made based on the NodeTypes table loaded by the Frontend Session. This table is loaded by aggregating the component type definition documents (DNT) for the appropriate client from each library in the application, tracing library dependencies recursively. Each entry in this component types table specifies a .NET Framework type to be used whenever a given component is to be created. Although this type is not required to be client-specific, it can be.
 
-For example, the Source entry specifies that the Frontend.Client.Source .NET type be used to represent Source components. This entry is made for both the Windows and Web clients. However, the TextBox entry specifies a completely different class for the Windows client than for the Web. This is because in the Windows client, the TextBox corresponds with a Windows edit control, while in the Web client, a control rendering an \<INPUT\> tag is used.
+For example, the Source entry specifies that the Frontend.Client.Source .NET type be used to represent Source components; that type is not tied to any one client. The TextBox entry, by contrast, names a Windows Forms edit control, which is specific to the Windows client. Release 4.0 ships only the Windows client, so every entry it loads is that client’s, but the table keeps its per-client shape: a client for another platform supplies its own component type definition documents, naming the classes that render each component on that platform.
 
 ### Derivation
 

@@ -251,7 +251,7 @@ Once a connection is established, the clients then provide an interface to selec
 
 Each client communicates with the Dataphor Server using the Data Access Layer, requests the user interfaces described by the application, and manages the interaction with the user. Because of the services and capabilities exposed by the Dataphor Server, these processes can be completely automated. The resulting clients provide a rich user interface experience that is defined entirely within the centralized application schema.
 
-The Dataphor product ships with a Windows and Web Client, but the architecture is designed to be extensible, and other clients could be easily developed for environments like PDA’s and cell phones.
+The Dataphor product ships with a Windows client, but the architecture is designed to be extensible, and other clients could be easily developed for environments like PDA’s and cell phones.
 
 ## Dataphoria
 

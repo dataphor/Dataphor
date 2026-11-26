@@ -71,7 +71,7 @@ Dataphor libraries also contain various documents that essentially constitute th
 
 At the lowest level, all communication with the Dataphor Server is performed through the Call-Level Interface (CLI). Although developers can communicate directly with the Dataphor Server through this CLI, it is usually advantageous to utilize the high-level Data Access Components (DAC) provided with Dataphor.
 
-The Data Access Components are a set of components and controls built in Microsoft C# that provide a high-level wrapper for communication with the Dataphor Server. They manage client-side buffering and state management, as well as data-binding to visual controls such as text boxes and grids. These components form the basis for connectivity in the Windows and Web clients, as well as the forms layer in Windows-based applications like Dataphoria or the Windows Client.
+The Data Access Components are a set of components and controls built in Microsoft C# that provide a high-level wrapper for communication with the Dataphor Server. They manage client-side buffering and state management, as well as data-binding to visual controls such as text boxes and grids. These components form the basis for connectivity in the Windows client, as well as the forms layer in Windows-based applications like Dataphoria or the Windows Client.
 
 ## Hosting a Dataphor Server
 
@@ -89,7 +89,6 @@ ecause the Dataphor Server is essentially "middleware", it can be deployed in a 
 
 - Dataphor Server
 - Storage Device(s)
-- Web Client Server (optional)
 - Windows Client
 
 In the simplest deployment scenario, all these components can be run on the same physical machine. In the most demanding enterprise environments, each of these roles can be filled by a load-balanced, fault-tolerant cluster of machines. Due to the flexibility of the architecture, Dataphor Applications can be scaled anywhere in-between these two extremes as necessary.
@@ -107,12 +106,10 @@ A typical client-server deployment scenario consists of:
 - Storage system such as Microsoft SQL Server running on the "Server" machine.
 - Dataphor Windows Client installed on each "Client" machine accessing the "Server".
 
-In order to provide a web-based client in this scenario, the Web Client Server can be deployed on the "Server" machine.
-
 A typical n-tier deployment scenario consists of:
 
 - Dataphor Server running as a service on a dedicated machine or cluster.
 - Storage system running on a dedicated machine or cluster.
-- Web Client Server running on a dedicated machine or cluster.
+- Dataphor Windows Client installed on each "Client" machine accessing the Dataphor Server.
 
 These example scenarios illustrate the typical software and hardware environment for a Dataphor Application.

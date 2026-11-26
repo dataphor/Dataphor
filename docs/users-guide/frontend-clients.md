@@ -14,6 +14,6 @@ Because the Dataphor Frontend Client architecture is designed to be consumed fro
 
 The Windows Client is a Windows executable program that communicates with the Dataphor Server to request user interface descriptions, and to retrieve and manipulate the data in the database. The Windows Client makes use of the Dataphor Data Access Components to provide access to the Dataphor Server. These components take full advantage of the application-targeted features exposed by the Dataphor Server.
 
-## Web Client
+## Clients That Are No Longer Shipped
 
-The Web Client is an ASP.NET web application that provides HTML based user interface pages to browser clients. These pages are produced by combining the DIL documents retrieved from the Frontend Server with data from an instance of the Dataphor Server. The user interfaces produced are very similar to those provided by the Windows client because both clients consume the same user interface description. This also means that customizations to the user interface descriptions appear across clients.
+Release 3.x also shipped two browser-hosted Frontend Clients: a Web Client, which was an ASP.NET web application rendering HTML pages, and a Silverlight client. Release 4.0 ships neither of them, and the Windows Client described above is the only client included in the product. See the [migration notes](../migration-notes.md) for what this means for an existing application.
