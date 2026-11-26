@@ -45,6 +45,7 @@
     <Compile Include="DeviceTranslationGoldenTests.cs" />
     <Compile Include="FormCustomizationTest.cs" />
     <Compile Include="FormDocumentCorpusTest.cs" />
+    <Compile Include="FrontendClientTypesTest.cs" />
     <Compile Include="FrontendDerivationGoldenTest.cs" />
     <Compile Include="FrontendFixture.cs" />
     <Compile Include="HostBindingHookTest.cs" />
