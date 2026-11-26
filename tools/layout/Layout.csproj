@@ -149,10 +149,12 @@
     in and still does not load: the default load context already holds the framework's copy under that simple name, and
     Assembly.LoadFrom's resolve handler - the only route to the folder, since a flat folder has no .deps.json - then fails
     with FileLoadException ("the located assembly's manifest definition does not match the assembly reference"). Measured on
-    Npgsql 11.0.0, whose Microsoft.Extensions.Logging.Abstractions and System.Diagnostics.DiagnosticSource dependencies are
-    version 11.0.0 against the 10.0.0 that Microsoft.AspNetCore.App and Microsoft.NETCore.App provide: the driver threw on
-    its first data source, before connecting to anything. Directory.Packages.props pins the 10.x line for that reason. Check
-    a new package's transitive versions against the host's frameworks before giving it to a library.
+    Npgsql 11.0.0, whose dependency closure is Microsoft.Extensions.DependencyInjection.Abstractions,
+    Microsoft.Extensions.Logging.Abstractions and System.Diagnostics.DiagnosticSource at 11.0.0, against the 10.0.x that
+    Microsoft.AspNetCore.App and Microsoft.NETCore.App provide: the driver threw on its first data source, before connecting
+    to anything. Directory.Packages.props pins the 10.x line for that reason. The transitive closure is what matters, not the
+    package's own dependency list, so check a new package's whole closure against the host's frameworks before giving it to
+    a library.
   -->
   <Target Name="_DataphorComputeLayout" DependsOnTargets="_DataphorCheckLayoutDir;_DataphorGetLayoutItems;_DataphorListLibraries">
     <ItemGroup>

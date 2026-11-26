@@ -69,6 +69,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public void PGSQLConnectionLibraryRegistersWithoutAPostgreSQLServer()
 		{
 			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('PGSQLConnection');"));
+
+			// Registering without throwing is only proof the driver loaded if the driver did in fact load: the .d4l entry for
+			// Npgsql.dll is what makes RegisterLibraryFiles call Assembly.LoadFrom on it, and nothing else in this process
+			// references the driver, so the loaded set is the check that the entry is still doing its job.
+			Assert.That
+			(
+				Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), assembly => assembly.GetName().Name == "Npgsql"),
+				Is.True,
+				"the Npgsql driver did not load out of the PGSQLConnection library folder"
+			);
 		}
 	}
 }
