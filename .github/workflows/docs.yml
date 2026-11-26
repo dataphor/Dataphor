@@ -55,5 +55,9 @@ jobs:
       # --pending exempts the links into the reference pages that have not been converted yet (defect K17
       # in docs/modernization-plan.md); everything else is gated. docs-remove-old-sources deletes
       # tools/docs-convert/, this list with it, and drops the argument in the same commit.
+      # NOTE: only docs/ is scanned - links from AGENTS.md and the root README into docs/ are not gated
+      # (all of them resolve today). Widening the root is not free: scanning the repository also reports
+      # the tess/ paths and the tools/docs-convert/ fragments as errors, and --pending targets resolve
+      # relative to each root, so the exemptions above would stop applying.
       - name: Documentation links
         run: python3 tools/docs-link-check/check_links.py docs --pending tools/docs-convert/legacy-links.tsv
