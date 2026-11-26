@@ -32,7 +32,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// connection string this device builds. The keyword legend behind that string
 	/// (PostgreSQLConnectionStringBuilder) is a compatibility surface - its tag names are what a device definition writes -
 	/// and the review of device-pgsql-connection-port measured the whole string against the pinned driver, keyword by
-	/// keyword, so a difference in that golden means the device changed rather than that the legend needs correcting.
+	/// keyword, so a difference in that golden means the device changed rather than that the legend needs correcting. Two
+	/// of the six keywords in the golden come from the session rather than from the device definition: User Id and Password
+	/// are the device user PostgreSQLDeviceSession was handed, which for this fixture is the test instance's Admin with an
+	/// empty password - so the golden moves if the harness ever connects as someone else. And the empty SearchPath= in it is
+	/// a no-op at the driver, not a request to empty the search path; the NOTE in PostgreSQLConnection.cs has the
+	/// measurement.
 	/// </para>
 	/// </remarks>
 	// Not [Parallelizable]: see the base class.

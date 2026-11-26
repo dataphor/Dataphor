@@ -81,6 +81,15 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								== IsolationLevel.Isolated
 						)
 				)
+					// NOTE: this is the device's equivalent of the MSSQL device's (updlock) table hint, and it is the construct of
+					// this device's translation most likely to be rejected by a real server. Where the hint rides on the table
+					// reference, "for update" is a clause of the select, so when SQLDevice puts this select inside an exists in the
+					// select list of another statement - which is exactly the key check in front of every insert into a device table,
+					// see tests/goldens/devices/PGSQL/DML.Insert.sql - the locking clause ends up nested there. PostgreSQL restricts
+					// where a locking clause may appear and locks only the rows the sub-query it sits on returns, so two things need
+					// a server to settle: whether the statement is accepted at all, and whether it takes the lock the key check is
+					// asking for. device-pgsql-port is the pass that can see both; neither was verified here, and a rejection would
+					// affect every insert rather than an edge case.
 					selectExpression.ForSpecifier = ForSpecifier.Update;
 
 				selectExpression.SelectClause.Distinct =

@@ -18,7 +18,11 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 		// NOTE: the current driver throws on a connection-string keyword it does not know, where 2.0.4 ignored one. Every
 		// keyword the PostgreSQL device builds is still accepted, SearchPath included - measured on the pinned driver with
 		// the six-keyword string PostgreSQLDeviceSession produces (Server, Port, Database, SearchPath, User Id, Password),
-		// with the search path both empty and set. The driver's canonical spelling is "Search Path" with a space, but its
+		// with the search path both empty and set - and an empty one is dropped rather than sent: with SearchPath= in the
+		// string the driver's search-path property reads back null and the startup packet it writes carries no search_path
+		// parameter at all, byte for byte what the keyword's absence produces (measured 2026-11-26 against a loopback
+		// listener on the pinned driver), so the SearchPath= the device always emits for an unset search path is a no-op
+		// rather than a request to empty the search path. The driver's canonical spelling is "Search Path" with a space, but its
 		// keyword lookup ignores the spacing, so PostgreSQLConnectionStringBuilder's legend in PGSQLDevice is right as it
 		// stands and must not be "corrected": those tag names are what a device's D4 definition writes. What is newly fatal
 		// is an *extra* keyword - SQLDevice.GetConnectionParameters merges a deployment's ConnectionParameters tag into the
