@@ -421,6 +421,56 @@ begin
 	DropLibrary('UpgradeFail');
 end;
 
+// UpgradeLibraries() across several libraries, and what it leaves behind when one of them fails. It visits every registered
+// library in requisite-first order and has no catch around that loop, so the first failure ends the whole run: every library
+// after the failing one is left un-upgraded at its own recorded version, and the error names only the library that failed. An
+// administrator who upgrades a server after a release therefore has to read the recorded versions to learn what applied and
+// what did not. The two libraries here require nothing of each other, so the order is the order they were registered in,
+// which is what makes "the one after it" mean anything; and the second library's upgrade would create a table, so the absence
+// of that table is independent evidence that it never ran.
+begin
+	CreateLibrary(LibraryDescriptor('UpgradeStopsFirst', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	CreateLibrary(LibraryDescriptor('UpgradeStopsSecond', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
+	RegisterLibrary('UpgradeStopsFirst');
+	RegisterLibrary('UpgradeStopsSecond');
+
+	var LInjected : VersionNumber := InjectUpgrade('UpgradeStopsFirst', "raise Error('Deliberate failure from the first of two pending libraries.');");
+	LInjected := InjectUpgrade('UpgradeStopsSecond', "create table StopsTrace { ID : Integer, Trace : String, key { ID } }; insert table { row { 0 ID, 'second;' Trace } } into StopsTrace;");
+
+	// Stands for: the files of version 1.0.1 of both libraries have arrived and the server has been restarted on them.
+	update LibraryVersions set { Version := VersionNumber(1, 0, 0) } where LibraryName in { 'UpgradeStopsFirst', 'UpgradeStopsSecond' };
+
+	var LCaught : String := '';
+	try
+		UpgradeLibraries();
+	except on E : Error do
+		LCaught := E.GetDetailedErrorDescription();
+	end;
+	if IndexOf(LCaught, 'Deliberate failure from the first of two pending libraries.') < 0 then
+		raise Error('UpgradeLibraries did not surface the error the failing upgrade script raised: ' + LCaught);
+
+	if IndexOf(LCaught, 'UpgradeStopsSecond') >= 0 then
+		raise Error('The error named the library that was never reached: ' + LCaught);
+
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeStopsFirst')) <> VersionNumber(1, 0, 0) then
+		raise Error('The library whose upgrade failed did not stay at the version the run started from.');
+
+	// The library after the failing one is the point of this section: nothing upgraded it and nothing said so.
+	if (Version from row from (LibraryVersions where LibraryName = 'UpgradeStopsSecond')) <> VersionNumber(1, 0, 0) then
+		raise Error('The library after the failing one was upgraded anyway.');
+
+	if exists (CatalogObjects where Name = 'UpgradeStopsSecond.StopsTrace') then
+		raise Error('The upgrade of the library after the failing one ran.');
+
+	if not (UpgradeRequired from row from (LibraryView where Name = 'UpgradeStopsSecond')) then
+		raise Error('The library after the failing one stopped reporting an upgrade as required.');
+
+	UnregisterLibrary('UpgradeStopsSecond');
+	UnregisterLibrary('UpgradeStopsFirst');
+	DropLibrary('UpgradeStopsSecond');
+	DropLibrary('UpgradeStopsFirst');
+end;
+
 // The one caller the DropLibrary refusal takes away, pinned so that it stays a decision rather than a surprise: an upgrade script
 // runs inside the transaction the machinery opened for it (the BeginTransaction() in InternalUpgradeLibrary's statement), which is
 // a transaction that can roll back after the library's directory has already been deleted, so a DropLibrary there is refused with
@@ -456,8 +506,8 @@ begin
 	DropLibrary('UpgradeDropVictim');
 end;
 
-if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeDropper', 'UpgradeDropVictim' }) then
+if exists (Libraries where Name in { 'UpgradeArith', 'UpgradeNoRevision', 'UpgradeBadVersion', 'UpgradeUnregistered', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeStopsFirst', 'UpgradeStopsSecond', 'UpgradeDropper', 'UpgradeDropVictim' }) then
 	raise Error('The script left a library behind.');
 
-if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeDropper' }) then
+if exists (LibraryVersions where LibraryName in { 'UpgradeArith', 'UpgradeTeens', 'UpgradeSkip', 'UpgradeOrder', 'UpgradeBase', 'UpgradeDependent', 'UpgradeNested', 'UpgradeNesting', 'UpgradeFail', 'UpgradeStopsFirst', 'UpgradeStopsSecond', 'UpgradeDropper' }) then
 	raise Error('The script left a library version behind.');
