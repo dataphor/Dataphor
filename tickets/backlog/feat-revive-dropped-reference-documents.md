@@ -74,6 +74,6 @@ It is a catalog of eight shapes a pair of related tables can take and the interf
 
     git show <commit before docs-remove-old-sources>:legacy/Documentation/DocBookManuals/DerivationReference.xml
 
-`git log --diff-filter=D -- legacy/Documentation/DocBookManuals/DerivationReference.xml` finds that commit. The same recipe works for every path in the `files:` header, and for the illustration images named in arm 5.
+`git log --diff-filter=D -- legacy/Documentation/DocBookManuals/DerivationReference.xml` finds that commit. The same recipe works for every path in the `files:` header, and for the illustration images named in arm 5. The deletion has landed: it is in the commit `tess: salvage uncommitted working tree (no ticket in progress)` (a runner salvage, so no commit message names this ticket's slug) - use the `--diff-filter=D` recipe above rather than searching commit messages.
 
 The conversion tooling under `tools/docs-convert/` is deleted by the same ticket, so a revival converts the DocBook by hand or with a fresh pandoc invocation. All five sources are ordinary DocBook with no generated-content placeholders - the thing that made the reference material hard - so each is a plain pandoc job followed by an editorial pass, and the editorial pass is where the work is.

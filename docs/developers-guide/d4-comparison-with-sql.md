@@ -767,7 +767,7 @@ While the two statements are very similar in structure, there are some important
 
 - Assignment operator
 
-  The D4 version of the statement uses the assignment operator \<\<D4ImperativeStatements.adoc#Assignment_Statement, :⇒\> to indicate that this is indeed an assignment statement. The current value of the variable is being replaced by a new value.
+  The D4 version of the statement uses the assignment operator [`:=`](d4-imperative-statements.md#assignment-statement) to indicate that this is indeed an assignment statement. The current value of the variable is being replaced by a new value.
 
 - Restrictions on target
 

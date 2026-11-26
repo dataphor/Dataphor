@@ -26,7 +26,7 @@ A middle answer is also available and may be the right one: take only the archit
     git show <commit before docs-remove-old-sources>:legacy/Documentation/DocBookManuals/DACDevP1UsingtheDAC.xml
     git show <commit before docs-remove-old-sources>:legacy/Documentation/DocBookManuals/DACDevGuide.xml
 
-`git log --diff-filter=D -- legacy/Documentation/DocBookManuals/DACDevGuide.xml` finds that commit. The other files of the set (`DACDevIntroduction.xml`, `DACDevP2ExtendingTheDAC.xml`, `DACDevGuideStandAlone.xml`) are all under 3 KB and are assembly and stub files.
+`git log --diff-filter=D -- legacy/Documentation/DocBookManuals/DACDevGuide.xml` finds that commit. The other files of the set (`DACDevIntroduction.xml`, `DACDevP2ExtendingTheDAC.xml`, `DACDevGuideStandAlone.xml`) are all under 3 KB and are assembly and stub files. The deletion has landed: it is in the commit `tess: salvage uncommitted working tree (no ticket in progress)` (a runner salvage, so no commit message names this ticket's slug) - use the `--diff-filter=D` recipe above rather than searching commit messages.
 
 ## Worth knowing before planning it
 
