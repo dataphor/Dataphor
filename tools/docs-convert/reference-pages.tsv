@@ -4,7 +4,7 @@ O-System.All	reference/system-library/operators/System.All.md	System.All
 O-System.Any	reference/system-library/operators/System.Any.md	System.Any	
 O-System.Avg	reference/system-library/operators/System.Avg.md	System.Avg	
 O-System.Concat	reference/system-library/operators/System.Concat.md	System.Concat	
-O-System.ConcatAggregate	reference/system-library/operators/System.Concat.md	System.Concat	the printed reference listed this operator under another category too
+O-System.ConcatAggregate	reference/system-library/operators/System.Concat.md	System.Concat (Aggregate)	the printed reference listed this operator under another category too
 O-System.Count	reference/system-library/operators/System.Count.md	System.Count	
 O-System.iAggregate	reference/system-library/operators/System.iAggregate.md	System.iAggregate	
 O-System.Max	reference/system-library/operators/System.Max.md	System.Max	
@@ -12,7 +12,7 @@ O-System.Min	reference/system-library/operators/System.Min.md	System.Min
 O-System.Sum	reference/system-library/operators/System.Sum.md	System.Sum	
 O-System.ArithmeticOperators	reference/system-library/operators/System.ArithmeticOperators.md	Arithmetic Operators	
 O-System.iAddition	reference/system-library/operators/System.iAddition.md	System.iAddition	
-O-System.iAdditionString	reference/system-library/operators/System.iAddition.md	System.iAddition	the printed reference listed this operator under another category too
+O-System.iAdditionString	reference/system-library/operators/System.iAddition.md	System.iAddition (String)	the printed reference listed this operator under another category too
 O-System.iDiv	reference/system-library/operators/System.iDiv.md	System.iDiv	
 O-System.iDivision	reference/system-library/operators/System.iDivision.md	System.iDivision	
 O-System.iMultiplication	reference/system-library/operators/System.iMultiplication.md	System.iMultiplication	
@@ -149,8 +149,8 @@ O-System.ListOperators	reference/system-library/operators/System.ListOperators.m
 O-System.Add	reference/system-library/operators/System.Add.md	System.Add	
 O-System.Clear	reference/system-library/operators/System.Clear.md	System.Clear	
 O-System.iIn	reference/system-library/operators/System.iIn.md	System.iIn	
-O-System.iInListOperator.html	reference/system-library/operators/System.iIn.md	System.iIn	the printed reference listed this operator under another category too
-O-System.iInRowOperator.html	reference/system-library/operators/System.iIn.md	System.iIn	the printed reference listed this operator under another category too
+O-System.iInListOperator.html	reference/system-library/operators/System.iIn.md	System.iIn (List)	the printed reference listed this operator under another category too
+O-System.iInRowOperator.html	reference/system-library/operators/System.iIn.md	System.iIn (Row)	the printed reference listed this operator under another category too
 O-System.ListIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (List)	the printed reference listed this operator under another category too
 O-System.IndexOfListOperator	reference/system-library/operators/System.IndexOf.md	System.IndexOf	the printed reference listed this operator under another category too
 O-System.StringIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (String)	the printed reference listed this operator under another category too
@@ -226,15 +226,15 @@ O-System.IsNotNil	reference/system-library/operators/System.IsNotNil.md	System.I
 O-System.IsSpecial	reference/system-library/operators/System.IsSpecial.md	System.IsSpecial	
 O-System.RowOperators	reference/system-library/operators/System.RowOperators.md	Row Operators	
 O-System.iExtend	reference/system-library/operators/System.iExtend.md	System.iExtend	
-O-System.iExtendRowOperator	reference/system-library/operators/System.iExtend.md	System.iExtend	the printed reference listed this operator under another category too
+O-System.iExtendRowOperator	reference/system-library/operators/System.iExtend.md	System.iExtend (Row)	the printed reference listed this operator under another category too
 O-System.iJoin	reference/system-library/operators/System.iJoin.md	System.iJoin	
-O-System.iJoinRowOperator	reference/system-library/operators/System.iJoin.md	System.iJoin (row)	the printed reference listed this operator under another category too
+O-System.iJoinRowOperator	reference/system-library/operators/System.iJoin.md	System.iJoin (Row)	the printed reference listed this operator under another category too
 O-System.iProject	reference/system-library/operators/System.iProject.md	System.iProject	
 O-System.iProjectRowOperator	reference/system-library/operators/System.iProject.md	System.iProject (Row)	the printed reference listed this operator under another category too
 O-System.iRemove	reference/system-library/operators/System.iRemove.md	System.iRemove	
-O-System.iRemoveRowOperator	reference/system-library/operators/System.iRemove.md	System.iRemove	the printed reference listed this operator under another category too
+O-System.iRemoveRowOperator	reference/system-library/operators/System.iRemove.md	System.iRemove (Row)	the printed reference listed this operator under another category too
 O-System.iRename	reference/system-library/operators/System.iRename.md	System.iRename	
-O-System.iRenameRowOperator	reference/system-library/operators/System.iRename.md	System.iRename	the printed reference listed this operator under another category too
+O-System.iRenameRowOperator	reference/system-library/operators/System.iRename.md	System.iRename (Row)	the printed reference listed this operator under another category too
 O-System.SecurityOperators	reference/system-library/operators/System.SecurityOperators.md	Security Operators	
 O-System.AddUserToRole	reference/system-library/operators/System.AddUserToRole.md	System.AddUserToRole	
 O-System.ChangeDeviceUserPassword	reference/system-library/operators/System.ChangeDeviceUserPassword.md	System.ChangeDeviceUserPassword	
@@ -359,3 +359,4 @@ T-System.Time	reference/system-library/types/System.Time.md	System.Time
 T-System.TimeSpan	reference/system-library/types/System.TimeSpan.md	System.TimeSpan	
 T-System.UserID	reference/system-library/types/System.UserID.md	System.UserID	
 T-System.VersionNumber	reference/system-library/types/System.VersionNumber.md	System.VersionNumber	
+System.iXor.xml	reference/system-library/operators/System.iXor.md	System.iXor	the only source is the 2004 OperatorDocs file, whose root section carries no id, so this row is keyed on the file name

@@ -64,11 +64,18 @@ DECLARATION = 'create operator .Lib.Abs(const AValue : Lib.Decimal) : Lib.Decima
 class Harness:
     """A source, a page map and a declaration table in a temporary folder."""
 
-    def __init__(self, stack, pages=PAGES, declarations=(("O-Lib.Abs", DECLARATION),)):
+    def __init__(self, stack, pages=PAGES, declarations=(("O-Lib.Abs", DECLARATION),), extra=None):
         self.folder = stack.enter_context(tempfile.TemporaryDirectory())
         self.source = os.path.join(self.folder, "LibOperators.xml")
         with open(self.source, "wb") as stream:
             stream.write(SOURCE.encode("utf-8"))
+        self.sources = [self.source]
+        if extra is not None:
+            name, body = extra
+            path = os.path.join(self.folder, name)
+            with open(path, "wb") as stream:
+                stream.write(body.encode("utf-8"))
+            self.sources.append(path)
         self.pages = os.path.join(self.folder, "pages.tsv")
         convert.write_tsv(self.pages, split.PAGES_COLUMNS, pages)
         self.declarations = os.path.join(self.folder, "declarations.tsv")
@@ -78,7 +85,7 @@ class Harness:
 
     def run(self):
         self.report = split.Report()
-        self.status = split.split([self.source], self.pages, self.declarations, self.out, self.report)
+        self.status = split.split(self.sources, self.pages, self.declarations, self.out, self.report)
         return self.status
 
     def page(self, output):
@@ -141,6 +148,30 @@ class SplitTest(unittest.TestCase):
         document = ET.fromstring(harness.page("ref/operators/Lib.Abs.md"))
         urls = sorted(e.get("url") for e in document.iter("ulink"))
         self.assertEqual(urls, ["DDGSomewhere.html", "O-Lib.Abs.html", "O-Lib.Ceiling.html"])
+
+    def test_a_root_section_with_no_id_is_addressed_by_its_file_name(self):
+        # The 2004 OperatorDocs sources carry no id anywhere, so the file name is the only thing
+        # a page map can key on. It has to be opt-in by row, because an id-less root is not
+        # always a page: SystemOperators.xml's root section has none either and stays out.
+        extra = ("Lib.Xor.xml",
+                 '<?xml version="1.0"?>'
+                 '<!DOCTYPE sect2 SYSTEM "/gone/docbookx.dtd">'
+                 '<sect2><title>Xor</title>'
+                 '<para>See <ulink url="O-Lib.Abs.html">Lib.Abs</ulink>.</para></sect2>')
+        row = {"id": "Lib.Xor.xml", "output": "ref/operators/Lib.Xor.md", "title": "Lib.Xor", "reason": ""}
+        harness = self.harness(pages=PAGES + [row], extra=extra)
+        self.assertEqual(harness.run(), 0)
+        document = ET.fromstring(harness.page("ref/operators/Lib.Xor.md"))
+        self.assertEqual(split.title_text(document), "Lib.Xor")
+        self.assertIn("Lib.Xor.xml", harness.report.lines["root-sections-addressed-by-their-file-name"])
+        # Such a page has no help page and needs none: no enclosing section can cut it out, so
+        # no generated navigation list ever links it by name.
+        self.assertNotIn("Lib.Xor", "".join(harness.report.lines["pages-needing-a-legacy-map-row"]))
+
+        plain = self.harness(extra=extra)
+        self.assertEqual(plain.run(), 0)
+        self.assertFalse(os.path.exists(os.path.join(plain.out, split.work_name("ref/operators/Lib.Xor.md"))))
+        self.assertIn("Lib.Xor.xml: Xor", plain.report.lines["sections-without-an-id"])
 
     def test_a_section_id_with_no_row_is_an_error(self):
         harness = self.harness(pages=[row for row in PAGES if row["id"] != "O-Lib.Version"])

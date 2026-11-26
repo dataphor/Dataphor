@@ -61,6 +61,9 @@ SUBSTANTIVE = ("imagedata", "graphic", "inlinemediaobject", "mediaobject", "xref
                "ulink", "link", "olink")
 
 LEGACY_SUFFIX = re.compile(r"\.html?$", re.IGNORECASE)
+# A page-map key that names a source file instead of a section id, which is how a file whose
+# root section carries no id is addressed. No DocBook id in the sources ends in `.xml`.
+FILE_KEY = re.compile(r"\.xml$", re.IGNORECASE)
 
 
 def xml_parser():
@@ -254,19 +257,44 @@ def read_declarations(path):
 # split: the page map
 
 def legacy_name(identifier):
-    """The help-file page name of a section id. A few ids in the sources carry the `.html` suffix
-    already (`O-System.iInListOperator.html`), a source defect the links repeat."""
+    """The help-file page name of a section id, or None for a key that names a source file.
+
+    A few ids in the sources carry the `.html` suffix already (`O-System.iInListOperator.html`),
+    a source defect the links repeat. A key that names a file names no help page: the files
+    addressed that way are the 2004 `OperatorDocs/` ones, which the published help file, built
+    from the 2007 sources, never carried."""
+    if FILE_KEY.search(identifier):
+        return None
     return identifier if LEGACY_SUFFIX.search(identifier) else identifier + ".html"
 
 
 def rule_output(identifier):
     """The page `convert.py`'s built-in legacy rule already promises for this section's help
-    page, so a seeded map agrees with the links under docs/ that point at it."""
-    return convert.legacy_target(legacy_name(identifier)) or ""
+    page, so a seeded map agrees with the links under docs/ that point at it. Empty when the
+    section has no help page at all, or none the rule describes."""
+    name = legacy_name(identifier)
+    return (convert.legacy_target(name) or "") if name else ""
+
+
+def name_root_section(root, source, pages, report):
+    """Give a file's root section the file's own name as its id, when it has none and the page
+    map carries a row for that name.
+
+    The 2004 `OperatorDocs/` files are one operator per file and carry no id anywhere, so the
+    file name is the only thing a page map can key on. It is opt-in by row because an id-less
+    root is not always a page: `SystemOperators.xml`'s root section is the wrapper holding the
+    339 operator sections, has no id either, and stays unconverted."""
+    if is_tag(root) and root.tag in SECTIONS and not root.get("id") and source in pages:
+        root.set("id", source)
+        report.add("root-sections-addressed-by-their-file-name", source)
 
 
 def link_names(pages):
     """output -> (the help-page name a generated link to that page uses, its link text).
+
+    The name is None for a page addressed by a file name, which has no help page; such a page
+    is never in a generated list, because the row reaches a file's root section and no enclosing
+    section can cut it out.
 
     A merged page holds several sections, and only one of their help-page names is the one the
     built-in rule sends to that page - the one the links under docs/ already use. Linking by
@@ -653,7 +681,7 @@ def split(files, pages_path, declarations_path, out_dir, report):
     declarations = read_declarations(declarations_path)
     names = link_names(pages)
     for output, (name, _) in sorted(names.items()):
-        if convert.legacy_target(name) != output:
+        if name is not None and convert.legacy_target(name) != output:
             report.add("pages-needing-a-legacy-map-row", "%s is linked as %s, which the rule sends to %s"
                        % (output, name, convert.legacy_target(name) or "no page"))
 
@@ -666,7 +694,9 @@ def split(files, pages_path, declarations_path, out_dir, report):
     filled = 0
     for path in files:
         source = os.path.basename(path)
-        found = sections_of(read_xml(path))
+        root = read_xml(path)
+        name_root_section(root, source, pages, report)
+        found = sections_of(root)
         check_ids(found, pages, source, pages_path, seen, report)
         if report.errors:
             continue
