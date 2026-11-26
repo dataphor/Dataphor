@@ -262,8 +262,8 @@ namespace Alphora.Dataphor
 					lock (_assemblyByName)
 					{
 						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                            if (!_assemblyByName.ContainsKey(AssemblyNameUtility.GetName(assembly.FullName)))
-    							RegisterAssembly(assembly);
+							if (!_assemblyByName.ContainsKey(AssemblyNameUtility.GetName(assembly.FullName)))
+								RegisterAssembly(assembly);
 					}
 			}
 		}

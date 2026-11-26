@@ -20,6 +20,7 @@ namespace Alphora.Dataphor
 
 		[DllImport("kernel32.dll", EntryPoint = "QueryPerformanceFrequency", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool QueryPerformanceFrequency(out long lpFrequency);
+
 		static TimingUtility()
 		{
 			QueryPerformanceFrequency(out _ticksPerSecond);
