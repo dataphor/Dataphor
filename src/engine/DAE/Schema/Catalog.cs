@@ -307,7 +307,11 @@ namespace Alphora.Dataphor.DAE.Schema
         // Catalog Emission
         private void EmitDependencies(EmissionContext context, Object objectValue)
         {
-			if (objectValue.HasDependencies())
+			// Several callers pass an optional member rather than a collection element - a scalar type's is-special
+			// operator, a special's selector and comparer - and each of those is null on an object that does not have
+			// one. A null object has no dependencies to emit. Unguarded, this dereference made Script() on a scalar
+			// type with no specials (System.Boolean, System.Scalar) fail with a null reference from inside the engine.
+			if (objectValue != null && objectValue.HasDependencies())
 				for (int index = 0; index < objectValue.Dependencies.Count; index++)
 					EmitObject(context, objectValue.Dependencies.ResolveObject(context.Session, index));
         }
@@ -410,11 +414,8 @@ namespace Alphora.Dataphor.DAE.Schema
 						}
 					}
 					
-					// A scalar type with no specials has no IsSpecialOperator, and EmitDependencies dereferences what it is
-					// given, so the unguarded call crashed Script() on such a type (System.Boolean, System.Scalar). A null
-					// operator has no dependencies to emit; the calls around this one are guarded by their own conditions.
-					if (scalarType.IsSpecialOperator != null)
-						EmitDependencies(context, scalarType.IsSpecialOperator);
+					// Null on a type with no specials; EmitDependencies handles null.
+					EmitDependencies(context, scalarType.IsSpecialOperator);
 					foreach (Schema.Special special in scalarType.Specials)
 					{
 						if ((!special.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && context.ShouldEmitWithLibrary(special))

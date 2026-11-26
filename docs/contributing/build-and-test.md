@@ -55,7 +55,7 @@ Starting a server from a copy of it, and the two environment variables that keep
 
 ## Environment variables
 
-Three variables change which tests a run includes. All three are read in one place, so nothing else parses them.
+Three variables change what a run does - two of them by turning tests on. All three are read in one place, so nothing else parses them.
 
 | Variable | What it does |
 |---|---|

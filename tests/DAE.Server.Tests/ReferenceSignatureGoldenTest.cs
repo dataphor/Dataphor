@@ -312,7 +312,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// The System library's scalar types that no page documents, each one an internal type the engine uses to carry a
 		/// value across the catalog or the library machinery rather than one a D4 script writes a literal of. The 2007
 		/// reference documented none of them. The operator side of the same gap is the inventory file, which is a line
-		/// per name rather than a list here because there are 308 of them.
+		/// per name rather than a list here because there are 301 of them.
 		/// </summary>
 		private static readonly string[] CatalogTypesWithNoPage =
 		[
@@ -486,12 +486,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private Dictionary<string, string> _typeDeclarations;
 
 		/// <summary>
-		/// Generates the declarations if this fixture has not done it yet. On first use rather than in a OneTimeSetUp
-		/// because the base fixture gives each test its own session and process, so there is no process yet when a
-		/// OneTimeSetUp runs; the server is the fixture's, so one generation serves every case.
+		/// Generates the declarations if this fixture has not done it yet. Called by the cases that need them rather
+		/// than from a SetUp, so that the case holding the engine defect this ticket fixed fails on its own assertion:
+		/// a SetUp generating every declaration would itself crash on the type that could not be scripted, and all three
+		/// cases would then report the same SetUp error. Not a OneTimeSetUp either, because the base fixture gives each
+		/// test its own session and process and there is no process yet when one runs; the server is the fixture's, so
+		/// one generation serves every case.
 		/// </summary>
-		[SetUp]
-		public void GenerateDeclarations()
+		private void EnsureDeclarations()
 		{
 			if (_operatorDeclarations == null)
 			{
@@ -605,21 +607,37 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>The text inside the fenced d4 block under the given bold heading, or null if the page has no such heading.</summary>
 		/// <remarks>
-		/// Strict on purpose: a heading with no fenced d4 block under it, or an unterminated fence, throws rather than
-		/// coming back empty. An empty block would compare as a difference and be classified as one, when what has
-		/// actually happened is that the page's shape changed.
+		/// Strict on purpose: a heading whose own first non-blank line is not a terminated d4 fence throws, rather than
+		/// coming back empty or reaching forward for a later block. An empty block would compare as a difference and be
+		/// classified as one, when what has actually happened is that the page's shape changed - and reaching forward
+		/// would be worse: 273 of the 310 pages with a declaration heading carry further d4 blocks in their examples, so
+		/// a declarations block that lost its fence would be compared against that page's first example instead,
+		/// silently. The fence is on the first non-blank line after the heading on every page of the corpus, measured.
 		/// </remarks>
 		private static string Block(string pageRelativePath, string pageText, string heading)
 		{
-			int headingAt = pageText.IndexOf("**" + heading + "**", StringComparison.Ordinal);
+			string marker = "**" + heading + "**";
+			int headingAt = pageText.IndexOf(marker, StringComparison.Ordinal);
 			if (headingAt < 0)
 				return null;
-			int fenceAt = pageText.IndexOf("```d4", headingAt, StringComparison.Ordinal);
-			int bodyAt = fenceAt < 0 ? -1 : pageText.IndexOf('\n', fenceAt) + 1;
+			int fenceAt = FirstNonBlank(pageText, headingAt + marker.Length);
+			int bodyAt = String.CompareOrdinal(pageText, fenceAt, Fence, 0, Fence.Length) == 0 ? pageText.IndexOf('\n', fenceAt) + 1 : -1;
 			int endAt = bodyAt <= 0 ? -1 : pageText.IndexOf("\n```", bodyAt, StringComparison.Ordinal);
 			if (endAt < 0)
-				throw new InvalidOperationException(String.Format("\"{0}\" has a **{1}** heading with no fenced d4 block under it. This pass reads that block; fix the page, or record the page in PagesWithNoDeclarations with the reason.", pageRelativePath, heading));
+				throw new InvalidOperationException(String.Format("\"{0}\" has a **{1}** heading whose first non-blank line is not a terminated {2} block. This pass reads that block; fix the page, or record the page in PagesWithNoDeclarations with the reason.", pageRelativePath, heading, Fence));
 			return pageText.Substring(bodyAt, endAt - bodyAt);
+		}
+
+		/// <summary>The opening fence of a declarations block.</summary>
+		private const string Fence = "```d4";
+
+		/// <summary>The index of the first non-whitespace character at or after the given one, or the end of the text.</summary>
+		private static int FirstNonBlank(string text, int from)
+		{
+			int index = from;
+			while (index < text.Length && Char.IsWhiteSpace(text[index]))
+				index++;
+			return index;
 		}
 
 		/// <summary>
@@ -627,15 +645,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// A category page carries links and no declarations, so it is not an object and has nothing to compare; reading
 		/// the README is what keeps a new page from escaping the comparison by looking like a category.
 		/// </summary>
+		/// <remarks>
+		/// Reading the README can also take a page away: a link to an object page added to that list would classify the
+		/// page as a category and drop it out of the comparison, and for one of the 214 pages that agree, nothing else
+		/// would say so. So a page read as a category must carry no declarations block, and the run fails naming the page
+		/// if one does.
+		/// </remarks>
 		private static List<string> CategoryPages()
 		{
 			string readme = File.ReadAllText(Path.Combine(PagesDirectory, "README.md"));
-			return
+			var names =
 				Regex.Matches(readme, @"\]\(operators/(?<name>[^)]+)\.md\)")
 					.Select(match => match.Groups["name"].Value)
 					.Distinct(StringComparer.Ordinal)
 					.OrderBy(name => name, StringComparer.Ordinal)
 					.ToList();
+			foreach (string name in names)
+			{
+				string pageRelativePath = OperatorsFolder + "/" + name + ".md";
+				if (Block(pageRelativePath, File.ReadAllText(Path.Combine(PagesDirectory, pageRelativePath.Replace('/', Path.DirectorySeparatorChar))), DeclarationsHeading) != null)
+					throw new InvalidOperationException(String.Format("\"{0}\" is linked from the README's Operators list, which is how this pass tells a category index page from an object page, but it carries a **{1}** block. Link the category index instead, or this page is no longer compared with the catalog.", pageRelativePath, DeclarationsHeading));
+			}
+			return names;
 		}
 
 		#endregion
@@ -743,8 +774,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void EveryPublishedSignatureAgreesWithTheCatalog()
 		{
+			EnsureDeclarations();
 			bool updating = Updating;
 			var problems = new List<string>();
+			// Case-insensitive because this is held against the names a Windows filesystem gives back, not against the
+			// catalog. NOTE: two System names differing only in case would therefore share one golden file and the second
+			// would overwrite the first; there is no such pair today (measured over the 311 names). If one ever arrives,
+			// GoldenRelativePath needs to disambiguate before this set can tell the two apart.
 			var claimed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 			var differenceByPath = Differences.ToDictionary(difference => difference.BlockPath, StringComparer.Ordinal);
 			var differencesMatched = new HashSet<string>(StringComparer.Ordinal);
@@ -966,6 +1002,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test]
 		public void TheSameCatalogAlwaysGeneratesTheSameDeclarations()
 		{
+			EnsureDeclarations();
 			Dictionary<string, int> counts;
 			Assert.That(OperatorDeclarations(Process, out counts), Is.EqualTo(_operatorDeclarations), "Asking the same catalog for its operator declarations twice gave two different answers.");
 			Assert.That(TypeDeclarations(Process), Is.EqualTo(_typeDeclarations), "Asking the same catalog for its scalar type declarations twice gave two different answers.");
@@ -1001,8 +1038,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				var parameters = new DataParams();
 				parameters.Add(DataParam.Create(Process, "ASpecifier", name));
-				string declaration = (string)((ServerProcess)Process).Evaluate("Script(ASpecifier)", parameters).AsNative;
-				Assert.That(declaration, Does.Contain("create type"), String.Format("Script('{0}') did not return a create type statement.", name));
+				using (IDataValue value = ((ServerProcess)Process).Evaluate("Script(ASpecifier)", parameters))
+					Assert.That((string)value.AsNative, Does.Contain("create type"), String.Format("Script('{0}') did not return a create type statement.", name));
 			}
 		}
 	}

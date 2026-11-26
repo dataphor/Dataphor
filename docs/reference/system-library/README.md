@@ -63,10 +63,10 @@ The signatures on these pages are the 2007 published record and this release is 
 
 What that measurement found, and what it means for reading these pages:
 
-- **Of the 290 operator pages with a declaration block, 214 match this release exactly.** For those, the page is current.
+- **Of the 290 operator pages with a declaration block, 214 match this release** once the tabs and line endings the help file's conversion changed are set aside. For those, the page is current.
 - **The other 76 differ, and none of the differences is a changed signature introduced by the .NET port** - each was traced to a change that had already happened in the 3.x product after the help file was published. Most are extra metadata tags the product gained, or an operator body printed as its source text rather than as the compiler's rewriting of it. Thirteen are substantive for a reader: the page lists fewer overloads than the product has - the `Money` and `Long` arms of `Abs`, `Avg`, `Ceiling`, `Floor`, `Frac`, `Max`, `Min`, `Sum`, `Truncate` and `iDivision`, the string arms of `IndexOf` and `LastIndexOf`, and one extra arm of `ToList`. **For those thirteen names, read the checked-in file rather than the page.**
 - **Every scalar type's *Type Declaration* block differs,** because the product now writes a type's representations as separate `alter type` statements instead of inside the `create type`. The type, its representations and their selectors are the same; only the shape of the statement is different.
-- **308 System operator names have no page at all.** The inventory file is the only list of them.
+- **301 System operator names have no page at all.** The inventory file is the only list of them.
 
 These pages are deliberately not rewritten to match: they are the baseline the comparison is measured against, and a page corrected to 4.0 would make the next comparison prove nothing. The one exception was `System.RequiredObjects`, whose block carried `System.RequiredLibraries`' declarations - a conversion error, not a product difference - and has been corrected.
 
