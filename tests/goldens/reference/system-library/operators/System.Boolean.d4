@@ -1,0 +1,2 @@
+create operator .System.Boolean(const Value : System.Boolean) : System.Boolean
+ class "System.ScalarSelectorNode";

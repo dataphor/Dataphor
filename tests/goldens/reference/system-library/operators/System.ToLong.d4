@@ -1,0 +1,14 @@
+create operator .System.ToLong(const AValue : System.Boolean) : System.Long
+ class "System.BooleanToLongNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToLong(const AValue : System.String) : System.Long
+ class "System.StringToLongNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToLong(const AValue : System.Byte) : System.Long
+ class "System.ByteToLongNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToLong(const AValue : System.Short) : System.Long
+ class "System.ShortToLongNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToLong(const AValue : System.Integer) : System.Long
+ class "System.IntegerToLongNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToLong(const AValue : System.Decimal) : System.Long
+ class "System.DecimalToLongNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToLong(const AValue : System.Money) : System.Long
+ class "System.DecimalToLongNode" static tags { DAE.IsOrderPreserving = "True" };

@@ -1,0 +1,6 @@
+create operator .System.LastIndexOfAny(const AString : System.String, const AAnyOf : list(System.String)) : System.Integer
+ class "System.StringLastIndexOfAnyNode";
+create operator .System.LastIndexOfAny(const AString : System.String, const AAnyOf : list(System.String), const AStartIndex : System.Integer) : System.Integer
+ class "System.StringLastIndexOfAnyNode";
+create operator .System.LastIndexOfAny(const AString : System.String, const AAnyOf : list(System.String), const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.StringLastIndexOfAnyNode";

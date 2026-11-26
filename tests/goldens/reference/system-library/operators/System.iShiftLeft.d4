@@ -1,0 +1,8 @@
+create operator .System.iShiftLeft(const ALeftValue : System.Byte, const ARightValue : System.Integer) : System.Byte
+ class "System.ByteShiftLeftNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iShiftLeft(const ALeftValue : System.Short, const ARightValue : System.Integer) : System.Short
+ class "System.ShortShiftLeftNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iShiftLeft(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerShiftLeftNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iShiftLeft(const ALeftValue : System.Long, const ARightValue : System.Integer) : System.Long
+ class "System.LongShiftLeftNode" static tags { DAE.IsBuiltin = "True" };

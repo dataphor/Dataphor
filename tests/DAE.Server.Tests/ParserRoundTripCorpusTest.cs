@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// the result gives the same tree. Exercises the lexer, parser and D4TextEmitter in isolation, with no server.
 	/// </summary>
 	/// <remarks>
+	/// <para>
 	/// Three kinds of .d4 file are not a whole D4 script, and each has its own rule here. A device's SystemCatalog
 	/// resource is a String.Format template, so <see cref="FormatTemplates"/> formats it first, as the device does. A
 	/// document under the parked trees that the parser cannot read is Ignored rather than failed, with
@@ -30,6 +31,14 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// is not a script is named in <see cref="AllowList"/> with the line the parser stops at, and
 	/// <see cref="EveryExcludedFileIsStillWhatItsReasonSays"/> holds those entries against the tree: each file it names
 	/// must still fail, and still fail at the line its entry records.
+	/// </para>
+	/// <para>
+	/// The reference signature goldens (tests/goldens/reference) are in this corpus on purpose, not by accident of the
+	/// walk: they are what the engine's own catalog emitter writes for every System operator and scalar type, so
+	/// parsing and round-tripping them asks whether a catalog copy script the product generates can be read back - the
+	/// property an administrator depends on when they script a catalog and run it elsewhere.
+	/// ReferenceSignatureGoldenTest generates them; a change there changes this corpus's case count.
+	/// </para>
 	/// </remarks>
 	[TestFixture]
 	public class ParserRoundTripCorpusTest

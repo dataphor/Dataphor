@@ -1,0 +1,12 @@
+create operator .System.iNegate(const AValue : System.Short) : System.Short
+ class "System.ShortNegateNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iNegate(const AValue : System.Integer) : System.Integer
+ class "System.IntegerNegateNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iNegate(const AValue : System.Long) : System.Long
+ class "System.LongNegateNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iNegate(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalNegateNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iNegate(const AValue : System.Money) : System.Money
+ class "System.DecimalNegateNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iNegate(const AValue : System.TimeSpan) : System.TimeSpan
+ class "System.TimeSpanNegateNode" static tags { DAE.IsBuiltin = "True" };

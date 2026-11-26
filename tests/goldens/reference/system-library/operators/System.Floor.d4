@@ -1,0 +1,4 @@
+create operator .System.Floor(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalFloorNode";
+create operator .System.Floor(const AValue : System.Money) : System.Money
+ class "System.DecimalFloorNode";

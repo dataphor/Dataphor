@@ -1,0 +1,8 @@
+create operator .System.iBitwiseAnd(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteBitwiseAndNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseAnd(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortBitwiseAndNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseAnd(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerBitwiseAndNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseAnd(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongBitwiseAndNode" static tags { DAE.IsBuiltin = "True" };

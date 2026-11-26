@@ -1,0 +1,2 @@
+create operator .System.CreateLibrary(const ALibraryDescriptor : System.LibraryDescriptor)
+ class "System.SystemCreateLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

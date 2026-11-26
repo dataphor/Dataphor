@@ -1,0 +1,9 @@
+create operator .System.ActualTime() : System.Time
+ class "System.ActualTimeNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};

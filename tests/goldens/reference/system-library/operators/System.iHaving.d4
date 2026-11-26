@@ -1,0 +1,2 @@
+create operator .System.iHaving(ALeftTable : generic table, ARightTable : generic table) : generic table
+ class "System.HavingNode" static tags { DAE.IsBuiltin = "True" };

@@ -1,0 +1,4 @@
+create operator .System.AddYears(const AValue : System.DateTime, const AYears : System.Integer) : System.DateTime
+ class "System.DateTimeAddYearsNode";
+create operator .System.AddYears(const AValue : System.Date, const AYears : System.Integer) : System.Date
+ class "System.DateAddYearsNode";

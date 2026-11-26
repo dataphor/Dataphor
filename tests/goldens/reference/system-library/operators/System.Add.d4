@@ -1,0 +1,2 @@
+create operator .System.Add(var AList : list, AValue : generic) : System.Integer
+ class "System.ListAddNode" static tags { DAE.IsFunctional = "False" };

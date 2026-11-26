@@ -1,0 +1,2 @@
+create operator .System.AttachLibrary(const AName : System.Name, const ADirectory : System.String)
+ class "System.SystemAttachLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

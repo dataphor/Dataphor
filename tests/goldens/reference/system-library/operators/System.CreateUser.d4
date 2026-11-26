@@ -1,0 +1,2 @@
+create operator .System.CreateUser(const AUserID : System.UserID, const AUserName : System.String, const APassword : System.String)
+ class "System.SystemCreateUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

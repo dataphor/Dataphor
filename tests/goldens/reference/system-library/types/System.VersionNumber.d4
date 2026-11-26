@@ -1,0 +1,41 @@
+create type .System.VersionNumber class "System.VersionNumberConveyor"
+	tags
+	{ 
+		
+		static Storage.Length = "14", 
+		static DAE.AsString = "AsString", 
+		Frontend.Width = "15", 
+		Frontend.TextBox.MaxLength = "14", 
+		Frontend.TextBox.MaxWidth = "15"
+	};
+alter type System.VersionNumber
+{
+	create representation VersionNumber
+	{
+		Major : System.Integer
+			read  class "System.VersionNumberMajorReadAccessorNode"
+			write  class "System.VersionNumberMajorWriteAccessorNode", 
+		Minor : System.Integer
+			read  class "System.VersionNumberMinorReadAccessorNode"
+			write  class "System.VersionNumberMinorWriteAccessorNode", 
+		Revision : System.Integer
+			read  class "System.VersionNumberRevisionReadAccessorNode"
+			write  class "System.VersionNumberRevisionWriteAccessorNode", 
+		Build : System.Integer
+			read  class "System.VersionNumberBuildReadAccessorNode"
+			write  class "System.VersionNumberBuildWriteAccessorNode"
+	}selector  class "System.VersionNumberSelectorNode"
+};
+alter type System.VersionNumber
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.VersionNumberAsStringReadAccessorNode"
+			write  class "System.VersionNumberAsStringWriteAccessorNode"
+	}selector  class "System.VersionNumberAsStringSelectorNode"
+};
+alter type System.VersionNumber
+{
+	create special Undefined (.System.VersionNumber(-1, -1, -1, -1))
+};

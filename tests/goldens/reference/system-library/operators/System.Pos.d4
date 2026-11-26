@@ -1,0 +1,2 @@
+create operator .System.Pos(const ASubString : System.String, const AString : System.String) : System.Integer
+ class "System.StringPosNode";

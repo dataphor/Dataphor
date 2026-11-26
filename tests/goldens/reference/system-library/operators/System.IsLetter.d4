@@ -1,0 +1,4 @@
+create operator .System.IsLetter(const AString : System.String) : System.Boolean
+ class "System.StringIsLetterNode";
+create operator .System.IsLetter(const AString : System.String, const AIndex : System.Integer) : System.Boolean
+ class "System.StringIsLetterNode";

@@ -1,0 +1,2 @@
+create operator .System.Name(const Value : System.String) : System.Name
+ class "System.SystemNameSelectorNode";

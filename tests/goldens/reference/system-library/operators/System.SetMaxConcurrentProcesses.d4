@@ -1,0 +1,2 @@
+create operator .System.SetMaxConcurrentProcesses(const AMaxConcurrentProcesses : System.Integer)
+ class "System.SystemSetMaxConcurrentProcessesNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

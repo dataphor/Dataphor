@@ -1,0 +1,2 @@
+create operator .System.Math.Exp(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalExpNode";

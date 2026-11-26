@@ -1,0 +1,2 @@
+create operator .System.Trim(const AString : System.String) : System.String
+ class "System.StringTrimNode";

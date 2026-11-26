@@ -1,0 +1,2 @@
+create operator .System.iOrder(ATable : generic table) : generic table
+ class "System.OrderNode" static tags { DAE.IsBuiltin = "True" };

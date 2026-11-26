@@ -1,0 +1,6 @@
+create operator .System.ObjectDisplayName(const AName : System.Name) : System.String
+ class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.ObjectDisplayName(const ASpecifier : System.String) : System.String
+ class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.ObjectDisplayName(const AID : System.Integer) : System.String
+ class "System.ObjectDisplayNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

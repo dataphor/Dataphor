@@ -1,0 +1,2 @@
+create operator .System.ToTimeSpan(const AValue : System.String) : System.TimeSpan
+ class "System.StringToTimeSpanNode" static tags { DAE.IsUniquePreserving = "True" };

@@ -1,0 +1,2 @@
+create operator .System.NameFromGuid(const AID : System.Guid) : System.Name
+ class "System.SystemNameFromGuidNode";

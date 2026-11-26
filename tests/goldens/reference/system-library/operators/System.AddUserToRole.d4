@@ -1,0 +1,2 @@
+create operator .System.AddUserToRole(const AUserID : System.UserID, const ARoleName : System.Name)
+ class "System.SystemAddUserToRoleNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

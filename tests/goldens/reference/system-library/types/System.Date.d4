@@ -1,0 +1,42 @@
+create type .System.Date class "System.DateTimeConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Date", 
+		static DAE.AsString = "AsString", 
+		Frontend.Width = "11", 
+		Frontend.DateTimeBox.MaxWidth = "11"
+	};
+alter type System.Date
+{
+	create representation Ticks
+	{
+		Ticks : System.Long
+			read  class "System.SystemDateTicksReadTicksNode"
+			write  class "System.SystemDateTicksWriteTicksNode"
+	}selector  class "System.SystemDateTicksSelectorNode"
+};
+alter type System.Date
+{
+	create representation Date
+	{
+		Year : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadYearNode"
+			write  class "System.SystemDateTimeDateTimeWriteYearNode", 
+		Month : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadMonthNode"
+			write  class "System.SystemDateTimeDateTimeWriteMonthNode", 
+		Day : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadDayNode"
+			write  class "System.SystemDateTimeDateTimeWriteDayNode"
+	}selector  class "System.SystemDateTimeDateTimeDaysSelectorNode"
+};
+alter type System.Date
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.DateAsStringReadAccessorNode"
+			write  class "System.DateAsStringWriteAccessorNode"
+	}selector  class "System.DateAsStringSelectorNode"
+};

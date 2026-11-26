@@ -1,0 +1,36 @@
+create type .System.String
+{
+	representation String
+	{
+		Value : System.String
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.StringConveyor" static tags { Catalog.Comment = "System String", Storage.Length = "20" };
+alter type System.String
+{
+	create representation Unicode
+	{
+		Unicode : list(System.Integer)
+			read  class "System.SystemStringReadUnicodeNode"
+			write  class "System.SystemStringWriteUnicodeNode"
+	}selector  class "System.SystemStringUnicodeNode"
+};
+alter type System.String
+{
+	create representation UTF8
+	{
+		UTF8 : list(System.Byte)
+			read  class "System.SystemStringReadUTF8Node"
+			write  class "System.SystemStringWriteUTF8Node"
+	}selector  class "System.SystemStringUTF8Node"
+};
+alter type System.String
+{
+	create representation ASCII
+	{
+		ASCII : list(System.Byte)
+			read  class "System.SystemStringReadASCIINode"
+			write  class "System.SystemStringWriteASCIINode"
+	}selector  class "System.SystemStringASCIINode"
+};

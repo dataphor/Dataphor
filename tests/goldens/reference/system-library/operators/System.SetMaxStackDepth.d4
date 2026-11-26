@@ -1,0 +1,2 @@
+create operator .System.SetMaxStackDepth(const AMaxStackDepth : System.Integer)
+ class "System.SystemSetMaxStackDepthNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

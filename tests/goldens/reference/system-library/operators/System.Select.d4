@@ -1,0 +1,2 @@
+create operator .System.Select(const ACursor : generic cursor) : generic row
+ class "System.CursorSelectNode";

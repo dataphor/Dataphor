@@ -1,0 +1,14 @@
+create operator .System.ToInteger(const AValue : System.Boolean) : System.Integer
+ class "System.BooleanToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToInteger(const AValue : System.String) : System.Integer
+ class "System.StringToIntegerNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToInteger(const AValue : System.Decimal) : System.Integer
+ class "System.DecimalToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToInteger(const AValue : System.Money) : System.Integer
+ class "System.DecimalToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToInteger(const AValue : System.Byte) : System.Integer
+ class "System.ByteToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToInteger(const AValue : System.Short) : System.Integer
+ class "System.ShortToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToInteger(const AValue : System.Long) : System.Integer
+ class "System.LongToIntegerNode" static tags { DAE.IsOrderPreserving = "True" };

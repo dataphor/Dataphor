@@ -1,0 +1,2 @@
+create operator .System.LastPos(const ASubString : System.String, const AString : System.String) : System.Integer
+ class "System.StringLastPosNode";

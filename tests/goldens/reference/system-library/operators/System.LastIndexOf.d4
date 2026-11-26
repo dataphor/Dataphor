@@ -1,0 +1,12 @@
+create operator .System.LastIndexOf(const AList : list, const AValue : generic) : System.Integer
+ class "System.ListLastIndexOfNode";
+create operator .System.LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : System.Integer) : System.Integer
+ class "System.ListLastIndexOfStartNode";
+create operator .System.LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.ListLastIndexOfStartLengthNode";
+create operator .System.LastIndexOf(const AString : System.String, const ASubString : System.String) : System.Integer
+ class "System.StringLastIndexOfNode";
+create operator .System.LastIndexOf(const AString : System.String, const ASubString : System.String, const AStartIndex : System.Integer) : System.Integer
+ class "System.StringLastIndexOfStartNode";
+create operator .System.LastIndexOf(const AString : System.String, const ASubString : System.String, const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.StringLastIndexOfStartLengthNode";

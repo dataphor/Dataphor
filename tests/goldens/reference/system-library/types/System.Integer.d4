@@ -1,0 +1,18 @@
+create type .System.Integer
+{
+	representation Integer
+	{
+		Value : System.Integer
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.Int32Conveyor" static tags { Catalog.Comment = "System Signed 32-bit Integer", DAE.AsString = "AsString" };
+alter type System.Integer
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.IntegerAsStringReadAccessorNode"
+			write  class "System.IntegerAsStringWriteAccessorNode"
+	}selector  class "System.IntegerAsStringSelectorNode"
+};

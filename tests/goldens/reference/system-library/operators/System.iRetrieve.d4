@@ -1,0 +1,2 @@
+create operator .System.iRetrieve() : generic table
+ class "System.BaseTableVarNode" static tags { DAE.IsBuiltin = "True" };

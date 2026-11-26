@@ -1,0 +1,24 @@
+create operator .System.iAddition(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.String, const ARightValue : System.String) : System.String
+ class "System.StringAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Money, const ARightValue : System.Money) : System.Money
+ class "System.MoneyAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.TimeSpan, const ARightValue : System.TimeSpan) : System.TimeSpan
+ class "System.TimeSpanAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.DateTime, const ARightValue : System.TimeSpan) : System.DateTime
+ class "System.DateTimeTimeSpanAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Date, const ARightValue : System.TimeSpan) : System.Date
+ class "System.DateTimeSpanAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Time, const ARightValue : System.TimeSpan) : System.Time
+ class "System.TimeTimeSpanAdditionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iAddition(const ALeftValue : System.Name, const ARightValue : System.Name) : System.String
+ class "System.StringAdditionNode" static tags { DAE.IsBuiltin = "True" };

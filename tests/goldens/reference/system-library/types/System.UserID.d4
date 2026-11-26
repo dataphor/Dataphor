@@ -1,0 +1,15 @@
+create type .System.UserID like System.String
+	tags
+	{ 
+		
+		static Catalog.Comment = "System String", 
+		static Storage.Length = "255", 
+		Frontend.Title = "User ID", 
+		Frontend.Width = "10", 
+		Frontend.TextBox.MaxLength = "255", 
+		Frontend.TextBox.MaxWidth = "15"
+	};
+alter type .System.UserID
+{
+	create constraint LengthValid ((.System.Length(.System.UserID.ReadValue(.value)) <= 255))
+};

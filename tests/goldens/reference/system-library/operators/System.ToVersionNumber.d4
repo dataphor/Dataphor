@@ -1,0 +1,2 @@
+create operator .System.ToVersionNumber(const AValue : System.String) : System.VersionNumber
+ class "System.StringToVersionNumberNode";

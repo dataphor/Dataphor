@@ -6,7 +6,7 @@
 
 Reference material for the Dataphor product: the D4 language's own grammar and vocabulary, the libraries this release ships, the metadata tags that guide user-interface derivation, the error-code ranges, the behaviour switches the build is compiled with, and overviews of the two .NET layers an application reaches the server through. The guides are elsewhere - the [User's Guide](../users-guide/README.md) is the product from a user's side and the [Developer's Guide](../developers-guide/README.md) teaches D4 and application design. These pages are for looking something up.
 
-Most of this was converted from the DocBook sources the published 3.x help collection was built from, so **the material records what shipped rather than a reading of today's source.** Where a signature or a sentence disagrees with this repository, the disagreement is worth knowing; `docs-reference-generator` is the work item that will emit the parts of it a running server can be asked for.
+Most of this was converted from the DocBook sources the published 3.x help collection was built from, so **the material records what shipped rather than a reading of today's source.** Where a signature or a sentence disagrees with this repository, the disagreement is worth knowing rather than quietly fixed. For the System library's operator and type signatures the disagreements are now measured rather than guessed at: the test suite asks a running server for the same declarations and holds them against these pages, and the generated 4.0 text is checked in beside them. [The System library page](system-library/README.md#what-the-running-product-says) says where to read it.
 
 ## Sections
 

@@ -1,0 +1,2 @@
+create operator .System.NewGuid() : System.Guid
+ class "System.NewGuidNode" static tags { DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };

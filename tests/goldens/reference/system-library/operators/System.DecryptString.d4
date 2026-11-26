@@ -1,0 +1,2 @@
+create operator .System.DecryptString(const AEncrypted : System.String) : System.String
+ class "System.SystemDecryptStringNode";

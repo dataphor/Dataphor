@@ -1,0 +1,12 @@
+create operator .System.IndexOf(const AList : list, const AValue : generic) : System.Integer
+ class "System.ListIndexOfNode";
+create operator .System.IndexOf(const AList : list, const AValue : generic, const AStartIndex : System.Integer) : System.Integer
+ class "System.ListIndexOfStartNode";
+create operator .System.IndexOf(const AList : list, const AValue : generic, const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.ListIndexOfStartLengthNode";
+create operator .System.IndexOf(const AString : System.String, const ASubString : System.String) : System.Integer
+ class "System.StringIndexOfNode";
+create operator .System.IndexOf(const AString : System.String, const ASubString : System.String, const AStartIndex : System.Integer) : System.Integer
+ class "System.StringIndexOfStartNode";
+create operator .System.IndexOf(const AString : System.String, const ASubString : System.String, const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.StringIndexOfStartLengthNode";

@@ -1,0 +1,26 @@
+create type .System.Binary class "System.BinaryConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Binary", 
+		static DAE.AsDisplayString = "AsDisplayString", 
+		Frontend.ElementType = "File"
+	};
+alter type System.Binary
+{
+	create representation Binary
+	{
+		Value : System.String
+			read  class "System.SystemBinaryReadAccessorNode"
+			write  class "System.SystemBinaryWriteAccessorNode"
+	}selector  class "System.SystemBinarySelectorNode"
+};
+alter type System.Binary
+{
+	create representation AsDisplayString
+	{
+		AsDisplayString : System.String
+			read  class "System.BinaryAsDisplayStringReadAccessorNode"
+			write  class "System.BinaryAsDisplayStringWriteAccessorNode"
+	}selector  class "System.BinaryAsDisplayStringSelectorNode"
+};

@@ -1,0 +1,4 @@
+create operator .System.Truncate(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalTruncateNode";
+create operator .System.Truncate(const AValue : System.Money) : System.Money
+ class "System.DecimalTruncateNode";

@@ -1,0 +1,13 @@
+create operator .System.Time(const Hour : System.Integer, const Minute : System.Integer, const Second : System.Integer) : System.Time
+ class "System.SystemTimeTimeSecondsSelectorNode";
+create operator .System.Time(const AHours : System.Integer, const AMinutes : System.Integer) : System.Time
+ class "System.SystemTimeTimeMinutesSelectorNode";
+create operator .System.Time() : System.Time
+ class "System.TimeNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsLiteral = "False", 
+		DAE.IsDeterministic = "False"
+	};

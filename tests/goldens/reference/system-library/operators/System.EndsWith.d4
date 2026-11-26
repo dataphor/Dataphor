@@ -1,0 +1,2 @@
+create operator .System.EndsWith(const AString : System.String, const ASubString : System.String) : System.Boolean
+ class "System.StringEndsWith";

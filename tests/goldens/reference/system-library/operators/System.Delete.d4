@@ -1,0 +1,2 @@
+create operator .System.Delete(const ACursor : generic cursor)
+ class "System.CursorDeleteNode" static tags { DAE.IsFunctional = "False" };

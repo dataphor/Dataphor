@@ -1,0 +1,2 @@
+create operator .System.RoleHasRight(const ARoleName : System.Name, const ARightName : System.Name) : System.Boolean
+ class "System.SystemRoleHasRightNode" static tags { DAE.IsRemotable = "False", DAE.IsLiteral = "False" };

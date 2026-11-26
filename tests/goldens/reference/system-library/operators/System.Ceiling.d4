@@ -1,0 +1,4 @@
+create operator .System.Ceiling(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalCeilingNode";
+create operator .System.Ceiling(const AValue : System.Money) : System.Money
+ class "System.DecimalCeilingNode";

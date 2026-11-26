@@ -1,0 +1,2 @@
+create operator .System.iNot(const AValue : System.Boolean) : System.Boolean
+ class "System.BooleanNotNode" static tags { DAE.IsBuiltin = "True" };

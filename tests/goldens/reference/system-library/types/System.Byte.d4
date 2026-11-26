@@ -1,0 +1,18 @@
+create type .System.Byte
+{
+	representation Byte
+	{
+		Value : System.Byte
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.ByteConveyor" static tags { Catalog.Comment = "System Unsigned 8-bit Integer", DAE.AsString = "AsString" };
+alter type System.Byte
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.ByteAsStringReadAccessorNode"
+			write  class "System.ByteAsStringWriteAccessorNode"
+	}selector  class "System.ByteAsStringSelectorNode"
+};

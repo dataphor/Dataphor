@@ -1,0 +1,16 @@
+create operator .System.Count(const AList : list) : System.Integer
+ class "System.ListCountNode";
+create aggregate operator .System.Count() : System.Integer
+initialization
+ class "System.CountInitializationNode"
+aggregation
+ class "System.CountAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode";
+create aggregate operator .System.Count(AValue : System.Scalar) : System.Integer
+initialization
+ class "System.CountInitializationNode"
+aggregation
+ class "System.ObjectCountAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode";

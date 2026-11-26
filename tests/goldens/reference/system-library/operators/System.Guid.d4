@@ -1,0 +1,2 @@
+create operator .System.Guid(const Value : System.String) : System.Guid
+ class "System.SystemGuidSelectorNode";

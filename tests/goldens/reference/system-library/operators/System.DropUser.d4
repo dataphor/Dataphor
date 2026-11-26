@@ -1,0 +1,2 @@
+create operator .System.DropUser(const AUserID : System.UserID)
+ class "System.SystemDropUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

@@ -1,0 +1,2 @@
+create operator .System.Long(const Value : System.Long) : System.Long
+ class "System.ScalarSelectorNode";

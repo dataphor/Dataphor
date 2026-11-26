@@ -1,0 +1,35 @@
+create aggregate operator .System.Sum(AValue : System.Integer) : System.Integer
+initialization
+ class "System.IntegerInitializationNode"
+aggregation
+ class "System.IntegerSumAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };
+create aggregate operator .System.Sum(AValue : System.Long) : System.Long
+initialization
+ class "System.LongInitializationNode"
+aggregation
+ class "System.LongSumAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };
+create aggregate operator .System.Sum(AValue : System.Decimal) : System.Decimal
+initialization
+ class "System.DecimalInitializationNode"
+aggregation
+ class "System.DecimalSumAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };
+create aggregate operator .System.Sum(AValue : System.Money) : System.Money
+initialization
+ class "System.MoneyInitializationNode"
+aggregation
+ class "System.MoneySumAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };
+create aggregate operator .System.Sum(AValue : System.TimeSpan) : System.TimeSpan
+initialization
+ class "System.TimeSpanInitializationNode"
+aggregation
+ class "System.TimeSpanSumAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };

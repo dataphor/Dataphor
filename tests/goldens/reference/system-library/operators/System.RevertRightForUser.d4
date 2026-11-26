@@ -1,0 +1,2 @@
+create operator .System.RevertRightForUser(const ARightName : System.Name, const AUserID : System.UserID)
+ class "System.SystemRevertRightForUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

@@ -1,0 +1,2 @@
+create operator .System.GotoBookmark(const ACursor : generic cursor, const ABookmark : generic row) : System.Boolean
+ class "System.CursorGotoBookmarkNode";

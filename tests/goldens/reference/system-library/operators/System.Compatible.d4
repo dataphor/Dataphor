@@ -1,0 +1,2 @@
+create operator .System.Compatible(const ASource : System.VersionNumber, const ATarget : System.VersionNumber) : System.Boolean
+ class "System.VersionNumberCompatibleNode";

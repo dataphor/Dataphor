@@ -1,0 +1,6 @@
+create operator .System.ToTable(const AValue : list) : generic table
+ class "System.ListToTableNode";
+create operator .System.ToTable(const AValue : list, const AColumnName : System.Name) : generic table
+ class "System.ListToTableNode";
+create operator .System.ToTable(const AValue : list, const AColumnName : System.Name, const ASequenceName : System.Name) : generic table
+ class "System.ListToTableNode";

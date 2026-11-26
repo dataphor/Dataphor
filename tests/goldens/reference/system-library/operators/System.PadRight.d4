@@ -1,0 +1,4 @@
+create operator .System.PadRight(const AString : System.String, const ATotalLength : System.Integer) : System.String
+ class "System.StringPadRightNode";
+create operator .System.PadRight(const AString : System.String, const ATotalLength : System.Integer, const APadString : System.String) : System.String
+ class "System.StringPadRightNode";

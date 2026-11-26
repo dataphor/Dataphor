@@ -1,0 +1,2 @@
+create operator .System.RevokeRightFromRole(const ARightName : System.Name, const ARoleName : System.Name)
+ class "System.SystemRevokeRightFromRoleNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

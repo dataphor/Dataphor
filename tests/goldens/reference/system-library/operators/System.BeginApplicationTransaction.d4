@@ -1,0 +1,4 @@
+create operator .System.BeginApplicationTransaction() : System.Guid
+ class "System.BeginApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+create operator .System.BeginApplicationTransaction(const AShouldJoin : System.Boolean, const AIsInsert : System.Boolean) : System.Guid
+ class "System.BeginApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

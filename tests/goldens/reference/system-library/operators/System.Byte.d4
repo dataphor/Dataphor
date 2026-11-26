@@ -1,0 +1,2 @@
+create operator .System.Byte(const Value : System.Byte) : System.Byte
+ class "System.ScalarSelectorNode";

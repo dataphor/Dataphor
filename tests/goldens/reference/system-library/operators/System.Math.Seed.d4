@@ -1,0 +1,4 @@
+create operator .System.Math.Seed()
+ class "System.SeedNode";
+create operator .System.Math.Seed(const AValue : System.Integer)
+ class "System.SeedNode";

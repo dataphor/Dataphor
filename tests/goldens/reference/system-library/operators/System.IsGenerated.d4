@@ -1,0 +1,6 @@
+create operator .System.IsGenerated(const AName : System.Name) : System.Boolean
+ class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.IsGenerated(const AString : System.String) : System.Boolean
+ class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.IsGenerated(const AID : System.Integer) : System.Boolean
+ class "System.ObjectIsGeneratedNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

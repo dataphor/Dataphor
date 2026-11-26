@@ -1,0 +1,34 @@
+create operator .System.iCompare(const ALeftValue : System.Boolean, const ARightValue : System.Boolean) : System.Integer
+ class "System.BooleanCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Integer
+ class "System.ByteCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Integer
+ class "System.ShortCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Integer
+ class "System.LongCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Guid, const ARightValue : System.Guid) : System.Integer
+ class "System.GuidCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Integer
+ class "System.DecimalCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.String, const ARightValue : System.String) : System.Integer
+ class "System.StringCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.TimeSpan, const ARightValue : System.TimeSpan) : System.Integer
+ class "System.TimeSpanCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.DateTime, const ARightValue : System.DateTime) : System.Integer
+ class "System.DateTimeCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Date, const ARightValue : System.Date) : System.Integer
+ class "System.DateCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Time, const ARightValue : System.Time) : System.Integer
+ class "System.TimeCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Money, const ARightValue : System.Money) : System.Integer
+ class "System.MoneyCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.Name, const ARightValue : System.Name) : System.Integer
+ class "System.StringCompareNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iCompare(const ALeftValue : System.UserID, const ARightValue : System.UserID) : System.Integer
+ class "System.StringCompareNode";
+create operator .System.iCompare(const ALeftValue : System.VersionNumber, const ARightValue : System.VersionNumber) : System.Integer
+ class "System.VersionNumberCompareNode";
+create operator .System.iCompare(const ALeftValue : System.LibraryReference, const ARightValue : System.LibraryReference) : System.Integer
+ class "System.LibraryReferenceCompareNode";

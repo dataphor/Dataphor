@@ -1,0 +1,85 @@
+create type .System.TimeSpan class "System.TimeSpanConveyor" static tags { Catalog.Comment = "System Time Span", DAE.AsString = "AsString" };
+alter type System.TimeSpan
+{
+	create representation Ticks
+	{
+		Ticks : System.Long
+			read  class "System.SystemTimeSpanTicksReadTicksNode"
+			write  class "System.SystemTimeSpanTicksWriteTicksNode"
+	}selector  class "System.SystemTimeSpanTicksSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation Milliseconds
+	{
+		Milliseconds : System.Decimal
+			read  class "System.SystemTimeSpanMillisecondsReadMillisecondsNode"
+			write  class "System.SystemTimeSpanMillisecondsWriteMillisecondsNode"
+	}selector  class "System.SystemTimeSpanMillisecondsSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation Seconds
+	{
+		Seconds : System.Decimal
+			read  class "System.SystemTimeSpanSecondsReadSecondsNode"
+			write  class "System.SystemTimeSpanSecondsWriteSecondsNode"
+	}selector  class "System.SystemTimeSpanSecondsSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation Minutes
+	{
+		Minutes : System.Decimal
+			read  class "System.SystemTimeSpanMinutesReadMinutesNode"
+			write  class "System.SystemTimeSpanMinutesWriteMinutesNode"
+	}selector  class "System.SystemTimeSpanMinutesSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation Hours
+	{
+		Hours : System.Decimal
+			read  class "System.SystemTimeSpanHoursReadHoursNode"
+			write  class "System.SystemTimeSpanHoursWriteHoursNode"
+	}selector  class "System.SystemTimeSpanHoursSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation Days
+	{
+		Days : System.Decimal
+			read  class "System.SystemTimeSpanDaysReadDaysNode"
+			write  class "System.SystemTimeSpanDaysWriteDaysNode"
+	}selector  class "System.SystemTimeSpanDaysSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation TimeSpan
+	{
+		Day : System.Integer
+			read  class "System.SystemTimeSpanTimeSpanReadDayNode"
+			write  class "System.SystemTimeSpanTimeSpanWriteDayNode", 
+		Hour : System.Integer
+			read  class "System.SystemTimeSpanTimeSpanReadHourNode"
+			write  class "System.SystemTimeSpanTimeSpanWriteHourNode", 
+		Minute : System.Integer
+			read  class "System.SystemTimeSpanTimeSpanReadMinuteNode"
+			write  class "System.SystemTimeSpanTimeSpanWriteMinuteNode", 
+		Second : System.Integer
+			read  class "System.SystemTimeSpanTimeSpanReadSecondNode"
+			write  class "System.SystemTimeSpanTimeSpanWriteSecondNode", 
+		Millisecond : System.Decimal
+			read  class "System.SystemTimeSpanTimeSpanReadMillisecondNode"
+			write  class "System.SystemTimeSpanTimeSpanWriteMillisecondNode"
+	}selector  class "System.SystemTimeSpanTimeSpanMillisecondsSelectorNode"
+};
+alter type System.TimeSpan
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.TimeSpanAsStringReadAccessorNode"
+			write  class "System.TimeSpanAsStringWriteAccessorNode"
+	}selector  class "System.TimeSpanAsStringSelectorNode"
+};

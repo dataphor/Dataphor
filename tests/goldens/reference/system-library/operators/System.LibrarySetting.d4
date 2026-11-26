@@ -1,0 +1,6 @@
+create operator LibrarySetting(const ALibraryName : Name, const ASettingName : String) : String
+	begin
+		result := LibrarySettings[ALibraryName, ASettingName].Value;
+	end;
+create operator .System.LibrarySetting(const ASettingName : System.String) : System.String
+ class "System.SystemLibrarySettingNode" static tags { DAE.IsRemotable = "False" };

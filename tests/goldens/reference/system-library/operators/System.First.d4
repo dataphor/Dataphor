@@ -1,0 +1,2 @@
+create operator .System.First(const ACursor : generic cursor)
+ class "System.CursorFirstNode";

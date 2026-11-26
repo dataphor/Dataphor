@@ -1,0 +1,2 @@
+create operator .System.Graphic(const Value : System.String) : System.Graphic
+ class "System.SystemBinarySelectorNode";

@@ -1,0 +1,4 @@
+create operator .System.IsNil(const AValue : generic) : System.Boolean
+ class "System.IsNilNode";
+create operator .System.IsNil(const AValue : generic row, const AColumnName : System.String) : System.Boolean
+ class "System.IsNilRowNode";

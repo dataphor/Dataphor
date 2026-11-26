@@ -1,0 +1,2 @@
+create operator .System.DeleteUpgrade(const ALibraryName : System.Name, const AVersion : System.VersionNumber)
+ class "System.DeleteUpgradeNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

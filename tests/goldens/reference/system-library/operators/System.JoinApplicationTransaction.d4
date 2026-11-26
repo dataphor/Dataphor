@@ -1,0 +1,2 @@
+create operator .System.JoinApplicationTransaction(const AID : System.Guid, const AIsInsert : System.Boolean)
+ class "System.JoinApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

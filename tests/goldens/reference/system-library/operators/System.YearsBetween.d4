@@ -1,0 +1,4 @@
+create operator .System.YearsBetween(const AStartDate : System.DateTime, const AEndDate : System.DateTime) : System.Integer
+ class "System.DateTimeYearsBetweenNode";
+create operator .System.YearsBetween(const AStartDate : System.Date, const AEndDate : System.Date) : System.Integer
+ class "System.DateTimeYearsBetweenNode";

@@ -1,0 +1,18 @@
+create type .System.Decimal
+{
+	representation Decimal
+	{
+		Value : System.Decimal
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.DecimalConveyor" static tags { Catalog.Comment = "System Binary Coded Decimal", DAE.AsString = "AsString" };
+alter type System.Decimal
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.DecimalAsStringReadAccessorNode"
+			write  class "System.DecimalAsStringWriteAccessorNode"
+	}selector  class "System.DecimalAsStringSelectorNode"
+};

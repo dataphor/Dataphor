@@ -1,0 +1,2 @@
+create operator .System.LoadUpgrade(const ALibraryName : System.Name, const AVersion : System.VersionNumber) : System.String
+ class "System.LoadUpgradeNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

@@ -1,0 +1,9 @@
+create operator .System.CacheTimeStamp() : System.Long
+ class "System.SystemCacheTimeStampNode"
+	static tags
+	{ 
+		
+		DAE.IsDeterministic = "False", 
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False"
+	};

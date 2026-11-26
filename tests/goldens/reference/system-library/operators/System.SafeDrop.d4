@@ -1,0 +1,5 @@
+create operator SafeDrop(const AObjectSpecifier : String)
+	begin
+		if ObjectExists(AObjectSpecifier) then
+			Execute(ScriptDrop(AObjectSpecifier));
+	end;

@@ -1,0 +1,2 @@
+create operator .System.Money(const Value : System.Decimal) : System.Money
+ class "System.ScalarSelectorNode";

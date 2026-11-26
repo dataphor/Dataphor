@@ -1,0 +1,2 @@
+create operator .System.RemoveUserFromRole(const AUserID : System.UserID, const ARoleName : System.Name)
+ class "System.SystemRemoveUserFromRoleNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

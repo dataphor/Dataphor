@@ -1,0 +1,10 @@
+create operator .System.ToBoolean(const AValue : System.String) : System.Boolean
+ class "System.StringToBooleanNode";
+create operator .System.ToBoolean(const AValue : System.Byte) : System.Boolean
+ class "System.ByteToBooleanNode";
+create operator .System.ToBoolean(const AValue : System.Short) : System.Boolean
+ class "System.ShortToBooleanNode";
+create operator .System.ToBoolean(const AValue : System.Integer) : System.Boolean
+ class "System.IntegerToBooleanNode";
+create operator .System.ToBoolean(const AValue : System.Long) : System.Boolean
+ class "System.LongToBooleanNode";

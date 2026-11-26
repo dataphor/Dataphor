@@ -1,0 +1,10 @@
+create operator .System.ToByte(const AValue : System.Boolean) : System.Byte
+ class "System.BooleanToByteNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToByte(const AValue : System.String) : System.Byte
+ class "System.StringToByteNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToByte(const AValue : System.Short) : System.Byte
+ class "System.ShortToByteNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToByte(const AValue : System.Integer) : System.Byte
+ class "System.IntegerToByteNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToByte(const AValue : System.Long) : System.Byte
+ class "System.LongToByteNode" static tags { DAE.IsOrderPreserving = "True" };

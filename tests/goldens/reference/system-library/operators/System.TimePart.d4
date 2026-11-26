@@ -1,0 +1,2 @@
+create operator .System.TimePart(const AValue : System.DateTime) : System.Time
+ class "System.TimePartNode";

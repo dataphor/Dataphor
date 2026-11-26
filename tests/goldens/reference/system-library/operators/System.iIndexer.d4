@@ -1,0 +1,4 @@
+create operator .System.iIndexer(const AList : list, const AIndex : System.Integer) : generic
+ class "System.IndexerNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iIndexer(const AValue : System.String, const AIndex : System.Integer) : System.String
+ class "System.StringIndexerNode" static tags { DAE.IsBuiltin = "True" };

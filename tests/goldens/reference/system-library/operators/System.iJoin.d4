@@ -1,0 +1,4 @@
+create operator .System.iJoin(const ALeftRow : generic row, const ARightRow : generic row) : generic row
+ class "System.RowJoinNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iJoin(ALeftTable : generic table, ARightTable : generic table) : generic table
+ class "System.JoinNode" static tags { DAE.IsBuiltin = "True" };

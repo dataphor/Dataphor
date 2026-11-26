@@ -1,0 +1,2 @@
+create operator .System.RenameLibrary(const AOldName : System.Name, const ANewName : System.Name)
+ class "System.SystemRenameLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

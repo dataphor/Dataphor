@@ -1,0 +1,2 @@
+create operator .System.iQuota(ATable : generic table, const AQuota : System.Integer) : generic table
+ class "System.QuotaNode" static tags { DAE.IsBuiltin = "True" };

@@ -1,0 +1,2 @@
+create operator .System.iExplode(ATable : generic table, const ARootTable : generic table, const AParentTable : generic table) : generic table
+ class "System.ExplodeNode" static tags { DAE.IsBuiltin = "True" };

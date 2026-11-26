@@ -1,0 +1,2 @@
+create operator .System.BOF(const ACursor : generic cursor) : System.Boolean
+ class "System.CursorBOFNode";

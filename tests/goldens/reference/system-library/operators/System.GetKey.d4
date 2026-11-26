@@ -1,0 +1,2 @@
+create operator .System.GetKey(const ACursor : generic cursor) : generic row
+ class "System.CursorGetKeyNode";

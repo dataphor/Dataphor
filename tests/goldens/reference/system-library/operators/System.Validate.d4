@@ -1,0 +1,4 @@
+create operator .System.Validate(const ACursor : generic cursor, const AOldRow : generic row, var ANewRow : generic row) : System.Boolean
+ class "System.CursorValidateNode" static tags { DAE.IsFunctional = "False" };
+create operator .System.Validate(const ACursor : generic cursor, const AOldRow : generic row, var ANewRow : generic row, const AColumnName : System.String) : System.Boolean
+ class "System.CursorValidateNode" static tags { DAE.IsFunctional = "False" };

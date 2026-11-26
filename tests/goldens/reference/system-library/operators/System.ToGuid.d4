@@ -1,0 +1,2 @@
+create operator .System.ToGuid(const AValue : System.String) : System.Guid
+ class "System.StringToGuidNode" static tags { DAE.IsUniquePreserving = "True" };

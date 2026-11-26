@@ -1,0 +1,4 @@
+create operator .System.CreateDeviceUser(const AUserID : System.UserID, const ADeviceName : System.Name, const ADeviceUserID : System.String, const ADevicePassword : System.String)
+ class "System.SystemCreateDeviceUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+create operator .System.CreateDeviceUser(const AUserID : System.UserID, const ADeviceName : System.Name, const ADeviceUserID : System.String, const ADevicePassword : System.String, const AConnectionParameters : System.String)
+ class "System.SystemCreateDeviceUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

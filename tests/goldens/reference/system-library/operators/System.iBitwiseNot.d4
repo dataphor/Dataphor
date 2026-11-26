@@ -1,0 +1,8 @@
+create operator .System.iBitwiseNot(const AValue : System.Byte) : System.Byte
+ class "System.ByteBitwiseNotNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseNot(const AValue : System.Short) : System.Short
+ class "System.ShortBitwiseNotNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseNot(const AValue : System.Integer) : System.Integer
+ class "System.IntegerBitwiseNotNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseNot(const AValue : System.Long) : System.Long
+ class "System.LongBitwiseNotNode" static tags { DAE.IsBuiltin = "True" };

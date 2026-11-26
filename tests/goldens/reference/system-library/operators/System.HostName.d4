@@ -1,0 +1,9 @@
+create operator .System.HostName() : System.String
+ class "System.SystemHostNameNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRemotable = "False"
+	};

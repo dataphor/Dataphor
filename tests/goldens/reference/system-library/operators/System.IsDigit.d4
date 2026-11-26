@@ -1,0 +1,4 @@
+create operator .System.IsDigit(const AString : System.String) : System.Boolean
+ class "System.StringIsDigitNode";
+create operator .System.IsDigit(const AString : System.String, const AIndex : System.Integer) : System.Boolean
+ class "System.StringIsDigitNode";

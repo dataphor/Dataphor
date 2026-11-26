@@ -1,0 +1,2 @@
+create operator .System.ToTime(const AValue : System.String) : System.Time
+ class "System.StringToTimeNode" static tags { DAE.IsUniquePreserving = "True" };

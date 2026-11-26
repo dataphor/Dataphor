@@ -1,0 +1,23 @@
+create operator .System.Concat(const AStrings : list(System.String)) : System.String
+ class "System.StringConcatNode";
+create operator .System.Concat(const AStrings : list(System.String), const ADelimiter : System.String) : System.String
+ class "System.StringConcatNode";
+create aggregate operator Concat(AString : String) : String
+		initialization class "System.EmptyFinalizationNode"
+		aggregation
+		begin
+			if not(IsNil(AString)) then
+				result := IfNil(result, "") + AString;
+		end
+		finalization class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True", DAE.IsOrderDependent = "True" };
+create aggregate operator Concat(AString : String, ADelimiter : String) : String
+		initialization class "System.EmptyFinalizationNode"
+		aggregation
+		begin
+			if not(IsNil(AString)) then
+				if Length(result) > 0 then
+					result := result + IfNil(ADelimiter, "") + AString
+				else
+					result := IfNil(result, "") + AString;
+		end
+		finalization class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True", DAE.IsOrderDependent = "True" };

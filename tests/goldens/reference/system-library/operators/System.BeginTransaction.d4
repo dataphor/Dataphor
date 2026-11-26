@@ -1,0 +1,4 @@
+create operator .System.BeginTransaction()
+ class "System.SystemBeginTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+create operator .System.BeginTransaction(const AIsolationLevel : System.String)
+ class "System.SystemBeginTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

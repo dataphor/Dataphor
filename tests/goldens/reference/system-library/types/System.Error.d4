@@ -1,0 +1,28 @@
+create type .System.Error class "System.BOPObjectConveyor" static tags { Catalog.Comment = "System Error", DAE.AsDisplayString = "AsDisplayString" };
+alter type System.Error
+{
+	create representation Error
+	{
+		Severity : System.String
+			read  class "System.SystemErrorReadSeverityNode"
+			write  class "System.SystemErrorWriteSeverityNode", 
+		Code : System.Integer
+			read  class "System.SystemErrorReadCodeNode"
+			write  class "System.SystemErrorWriteCodeNode", 
+		Message : System.String
+			read  class "System.SystemErrorReadMessageNode"
+			write  class "System.SystemErrorWriteMessageNode", 
+		InnerError : System.Error
+			read  class "System.SystemErrorReadInnerErrorNode"
+			write  class "System.SystemErrorWriteInnerErrorNode"
+	}selector  class "System.SystemErrorSelectorNode"
+};
+alter type System.Error
+{
+	create representation AsDisplayString
+	{
+		AsDisplayString : System.String
+			read  class "System.ErrorAsDisplayStringReadAccessorNode"
+			write  class "System.ErrorAsDisplayStringWriteAccessorNode"
+	}selector  class "System.ErrorAsDisplayStringSelectorNode"
+};

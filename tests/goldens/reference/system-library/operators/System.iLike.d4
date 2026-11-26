@@ -1,0 +1,4 @@
+create operator .System.iLike(const AString : System.String, const APattern : System.String) : System.Boolean
+ class "System.StringLikeNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iLike(const AString : System.Name, const APattern : System.String) : System.Boolean
+ class "System.StringLikeNode" static tags { DAE.IsBuiltin = "True" };

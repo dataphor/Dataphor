@@ -1,0 +1,8 @@
+create operator .System.ToMoney(const AValue : System.String) : System.Money
+ class "System.StringToMoneyNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToMoney(const AValue : System.Integer) : System.Money
+ class "System.IntegerToDecimalNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToMoney(const AValue : System.Long) : System.Money
+ class "System.LongToDecimalNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToMoney(const AValue : System.Decimal) : System.Money
+ class "System.DecimalToMoneyNode" static tags { DAE.IsOrderPreserving = "True" };

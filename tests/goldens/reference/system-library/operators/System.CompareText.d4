@@ -1,0 +1,2 @@
+create operator .System.CompareText(const ALeftString : System.String, const ARightString : System.String) : System.Integer
+ class "System.StringCompareTextNode";

@@ -83,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolClient.cs" />
     <Compile Include="QuotaDeleteCostTest.cs" />
+    <Compile Include="ReferenceSignatureGoldenTest.cs" />
     <Compile Include="RemoteEventHandlerCacheTest.cs" />
     <Compile Include="RemoteProposalStalenessTest.cs" />
     <Compile Include="RemoteStreamValueTest.cs" />

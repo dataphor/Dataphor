@@ -1,0 +1,2 @@
+create operator .System.EncryptString(const AUnencrypted : System.String) : System.String
+ class "System.SystemEncryptStringNode" static tags { DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };

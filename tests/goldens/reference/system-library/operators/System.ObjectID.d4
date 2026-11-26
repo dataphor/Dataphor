@@ -1,0 +1,4 @@
+create operator .System.ObjectID(const AName : System.Name) : System.Integer
+ class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.ObjectID(const ASpecifier : System.String) : System.Integer
+ class "System.SystemObjectIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

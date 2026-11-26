@@ -1,0 +1,2 @@
+create operator .System.ScriptCatalog() : System.String
+ class "System.SystemScriptCatalogNode" static tags { DAE.IsRemotable = "False" };

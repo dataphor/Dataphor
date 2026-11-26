@@ -1,0 +1,2 @@
+create operator .System.CloseSession(const ASessionID : System.Integer)
+ class "System.SystemCloseSessionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

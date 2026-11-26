@@ -1,0 +1,2 @@
+create operator .System.Clear(var AList : list)
+ class "System.ListClearNode" static tags { DAE.IsFunctional = "False" };

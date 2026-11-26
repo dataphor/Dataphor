@@ -1,0 +1,4 @@
+create operator .System.iRemove(const ARow : generic row) : generic row
+ class "System.RowRemoveNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iRemove(ATable : generic table) : generic table
+ class "System.RemoveNode" static tags { DAE.IsBuiltin = "True" };

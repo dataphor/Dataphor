@@ -1,0 +1,2 @@
+create operator .System.Diagnostics.LogMessage(const AMessage : System.String)
+ class "System.SystemLogMessageNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

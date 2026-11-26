@@ -1,0 +1,2 @@
+create operator .System.ScriptLibrary(const ALibraryName : System.Name) : System.String
+ class "System.SystemScriptLibraryNode" static tags { DAE.IsRemotable = "False" };

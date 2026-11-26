@@ -1,0 +1,22 @@
+create operator .System.iDivision(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Decimal
+ class "System.ByteDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Decimal
+ class "System.ShortDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Decimal
+ class "System.IntegerDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Decimal
+ class "System.LongDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Money, const ARightValue : System.Money) : System.Decimal
+ class "System.MoneyDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Money, const ARightValue : System.Decimal) : System.Money
+ class "System.MoneyDecimalDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.Money, const ARightValue : System.Integer) : System.Money
+ class "System.MoneyIntegerDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.TimeSpan, const ARightValue : System.Integer) : System.TimeSpan
+ class "System.TimeSpanIntegerDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.TimeSpan, const ARightValue : System.Decimal) : System.TimeSpan
+ class "System.TimeSpanDecimalDivisionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDivision(const ALeftValue : System.TimeSpan, const ARightValue : System.TimeSpan) : System.Decimal
+ class "System.TimeSpanTimeSpanDivisionNode" static tags { DAE.IsBuiltin = "True" };

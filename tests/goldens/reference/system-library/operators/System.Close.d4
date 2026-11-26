@@ -1,0 +1,2 @@
+create operator .System.Close(const ACursor : generic cursor)
+ class "System.CursorCloseNode";

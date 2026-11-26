@@ -1,0 +1,2 @@
+create operator .System.UpgradeLibrary(const AName : System.Name)
+ class "System.SystemUpgradeLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

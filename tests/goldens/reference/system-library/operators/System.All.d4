@@ -1,0 +1,7 @@
+create aggregate operator .System.All(AValue : System.Boolean) : System.Boolean
+initialization
+ class "System.BooleanAllInitializationNode"
+aggregation
+ class "System.BooleanAllAggregationNode"
+finalization
+ class "System.EmptyFinalizationNode" static tags { DAE.IsNilable = "True" };

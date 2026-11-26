@@ -1,0 +1,2 @@
+create operator .System.ScriptData(const AExpression : System.String) : System.String
+ class "System.SystemScriptDataNode" static tags { DAE.IsRemotable = "False" };

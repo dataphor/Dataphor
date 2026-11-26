@@ -1,0 +1,2 @@
+create operator .System.iDifference(ALeftTable : generic table, ARightTable : generic table) : generic table
+ class "System.DifferenceNode" static tags { DAE.IsBuiltin = "True" };

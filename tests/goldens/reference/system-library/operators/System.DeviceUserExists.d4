@@ -1,0 +1,2 @@
+create operator .System.DeviceUserExists(const AUserID : System.UserID, const ADeviceName : System.Name) : System.Boolean
+ class "System.SystemDeviceUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

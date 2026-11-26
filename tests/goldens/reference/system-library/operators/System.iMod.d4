@@ -1,0 +1,10 @@
+create operator .System.iMod(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteModNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iMod(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortModNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iMod(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerModNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iMod(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongModNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iMod(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalModNode" static tags { DAE.IsBuiltin = "True" };

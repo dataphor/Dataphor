@@ -1,0 +1,26 @@
+create operator .System.iSubtraction(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Money, const ARightValue : System.Money) : System.Money
+ class "System.MoneySubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.TimeSpan, const ARightValue : System.TimeSpan) : System.TimeSpan
+ class "System.TimeSpanSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.DateTime, const ARightValue : System.TimeSpan) : System.DateTime
+ class "System.DateTimeTimeSpanSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.DateTime, const ARightValue : System.DateTime) : System.TimeSpan
+ class "System.DateTimeSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Date, const ARightValue : System.Date) : System.TimeSpan
+ class "System.DateSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Date, const ARightValue : System.TimeSpan) : System.Date
+ class "System.DateTimeSpanSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Time, const ARightValue : System.Time) : System.TimeSpan
+ class "System.TimeSubtractionNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iSubtraction(const ALeftValue : System.Time, const ARightValue : System.TimeSpan) : System.Time
+ class "System.TimeTimeSpanSubtractionNode" static tags { DAE.IsBuiltin = "True" };

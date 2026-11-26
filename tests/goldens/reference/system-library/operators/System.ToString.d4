@@ -1,0 +1,26 @@
+create operator .System.ToString(const AValue : System.Boolean) : System.String
+ class "System.BooleanToStringNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToString(const AValue : System.Byte) : System.String
+ class "System.ByteToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Short) : System.String
+ class "System.ShortToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Integer) : System.String
+ class "System.IntegerToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Long) : System.String
+ class "System.LongToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Decimal) : System.String
+ class "System.DecimalToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Money) : System.String
+ class "System.MoneyToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Guid) : System.String
+ class "System.GuidToStringNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToString(const AValue : System.DateTime) : System.String
+ class "System.DateTimeToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Date) : System.String
+ class "System.DateToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.TimeSpan) : System.String
+ class "System.TimeSpanToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.Time) : System.String
+ class "System.TimeToStringNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToString(const AValue : System.VersionNumber) : System.String
+ class "System.VersionNumberToStringNode";

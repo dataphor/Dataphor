@@ -1,0 +1,2 @@
+create operator .System.Binary(const Value : System.String) : System.Binary
+ class "System.SystemBinarySelectorNode";

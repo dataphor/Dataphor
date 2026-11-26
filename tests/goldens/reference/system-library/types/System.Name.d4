@@ -1,0 +1,18 @@
+create type .System.Name class "System.StringConveyor"
+	tags
+	{ 
+		
+		Frontend.Width = "50", 
+		static Catalog.Comment = "System Catalog Name", 
+		static DAE.AsString = "Name", 
+		static Storage.Length = "200"
+	};
+alter type System.Name
+{
+	create representation Name
+	{
+		Value : System.String
+			read  class "System.SystemNameReadAccessorNode"
+			write  class "System.SystemNameWriteAccessorNode"
+	}selector  class "System.SystemNameSelectorNode"
+};

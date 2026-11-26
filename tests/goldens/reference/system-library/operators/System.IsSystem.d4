@@ -1,0 +1,6 @@
+create operator .System.IsSystem(const AName : System.Name) : System.Boolean
+ class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.IsSystem(const ASpecifier : System.String) : System.Boolean
+ class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.IsSystem(const AID : System.Integer) : System.Boolean
+ class "System.ObjectIsSystemNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

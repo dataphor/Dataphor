@@ -55,7 +55,7 @@ Starting a server from a copy of it, and the two environment variables that keep
 
 ## Environment variables
 
-Three variables change what a test run does. All three are read in one place, so nothing else parses them.
+Three variables change which tests a run includes. All three are read in one place, so nothing else parses them.
 
 | Variable | What it does |
 |---|---|
@@ -66,6 +66,18 @@ Three variables change what a test run does. All three are read in one place, so
 **A pass that needs a server it was not given reports itself skipped, with the reason — it does not pass quietly.** That is deliberate: a green run with no variables set is a green run of a smaller suite, and the run says which cases it left out. The same is true in continuous integration, which starts a local SQL Server and PostgreSQL but stays green, with those cases skipped, if a runner image has dropped one.
 
 AGENTS.md lists, case by case, exactly what each variable turns on and what each of those cases needs.
+
+### Rewriting the checked-in comparison files
+
+Three passes generate something from a running server and compare it, character for character, with a file checked into `tests/goldens/`: the derived forms, the SQL a device would send, and the D4 declarations of the System library. Each has a variable that **rewrites** its files instead of comparing them, deletes the ones nothing produces any more, and then fails the run anyway, so that an update can never be mistaken for a passing run.
+
+| Variable | Which files |
+|---|---|
+| `DATAPHOR_UPDATE_FRONTEND_GOLDENS=1` | `tests/goldens/frontend/` — a derived form per page type per table variable. |
+| `DATAPHOR_UPDATE_DEVICE_GOLDENS=1` | `tests/goldens/devices/` — the SQL each device generates for the shared translation corpus. |
+| `DATAPHOR_UPDATE_REFERENCE_GOLDENS=1` | `tests/goldens/reference/` — the declaration of every System operator and scalar type, and the inventory of operator names. |
+
+**The diff is the review.** Read it before committing it: these files are the only record of what the product used to produce, and there is no reference runtime to regenerate one from if it is overwritten by mistake.
 
 ## Two things that are run by hand
 

@@ -1,0 +1,2 @@
+create operator .System.EOF(const ACursor : generic cursor) : System.Boolean
+ class "System.CursorEOFNode";

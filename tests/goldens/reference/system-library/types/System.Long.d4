@@ -1,0 +1,18 @@
+create type .System.Long
+{
+	representation Long
+	{
+		Value : System.Long
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.Int64Conveyor" static tags { Catalog.Comment = "System Signed 64-bit Integer", DAE.AsString = "AsString" };
+alter type System.Long
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.LongAsStringReadAccessorNode"
+			write  class "System.LongAsStringWriteAccessorNode"
+	}selector  class "System.LongAsStringSelectorNode"
+};

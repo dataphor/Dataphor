@@ -1,0 +1,4 @@
+create operator .System.Default(const ACursor : generic cursor, var ARow : generic row) : System.Boolean
+ class "System.CursorDefaultNode" static tags { DAE.IsFunctional = "False" };
+create operator .System.Default(const ACursor : generic cursor, var ARow : generic row, const AColumnName : System.String) : System.Boolean
+ class "System.CursorDefaultNode" static tags { DAE.IsFunctional = "False" };

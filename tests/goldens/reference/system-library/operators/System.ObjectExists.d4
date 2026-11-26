@@ -1,0 +1,4 @@
+create operator .System.ObjectExists(const ASpecifier : System.String) : System.Boolean
+ class "System.ObjectExistsNode" static tags { DAE.IsRemotable = "false" };
+create operator .System.ObjectExists(const AName : System.Name) : System.Boolean
+ class "System.ObjectExistsNode" static tags { DAE.IsRemotable = "false" };

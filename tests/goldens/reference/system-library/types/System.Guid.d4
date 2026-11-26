@@ -1,0 +1,27 @@
+create type .System.Guid class "System.GuidConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Globally Unique Identifier", 
+		static DAE.AsString = "AsString", 
+		Frontend.Width = "36", 
+		Frontend.TextBox.Width = "40"
+	};
+alter type System.Guid
+{
+	create representation Guid
+	{
+		Value : System.String
+			read  class "System.SystemGuidReadAccessorNode"
+			write  class "System.SystemGuidWriteAccessorNode"
+	}selector  class "System.SystemGuidSelectorNode"
+};
+alter type System.Guid
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.GuidAsStringReadAccessorNode"
+			write  class "System.GuidAsStringWriteAccessorNode"
+	}selector  class "System.GuidAsStringSelectorNode"
+};

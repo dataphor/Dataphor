@@ -1,0 +1,66 @@
+create operator .System.Execute(const AScript : System.String)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.Execute(const AScript : System.String, const AInParams : generic row)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.Execute(const AScript : System.String, const AInParams : generic row, var AOutParams : generic row)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.Execute(const AProcessID : System.Integer, const AScript : System.String)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.Execute(const AProcessID : System.Integer, const AScript : System.String, const AInParams : generic row)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.Execute(const AProcessID : System.Integer, const AScript : System.String, const AInParams : generic row, var AOutParams : generic row)
+ class "System.SystemExecuteNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};

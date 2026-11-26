@@ -1,0 +1,2 @@
+create operator .System.Prior(const ACursor : generic cursor) : System.Boolean
+ class "System.CursorPriorNode";

@@ -1,0 +1,6 @@
+create operator .System.ObjectMetaData(const AID : System.Integer, const ATagName : System.String, const ADefaultValue : System.String) : System.String
+ class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.ObjectMetaData(const AName : System.Name, const ATagName : System.String, const ADefaultValue : System.String) : System.String
+ class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.ObjectMetaData(const ASpecifier : System.String, const ATagName : System.String, const ADefaultValue : System.String) : System.String
+ class "System.ObjectMetaDataNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

@@ -1,0 +1,10 @@
+create operator .System.TimeSpan(const Day : System.Integer, const Hour : System.Integer, const Minute : System.Integer, const Second : System.Integer, const Millisecond : System.Decimal) : System.TimeSpan
+ class "System.SystemTimeSpanTimeSpanMillisecondsSelectorNode";
+create operator .System.TimeSpan(const ADays : System.Integer, const AHours : System.Integer, const AMinutes : System.Integer, const ASeconds : System.Integer) : System.TimeSpan
+ class "System.SystemTimeSpanTimeSpanSecondsSelectorNode";
+create operator .System.TimeSpan(const ADays : System.Integer, const AHours : System.Integer, const AMinutes : System.Integer) : System.TimeSpan
+ class "System.SystemTimeSpanTimeSpanMinutesSelectorNode";
+create operator .System.TimeSpan(const ADays : System.Integer, const AHours : System.Integer) : System.TimeSpan
+ class "System.SystemTimeSpanTimeSpanHoursSelectorNode";
+create operator .System.TimeSpan(const ADays : System.Integer) : System.TimeSpan
+ class "System.SystemTimeSpanTimeSpanDaysSelectorNode";

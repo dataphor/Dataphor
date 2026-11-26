@@ -1,0 +1,43 @@
+create type .System.DateTime class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Date Time", DAE.AsString = "AsString" };
+alter type System.DateTime
+{
+	create representation Ticks
+	{
+		Ticks : System.Long
+			read  class "System.SystemDateTimeTicksReadTicksNode"
+			write  class "System.SystemDateTimeTicksWriteTicksNode"
+	}selector  class "System.SystemDateTimeTicksSelectorNode"
+};
+alter type System.DateTime
+{
+	create representation DateTime
+	{
+		Year : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadYearNode"
+			write  class "System.SystemDateTimeDateTimeWriteYearNode", 
+		Month : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadMonthNode"
+			write  class "System.SystemDateTimeDateTimeWriteMonthNode", 
+		Day : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadDayNode"
+			write  class "System.SystemDateTimeDateTimeWriteDayNode", 
+		Hour : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadHourNode"
+			write  class "System.SystemDateTimeDateTimeWriteHourNode", 
+		Minute : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadMinuteNode"
+			write  class "System.SystemDateTimeDateTimeWriteMinuteNode", 
+		Second : System.Integer
+			read  class "System.SystemDateTimeDateTimeReadSecondNode"
+			write  class "System.SystemDateTimeDateTimeWriteSecondNode"
+	}selector  class "System.SystemDateTimeDateTimeSecondsSelectorNode"
+};
+alter type System.DateTime
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.DateTimeAsStringReadAccessorNode"
+			write  class "System.DateTimeAsStringWriteAccessorNode"
+	}selector  class "System.DateTimeAsStringSelectorNode"
+};

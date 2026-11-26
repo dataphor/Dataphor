@@ -1,0 +1,4 @@
+create operator .System.iProject(const ARow : generic row) : generic row
+ class "System.RowProjectNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iProject(ATable : generic table) : generic table
+ class "System.ProjectNode" static tags { DAE.IsBuiltin = "True" };

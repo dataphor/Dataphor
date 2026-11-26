@@ -1,0 +1,27 @@
+create type .System.Graphic class "System.BinaryConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Graphic", 
+		static DAE.AsDisplayString = "AsDisplayString", 
+		Frontend.ElementType = "Image", 
+		Frontend.Grid.ElementType = "ImageColumn"
+	};
+alter type System.Graphic
+{
+	create representation Graphic
+	{
+		Value : System.String
+			read  class "System.SystemBinaryReadAccessorNode"
+			write  class "System.SystemBinaryWriteAccessorNode"
+	}selector  class "System.SystemBinarySelectorNode"
+};
+alter type System.Graphic
+{
+	create representation AsDisplayString
+	{
+		AsDisplayString : System.String
+			read  class "System.GraphicAsDisplayStringReadAccessorNode"
+			write  class "System.GraphicAsDisplayStringWriteAccessorNode"
+	}selector  class "System.GraphicAsDisplayStringSelectorNode"
+};

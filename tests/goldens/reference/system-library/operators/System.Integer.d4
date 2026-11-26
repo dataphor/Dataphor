@@ -1,0 +1,2 @@
+create operator .System.Integer(const Value : System.Integer) : System.Integer
+ class "System.ScalarSelectorNode";

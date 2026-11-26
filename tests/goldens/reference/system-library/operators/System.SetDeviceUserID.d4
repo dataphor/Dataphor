@@ -1,0 +1,2 @@
+create operator .System.SetDeviceUserID(const AUserID : System.UserID, const ADeviceName : System.Name, const ADeviceUserID : System.String)
+ class "System.SystemSetDeviceUserIDNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

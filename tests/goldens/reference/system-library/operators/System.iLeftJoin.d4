@@ -1,0 +1,2 @@
+create operator .System.iLeftJoin(ALeftTable : generic table, ARightTable : generic table) : generic table
+ class "System.LeftOuterJoinNode" static tags { DAE.IsBuiltin = "True" };

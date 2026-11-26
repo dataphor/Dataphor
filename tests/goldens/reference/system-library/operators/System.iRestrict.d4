@@ -1,0 +1,2 @@
+create operator .System.iRestrict(ATable : generic table, const ACondition : System.Boolean) : generic table
+ class "System.RestrictNode" static tags { DAE.IsBuiltin = "True" };

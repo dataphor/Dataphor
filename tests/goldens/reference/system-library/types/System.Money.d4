@@ -1,0 +1,37 @@
+create type .System.Money class "System.DecimalConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Money", 
+		static DAE.AsString = "AsString", 
+		static DAE.AsDisplayString = "AsDisplayString", 
+		Frontend.Width = "10", 
+		Frontend.NumericTextBox.MaxWidth = "10"
+	};
+alter type System.Money
+{
+	create representation Money
+	{
+		Value : System.Decimal
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+};
+alter type System.Money
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.MoneyAsStringReadAccessorNode"
+			write  class "System.MoneyAsStringWriteAccessorNode"
+	}selector  class "System.MoneyAsStringSelectorNode"
+};
+alter type System.Money
+{
+	create representation AsDisplayString
+	{
+		AsDisplayString : System.String
+			read  class "System.MoneyAsDisplayStringReadAccessorNode"
+			write  class "System.MoneyAsStringWriteAccessorNode"
+	}selector  class "System.MoneyAsStringSelectorNode"
+};

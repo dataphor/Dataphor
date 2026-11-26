@@ -1,0 +1,2 @@
+create operator .System.DayOfWeek(const AValue : System.DateTime) : System.Integer
+ class "System.DayOfWeekNode";

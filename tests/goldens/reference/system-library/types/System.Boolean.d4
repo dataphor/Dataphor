@@ -1,0 +1,34 @@
+create type .System.Boolean
+{
+	representation Boolean
+	{
+		Value : System.Boolean
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.BooleanConveyor"
+	static tags
+	{ 
+		
+		Catalog.Comment = "System Boolean", 
+		DAE.AsString = "AsString", 
+		DAE.AsDisplayString = "AsDisplayString"
+	};
+alter type System.Boolean
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.BooleanAsStringReadAccessorNode"
+			write  class "System.BooleanAsStringWriteAccessorNode"
+	}selector  class "System.BooleanAsStringSelectorNode"
+};
+alter type System.Boolean
+{
+	create representation AsDisplayString
+	{
+		AsDisplayString : System.String
+			read  class "System.BooleanAsDisplayStringReadAccessorNode"
+			write  class "System.BooleanAsDisplayStringWriteAccessorNode"
+	}selector  class "System.BooleanAsDisplayStringSelectorNode"
+};

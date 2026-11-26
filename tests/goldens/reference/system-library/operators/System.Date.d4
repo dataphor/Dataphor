@@ -1,0 +1,11 @@
+create operator .System.Date(const Year : System.Integer, const Month : System.Integer, const Day : System.Integer) : System.Date
+ class "System.SystemDateTimeDateTimeDaysSelectorNode";
+create operator .System.Date() : System.Date
+ class "System.DateNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsLiteral = "False", 
+		DAE.IsDeterministic = "False"
+	};

@@ -1,0 +1,2 @@
+create operator .System.RemoveAt(var AList : list, const AInteger : System.Integer)
+ class "System.ListRemoveAtNode" static tags { DAE.Functional = "False" };

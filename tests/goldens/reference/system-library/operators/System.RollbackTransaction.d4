@@ -1,0 +1,2 @@
+create operator .System.RollbackTransaction()
+ class "System.SystemRollbackTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

@@ -1,0 +1,54 @@
+create operator .System.Evaluate(const AExpression : System.String) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsNilable = "True"
+	};
+create operator .System.Evaluate(const AExpression : System.String, const AInParams : generic row) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsNilable = "True"
+	};
+create operator .System.Evaluate(const AExpression : System.String, const AInParams : generic row, var AOutParams : generic row) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsNilable = "True"
+	};
+create operator .System.Evaluate(const AProcessID : System.Integer, const AExpression : System.String) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotabe = "False", 
+		DAE.IsNilable = "True"
+	};
+create operator .System.Evaluate(const AProcessID : System.Integer, const AExpression : System.String, const AInParams : generic row) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsNilable = "True"
+	};
+create operator .System.Evaluate(const AProcessID : System.Integer, const AExpression : System.String, const AInParams : generic row, var AOutParams : generic row) : generic
+ class "System.SystemEvaluateNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsNilable = "True"
+	};

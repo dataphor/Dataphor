@@ -1,0 +1,60 @@
+create operator .System.ExecuteWithTimeout(const AScript : System.String, const ATimeout : System.Integer)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteWithTimeout(const AScript : System.String, const ATimeout : System.Integer, const AInParams : generic row)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteWithTimeout(const AScript : System.String, const ATimeout : System.Integer, const AInParams : generic row, var AOutParams : generic row)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteWithTimeout(const AProcessID : System.Integer, const AScript : System.String, const ATimeout : System.Integer)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteWithTimeout(const AProcessID : System.Integer, const AScript : System.String, const ATimeout : System.Integer, const AInParams : generic row)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteWithTimeout(const AProcessID : System.Integer, const AScript : System.String, const ATimeout : System.Integer, const AInParams : generic row, var AOutParams : generic row)
+ class "System.SystemExecuteWithTimeoutNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};

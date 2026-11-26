@@ -1,0 +1,2 @@
+create operator .System.Duration(const ATimeSpan : System.TimeSpan) : System.TimeSpan
+ class "System.DurationNode";

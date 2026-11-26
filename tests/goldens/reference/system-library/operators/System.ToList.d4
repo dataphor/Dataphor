@@ -1,0 +1,4 @@
+create operator .System.ToList(const AValue : generic cursor) : list
+ class "System.TableToListNode";
+create operator .System.ToList(const AValue : generic table) : list
+ class "System.TableToListNode";

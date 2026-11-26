@@ -1,0 +1,2 @@
+create operator .System.InjectUpgrade(const ALibraryName : System.Name, const AScript : System.String) : System.VersionNumber
+ class "System.InjectUpgradeNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

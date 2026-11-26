@@ -1,0 +1,4 @@
+create operator .System.Frac(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalFracNode";
+create operator .System.Frac(const AValue : System.Money) : System.Money
+ class "System.DecimalFracNode";

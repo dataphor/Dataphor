@@ -1,0 +1,2 @@
+create operator .System.InTransaction() : System.Boolean
+ class "System.SystemInTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsLiteral = "False" };

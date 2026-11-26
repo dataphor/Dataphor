@@ -1,0 +1,4 @@
+create operator .System.IsUndefined(const AValue : System.VersionNumber) : System.Boolean
+begin
+	result := (AValue = .System.VersionNumber(-1, -1, -1, -1));
+end;

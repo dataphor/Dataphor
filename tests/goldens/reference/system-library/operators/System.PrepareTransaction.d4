@@ -1,0 +1,2 @@
+create operator .System.PrepareTransaction()
+ class "System.SystemPrepareTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

@@ -1,0 +1,2 @@
+create operator .System.Math.Ln(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalLnNode";

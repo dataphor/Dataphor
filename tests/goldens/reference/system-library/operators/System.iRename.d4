@@ -1,0 +1,4 @@
+create operator .System.iRename(const ARow : generic row) : generic row
+ class "System.RowRenameNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iRename(ATable : generic table) : generic table
+ class "System.RenameNode" static tags { DAE.IsBuiltin = "True" };

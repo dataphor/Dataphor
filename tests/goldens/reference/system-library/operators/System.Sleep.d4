@@ -1,0 +1,2 @@
+create operator .System.Sleep(const AValue : System.Integer)
+ class "System.SystemSleepNode" static tags { DAE.IsRemotable = "False" };

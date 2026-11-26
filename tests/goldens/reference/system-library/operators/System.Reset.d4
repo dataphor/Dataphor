@@ -1,0 +1,2 @@
+create operator .System.Reset(const ACursor : generic cursor)
+ class "System.CursorResetNode";

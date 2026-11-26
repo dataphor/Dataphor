@@ -1,0 +1,2 @@
+create operator .System.Diagnostics.ShowPlan(const AStatement : System.String) : System.String
+ class "System.SystemShowPlanNode" static tags { DAE.IsRemotable = "False" };

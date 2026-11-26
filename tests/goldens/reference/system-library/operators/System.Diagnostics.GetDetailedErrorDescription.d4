@@ -1,0 +1,2 @@
+create operator .System.Diagnostics.GetDetailedErrorDescription(const AValue : System.Error) : System.String
+ class "System.SystemGetDetailedErrorDescriptionNode";

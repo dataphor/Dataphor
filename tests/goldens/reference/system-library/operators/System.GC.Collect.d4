@@ -1,0 +1,2 @@
+create operator .System.GC.Collect()
+ class "System.SystemCollectNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

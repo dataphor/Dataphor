@@ -1,0 +1,2 @@
+create operator .System.UserExists(const AUserID : System.UserID) : System.Boolean
+ class "System.SystemUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

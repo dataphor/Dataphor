@@ -1,0 +1,6 @@
+create operator .System.IndexOfAny(const AString : System.String, const AAnyOf : list(System.String)) : System.Integer
+ class "System.StringIndexOfAnyNode";
+create operator .System.IndexOfAny(const AString : System.String, const AAnyOf : list(System.String), const AStartIndex : System.Integer) : System.Integer
+ class "System.StringIndexOfAnyNode";
+create operator .System.IndexOfAny(const AString : System.String, const AAnyOf : list(System.String), const AStartIndex : System.Integer, const ALength : System.Integer) : System.Integer
+ class "System.StringIndexOfAnyNode";

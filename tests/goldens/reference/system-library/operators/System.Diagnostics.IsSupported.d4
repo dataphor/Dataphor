@@ -1,0 +1,2 @@
+create operator .System.Diagnostics.IsSupported(const ADeviceName : System.Name, const AStatement : System.String) : System.Boolean
+ class "System.SystemIsSupportedNode" static tags { DAE.IsRemotable = "False" };

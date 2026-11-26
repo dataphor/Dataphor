@@ -1,0 +1,10 @@
+create operator .System.iDiv(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteDivNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDiv(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortDivNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDiv(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerDivNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDiv(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongDivNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iDiv(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalDivNode" static tags { DAE.IsBuiltin = "True" };

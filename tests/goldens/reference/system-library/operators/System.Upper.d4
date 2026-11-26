@@ -1,0 +1,2 @@
+create operator .System.Upper(const AString : System.String) : System.String
+ class "System.StringUpperNode";

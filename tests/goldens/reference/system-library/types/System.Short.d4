@@ -1,0 +1,18 @@
+create type .System.Short
+{
+	representation Short
+	{
+		Value : System.Short
+			read  class "System.ScalarReadAccessorNode"
+			write  class "System.ScalarWriteAccessorNode"
+	}selector  class "System.ScalarSelectorNode"
+} class "System.Int16Conveyor" static tags { Catalog.Comment = "System Signed 16-bit Integer", DAE.AsString = "AsString" };
+alter type System.Short
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.ShortAsStringReadAccessorNode"
+			write  class "System.ShortAsStringWriteAccessorNode"
+	}selector  class "System.ShortAsStringSelectorNode"
+};

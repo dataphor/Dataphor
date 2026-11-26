@@ -1,0 +1,8 @@
+create operator .System.ToDecimal(const AValue : System.String) : System.Decimal
+ class "System.StringToDecimalNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToDecimal(const AValue : System.Integer) : System.Decimal
+ class "System.IntegerToDecimalNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToDecimal(const AValue : System.Long) : System.Decimal
+ class "System.LongToDecimalNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToDecimal(const AValue : System.Money) : System.Decimal
+ class "System.ScalarSelectorNode" static tags { DAE.IsOrderPreserving = "True" };

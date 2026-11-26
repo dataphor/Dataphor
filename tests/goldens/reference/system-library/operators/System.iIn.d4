@@ -1,0 +1,6 @@
+create operator .System.iIn(const AValue : generic, const AList : list) : System.Boolean
+ class "System.ValueInListNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iIn(const AValue : System.Scalar, const ATable : generic table) : System.Boolean
+ class "System.InTableNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iIn(const AValue : generic row, const ATable : generic table) : System.Boolean
+ class "System.InTableNode" static tags { DAE.IsBuiltin = "True" };

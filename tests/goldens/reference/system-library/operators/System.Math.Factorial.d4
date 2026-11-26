@@ -1,0 +1,2 @@
+create operator .System.Math.Factorial(const AValue : System.Integer) : System.Integer
+ class "System.IntegerFactorialNode";

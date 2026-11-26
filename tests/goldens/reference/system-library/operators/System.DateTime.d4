@@ -1,0 +1,15 @@
+create operator .System.DateTime(const Year : System.Integer, const Month : System.Integer, const Day : System.Integer, const Hour : System.Integer, const Minute : System.Integer, const Second : System.Integer) : System.DateTime
+ class "System.SystemDateTimeDateTimeSecondsSelectorNode";
+create operator .System.DateTime(const AYears : System.Integer, const AMonths : System.Integer, const ADays : System.Integer, const AHours : System.Integer, const AMinutes : System.Integer) : System.DateTime
+ class "System.SystemDateTimeDateTimeMinutesSelectorNode";
+create operator .System.DateTime(const AYears : System.Integer, const AMonths : System.Integer, const ADays : System.Integer) : System.DateTime
+ class "System.SystemDateTimeDateTimeDaysSelectorNode";
+create operator .System.DateTime() : System.DateTime
+ class "System.DateTimeNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsLiteral = "False", 
+		DAE.IsDeterministic = "False"
+	};

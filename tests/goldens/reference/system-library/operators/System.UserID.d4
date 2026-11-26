@@ -1,0 +1,11 @@
+create operator .System.UserID(const Value : System.String) : System.UserID
+ class "System.ValidatingScalarSelectorNode";
+create operator .System.UserID() : System.UserID
+ class "System.SystemUserIDNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsDeterministic = "False"
+	};

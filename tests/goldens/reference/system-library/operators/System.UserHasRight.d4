@@ -1,0 +1,2 @@
+create operator .System.UserHasRight(const AUserID : System.UserID, const ARightName : System.Name) : System.Boolean
+ class "System.SystemUserHasRightNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

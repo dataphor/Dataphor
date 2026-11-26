@@ -1,0 +1,7 @@
+create operator EnsureGenerators()
+	begin
+		if not exists (TableVars where Name = LibraryName() + '.Generators') then
+		begin
+			CreateGenerators();
+		end;
+	end;

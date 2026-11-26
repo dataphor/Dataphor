@@ -3,10 +3,14 @@
 **Declarations**
 
 ```d4
-create operator .System.RequiredLibraries(const ALibraryName : System.Name) : table { Library_Name : System.Name, Sequence : System.Integer, Level : System.Integer }
- class "System.SystemRequiredLibrariesNode" static tags { DAE.IsRemotable = "False" };
-create operator .System.RequiredLibraries(const ALibraryName : System.Name, const ARecursive : System.Boolean) : table { Library_Name : System.Name, Sequence : System.Integer, Level : System.Integer }
- class "System.SystemRequiredLibrariesNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.RequiredObjects(const AObjectID : System.Integer) : table { Object_ID : System.Integer, Object_Name : System.Name, Object_Description : System.String, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemRequiredObjectsNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.RequiredObjects(const AObjectID : System.Integer, const ARecursive : System.Boolean) : table { Object_ID : System.Integer, Object_Name : System.Name, Object_Description : System.String, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemRequiredObjectsNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.RequiredObjects(const AObjectName : System.Name) : table { Object_ID : System.Integer, Object_Name : System.Name, Object_Description : System.String, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemRequiredObjectsNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.RequiredObjects(const AObjectName : System.Name, const ARecursive : System.Boolean) : table { Object_ID : System.Integer, Object_Name : System.Name, Object_Description : System.String, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemRequiredObjectsNode" static tags { DAE.IsRemotable = "False" };
 ```
 
 **Remarks**

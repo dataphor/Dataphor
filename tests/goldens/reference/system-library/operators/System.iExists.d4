@@ -1,0 +1,2 @@
+create operator .System.iExists(ATable : generic table) : System.Boolean
+ class "System.ExistsNode" static tags { DAE.IsBuiltin = "True" };

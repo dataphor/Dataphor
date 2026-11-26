@@ -1,0 +1,4 @@
+create operator .System.IsLetterOrDigit(const AString : System.String) : System.Boolean
+ class "System.StringIsLetterOrDigitNode";
+create operator .System.IsLetterOrDigit(const AString : System.String, const AIndex : System.Integer) : System.Boolean
+ class "System.StringIsLetterOrDigitNode";

@@ -1,0 +1,2 @@
+create operator .System.FindKey(const ACursor : generic cursor, const ARow : generic row) : System.Boolean
+ class "System.CursorFindKeyNode";

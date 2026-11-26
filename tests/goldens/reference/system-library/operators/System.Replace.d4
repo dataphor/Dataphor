@@ -1,0 +1,4 @@
+create operator .System.Replace(const AString : System.String, const AOldString : System.String, const ANewString : System.String) : System.String
+ class "System.StringReplaceNode";
+create operator .System.Replace(const AString : System.String, const AOldString : System.String, const ANewString : System.String, const ACaseSensitive : System.Boolean) : System.String
+ class "System.StringReplaceNode";

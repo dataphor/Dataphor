@@ -1,0 +1,2 @@
+create operator .System.IsLeapYear(const AYear : System.Integer) : System.Boolean
+ class "System.IsLeapYearNode";

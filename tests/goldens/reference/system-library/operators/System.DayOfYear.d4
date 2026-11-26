@@ -1,0 +1,2 @@
+create operator .System.DayOfYear(const AValue : System.DateTime) : System.Integer
+ class "System.DayOfYearNode";

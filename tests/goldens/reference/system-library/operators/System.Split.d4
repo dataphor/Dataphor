@@ -1,0 +1,6 @@
+create operator .System.Split(const AString : System.String) : list(System.String)
+ class "System.StringSplitNode";
+create operator .System.Split(const AString : System.String, const ADelimiter : System.String) : list(System.String)
+ class "System.StringSplitNode";
+create operator .System.Split(const AString : System.String, const ADelimiters : list(System.String)) : list(System.String)
+ class "System.StringSplitNode";

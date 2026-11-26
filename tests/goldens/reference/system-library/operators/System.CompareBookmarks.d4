@@ -1,0 +1,2 @@
+create operator .System.CompareBookmarks(const ACursor : generic cursor, const ABookmark1 : generic row, const ABookmark2 : generic row) : System.Integer
+ class "System.CursorCompareBookmarksNode";

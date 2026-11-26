@@ -1,0 +1,4 @@
+create operator .System.iExtend(const ARow : generic row) : generic row
+ class "System.RowExtendNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iExtend(ATable : generic table) : generic table
+ class "System.ExtendNode" static tags { DAE.IsBuiltin = "True" };

@@ -1,0 +1,6 @@
+create operator .System.Length(const ABinary : System.Binary) : System.Long
+ class "System.BinaryLengthNode";
+create operator .System.Length(const AGraphic : System.Graphic) : System.Long
+ class "System.BinaryLengthNode";
+create operator .System.Length(const AString : System.String) : System.Integer
+ class "System.StringLengthNode";

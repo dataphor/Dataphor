@@ -1,0 +1,2 @@
+create operator .System.DropDeviceUser(const AUserID : System.UserID, const ADeviceName : System.Name)
+ class "System.SystemDropDeviceUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

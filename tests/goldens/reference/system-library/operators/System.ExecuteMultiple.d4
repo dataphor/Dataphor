@@ -1,0 +1,20 @@
+create operator .System.ExecuteMultiple(const AStatement : System.String, const ANumber : System.Integer, const AUserID : System.String, const APassword : System.String)
+ class "System.SystemExecuteMultipleNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteMultiple(const AStatement : System.String, const ANumber : System.Integer)
+ class "System.SystemExecuteMultipleNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};

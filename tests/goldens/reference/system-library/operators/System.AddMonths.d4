@@ -1,0 +1,4 @@
+create operator .System.AddMonths(const AValue : System.DateTime, const AMonths : System.Integer) : System.DateTime
+ class "System.DateTimeAddMonthsNode";
+create operator .System.AddMonths(const AValue : System.Date, const AMonths : System.Integer) : System.Date
+ class "System.DateAddMonthsNode";

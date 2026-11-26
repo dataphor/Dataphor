@@ -1,0 +1,24 @@
+create operator CreateGenerators()
+	begin
+		Execute
+		(
+			"
+				create table Generators
+				{
+					ID : System.Name,
+					NextKey : System.Integer,
+					key { ID }
+				} tags { DAE.ShouldTranslate = 'false' };
+				
+				create operator GetNextGenerator(const AID : System.Name) : System.Integer
+				begin
+					update Generators set { NextKey := NextKey + 1 } where ID = AID;
+					if not exists (Generators where ID = AID) then
+						insert table { row { AID ID, 2 NextKey } } into Generators;
+					result := Generators[AID].NextKey - 1;
+				end tags { DAE.IsDeterministic = 'false', DAE.IsRepeatable = 'false', DAE.ShouldTranslate = 'false' };
+				
+				grant usage on GetNextGenerator(System.Name) to role System.User;
+			"
+		);
+	end;

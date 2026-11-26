@@ -1,0 +1,2 @@
+create operator .System.Lower(const AString : System.String) : System.String
+ class "System.StringLowerNode";

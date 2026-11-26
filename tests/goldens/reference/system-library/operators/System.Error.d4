@@ -1,0 +1,16 @@
+create operator .System.Error(const Severity : System.String, const Code : System.Integer, const Message : System.String, const InnerError : System.Error) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const AMessage : System.String) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const AMessage : System.String, const AInnerError : System.Error) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const ACode : System.Integer, const AMessage : System.String) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const ACode : System.Integer, const AMessage : System.String, const AInnerError : System.Error) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const ASeverity : System.String, const AMessage : System.String) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const ASeverity : System.String, const AMessage : System.String, const AInnerError : System.Error) : System.Error
+ class "System.SystemErrorSelectorNode";
+create operator .System.Error(const ASeverity : System.String, const ACode : System.Integer, const AMessage : System.String) : System.Error
+ class "System.SystemErrorSelectorNode";

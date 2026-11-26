@@ -1,0 +1,2 @@
+create operator .System.iPower(const ALeftValue : System.Decimal, const ARightValue : System.Decimal) : System.Decimal
+ class "System.DecimalPowerNode" static tags { DAE.IsBuiltin = "True" };

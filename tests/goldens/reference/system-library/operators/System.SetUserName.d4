@@ -1,0 +1,2 @@
+create operator .System.SetUserName(const AUserID : System.UserID, const AUserName : System.String)
+ class "System.SystemSetUserNameNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

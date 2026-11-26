@@ -1,0 +1,18 @@
+create operator .System.SetDefaultDeviceName(const ADeviceName : System.Name)
+ class "System.SystemSetDefaultDeviceNameNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False"
+	};
+create operator .System.SetDefaultDeviceName(const ALibraryName : System.Name, const ADeviceName : System.Name)
+ class "System.SystemSetDefaultDeviceNameNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False"
+	};

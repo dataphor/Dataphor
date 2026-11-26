@@ -1,0 +1,6 @@
+create operator .System.LibraryName() : System.Name
+ class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.LibraryName(const AObjectName : System.Name) : System.Name
+ class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.LibraryName(const AObjectID : System.Integer) : System.Name
+ class "System.SystemLibraryNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

@@ -1,0 +1,6 @@
+create operator .System.Abs(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalAbsNode";
+create operator .System.Abs(const AValue : System.Money) : System.Money
+ class "System.DecimalAbsNode";
+create operator .System.Abs(const AValue : System.Integer) : System.Integer
+ class "System.IntegerAbsNode";

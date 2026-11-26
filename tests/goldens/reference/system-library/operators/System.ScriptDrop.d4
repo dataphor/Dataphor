@@ -1,0 +1,8 @@
+create operator .System.ScriptDrop(const AName : System.Name) : System.String
+ class "System.SystemScriptDropNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.ScriptDrop(const ASpecifier : System.String) : System.String
+ class "System.SystemScriptDropNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.ScriptDrop(const ASpecifier : System.String, const AIncludeDependents : System.Boolean) : System.String
+ class "System.SystemScriptDropNode" static tags { DAE.IsRemotable = "False" };
+create operator .System.ScriptDrop(const ASpecifier : System.String, const AIncludeDependents : System.Boolean, const AIncludeObject : System.Boolean) : System.String
+ class "System.SystemScriptDropNode" static tags { DAE.IsRemotable = "False" };

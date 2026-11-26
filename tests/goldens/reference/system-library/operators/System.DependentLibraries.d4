@@ -1,0 +1,4 @@
+create operator .System.DependentLibraries(const ALibraryName : System.Name) : table { Library_Name : System.Name, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemDependentLibrariesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+create operator .System.DependentLibraries(const ALibraryName : System.Name, const ARecursive : System.Boolean) : table { Library_Name : System.Name, Sequence : System.Integer, Level : System.Integer }
+ class "System.SystemDependentLibrariesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };

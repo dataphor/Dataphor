@@ -1,0 +1,4 @@
+create operator .System.Remove(var AList : list, const AValue : generic)
+ class "System.ListRemoveNode" static tags { DAE.Functional = "False" };
+create operator .System.Remove(const AString : System.String, const AStartIndex : System.Integer, const ALength : System.Integer) : System.String
+ class "System.StringRemoveNode";

@@ -1,0 +1,8 @@
+create operator .System.Round(const AValue : System.Decimal, const ADigits : System.Integer) : System.Decimal
+ class "System.DecimalRoundNode";
+create operator .System.Round(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalRoundNode";
+create operator .System.Round(const AValue : System.Money, const ADigits : System.Integer) : System.Money
+ class "System.DecimalRoundNode";
+create operator .System.Round(const AValue : System.Money) : System.Money
+ class "System.DecimalRoundNode";

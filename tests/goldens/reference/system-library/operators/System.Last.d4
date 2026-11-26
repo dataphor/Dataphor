@@ -1,0 +1,2 @@
+create operator .System.Last(const ACursor : generic cursor)
+ class "System.CursorLastNode";

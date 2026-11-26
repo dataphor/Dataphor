@@ -1,0 +1,4 @@
+create operator .System.ToDateTime(const AValue : System.Date) : System.DateTime
+ class "System.ScalarSelectorNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToDateTime(const AValue : System.String) : System.DateTime
+ class "System.StringToDateTimeNode" static tags { DAE.IsUniquePreserving = "True" };

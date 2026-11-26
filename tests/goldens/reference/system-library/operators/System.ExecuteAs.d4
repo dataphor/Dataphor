@@ -1,0 +1,30 @@
+create operator .System.ExecuteAs(const AScript : System.String, const AUserID : System.UserID, const APassword : System.String)
+ class "System.SystemExecuteAsNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteAs(const AScript : System.String, const AUserID : System.UserID, const APassword : System.String, const AInParams : generic row)
+ class "System.SystemExecuteAsNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};
+create operator .System.ExecuteAs(const AScript : System.String, const AUserID : System.UserID, const APassword : System.String, const AInParams : generic row, var AOutParams : generic row)
+ class "System.SystemExecuteAsNode"
+	static tags
+	{ 
+		
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False", 
+		DAE.IsDeterministic = "False", 
+		DAE.IsRepeatable = "False"
+	};

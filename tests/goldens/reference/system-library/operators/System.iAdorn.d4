@@ -1,0 +1,2 @@
+create operator .System.iAdorn(ATable : generic table) : generic table
+ class "System.AdornNode" static tags { DAE.IsBuiltin = "True" };

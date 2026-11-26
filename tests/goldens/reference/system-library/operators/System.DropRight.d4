@@ -1,0 +1,2 @@
+create operator .System.DropRight(const ARightName : System.Name)
+ class "System.SystemDropRightNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

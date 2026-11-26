@@ -1,0 +1,2 @@
+create operator .System.SetLibraryDescriptor(const AName : System.Name, const ADescriptor : System.LibraryDescriptor)
+ class "System.SystemSetLibraryDescriptorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

@@ -1,0 +1,2 @@
+create operator .System.IfNil(const ANilableValue : generic, const AReplacementValue : generic) : generic
+ class "System.IfNilNode";

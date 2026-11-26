@@ -1,0 +1,2 @@
+create operator .System.RefreshLibraries()
+ class "System.SystemRefreshLibrariesNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

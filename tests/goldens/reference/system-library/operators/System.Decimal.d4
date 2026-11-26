@@ -1,0 +1,2 @@
+create operator .System.Decimal(const Value : System.Decimal) : System.Decimal
+ class "System.ScalarSelectorNode";

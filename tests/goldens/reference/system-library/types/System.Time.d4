@@ -1,0 +1,43 @@
+create type .System.Time class "System.DateTimeConveyor"
+	tags
+	{ 
+		
+		static Catalog.Comment = "System Time", 
+		static DAE.AsString = "AsString", 
+		Frontend.ElementType = "TextBox", 
+		Frontend.Width = "10", 
+		Frontend.TextBox.MaxWidth = "10"
+	};
+alter type System.Time
+{
+	create representation Ticks
+	{
+		Ticks : System.Long
+			read  class "System.SystemTimeTicksReadTicksNode"
+			write  class "System.SystemTimeTicksWriteTicksNode"
+	}selector  class "System.SystemTimeTicksSelectorNode"
+};
+alter type System.Time
+{
+	create representation Time
+	{
+		Hour : System.Integer
+			read  class "System.SystemTimeTimeReadHourNode"
+			write  class "System.SystemTimeTimeWriteHourNode", 
+		Minute : System.Integer
+			read  class "System.SystemTimeTimeReadMinuteNode"
+			write  class "System.SystemTimeTimeWriteMinuteNode", 
+		Second : System.Integer
+			read  class "System.SystemTimeTimeReadSecondNode"
+			write  class "System.SystemTimeTimeWriteSecondNode"
+	}selector  class "System.SystemTimeTimeSecondsSelectorNode"
+};
+alter type System.Time
+{
+	create representation AsString
+	{
+		AsString : System.String
+			read  class "System.TimeAsStringReadAccessorNode"
+			write  class "System.TimeAsStringWriteAccessorNode"
+	}selector  class "System.TimeAsStringSelectorNode"
+};

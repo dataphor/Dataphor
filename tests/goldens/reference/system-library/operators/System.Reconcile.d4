@@ -1,0 +1,27 @@
+create operator .System.Reconcile() : table { Sequence : System.Integer, Error : System.Error }
+ class "System.SystemReconcileNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False"
+	};
+create operator .System.Reconcile(const ADeviceName : System.Name) : table { Sequence : System.Integer, Error : System.Error }
+ class "System.SystemReconcileNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False"
+	};
+create operator .System.Reconcile(const ADeviceName : System.Name, const ATableName : System.Name) : table { Sequence : System.Integer, Error : System.Error }
+ class "System.SystemReconcileNode"
+	static tags
+	{ 
+		
+		DAE.IsLiteral = "False", 
+		DAE.IsRemotable = "False", 
+		DAE.IsFunctional = "False"
+	};

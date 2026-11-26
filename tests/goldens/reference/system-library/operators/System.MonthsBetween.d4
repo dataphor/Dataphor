@@ -1,0 +1,4 @@
+create operator .System.MonthsBetween(const AStartDate : System.DateTime, const AEndDate : System.DateTime) : System.Integer
+ class "System.DateTimeMonthsBetweenNode";
+create operator .System.MonthsBetween(const AStartDate : System.Date, const AEndDate : System.Date) : System.Integer
+ class "System.DateTimeMonthsBetweenNode";

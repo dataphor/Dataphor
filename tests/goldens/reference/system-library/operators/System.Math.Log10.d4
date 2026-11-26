@@ -1,0 +1,2 @@
+create operator .System.Math.Log10(const AValue : System.Decimal) : System.Decimal
+ class "System.DecimalLog10Node";

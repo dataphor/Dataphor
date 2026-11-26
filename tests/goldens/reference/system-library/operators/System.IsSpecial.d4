@@ -1,0 +1,88 @@
+create operator .System.IsSpecial(const AValue : System.Scalar) : System.Boolean
+ class "System.ScalarIsSpecialNode";
+create operator .System.IsSpecial(const AValue : System.Boolean) : System.Boolean
+ class "System.ScalarIsSpecialNode";
+create operator .System.IsSpecial(const AValue : System.Decimal) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Long) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Integer) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Short) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Byte) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.String) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.TimeSpan) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.DateTime) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Date) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Time) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Money) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Guid) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Binary) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Graphic) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Error) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.Name) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.UserID) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.VersionNumber) : System.Boolean
+begin
+	result := (false or (AValue = .System.VersionNumber(-1, -1, -1, -1)));
+end;
+create operator .System.IsSpecial(const AValue : System.LibraryReference) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.FileReference) : System.Boolean
+begin
+	result := false;
+end;
+create operator .System.IsSpecial(const AValue : System.LibraryDescriptor) : System.Boolean
+begin
+	result := false;
+end;

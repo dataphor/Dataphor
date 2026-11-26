@@ -1,0 +1,2 @@
+create operator .System.iBrowse(ATable : generic table) : generic table
+ class "System.BrowseNode" static tags { DAE.IsBuiltin = "True" };

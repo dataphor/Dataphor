@@ -1,0 +1,2 @@
+create operator .System.DaysInMonth(const AYear : System.Integer, const AMonth : System.Integer) : System.Integer
+ class "System.DaysInMonthNode";

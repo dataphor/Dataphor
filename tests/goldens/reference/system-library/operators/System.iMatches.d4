@@ -1,0 +1,4 @@
+create operator .System.iMatches(const AString : System.String, const APattern : System.String) : System.Boolean
+ class "System.StringMatchesNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iMatches(const AString : System.Name, const APattern : System.String) : System.Boolean
+ class "System.StringMatchesNode" static tags { DAE.IsBuiltin = "True" };

@@ -1,0 +1,2 @@
+create operator .System.iAnd(const ALeftValue : System.Boolean, const ARightValue : System.Boolean) : System.Boolean
+ class "System.BooleanAndNode" static tags { DAE.IsBuiltin = "True" };

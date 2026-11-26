@@ -1,0 +1,2 @@
+create operator .System.TransactionCount() : System.Integer
+ class "System.SystemTransactionCountNode" static tags { DAE.IsRemotable = "False", DAE.IsLiteral = "False" };

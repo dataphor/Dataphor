@@ -1,0 +1,6 @@
+create operator .System.Math.Random() : System.Decimal
+ class "System.DecimalRandomNode" static tags { DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator .System.Math.Random(const AUpperBound : System.Integer) : System.Integer
+ class "System.IntegerRandomNode" static tags { DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator .System.Math.Random(const ALowerBound : System.Integer, const AUpperBound : System.Integer) : System.Integer
+ class "System.IntegerIntegerRandomNode" static tags { DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };

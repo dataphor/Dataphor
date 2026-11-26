@@ -1,0 +1,4 @@
+create operator .System.Refresh(const ACursor : generic cursor, const ARow : generic row)
+ class "System.CursorRefreshNode";
+create operator .System.Refresh(const ACursor : generic cursor)
+ class "System.CursorRefreshNode";

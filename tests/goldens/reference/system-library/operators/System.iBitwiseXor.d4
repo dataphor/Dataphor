@@ -1,0 +1,8 @@
+create operator .System.iBitwiseXor(const ALeftValue : System.Byte, const ARightValue : System.Byte) : System.Byte
+ class "System.ByteBitwiseXorNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseXor(const ALeftValue : System.Short, const ARightValue : System.Short) : System.Short
+ class "System.ShortBitwiseXorNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseXor(const ALeftValue : System.Integer, const ARightValue : System.Integer) : System.Integer
+ class "System.IntegerBitwiseXorNode" static tags { DAE.IsBuiltin = "True" };
+create operator .System.iBitwiseXor(const ALeftValue : System.Long, const ARightValue : System.Long) : System.Long
+ class "System.LongBitwiseXorNode" static tags { DAE.IsBuiltin = "True" };

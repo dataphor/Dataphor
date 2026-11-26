@@ -1,0 +1,2 @@
+create operator .System.StopProcess(const AProcessID : System.Integer)
+ class "System.SystemStopProcessNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

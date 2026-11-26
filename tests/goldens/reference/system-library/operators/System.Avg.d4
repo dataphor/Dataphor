@@ -1,0 +1,35 @@
+create aggregate operator .System.Avg(AValue : System.Integer) : System.Decimal
+initialization
+ class "System.IntegerAvgInitializationNode"
+aggregation
+ class "System.IntegerAvgAggregationNode"
+finalization
+ class "System.IntegerAvgFinalizationNode" static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };
+create aggregate operator .System.Avg(AValue : System.Long) : System.Decimal
+initialization
+ class "System.LongAvgInitializationNode"
+aggregation
+ class "System.LongAvgAggregationNode"
+finalization
+ class "System.LongAvgFinalizationNode" static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };
+create aggregate operator .System.Avg(AValue : System.Decimal) : System.Decimal
+initialization
+ class "System.DecimalAvgInitializationNode"
+aggregation
+ class "System.DecimalAvgAggregationNode"
+finalization
+ class "System.DecimalAvgFinalizationNode" static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };
+create aggregate operator .System.Avg(AValue : System.Money) : System.Money
+initialization
+ class "System.MoneyAvgInitializationNode"
+aggregation
+ class "System.MoneyAvgAggregationNode"
+finalization
+ class "System.MoneyAvgFinalizationNode" static tags { DAE.IsNilable = "True" };
+create aggregate operator .System.Avg(AValue : System.TimeSpan) : System.TimeSpan
+initialization
+ class "System.TimeSpanAvgInitializationNode"
+aggregation
+ class "System.TimeSpanAvgAggregationNode"
+finalization
+ class "System.TimeSpanAvgFinalizationNode" static tags { DAE.Initialization.StackDisplacement = "1", DAE.IsNilable = "True" };

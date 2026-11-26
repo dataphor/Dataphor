@@ -1,0 +1,8 @@
+create operator .System.VersionNumber(const Major : System.Integer, const Minor : System.Integer, const Revision : System.Integer, const Build : System.Integer) : System.VersionNumber
+ class "System.VersionNumberSelectorNode";
+create operator .System.VersionNumber(const AMajor : System.Integer) : System.VersionNumber
+ class "System.VersionNumberSelectorNode";
+create operator .System.VersionNumber(const AMajor : System.Integer, const AMinor : System.Integer) : System.VersionNumber
+ class "System.VersionNumberSelectorNode";
+create operator .System.VersionNumber(const AMajor : System.Integer, const AMinor : System.Integer, const ARevision : System.Integer) : System.VersionNumber
+ class "System.VersionNumberSelectorNode";

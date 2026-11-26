@@ -1,0 +1,2 @@
+create operator .System.GrantRightToUser(const ARightName : System.Name, const AUserID : System.UserID)
+ class "System.SystemGrantRightToUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

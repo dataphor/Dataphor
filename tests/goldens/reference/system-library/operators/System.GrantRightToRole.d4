@@ -1,0 +1,2 @@
+create operator .System.GrantRightToRole(const ARightName : System.Name, const ARoleName : System.Name)
+ class "System.SystemGrantRightToRoleNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

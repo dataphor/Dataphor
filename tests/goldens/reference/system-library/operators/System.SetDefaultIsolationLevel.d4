@@ -1,0 +1,2 @@
+create operator .System.SetDefaultIsolationLevel(const AIsolationLevel : System.String)
+ class "System.SystemSetDefaultIsolationLevelNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

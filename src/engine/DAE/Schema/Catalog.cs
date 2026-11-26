@@ -410,7 +410,11 @@ namespace Alphora.Dataphor.DAE.Schema
 						}
 					}
 					
-					EmitDependencies(context, scalarType.IsSpecialOperator);
+					// A scalar type with no specials has no IsSpecialOperator, and EmitDependencies dereferences what it is
+					// given, so the unguarded call crashed Script() on such a type (System.Boolean, System.Scalar). A null
+					// operator has no dependencies to emit; the calls around this one are guarded by their own conditions.
+					if (scalarType.IsSpecialOperator != null)
+						EmitDependencies(context, scalarType.IsSpecialOperator);
 					foreach (Schema.Special special in scalarType.Specials)
 					{
 						if ((!special.IsGenerated || context.IncludeGenerated || (context.Mode == EmitMode.ForStorage)) && context.ShouldEmitWithLibrary(special))

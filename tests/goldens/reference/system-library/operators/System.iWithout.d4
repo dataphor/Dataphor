@@ -1,0 +1,2 @@
+create operator .System.iWithout(ALeftTable : generic table, ARightTable : generic table) : generic table
+ class "System.WithoutNode" static tags { DAE.IsBuiltin = "True" };

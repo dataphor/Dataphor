@@ -1,0 +1,10 @@
+create operator .System.ToShort(const AValue : System.Boolean) : System.Short
+ class "System.BooleanToShortNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToShort(const AValue : System.String) : System.Short
+ class "System.StringToShortNode" static tags { DAE.IsUniquePreserving = "True" };
+create operator .System.ToShort(const AValue : System.Byte) : System.Short
+ class "System.ByteToShortNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToShort(const AValue : System.Integer) : System.Short
+ class "System.IntegerToShortNode" static tags { DAE.IsOrderPreserving = "True" };
+create operator .System.ToShort(const AValue : System.Long) : System.Short
+ class "System.LongToShortNode" static tags { DAE.IsOrderPreserving = "True" };

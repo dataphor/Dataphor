@@ -1,0 +1,6 @@
+create operator .System.Insert(var AList : list, AValue : generic, const AIndex : System.Integer)
+ class "System.ListInsertNode" static tags { DAE.Functional = "False" };
+create operator .System.Insert(const AString : System.String, const AStartIndex : System.Integer, const AInsertString : System.String) : System.String
+ class "System.StringInsertNode";
+create operator .System.Insert(const ACursor : generic cursor, const ARow : generic row)
+ class "System.CursorInsertNode" static tags { DAE.IsFunctional = "False" };
