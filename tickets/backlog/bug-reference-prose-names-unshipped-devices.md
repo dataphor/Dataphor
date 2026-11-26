@@ -1,7 +1,7 @@
 description: Two published reference pages still talk about Oracle and DB2 database support that this release does not ship, and the page that lists the settings for each database device never mentions PostgreSQL, which is one of the two databases it does ship.
 prereq: docs-remove-old-sources
 architecture: docs/modernization-plan.md#ws8-documentation
-files: docs/reference/libraries/SQLDevice.md, docs/reference/libraries/SimpleDevice.md, docs/reference/libraries/README.md, docs/reference/
+files: docs/reference/libraries/SQLDevice.md, docs/reference/libraries/SimpleDevice.md, docs/reference/libraries/README.md, docs/reference/, docs/developers-guide/realsql.md, docs/developers-guide/d4-programming-topics.md
 repro: verified
 severity: wrong-result
 likelihood: normal-use
@@ -33,6 +33,17 @@ Not just the three sentences above. By then four more conversion tickets will ha
 - Add the PostgreSQL entry to the SQLDevice settings list. `docs/reference/libraries/PGSQLDevice.md` currently has no settings section of its own; whoever does this should decide whether to write one (the device's own settings - `Server`, `Port`, `Database`, `SearchPath` - appear only in `libraries/PGSQLDevice/Source/.../PostgreSQLDeviceSession.cs`) or to point the bullet at the generic settings table and say the device adds those four.
 - Remove the paragraph in `docs/reference/libraries/README.md` that apologises for these sentences, since it will no longer be true.
 
+## Four more instances, on two pages outside `docs/reference/` - found by `docs-reference-chapters`
+
+That ticket converted two guide chapters from the same 2007 sources, into `docs/developers-guide/`, and hit this ticket's situation exactly: statements the shipping code contradicts, on a generated page that a rerun would overwrite. **So the sweep above is a sweep of `docs/developers-guide/` too, not only of `docs/reference/`.** The four it noticed, each verified against the code:
+
+- **`docs/developers-guide/realsql.md`, *Operator Invocation*, says that "operators which take variable arguments may not be invoked, because RealSQL has no imperative mechanism for declaring a variable".** The parser accepts them: `ActualParameter` in `src/engine/DAE/Language.RealSQL/RealSQLParser.cs` reads an optional `var` keyword and builds a by-reference parameter, and `var` is in the language's keyword table. This is the one of the four that could cost a reader real time, because it tells them a thing they can do is impossible. Whoever fixes it should decide which side is right - the sentence may describe an intent that the parser never enforced, in which case the engine is the thing to question and this becomes a `fix/` ticket rather than an edit.
+- **The same page's grammar is a simplified one.** Its `<binary expression>` and `<arithmetic expression>` productions collapse what the parser actually implements as nine precedence levels (logical operator clause, logical binary and ternary, logical-and, bitwise binary, comparison, additive, multiplicative, exponent, unary). The accurate grammar is in that parser's own comments, all 49 productions. Not wrong, but a reader deriving precedence from this page will get it wrong; a sentence saying the page gives a simplified form and naming where the full one is would settle it.
+- **`docs/developers-guide/d4-programming-topics.md` names two accessor classes without the suffix the engine uses** - `System.ScalarReadAccessor` and `System.ScalarWriteAccessor`, where `src/engine/DAE/Schema/DataTypes.d4` writes `System.ScalarReadAccessorNode` and `System.ScalarWriteAccessorNode`. Every other class name in that block matches the engine exactly, so this reads as a typo in the 2007 source rather than a change since.
+- **The same page carries four plain source defects** that a rerun faithfully reproduces: an unterminated quote in the `System.String` definition (`class "System.SystemStringUTF8Node,`), prose announcing "seven properties" above a list of six, a `DateTime` selector example passing seven arguments to a six-property representation, and the spellings "ommitted" and "separataed" (the last on the RealSQL page).
+
+The last two items are copy-editing and could be declined without cost. The first is the one that matters.
+
 ## Expected behaviour
 
-Every sentence in the reference describes something a reader of this release can actually use, and the list of device-specific settings covers both shipped database devices.
+Every sentence in the reference and in the converted guide chapters describes something a reader of this release can actually use; the list of device-specific settings covers both shipped database devices; and no code sample in them is syntactically broken.

@@ -40,9 +40,9 @@ The editor has the following commands and associated shortcut keys:
 | Find Next | F3 | Repeats the last find operation. |
 | Goto Matching Brace | Ctrl+B | Moves cursor to the matching brace. |
 | Toggle Edit Mode | Insert | Toggles between insert and overtype. |
-| Undo | Ctrl+Z or Alt+BkSp | Delete |
-| Undoes the last keystroke. | Redo | Ctrl+Y |
-| Delete | Repeates the last keystroke. | Split Window |
+| Undo | Ctrl+Z or Alt+BkSp | Undoes the last keystroke. |
+| Redo | Ctrl+Y | Repeates the last keystroke. |
+| Split Window | Ctrl+Shift+1 | Split the editor window. Allowes two locations of the same text to be viewed/edited at the same time. |
 
 ### SELECTION/BLOCK
 

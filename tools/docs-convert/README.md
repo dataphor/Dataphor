@@ -213,6 +213,33 @@ NOTE: `pages-needing-a-legacy-map-row` reports `reference/libraries/ODBCConnecti
 
 NOTE: the common SQL device settings table renders with a trailing empty column, on `reference/libraries/SQLDevice.md` and `reference/libraries/MSSQLDevice.md`. `SQLDeviceSettings.xml` declares `<tgroup cols="4">` with four `colspec`s but gives every row three cells, so the fourth column is empty in the source and the old help build would have shown it the same way. If a later source set brings in enough of these to look like a defect, drop a trailing all-empty column in `convert.py` rather than editing the legacy source, which is the record of what was published.
 
+### The run that produced the two guide chapters
+
+`docs-reference-chapters` added `docs/developers-guide/realsql.md` and `docs/developers-guide/d4-programming-topics.md` with the same two commands, over every reference source **plus four more files of `Docs2.0/`**. The whole set is passed again for the reason given above - a run that leaves a source out does not rewrite the links on its pages, and this run changes four of them (the four date and time type pages, which gain a link to the new Programming Topics page). Each command is one line; add `--pandoc PATH` where pandoc is not on `PATH`.
+
+```
+python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml legacy/Documentation/Docs2.0/SystemTypes.xml legacy/Documentation/DocBookManuals/OperatorDocs/System.iXor.xml legacy/Documentation/Docs2.0/ConnectionLibraryReference.xml legacy/Documentation/Docs2.0/FrontendReference.xml legacy/Documentation/Docs2.0/FrontendOperators.xml legacy/Documentation/Docs2.0/GeneralLibraryReference.xml legacy/Documentation/Docs2.0/MSSQLDeviceReference.xml legacy/Documentation/Docs2.0/MSSQLDeviceTypes.xml legacy/Documentation/Docs2.0/MSSQLDeviceOperators.xml legacy/Documentation/Docs2.0/ODBCConnectionLibraryReference.xml legacy/Documentation/Docs2.0/SecurityLibraryReference.xml legacy/Documentation/Docs2.0/SimpleDeviceReference.xml legacy/Documentation/Docs2.0/SimpleDeviceOperators.xml legacy/Documentation/Docs2.0/SQLDeviceReference.xml legacy/Documentation/Docs2.0/SQLDeviceTypes.xml legacy/Documentation/Docs2.0/SQLDeviceOperators.xml legacy/Documentation/Docs2.0/SystemIntegrationLibraryReference.xml legacy/Documentation/Docs2.0/SystemIntegrationOperators.xml legacy/Documentation/Docs2.0/SystemInternetLibraryReference.xml legacy/Documentation/Docs2.0/RealSQLLanguageGuide.xml legacy/Documentation/Docs2.0/ProgrammingTopics.xml legacy/Documentation/Docs2.0/Keys.xml legacy/Documentation/Docs2.0/TypeConventions.xml --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --facts tools/docs-convert/library-facts.tsv --include legacy/Documentation/Docs2.0/SQLDeviceSettings.xml --out C:/temp/dref/work
+
+python tools/docs-convert/convert.py docbook C:/temp/dref/work/*.xml --out docs --pages C:/temp/dref/work/pages.tsv --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text --legacy-table C:/temp/dref/reference-legacy.tsv
+```
+
+That writes 354 pages: the 352 of the two runs above, byte for byte as they were but for those four, plus the two guide chapters.
+
+**`Keys.xml` and `TypeConventions.xml` are passed to the split only so that their page-map rows address something.** Both are already under `docs/`, by way of the AsciiDoc conversion rather than this one, so both rows are `(drop)` and the split reports them under *sections-not-converted*:
+
+| Source | Where it already is | How it got there |
+|---|---|---|
+| `Keys.xml` (the *Editor Shortcut Keys* appendix) | the *Editor Shortcut Keys* section of `docs/users-guide/tutorials.md`, all six tables and 71 shortcut rows | `DataphorSet.xml` attaches this appendix to the User's Guide right after its Tutorials part, and the AsciiDoc `UsersGuide/Tutorials.adoc` carries it in that position |
+| `TypeConventions.xml` | the *Type Conventions* section of `docs/developers-guide/README.md` | `DataphorSet.xml` includes this section in the preface of both the User's and the Developer's Guide, and the AsciiDoc `DevelopersGuide/DevelopersGuide.adoc` carries it |
+
+NOTE: neither chapter this run converts was in the published 2007 help collection. `DataphorSet.xml` declares an entity for `RealSQLLanguageGuide.xml` and never references it, and does not mention `ProgrammingTopics.xml` at all - whose own first comment says the chapter "was removed from the D4LG, and is no longer needed, having been replaced by Part II of the Developer's Guide, and by the System Library Reference". They are converted anyway because nothing under `docs/` covers the RealSQL language or the narrative treatment of the string, date and time types, and `docs-remove-old-sources` deletes the only copy. `docs/developers-guide/README.md` says as much where it links them, so a reader is not told these are maintained parts of the guide.
+
+NOTE: `pages-needing-a-legacy-map-row` also reports `developers-guide/realsql.md` and `developers-guide/d4-programming-topics.md`, and neither needs a row, for the same reason as the two library pages above: no generated navigation list links either page, so the help-page name of its primary section is never used. A row would be reported as matching no link instead.
+
+NOTE: the RealSQL page names four sections of the D4 Language Guide in prose - *Data Management Differences*, *Syntactic Conventions*, *Lexical Elements* and *Table Expressions* - without linking them, because `RealSQLLanguageGuide.xml` contains no link markup at all: its cross-references were typeset as plain text. Hand-adding the links would be lost on the next rerun, which rewrites the whole page. If they are wanted, the place for them is a `<ulink>` added to the legacy source, or a hand-maintained page that is no source's output.
+
+NOTE: two pages under `docs/` were edited by hand here, and an `--out docs` rerun of the **AsciiDoc** conversion (not of the two commands above, which do not write either path) would overwrite both. `docs/developers-guide/README.md` gained the two links described above. `docs/users-guide/tutorials.md` had the last three rows of its *EDITING* table re-laid: two rows of both legacy sources carry a spurious fourth cell in a three-column table (`<entry colname="col02"><keycap>Delete</keycap></entry>` repeated after the real shortcut cell on *Undo* and on *Redo*), which shifted every following cell by one and dropped the *Split Window* shortcut and description off the end of the table. The sources are left as they are, being the record of what was published; the published page is what was fixed.
+
 ## The DocBook stage on its own
 
 ```

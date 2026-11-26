@@ -566,3 +566,34 @@ DRSystem.InternetLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs
 DRSystem.InternetLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
 DRSystem.InternetLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
 DRSystem.InternetLibrary-Schema-Tables	(drop)	Tables	a generated schema list; docs-reference-generator owns it
+DDGP1RealSQLLanguage	developers-guide/realsql.md	RealSQL Language	
+DDGP1Introduction		Introduction	a section of the RealSQL chapter
+DDGP1ScriptsandExecution		Scripts and Execution	a section of the RealSQL chapter
+DDGP1Statements		Statements	a section of the RealSQL chapter
+DDGP1SelectStatement		Select Statement	a section of the RealSQL chapter
+DDGP1QueryExpression		Query Expression	a section of the RealSQL chapter
+DDGP1SelectExpression		Select Expression	a section of the RealSQL chapter
+DDGP1SelectClause		Select Clause	a section of the RealSQL chapter
+DDGP1FromClause		From Clause	a section of the RealSQL chapter
+DDGP1WhereClause		Where Clause	a section of the RealSQL chapter
+DDGP1GroupByClause		Group By Clause	a section of the RealSQL chapter
+DDGP1HavingClause		Having Clause	a section of the RealSQL chapter
+DDGP1InsertStatement		Insert Statement	a section of the RealSQL chapter
+DDGP1UpdateStatement		Update Statement	a section of the RealSQL chapter
+DDGP1DeleteStatement		Delete Statement	a section of the RealSQL chapter
+DDGP1Expression		Expression	a section of the RealSQL chapter
+DDGP1BetweenClause		Between Clause	a section of the RealSQL chapter
+DDGP1BinaryExpression		Binary Expression	a section of the RealSQL chapter
+DDGP1ArithmeticExpression		Arithmetic Expression	a section of the RealSQL chapter
+DDGP1UnaryExpression		Unary Expression	a section of the RealSQL chapter
+DDGP1QualifierExpression		Qualifier Expression	a section of the RealSQL chapter
+DDGP1IndexerExpression		Indexer Expression	a section of the RealSQL chapter
+DDGP1Factor		Factor	a section of the RealSQL chapter
+DDGP1OperatorInvocation		Operator Invocation	a section of the RealSQL chapter
+DDGP1AggregateOperatorInvocation		Aggregate Operator Invocation	a section of the RealSQL chapter
+DDGP1CaseExpression		Case Expression	a section of the RealSQL chapter
+D4LGProgrammingTopics	developers-guide/d4-programming-topics.md	Programming Topics	
+D4LGProgrammingTopics-UsingStrings		Using Strings	a section of the Programming Topics chapter
+D4LGProgrammingTopics-UsingDateandTimeValues		Using Date and Time Values	a section of the Programming Topics chapter
+Alphora.Dataphor.Keys	(drop)	Editor Shortcut Keys	already under docs/: the AsciiDoc User’s Guide carries this appendix as the Editor Shortcut Keys section of users-guide/tutorials.md
+TypeConventions.xml	(drop)	Type Conventions	already under docs/: the AsciiDoc Developer’s Guide carries this table as the Type Conventions section of developers-guide/README.md

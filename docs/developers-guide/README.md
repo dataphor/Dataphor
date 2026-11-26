@@ -10,6 +10,11 @@
 4.  [Physical Realization](physical-realization.md)
 5.  [D4 Language Guide](d4-language-guide.md)
 
+**Chapters from the older DocBook manuals**, which are not among the five sections above and were not in the published help collection either. They are here because nothing else under `docs/` covers their subjects:
+
+- [RealSQL Language](realsql.md) — the SQL dialect the Dataphor Server accepts alongside D4.
+- [Programming Topics](d4-programming-topics.md) — constructing and manipulating string, date and time values in D4.
+
 ## Summary
 
 The Dataphor Developer’s Guide discusses the declarative approach to application development as a solution to many of the technical problems associated with producing software. It is primarily intended to be read by software engineers; however, much of the material is pertinent for application and database administrators as well, particularly the discussions in Part I.

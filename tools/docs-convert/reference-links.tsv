@@ -33,11 +33,14 @@ D4LGNilSemantics.html	developers-guide/d4-language-elements.md#nil-semantics	tit
 D4LGOperatorPrecedence.html	developers-guide/d4-language-elements.md#operator-precedence	the 2004 sources' name for the same section the 2007 ones call D4LGLanguageElements-Expressions-OperatorPrecedence
 D4LGOrders.html	developers-guide/d4-catalog.md#orders	title under Table Variables, Common Characteristics
 D4LGProgrammingTopics-DynamicExecution.html	developers-guide/modeling-process-logic.md#dynamic-execution	title; help page sits in Modeling Process Logic
-D4LGProgrammingTopics-UsingDateandTimeValues.html		Programming Topics chapter is in neither the published help nor docs
+D4LGProgrammingTopics-UsingDateandTimeValues.html	developers-guide/d4-programming-topics.md#using-date-and-time-values	title in the Programming Topics chapter
 D4LGProgrammingTopics-UsingGenerators.html		no help page; no Using Generators section in docs
 D4LGScriptsandExecution.html	developers-guide/d4-scripts-and-execution.md	chapter page -> whole file
 D4LGTableExpressions-Add.html	developers-guide/d4-table-operators.md#extension	help page title "Extension"
 D4LGTableExpressions-Adorn.html	developers-guide/d4-table-operators.md#adorn	title in the Table Operators chapter
+D4LGTableExpressions-Aggregate-Count.html	reference/system-library/operators/System.Count.md	no help page of this name; the aggregate operator’s own reference page
+D4LGTableExpressions-Aggregate-Max.html	reference/system-library/operators/System.Max.md	no help page of this name; the aggregate operator’s own reference page
+D4LGTableExpressions-Aggregate-Min.html	reference/system-library/operators/System.Min.md	no help page of this name; the aggregate operator’s own reference page
 D4LGTableExpressions-Aggregate.html	developers-guide/d4-table-operators.md#aggregate	title in the Table Operators chapter
 D4LGTableExpressions-ComparisonOperators.html	developers-guide/d4-table-operators.md#comparison-operators	title in the Table Operators chapter
 D4LGTableExpressions-Explode.html	developers-guide/d4-table-operators.md#explode	title in the Table Operators chapter
