@@ -61,6 +61,7 @@
     <Compile Include="LibraryLoadingTest.cs" />
     <Compile Include="LibraryUpgradeRestartTest.cs" />
     <Compile Include="LiveDeviceTest.cs" />
+    <Compile Include="LivePGSQLDeviceTest.cs" />
     <Compile Include="MSSQLDeviceTranslationGoldenTests.cs" />
     <Compile Include="MSSQLStoreConnectionStringTest.cs" />
     <Compile Include="MSSQLTextParameterTest.cs" />

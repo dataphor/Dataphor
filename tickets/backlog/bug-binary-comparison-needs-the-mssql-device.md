@@ -88,3 +88,15 @@ Device Case 70 failed: Violation of insert transition for constraint "Key" defin
 The case creates a table whose only column is a `System.Binary` and whose key is that column, inserts one value, and asserts that inserting the *same* value again is refused; it then does the same with a second, different value. The key check refuses the second, different value as a duplicate - the same "two different `Binary` values compare equal because `System` declares no ordering for `Binary`" that the previous arm reached on a bare in-process server with a table literal. What this instance adds is that it happens with a SQL device in the picture and through the device's own key-check select, so the gap is not confined to the in-memory index; and that it is a recorded assertion in a corpus, so whichever shape is chosen above has a live test waiting for it.
 
 Reproducing it needs the one statement that `test-pre-3-1-scripts-policy`'s third arm asks the owner to rule on; until then `LiveDeviceTest` does not reach this case. Recorded here as evidence, not as a new ticket: the cause is the one this ticket already states.
+
+## A fourth instance: the same case fails on the PostgreSQL device, which moves the cause
+
+Verified 2026-11-26 by `device-pgsql-port`, against PostgreSQL 13.23, 14.25, 16.16 and 18.7 in containers. The new fixture `tests/DAE.Server.Tests/LivePGSQLDeviceTest.cs` runs the same device-coverage corpus against a PostgreSQL device, and device case 70 fails with the same message as the third arm above, on all four servers:
+
+```
+Device Case 70 failed: Violation of insert transition for constraint "Key" defined on table "TestFramework.Coverage.Devices.ListBinaryTestTable".
+```
+
+What this adds is where the cause cannot be. The SQL Server device and the PostgreSQL device share only `libraries/SQLDevice` and the engine; the two emit different SQL, map `System.Binary` onto different column types (`image` against `bytea`) and use different drivers. A case that fails identically on both is therefore not the SQL Server device's doing, which is what this ticket's slug says and the body does not: the first two arms already place it in `libraries/SQLDevice/Documents/Register.d4`, where `System.Binary` is declared with no ordering, and this instance is the evidence that nothing device-specific is involved. Whoever takes this ticket should read the slug as historical.
+
+That the PostgreSQL run reaches the case at all is the other thing worth knowing: the PostgreSQL driver script `TestPGSQLDevice.d4` deliberately omits the one statement that `test-pre-3-1-scripts-policy`'s third arm asks the owner to rule on, so no ruling is needed to reproduce this on PostgreSQL. `dotnet test tests/DAE.Server.Tests --no-build --filter "FullyQualifiedName~LivePGSQLDeviceTest"` with `DATAPHOR_TEST_PGSQL` set prints the whole roll-up.

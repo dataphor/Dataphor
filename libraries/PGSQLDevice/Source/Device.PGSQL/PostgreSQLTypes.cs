@@ -100,6 +100,17 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 		public PostgreSQLMoney(int AID, string AName)
 			: base(AID, AName)
 		{
+			// PostgreSQL has no implicit conversion between money and numeric, and no money <> numeric operator at all, so a
+			// Money literal translated as a literal makes the whole statement fail: SQLDevice.FromScalar emits
+			// ValueExpression(ParameterFromScalar(...)) for a literal of a type that does not ask for a parameter, which for
+			// this type is a bare decimal - "where ("T1"."Salary" > 1000.0)" against a money column, which PostgreSQL rejects
+			// with "operator does not exist: money > numeric". Asking for a parameter instead sends the value as
+			// NpgsqlDbType.Money, which compares. (ToLiteral is not the fix: it is only consulted for cursor key parameters,
+			// not for a literal operand of a translated expression.)
+			// Reproductions: the Money cases of the device-coverage corpus (LivePGSQLDeviceTest); the generated text is pinned
+			// by tests/goldens/devices/PGSQL/Query.Restrict.Comparison.sql, whose pre-fix form was SQL no PostgreSQL server
+			// accepts.
+			UseParametersForLiterals = true;
 		}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
@@ -195,16 +206,26 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
+		/// <remarks>
+		/// The current driver hands a PostgreSQL date back as a DateOnly, where the Npgsql 2.0.4 this was written against
+		/// handed back a DateTime - so the straight cast this used to be threw "Unable to cast object of type
+		/// 'System.DateOnly' to type 'System.DateTime'" the first time a Date column was read into the engine. D4's Date is
+		/// a DateTime at midnight, which is what DateOnly carries plus the implied time. Both shapes are accepted because the
+		/// driver's mapping is the driver's to change, and a device that reads only one of them breaks on the next change.
+		/// Reproduction: the Date ordering cases of the device-coverage corpus (LivePGSQLDeviceTest).
+		/// </remarks>
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
+			if (AValue is DateOnly dateOnly)
+				return dateOnly.ToDateTime(TimeOnly.MinValue);
 			return (DateTime)AValue;
 		}
-		
+
 		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
-		
+
 		public override SQLType GetSQLType(MetaData AMetaData)
 		{
 			return new SQLDateType();
@@ -242,17 +263,35 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
+		/// <remarks>
+		/// The current driver carries converters for a PostgreSQL time only to TimeOnly and TimeSpan, where the Npgsql 2.0.4
+		/// this was written against took and gave a DateTime - so both directions had to move. D4's Time is a DateTime on
+		/// 0001-01-01 whose date part is ignored, which is what a TimeOnly is plus that implied date. The DateTime branch is
+		/// kept, including its truncation to milliseconds, for a deployment that names a connection class of its own: it is
+		/// what this operator did before, and nothing here can know what such a class hands back.
+		/// Reproduction: the Time cases of the device-coverage corpus (LivePGSQLDeviceTest), which failed with "Writing
+		/// values of 'System.DateTime' is not supported for parameters having NpgsqlDbType 'Time'".
+		/// </remarks>
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
+			if (AValue is TimeOnly timeOnly)
+				return new DateTime(1, 1, 1).Add(timeOnly.ToTimeSpan());
+			// PostgreSQL's time is confined to one day, so adding the span to the base date cannot carry into another date -
+			// except for the literal '24:00:00' the type admits, which lands on 0001-01-02 and is as close as this
+			// representation comes to it.
+			if (AValue is TimeSpan timeSpan)
+				return new DateTime(1, 1, 1).Add(timeSpan);
 			DateTime LDateTime = (DateTime)AValue;
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
-		
+
 		public override object FromScalar(IValueManager AManager, object AValue)
 		{
-			return (DateTime)AValue;
+			// The whole time of day rather than its hours, minutes, seconds and milliseconds: PostgreSQL's time holds
+			// microseconds, so truncating here would make a value fail to compare equal to itself after a round trip.
+			return TimeOnly.FromTimeSpan(((DateTime)AValue).TimeOfDay);
 		}
-		
+
 		public override SQLType GetSQLType(MetaData AMetaData)
 		{
 			return new SQLTimeType();
@@ -392,9 +431,19 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 			return new SQLByteArrayType(GetLength(AMetaData));
 		}
 
+		/// <remarks>
+		/// No length. PostgreSQL's bytea takes no type modifier at all - "create table t (x bytea(30))" is rejected with
+		/// "type modifier is not allowed for type bytea" (measured 2026-11-26 against PostgreSQL 18.7) - so the length this
+		/// used to emit made every create-table statement carrying an SQLDevice.MSSQLBinary column invalid, and the Storage.Length
+		/// tag is now carried only by the SQLByteArrayType above, where it bounds the parameter rather than the column.
+		/// Nothing in the repository reached it: the device-coverage corpus's MSSQLBinary cases are named for the SQL Server
+		/// device's own scalar type and so are not applicable to this device, which is why a golden-only pass could not see it
+		/// either. No deployment can have such a column, because creating one never succeeded.
+		/// Reproduction: LivePGSQLDeviceTest.TheDeviceCreatesATableWithAByteArrayColumn.
+		/// </remarks>
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-            return String.Format("bytea({0})", GetLength(AMetaData));
+            return "bytea";
 		}
 	}
 

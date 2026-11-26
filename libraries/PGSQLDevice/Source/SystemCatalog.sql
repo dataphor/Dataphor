@@ -616,3 +616,22 @@ create or replace function DAE_Reverse(AString text)
 		RETURN LReturnVal;
 	end;
 	$$ LANGUAGE plpgsql;
+\
+-- DAE_TooManyRows
+-- Every row-extractor translation calls this, whether or not the source can have more than one row:
+-- SQLDevice.TranslateExtractRowNode emits "case when (select count(*) ...) > 1 then DAE_TooManyRows(1) else 1 end = 1"
+-- as the restriction, so the function has to exist on the server for "row from <table>" to run at all. It did not here,
+-- and the device-coverage corpus reported it as "function dae_toomanyrows(integer) does not exist" (device case 72,
+-- LivePGSQLDeviceTest). The SQL Server device's copy of this script has had it since 2008; this one never did.
+-- Deliberately not marked immutable: PostgreSQL constant-folds an immutable function of constant arguments at plan time,
+-- which would raise this error on every row extraction rather than only when the count exceeds one. plpgsql defaults to
+-- volatile, which is what keeps it inside the case expression.
+-- The message is the text of error 105199 (CompilerException.Codes.InvalidRowExtractorExpression), as the SQL Server
+-- copy's is, so that a row extraction over too many rows says the same thing whichever device evaluated it.
+create or replace function DAE_TooManyRows(ADummy in int)
+	RETURNS int
+	AS $$
+	begin
+		raise 'Row extractor expression must reference a table expression with at most one row.  Use a restriction or quota query to limit the number of rows in the source table expression.';
+	end;
+	$$ LANGUAGE plpgsql;

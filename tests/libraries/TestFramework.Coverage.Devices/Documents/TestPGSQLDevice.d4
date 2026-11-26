@@ -1,0 +1,52 @@
+/*
+	Dataphor
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+	Runs device coverage for the PGSQLDevice: the sibling of TestMSSQLDevice, driving the same corpus.
+
+	TestDevice is created by whoever runs this script, not here, as in the sibling: LivePGSQLDeviceTest
+	(tests/DAE.Server.Tests) creates it in TestFramework.Coverage.Base against the server the environment variable
+	DATAPHOR_TEST_PGSQL names, and D4 has no way to read an environment variable.
+
+	One statement of the sibling is deliberately absent here. That script raises an error naming every catalog object called
+	TestFramework.Coverage.Devices.TestDevice-something, which cannot succeed against any device or any version: this
+	library's own Logic.d4 creates an operator TestDevice(Name, Integer) whose catalog name is exactly that, so the statement
+	always fires and stops the run before the corpus is reached (LiveDeviceTest records it as a known failure, and
+	test-pre-3-1-scripts-policy owns whether it may be repaired there). Copying it here would mean writing a new script that
+	cannot pass. Nothing else differs.
+*/
+
+// Make sure the device is functional and connected
+EnsureDeviceStarted('TestDevice');
+
+if not exists (DeviceOperators where Device_Name = ObjectName('TestDevice')) then
+	raise Error('TestDevice has no operator maps: the device''s system catalog did not register.');
+
+// reset applicable cases
+delete ApplicableDeviceCases;
+
+// Run the tests
+TestDevice(ObjectName('TestDevice'), nil);
+
+// If any test failed, throw an error with all the test failure messages.
+if exists (DeviceCaseResults where DeviceName = ObjectName('TestDevice') and Status = "Failed") then
+	raise
+		Error
+		(
+			Concat
+			(
+				{ Message, Delimiter }
+					from
+					(
+						DeviceCaseResults
+							where DeviceName = ObjectName('TestDevice')
+								and Status = "Failed"
+							{
+								DeviceCase_ID,
+								'Device Case ' + DeviceCase_ID.ToString() + ' failed: ' + Results Message,
+								ASCII(list(Byte) { 10, 13 }) Delimiter
+							}
+					)
+				order by { DeviceCase_ID }
+			)
+		);

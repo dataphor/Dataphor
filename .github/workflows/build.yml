@@ -93,10 +93,32 @@ jobs:
           $info
           if (($info -join "`n") -notmatch 'State:\s+Running') { throw 'MSSQLLocalDB is not running; the live SQL Server passes will report Inconclusive.' }
 
+      # The PostgreSQL passes read DATAPHOR_TEST_PGSQL and skip themselves where it is unset, exactly as the SQL Server
+      # ones do. This image carries PostgreSQL as a service that is installed, stopped and disabled - "postgresql-x64-14",
+      # version 14.25, with the user postgres and the password root (the image's own Databases section, read 2026-11-26) -
+      # so starting it is all this needs. Guarded the same way as the step above: it prints what it finds and
+      # continue-on-error keeps the job green if a later image drops or renames the service, and the Test step then
+      # leaves the variable empty so the live cases report Inconclusive instead of failing.
+      # The password is the image's published default for a service on an ephemeral runner, not a secret, and it is the
+      # only way in: PostgreSQL has no integrated-security equivalent. Nothing outside the runner can reach the server.
+      # Cost: the fixture's two cases took 13 s locally against PostgreSQL 14.25 in a container (1180 device cases in
+      # about 10 s of that); the service start is a few seconds on top. The CI figure comes from the first run.
+      - name: Start PostgreSQL
+        id: postgres
+        continue-on-error: true
+        run: |
+          $service = Get-Service -Name 'postgresql-x64-14' -ErrorAction Stop
+          $service
+          Set-Service -Name 'postgresql-x64-14' -StartupType Manual
+          Start-Service -Name 'postgresql-x64-14'
+          (Get-Service -Name 'postgresql-x64-14').Status
+          if ((Get-Service -Name 'postgresql-x64-14').Status -ne 'Running') { throw 'postgresql-x64-14 is not running; the live PostgreSQL passes will report Inconclusive.' }
+
       - name: Test
         env:
           # Empty where the step above failed; TestEnvironment reads an empty value as "no server configured".
           DATAPHOR_TEST_MSSQL: ${{ steps.localdb.outcome == 'success' && 'Data Source=(localdb)\MSSQLLocalDB;Integrated Security=SSPI' || '' }}
+          DATAPHOR_TEST_PGSQL: ${{ steps.postgres.outcome == 'success' && 'Host=localhost;Port=5432;Username=postgres;Password=root' || '' }}
         run: dotnet test Dataphor.slnx -c ${{ matrix.configuration }} --no-build --logger trx --results-directory artifacts/TestResults/${{ matrix.configuration }}
 
       - name: Upload test results

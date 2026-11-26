@@ -56,3 +56,17 @@ What the measurement adds is a consequence that arm did not have. Reconciliation
 The fix is the one that arm already named - record the character width rather than the byte count - and the place that decides it is the same `MSSQLDevice.FindScalarType`. The reconciliation query is in `GetDeviceTablesExpression` in the same file, which selects `convert(integer, sc.max_length) as Length` on SQL Server 9 and above and `convert(integer, sc.length)` below it; both are byte counts, so a correction belongs where the number is interpreted or in both queries, not in one.
 
 Whoever takes this: the fixture above pins the current behaviour, so the fix has to change its expectation for `NVarcharColumn` from 60 to 30, and that is the one change to it that is correct to make.
+
+## A fifth arm, from the other side: the PostgreSQL device compares text case-*sensitively*
+
+Verified 2026-11-26 by `device-pgsql-port`, against PostgreSQL 13.23, 14.25, 16.16 and 18.7, through `tests/DAE.Server.Tests/LivePGSQLDeviceTest.cs`. Two cases of the device-coverage corpus fail with
+
+```
+Device Case <n> failed: System.UserID compared sensitively.
+```
+
+which is the exact mirror of the case-insensitivity arm above. `System.UserID` is a D4 type whose comparison is case-insensitive; the PostgreSQL device creates the column as `character varying` and the comparison is pushed into the server, which compares by the database collation - case-*sensitive* on a stock `en_US.utf8` database - so two spellings that D4 says are the same user come back different. On SQL Server the same corpus fails in the opposite direction, because that server's default collation is case-insensitive and a plain D4 `String` column therefore compares insensitively when it should not.
+
+That is the evidence that the two arms are one question with one answer, and the answer is not a collation setting: **whichever collation a database has, a D4 comparison pushed into it is that database's comparison and not D4's.** Either the device stops pushing a comparison it cannot reproduce - for `UserID` and for any type whose D4 comparison is case-insensitive, and for plain `String`, whose comparison is case-*sensitive* and which SQL Server therefore also gets wrong - or the device wraps those comparisons in something that makes the server agree (`lower(...)` on both sides, or a column collation the device names when it creates the column), or the promise is weakened and said out loud in the user's guide. The third is cheapest and the first is correct; the second is the only one that keeps both the promise and the pushdown.
+
+Note for whoever takes it: a fix in the device must not be a fix in one device. The two devices share `libraries/SQLDevice`, which is where `SQLString` and the comparison operator maps live, and a change there moves both devices' translation goldens (`tests/goldens/devices/MSSQL/` and `tests/goldens/devices/PGSQL/`) - which is the right place for the diff to show up.

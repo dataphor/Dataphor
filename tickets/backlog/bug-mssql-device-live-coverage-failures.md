@@ -63,3 +63,19 @@ dotnet test tests/DAE.Server.Tests --no-build --filter "FullyQualifiedName~LiveD
 The fixture prints the whole roll-up: one block per failed case, with the case's `DeviceCase.ID` and its message.
 
 **Do not map those printed ids onto the `/*<n>ID, */` comments in `InsertDeviceCase.d4`.** The ids are handed out by `GetNextGenerator('DeviceCase.ID')` as the rows are inserted, and the comments have drifted out of step with them by varying amounts - verified: the two "compared insensitively" messages printed as ids 761 and 762 belong to the rows commented 759 and 760, while id 70's message belongs to the row commented 70. Read `Coverage.Devices.DeviceCase` from the running server instead, or match on the message text, which is unique to each case.
+
+## Both arms reproduce on the PostgreSQL device, so neither is SQL Server's
+
+Verified 2026-11-26 by `device-pgsql-port`, against PostgreSQL 13.23, 14.25, 16.16 and 18.7 in containers, through the new fixture `tests/DAE.Server.Tests/LivePGSQLDeviceTest.cs`. It runs the same 1,180-case corpus against a PostgreSQL device, and both of this ticket's arms turn up unchanged. The two devices share only `libraries/SQLDevice` and the engine, so a failure common to both is not either device's dialect.
+
+**Arm one, ordering.** Five to seven of the thirty-four ordering cases fail with `Next() returned an unexpected row`, and **which ones changes between identical runs of the same build** - measured three times on PostgreSQL 18.7: the `Byte` pair's failing member swapped between runs, and one `Long` case failed in one run and passed in the next. That is the same instability recorded above against SQL Server, on a different database with a different sort implementation, which makes the tie-in-the-ordering-column reading of it much the stronger of the two. The types whose pair failed in at least one PostgreSQL run: `Byte`, `Integer`, `Long`, `Short`, `UserID`. The SQL emitted is a total order - `order by "Byte2" desc, "Byte1" desc`, the key column included - so the tie is not in the SQL; whatever is free to vary is above it.
+
+**Arm two, the current date and time.** Two cases fail on PostgreSQL rather than one: `System.DateTime current time values were not retrieved properly` and `System.Date current time values were not retrieved properly`. The PostgreSQL run also shows why, which the SQL Server run could not: the device translates the *second* call, the one in the assertion, into the database server's own clock. The statement the server logged is
+
+```sql
+select case when ((select "T3"."DateTime1" from "ListDateTimeTestTable" as "T3" where ...) <> (now()::timestamp)) then 1 else 0 end ...
+```
+
+while the value in the table was inserted as a parameter the engine had evaluated. So the case compares the Dataphor server's clock with the database server's, and the two differ by the elapsed milliseconds at best and by a whole time-zone offset at worst - the measurement machine was at UTC-7 and the container at UTC. This settles the first of the two possibilities arm two lists (the case compares against a second call to the operator) as a real part of the cause, and it adds a question the arm does not ask: **which clock a D4 program's `DateTime()` means when the expression is pushed into a device.** An application that stores `DateTime()` and later restricts on `DateTime()` gets two different clocks today. That is a semantic question about device translation, not a precision one, and it should be answered with the rest of this arm.
+
+The device's own `DateTime` precision is not in question on PostgreSQL: `timestamp` holds microseconds and every one of the corpus's stored-value `DateTime` cases passes. Whether SQL Server's `datetime` rounding is the other half of arm two is still for SQL Server to answer.

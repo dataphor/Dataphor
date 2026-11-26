@@ -180,30 +180,52 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             }
         }
 
+        /// <remarks>
+        /// Against the stock postgres database rather than the device's own, the way EnsureDatabase above does it and the
+        /// way the SQL Server device does it in both places (there it is master): the device's own database may not exist
+        /// yet, because EnsureDatabase is what creates it and the start sequence runs this first. Asked of the device's own
+        /// database this failed outright - PostgreSQL 3D000, "database ... does not exist" - which is the whole of a device
+        /// start against a server where the database is not there yet. Nothing could see it while ShouldDetermineVersion
+        /// defaulted off and nothing in the repository connected; LivePGSQLDeviceTest.TheDeviceReadsTheServerVersion turns
+        /// it on and is the reproduction.
+        /// </remarks>
         protected void DetermineVersion(ServerProcess process)
         {
-            var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
+			var database = Database;
+			Database = "postgres"; // This assumes all PostgreSQL installations have a postgres db.
             try
             {
-				SQLCursor cursor = deviceSession.Connection.Open("SELECT version()");
-                try
-                {
-                    string version = String.Empty;
-                    cursor.Next();
-                    var rawVersion = (string) cursor[0];
-					version  = rawVersion.Split(' ')[1];                    	                        
+				var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
+				try
+				{
+					SQLCursor cursor = deviceSession.Connection.Open("SELECT version()");
+					try
+					{
+						// Guarded, as the SQL Server device's guards it: version() answering nothing, or answering something
+						// without a space in it, would otherwise come back as an index out of range from inside a device start.
+						if (cursor.Next())
+						{
+							var rawVersion = Convert.ToString(cursor[0]);
+							var words = rawVersion.Split(' ');
+							var version = words.Length > 1 ? words[1] : String.Empty;
 
-                    if (version.Length > 0)
-                        _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
-                }
-                finally
-                {
-                    cursor.Command.Connection.Close(cursor);
-                }
+							if (version.IndexOf('.') > 0)
+								_majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
+						}
+					}
+					finally
+					{
+						cursor.Command.Connection.Close(cursor);
+					}
+				}
+				finally
+				{
+					Disconnect(deviceSession);
+				}
             }
             finally
             {
-                Disconnect(deviceSession);
+				Database = database;
             }
         }
 

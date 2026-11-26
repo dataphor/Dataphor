@@ -200,6 +200,63 @@ Columns of type `datetime2` and `datetimeoffset` are **left out of the reconcile
 
 A Unicode column reconciles twice as wide as it is: an `nvarchar(30)` column arrives with a length of 60, because SQL Server reports that column's width in bytes and Dataphor reads the number as a count of characters. The length constraint Dataphor then puts on the column admits strings the server will not store, so the error arrives from SQL Server on the write rather than from Dataphor on the edit. Both of these are defects rather than decisions and are expected to change; a release that fixes them will say so in the migration notes.
 
+## Which PostgreSQL versions work
+
+This section is about the PostgreSQL **device** an application's libraries use to hold their tables. There is no PostgreSQL catalog store in this release — the catalog goes in SQLite or in SQL Server — so unlike the SQL Server answer above, this one covers one thing rather than two.
+
+**PostgreSQL 14 is the supported minimum.** Versions 14, 16 and 18 were measured and behave identically; 13 was measured too and also behaves identically, but it is past the end of PostgreSQL's own support and is therefore not a supported target. Support follows roughly the last five years of PostgreSQL releases, so a version will leave this list as it ages out. Nothing in Dataphor refuses an older server.
+
+### What was measured, and on what
+
+Each row was measured by pointing the test suite's live PostgreSQL pass at that server. It creates a test library's tables on the server through the device, puts the library's 1,180 rows of recorded test data in them, and then runs those 1,180 cases — one per D4 scalar type and per operator — against the device. Measured 26 November 2026, against the official `postgres` container images, each reached over TCP with a PostgreSQL login. The pass takes about 13 seconds per server.
+
+| PostgreSQL | Version reported | Result |
+|---|---|---|
+| 18 | 18.7 (Debian) | **Passes**, with the failures listed below |
+| 16 | 16.16 (Debian) | **Passes**, identically |
+| 14 | 14.25 (Debian) | **Passes**, identically |
+| 13 | 13.23 (Debian) | Passes identically, but is below the supported minimum — information, not a promise |
+
+"Identically" is the point of the table: the four servers differ only in which members of one unstable family of test cases fail (five to seven of them, and a different subset each run — see below). Everything else — every type that round-trips, every operator that translates, the database the device creates, the support functions it installs — is the same from 13 through 18. So the version floor above is a support decision, not a measurement of where the device stops working.
+
+Three things the measurement confirmed on every version, each of which is the first thing to fail against a server nobody has tried. The device reads the server's version from `version()` and parses it. Starting the device **creates the database** named in its definition when that database is absent, and installs the forty-odd `DAE_` support functions it needs into it. And the lock the device takes before every insert into one of its tables — a `for update` clause on a key-check select, which PostgreSQL has to accept in a position SQL Server does not use — both parses and takes a real row lock, checked directly against the server.
+
+### What still fails, and what is not yet proved
+
+Of the 1,180 recorded cases, these families fail. None of them is new to PostgreSQL alone: the first three fail the same way against SQL Server and are already recorded as defects.
+
+- **Ordering.** A table held on the device sorts differently from the same rows sorted in the engine, in five to seven of the thirty-four ordering cases, and which ones changes between identical runs. A device sorts by the database's rules; whether a D4 `order` is promised to give the same sequence either way is an open question rather than a settled defect.
+- **The current date and time.** A case that stores `DateTime()` (or `Date()`) in a table on the device and then checks the value against a second call to the same operator fails. The device translates those operators to the *database server's* clock, so against a database server in another time zone an application gets that server's wall-clock time, not the Dataphor server's.
+- **A table keyed on a `Binary` column** refuses a second, different value as a duplicate.
+- **Case-insensitive comparison.** A `UserID` column on the device compares case-*sensitively*, because PostgreSQL compares text by the database collation. D4's `UserID` is case-insensitive.
+- **`Time` columns.** A D4 `Time` value can be written to a PostgreSQL device table but cannot be compared with one: the device declares the column `time` while every operator it registers over that column is written for `timestamp`, so a comparison fails on the server. **Avoid `Time` columns on a PostgreSQL device in this release**; a `DateTime` column works.
+
+Two further things are not proved either way. Nothing in the test corpus stores a value large enough to need the device's streamed read path, so large `Binary` and `SQLText` values are untested beyond about 200 bytes. And a `Money` column holds only two decimal places, because that is what PostgreSQL's `money` type holds: a D4 `Money` value with more than two — a unit price, a tax rate — is silently rounded on the way in. Use a `Decimal` column for those.
+
+One behaviour is worth knowing because it has no equivalent on SQL Server: **after any failed statement, a PostgreSQL transaction is unusable until it ends.** Dataphor does not currently notice, so D4 that catches an error from a PostgreSQL device inside a transaction and carries on will find every later statement failing with *current transaction is aborted*. Let the transaction end and start a new one.
+
+### Connection settings
+
+A device definition names the server, the port and the database, and the login goes on a device user rather than on the device, so that it is stored encrypted:
+
+```
+create device MyDevice
+	reconciliation { mode = { command }, master = device }
+	class "PostgreSQLDevice.PostgreSQLDevice"
+	attributes
+	{
+		"Server" = "dbhost",
+		"Port" = "5432",
+		"Database" = "mydatabase"
+	};
+
+CreateDeviceUser('Admin', 'MyDevice', 'myloginname', 'mypassword');
+```
+
+`Port` defaults to 5432 and `Server` to 127.0.0.1, so a device on the same machine can leave both out. `Database` defaults to `postgres`, which is almost never what a deployment wants. `SearchPath` sets the server's schema search path for the device's connections and may be left out. The device creates the database if it is absent, which needs a login with the right to create one; give it an existing database and a login without that right if that is not wanted, and set `"ShouldEnsureDatabase" = "False"`.
+
+Nothing about encryption was measured: the servers in the table above accept unencrypted connections, which is what the driver then uses. A server that requires TLS needs the driver's own keywords, which reach it through the device's `ConnectionParameters` attribute — for example `"ConnectionParameters" = "SSL Mode=Require"`. **One keyword the driver does not recognise now fails the connection** where the driver this device used in release 3.1 ignored it, so a `ConnectionParameters` setting carried over from release 3.1 should be checked against [the driver's documented keywords](https://www.npgsql.org/doc/connection-string-parameters.html).
+
 ## Uninstalling
 
 The Dataphor Service can be manually uninstalled from the Windows services list by running `DAEService.exe` with the `-u` parameter as follows:

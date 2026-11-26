@@ -96,10 +96,11 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
                 else if (parameter.Type is SQLTimeType)
                 {
                     // NOTE: the current driver carries converters for a PostgreSQL time only to TimeOnly and TimeSpan, where
-                    // 2.0.4 took a DateTime - so both directions of the device's Time scalar type are now wrong, not just the
-                    // one: PostgreSQLTime.FromScalar, in PGSQLDevice, hands a DateTime over to be bound, and its ToScalar casts
-                    // what comes back to DateTime. Not changed here: what to send and what to read is the device scalar type's
-                    // decision, and device-pgsql-port is the first ticket that runs a device against a server and sees it.
+                    // 2.0.4 took a DateTime. Both directions of the device's Time scalar type were therefore wrong and
+                    // device-pgsql-port fixed them where they belong - PostgreSQLTime.FromScalar now hands over a TimeOnly and
+                    // its ToScalar reads TimeOnly and TimeSpan as well as DateTime (PGSQLDevice, PostgreSQLTypes.cs). A
+                    // deployment naming a connection class of its own is on the same contract: what reaches this parameter has
+                    // to be one of the two shapes the driver converts.
                     npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Time;
                 }
                 else if (parameter.Type is SQLGuidType)

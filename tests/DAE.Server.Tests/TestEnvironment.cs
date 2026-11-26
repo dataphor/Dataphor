@@ -561,5 +561,194 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		#endregion
+
+		#region The configured PostgreSQL server
+
+		/// <summary>
+		/// Set to a connection string naming a <em>PostgreSQL server</em> - not a database - to run the passes that need a
+		/// live one; see AGENTS.md "Build and test". Every pass that reads it puts its own database on whatever is set.
+		/// </summary>
+		public const string PGSQLVariable = "DATAPHOR_TEST_PGSQL";
+
+		/// <summary>What <see cref="PGSQLVariable"/> holds, or null where it is unset or empty.</summary>
+		public static string PGSQLConnectionString
+		{
+			get
+			{
+				string result = Environment.GetEnvironmentVariable(PGSQLVariable);
+				return String.IsNullOrEmpty(result) ? null : result;
+			}
+		}
+
+		/// <summary>Whether this machine has been given a PostgreSQL server to test against.</summary>
+		/// <remarks>
+		/// The variable being set is the only test, for the reason given on <see cref="MSSQLConfigured"/>: nothing may connect
+		/// in order to decide whether to connect.
+		/// </remarks>
+		public static bool PGSQLConfigured => PGSQLConnectionString != null;
+
+		/// <summary>
+		/// What a case says when it is skipped for want of a PostgreSQL server. <paramref name="whatWouldRun"/> completes the
+		/// sentence "Set DATAPHOR_TEST_PGSQL ... to &lt;whatWouldRun&gt;."
+		/// </summary>
+		public static string PGSQLNotConfigured(string whatWouldRun)
+		{
+			return
+				String.Format
+				(
+					"Set {0} to a PostgreSQL connection string - a server, not a database, for example \"Host=localhost;Port=5432;Username=postgres;Password=<a throwaway password>\" - to {1}.",
+					PGSQLVariable,
+					whatWouldRun
+				);
+		}
+
+		/// <summary>
+		/// The first of <paramref name="keywords"/> the variable names, or <paramref name="defaultValue"/> where it names none.
+		/// </summary>
+		/// <remarks>
+		/// Read with the framework's own connection-string parser rather than with Npgsql's, because this project must not
+		/// reference the PostgreSQL driver: the driver arrives with the D4 library libraries/PGSQLConnection, which the server
+		/// loads from the runtime layout, and whether the layout puts it where that library can find it is one of the things a
+		/// live run is here to prove. A package reference here would satisfy that load from the test assembly's own folder
+		/// instead, because the library resolver is an AssemblyResolve handler and only fires after the default load path has
+		/// failed (Base.Windows/LibraryAssemblyResolver.cs). So every keyword spelling the driver accepts has to be listed by
+		/// the callers below; DbConnectionStringBuilder matches a key case-insensitively but not across a difference in
+		/// spacing, so "User ID" and "UserID" are two entries.
+		/// </remarks>
+		private static string PGSQLSetting(string defaultValue, params string[] keywords)
+		{
+			DbConnectionStringBuilder asWritten = new DbConnectionStringBuilder();
+			asWritten.ConnectionString = PGSQLConnectionString;
+			foreach (string keyword in keywords)
+				if (asWritten.ContainsKey(keyword))
+					return Convert.ToString(asWritten[keyword]);
+			return defaultValue;
+		}
+
+		/// <summary>The configured server's host, defaulted as the driver defaults it.</summary>
+		public static string PGSQLHost => PGSQLSetting("localhost", "Host", "Server");
+
+		/// <summary>The configured server's port, defaulted as the driver and the device both default it.</summary>
+		public static string PGSQLPort => PGSQLSetting("5432", "Port");
+
+		/// <summary>
+		/// The login the configured server is reached as. PostgreSQL has no equivalent of the integrated security the SQL
+		/// Server passes fall back on, so a device against it always carries a user.
+		/// </summary>
+		public static string PGSQLUserID => PGSQLSetting(String.Empty, "Username", "User ID", "UserID", "User Id", "User Name", "UserName");
+
+		public static string PGSQLPassword => PGSQLSetting(String.Empty, "Password", "pwd", "psw");
+
+		/// <summary>
+		/// The whole of the D4 that gives a server a PostgreSQL device named <paramref name="deviceName"/> against the
+		/// configured server, holding its tables in <paramref name="databaseName"/> and reconciling in
+		/// <paramref name="reconciliationMode"/> ("command" for a device that data-definition commands reach, "none" for one
+		/// that is only read): the create-device statement and the device user after it. Ends in a line break, so a caller can
+		/// concatenate it into a script.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// One operation rather than two, for the reason <see cref="MSSQLDeviceDefinition"/> gives: a PostgreSQL device carries
+		/// no credentials of its own that this driver would be given, so a definition emitted without its device user would
+		/// connect as nobody. It is also the one place this device's registered class name is spelled -
+		/// "PostgreSQLDevice.PostgreSQLDevice".
+		/// </para>
+		/// <para>
+		/// ShouldDetermineVersion is turned on, where the device defaults it off. What the device does with the version it
+		/// reads is almost nothing (MajorVersion decides no SQL this device emits today), but DetermineVersion parses the
+		/// string <c>version()</c> returns and a live pass is the only thing that can show whether that still works against a
+		/// server nobody has tried - a device that never asked would hide it. The other two connecting settings,
+		/// ShouldEnsureDatabase and ShouldEnsureOperators, are left at their defaults, which are on: creating the database and
+		/// the DAE_ support functions is what starting this device is expected to do, and the live passes rest on it.
+		/// </para>
+		/// </remarks>
+		public static string PGSQLDeviceDefinition(string deviceName, string databaseName, string reconciliationMode)
+		{
+			return
+				String.Format
+				(
+					"create device {0} reconciliation {{ mode = {{ {1} }}, master = device }} class \"PostgreSQLDevice.PostgreSQLDevice\" attributes {{ {2} }};\r\n{3}\r\n",
+					deviceName,
+					reconciliationMode,
+					PGSQLDeviceAttributes(databaseName),
+					PGSQLDeviceUser(deviceName)
+				);
+		}
+
+		/// <summary>
+		/// The attribute list of a D4 PostgreSQL device definition against the configured server, for a device holding its
+		/// tables in <paramref name="databaseName"/>: the host, the port, the database and the version switch above.
+		/// </summary>
+		// The login is not among them: it goes to a device user instead, so that no password is stored as the literal text of
+		// a device definition - which is where one in the variable would otherwise land, and where a run kept with
+		// DATAPHOR_TEST_LOGGING=1 would leave it on disk.
+		private static string PGSQLDeviceAttributes(string databaseName)
+		{
+			List<string> attributes = new List<string>();
+			attributes.Add(DeviceAttribute("Server", PGSQLHost));
+			attributes.Add(DeviceAttribute("Port", PGSQLPort));
+			attributes.Add(DeviceAttribute("Database", databaseName));
+			attributes.Add(DeviceAttribute("ShouldDetermineVersion", "True"));
+			return String.Join(", ", attributes);
+		}
+
+		/// <summary>The statement that gives the device named <paramref name="deviceName"/> the login the variable names, to run after the device has been created.</summary>
+		/// <remarks>
+		/// A device user rather than credentials on the device itself, for the reason <see cref="MSSQLDeviceDefinition"/>
+		/// gives: a device user's password is stored encrypted, and Schema.Device has no property the "User Id" tag name this
+		/// device's connection-string builder maps would bind to anyway.
+		/// </remarks>
+		private static string PGSQLDeviceUser(string deviceName)
+		{
+			return
+				String.Format
+				(
+					"CreateDeviceUser('{0}', '{1}', '{2}', '{3}');",
+					Engine.AdminUserID,
+					deviceName,
+					D4StringLiteral(PGSQLUserID),
+					D4StringLiteral(PGSQLPassword)
+				);
+		}
+
+		/// <summary>
+		/// The D4 that drops every table of every non-system schema of the database the started device named
+		/// <paramref name="deviceName"/> is pointed at, so that the case about to run starts on a database with nothing of an
+		/// earlier run's in it. Ends in a line break, so a caller can concatenate it into a script.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// At the start of a case rather than at the end, which is the rule the store contract established and
+		/// <see cref="EmptyMSSQLDatabase"/> follows: a run kept with DATAPHOR_TEST_LOGGING=1, or one that crashed, then leaves
+		/// its database to be looked at and the next run is still not poisoned by it. Nothing drops these databases afterwards,
+		/// because what a device left in one is the evidence of what the device did.
+		/// </para>
+		/// <para>
+		/// Through the device rather than through a connection of the harness's own, which is the opposite of what the SQL
+		/// Server passes do and for the reason given on <see cref="PGSQLSetting"/>: this project does not reference the
+		/// PostgreSQL driver, so the statement goes out over the device's own connection, through the library the server
+		/// loaded. It therefore needs a started device, and a caller runs it after that start has created the database and the
+		/// DAE_ support functions - which is also why it drops only tables and leaves those functions alone.
+		/// </para>
+		/// </remarks>
+		// NOTE: the database name is a shared resource with a fixed name, as the SQL Server passes' are. Two runs against one
+		// server at the same time - two developers, or a developer and a CI agent, with DATAPHOR_TEST_PGSQL pointed at one
+		// shared server - would empty each other's database mid-case. If that day comes, name the database after the run.
+		public static string PGSQLEmptyDatabaseStatement(string deviceName)
+		{
+			// relkind 'r' is an ordinary table, and cascade takes the foreign keys referencing it along, so no separate pass
+			// over the constraints is needed. A do block because PostgreSQL has no "drop every table" statement and the
+			// device's SQLExecute takes one statement.
+			string statement =
+				"do $$ declare r record; begin" +
+					" for r in select n.nspname as s, c.relname as t from pg_class c" +
+					" join pg_namespace n on n.oid = c.relnamespace" +
+					" where c.relkind = 'r' and n.nspname not in ('pg_catalog', 'information_schema')" +
+					" loop execute 'drop table ' || quote_ident(r.s) || '.' || quote_ident(r.t) || ' cascade'; end loop;" +
+					" end $$;";
+			return String.Format("SQLDevice.SQLExecute('{0}', '{1}');\r\n", deviceName, D4StringLiteral(statement));
+		}
+
+		#endregion
 	}
 }
