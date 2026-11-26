@@ -105,12 +105,13 @@ Dataphor Reference documents the Dataphor product, including the Call-Level Inte
     5.  [Error Message Prefix Codes](reference/error-codes.md)
     6.  [Tags](reference/tags.md)
     7.  [Libraries](reference/libraries/README.md)
+    8.  [Compiler Defines](reference/compiler-defines.md)
 
 ### Misc
 
 1.  [Glossary](glossary.md)
 2.  [Bibliography](bibliography.md)
-3.  Authoring Documentation
+3.  [Writing Documentation](contributing/writing-docs.md)
 
 ## Project documents
 
@@ -129,3 +130,4 @@ Dataphor Reference documents the Dataphor product, including the Call-Level Inte
 - [Migration notes](migration-notes.md): the changes that an application, a deployment script or a custom extension will notice.
 - [Test coverage report](coverage-report.md): what the test suite reaches in the engine and what it does not, measured on one full run with the coverage collector switched on.
 - [Performance baseline](perf-baseline.md): how fast the engine is, recorded by the test suite and by the benchmark program so that a large slowdown is visible, and the procedure for the one-off comparison with 3.1.
+- [Contributing](contributing/README.md): how to build, test and document the project - what you need installed, which solution to open, where the build puts things, and the conventions the documentation under `docs/` follows.

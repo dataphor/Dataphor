@@ -11,6 +11,7 @@
 5.  [Error Message Prefix Codes](error-codes.md)
 6.  [Tags](tags.md)
 7.  [Libraries](libraries/README.md)
+8.  [Compiler Defines](compiler-defines.md)
 
 ## Summary
 

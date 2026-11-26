@@ -163,7 +163,7 @@ artifacts/             build output (ignored)
 | `Dataphor/DAE.Service.ConfigurationUtility` | `src/windows/ConfigurationUtility` |
 | `Dataphor/DAEServer`, `Dataphor/DAE.Service`, `Dataphor/D4Runner` | `src/hosts/DAEServer`, `src/hosts/DAEService`, `src/hosts/D4Runner` |
 | `Dataphor/Language.SQL` | deleted (`repo-delete-dead-trees`; only the old solution referenced it) |
-| `Dataphor/CompilerDefines.txt`, `Dataphor/Error Message Prefix Codes.txt` | `docs/reference/`, moved unchanged by the reorganization (since `Dataphor/` is emptied); WS8 converts them |
+| `Dataphor/CompilerDefines.txt`, `Dataphor/Error Message Prefix Codes.txt` | `docs/reference/compiler-defines.md` and merged into `docs/reference/error-codes.md`; moved unchanged by the reorganization (since `Dataphor/` is emptied), then converted by `docs-contributing` |
 | `Libraries/` — Connection, SQLDevice, MSSQLDevice, PGSQLDevice, PGSQLConnection, SimpleDevice, Frontend, Security, General, System.Platform, System.Internet, System.Integration | `libraries/<Name>` (internal structure unchanged) |
 | `Libraries/Sample.*` | `samples/` |
 | `Libraries/TestFramework*` | `tests/libraries/` |
@@ -613,7 +613,7 @@ docs/
     frontend-nodes/         from the DIL reference
   admin/                    install, instances, services, rebuilding a catalog, security, troubleshooting
   migration-notes.md        running list of changes an application or extension can notice (D16)
-  contributing/             build, test, writing docs, release checklist
+  contributing/             build, test, writing docs (the release checklist is WS9's)
   images/                   PNG and SVG only
 ```
 
@@ -625,7 +625,7 @@ docs/
 | `docs-convert-legacy-reference` | DocBook reference material into `docs/reference/`; repair the 206 links. | `docs-convert-asciidoc` | hard |
 | `docs-remove-old-sources` | Delete `Documentation/`, `legacy/Documentation/` and `book.json`; repoint the links in the root `README.md` to the converted pages. | `docs-convert-legacy-reference` | easy |
 | `docs-admin-guide` | New: installation, instance configuration, running as a service, ports and firewall, backup, rebuilding a catalog from scripts, moving an application from 3.x. | `store-rebuild-workflow`, `installer-msi` | medium |
-| `docs-contributing` | Build, test, layout, release checklist; fold `CompilerDefines.txt` and the error prefix list into `reference/`. | `build-core-sdk-projects` | easy |
+| `docs-contributing` | Build, test, layout; fold `CompilerDefines.txt` and the error prefix list into `reference/`. **Done**: `docs/contributing/` holds `README.md`, `build-and-test.md` and `writing-docs.md`, each linking `AGENTS.md` for the agent-facing detail rather than copying it; `reference/compiler-defines.md` carries all 51 switches with their state measured from the tree rather than inherited (the old text file called 8 of them enabled that are defined nowhere); the error prefix list is merged into `reference/error-codes.md`, which gains 130, 206 and 207 and marks 204, 206 and 207 retired but reserved. The **release checklist is WS9's**, not this row's: `release-checklist-and-changelog` owns it, because it needs the installer and the release workflow to describe. | `build-core-sdk-projects` | easy |
 | `docs-reference-generator` | Markdown emitter for the catalog documentation operator; regenerate and diff. | `docs-convert-legacy-reference`, `test-harness-inprocess` | medium |
 | `docs-retire-removed-client-text` | Remove the removed browser clients from the converted guides; one historical note on `users-guide/frontend-clients.md`. **Done.** Note for the remaining guide passes: a grep for the product's own names (*Web Client*, *Silverlight*) misses paraphrases - "a Web user interface", "over the World-Wide Web" - so sweep for the capability as well as for the name. | — | easy |
 | `docs-link-check-ci` | Link checker in CI. **Done**: the *Documentation links* step of `.github/workflows/docs.yml`, run with `--pending tools/docs-convert/legacy-links.tsv` until `docs-remove-old-sources` drops that argument with the list. | `build-ci`, `docs-convert-asciidoc` | easy |
@@ -905,7 +905,7 @@ Measured on the pre-move layout during the baseline survey (November 2026). Dire
 | Dataphor/Client | 7,700 |
 | Dataphor/Base | 7,300 |
 
-**Non-default compiler constants to preserve.** Engine: `USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT` (Debug; Release omits `ACCUMULATOR` and `USEVISIT` and adds `DISABLE_PERFORMANCE_COUNTERS`, which no code reads). Decided in `build-core-sdk-convert`: every project builds with the set 3.1 shipped, its legacy Release set (minus `SIGNASSEMBLIES` and `DISABLE_PERFORMANCE_COUNTERS`), in both configurations, with `DEBUG` added in Debug, so that tests run the code paths users ran and `ACCUMULATOR` and `USEVISIT` (engine and SQLDevice, Debug only) are not defined; with the spike, that set gave the same smoke and coverage results as the legacy Debug set. SQLDevice: `USEVISIT` (Debug only, so no longer defined). Frontend server: `USEINCLUDETAG`. Dataphoria: `TRACEFOCUS` (Debug only). `SIGNASSEMBLIES` (Release) becomes unconditional signing (D7). File-level `#define`s are catalogued in `docs/reference/CompilerDefines.txt`.
+**Non-default compiler constants to preserve.** Engine: `USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;USEVISIT` (Debug; Release omits `ACCUMULATOR` and `USEVISIT` and adds `DISABLE_PERFORMANCE_COUNTERS`, which no code reads). Decided in `build-core-sdk-convert`: every project builds with the set 3.1 shipped, its legacy Release set (minus `SIGNASSEMBLIES` and `DISABLE_PERFORMANCE_COUNTERS`), in both configurations, with `DEBUG` added in Debug, so that tests run the code paths users ran and `ACCUMULATOR` and `USEVISIT` (engine and SQLDevice, Debug only) are not defined; with the spike, that set gave the same smoke and coverage results as the legacy Debug set. SQLDevice: `USEVISIT` (Debug only, so no longer defined). Frontend server: `USEINCLUDETAG`. Dataphoria: `TRACEFOCUS` (Debug only). `SIGNASSEMBLIES` (Release) becomes unconditional signing (D7). File-level `#define`s are catalogued in [docs/reference/compiler-defines.md](reference/compiler-defines.md).
 
 **Wire contracts.** `IDataphorService` 88 operations, `INativeCLIService` 11, `IListenerService` 3; 55 data-contract types, mostly in `src/engine/DAE/Contracts`.
 
