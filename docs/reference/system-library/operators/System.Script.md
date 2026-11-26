@@ -35,4 +35,4 @@ create table .System.Users in System.Catalog
 
 **See Also**
 
-[Scripts and Execution](../../../developers-guide/d4-scripts-and-execution.md) \| Frontend.ExecuteScript \| [System.ScriptDrop](System.ScriptDrop.md) \| [System.ScriptCatalog](System.ScriptCatalog.md) \| [System.ScriptDropCatalog](System.ScriptDropCatalog.md) \| [System.ScriptLibrary](System.ScriptLibrary.md) \| [System.ScriptDropLibrary](System.ScriptLibrary.md) \| [System.ScriptData](System.ScriptData.md)
+[Scripts and Execution](../../../developers-guide/d4-scripts-and-execution.md) \| [Frontend.ExecuteScript](../../libraries/Frontend.md#frontendexecutescript) \| [System.ScriptDrop](System.ScriptDrop.md) \| [System.ScriptCatalog](System.ScriptCatalog.md) \| [System.ScriptDropCatalog](System.ScriptDropCatalog.md) \| [System.ScriptLibrary](System.ScriptLibrary.md) \| [System.ScriptDropLibrary](System.ScriptLibrary.md) \| [System.ScriptData](System.ScriptData.md)

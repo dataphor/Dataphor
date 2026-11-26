@@ -360,3 +360,209 @@ T-System.TimeSpan	reference/system-library/types/System.TimeSpan.md	System.TimeS
 T-System.UserID	reference/system-library/types/System.UserID.md	System.UserID	
 T-System.VersionNumber	reference/system-library/types/System.VersionNumber.md	System.VersionNumber	
 System.iXor.xml	reference/system-library/operators/System.iXor.md	System.iXor	the only source is the 2004 OperatorDocs file, whose root section carries no id, so this row is keyed on the file name
+DRConnectionLibrary	reference/libraries/Connection.md	Connection	the library's page
+DRConnectionLibrary-Definition		Definition	a section of the library's page
+DRConnectionLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRConnectionLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRConnectionLibrary-Documentation	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRConnectionLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DRConnectionLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRConnectionLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRConnectionLibrary-Example	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRConnectionLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRConnectionLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRConnectionLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRConnectionLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRConnectionLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRConnectionLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary	reference/libraries/Frontend.md	Frontend	the library's page
+DRFrontendLibrary-Definition		Definition	a section of the library's page
+DRFrontendLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRFrontendLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRFrontendLibrary-Documentation	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRFrontendLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DRFrontendLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRFrontendLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRFrontendLibrary-Example	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRFrontendLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRFrontendLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DRFrontend-Schema-Tables	(drop)	Tables	a generated schema list; docs-reference-generator owns it
+O-Frontend.Operators	reference/libraries/Frontend.md	Operators	the operators of the Frontend library, on its page
+O-Frontend.ApplicationOperators		Application Operators	a section of the library's page
+O-Frontend.AddApplication		Frontend.AddApplication	a section of the library's page
+O-Frontend.PrepareApplication		Frontend.PrepareApplication	a section of the library's page
+O-Frontend.CRCOperators		CRC Operators	a section of the library's page
+O-Frontend.GetCRC32		Frontend.GetCRC32	a section of the library's page
+O-Frontend.LoadIfNecessary		Frontend.LoadIfNecessary	a section of the library's page
+O-Frontend.DocumentOperators		Document Operators	a section of the library's page
+O-Frontend.CopyDocument		Frontend.CopyDocument	a section of the library's page
+O-Frontend.CreateAndSave		Frontend.CreateAndSave	a section of the library's page
+O-Frontend.CreateDocument		Frontend.CreateDocument	a section of the library's page
+O-Frontend.DeleteDocument		Frontend.DeleteDocument	a section of the library's page
+O-Frontend.DocumentExists		Frontend.DocumentExists	a section of the library's page
+O-Frontend.GetDefaultDocumentType		Frontend.GetDefaultDocumentType	a section of the library's page
+O-Frontend.GetDocumentType		Frontend.GetDocumentType	a section of the library's page
+O-Frontend.Load		Frontend.Load	a section of the library's page
+O-Frontend.Image		Frontend.Image	a section of the library's page
+O-Frontend.LoadAndProcess		Frontend.LoadAndProcess	a section of the library's page
+O-Frontend.LoadBinary		Frontend.LoadBinary	a section of the library's page
+O-Frontend.LoadCustomization		Frontend.LoadCustomization	a section of the library's page
+O-Frontend.LoadDocument		Frontend.LoadDocument	a section of the library's page
+O-Frontend.MoveDocument		Frontend.MoveDocument	a section of the library's page
+O-Frontend.RefreshDocuments		Frontend.RefreshDocuments	a section of the library's page
+O-Frontend.RenameDocument		Frontend.RenameDocument	a section of the library's page
+O-Frontend.Save		Frontend.Save	a section of the library's page
+O-Frontend.SaveDocument		Frontend.SaveDocument	a section of the library's page
+O-Frontend.Dynamic-ExecutionOperators		Dynamic-Execution Operators	a section of the library's page
+O-Frontend.ExecuteScript		Frontend.ExecuteScript	a section of the library's page
+O-Frontend.FormOperators		Form Operators	a section of the library's page
+O-Frontend.ClearDerivationCache		Frontend.ClearDerivationCache	a section of the library's page
+O-Frontend.Derive		Frontend.Derive	a section of the library's page
+O-Frontend.Form		Frontend.Form	a section of the library's page
+O-Frontend.InternalOperators		Internal Operators	a section of the library's page
+O-Frontend.GetApplicationNodeTypes		Frontend.GetApplicationNodeTypes	a section of the library's page
+O-Frontend.GetLibraryNodeTypes		Frontend.GetLibraryNodeTypes	a section of the library's page
+O-Frontend.GetNodeTypes		Frontend.GetNodeTypes	a section of the library's page
+DRGeneralLibrary	reference/libraries/General.md	General	the library's page
+DRGeneralLibrary-Definition		Definition	a section of the library's page
+DRGeneralLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRGeneralLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRGeneralLibrary-Documentation	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRGeneralLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DRGeneralLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRGeneralLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRGeneralLibrary-Example	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRGeneralLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DRGeneralLibrary-Schema-Tables	(drop)	Tables	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary	reference/libraries/MSSQLDevice.md	MSSQLDevice	the library's page
+DRMSSQLDeviceLibrary-Definition		Definition	a section of the library's page
+DRMSSQLDeviceLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRMSSQLDeviceLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRMSSQLDeviceLibrary-Documentation		Documentation	a section of the library's page
+DRMSSQLDeviceLibrary-Settings		Settings	a section of the library's page
+DRMSSQLDeviceLibrary-Schema-	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRMSSQLDeviceLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+MSSQLDeviceTypes.xml	reference/libraries/MSSQLDevice.md	Scalar Types	the types of the MSSQLDevice library, on its page
+T-MSSQLDevice.Binary		MSSQLDevice.MSSQLBinary	a section of the library's page
+O-MSSQLDevice.Operators	reference/libraries/MSSQLDevice.md	Operators	the operators of the MSSQLDevice library, on its page
+O-MSSQLDevice.iCompare		MSSQLDevice.iCompare	a section of the library's page
+O-MSSQLDevice.iEqual		MSSQLDevice.iEqual	a section of the library's page
+O-MSSQLDevice.iGreater		MSSQLDevice.iGreater	a section of the library's page
+O-MSSQLDevice.iInclusiveGreater		MSSQLDevice.iInclusiveGreater	a section of the library's page
+O-MSSQLDevice.iInclusiveLess		MSSQLDevice.iInclusiveLess	a section of the library's page
+O-MSSQLDevice.iLess		MSSQLDevice.iLess	a section of the library's page
+O-MSSQLDevice.iNotEqual		MSSQLDevice.iNotEqual	a section of the library's page
+DRODBCConnectionLibrary-	reference/libraries/ODBCConnection.md	ODBCConnection	the library's page
+DRODBCConnectionLibrary-Definition		Definition	a section of the library's page
+DRODBCConnectionLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRODBCConnectionLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRODBCConnectionLibrary-Documentation	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRODBCConnectionLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DRODBCConnectionLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRODBCConnectionLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRODBCConnectionLibrary-Example	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRODBCConnectionLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRODBCConnectionLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRODBCConnectionLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRODBCConnectionLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRODBCConnectionLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRODBCConnectionLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DocLib:D4Field_ChapterID	reference/libraries/Security.md	Security	the library's page
+DocLib:D4Field_DefinitionID		Definition	a section of the library's page
+DocLib:D4Field_AssembliesID		Registered Assemblies	a section of the library's page
+DocLib:D4Field_ClassesID		Registered Classes	a section of the library's page
+DocLib:D4Field_SettingsID	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRSecurityLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DocLib:D4Field_ConnectivityID	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DocLib:D4Field_TranslationID	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DocLib:D4Field_ExampleID	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRSecurityLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DRSecurityLibrary-Schema-Tables	(drop)	Tables	a generated schema list; docs-reference-generator owns it
+DocLib:D4Field_DocID	(drop)	(one generated section per table)	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary	reference/libraries/SimpleDevice.md	SimpleDevice	the library's page
+DRSimpleDeviceLibrary-Definition		Definition	a section of the library's page
+DRSimpleDeviceLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRSimpleDeviceLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRSimpleDeviceLibrary-Documentation		Documentation	a section of the library's page
+DRSimpleDeviceLibrary-Settings		Settings	a section of the library's page
+DRSimpleDeviceLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRSimpleDeviceLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRSimpleDeviceLibrary-Example		Example	a section of the library's page
+DRSimpleDeviceLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRSimpleDeviceLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+SimpleDeviceOperators.xml	reference/libraries/SimpleDevice.md	Operators	the operators of the SimpleDevice library, on its page
+O-SimpleDevice.BeginUpdate		SimpleDevice.BeginUpdate	a section of the library's page
+O-SimpleDevice.EndUpdate		SimpleDevice.EndUpdate	a section of the library's page
+O-SimpleDevice.LoadTable		SimpleDevice.LoadTable	a section of the library's page
+O-SimpleDevice.SaveTable		SimpleDevice.SaveTable	a section of the library's page
+O-SimpleDevice.TruncateTable		SimpleDevice.TruncateTable	a section of the library's page
+DRSQLDeviceLibrary	reference/libraries/SQLDevice.md	SQLDevice	the library's page
+DRSQLDeviceLibrary-Definition		Definition	a section of the library's page
+DRSQLDeviceLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRSQLDeviceLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRSQLDeviceLibrary-Documentation		Documentation	a section of the library's page
+DRSQLDeviceLibrary-Settings		Settings	a section of the library's page
+DRSQLDeviceLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRSQLDeviceLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRSQLDeviceLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRSQLDeviceLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRSQLDeviceLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+SQLDeviceTypes.xml	reference/libraries/SQLDevice.md	Scalar Types	the types of the SQLDevice library, on its page
+T-SQLDevice.SQLText		SQLDevice.SQLText	a section of the library's page
+SQLDeviceOperators.xml	reference/libraries/SQLDevice.md	Operators	the operators of the SQLDevice library, on its page
+O-SQLDevice.AvailableReferences		SQLDevice.AvailableReferences	a section of the library's page
+O-SQLDevice.AvailableTables		SQLDevice.AvailableTables	a section of the library's page
+O-SQLDevice.D4ToSQL		SQLDevice.D4ToSQL	a section of the library's page
+O-SQLDevice.SQLExecute		SQLDevice.SQLExecute	a section of the library's page
+O-SQLDevice.SQLQuery		SQLDevice.SQLQuery	a section of the library's page
+DRSystemIntegrationLibrary	reference/libraries/System.Integration.md	System.Integration	the library's page
+DRSystemIntegrationLibrary-Definition		Definition	a section of the library's page
+DRSystemIntegrationLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRSystemIntegrationLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRSystemIntegrationLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRSystemIntegrationLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRSystemIntegrationLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRSystemIntegrationLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRSystemIntegrationLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRSystemIntegrationLibrary-Schema-Operators	reference/libraries/System.Integration.md	Operators	the operators of the System.Integration library, on its page
+O-System.Integration.Copy		System.Integration.Copy	a section of the library's page
+O-System.Integration.CopyTables		System.Integration.CopyTables	a section of the library's page
+O-System.Integration.Insert		System.Integration.Insert	a section of the library's page
+DRSystem.InternetLibrary	reference/libraries/System.Internet.md	System.Internet	the library's page
+DRSystem.InternetLibrary-Definition		Definition	a section of the library's page
+DRSystem.InternetLibrary-RegisteredAssemblies		Registered Assemblies	a section of the library's page
+DRSystem.InternetLibrary-RegisteredClasses		Registered Classes	a section of the library's page
+DRSystem.InternetLibrary-Documentation	(drop)	Documentation	never written; the 2007 build suppressed this subtree too
+DRSystem.InternetLibrary-Settings	(drop)	Settings	never written; the 2007 build suppressed this subtree too
+DRSystem.InternetLibrary-Connectivity	(drop)	Connectivity	never written; the 2007 build suppressed this subtree too
+DRSystem.InternetLibrary-Translation	(drop)	Translation	never written; the 2007 build suppressed this subtree too
+DRSystem.InternetLibrary-Example	(drop)	Example	never written; the 2007 build suppressed this subtree too
+DRSystem.InternetLibrary-Schema	(drop)	Schema	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-Forms	(drop)	Forms	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-CustomizedForms	(drop)	Customized Forms	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-Roles	(drop)	Roles	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-Devices	(drop)	Devices	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-Types	(drop)	Types	a generated schema list; docs-reference-generator owns it
+DRSystem.InternetLibrary-Schema-Tables	(drop)	Tables	a generated schema list; docs-reference-generator owns it

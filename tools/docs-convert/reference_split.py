@@ -11,9 +11,10 @@ and writes one DocBook document per page for `convert.py docbook` to convert.
     reference_split.py declarations <decompiled-chm-dir> --out declarations.tsv
     reference_split.py split FILE.xml ... --seed-pages reference-pages.tsv
     reference_split.py split FILE.xml ... --pages TSV --declarations TSV --out WORKDIR
+    reference_split.py split FILE.xml ... --pages TSV --facts TSV --include FILE.xml --out WORKDIR
 
-See README.md in this folder for the tables, the commands, and why the signatures come from the
-published help file rather than from a live catalog.
+See README.md in this folder for the tables, the commands, why the signatures come from the
+published help file rather than from a live catalog, and why the library facts do not.
 """
 
 import argparse
@@ -31,7 +32,14 @@ import convert  # noqa: E402  -- the tab-separated table dialect and the legacy 
 
 PAGES_COLUMNS = ("id", "output", "title", "reason")
 DECLARATIONS_COLUMNS = ("id", "declaration")
+FACTS_COLUMNS = ("id", "field", "value", "detail", "reason")
 WORK_PAGES_COLUMNS = ("source", "output")
+
+# A page-map `output` that removes the section and everything under it instead of placing it on a
+# page. The library chapters carry sections whose whole content was generated from a live catalog
+# (the *Schema* lists) or was never written (*Connectivity*, *Translation*); a heading with
+# nothing under it reads as a documentation gap rather than as a block that was never filled.
+DROP = "(drop)"
 
 # The DocBook elements that carry an id and can become a page or a section of one.
 SECTIONS = ("section", "sect1", "sect2", "sect3", "sect4", "sect5", "simplesect",
@@ -50,6 +58,30 @@ DOCLIB = "DocLib"
 XM_REPLACE = "xm-replace_text"
 DECLARATION_FIELD = "D4Field Declaration"
 DECLARATIONS_TITLE = "Declarations"
+
+# The generated blocks of a library chapter's *Definition* section: the catalog table the old
+# publishing tool read each from, the kind of library-facts row that replaces it, and the
+# `<?DocLib D4Field <column>?>` placeholders of its template, in the order the facts table's
+# `value` and `detail` columns fill them.
+FACT_BLOCKS = {
+    "LibraryRequisites": ("requisite", ("Required_Library_Name", "Required_Library_Version")),
+    "LibraryFiles": ("file", ("FileName", "IsAssembly")),
+    "RegisteredAssemblies": ("assembly", ("SimpleName",)),
+    "RegisteredClasses": ("class", ("SimpleName",)),
+}
+FACT_FIELDS = ("library", "version") + tuple(kind for kind, _ in FACT_BLOCKS.values())
+
+# `<?DocLib D4ExpressionBlock <wrapper> <table> …?>` introduces a repeating block: the element
+# after it holds one `<wrapper>` carrying the placeholders of a single catalog row.
+EXPRESSION_BLOCK = re.compile(r"^D4ExpressionBlock\s+(\S+)\s+(\S+)")
+D4_FIELD = re.compile(r"^D4Field\s+(\S+)$")
+# The library version is written inline, as a field in `SecurityLibraryReference.xml` and as an
+# expression field in the other nine chapters.
+VERSION_FIELD = re.compile(r"^D4(?:Expression)?Field\s+Version\b")
+LIBRARY_NAME_FIELD = "D4Field LibraryName"
+# `<?DocLib ExtDoc … <path>?>` is a splice point for a separate source file; the paths in the
+# sources are absolute ones from the 2007 build machine, so only the file name is usable.
+EXTDOC = re.compile(r"^(?:D4)?ExtDoc\b.*?([^\s\\/]+\.xml)\s*$", re.IGNORECASE)
 
 # Removing a placeholder can leave its enclosing blocks with nothing to render. Only the
 # ancestors of a removed placeholder are pruned, so hand-written content is left alone.
@@ -123,6 +155,24 @@ def append_text(element, text):
         children[-1].tail = (children[-1].tail or "") + text
     else:
         element.text = (element.text or "") + text
+
+
+def collapse_title(title):
+    """Whitespace inside a title collapsed to single spaces and trimmed at both ends.
+
+    The sources lay a title out over several indented lines around its index terms, so a title
+    taken straight from one reaches the page as a heading with leading spaces."""
+    nodes = [(title, "text")] + [(child, "tail") for child in title]
+    for node, field in nodes:
+        value = getattr(node, field)
+        if value:
+            setattr(node, field, re.sub(r"\s+", " ", value))
+    node, field = nodes[0]
+    if getattr(node, field):
+        setattr(node, field, getattr(node, field).lstrip())
+    node, field = nodes[-1]
+    if getattr(node, field):
+        setattr(node, field, getattr(node, field).rstrip())
 
 
 def title_text(element):
@@ -253,6 +303,37 @@ def read_declarations(path):
     return table
 
 
+def read_facts(path):
+    """chapter id -> {field: [(value, detail)]}, in the table's own row order.
+
+    The row order is the order the requisites, files, assemblies and classes are listed in on the
+    page, so moving a row moves a list entry. `detail` is the second value of a two-column block
+    (a requisite's version, whether a file is an assembly) and is empty for the one-column ones;
+    the `reason` column records where the fact was read from and is not used here."""
+    if not path:
+        return {}
+    table = collections.OrderedDict()
+    for row in convert.read_tsv(path, FACTS_COLUMNS):
+        field = row["field"].strip()
+        if field not in FACT_FIELDS:
+            convert.fail("%s line %d: field %r is not one of %s"
+                         % (os.path.basename(path), row["_line"], field, ", ".join(FACT_FIELDS)))
+        fields = table.setdefault(row["id"].strip(), collections.OrderedDict())
+        fields.setdefault(field, []).append((row["value"].strip(), row["detail"].strip()))
+    return table
+
+
+def read_includes(paths):
+    """lower-case file name -> the parsed root of each file `--include` names."""
+    includes = collections.OrderedDict()
+    for path in paths or ():
+        name = os.path.basename(path).lower()
+        if name in includes:
+            convert.fail("--include names %s twice" % os.path.basename(path))
+        includes[name] = read_xml(path)
+    return includes
+
+
 # ---------------------------------------------------------------------------
 # split: the page map
 
@@ -308,7 +389,7 @@ def link_names(pages):
     chosen = {}
     for identifier, row in pages.items():
         output = row["output"]
-        if not output:
+        if not output or output == DROP:
             continue
         held = chosen.get(output)
         if held is None or (rule_output(identifier) == output and rule_output(held) != output):
@@ -378,6 +459,21 @@ def enclosing_formalpara(node, parents, title):
     return None
 
 
+def enclosing_section_id(node, parents, fallback):
+    """The id of the nearest section around the node, or `fallback` when it has none.
+
+    A page can hold sections that are not pages of their own - a library chapter's operator
+    sections are nested under their category - and a declaration block belongs to the section it
+    sits in, not to the page's first section. For a page whose sections are all pages, which is
+    every page of the core-library reference, this is that page's own id."""
+    current = parents.get(id(node))
+    while current is not None:
+        if is_tag(current) and current.tag in SECTIONS and current.get("id"):
+            return current.get("id")
+        current = parents.get(id(current))
+    return fallback
+
+
 def has_content(element):
     if (element.text or "").strip():
         return True
@@ -431,6 +527,157 @@ def prune(chunk, spent):
         level = list(above.values())
 
 
+def doclib(node):
+    """The text of a `<?DocLib …?>` instruction after its target, or None for anything else."""
+    kind = placeholder(node)
+    return kind[1] if kind is not None and kind[0] == DOCLIB else None
+
+
+def replace_with_text(parent, node, text):
+    """Put `text` where a child stood, keeping the text that followed it.
+
+    ElementTree holds the text after a child on that child's `tail` and the text before the first
+    child on the parent's `text`, so a value substituted into the middle of a sentence has to land
+    in one of those two places and not merely at the end of the parent."""
+    children = list(parent)
+    index = children.index(node)
+    carry = text + (node.tail or "")
+    parent.remove(node)
+    if index == 0:
+        parent.text = (parent.text or "") + carry
+    elif carry:
+        before = children[index - 1]
+        before.tail = (before.tail or "") + carry
+
+
+def next_element(parent, node):
+    """The element following the node among its parent's children, or None.
+
+    A generated block is an instruction followed by the formalpara or section holding its
+    template, which is how the old publishing tool paired the two."""
+    children = list(parent)
+    for child in children[children.index(node) + 1:]:
+        if is_tag(child):
+            return child
+    return None
+
+
+def template_in(container, tag):
+    """(parent, the one `tag` child holding placeholders) inside the container, or (None, None)."""
+    for element in container.iter():
+        if not is_tag(element):
+            continue
+        for child in element:
+            if is_tag(child, tag) and any(placeholder(node) for node in child.iter()):
+                return element, child
+    return None, None
+
+
+def fill_block(container, wrapper, columns, values, report, where):
+    """Repeat the container's template element once per fact, filling its field placeholders.
+
+    The sources carry a single row or member holding `<?DocLib D4Field <column>?>` placeholders -
+    the template the old tool repeated per catalog row. Repeating it rather than building a block
+    keeps the hand-written column headings and the list's column count."""
+    parent, template = template_in(container, wrapper)
+    if template is None:
+        report.add("generated-blocks-with-no-template", "%s: %s" % (where, wrapper))
+        return 0
+    index = list(parent).index(template)
+    tail = template.tail
+    parent.remove(template)
+    for offset, value in enumerate(values):
+        copy = copy_without(template, {})
+        copy.tail = tail
+        fields = dict(zip(columns, value))
+        parents = parents_of(copy)
+        for node in list(copy.iter()):
+            rest = doclib(node)
+            field = D4_FIELD.match(rest) if rest else None
+            if field is not None and field.group(1) in fields:
+                replace_with_text(parents[id(node)], node, fields[field.group(1)])
+        parent.insert(index + offset, copy)
+    return len(values)
+
+
+def fill_library_facts(chunk, identifier, facts, report):
+    """Fill a library chapter's version, requisites, files, registered assemblies and registered
+    classes from the reviewed library-facts table, and write the library's name where the sources
+    left a placeholder for it.
+
+    The old publishing tool read all five from a live catalog, and the values in the published help
+    file are the 2.1 ones - its `DRSimpleDeviceLibrary-Definition.html` gives version 2.1.0.0 where
+    the shipped descriptor says 3.0.0.0 - so unlike the operator signatures these do not come from
+    that file. They come from the library's own `.d4l` descriptor and its `Register.cs`, by way of
+    `library-facts.tsv`; see README.md. A block the table has no row for is removed with its
+    heading, as an unfilled generated block is."""
+    rows = facts.get(identifier)
+    if rows is None:
+        return 0
+    filled = 0
+    name = rows.get("library", [("", "")])[0][0]
+    version = rows.get("version", [("", "")])[0][0]
+    parents = parents_of(chunk)
+    for node in list(chunk.iter()):
+        rest = doclib(node)
+        parent = parents.get(id(node))
+        if rest is None or parent is None:
+            continue
+        if rest == LIBRARY_NAME_FIELD:
+            replace_with_text(parent, node, name)
+            filled += 1
+            continue
+        if VERSION_FIELD.match(rest):
+            replace_with_text(parent, node, version)
+            filled += 1
+            continue
+        block = EXPRESSION_BLOCK.match(rest)
+        if block is None or block.group(2) not in FACT_BLOCKS:
+            continue
+        kind, columns = FACT_BLOCKS[block.group(2)]
+        container = next_element(parent, node)
+        replace_with_text(parent, node, "")
+        if container is None:
+            report.add("generated-blocks-with-nothing-to-fill", "%s: %s" % (identifier, kind))
+            continue
+        values = rows.get(kind, [])
+        if not values:
+            parent.remove(container)
+            report.add("generated-blocks-removed-for-want-of-a-fact", "%s: %s" % (identifier, kind))
+            continue
+        filled += fill_block(container, block.group(1), columns, values, report, identifier)
+    return filled
+
+
+def splice_includes(chunk, includes, spliced):
+    """Replace an `<?DocLib ExtDoc … FILE.xml?>` instruction with the content of that file, for
+    each file `--include` names.
+
+    These instructions are the splice points where the old publishing tool pulled in a separate
+    source. The per-library operator and type files are reached through the page map instead, which
+    is what gives their sections their own declaration blocks, so they are not included here; the
+    one file that needs this is `SQLDeviceSettings.xml`, the hand-written table of the settings
+    every SQL device accepts, which is a bare fragment with no section of its own and so no page
+    map can address it. An instruction naming a file that was not included is removed like any
+    other placeholder."""
+    parents = parents_of(chunk)
+    for node in list(chunk.iter()):
+        rest = doclib(node)
+        parent = parents.get(id(node))
+        if rest is None or parent is None:
+            continue
+        match = EXTDOC.match(rest)
+        if match is None or match.group(1).lower() not in includes:
+            continue
+        name = match.group(1).lower()
+        content = copy_without(includes[name], {})
+        content.tail = node.tail
+        index = list(parent).index(node)
+        parent.remove(node)
+        parent.insert(index, content)
+        spliced.add(name)
+
+
 def substitute_placeholders(chunk, identifier, declarations, report):
     """Fill in or remove every placeholder in the chunk."""
     filled = 0
@@ -449,27 +696,35 @@ def substitute_placeholders(chunk, identifier, declarations, report):
         if parent is None:
             continue
         if kind == (DOCLIB, DECLARATION_FIELD):
+            section = enclosing_section_id(node, parents, identifier)
             formalpara = enclosing_formalpara(node, parents, DECLARATIONS_TITLE)
             if formalpara is None:
-                report.add("declarations-placeholder-outside-a-declarations-block", identifier)
+                report.add("declarations-placeholder-outside-a-declarations-block", section)
             elif not is_tag(parent, "programlisting"):
-                report.add("declarations-placeholder-not-in-a-programlisting", identifier)
-            elif identifier in declarations:
+                report.add("declarations-placeholder-not-in-a-programlisting", section)
+            elif section in declarations:
                 # The placeholder is the whole content of the formalpara's <programlisting>; the
                 # signature block replaces it there, under the "Declarations" heading.
                 parent.remove(node)
-                parent.text = declarations[identifier]
+                parent.text = declarations[section]
                 filled += 1
                 continue
             else:
                 # Nothing was published for this section: drop the heading too, rather than
                 # leave a "Declarations" block with nothing under it.
-                report.add("sections-with-no-published-declaration", identifier)
+                report.add("sections-with-no-published-declaration", section)
                 grandparent = parents.get(id(formalpara))
                 if grandparent is not None:
                     grandparent.remove(formalpara)
                     spent.append(grandparent)
                 continue
+        external = EXTDOC.match(kind[1]) if kind[0] == DOCLIB else None
+        if external is not None:
+            # Listed because the splice point is where a whole separate source used to arrive:
+            # a reviewer has to agree that the page does not want it. See splice_includes.
+            report.add("external-document-instructions-removed",
+                       "%s: %s" % (enclosing_section_id(node, parents, identifier),
+                                   external.group(1)))
         tail = node.tail
         parent.remove(node)
         if tail and tail.strip():
@@ -477,6 +732,53 @@ def substitute_placeholders(chunk, identifier, declarations, report):
         spent.append(parent)
     prune(chunk, spent)
     return filled
+
+
+def tidy_section_titles(chunk):
+    """Strip the index terms and the source's line breaks from every section title in the chunk.
+
+    A page's own title goes through `title_for`, which already does this; the title of a section
+    that is not a page of its own - a library chapter's Definition, or an operator under its
+    category - comes straight from the source and needs the same treatment."""
+    for element in chunk.iter():
+        if not (is_tag(element) and element.tag in SECTIONS):
+            continue
+        for index, child in enumerate(list(element)):
+            if not is_tag(child, "title"):
+                continue
+            tidy = title_element(element)
+            collapse_title(tidy)
+            tidy.tail = child.tail
+            element.remove(child)
+            element.insert(index, tidy)
+            break
+
+
+def prune_informal_headings(chunk, report, where):
+    """Drop a `<bridgehead>` that removing a placeholder left with nothing under it.
+
+    A bridgehead heads the blocks that follow it, up to the next bridgehead or the next section,
+    so one with nothing in between is an empty heading. Every library chapter's *See Also* in its
+    Definition section is one: the list of links there was never written and stood as a
+    placeholder, whose removal leaves the heading behind."""
+    for parent in list(chunk.iter()):
+        if not is_tag(parent):
+            continue
+        children = list(parent)
+        for index, child in enumerate(children):
+            if not is_tag(child, "bridgehead"):
+                continue
+            under = []
+            for following in children[index + 1:]:
+                if not is_tag(following):
+                    continue            # a comment does not end the run of blocks
+                if following.tag == "bridgehead" or following.tag in SECTIONS:
+                    break
+                under.append(following)
+            if not any(has_content(element) for element in under):
+                parent.remove(child)
+                report.add("informal-headings-with-nothing-under-them",
+                           "%s: %s" % (where, "".join(child.itertext()).strip()))
 
 
 def normalise_urls(chunk, report):
@@ -681,9 +983,24 @@ def check_stale_documents(out_dir, written, report):
             report.add("stale-documents-in-the-out-folder", name)
 
 
-def split(files, pages_path, declarations_path, out_dir, report):
+def check_dropped(found, is_dropped, has_page, source, report):
+    """A dropped section takes its whole subtree with it, so a page inside one would be lost
+    without a word; the row that asks for that is an error rather than a surprise."""
+    for element, _ in found:
+        if not is_dropped(element):
+            continue
+        for below, _ in sections_of(element):
+            if below is not element and has_page(below):
+                report.error("%s: %s is a page inside the dropped section %s"
+                             % (source, below.get("id"), element.get("id")))
+
+
+def split(files, pages_path, declarations_path, out_dir, report, facts_path=None, include=None):
     pages = read_pages(pages_path)
     declarations = read_declarations(declarations_path)
+    facts = read_facts(facts_path)
+    includes = read_includes(include)
+    spliced = set()
     names = link_names(pages)
     for output, (name, _) in sorted(names.items()):
         if name is not None and convert.legacy_target(name) != output:
@@ -692,17 +1009,23 @@ def split(files, pages_path, declarations_path, out_dir, report):
 
     def has_page(element):
         row = pages.get(element.get("id") or "")
-        return bool(row and row["output"])
+        return bool(row and row["output"] and row["output"] != DROP)
+
+    def is_dropped(element):
+        row = pages.get(element.get("id") or "")
+        return bool(row and row["output"] == DROP)
 
     items = collections.OrderedDict()   # output -> [Item]
     seen = {}
     filled = 0
+    facts_filled = 0
     for path in files:
         source = os.path.basename(path)
         root = read_xml(path)
         name_root_section(root, source, pages, report)
         found = sections_of(root)
         check_ids(found, pages, source, pages_path, seen, report)
+        check_dropped(found, is_dropped, has_page, source, report)
         if report.errors:
             continue
         enclosing = {id(element): parent for element, parent in found}
@@ -718,7 +1041,13 @@ def split(files, pages_path, declarations_path, out_dir, report):
                            % (identifier, output, rule_output(identifier)))
             cut, children, listed = {}, [], set()
             for other, _ in found:
-                if other is element or not has_page(other) or holder[id(other)] is not element:
+                if other is element or holder[id(other)] is not element:
+                    continue
+                if is_dropped(other):
+                    cut[id(other)] = other
+                    report.add("sections-dropped", "%s: %s" % (source, other.get("id")))
+                    continue
+                if not has_page(other):
                     continue
                 cut[id(other)] = other
                 below = pages[other.get("id")]["output"]
@@ -728,7 +1057,11 @@ def split(files, pages_path, declarations_path, out_dir, report):
                     listed.add(below)
                     children.append(names[below])
             chunk = copy_without(element, cut)
+            splice_includes(chunk, includes, spliced)
+            facts_filled += fill_library_facts(chunk, identifier, facts, report)
             filled += substitute_placeholders(chunk, identifier, declarations, report)
+            tidy_section_titles(chunk)
+            prune_informal_headings(chunk, report, identifier)
             normalise_urls(chunk, report)
             if children:
                 chunk.append(link_list(children))
@@ -736,6 +1069,10 @@ def split(files, pages_path, declarations_path, out_dir, report):
                 Item(identifier, title_for(element, row), chunk, row["order"]))
     for identifier in sorted(set(pages) - set(seen)):
         report.add("page-map-rows-that-matched-nothing", identifier)
+    for identifier in sorted(set(facts) - set(seen)):
+        report.add("library-facts-rows-that-matched-nothing", identifier)
+    for name in sorted(set(includes) - spliced):
+        report.add("included-files-no-instruction-asked-for", name)
     if report.errors:
         return 1
     for group in items.values():
@@ -751,8 +1088,10 @@ def split(files, pages_path, declarations_path, out_dir, report):
     convert.write_tsv(os.path.join(out_dir, "pages.tsv"), WORK_PAGES_COLUMNS,
                       sorted(({"source": name, "output": output} for name, output, _ in written),
                              key=lambda row: row["source"]))
-    report.summary.append("%d section(s) on %d page(s); %d declaration block(s) filled; written to %s"
-                          % (sum(len(group) for group in items.values()), len(written), filled, out_dir))
+    report.summary.append("%d section(s) on %d page(s); %d declaration block(s) filled; "
+                          "%d library fact(s) filled; written to %s"
+                          % (sum(len(group) for group in items.values()), len(written), filled,
+                             facts_filled, out_dir))
     return 0
 
 
@@ -775,6 +1114,9 @@ def main(argv=None):
     split_mode.add_argument("files", nargs="+", metavar="FILE.xml")
     split_mode.add_argument("--pages", metavar="TSV", help="page map with columns id, output")
     split_mode.add_argument("--declarations", metavar="TSV", help="signature table from the declarations mode")
+    split_mode.add_argument("--facts", metavar="TSV", help="library facts read from the tree; columns id, field, value, detail")
+    split_mode.add_argument("--include", metavar="FILE.xml", action="append",
+                            help="splice this file in at the ExtDoc instruction that names it (repeatable)")
     split_mode.add_argument("--out", metavar="DIR", help="folder for the split documents and their page map")
     split_mode.add_argument("--seed-pages", metavar="TSV", help="write a seeded page map here instead of splitting")
 
@@ -788,7 +1130,8 @@ def main(argv=None):
         elif not args.pages or not args.out:
             convert.fail("split needs --pages and --out, or --seed-pages")
         else:
-            status = split(args.files, args.pages, args.declarations, args.out, report)
+            status = split(args.files, args.pages, args.declarations, args.out, report,
+                           facts_path=args.facts, include=args.include)
     except convert.ConvertError as error:
         report.error(str(error))
         status = 2

@@ -60,32 +60,124 @@ PAGES = [
 
 DECLARATION = 'create operator .Lib.Abs(const AValue : Lib.Decimal) : Lib.Decimal\n\tclass "Lib.AbsNode";'
 
+# A library chapter in miniature: the five generated blocks of its Definition section in the shape
+# every chapter of the 2007 reference has them, a never-written See Also, a generated Schema
+# subtree, and a Settings section with two external-document splice points.
+LIBRARY_SOURCE = r"""<?xml version="1.0"?>
+<chapter id="DRLibLibrary">
+  <title><indexterm><primary>Lib</primary></indexterm> <?DocLib D4Field LibraryName?> </title>
+  <para>Reference material for the Dataphor <?DocLib D4Field LibraryName?> Library.</para>
+  <section id="DRLibLibrary-Definition">
+    <title> Definition </title>
+    <formalpara><title>Version</title>
+      <para><?DocLib D4ExpressionField Version Libraries where Name = "Lib"?></para></formalpara>
+    <?DocLib D4ExpressionBlock row LibraryRequisites where Library_Name = "Lib"?>
+    <formalpara><title>Requisites</title><para><informaltable><tgroup cols="2">
+      <thead><row><entry>Name</entry><entry>Version</entry></row></thead>
+      <tbody><row><entry><?DocLib D4Field Required_Library_Name?></entry>
+        <entry><?DocLib D4Field Required_Library_Version?></entry></row></tbody>
+    </tgroup></informaltable></para></formalpara>
+    <?DocLib D4ExpressionBlock row LibraryFiles where Library_Name = "Lib"?>
+    <formalpara><title><?DocLib D4Field LibraryName?> Files</title><para><informaltable><tgroup cols="2">
+      <thead><row><entry>Name</entry><entry>Is Assembly</entry></row></thead>
+      <tbody><row><entry><?DocLib D4Field FileName?></entry>
+        <entry><?DocLib D4Field IsAssembly?></entry></row></tbody>
+    </tgroup></informaltable></para></formalpara>
+    <bridgehead renderas="sect4">See Also</bridgehead>
+    <para><?xm-replace_text {para}?></para>
+    <?DocLib D4ExpressionBlock member RegisteredClasses where Library_Name = 'Lib'?>
+    <section id="DRLibLibrary-RegisteredClasses">
+      <title>Registered Classes</title>
+      <para><simplelist columns="2"><member><?DocLib D4Field SimpleName?></member></simplelist></para>
+    </section>
+  </section>
+  <section id="DRLibLibrary-Settings">
+    <title>Settings</title>
+    <bridgehead>Attributes</bridgehead>
+    <para>The attributes of the device.</para>
+    <?DocLib ExtDoc outer droptags="abc" c:\src\Alphora\Docs\LibSettings.xml?>
+    <?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\LibElsewhere.xml?>
+  </section>
+  <section id="DRLibLibrary-Schema">
+    <title>Schema</title>
+    <para>The following sections list the schema elements defined in the Lib library.</para>
+    <section id="DRLibLibrary-Schema-Forms">
+      <title>Forms</title>
+      <para>The following lists the forms defined in the Lib library.</para>
+    </section>
+  </section>
+</chapter>
+"""
+
+# The common settings fragment: a bare <para> with no section of its own, which is why it can only
+# reach a page by being spliced in at the instruction that names it.
+LIBRARY_SETTINGS = ('<?xml version="1.0"?>'
+                    "<para>Settings common to every device of this kind.</para>")
+
+# An operator file whose root carries no id and whose operator sections are not pages of their own.
+LIBRARY_OPERATORS = """<?xml version="1.0"?>
+<section>
+  <title>Operators</title>
+  <para>The following sections describe the operators of the Lib library.</para>
+  <section id="O-Lib.Sum">
+    <title>Lib.Sum</title>
+    <formalpara><title>Declarations</title>
+      <para><programlisting><?DocLib D4Field Declaration?></programlisting></para></formalpara>
+  </section>
+</section>
+"""
+
+LIBRARY_PAGE = "reference/libraries/Lib.md"
+LIBRARY_PAGES = [
+    {"id": "DRLibLibrary", "output": LIBRARY_PAGE, "title": "Lib", "reason": ""},
+    {"id": "DRLibLibrary-Definition", "output": "", "title": "Definition", "reason": ""},
+    {"id": "DRLibLibrary-RegisteredClasses", "output": "", "title": "Registered Classes", "reason": ""},
+    {"id": "DRLibLibrary-Settings", "output": "", "title": "Settings", "reason": ""},
+    {"id": "DRLibLibrary-Schema", "output": split.DROP, "title": "Schema", "reason": "generated"},
+    {"id": "DRLibLibrary-Schema-Forms", "output": split.DROP, "title": "Forms", "reason": "generated"},
+    {"id": "LibOperators2.xml", "output": LIBRARY_PAGE, "title": "Operators", "reason": ""},
+    {"id": "O-Lib.Sum", "output": "", "title": "Lib.Sum", "reason": ""},
+]
+LIBRARY_FACTS = [
+    {"id": "DRLibLibrary", "field": "library", "value": "Lib", "detail": "", "reason": ""},
+    {"id": "DRLibLibrary", "field": "version", "value": "1.2.3.4", "detail": "", "reason": ""},
+    {"id": "DRLibLibrary", "field": "requisite", "value": "System", "detail": "*", "reason": ""},
+    {"id": "DRLibLibrary", "field": "requisite", "value": "Other", "detail": "2.0.0.0", "reason": ""},
+    {"id": "DRLibLibrary", "field": "file", "value": "Lib.dll", "detail": "True", "reason": ""},
+]
+SUM_DECLARATION = 'create operator .Lib.Sum(const AValue : Lib.Decimal) : Lib.Decimal;'
+
 
 class Harness:
-    """A source, a page map and a declaration table in a temporary folder."""
+    """Sources, a page map and the tables that fill them, in a temporary folder."""
 
-    def __init__(self, stack, pages=PAGES, declarations=(("O-Lib.Abs", DECLARATION),), extra=None):
+    def __init__(self, stack, pages=PAGES, declarations=(("O-Lib.Abs", DECLARATION),),
+                 sources=(("LibOperators.xml", SOURCE),), facts=None, include=()):
         self.folder = stack.enter_context(tempfile.TemporaryDirectory())
-        self.source = os.path.join(self.folder, "LibOperators.xml")
-        with open(self.source, "wb") as stream:
-            stream.write(SOURCE.encode("utf-8"))
-        self.sources = [self.source]
-        if extra is not None:
-            name, body = extra
-            path = os.path.join(self.folder, name)
-            with open(path, "wb") as stream:
-                stream.write(body.encode("utf-8"))
-            self.sources.append(path)
+        self.sources = [self.write(name, body) for name, body in sources]
+        self.source = self.sources[0]
+        self.include = [self.write(name, body) for name, body in include]
         self.pages = os.path.join(self.folder, "pages.tsv")
         convert.write_tsv(self.pages, split.PAGES_COLUMNS, pages)
         self.declarations = os.path.join(self.folder, "declarations.tsv")
         convert.write_tsv(self.declarations, split.DECLARATIONS_COLUMNS,
                           [{"id": i, "declaration": split.escape_declaration(d)} for i, d in declarations])
+        self.facts = None
+        if facts is not None:
+            self.facts = os.path.join(self.folder, "facts.tsv")
+            convert.write_tsv(self.facts, split.FACTS_COLUMNS, facts)
         self.out = os.path.join(self.folder, "work")
+
+    def write(self, name, body):
+        path = os.path.join(self.folder, name)
+        with open(path, "wb") as stream:
+            stream.write(body.encode("utf-8"))
+        return path
 
     def run(self):
         self.report = split.Report()
-        self.status = split.split(self.sources, self.pages, self.declarations, self.out, self.report)
+        self.status = split.split(self.sources, self.pages, self.declarations, self.out,
+                                  self.report, facts_path=self.facts, include=self.include)
         return self.status
 
     def page(self, output):
@@ -153,13 +245,14 @@ class SplitTest(unittest.TestCase):
         # The 2004 OperatorDocs sources carry no id anywhere, so the file name is the only thing
         # a page map can key on. It has to be opt-in by row, because an id-less root is not
         # always a page: SystemOperators.xml's root section has none either and stays out.
-        extra = ("Lib.Xor.xml",
-                 '<?xml version="1.0"?>'
-                 '<!DOCTYPE sect2 SYSTEM "/gone/docbookx.dtd">'
-                 '<sect2><title>Xor</title>'
-                 '<para>See <ulink url="O-Lib.Abs.html">Lib.Abs</ulink>.</para></sect2>')
+        sources = (("LibOperators.xml", SOURCE),
+                   ("Lib.Xor.xml",
+                    '<?xml version="1.0"?>'
+                    '<!DOCTYPE sect2 SYSTEM "/gone/docbookx.dtd">'
+                    '<sect2><title>Xor</title>'
+                    '<para>See <ulink url="O-Lib.Abs.html">Lib.Abs</ulink>.</para></sect2>'))
         row = {"id": "Lib.Xor.xml", "output": "ref/operators/Lib.Xor.md", "title": "Lib.Xor", "reason": ""}
-        harness = self.harness(pages=PAGES + [row], extra=extra)
+        harness = self.harness(pages=PAGES + [row], sources=sources)
         self.assertEqual(harness.run(), 0)
         document = ET.fromstring(harness.page("ref/operators/Lib.Xor.md"))
         self.assertEqual(split.title_text(document), "Lib.Xor")
@@ -168,7 +261,7 @@ class SplitTest(unittest.TestCase):
         # no generated navigation list ever links it by name.
         self.assertNotIn("Lib.Xor", "".join(harness.report.lines["pages-needing-a-legacy-map-row"]))
 
-        plain = self.harness(extra=extra)
+        plain = self.harness(sources=sources)
         self.assertEqual(plain.run(), 0)
         self.assertFalse(os.path.exists(os.path.join(plain.out, split.work_name("ref/operators/Lib.Xor.md"))))
         self.assertIn("Lib.Xor.xml: Xor", plain.report.lines["sections-without-an-id"])
@@ -203,6 +296,110 @@ class SplitTest(unittest.TestCase):
         split.build_page("ref/x.md", [split.Item("x", ET.Element("title"), chunk, 0)], report)
         self.assertEqual(len(report.errors), 1)
         self.assertIn("placeholder(s) survived", report.errors[0])
+
+
+class LibraryChapterTest(unittest.TestCase):
+    """The branches a library chapter needs that an operator page does not."""
+
+    def harness(self, **kwargs):
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        kwargs.setdefault("pages", LIBRARY_PAGES)
+        kwargs.setdefault("facts", LIBRARY_FACTS)
+        kwargs.setdefault("declarations", (("O-Lib.Sum", SUM_DECLARATION),))
+        kwargs.setdefault("sources", (("LibLibrary.xml", LIBRARY_SOURCE),
+                                      ("LibOperators2.xml", LIBRARY_OPERATORS)))
+        kwargs.setdefault("include", (("LibSettings.xml", LIBRARY_SETTINGS),))
+        return Harness(stack, **kwargs)
+
+    def page(self, harness):
+        return ET.fromstring(harness.page(LIBRARY_PAGE))
+
+    def test_a_dropped_row_takes_the_section_and_everything_under_it(self):
+        # The generated Schema subtree is the reason the sentinel exists: its lists came from a
+        # live catalog, and an empty heading reads as a documentation gap rather than as a block
+        # that was never filled.
+        harness = self.harness()
+        self.assertEqual(harness.run(), 0)
+        titles = [split.title_text(e) for e in self.page(harness).iter("section")]
+        self.assertNotIn("Schema", titles)
+        self.assertNotIn("Forms", titles)
+        self.assertIn("LibLibrary.xml: DRLibLibrary-Schema", harness.report.lines["sections-dropped"])
+
+        # A page inside a dropped section would be lost without a word, so the row asking for
+        # that is an error rather than a surprise.
+        pages = [dict(row) for row in LIBRARY_PAGES]
+        pages[5]["output"] = "reference/libraries/Lib.Forms.md"
+        inside = self.harness(pages=pages)
+        self.assertEqual(inside.run(), 1)
+        self.assertTrue(any("inside the dropped section" in line for line in inside.report.errors),
+                        inside.report.errors)
+
+    def test_an_included_file_is_spliced_in_where_its_instruction_stood(self):
+        # SQLDeviceSettings.xml is a bare fragment with no section of its own, so the page map
+        # cannot address it and the splice point is the only way in. An instruction naming a file
+        # that was not included is removed like any other placeholder, and listed.
+        harness = self.harness()
+        self.assertEqual(harness.run(), 0)
+        settings = [e for e in self.page(harness).iter("section")
+                    if split.title_text(e) == "Settings"][0]
+        self.assertIn("Settings common to every device of this kind.",
+                      [(e.text or "").strip() for e in settings.iter("para")])
+        self.assertIn("DRLibLibrary-Settings: LibElsewhere.xml",
+                      harness.report.lines["external-document-instructions-removed"])
+
+        absent = self.harness(include=())
+        self.assertEqual(absent.run(), 0)
+        self.assertNotIn("Settings common to every device of this kind.",
+                         absent.page(LIBRARY_PAGE))
+
+    def test_the_facts_table_fills_the_definition_blocks_and_removes_the_ones_it_has_no_row_for(self):
+        harness = self.harness()
+        self.assertEqual(harness.run(), 0)
+        document = self.page(harness)
+        definition = [e for e in document.iter("section")
+                      if split.title_text(e) == "Definition"][0]
+        blocks = {split.title_text(e): e for e in definition.iter("formalpara")}
+        self.assertEqual(sorted(blocks), ["Lib Files", "Requisites", "Version"])
+        self.assertEqual("".join(blocks["Version"].find("para").itertext()).strip(), "1.2.3.4")
+        # The one template row is repeated per fact, keeping the hand-written column headings.
+        cells = [[" ".join("".join(c.itertext()).split()) for c in row]
+                 for row in blocks["Requisites"].iter("row")]
+        self.assertEqual(cells, [["Name", "Version"], ["System", "*"], ["Other", "2.0.0.0"]])
+        self.assertEqual([[" ".join("".join(c.itertext()).split()) for c in row]
+                          for row in blocks["Lib Files"].iter("row")],
+                         [["Name", "Is Assembly"], ["Lib.dll", "True"]])
+        # The library's name is written where the sources left a placeholder for it, in the
+        # chapter's prose as well as in that Files heading.
+        self.assertIn("Reference material for the Dataphor Lib Library.",
+                      [" ".join("".join(e.itertext()).split()) for e in document.iter("para")])
+        # No `class` row, so the Registered Classes section goes rather than publishing an empty
+        # list: for most libraries that list is built by reflecting over the assembly.
+        self.assertNotIn("Registered Classes",
+                         [split.title_text(e) for e in document.iter("section")])
+        self.assertIn("DRLibLibrary: class",
+                      harness.report.lines["generated-blocks-removed-for-want-of-a-fact"])
+
+    def test_a_declaration_is_taken_from_the_section_that_holds_it(self):
+        # A library's operator sections are not pages of their own - they are nested under their
+        # category on the library's page - so the signature has to be looked up by the id of the
+        # section the block is in, not by the id of the page's first section.
+        harness = self.harness()
+        self.assertEqual(harness.run(), 0)
+        listings = [e.text for e in self.page(harness).iter("programlisting")]
+        self.assertEqual(listings, [SUM_DECLARATION])
+        self.assertEqual(harness.report.lines["sections-with-no-published-declaration"], {})
+
+    def test_an_informal_heading_left_with_nothing_under_it_is_dropped(self):
+        # Every chapter's Definition section ends in a See Also whose list of links was never
+        # written and stood as a placeholder; removing the placeholder leaves the heading behind.
+        harness = self.harness()
+        self.assertEqual(harness.run(), 0)
+        headings = ["".join(e.itertext()).strip() for e in self.page(harness).iter("bridgehead")]
+        self.assertNotIn("See Also", headings)
+        self.assertIn("Attributes", headings)   # this one still has its paragraph
+        self.assertIn("DRLibLibrary: See Also",
+                      harness.report.lines["informal-headings-with-nothing-under-them"])
 
 
 class DeclarationTableTest(unittest.TestCase):

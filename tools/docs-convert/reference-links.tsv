@@ -72,12 +72,14 @@ DDGTheAutomationofForms-GuidingDerivation.html	developers-guide/form-automation.
 DDGWorkingWithLibraries.html	developers-guide/working-with-libraries.md	chapter page -> whole file
 DFRTagReference.HTML	reference/tags.md	tag reference chapter as a whole
 DRDB2DeviceLibrary-Settings.html		device library not shipped in this release
+DRDB2DeviceLibrary.html		device library not shipped in this release
 DRErrorMessagePrefixCodes.html	reference/error-codes.md	chapter page -> whole file
-DRMSSQLDeviceLibrary-Example.html		the library page lands in docs-reference-libraries, which fills this row in
-DRMSSQLDeviceLibrary-Settings.html		the library page lands in docs-reference-libraries, which fills this row in
+DRMSSQLDeviceLibrary-Example.html		no Example section exists in the 2007 MSSQLDevice chapter, so there is nothing to link
+DRMSSQLDeviceLibrary-Settings.html	reference/libraries/MSSQLDevice.md#settings	a section of the MSSQLDevice library's page
 DROracleDevice-Settings.html		device library not shipped in this release
 DROracleDevice.html		device library not shipped in this release
-DRSimpleDeviceLibrary-Schema.html		the library page lands in docs-reference-libraries, which fills this row in
+DRSimpleDeviceLibrary-Schema.html	reference/libraries/SimpleDevice.md#operators	the generated Schema section is not published; the link text names the operators, which are on the page
+DRSystemIntegrationLibrary.html	reference/libraries/System.Integration.md	the chapter calls the library SystemIntegration; the shipped descriptor calls it System.Integration
 DUGP1ConfiguringtheDataphorService.html	users-guide/dataphor-service.md#configuration	same text under Service Configuration Utility, renamed "Configuration"
 DUGP1Dataphoria-Aliases-SessionInformation.html	users-guide/aliases.md#session-information	title under Aliases
 DUGP1Dataphoria-Aliases.html	users-guide/aliases.md	section page -> whole file
@@ -95,7 +97,33 @@ DUGP1Users.html	users-guide/dataphoria-security.md#users	title under Dataphor Ex
 DUGP1UsingDataphorApplications-StartingaDataphorApplication-Connecting.html	users-guide/starting-dataphor-applications.md#connecting-to-a-dataphor-server	first section of Starting a Dataphor Application, renamed
 DUGP3Security.html	users-guide/security.md	chapter page -> whole file
 FTRTagsDescriptions-StorageTags-ShouldReconcile.html	reference/tags.md#shouldreconcile	tag name is the heading
-O-Frontend.ExecuteScript.html		a Frontend library operator: docs-reference-libraries puts its section on reference/libraries/Frontend.md and fills this row in
+O-Frontend.ApplicationOperators.html	reference/libraries/Frontend.md#application-operators	the Frontend library's application-operator category, a section of its page
+O-Frontend.CRCOperators.html	reference/libraries/Frontend.md#crc-operators	the Frontend library's CRC-operator category, a section of its page
+O-Frontend.Derive.html	reference/libraries/Frontend.md#frontendderive	a Frontend library operator, a section of its library's page
+O-Frontend.DocumentOperators.html	reference/libraries/Frontend.md#document-operators	the Frontend library's document-operator category, a section of its page
+O-Frontend.ExecuteScript.html	reference/libraries/Frontend.md#frontendexecutescript	a Frontend library operator, a section of its library's page
+O-Frontend.Form.html	reference/libraries/Frontend.md#frontendform	a Frontend library operator, a section of its library's page
+O-Frontend.FormOperators.html	reference/libraries/Frontend.md#form-operators	the Frontend library's form-operator category, a section of its page
+O-Frontend.GetCRC32.html	reference/libraries/Frontend.md#frontendgetcrc32	a Frontend library operator, a section of its library's page
+O-Frontend.InternalOperators.html	reference/libraries/Frontend.md#internal-operators	the Frontend library's internal-operator category, a section of its page
+O-Frontend.Load.html	reference/libraries/Frontend.md#frontendload	a Frontend library operator, a section of its library's page
+O-Frontend.LoadAndProcess.html	reference/libraries/Frontend.md#frontendloadandprocess	a Frontend library operator, a section of its library's page
+O-Frontend.LoadDocument.html	reference/libraries/Frontend.md#frontendloaddocument	a Frontend library operator, a section of its library's page
+O-Frontend.LoadIfNecessary.html	reference/libraries/Frontend.md#frontendloadifnecessary	a Frontend library operator, a section of its library's page
+O-Frontend.Operators.html	reference/libraries/Frontend.md#operators	the Frontend library's operator index, a section of its page
+O-MSSQLDevice.Operators.html	reference/libraries/MSSQLDevice.md#operators	the MSSQLDevice library's operator index, a section of its page
+O-MSSQLDevice.iEqual.html	reference/libraries/MSSQLDevice.md#mssqldeviceiequal	an MSSQLDevice library operator, a section of its library's page
+O-MSSQLDevice.iGreater.html	reference/libraries/MSSQLDevice.md#mssqldeviceigreater	an MSSQLDevice library operator, a section of its library's page
+O-MSSQLDevice.iInclusiveGreater.html	reference/libraries/MSSQLDevice.md#mssqldeviceiinclusivegreater	an MSSQLDevice library operator, a section of its library's page
+O-MSSQLDevice.iInclusiveLess.html	reference/libraries/MSSQLDevice.md#mssqldeviceiinclusiveless	an MSSQLDevice library operator, a section of its library's page
+O-MSSQLDevice.iLess.html	reference/libraries/MSSQLDevice.md#mssqldeviceiless	an MSSQLDevice library operator, a section of its library's page
+O-MSSQLDevice.iNotEqual.html	reference/libraries/MSSQLDevice.md#mssqldeviceinotequal	an MSSQLDevice library operator, a section of its library's page
+O-SQLDevice.Operators.html	reference/libraries/SQLDevice.md#operators	the SQLDevice library's operator index, a section of its page
+O-SimpleDevice.BeginUpdate.html	reference/libraries/SimpleDevice.md#simpledevicebeginupdate	a SimpleDevice library operator, a section of its library's page
+O-SimpleDevice.EndUpdate.html	reference/libraries/SimpleDevice.md#simpledeviceendupdate	a SimpleDevice library operator, a section of its library's page
+O-SimpleDevice.LoadTable.html	reference/libraries/SimpleDevice.md#simpledeviceloadtable	a SimpleDevice library operator, a section of its library's page
+O-SimpleDevice.SaveTable.html	reference/libraries/SimpleDevice.md#simpledevicesavetable	a SimpleDevice library operator, a section of its library's page
+O-SimpleDevice.TruncateTable.html	reference/libraries/SimpleDevice.md#simpledevicetruncatetable	a SimpleDevice library operator, a section of its library's page
 O-System.ConCat.html	reference/system-library/operators/System.Concat.md	the link misspells the case of Concat
 O-System.CreateGroup.html		group-based security operator: still in the catalog script but tagged DAE.IsDeprecated, and undocumented since 2007
 O-System.DefaultSetMaxCallDepth.html	reference/system-library/operators/System.SetDefaultMaxCallDepth.md	the link scrambles the words of SetDefaultMaxCallDepth
@@ -105,8 +133,12 @@ O-System.Diagnostics.GetErrorDecsription.html	reference/system-library/operators
 O-System.DropGroup.html		group-based security operator: no such operator in the engine's catalog script, and undocumented since 2007
 O-System.GroupExists.html		group-based security operator: no such operator in the engine's catalog script, and undocumented since 2007
 O-System.Guid.html	reference/system-library/types/System.Guid.md	documented as a scalar type, not as an operator
+O-System.Integration.Copy.html	reference/libraries/System.Integration.md#systemintegrationcopy	a System.Integration library operator, a section of its library's page
+O-System.Integration.CopyTables.html	reference/libraries/System.Integration.md#systemintegrationcopytables	a System.Integration library operator, a section of its library's page
+O-System.Integration.Insert.html	reference/libraries/System.Integration.md#systemintegrationinsert	a System.Integration library operator, a section of its library's page
 O-System.ListIndexOf.html	reference/system-library/operators/System.IndexOf.md	merged onto the operator's page
 O-System.ListLastIndexOf.html	reference/system-library/operators/System.LastIndexOf.md	merged onto the operator's page
+O-System.Operators.html	reference/system-library/README.md#operators	the core library's operator index: the 2007 wrapper section is not a page, the section index is
 O-System.ReguiredLibraries.html	reference/system-library/operators/System.RequiredLibraries.md	the link misspells Required
 O-System.SettIsolationLevel.html	reference/system-library/operators/System.SetIsolationLevel.md	the section id misspells the operator
 O-System.StringIndexOf.html	reference/system-library/operators/System.IndexOf.md	merged onto the operator's page
