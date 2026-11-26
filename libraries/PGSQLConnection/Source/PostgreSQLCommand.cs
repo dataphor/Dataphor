@@ -81,6 +81,18 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
                 {
                     npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Bytea;
                 }
+                else if (parameter.Type is SQLByteArrayType)
+                {
+                    // bytea as well, because PostgreSQL has no fixed-length binary type and the device therefore declares
+                    // the column plain bytea (PostgreSQLMSSQLBinary.InternalNativeDomainName). Every other connection class
+                    // in the tree has had this branch since 3.1; this one has never had it, so a parameter of this type -
+                    // which is every value written to, or keyed on, an SQLDevice.MSSQLBinary column - reached the throw
+                    // below instead. Reproduction: LivePGSQLDeviceTest.TheDeviceRoundTripsAByteArrayColumn.
+                    // Size is deliberately left unset, where the SQL Server and OLE DB commands set theirs from the type's
+                    // declared length: the current driver truncates a byte array longer than Size, and the column here has
+                    // no length to exceed, so bounding the parameter would silently drop bytes the column would have held.
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Bytea;
+                }
                 else if (parameter.Type is SQLTextType)
                 {
                     npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text;

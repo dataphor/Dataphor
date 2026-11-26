@@ -149,55 +149,80 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             }
         }
 
-        protected void EnsureDatabase(ServerProcess process)
-        {
-            var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
+		/// <summary>
+		/// Runs <paramref name="action"/> over a device session pointed at the stock <c>postgres</c> database, which every
+		/// PostgreSQL installation has, and hands it the name of the device's own database.
+		/// </summary>
+		/// <remarks>
+		/// Both callers need the server without going through the device's own database: EnsureDatabase because it is about to
+		/// create it, and DetermineVersion because the start sequence runs it first and the database may therefore not be there
+		/// yet - asked of a database that does not exist, either fails with PostgreSQL 3D000 and takes the device's start with
+		/// it. The Database property is what the connection string is built from, so the swap has to enclose the session as
+		/// well as the statement; it used to enclose only the statement here, which worked only because a device session opens
+		/// its connection lazily. The SQL Server device does the same thing with master, in the same two places.
+		/// </remarks>
+		protected void ExecuteAgainstStockDatabase(ServerProcess process, Action<SQLDeviceSession, string> action)
+		{
 			var database = Database;
-			Database = "postgres"; // This assumes all PostgreSQL installations have a postgres db.
-            try
-            {
-				// Detect if the database exists
-				bool exists;
-                SQLCursor cursor = deviceSession.Connection.Open(String.Format(CEnsureDatabase, database));
-                try
-                {
-                    cursor.Next();
-                    exists = (long)cursor[0] > 0;
-                }
-                finally
-                {
-                    cursor.Command.Connection.Close(cursor);
-                }
-
-				// If not, attempt to create it
-				if (!exists)
-					deviceSession.Connection.Execute(String.Format(CCreateDatabase, database));
-			}
-            finally
-            {
-                Disconnect(deviceSession);
-				Database = database;
-            }
-        }
-
-        /// <remarks>
-        /// Against the stock postgres database rather than the device's own, the way EnsureDatabase above does it and the
-        /// way the SQL Server device does it in both places (there it is master): the device's own database may not exist
-        /// yet, because EnsureDatabase is what creates it and the start sequence runs this first. Asked of the device's own
-        /// database this failed outright - PostgreSQL 3D000, "database ... does not exist" - which is the whole of a device
-        /// start against a server where the database is not there yet. Nothing could see it while ShouldDetermineVersion
-        /// defaulted off and nothing in the repository connected; LivePGSQLDeviceTest.TheDeviceReadsTheServerVersion turns
-        /// it on and is the reproduction.
-        /// </remarks>
-        protected void DetermineVersion(ServerProcess process)
-        {
-			var database = Database;
-			Database = "postgres"; // This assumes all PostgreSQL installations have a postgres db.
-            try
-            {
+			Database = "postgres";
+			try
+			{
 				var deviceSession = (SQLDeviceSession)Connect(process, process.ServerSession.SessionInfo);
 				try
 				{
+					action(deviceSession, database);
+				}
+				finally
+				{
+					Disconnect(deviceSession);
+				}
+			}
+			finally
+			{
+				Database = database;
+			}
+		}
+
+		protected void EnsureDatabase(ServerProcess process)
+		{
+			ExecuteAgainstStockDatabase
+			(
+				process,
+				(deviceSession, database) =>
+				{
+					// Detect if the database exists
+					bool exists;
+					SQLCursor cursor = deviceSession.Connection.Open(String.Format(CEnsureDatabase, database));
+					try
+					{
+						cursor.Next();
+						exists = (long)cursor[0] > 0;
+					}
+					finally
+					{
+						cursor.Command.Connection.Close(cursor);
+					}
+
+					// If not, attempt to create it
+					if (!exists)
+						deviceSession.Connection.Execute(String.Format(CCreateDatabase, database));
+				}
+			);
+		}
+
+		/// <remarks>
+		/// Against the stock postgres database rather than the device's own; see ExecuteAgainstStockDatabase for why. Nothing
+		/// could see that this asked the wrong database while ShouldDetermineVersion defaulted off and nothing in the
+		/// repository connected; LivePGSQLDeviceTest.TheDeviceReadsTheServerVersion turns it on and is the reproduction.
+		/// </remarks>
+		protected void DetermineVersion(ServerProcess process)
+		{
+			ExecuteAgainstStockDatabase
+			(
+				process,
+				(deviceSession, database) =>
+				{
+					// The device's own database name is not needed here; only the connection had to avoid it.
 					SQLCursor cursor = deviceSession.Connection.Open("SELECT version()");
 					try
 					{
@@ -218,16 +243,8 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 						cursor.Command.Connection.Close(cursor);
 					}
 				}
-				finally
-				{
-					Disconnect(deviceSession);
-				}
-            }
-            finally
-            {
-				Database = database;
-            }
-        }
+			);
+		}
 
         protected void InitializeDatabase(ServerProcess process)
         {

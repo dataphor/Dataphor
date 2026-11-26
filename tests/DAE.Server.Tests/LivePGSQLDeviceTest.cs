@@ -327,25 +327,29 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Assert.Warn(String.Format("known failures against PostgreSQL ({0}): {1} failed with:\r\n{2}", _serverVersion, ScriptName, error));
 		}
 
+		/// <summary>The value the byte-array case below writes and reads back, as D4 spells one - the base64 the MSSQLBinary selector takes.</summary>
+		private const string ByteArrayValue = "07f9b0d7ea0843708a9e24245b19e12e";
+
 		/// <summary>
-		/// A table with a column of the shared SQL-device scalar type <c>SQLDevice.MSSQLBinary</c> can be created on the
-		/// device. That type is the one column type this device declares with a length the server will not take: PostgreSQL's
-		/// <c>bytea</c> accepts no type modifier, so the <c>bytea(30)</c> the device used to emit made the create-table
-		/// statement invalid outright.
+		/// A column of the shared SQL-device scalar type <c>SQLDevice.MSSQLBinary</c> can be created on the device, written to
+		/// and read back. Both halves were broken, and each in a place nothing else in the tree touches: the device declared
+		/// the column <c>bytea(30)</c>, which PostgreSQL rejects outright because <c>bytea</c> takes no type modifier, and
+		/// <c>PostgreSQLCommand</c> had no branch for the <c>SQLByteArrayType</c> parameter such a column binds, so an insert
+		/// raised <em>unknown SQL data type</em> from the connection class before reaching the server.
 		/// </summary>
 		/// <remarks>
-		/// This is a case in C# rather than one in the corpus because the corpus cannot reach it: its MSSQLBinary cases are
-		/// named for the SQL Server device's own scalar type, so they are not applicable to this device, and the translation
-		/// goldens pin a corpus shared by both devices that has no column of this type. It asserts only what the device must
-		/// produce - a statement the server accepts - and nothing about what PostgreSQL ought to do with the value, which is
-		/// the corpus's business (decision D2). The table is dropped again, because this fixture's database is emptied only at
-		/// the start of a run and the corpus case that follows would otherwise find it.
+		/// A case in C# rather than one in the corpus because the corpus cannot reach it: its MSSQLBinary cases are named for
+		/// the SQL Server device's own scalar type, so they are not applicable to this device, and the translation goldens pin
+		/// a corpus shared by both devices that has no column of this type. The read-back compares the bytes in the engine
+		/// rather than in D4, so that what is asserted is the device's own round trip and not the pushed-down comparison of
+		/// this type, which is a separate open question (bug-binary-comparison-needs-the-mssql-device). The table is dropped
+		/// again, because this fixture's database is emptied only at the start of a run.
 		/// </remarks>
 		[Test]
-		public void TheDeviceCreatesATableWithAByteArrayColumn()
+		public void TheDeviceRoundTripsAByteArrayColumn()
 		{
 			if (!TestEnvironment.PGSQLConfigured)
-				Assert.Ignore(TestEnvironment.PGSQLNotConfigured("create a table with an SQLDevice.MSSQLBinary column on a PostgreSQL device"));
+				Assert.Ignore(TestEnvironment.PGSQLNotConfigured("write and read an SQLDevice.MSSQLBinary column on a PostgreSQL device"));
 
 			_instance.ExecuteScript
 			(
@@ -353,11 +357,57 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				(
 					"SetLibrary('{0}');\r\n" +
 						"create table ByteArrayColumnTest in {1} {{ ID : Integer, Payload : SQLDevice.MSSQLBinary, key {{ ID }} }};\r\n" +
-						"drop table ByteArrayColumnTest;\r\n",
+						"insert table {{ row {{ 1 ID, SQLDevice.MSSQLBinary(\"{2}\") Payload }} }} into ByteArrayColumnTest;\r\n",
 					DeviceLibraryName,
-					DeviceUnderTestName
+					DeviceUnderTestName,
+					ByteArrayValue
 				)
 			);
+			try
+			{
+				Assert.That
+				(
+					ReadTheByteArrayColumn(),
+					Is.EqualTo(Convert.FromBase64String(ByteArrayValue)),
+					"the value read back from the SQLDevice.MSSQLBinary column is not the one that was written."
+				);
+			}
+			finally
+			{
+				_instance.ExecuteScript(String.Format("SetLibrary('{0}');\r\ndrop table ByteArrayColumnTest;\r\n", DeviceLibraryName));
+			}
+		}
+
+		/// <summary>The one byte-array value the case above wrote, read back off the device through the engine.</summary>
+		private byte[] ReadTheByteArrayColumn()
+		{
+			IServerSession session = _instance.Server.Connect(new SessionInfo("Admin", String.Empty, DeviceLibraryName));
+			try
+			{
+				IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
+				try
+				{
+					IServerCursor cursor = process.OpenCursor("select ByteArrayColumnTest", null);
+					try
+					{
+						Assert.That(cursor.Next(), Is.True, "the row inserted into ByteArrayColumnTest is not there.");
+						using (IRow row = cursor.Select())
+							return ((IScalar)row.GetValue("Payload")).AsByteArray;
+					}
+					finally
+					{
+						process.CloseCursor(cursor);
+					}
+				}
+				finally
+				{
+					session.StopProcess(process);
+				}
+			}
+			finally
+			{
+				_instance.Server.Disconnect(session);
+			}
 		}
 
 		/// <summary>Runs the script and returns null, or its whole error text with the newlines the roll-up puts in it.</summary>

@@ -105,8 +105,9 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 			// ValueExpression(ParameterFromScalar(...)) for a literal of a type that does not ask for a parameter, which for
 			// this type is a bare decimal - "where ("T1"."Salary" > 1000.0)" against a money column, which PostgreSQL rejects
 			// with "operator does not exist: money > numeric". Asking for a parameter instead sends the value as
-			// NpgsqlDbType.Money, which compares. (ToLiteral is not the fix: it is only consulted for cursor key parameters,
-			// not for a literal operand of a translated expression.)
+			// NpgsqlDbType.Money, which compares. (ToLiteral is not the fix: what it returns is only ever substituted into a
+			// statement for a cursor key parameter on a device with UseParametersForCursors off, never for a literal operand of
+			// a translated expression.)
 			// Reproductions: the Money cases of the device-coverage corpus (LivePGSQLDeviceTest); the generated text is pinned
 			// by tests/goldens/devices/PGSQL/Query.Restrict.Comparison.sql, whose pre-fix form was SQL no PostgreSQL server
 			// accepts.
@@ -396,30 +397,36 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 	}
 
 	/// <summary>
-	/// PostgreSQL type : binary(Storage.Length)
+	/// PostgreSQL type : bytea
 	/// D4 Type : MSSQLBinary
 	/// </summary>
-	public class PostgreSQLMSSQLBinary : SQLScalarType
+	/// <remarks>
+	/// <para>
+	/// Derived from <see cref="SQLBinary"/> rather than from SQLScalarType, which is what it was. D4's MSSQLBinary is
+	/// declared <c>like System.Binary</c> (libraries/SQLDevice/Documents/Register.d4), so a value of it carries the same
+	/// shapes a System.Binary value does - a byte array for a small one and a StreamID for a stream-backed one - and this
+	/// type used to cast both straight to <c>byte[]</c>. That threw "Unable to cast object of type StreamID to type
+	/// System.Byte[]" on the first insert of a value selected in D4, which is every insert: the engine hands a selected
+	/// Binary over stream-backed whatever its length. SQLBinary already converts both shapes in both directions, and
+	/// allocates a stream for a value at or above its own threshold on the way back, so the three operators this class used
+	/// to carry are now its. Only the column type and the SQL parameter type are this device's business.
+	/// </para>
+	/// <para>
+	/// NOTE: the inherited ToLiteral emits base64 inside a cast, which is not a PostgreSQL bytea literal - those are hex
+	/// ("\x4142") or the escape format - so the statement would fail on the server if it ever reached one. It cannot today:
+	/// a scalar type's ToLiteral is only substituted into a statement when the command has UseParameters off, which for a
+	/// cursor follows SQLDevice.UseParametersForCursors, and this device sets that on. It is wrong in SQLBinary for T-SQL in
+	/// the same way, so it is one question for both devices rather than a PostgreSQL slip; if a deployment ever sets
+	/// UseParametersForCursors false, it has to be answered there.
+	/// </para>
+	/// <para>
+	/// The SQL Server device's MSSQLMSSQLBinary is the untouched twin of what this class was, and is broken the same way -
+	/// see bug-mssql-binary-column-cannot-take-a-value.
+	/// </para>
+	/// </remarks>
+	public class PostgreSQLMSSQLBinary : SQLBinary
 	{
         public PostgreSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
-
-		public override string ToLiteral(IValueManager AManager, object AValue)
-		{
-			if (AValue == null)
-				return String.Format("cast(null as {0})", DomainName());
-
-			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
-		}
-
-		public override object ToScalar(IValueManager AManager, object AValue)
-		{
-			return (byte[])AValue;
-		}
-
-		public override object FromScalar(IValueManager AManager, object AValue)
-		{
-			return (byte[])AValue;
-		}
 
 		protected int GetLength(MetaData AMetaData)
 		{
@@ -434,12 +441,13 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 		/// <remarks>
 		/// No length. PostgreSQL's bytea takes no type modifier at all - "create table t (x bytea(30))" is rejected with
 		/// "type modifier is not allowed for type bytea" (measured 2026-11-26 against PostgreSQL 18.7) - so the length this
-		/// used to emit made every create-table statement carrying an SQLDevice.MSSQLBinary column invalid, and the Storage.Length
-		/// tag is now carried only by the SQLByteArrayType above, where it bounds the parameter rather than the column.
+		/// used to emit made every create-table statement carrying an SQLDevice.MSSQLBinary column invalid. The Storage.Length
+		/// tag therefore now bounds nothing on this device: it still reaches the SQLByteArrayType above, but PostgreSQLCommand
+		/// deliberately does not turn that into a parameter size, because the column it would bound has no length either.
 		/// Nothing in the repository reached it: the device-coverage corpus's MSSQLBinary cases are named for the SQL Server
 		/// device's own scalar type and so are not applicable to this device, which is why a golden-only pass could not see it
 		/// either. No deployment can have such a column, because creating one never succeeded.
-		/// Reproduction: LivePGSQLDeviceTest.TheDeviceCreatesATableWithAByteArrayColumn.
+		/// Reproduction: LivePGSQLDeviceTest.TheDeviceRoundTripsAByteArrayColumn.
 		/// </remarks>
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{

@@ -101,7 +101,7 @@ jobs:
       # leaves the variable empty so the live cases report Inconclusive instead of failing.
       # The password is the image's published default for a service on an ephemeral runner, not a secret, and it is the
       # only way in: PostgreSQL has no integrated-security equivalent. Nothing outside the runner can reach the server.
-      # Cost: the fixture's two cases took 13 s locally against PostgreSQL 14.25 in a container (1180 device cases in
+      # Cost: the fixture's three cases took 13 s locally against PostgreSQL 14.25 in a container (1180 device cases in
       # about 10 s of that); the service start is a few seconds on top. The CI figure comes from the first run.
       - name: Start PostgreSQL
         id: postgres
