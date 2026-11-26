@@ -1,19 +1,19 @@
 # docs-link-check — broken-link checker for the Markdown docs
 
-Checks every link and image reference in the Markdown files under `docs/` (or any folder you name) and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a missing heading anchor, a path that leaves the repository. It was the acceptance check for the documentation conversion (`docs-convert-asciidoc`), and CI runs it: the *Documentation links* step of `.github/workflows/docs.yml`, the docs workflow that also gates the architecture page size, because `build.yml` ignores `docs/**` on purpose. That step passes `--pending tools/docs-convert/legacy-links.tsv` so that the not-yet-converted reference links do not fail the build; `docs-remove-old-sources` deletes that list and drops the argument in the same commit. It needs nothing beyond Python 3: one file, standard library only, no network.
+Checks every link and image reference in the Markdown files under `docs/` (or any folder you name) and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a missing heading anchor, a path that leaves the repository. It was the acceptance check for the documentation conversion (`docs-convert-asciidoc`), and CI runs it: the *Documentation links* step of `.github/workflows/docs.yml`, the docs workflow that also gates the architecture page size, because `build.yml` ignores `docs/**` on purpose. That step names no exemptions: every link under `docs/` must resolve. It needs nothing beyond Python 3: one file, standard library only, no network.
 
 ## Run it
 
 ```
 python tools/docs-link-check/check_links.py                       # checks docs/
-python tools/docs-link-check/check_links.py docs --pending tools/docs-convert/legacy-links.tsv
+python tools/docs-link-check/check_links.py docs
 python tools/docs-link-check/check_links.py C:\temp\docs-out --list-external
 python -m unittest discover -s tools/docs-link-check               # its tests
 ```
 
 `ROOT` arguments default to `docs`; every `*.md` file under each root is scanned. Output is one line per finding, `path:line: error|pending|external: message`, with paths relative to the repository root and forward slashes, then a summary line (files scanned, links checked, errors, pending, external). Exit code 0 when there are no errors, 1 when there are, 2 for bad arguments (a root that is not a folder, an unreadable pending file, a pending file without a `target` column).
 
-- `--pending FILE` — a tab-separated file with a header row and a column named `target` (other columns are ignored). Each target is a path relative to the root being checked, so one list serves both `docs/` and a scratch conversion folder; with several roots, each target is tried against each root. A link to a file that does not exist, whose resolved path is listed, is reported as `pending` instead of `error`. This is how links to reference pages that have not been converted yet pass until those pages exist; `tools/docs-convert/legacy-links.tsv` is such a list. A listed target that exists is simply a valid link.
+- `--pending FILE` — a tab-separated file with a header row and a column named `target` (other columns are ignored). Each target is a path relative to the root being checked, so one list serves both `docs/` and a scratch conversion folder; with several roots, each target is tried against each root. A link to a file that does not exist, whose resolved path is listed, is reported as `pending` instead of `error`. This is how a link to a page a conversion or a split has not written yet passes until that page exists, without the whole check being turned off. A listed target that exists is simply a valid link. Nothing in this repository uses the option today: the documentation conversion it was written for has landed, and CI gates `docs/` with no exemptions.
 - `--list-external` — print each external link (`http:`, `https:`, `mailto:`, `ftp:`). By default they are only counted. External links are never fetched and never fail the check. A link with any other scheme is an error.
 
 ## What is checked

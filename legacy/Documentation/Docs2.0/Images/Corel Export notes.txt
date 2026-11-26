@@ -1,3 +1,0 @@
-When exporting SVGs from corel use:
--Presentation Encoding (rather than Style Sheet)
--1:100 ratio

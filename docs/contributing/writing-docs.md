@@ -38,11 +38,11 @@ Only the architecture set is capped. That is not licence to write a long page an
 Both are standard-library Python 3 — no packages, no network — and both run in about a second:
 
 ```
-python tools/docs-link-check/check_links.py docs --pending tools/docs-convert/legacy-links.tsv
+python tools/docs-link-check/check_links.py docs
 python tools/docs-size-check/check_size.py
 ```
 
-The first checks every link and image reference under `docs/` and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a heading anchor that no heading produces, a path that leaves the repository. The expected result today is **0 errors** and a couple of hundred *pending*; `--pending` exempts the links into the reference pages that have not been converted yet, and that argument goes away with the list when they are. Its [README](../../tools/docs-link-check/README.md) documents the options and exactly what counts as a link.
+The first checks every link and image reference under `docs/` and reports the ones that point at nothing: a missing file, a file name with the wrong letter case, a heading anchor that no heading produces, a path that leaves the repository. The expected result is **0 errors**: every link under `docs/` must resolve, with no exemptions. Its [README](../../tools/docs-link-check/README.md) documents the options and exactly what counts as a link.
 
 The second is the word-count cap above. The expected result is **0 over the limit**.
 

@@ -2,8 +2,9 @@
 """Check the links and image references in Markdown documentation.
 
 Python 3 standard library only. See README.md in this folder for the rules.
-`slugify` and `heading_slugs` are imported by tools/docs-convert so that the
-converter and the checker agree on GitHub's heading anchors.
+`slugify` and `heading_slugs` were written to be imported, so that a documentation
+generator and this checker agree on GitHub's heading anchors; the converter that
+did so has been deleted along with its sources.
 """
 
 import argparse

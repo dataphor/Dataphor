@@ -96,11 +96,11 @@ The full plan, with evidence and sequencing, is in [docs/modernization-plan.md](
 
 The existing guides are thorough and still accurate about the language and the model:
 
-- [Product tour](Documentation/UsersGuide/ProductTour.adoc) and the [movie-rental tutorial](Documentation/UsersGuide/Tutorial_MovieRental.adoc), which builds the application above step by step
-- [Introduction to D4](Documentation/DevelopersGuide/D4Introduction.adoc) and [D4 compared with SQL](Documentation/DevelopersGuide/D4ComparisonWithSQL.adoc)
-- [Form automation](Documentation/DevelopersGuide/FormAutomation.adoc) — how derivation decides what to build
-- [Storage integration architecture](Documentation/DevelopersGuide/StorageIntegrationArchitecture.adoc) — how federation works
-- [The full User's Guide](Documentation/UsersGuide/UsersGuide.adoc), [Developer's Guide](Documentation/DevelopersGuide/DevelopersGuide.adoc) and [Reference](Documentation/DataphorReference/DataphorReference.adoc)
+- [Product tour](docs/users-guide/product-tour.md) and the [movie-rental tutorial](docs/users-guide/tutorial-movie-rental.md), which builds the application above step by step
+- [Introduction to D4](docs/developers-guide/d4-introduction.md) and [D4 compared with SQL](docs/developers-guide/d4-comparison-with-sql.md)
+- [Form automation](docs/developers-guide/form-automation.md) — how derivation decides what to build
+- [Storage integration architecture](docs/developers-guide/storage-integration-architecture.md) — how federation works
+- [The full User's Guide](docs/users-guide/README.md), [Developer's Guide](docs/developers-guide/README.md) and [Reference](docs/reference/README.md)
 - [Sample libraries](samples/) (`Sample.*`), from a one-form demonstration to a complete shipping application
 
 ## Contributing

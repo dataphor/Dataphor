@@ -3,7 +3,6 @@
     "legacy/",
     "Utilities/",
     "external/",
-    "Documentation/",
     "tests/libraries/TestFramework.Coverage.Devices/Documents/"
   ],
   "include": [],
