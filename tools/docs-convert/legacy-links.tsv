@@ -201,5 +201,5 @@ developers-guide/working-with-libraries.md	7	SetLibrary	O-System.SetLibrary.html
 developers-guide/working-with-libraries.md	15	System.VersionNumber	T-System.VersionNumber.html	reference/system-library/types/System.VersionNumber.md	DevelopersGuide/WorkingWithLibraries.adoc
 developers-guide/working-with-libraries.md	15	VersionNumberUndefined	T-System.VersionNumber.html	reference/system-library/types/System.VersionNumber.md	DevelopersGuide/WorkingWithLibraries.adoc
 developers-guide/working-with-libraries.md	47	LibrarySetting	O-System.LibrarySetting.html	reference/system-library/operators/System.LibrarySetting.md	DevelopersGuide/WorkingWithLibraries.adoc
-users-guide/security.md	153	Security Operators	O-System.SecurityOperartors.html	reference/system-library/operators/System.SecurityOperartors.md	UsersGuide/Security.adoc
-users-guide/tutorial-movie-rental.md	21	Frame	dilrefAlphora.Dataphor.Frontend.Client.IFrame.html	reference/frontend-nodes/Frame.md	UsersGuide/Tutorial_MovieRental.adoc
+users-guide/security.md	153	Security Operators	O-System.SecurityOperators.html	reference/system-library/operators/System.SecurityOperators.md	UsersGuide/Security.adoc
+users-guide/tutorial-movie-rental.md	21	Frame	dilrefAlphora.Dataphor.Frontend.Client.IFrame.html	reference/frontend-nodes/README.md	UsersGuide/Tutorial_MovieRental.adoc

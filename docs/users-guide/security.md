@@ -150,6 +150,6 @@ The created right is named by concatenating the name of the object with the name
 
 The Dataphor Server exposes all the functionality for managing the security system through the Security API. The D4 language then includes several shorthands for various calls in this API, and finally, the Dataphoria environment exposes the functionality visually using the Security library.
 
-For information on the Security API, refer to [Security Operators](../reference/system-library/operators/System.SecurityOperartors.md) in the System Library Reference.
+For information on the Security API, refer to [Security Operators](../reference/system-library/operators/System.SecurityOperators.md) in the System Library Reference.
 
 For information on the Security statements of D4, refer to [Security](../developers-guide/d4-catalog.md#security-1) in the Dataphor Developer’s Guide.

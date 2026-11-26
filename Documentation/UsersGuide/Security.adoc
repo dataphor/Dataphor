@@ -211,7 +211,7 @@ Dataphoria environment exposes the functionality visually using the
 Security library.
 
 For information on the Security API, refer to
-link:O-System.SecurityOperartors.html[Security Operators] in the System
+link:O-System.SecurityOperators.html[Security Operators] in the System
 Library Reference.
 
 For information on the Security statements of D4, refer to

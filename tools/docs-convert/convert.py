@@ -57,7 +57,9 @@ LEGACY_RULES = (
     (re.compile(r"^O-(.+)\.html$"), "reference/system-library/operators/{0}.md"),
     (re.compile(r"^T-(.+)\.html$"), "reference/system-library/types/{0}.md"),
     (re.compile(r"^DR(.+)Library\.html$"), "reference/libraries/{0}.md"),
-    (re.compile(r"^dilrefAlphora\.Dataphor\.Frontend\.Client\.I(.+)\.html$"), "reference/frontend-nodes/{0}.md"),
+    # One link in the whole corpus, and no per-node page will ever exist: the element reference was
+    # generated from the client's node interfaces and no copy of that output survives. Point at the index.
+    (re.compile(r"^dilrefAlphora\.Dataphor\.Frontend\.Client\.I.+\.html$"), "reference/frontend-nodes/README.md"),
     (re.compile(r"^Alphora\.Dataphor\.DAE\.Client\..+\.html$"), "reference/data-access-components.md"),
 )
 

@@ -18,7 +18,7 @@ This tutorial is designed to walk through building an application in Dataphor, f
 **[Form](using-dataphor-forms.md#summary)**  
 A user interface to the application and data.
 
-**[Frame](../reference/frontend-nodes/Frame.md)**  
+**[Frame](../reference/frontend-nodes/README.md)**  
 An embedded user interface (form) as an element of a form.
 
 **Component**  
