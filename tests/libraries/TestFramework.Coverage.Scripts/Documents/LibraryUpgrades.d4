@@ -425,9 +425,11 @@ end;
 // library in requisite-first order and has no catch around that loop, so the first failure ends the whole run: every library
 // after the failing one is left un-upgraded at its own recorded version, and the error names only the library that failed. An
 // administrator who upgrades a server after a release therefore has to read the recorded versions to learn what applied and
-// what did not. The two libraries here require nothing of each other, so the order is the order they were registered in,
-// which is what makes "the one after it" mean anything; and the second library's upgrade would create a table, so the absence
-// of that table is independent evidence that it never ran.
+// what did not. The two libraries here require nothing of each other, so the order is the order they were registered in -
+// Catalog.LoadedLibraries is array-backed, so that is an order the engine happens to have rather than one anything states;
+// were it ever to change, the assertions below fail loudly on the second library having been upgraded instead of quietly
+// covering nothing. That order is what makes "the one after it" mean anything; and the second library's upgrade would create
+// a table, so the absence of that table is independent evidence that it never ran.
 begin
 	CreateLibrary(LibraryDescriptor('UpgradeStopsFirst', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));
 	CreateLibrary(LibraryDescriptor('UpgradeStopsSecond', VersionNumber(1, 0, 0), "", list(FileReference){}, list(LibraryReference){}));

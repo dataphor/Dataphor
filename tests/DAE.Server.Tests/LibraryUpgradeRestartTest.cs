@@ -35,8 +35,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// is stopped, through the engine's own deserializer and serializer (Schema.LibraryUtility.LoadFromStream and SaveToFile)
 	/// rather than as text, so this fixture pins no idea of the descriptor format of its own. That is the honest stand-in for
 	/// an installer unpacking a new release over the old folder, because the files are what claims the new version.
-	/// SetLibraryDescriptor on the running server is not: it refuses to raise a registered library's version at all, and the
-	/// descriptor bump it does make for an unregistered one carries the recorded version along with it.
+	/// SetLibraryDescriptor on the running server is not: it refuses to change a registered library's version at all
+	/// (CannotChangeRegisteredLibraryVersion), and raising an unregistered library's leaves nothing pending either, because a
+	/// library with no LibraryVersions row records whatever its descriptor says at the moment it is registered.
 	///
 	/// Each case gets a TestServerInstance of its own - they stop and start the server and rewrite a file in its library
 	/// directory - and each library is one the server itself created, so the descriptor rewritten is one the server wrote.
@@ -44,22 +45,24 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// rather than the version the runtime layout's copy carries. The folders are per-run copies, so that is a difference to
 	/// read rather than to repair.
 	///
-	/// No case here ships an assembly, and the half of that worth covering cannot be shown in one process. A customer's new
-	/// library version may carry a new build of the library's own assembly, holding the classes the upgrade's new operators
-	/// name; a real deployment picks it up because the service process restarts. A loaded assembly is never unloaded (see
-	/// LibraryLoadingTest), and Assembly.LoadFrom on another copy with the same identity returns the instance already loaded,
-	/// so a Server.Stop()/Start() in this process would go on running the old build and a case over it would prove nothing.
-	/// The narrower half - a version that *adds* an assembly where the old version had none - would work, that load being the
-	/// only one, but there is no assembly in the suite to give it: every library assembly in the runtime layout belongs to a
-	/// library that registers it, and borrowing one would repoint the process-wide LibraryAssemblyResolver entry for that
-	/// assembly (keyed by assembly, and overwritten on registration) at this fixture's temporary folder, which would make
-	/// LibraryLoadingTest's own cases depend on test order. An assembly of this fixture's own means a new project in the
-	/// build, which is more than this fixture should carry.
-	///
 	/// The upgrade machinery's transaction contract is not this fixture's subject: LibraryUpgrades.d4's UpgradeNested section
 	/// pins that an upgrade script may upgrade a library outside its own requisites and must leave a transaction open when it
 	/// returns. Every upgrade script here is an ordinary one that does neither.
 	/// </remarks>
+	// NOTE: no case here ships an assembly, and the realistic half of that cannot be shown in one process. A customer's new
+	// library version may carry a new build of the library's own assembly, holding the classes the upgrade's new operators
+	// name; a real deployment picks it up because the service process restarts. A loaded assembly is never unloaded (see
+	// LibraryLoadingTest), and Assembly.LoadFrom on another copy with the same identity returns the instance already loaded,
+	// so a Server.Stop()/Start() in this process would go on running the old build and a case over it would prove nothing.
+	// The narrower half - a version that *adds* an assembly where the old version had none - would work, that load being the
+	// only one, but there is no assembly in the suite to give it: every library assembly in the runtime layout belongs to a
+	// library that registers it, and borrowing one would repoint the process-wide LibraryAssemblyResolver entry for that
+	// assembly (keyed by assembly, and overwritten on registration) at this fixture's temporary folder, which would make
+	// LibraryLoadingTest's own cases depend on test order. So the gap stays open deliberately: closing it costs a test
+	// library assembly of this fixture's own (a new project, in the layout's library list and on the coverage report's
+	// areas) plus a harness that restarts a host process and reloads its libraries, which nothing in the suite does. Take
+	// it when the suite grows that restart - OutOfProcessInstance is the vehicle, and debt-test-shipped-host-executable is
+	// the work item that would reach it first - and not before, because in-process cases over it cover nothing.
 	[TestFixture]
 	public class LibraryUpgradeRestartTest
 	{
