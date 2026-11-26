@@ -39,6 +39,7 @@
       being in the folder does not help. HostProgramTest keeps the two lists together.
     -->
     <ProjectReference Include="..\..\engine\Store.MSSQL\DAE.MSSQL.csproj" />
+    <ProjectReference Include="..\..\engine\Store.PGSQL\DAE.PGSQL.csproj" />
     <ProjectReference Include="..\..\engine\Store.SQLite\DAE.SQLite.csproj" />
   </ItemGroup>
 

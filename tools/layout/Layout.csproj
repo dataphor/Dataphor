@@ -46,6 +46,7 @@
     <ProjectReference Include="..\..\src\engine\Server\Server.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Server.Hosting\Server.Hosting.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Store.MSSQL\DAE.MSSQL.csproj" DataphorLayoutRole="Bin" />
+    <ProjectReference Include="..\..\src\engine\Store.PGSQL\DAE.PGSQL.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\engine\Store.SQLite\DAE.SQLite.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\Common\Common.csproj" DataphorLayoutRole="Bin" />
     <ProjectReference Include="..\..\src\protocol\NativeCLI\DAE.NativeCLI.csproj" DataphorLayoutRole="Bin" />
@@ -184,6 +185,24 @@
     <ItemGroup>
       <_DataphorLayoutFile Include="@(_DataphorLibraryOutput)">
         <DataphorDestination>$(_DataphorLayoutDirFull)Libraries\%(_DataphorLibraryOutput.DataphorLibrary)\%(_DataphorLibraryOutput.DataphorLayoutPath)</DataphorDestination>
+      </_DataphorLayoutFile>
+
+      <!--
+        The library assemblies that also belong in bin\, because a project in the Bin list above is compiled against one.
+        A Bin project contributes its own assembly and its whole package closure (that is how Npgsql reaches bin\), but not a
+        referenced *project's* assembly - every other Bin project references only other Bin projects, so the case never arose
+        before src\engine\Store.PGSQL. That store reaches a PostgreSQL server through PGSQLConnection's connection classes,
+        and a catalog store is loaded before any D4 library is registered: the library resolver is built out of what the
+        catalog says is registered, which is what the store exists to read, so the library folder is unreachable at that
+        point and bin\ is the only folder the copy can come from. Duplicating a library assembly in bin\ is safe -
+        Assembly.LoadFrom on the library folder's copy returns the instance already loaded from bin\ (see the note in
+        Base.Windows\LibraryAssemblyResolver.cs), so the library still registers its classes off one assembly.
+        Named rather than given a mechanism: one library is in this position, and a second one would be a reason to think
+        again about a catalog store depending on a library at all.
+      -->
+      <_DataphorLibraryOutputInBin Include="@(_DataphorLibraryOutput)" Condition="'%(_DataphorLibraryOutput.DataphorLibrary)' == 'PGSQLConnection'" />
+      <_DataphorLayoutFile Include="@(_DataphorLibraryOutputInBin)">
+        <DataphorDestination>$(_DataphorLayoutDirFull)bin\%(_DataphorLibraryOutputInBin.DataphorLayoutPath)</DataphorDestination>
       </_DataphorLayoutFile>
 
       <_DataphorLibraryPackage Condition="'%(_DataphorLibraryPackage.RuntimeIdentifier)' != ''">

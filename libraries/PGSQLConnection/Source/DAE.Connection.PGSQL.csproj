@@ -16,7 +16,16 @@
     <ProjectReference Include="..\..\..\src\engine\Base\Base.csproj" />
     <ProjectReference Include="..\..\..\src\engine\DAE\DAE.csproj" />
     <ProjectReference Include="..\..\..\src\engine\Server\Server.csproj" />
-    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj" />
+    <!--
+      PrivateAssets, where no other library project needs it: this library's D4 descriptor requires the library Connection
+      (PGSQLConnection.d4l), and the reference keeps that pairing and the build order the runtime layout relies on - but
+      nothing here compiles against that assembly, and its OLE DB and ODBC packages must not reach a consumer of this
+      project. The catalog store src\engine\Store.PGSQL is such a consumer and is in the layout's Bin list, where every
+      package file of its closure lands in bin\ beside the engine's own: System.Data.OleDb asks for
+      System.Configuration.ConfigurationManager 10.0.15 and Microsoft.Data.SqlClient 7.1.2 for 9.0.21, and bin\ holds one
+      file per name, so without this the layout fails with "Two different files would be copied to ...".
+    -->
+    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <!--

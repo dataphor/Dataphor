@@ -17,6 +17,7 @@ using NUnit.Framework;
 using Microsoft.Data.SqlClient;
 
 using Alphora.Dataphor.DAE.Connection;
+using Alphora.Dataphor.DAE.Connection.PGSQL;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
 {
@@ -606,14 +607,22 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// The first of <paramref name="keywords"/> the variable names, or <paramref name="defaultValue"/> where it names none.
 		/// </summary>
 		/// <remarks>
-		/// Read with the framework's own connection-string parser rather than with Npgsql's, because this project must not
-		/// reference the PostgreSQL driver: the driver arrives with the D4 library libraries/PGSQLConnection, which the server
-		/// loads from the runtime layout, and whether the layout puts it where that library can find it is one of the things a
-		/// live run is here to prove. A package reference here would satisfy that load from the test assembly's own folder
-		/// instead, because the library resolver is an AssemblyResolve handler and only fires after the default load path has
-		/// failed (Base.Windows/LibraryAssemblyResolver.cs). So every keyword spelling the driver accepts has to be listed by
+		/// <para>
+		/// Read with the framework's own connection-string parser rather than with Npgsql's, so that the harness does not have
+		/// to track the driver's keyword table. The cost is that every keyword spelling the driver accepts has to be listed by
 		/// the callers below; DbConnectionStringBuilder matches a key case-insensitively but not across a difference in
 		/// spacing, so "User ID" and "UserID" are two entries.
+		/// </para>
+		/// <para>
+		/// Until store-pgsql-port this project did not reference the PostgreSQL driver at all, and that was deliberate: the
+		/// driver arrives with the D4 library libraries/PGSQLConnection, which the server loads out of the runtime layout, so
+		/// a live device run also showed that the layout puts the driver where that library can find it. It no longer does.
+		/// The PostgreSQL catalog store's connection classes are that library's, so the store project references it and this
+		/// project references the store (PGSQLStoreContractTests), which puts Npgsql.dll in this assembly's own folder - where
+		/// the default load path finds it and the library resolver, an AssemblyResolve handler, never fires. What proves the
+		/// layout instead: the .d4l file check in tools/layout/Layout.csproj, HostProgramTest's dependency-file case, and
+		/// starting a server out of the layout on a PostgreSQL catalog store, which store-pgsql-port's handoff records.
+		/// </para>
 		/// </remarks>
 		private static string PGSQLSetting(string defaultValue, params string[] keywords)
 		{
@@ -623,6 +632,36 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				if (asWritten.ContainsKey(keyword))
 					return Convert.ToString(asWritten[keyword]);
 			return defaultValue;
+		}
+
+		/// <summary>The configured server's connection string with <paramref name="databaseName"/> as its database.</summary>
+		/// <remarks>
+		/// Everything else is carried through as the variable holds it, for the reason
+		/// <see cref="MSSQLConnectionStringFor"/> gives: what is set has to be reachable as it stands. Npgsql's canonical
+		/// keyword is Database, and the generic builder matches a key case-insensitively, so a variable that spells it in
+		/// another case is replaced rather than joined by a second entry; a variable naming a database at all is a misuse of
+		/// this one, which names a server.
+		/// </remarks>
+		public static string PGSQLConnectionStringFor(string databaseName)
+		{
+			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = PGSQLConnectionString;
+			builder["Database"] = databaseName;
+			return builder.ConnectionString;
+		}
+
+		/// <summary>Runs one statement on the configured PostgreSQL server, for a pass's own housekeeping.</summary>
+		/// <remarks>
+		/// The sibling of <see cref="ExecuteOnMSSQL"/>, and like it goes through the connection class the device and the store
+		/// share. The store passes need it because their database has to be dropped and emptied from outside the store, and
+		/// because dropping one needs a connection to another database; the device passes empty theirs over the device's own
+		/// connection instead (see <see cref="PGSQLEmptyDatabaseStatement"/>) and stay as they are - a device's statements
+		/// going out over the device is part of what those passes are for.
+		/// </remarks>
+		public static void ExecuteOnPGSQL(string connectionString, string statement)
+		{
+			using (PostgreSQLConnection connection = new PostgreSQLConnection(connectionString))
+				connection.Execute(statement);
 		}
 
 		/// <summary>The configured server's host, defaulted as the driver defaults it.</summary>
@@ -736,18 +775,26 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// shared server - would empty each other's database mid-case. If that day comes, name the database after the run.
 		public static string PGSQLEmptyDatabaseStatement(string deviceName)
 		{
-			// relkind 'r' is an ordinary table, and cascade takes the foreign keys referencing it along, so no separate pass
-			// over the constraints is needed. A do block because PostgreSQL has no "drop every table" statement and the
-			// device's SQLExecute takes one statement.
-			string statement =
-				"do $$ declare r record; begin" +
-					" for r in select n.nspname as s, c.relname as t from pg_class c" +
-					" join pg_namespace n on n.oid = c.relnamespace" +
-					" where c.relkind = 'r' and n.nspname not in ('pg_catalog', 'information_schema')" +
-					" loop execute 'drop table ' || quote_ident(r.s) || '.' || quote_ident(r.t) || ' cascade'; end loop;" +
-					" end $$;";
-			return String.Format("SQLDevice.SQLExecute('{0}', '{1}');\r\n", deviceName, D4StringLiteral(statement));
+			return String.Format("SQLDevice.SQLExecute('{0}', '{1}');\r\n", deviceName, D4StringLiteral(PGSQLDropAllTablesStatement));
 		}
+
+		/// <summary>
+		/// The statement that drops every table of every non-system schema of the database it is executed against, so that
+		/// the pass about to run starts on a database with nothing of an earlier run's in it.
+		/// </summary>
+		/// <remarks>
+		/// relkind 'r' is an ordinary table, and cascade takes the foreign keys referencing it along, so no separate pass over
+		/// the constraints is needed. A do block because PostgreSQL has no "drop every table" statement and both callers take
+		/// one statement: the device passes wrap it in <see cref="PGSQLEmptyDatabaseStatement"/>, and PGSQLStoreContractTests
+		/// sends it to the server with <see cref="ExecuteOnPGSQL"/>.
+		/// </remarks>
+		public const string PGSQLDropAllTablesStatement =
+			"do $$ declare r record; begin" +
+				" for r in select n.nspname as s, c.relname as t from pg_class c" +
+				" join pg_namespace n on n.oid = c.relnamespace" +
+				" where c.relkind = 'r' and n.nspname not in ('pg_catalog', 'information_schema')" +
+				" loop execute 'drop table ' || quote_ident(r.s) || '.' || quote_ident(r.t) || ' cascade'; end loop;" +
+				" end $$;";
 
 		#endregion
 	}

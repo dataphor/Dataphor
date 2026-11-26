@@ -4,9 +4,11 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 
 using Microsoft.Extensions.Hosting;
 
@@ -15,6 +17,7 @@ using NUnit.Framework;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Service;
 using Alphora.Dataphor.DAE.Store.MSSQL;
+using Alphora.Dataphor.DAE.Store.PGSQL;
 using Alphora.Dataphor.DAE.Store.SQLite;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
@@ -22,8 +25,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// <summary>
 	/// The host program (<see cref="DataphorHost"/>), which both host executables are one line over: that the .NET
 	/// Generic Host it builds brings a server up when it is started and takes it down when it is stopped, that a
-	/// failure to start is not swallowed, and that each executable's dependency file names every assembly the server
-	/// loads by simple name.
+	/// failure to start is not swallowed, that each executable's dependency file names every assembly the server loads
+	/// by simple name, and that the runtime layout holds every file those dependency files name.
 	/// </summary>
 	/// <remarks>
 	/// The server here is handed in already started from a configuration of this suite's own, which is what
@@ -114,8 +117,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		// Every catalog store the runtime layout ships, as types rather than names so that the compiler keeps the list
-		// honest. A store added under src\engine\Store.* belongs here and in both host projects.
-		private static readonly Type[] _shippedCatalogStoreTypes = new Type[] { typeof(SQLiteStore), typeof(MSSQLStore) };
+		// honest. A store added under src\engine\Store.* belongs here, in both host projects and in the Bin list of
+		// tools\layout\Layout.csproj.
+		private static readonly Type[] _shippedCatalogStoreTypes = new Type[] { typeof(SQLiteStore), typeof(MSSQLStore), typeof(PostgreSQLStore) };
 
 		[Test]
 		public void TheHostsDependencyFilesNameTheAssembliesTheServerLoadsByName()
@@ -150,6 +154,67 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 						Does.Contain(storeType.Assembly.GetName().Name + ".dll"),
 						String.Format("{0} does not name {1}, so a server whose catalogstoreclassname names {2} cannot load it; give the executable's project a reference to the store project", dependencyFileName, storeType.Assembly.GetName().Name + ".dll", storeType.FullName)
 					);
+			}
+		}
+
+		/// <summary>The sections of a dependency file's target that name a file the host expects beside its executable.</summary>
+		private static readonly string[] _dependencyFileSections = new string[] { "runtime", "runtimeTargets", "native", "resources" };
+
+		[Test]
+		public void TheRuntimeLayoutProvidesEveryAssemblyTheHostsDependencyFilesName()
+		{
+			// The other half of the case above, and the half that caught the PostgreSQL store out (store-pgsql-port): a host
+			// loads an assembly its dependency file names from its own folder, so a file that is named and not there fails at
+			// run time with FileNotFoundException the moment something needs it - for a catalog store, when an instance
+			// configured on it starts, which no build check sees. The two halves fail for different reasons and are fixed in
+			// different files: a name missing from the dependency file means a host project needs a reference, while a file
+			// missing from bin\ means tools\layout\Layout.csproj does not copy it. Every Bin project's own assembly and
+			// package closure is copied for it, but not a referenced *project's* assembly, which is how the PostgreSQL store's
+			// connection library came to be named and absent.
+			string binDirectory = Path.Combine(TestEnvironment.LayoutDirectory, "bin");
+			HashSet<string> present = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			foreach (string file in Directory.GetFiles(binDirectory, "*", SearchOption.AllDirectories))
+				present.Add(Path.GetFileName(file));
+
+			foreach (string dependencyFileName in new string[] { "DAEServer.deps.json", "DAEService.deps.json" })
+			{
+				string dependencyFilePath = Path.Combine(binDirectory, dependencyFileName);
+				Assert.That(File.Exists(dependencyFilePath), Is.True, String.Format("the runtime layout has no {0}; the host executables are not in it", dependencyFileName));
+
+				// Compared by file name alone, not by the path the dependency file gives: those paths are the package's own
+				// (lib\net10.0\Npgsql.dll), which the layout flattens into bin\, and the files that keep a subfolder keep the
+				// runtimes\<rid>\ one the host resolves them through. A name is unique across a published folder anyway - two
+				// files of one name would be the version split the layout already fails the build on.
+				foreach (string named in NamedFiles(dependencyFilePath))
+					Assert.That
+					(
+						present,
+						Does.Contain(named),
+						String.Format("{0} names {1}, which the runtime layout's bin folder does not hold, so a host that loads it fails at run time; add what brings it to tools\\layout\\Layout.csproj", dependencyFileName, named)
+					);
+			}
+		}
+
+		/// <summary>The assembly file names a dependency file's single target names, over every library in it.</summary>
+		private static IEnumerable<string> NamedFiles(string dependencyFilePath)
+		{
+			using (JsonDocument document = JsonDocument.Parse(File.ReadAllText(dependencyFilePath)))
+			{
+				JsonElement targets = document.RootElement.GetProperty("targets");
+				foreach (JsonProperty target in targets.EnumerateObject())
+					foreach (JsonProperty library in target.Value.EnumerateObject())
+						foreach (string section in _dependencyFileSections)
+						{
+							JsonElement files;
+							if (!library.Value.TryGetProperty(section, out files))
+								continue;
+							foreach (JsonProperty file in files.EnumerateObject())
+							{
+								string name = Path.GetFileName(file.Name.Replace('/', Path.DirectorySeparatorChar));
+								if (name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+									yield return name;
+							}
+						}
 			}
 		}
 

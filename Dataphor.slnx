@@ -12,6 +12,7 @@
     <Project Path="src/engine/Server/Server.csproj" />
     <Project Path="src/engine/Server.Hosting/Server.Hosting.csproj" />
     <Project Path="src/engine/Store.MSSQL/DAE.MSSQL.csproj" />
+    <Project Path="src/engine/Store.PGSQL/DAE.PGSQL.csproj" />
     <Project Path="src/engine/Store.SQLite/DAE.SQLite.csproj" />
   </Folder>
   <Folder Name="/protocol/">

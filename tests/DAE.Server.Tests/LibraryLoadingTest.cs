@@ -28,9 +28,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// manager on the machine - the connection class is constructed only when a device names it as its ConnectionClass.
 	///
 	/// The PGSQLConnection arm is that guard again for the library device-pgsql-connection-port brought back: its folder
-	/// holds one private managed package, the Npgsql driver, and its .d4l lists Npgsql.dll, so the server loads the
-	/// driver while registering the library - which must need no PostgreSQL server, the driver connecting only when a
-	/// device or a catalog store asks it to.
+	/// holds one private managed package, the Npgsql driver, and its .d4l lists Npgsql.dll, so registering the library must
+	/// need no PostgreSQL server, the driver connecting only when a device or a catalog store asks it to. Unlike the other
+	/// three arms it no longer shows where the driver was loaded from; the note in the case says why.
 	/// </remarks>
 	[TestFixture]
 	public class LibraryLoadingTest : InProcessTestFixture
@@ -70,15 +70,16 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			Assert.DoesNotThrow(() => Instance.ExecuteScript("EnsureLibraryRegistered('PGSQLConnection');"));
 
-			// Registering without throwing is only proof the driver loaded if the driver did in fact load: the .d4l entry for
-			// Npgsql.dll is what makes RegisterLibraryFiles call Assembly.LoadFrom on it, and nothing else in this process
-			// references the driver, so the loaded set is the check that the entry is still doing its job.
-			Assert.That
-			(
-				Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), assembly => assembly.GetName().Name == "Npgsql"),
-				Is.True,
-				"the Npgsql driver did not load out of the PGSQLConnection library folder"
-			);
+			// NOTE: this arm used to go on to assert that an Npgsql assembly was in the process's loaded set, on the ground
+			// that nothing else in this process referenced the driver, so the only thing that could have loaded it was the
+			// .d4l entry for Npgsql.dll. That ground is gone since store-pgsql-port: this project references the PostgreSQL
+			// catalog store, whose connection classes are this library's, so Npgsql.dll is in this assembly's own folder and
+			// another fixture may already have loaded it from there - which would have made the assertion pass without
+			// registering anything. It was removed rather than weakened, because an assertion that cannot fail is worse than
+			// its absence. What this arm still establishes is its own title: the library registers, with the driver's files
+			// where the layout puts them and no PostgreSQL server in reach. The resolver finding a library's private package
+			// in the library folder is what the LibraryLoadingProbe arms above prove, and they prove it properly: the probe's
+			// Newtonsoft.Json.Bson.dll and Microsoft.Data.SqlClient.SNI.dll are in no other folder this process can load from.
 		}
 	}
 }

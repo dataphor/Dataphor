@@ -14,6 +14,7 @@ using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Store.MSSQL;
+using Alphora.Dataphor.DAE.Store.PGSQL;
 using Alphora.Dataphor.DAE.Store.SQLite;
 
 namespace Alphora.Dataphor.DAE.Server.Tests
@@ -92,15 +93,41 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// <summary>The name every store assembly embeds the catalog's seed script under; CatalogStore.Initialize reads it by this name.</summary>
 		private const string SeedResourceName = "Alphora.Dataphor.DAE.SystemStoreCatalog.sql";
 
+		/// <summary>The column type a text column of this store's own catalog is declared with; T.V is created with it.</summary>
+		/// <remarks>
+		/// The contract's shapes are the catalog's shapes, and the catalog's seed script is per store: the two stores whose
+		/// script is written for SQL Server dialect declare a text column nvarchar and a boolean column tinyint, and the
+		/// PostgreSQL store's script - the same tables, in that server's dialect - declares them character varying and
+		/// boolean. Neither nvarchar nor tinyint is a type PostgreSQL has at all, so these two hooks are what lets one
+		/// description of the contract run against all three. Together with <see cref="TextCanHoldEmbeddedNul"/> they are the
+		/// only things a store may vary here, and each of the three says something about the store's back end rather than
+		/// about its code: no case, no assertion and no expected result differs between the fixtures.
+		/// </remarks>
+		protected virtual string TextColumnType { get { return "nvarchar(20)"; } }
+
+		/// <summary>The column type a boolean column of this store's own catalog is declared with; B.F is created with it.</summary>
+		/// <remarks>See <see cref="TextColumnType"/>.</remarks>
+		protected virtual string BooleanColumnType { get { return "tinyint"; } }
+
+		/// <summary>Whether a text value this store writes can hold an embedded NUL; see <see cref="AwkwardStringRoundTripsThroughWrites"/>.</summary>
+		/// <remarks>
+		/// A property of the back end, not of the store's code, which is why it is a hook here beside the two column types: a
+		/// store whose server refuses the byte cannot be made to carry it, and no catalog column holds one anyway (the note on
+		/// SQLStoreConnection.ModifyOperation says why - every catalog column is an integer or text the engine generates from a
+		/// D4 name, script or tag). Only the NUL is dropped where this is false; every other character of that case's strings
+		/// is still asserted, and it is those that the parameterized writes exist for.
+		/// </remarks>
+		protected virtual bool TextCanHoldEmbeddedNul { get { return true; } }
+
 		// T { K primary key, G, V }, rows 1, 2 and 3 in group 1 and row 4 in group 2: the shape every catalog store cursor is
 		// opened in, ordered on a non-unique index with rows named by the primary key.
 		// The key is declared int, not integer, so that the value a cursor reads back has the same .NET type as the range values
 		// the tests pass: System.Data.SQLite maps a column declared "integer" to Int64 and one declared "int" to Int32, the
 		// catalog's own tables are int, and SQLStoreCursor compares a read key value with a range value by IComparable, which
 		// throws when the two are different integer types.
-		private static void CreateGroupedTable(SQLStoreConnection connection)
+		private void CreateGroupedTable(SQLStoreConnection connection)
 		{
-			connection.ExecuteStatement("create table T (K int not null primary key, G int not null, V nvarchar(20))");
+			connection.ExecuteStatement(String.Format("create table T (K int not null primary key, G int not null, V {0})", TextColumnType));
 			connection.ExecuteStatement("create index IDX_T_G on T (G)");
 			connection.ExecuteStatement("insert into T values (1, 1, 'a'), (2, 1, 'b'), (3, 1, 'c'), (4, 2, 'd')");
 		}
@@ -135,11 +162,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 		
 		// B { K primary key, F }, where F holds a boolean: the shape of every catalog table that stores one (DAEObjects.IsSystem,
-		// DAERoleRightAssignments.IsGranted). F is declared tinyint, as the catalog declares them, and the key is a named primary
-		// key constraint, which is where the catalog's index names come from.
-		private static void CreateBooleanTable(SQLStoreConnection connection)
+		// DAERoleRightAssignments.IsGranted). F is declared with whatever this store's own catalog declares such a column
+		// (BooleanColumnType), and the key is a named primary key constraint, which is where the catalog's index names come from.
+		private void CreateBooleanTable(SQLStoreConnection connection)
 		{
-			connection.ExecuteStatement("create table B (K int not null, F tinyint not null, constraint PK_B primary key (K))");
+			connection.ExecuteStatement(String.Format("create table B (K int not null, F {0} not null, constraint PK_B primary key (K))", BooleanColumnType));
 		}
 
 		private static SQLStoreCursor OpenBooleanCursor(SQLStoreConnection connection)
@@ -336,9 +363,21 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		}
 
 		/// <summary>
-		/// A second cursor opened, read and closed while a first one is part way through its range does not move the first one:
-		/// the catalog reads one table through several cursors at once.
+		/// A second cursor opened while a first one is part way through its range does not move the first one. Where the store
+		/// reports multiple active result sets the second cursor reads its own range and the first carries on; where it does
+		/// not, the second cursor's first read fails and the first cursor still carries on.
 		/// </summary>
+		/// <remarks>
+		/// Two store cursors on one connection each hold a reader open, so whether both can exist is the store's
+		/// <see cref="SQLStore.SupportsMARS"/>, and the engine reads that flag for exactly one thing: it is what turns on
+		/// CatalogStore.UseCursorCache, which keeps a finished cursor's reader open past CloseCursor so that a later open of
+		/// the same index reuses it. So a MARS store is one whose catalog holds readers across closes, and a non-MARS store is
+		/// one whose catalog does not - and the catalog itself never nests two cursors in one method, measured over every one
+		/// of the 88 cursor opens in CatalogStore.cs. What the non-MARS branch pins is that the collision is reported, as a
+		/// ConnectionException - from the engine's own guard in SQLConnection.SetActiveCursor, or from a driver that refuses a
+		/// second reader first, as Npgsql does with "A command is already in progress" - and that the first cursor is left
+		/// usable, which is what makes the failure a reported error rather than a corrupted read.
+		/// </remarks>
 		[Test]
 		public void TwoCursorsOpenOnOneTableInOneTransaction()
 		{
@@ -356,8 +395,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 						using (SQLStoreCursor reading = OpenGroupedCursor(connection))
 						{
-							reading.SetRange(new object[] { 2 }, new object[] { 2 });
-							Assert.That(reading.Next() ? reading[0] : null, Is.EqualTo(4));
+							if (Store.SupportsMARS)
+							{
+								reading.SetRange(new object[] { 2 }, new object[] { 2 });
+								Assert.That(reading.Next() ? reading[0] : null, Is.EqualTo(4));
+							}
+							else
+								Assert.Catch<ConnectionException>(() => reading.SetRange(new object[] { 2 }, new object[] { 2 }), "a store that reports no multiple active result sets served a second reader on one connection");
 						}
 
 						Assert.That(iterating.Next() ? iterating[0] : null, Is.EqualTo(3));
@@ -507,14 +551,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// A string whose characters would end a quoted literal early - single quotes, a quote beside a statement separator, a
-		/// closing parenthesis and an embedded NUL - survives an insert, an update, a key condition that names the row by it and
-		/// a delete. The generated writes pass values as parameters; the quote-doubled literals they replaced cannot carry a NUL,
-		/// because the provider prepares the statement from text that the NUL ends.
+		/// closing parenthesis and, where the back end can hold one, an embedded NUL - survives an insert, an update, a key
+		/// condition that names the row by it and a delete. The generated writes pass values as parameters; the quote-doubled
+		/// literals they replaced cannot carry a NUL, because the provider prepares the statement from text that the NUL ends.
 		/// </summary>
 		[Test]
 		public void AwkwardStringRoundTripsThroughWrites()
 		{
-			AssertStringRoundTripsThroughWrites("a';'b');'c\0d", "x'';'y\0z");
+			string nul = TextCanHoldEmbeddedNul ? "\0" : String.Empty;
+			AssertStringRoundTripsThroughWrites("a';'b');'c" + nul + "d", "x'';'y" + nul + "z");
 		}
 
 		/// <summary>
@@ -526,7 +571,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// </summary>
 		/// <remarks>
 		/// The column has to be able to hold the characters for the parameter's own type to be what decides this, and it can: the
-		/// contract's T.V is nvarchar(20), as the catalog's own text columns are (41 nvarchar columns in SystemStoreCatalog.sql). The
+		/// contract's T.V is declared with whatever this store's own catalog declares a text column (see
+		/// <see cref="TextColumnType"/>) - nvarchar(20) for the two SQL Server dialect scripts, which have 41 such columns. The
 		/// accented letters are there to tell two failures apart - a value that comes back with only those intact was converted to a
 		/// Latin-1 code page, where one that comes back garbled throughout was lost for some other reason.
 		/// </remarks>
@@ -538,10 +584,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		/// <summary>
 		/// A boolean written through a store cursor comes back as a boolean, through both the values of an insert and the set list
-		/// of an update. The catalog declares its boolean columns tinyint, so a generated write passes 1 or 0 rather than a .NET
-		/// bool (SQLStoreConnection.NativeToParameter). On SQLite either mapping passes, because the provider stores a bool as an
-		/// integer anyway; this pins the round trip for every store the contract is run against, and it is the store whose catalog
-		/// declares the column with a boolean type, or whose provider binds a declared type strictly, that fails here unmapped.
+		/// of an update. The SQL Server dialect catalogs declare their boolean columns tinyint, so a generated write passes 1 or 0
+		/// rather than a .NET bool (SQLStoreConnection.NativeToParameter). On SQLite either mapping passes, because the provider
+		/// stores a bool as an integer anyway; this pins the round trip for every store the contract is run against, and it is the
+		/// store whose catalog declares the column with a boolean type, or whose provider binds a declared type strictly, that
+		/// fails here unmapped - which is why the PostgreSQL store overrides NativeToParameter and this case is what shows it.
 		/// </summary>
 		[Test]
 		public void BooleanRoundTripsThroughWrites()
@@ -804,6 +851,97 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			(
 				TestEnvironment.MSSQLConnectionStringFor(DatabaseName),
 				"declare @statements nvarchar(max) = N''; select @statements = @statements + N'drop table [' + name + N'];' from sys.tables; exec sp_executesql @statements;"
+			);
+		}
+	}
+
+	/// <summary>
+	/// The contract against the PostgreSQL catalog store, on the server named by the environment variable
+	/// DATAPHOR_TEST_PGSQL; the whole fixture is ignored where that is not set.
+	/// </summary>
+	/// <remarks>
+	/// The same shape as <see cref="MSSQLStoreContractTests"/> in every particular, for the same measured reasons: one
+	/// database with a fixed name for the whole fixture, dropped before the run and after it, made by the store's own
+	/// create-database probe, and emptied at the start of each test rather than at the end of the one before. The two
+	/// things that differ are this store's dialect, which the two column-type hooks carry, and that dropping the database
+	/// takes <c>with (force)</c> - PostgreSQL has no single-user mode, and a pooled connection of an earlier run would
+	/// otherwise hold the database open. <c>with (force)</c> needs PostgreSQL 13 or later, which is below the documented
+	/// floor of 14 (docs/users-guide/dataphor-service.md).
+	/// </remarks>
+	// NOTE: that fixed name is the fixture's one shared resource, as the SQL Server fixture's is; two runs against one
+	// server at the same time would empty each other's database mid-test. If that day comes, name the database after the
+	// run, as TestEnvironment's run directory is named after the process.
+	[TestFixture]
+	public class PGSQLStoreContractTests : StoreContractTests
+	{
+		/// <summary>Lower case, because PostgreSQL folds an unquoted identifier and a mixed-case database then has to be quoted everywhere.</summary>
+		private const string DatabaseName = "dataphorstorecontract";
+
+		/// <summary>The stock database every PostgreSQL installation has, which the drop below is executed from.</summary>
+		private const string StockDatabaseName = "postgres";
+
+		/// <summary>The test directory the fixture's one database was last emptied for; see <see cref="CreateStore"/>.</summary>
+		private static string _emptiedForDirectory;
+
+		/// <summary>This store's catalog declares a text column <c>character varying</c>: PostgreSQL has no nvarchar.</summary>
+		protected override string TextColumnType { get { return "character varying(20)"; } }
+
+		/// <summary>This store's catalog declares a boolean column <c>boolean</c>: PostgreSQL has no tinyint, and this is what PGSQLStoreConnection.NativeToParameter exists for.</summary>
+		protected override string BooleanColumnType { get { return "boolean"; } }
+
+		/// <summary>
+		/// PostgreSQL refuses an embedded NUL in a text value outright - SQLSTATE 22021, <c>invalid byte sequence for encoding
+		/// "UTF8": 0x00</c> - so no store against it can carry one, by parameter or by literal. Measured on PostgreSQL 18.7.
+		/// </summary>
+		protected override bool TextCanHoldEmbeddedNul { get { return false; } }
+
+		[OneTimeSetUp]
+		public void RequireServer()
+		{
+			if (!TestEnvironment.PGSQLConfigured)
+				Assert.Ignore(TestEnvironment.PGSQLNotConfigured("run the catalog store contract against PostgreSQL"));
+
+			// A run that crashed before its teardown, or one kept with DATAPHOR_TEST_LOGGING=1, leaves the database behind;
+			// dropping it outright here starts this run on a database with nothing of another run's in it. The first
+			// CreateStore makes it again, through the store's own create-database probe.
+			_emptiedForDirectory = null;
+			DropDatabase();
+		}
+
+		[OneTimeTearDown]
+		public void DropDatabaseAfterFixture()
+		{
+			if (TestEnvironment.PGSQLConfigured && !TestEnvironment.KeepFiles)
+				DropDatabase();
+		}
+
+		/// <summary>The store creates the database itself, through the <c>create database</c> probe in its own InternalInitialize.</summary>
+		protected override SQLStore CreateStore(string directory)
+		{
+			PostgreSQLStore store = new PostgreSQLStore();
+			store.ConnectionString = TestEnvironment.PGSQLConnectionStringFor(DatabaseName);
+			store.Initialize();
+			EmptyDatabaseForNewTest(directory);
+			return store;
+		}
+
+		// After the store, so that its probe has made the database on the first test of the run. A second call on the same
+		// directory is SeedSchemaReopens reopening the database it just wrote, and must leave what is in it alone.
+		private static void EmptyDatabaseForNewTest(string directory)
+		{
+			if (directory == _emptiedForDirectory)
+				return;
+			TestEnvironment.ExecuteOnPGSQL(TestEnvironment.PGSQLConnectionStringFor(DatabaseName), TestEnvironment.PGSQLDropAllTablesStatement);
+			_emptiedForDirectory = directory;
+		}
+
+		// From the stock database, because PostgreSQL cannot drop the database a connection is open on.
+		private static void DropDatabase()
+		{
+			TestEnvironment.ExecuteOnPGSQL
+			(
+				TestEnvironment.PGSQLConnectionStringFor(StockDatabaseName),
+				String.Format("drop database if exists \"{0}\" with (force)", DatabaseName)
 			);
 		}
 	}

@@ -4,22 +4,13 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-#define USESQLCONNECTION
-
 using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-#if USESQLCONNECTION
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Connection.PGSQL;
-
-#else
-using System.Data;
-using System.Data.Common;
-using System.Data.SqlClient;
-#endif
 
 namespace Alphora.Dataphor.DAE.Store.PGSQL
 {
@@ -27,24 +18,26 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
     {
         public PostgreSQLStoreConnection(PostgreSQLStore store) : base(store) { }
 
-		#if USESQLCONNECTION
+		// 3.1 carried a second form of this method behind #if USESQLCONNECTION, a constant this file defined at the top of
+		// itself and never undefined: the other form returned a System.Data.SqlClient SqlConnection - a SQL Server connection
+		// from the PostgreSQL store - and was one #define away from compiling. The constant and the dead form are both gone,
+		// so the only server this store reaches is the one the PostgreSQL connection class connects to.
 		protected override SQLConnection InternalCreateConnection()
 		{
 			return new PostgreSQLConnection(Store.ConnectionString);
 		}
-		#else
-        protected override DbConnection InternalCreateConnection()
-        {
-            return new SqlConnection(Store.ConnectionString);
-        }
-        #endif
 
-        public override bool HasTable(string tableName)
-        {
-            string statement = String.Format("select count(*)>0 from PG_TABLES where TABLENAME = '{0}'", tableName.ToLower());
-            bool tableExists = (bool) this.ExecuteScalar(statement);
-            return tableExists;           
-        }
+		// Lower-cased because PostgreSQL folds an unquoted identifier to lower case, and every table this store creates - the
+		// catalog's own, from SystemStoreCatalog.sql - is created unquoted, so pg_tables holds the folded name. Invariant rather
+		// than current culture, which is what 3.1 had: the server's folding is not the current culture's, and on a Turkish or
+		// Azeri machine ToLower() turns the I of DAEServerInfo into a dotless i, so the catalog store would report that it has
+		// no catalog and seed itself again over the one it already wrote.
+		public override bool HasTable(string tableName)
+		{
+			string statement = String.Format("select count(*)>0 from PG_TABLES where TABLENAME = '{0}'", tableName.ToLowerInvariant());
+			bool tableExists = (bool)this.ExecuteScalar(statement);
+			return tableExists;
+		}
 
 		public override object NativeToLiteralValue(object tempValue)
 		{
