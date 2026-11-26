@@ -8,9 +8,7 @@ using System;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Server;
 
-#if !SILVERLIGHT
 using Alphora.Dataphor.DAE.Service;
-#endif
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -35,7 +33,6 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (inProcessAlias != null)
 				{
-					#if !SILVERLIGHT
 					if (inProcessAlias.IsEmbedded)
 					{
 						ServerConfiguration configuration = InstanceManager.GetInstance(inProcessAlias.InstanceName);
@@ -51,9 +48,6 @@ namespace Alphora.Dataphor.DAE.Client
 						if (autoStart)
 							_serviceHost.Start();
 					}
-					#else
-					throw new NotSupportedException("In-process aliases are not supported in Silverlight");
-					#endif
 				}
 				else
 				{
@@ -94,7 +88,6 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void CleanUp()
 		{
-			#if !SILVERLIGHT
 			if (_hostedServer != null)
 			{
 				_hostedServer.Stop();
@@ -106,7 +99,6 @@ namespace Alphora.Dataphor.DAE.Client
 				_serviceHost.Stop();
 				_serviceHost = null;
 			}
-			#endif
 			
 			if (_localServer != null)
 			{
@@ -125,19 +117,13 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary>The alias used to establish this connection.</summary>
 		public ServerAlias Alias { get { return _serverAlias; } }
 		
-		#if !SILVERLIGHT
 		private DataphorServiceHost _serviceHost; // Used for non-embedded in-process server
 		private Server.Server _hostedServer; // Used for embedded in-process server
-		#endif
 		private ClientServer _clientServer; // Used for out-of-process server
 		private LocalServer _localServer; // Used for out-of-process server
 
 		/// <summary>The IServer interface for the server connection.</summary>
-		#if SILVERLIGHT
-		public IServer Server { get { return _localServer; } }
-		#else
 		public IServer Server { get { return _hostedServer != null ? _hostedServer : (_serviceHost != null ? _serviceHost.Server : _localServer); } }
-		#endif
 
 		public override string ToString()
 		{

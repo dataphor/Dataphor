@@ -755,7 +755,7 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 |---|---|---|
 | `Utilities/Wix` (WiX 3.5) | 60 MB | Delete with the old `Setup/` when WS9 lands |
 | `legacy/Documentation` build tools, PDFs, CHMs, jars | most of 79 MB | **Done**: deleted from the working tree by `docs-remove-old-sources` (WS8), with `Documentation/`. Still in git history, so the clone size is unchanged. |
-| 46 `#if SILVERLIGHT` blocks | 26 files | Remove the dead branches once the build exists to prove nothing changed |
+| 46 `#if SILVERLIGHT` blocks | 26 files | Done (`hygiene-silverlight-conditionals`): the symbol was defined nowhere, so every directive already resolved one way; each site kept the arm the compiler was taking and the directives are gone |
 | Tracked third-party DLLs and executables | ~45 MB | Replace with packages as each consumer is converted (D11); `external/` ends empty |
 | `Images/` source art (`.psd`, `.cdr`) | 11 MB | Done (`hygiene-large-binaries`): nothing referenced any of it, so the whole folder was deleted; the same change deleted the unused Thrift code generator, the unreferenced NUnit copies in `tests/` and the unread Sybase catalog dumps under `libraries/MSSQLDevice` |
 | `Dataphor/netsh_address_reservations.txt` | — | Done (`hygiene-large-binaries`): deleted (named a developer's machine account; described an HTTP binding no code uses) |
@@ -766,7 +766,7 @@ Target: user passwords stored as salted, iterated hashes, upgraded transparently
 
 | Work item | Scope | Prereq | Difficulty |
 |---|---|---|---|
-| `hygiene-silverlight-conditionals` | Remove `#if SILVERLIGHT` branches. (The `AllowSilverlightClients` setting is already gone: `protocol-corewcf-host-prepare` removed it.) | `test-harness-inprocess` | easy |
+| `hygiene-silverlight-conditionals` | Remove `#if SILVERLIGHT` branches. (The `AllowSilverlightClients` setting is already gone: `protocol-corewcf-host-prepare` removed it.) **Done**: 46 directive lines in 26 files deleted, keeping at each site the arm the preprocessor already took, so no compiled assembly changed; the compound `#if USENAMEDPIPES && !SILVERLIGHT` in `DataphorServiceUtility.cs` kept its live `USENAMEDPIPES` switch. The same change deleted the unreferenced `src/engine/Server/clientaccesspolicy.xml` and a `<remarks>` that documented only a deleted arm, and reworded the two D4 `TODO` comments in `System.Internet` and `System.Platform` to name a client-side assembly instead of the removed client. The `Frontend.ClientTypes` row and the `.dnt` documents stay for `hygiene-retire-web-silverlight-client-types`. | `test-harness-inprocess` | easy |
 | `hygiene-retire-web-silverlight-client-types` | Remove the `Web` and `Silverlight` rows from `Frontend.ClientTypes` and the two `.dnt` node-type documents of the removed clients, with a migration note. | — | easy |
 | `hygiene-remove-rest-leftovers` | Delete `RESTResult` and `RESTMarshal`, the JSON marshalling helpers whose only consumer was the parked web prototype, and the `Newtonsoft.Json` reference that only the second of them needed. | — | easy |
 | `hygiene-remove-dead-compiled-files` | Delete five compiled source files nothing references: `IndexList`, `TemporaryStream`, `CopyOnWriteStream`, `DebugContext` and `GenericDotNetConnection`. `TableForEachNode` stays, because the class registration publishes every `PlanNode` subclass under a D4 class name; the decision is recorded at the site. | `hygiene-remove-rest-leftovers` | easy |

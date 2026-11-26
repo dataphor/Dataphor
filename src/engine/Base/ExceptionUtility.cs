@@ -25,11 +25,7 @@ namespace Alphora.Dataphor
 		[System.Diagnostics.Conditional("DEBUG")]
 		public static void Warn(string message, params object[] arguments)
 		{
-			#if SILVERLIGHT
-			System.Diagnostics.Debug.WriteLine(String.Format(message, arguments));
-			#else
 			System.Diagnostics.Trace.WriteLine(String.Format(message, arguments));
-			#endif
 		}
 
 		/// <summary> Throws an "internal error" assertion exception for an unexpected critical condition. </summary>

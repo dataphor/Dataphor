@@ -31,11 +31,6 @@ namespace Alphora.Dataphor.DAE.Client
 			_overrideListenerPortNumber = overrideListenerPortNumber;
 			_listenerSecurityMode = listenerSecurityMode;
 			
-			#if SILVERLIGHT
-			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
-			System.Net.WebRequest.RegisterPrefix("https://", System.Net.Browser.WebRequestCreator.ClientHttp);
-			#endif
-			
 			Open();
 		}
 
@@ -44,11 +39,6 @@ namespace Alphora.Dataphor.DAE.Client
 			_hostName = hostName;
 			_clientConfigurationName = clientConfigurationName;
 
-			#if SILVERLIGHT
-			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
-			System.Net.WebRequest.RegisterPrefix("https://", System.Net.Browser.WebRequestCreator.ClientHttp);
-			#endif
-			
 			Open();
 		}
 

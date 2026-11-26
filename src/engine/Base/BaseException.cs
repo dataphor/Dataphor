@@ -92,9 +92,7 @@ namespace Alphora.Dataphor
 		public BaseException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
 		public BaseException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
 		public BaseException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
-	    #if !SILVERLIGHT // SerializationInfo
 		public BaseException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) {}
-		#endif
 		
 		public BaseException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) 
 			: base(severity, code, message, details, serverContext, innerException)

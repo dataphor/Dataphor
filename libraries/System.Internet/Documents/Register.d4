@@ -38,7 +38,7 @@ create operator SendEmail
 	class "System.Internet.SendEmailNode" static tags {DAE.IsRemotable = "False"};
 grant usage on SendEmail(String, String, String, String, String, String) to role User;
 
-// TODO: These are in-theory remotable, but a separate Silverlight assembly needs to be provided to enable that
+// TODO: These are in-theory remotable, but a client-side assembly providing them needs to be provided to enable that
 create operator HTMLAttributeEncode(const AValue : String) : String
 	class "System.Internet.HTMLAttributeEncodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on HTMLAttributeEncode(String) to role User;

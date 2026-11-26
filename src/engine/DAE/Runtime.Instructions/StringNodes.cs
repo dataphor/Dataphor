@@ -1191,11 +1191,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					encodedValue[index] = (byte)list[index];
 				}
-				#if SILVERLIGHT
-				Decoder decoder = UnicodeEncoding.UTF8.GetDecoder();
-				#else
 				Decoder decoder = UnicodeEncoding.ASCII.GetDecoder();
-				#endif
 				char[] decodedValue = new char[decoder.GetCharCount(encodedValue, 0, encodedValue.Length)];
 				decoder.GetChars(encodedValue, 0, encodedValue.Length, decodedValue, 0);
 				return new String(decodedValue);
@@ -1217,11 +1213,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				string stringValue = (string)argument1;
 				char[] decodedValue = new char[stringValue.Length];
 				stringValue.CopyTo(0, decodedValue, 0, stringValue.Length);
-				#if SILVERLIGHT
-				Encoder encoder = UnicodeEncoding.UTF8.GetEncoder();
-				#else
 				Encoder encoder = UnicodeEncoding.ASCII.GetEncoder();
-				#endif
 				byte[] encodedValue = new byte[encoder.GetByteCount(decodedValue, 0, decodedValue.Length, false)];
 				encoder.GetBytes(decodedValue, 0, decodedValue.Length, encodedValue, 0, true);
 				ListValue listValue = new ListValue(program.ValueManager, (Schema.ListType)_dataType);
@@ -1253,11 +1245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					encodedValue[index] = (byte)list[index];
 				}
-				#if SILVERLIGHT
-				Decoder decoder = UnicodeEncoding.UTF8.GetDecoder();
-				#else
 				Decoder decoder = UnicodeEncoding.ASCII.GetDecoder();
-				#endif
 				char[] decodedValue = new char[decoder.GetCharCount(encodedValue, 0, encodedValue.Length)];
 				decoder.GetChars(encodedValue, 0, encodedValue.Length, decodedValue, 0);
 				return new String(decodedValue);

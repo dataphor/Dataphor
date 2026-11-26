@@ -177,12 +177,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		private static Binding DefaultBuildBinding()
 		{
 			var messageEncodingElement = new BinaryMessageEncodingBindingElement();
-			#if !SILVERLIGHT
 			messageEncodingElement.ReaderQuotas.MaxArrayLength = MaxMessageLength;
 			messageEncodingElement.ReaderQuotas.MaxStringContentLength = MaxMessageLength;
-			#endif
 
-			#if USENAMEDPIPES && !SILVERLIGHT
+			#if USENAMEDPIPES
 			NamedPipeTransportBindingElement transportElement = new NamedPipeTransportBindingElement();
 			#else
 			TcpTransportBindingElement transportElement = new TcpTransportBindingElement();

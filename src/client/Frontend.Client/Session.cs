@@ -158,7 +158,6 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					using (DAE.Runtime.Data.IRow row = cursor.Plan.RequestRow())
 					{
-						#if !SILVERLIGHT
 						bool shouldLoad;
 						List<string> filesToLoad = new List<string>();
 
@@ -182,20 +181,6 @@ namespace Alphora.Dataphor.Frontend.Client
 						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
 						foreach (string fullFileName in filesToLoad)
 							Assembly.LoadFrom(fullFileName);
-						#else
-						while (cursor.Next())
-						{
-							cursor.Select(row);
-							((DAE.Server.LocalServer)DataSession.Server).LoadAndRegister
-							(
-								(DAE.Server.LocalProcess)cursor.Plan.Process,
-								cursor.Plan.Catalog.ClassLoader,
-								(string)row["Library_Name"],
-								(string)row["Name"],
-								(bool)row["ShouldRegister"]
-							);
-						}
-						#endif
 					}
 				}
 				finally

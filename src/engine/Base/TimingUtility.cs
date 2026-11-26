@@ -12,30 +12,14 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor
 {
-#if !SILVERLIGHT
 	[System.Security.SuppressUnmanagedCodeSecurity()]
-#endif
 	public sealed class TimingUtility
 	{
-#if SILVERLIGHT
-		public static bool QueryPerformanceCounter(out long lpPerformanceCount)
-		{
-			lpPerformanceCount = Environment.TickCount;
-			return true;
-		}
-		
-		public static bool QueryPerformanceFrequency(out long lpFrequency)
-		{
-			lpFrequency = 1000;
-			return true;
-		}
-#else
 		[DllImport("kernel32.dll", EntryPoint = "QueryPerformanceCounter", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
 
 		[DllImport("kernel32.dll", EntryPoint = "QueryPerformanceFrequency", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool QueryPerformanceFrequency(out long lpFrequency);
-#endif
 		static TimingUtility()
 		{
 			QueryPerformanceFrequency(out _ticksPerSecond);

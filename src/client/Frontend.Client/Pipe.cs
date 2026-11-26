@@ -479,9 +479,7 @@ namespace Alphora.Dataphor.Frontend.Client
 					{
 						// An abort above will cause this thread to terminate.  This is because a catch will not 
 						//  prevent abort exception propagation.  Must prevent this by resetting the abort state.
-						#if !SILVERLIGHT
 						System.Threading.Thread.ResetAbort();
-						#endif
 						// Don't rethrow - unnecessary
 					}
 					finally

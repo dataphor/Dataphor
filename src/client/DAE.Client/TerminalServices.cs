@@ -12,20 +12,13 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public static bool InTerminalSession
 		{
-			#if SILVERLIGHT
-			get { return false; }
-			#else
 			get { return System.Windows.Forms.SystemInformation.TerminalServerSession; }
-			#endif
 		}
 		
 		public static string ClientName 
 		{ 
 			get 
 			{ 
-				#if SILVERLIGHT
-				return "";
-				#else
 				if (InTerminalSession)
 				{
 					IntPtr buffer;
@@ -44,11 +37,9 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				else
 					return System.Environment.MachineName;
-				#endif
 			}
 		}
 
-		#if !SILVERLIGHT
 		public const int WTS_CURRENT_SERVER_HANDLE = -1;
 		public const int WTS_CURRENT_SESSION = -1;
 
@@ -78,6 +69,5 @@ namespace Alphora.Dataphor.DAE.Client
 
 		[DllImport("wtsapi32.dll", ExactSpelling = true, SetLastError = false)]
 		private static extern void WTSFreeMemory(IntPtr memory);
-		#endif
 	}
 }

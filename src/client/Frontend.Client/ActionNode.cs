@@ -6,11 +6,7 @@
 
 using System;
 using System.ComponentModel;
-#if SILVERLIGHT
-using Image=System.Windows.Media.ImageSource;
-#else
 using System.Drawing;
-#endif
 
 using Alphora.Dataphor.BOP;
 

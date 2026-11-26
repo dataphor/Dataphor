@@ -139,106 +139,13 @@ namespace Alphora.Dataphor
 		/// <summary> Converts a string value type to the .NET value based on the provided type. </summary>
 		public static object StringToValue(string value, Type type)
 		{
-			#if SILVERLIGHT
-			if (value == null)
-				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
-			if (typeof(Enum).IsAssignableFrom(type))
-				return Enum.Parse(type, value, true);
-			switch (Type.GetTypeCode(type))
-			{
-				case TypeCode.Boolean:
-					return Convert.ToBoolean(value);
-				case TypeCode.Char:
-					return Convert.ToChar(value);
-				case TypeCode.SByte:
-					return Convert.ToSByte(value);
-				case TypeCode.Byte:
-					return Convert.ToByte(value);
-				case TypeCode.Int16:
-					return Convert.ToInt16(value);
-				case TypeCode.UInt16:
-					return Convert.ToUInt16(value);
-				case TypeCode.Int32:
-					return Convert.ToInt32(value);
-				case TypeCode.UInt32:
-					return Convert.ToUInt32(value);
-				case TypeCode.Int64:
-					return Convert.ToInt64(value);
-				case TypeCode.UInt64:
-					return Convert.ToUInt64(value);
-				case TypeCode.Single:
-					return Convert.ToSingle(value);
-				case TypeCode.Double:
-					return Convert.ToDouble(value);
-				case TypeCode.Decimal:
-					return Convert.ToDecimal(value);
-				case TypeCode.DateTime:
-					return Convert.ToDateTime(value);
-				case TypeCode.String:
-					return value;
-				default:
-					if (type == typeof(byte[]))
-						return Convert.FromBase64String(value);
-					else if (type != typeof(object))
-					{
-						if (type == typeof(TimeSpan))
-							return TimeSpan.Parse(value);
-						else if (type == typeof(Guid))
-							return new Guid(value);
-						else if (type == typeof(Uri))
-							return new Uri(value);
-						else
-							break;
-					}
-					break;
-			}
-			throw new BaseException(BaseException.Codes.CannotConvertFromString, type.Name);
-			#else
 			return TypeDescriptor.GetConverter(type).ConvertFromString(value);
-			#endif
 		}
 
 		/// <summary> Converts a .NET value to a string based on the provided type. </summary>
 		public static string ValueToString(object value, Type type)
 		{
-			#if SILVERLIGHT
-			if (value == null)
-				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
-			switch (Type.GetTypeCode(type))
-			{
-				case TypeCode.Boolean:
-				case TypeCode.Char:
-				case TypeCode.SByte:
-				case TypeCode.Byte:
-				case TypeCode.Int16:
-				case TypeCode.UInt16:
-				case TypeCode.Int32:
-				case TypeCode.UInt32:
-				case TypeCode.Int64:
-				case TypeCode.UInt64:
-				case TypeCode.Single:
-				case TypeCode.Double:
-				case TypeCode.Decimal:
-				case TypeCode.DateTime:
-				case TypeCode.String:
-					return value.ToString();
-
-				default:
-					if (type == typeof(byte[]))
-						return Convert.ToBase64String((byte[])value);
-					else if (type != typeof(object))
-					{
-						if (type == typeof(TimeSpan) || type == typeof(Guid) || type == typeof(Uri) || typeof(Enum).IsAssignableFrom(type))
-							return value.ToString();
-					}
-					else if (typeof(IConvertible).IsAssignableFrom(type))
-						return ((IConvertible)value).ToString(System.Globalization.CultureInfo.InvariantCulture);
-					break;
-			}
-			throw new BaseException(BaseException.Codes.CannotConvertToString, type.Name);
-			#else
 			return TypeDescriptor.GetConverter(type).ConvertToString(value);
-			#endif
 		}
 
 		/// <summary> Gets a field, property, or simple method's value for a particular instance. </summary>
@@ -339,7 +246,6 @@ namespace Alphora.Dataphor
 		private static Dictionary<string, Assembly> _assemblyByName;
 
 		/// <summary> Ensures that the internal dictionary is populated with the set of initially loaded assemblies. </summary>
-		/// <remarks> Under Silverlight, this call must be made on the main thread. </remarks>
 		public static void EnsureAssemblyByName()
 		{
 			if (_assemblyByName == null)
@@ -355,25 +261,9 @@ namespace Alphora.Dataphor
 				)
 					lock (_assemblyByName)
 					{
-						#if SILVERLIGHT
-						foreach (var part in System.Windows.Deployment.Current.Parts)
-						{
-							RegisterAssembly
-							(
-								new System.Windows.AssemblyPart().Load
-								(
-									System.Windows.Application.GetResourceStream
-									(
-										new Uri(part.Source, UriKind.Relative)
-									).Stream
-								)
-							);
-						}
-						#else
 						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                             if (!_assemblyByName.ContainsKey(AssemblyNameUtility.GetName(assembly.FullName)))
     							RegisterAssembly(assembly);
-						#endif
 					}
 			}
 		}
@@ -396,22 +286,7 @@ namespace Alphora.Dataphor
 		
 		public static Assembly[] GetRegisteredAssemblies()
 		{
-			#if SILVERLIGHT
-			EnsureAssemblyByName();
-			lock (_assemblyByName)
-			{
-				var result = new Assembly[_assemblyByName.Count];
-				var i = 0;
-				foreach (Assembly assembly in _assemblyByName.Values)
-				{
-					result[i] = assembly;
-					i++;
-				}
-				return result;
-			}
-			#else
 			return AppDomain.CurrentDomain.GetAssemblies();
-			#endif
 		}
 
 		public static Type SearchAllAssembliesForClass(string qualifiedClassName)

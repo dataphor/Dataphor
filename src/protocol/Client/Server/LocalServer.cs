@@ -411,62 +411,6 @@ namespace Alphora.Dataphor.DAE.Server
 		private List<string> _filesCached = new List<string>();
 		private List<string> _assembliesCached = new List<string>();
 		
-		#if SILVERLIGHT
-
-		public static Assembly LoadAssembyFromRemote(LocalProcess process, string libraryName, string fileName)
-		{
-			using (Stream sourceStream = new RemoteStreamWrapper(process.RemoteProcess.GetFile(libraryName, fileName)))
-			{
-				var assembly = new System.Windows.AssemblyPart().Load(sourceStream);
-				ReflectionUtility.RegisterAssembly(assembly);
-				return assembly;
-			}
-		}
-		
-		public void ClassLoaderMissed(LocalProcess process, ClassLoader classLoader, ClassDefinition classDefinition)
-		{
-			AcquireCacheLock(process, LockMode.Exclusive);
-			try
-			{
-				if (!classLoader.Classes.Contains(classDefinition.ClassName))
-				{
-					// The local process has attempted to create an object from an unknown class alias.
-					// Use the remote server to attempt to download and install the necessary assemblies.
-
-					// Retrieve the list of all files required to load the assemblies required to load the class.
-					ServerFileInfo[] fileInfos = process.RemoteProcess.GetFileNames(classDefinition.ClassName, process.Session.SessionInfo.Environment);
-
-					for (int index = 0; index < fileInfos.Length; index++)
-						if (fileInfos[index].IsDotNetAssembly)
-							LoadAndRegister(process, classLoader, fileInfos[index].LibraryName, fileInfos[index].FileName, fileInfos[index].ShouldRegister);
-				}
-			}
-			finally
-			{
-				ReleaseCacheLock(process, LockMode.Exclusive);
-			}
-		}
-
-		public void LoadAndRegister(LocalProcess process, ClassLoader classLoader, string libraryName, string fileName, bool shouldRegister)
-		{
-			try
-			{
-				if (!_filesCached.Contains(fileName))
-				{
-					Assembly assembly = LoadAssembyFromRemote(process, libraryName, fileName);
-					if (shouldRegister && !classLoader.Assemblies.Contains(assembly.FullName))
-						classLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.SystemLibraryName], assembly);
-					_assembliesCached.Add(fileName);
-					_filesCached.Add(fileName);
-				}
-			}
-			catch (IOException E)
-			{
-				_internalServer.LogError(E);
-			}
-		}
-		
-		#else
 		private string FLocalBinDirectory;
 		private string LocalBinDirectory
 		{
@@ -571,7 +515,6 @@ namespace Alphora.Dataphor.DAE.Server
 				ReleaseCacheLock(AProcess, LockMode.Exclusive);
 			}
 		}
-		#endif
 
         /// <summary>Starts the server instance.  If it is already running, the call has no effect.</summary>
         public void Start()

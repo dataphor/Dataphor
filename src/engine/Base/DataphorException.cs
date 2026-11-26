@@ -90,8 +90,6 @@ namespace Alphora.Dataphor
 			HResult = OR_E_EXCEPTION;
 		}
 		
-	    #if !SILVERLIGHT // SerializationInfo
-
 		public DataphorException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) 
 		{
 			_code = info.GetInt32("Code");
@@ -108,8 +106,6 @@ namespace Alphora.Dataphor
 			info.AddValue("Details", _details);
 			info.AddValue("ServerContext", _serverContext);
 		}
-		
-		#endif
 		
 		private int _code;
 		public int Code 

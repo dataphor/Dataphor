@@ -100,7 +100,7 @@ grant usage on MoveFile(FileName, FileName) to role PlatformUser;
 create operator DirectoryExists(const ADirectoryName : FileName) : Boolean class "System.Platform.DirectoryExistsNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
 grant usage on DirectoryExists(FileName) to role PlatformUser;
 
-// TODO: These are in theory remotable, but a separate Silverlight assembly would need to provided to enable that
+// TODO: These are in theory remotable, but a client-side assembly providing them would need to provided to enable that
 //* Operator: GetFileName
 // Returns the file name of the path given by AFileName.
 create operator GetFileName(const AFileName : FileName) : FileName class "System.Platform.GetFileNameNode" tags { DAE.IsRemotable = "false" };

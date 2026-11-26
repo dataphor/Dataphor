@@ -965,7 +965,6 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Alias
 		
-		#if !SILVERLIGHT
 		// AliasName
 		private string _aliasName = String.Empty;
 		/// <summary> The name of the alias to use to establish a connection to a Dataphor Server. </summary>
@@ -989,7 +988,6 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 		}
-		#endif
 		
 		private void InternalSetAlias(ServerAlias alias)
 		{
@@ -1026,9 +1024,7 @@ namespace Alphora.Dataphor.DAE.Client
 				if (_alias != value)
 				{
 					InternalSetAlias(value);
-					#if !SILVERLIGHT
 					_aliasName = String.Empty;
-					#endif
 				}
 			}
 		}

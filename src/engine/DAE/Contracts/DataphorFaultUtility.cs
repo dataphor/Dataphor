@@ -17,10 +17,8 @@ using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 
-#if !SILVERLIGHT
 using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Connection;
-#endif
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
@@ -48,15 +46,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 			if (exception.InnerException != null)
 				fault.InnerFault = ExceptionToFault(exception.InnerException);
 				
-			#if !SILVERLIGHT
-			// Under Silverlight, a ConnectionException will come back as a DataphorException
-			// The statement is still present in the Details.
 			ConnectionException connectionException = exception as ConnectionException;
 			if (connectionException != null)
 			{
 				fault.Statement = connectionException.Statement;
 			}
-			#endif
 			
 			SyntaxException syntaxException = exception as SyntaxException;
 			if (syntaxException != null)
@@ -112,10 +106,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 				case "BOPException" : return new BOPException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 				case "CompilerException" : return new CompilerException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.ErrorLevel, fault.Line, fault.LinePos, fault.InnerFault == null ? null : FaultToException(fault.InnerFault)) { Locator = fault.Locator };
 				case "RuntimeException" : return new RuntimeException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.Locator, fault.Line, fault.LinePos, fault.Context, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
-				#if !SILVERLIGHT
 				case "ConnectionException" : return new ConnectionException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.Statement, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 				case "StoreException" : return new StoreException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
-				#endif
 				case "DeviceException" : 
 				case "ApplicationTransactionException" :
 				case "CatalogException" :

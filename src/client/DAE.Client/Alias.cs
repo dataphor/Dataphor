@@ -37,7 +37,6 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> This type converter hides the password from the property grid. </summary>
 		private class SessionInfoConverter : TypeConverter
 		{
-			#if !SILVERLIGHT
 			public override bool GetPropertiesSupported(ITypeDescriptorContext context)
 			{
 				return true;
@@ -57,7 +56,6 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				return new PropertyDescriptorCollection(filtered);
 			}
-			#endif
 		}
 
 		[System.ComponentModel.TypeConverter(typeof(SessionInfoConverter))]

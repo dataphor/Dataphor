@@ -9,9 +9,7 @@ using System.Reflection;
 
 namespace Alphora.Dataphor.BOP
 {
-	#if !SILVERLIGHT
 	[Serializable]
-	#endif
 	public class BOPException : DataphorException
 	{
 		public enum Codes : int
@@ -74,9 +72,7 @@ namespace Alphora.Dataphor.BOP
 		public BOPException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
 		public BOPException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
 		public BOPException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
-		#if !SILVERLIGHT
 		public BOPException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) {}
-		#endif
 		
 		public BOPException(ErrorSeverity severity, int code, string message, string details, string serverContext, DataphorException innerException) 
 			: base(severity, code, message, details, serverContext, innerException)

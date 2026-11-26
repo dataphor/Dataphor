@@ -72,10 +72,8 @@ namespace Alphora.Dataphor
 				if (objectValue == null)
 					return false;
 					
-				#if !SILVERLIGHT					
 				if (objectValue is System.Reflection.Pointer)
 					return false; // Unmanaged pointer, do not follow
-				#endif
 				Object visitedObject;
 				if (_visitedObjects.TryGetValue(objectValue, out visitedObject))
 					return false;

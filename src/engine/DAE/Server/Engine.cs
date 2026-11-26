@@ -868,10 +868,8 @@ namespace Alphora.Dataphor.DAE.Server
 				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- IServer.Connect", DateTime.Now.ToString("hh:mm:ss.ffff")));
 				#endif
 				CheckState(ServerState.Started);
-				#if !SILVERLIGHT
 				if (String.IsNullOrEmpty(sessionInfo.HostName))
 					sessionInfo.HostName = System.Environment.MachineName;
-				#endif
 				return (IServerSession)InternalConnect(GetNextSessionID(), sessionInfo);
 			}
 			catch (Exception E)
