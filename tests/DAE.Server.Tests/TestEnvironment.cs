@@ -373,11 +373,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// not connect at all. They are carried as the device's ConnectionParameters, which SQLDevice.GetConnectionParameters
 		/// applies after the builder has run and which is therefore what overrides the builder's Encrypt=False default.</para>
 		/// </remarks>
-		// NOTE: a password in the variable reaches the test server's catalog in clear text - it becomes an attribute of the
-		// device definition below - and the catalog of a run kept with DATAPHOR_TEST_LOGGING=1 stays on disk afterwards. That
-		// is acceptable for the integrated-security and LocalDB values these passes are pointed at. If a pass ever has to
-		// reach a server through a SQL login whose password matters, create the device with integrated security off and give
-		// it a device user instead, so that the password is not in the definition.
+		// A SQL login is not among them: it goes to a device user instead (MSSQLDeviceUser below), so that no password is
+		// stored as the literal text of a device definition - which is where one in the variable used to land, and where the
+		// catalog of a run kept with DATAPHOR_TEST_LOGGING=1 would leave it on disk.
 		public static string MSSQLDeviceAttributes(string databaseName)
 		{
 			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
@@ -386,17 +384,53 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			attributes.Add(DeviceAttribute("DatabaseName", databaseName));
 			if (server.IntegratedSecurity)
 				attributes.Add(DeviceAttribute("UseIntegratedSecurity", "True"));
-			else
-			{
-				attributes.Add(DeviceAttribute("UserName", server.UserID));
-				attributes.Add(DeviceAttribute("Password", server.Password));
-			}
 
 			string connectionParameters = MSSQLConnectionParameters();
 			if (connectionParameters.Length > 0)
 				attributes.Add(DeviceAttribute("ConnectionParameters", connectionParameters));
 
 			return String.Join(", ", attributes);
+		}
+
+		/// <summary>
+		/// The statement that gives the device named <paramref name="deviceName"/> the SQL login the variable names, to run
+		/// after the device has been created; empty where the variable asks for integrated security, which needs no login.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// A device user rather than credentials on the device itself: a device user's password is stored encrypted, where an
+		/// attribute of a device definition is stored as the literal text of the definition. The Dataphor user is Admin
+		/// because that is the user every server in this suite is reached as.
+		/// </para>
+		/// <para>
+		/// It is a separate statement because a SQL login cannot be a device attribute at all: Schema.Device's own credential
+		/// properties are UserID and Password, not the UserName and Password tag names the connection-string builders map -
+		/// and MSSQLDeviceAttributes emitted those tag names until a run against a server that needed a login reported
+		/// "Class MSSQLDevice does not contain a property named UserName". The device resolves a device user ahead of its own
+		/// credentials (Device.GetDeviceSessionInfo), so a device user is the spelling that works whichever it is given.
+		/// </para>
+		/// </remarks>
+		public static string MSSQLDeviceUser(string deviceName)
+		{
+			SqlConnectionStringBuilder server = new SqlConnectionStringBuilder(MSSQLConnectionString);
+			if (server.IntegratedSecurity)
+				return String.Empty;
+
+			return
+				String.Format
+				(
+					"CreateDeviceUser('{0}', '{1}', '{2}', '{3}');",
+					Engine.AdminUserID,
+					deviceName,
+					D4StringLiteral(server.UserID),
+					D4StringLiteral(server.Password)
+				);
+		}
+
+		/// <summary>The body of a D4 string literal; a single quote in the value is doubled, which is the only escape it has.</summary>
+		private static string D4StringLiteral(string value)
+		{
+			return (value ?? String.Empty).Replace("'", "''");
 		}
 
 		/// <summary>One D4 device attribute; a double quote in the value is doubled, which is the only escape a D4 string literal has.</summary>
@@ -442,6 +476,13 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		// server at the same time - two developers, or a developer and a CI agent, with DATAPHOR_TEST_MSSQL pointed at one
 		// shared instance - would empty each other's database mid-case. If that day comes, name the database after the run,
 		// as the run directory above is named after the process, and accept that a crashed run then leaves one behind per run.
+		// NOTE: the same fixed names collide across two LocalDB instances on one machine, and there they fail the create rather
+		// than racing: every LocalDB instance defaults a new database's files into the user's profile folder, so once one
+		// instance holds DataphorCoverageScripts the next instance cannot create it - "Cannot create file
+		// 'C:\Users\...\DataphorCoverageScripts.mdf' because it already exists" (met twice while measuring
+		// the supported-version matrix, 2026-11-26). Drop this suite's databases from the first instance before pointing the
+		// variable at a second one; the alternative, giving the create an explicit file path, would move where a run leaves
+		// its evidence, which is the one thing these fixed names are for.
 		public static void EmptyMSSQLDatabase(string databaseName)
 		{
 			ExecuteOnMSSQL(MSSQLConnectionStringFor("master"), String.Format("if db_id('{0}') is null create database [{0}];", databaseName));
@@ -463,6 +504,28 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
 				connection.Execute(statement);
+		}
+
+		/// <summary>
+		/// The first column of the first row <paramref name="expression"/> returns on the configured server, as a string, or null
+		/// where it returns no row.
+		/// </summary>
+		// Beside ExecuteOnMSSQL and for the same reason: one place reads the variable and one place reaches the server, through
+		// the connection class the device and the store share. The client-side cursor explicitly, because these expressions have
+		// no from clause and sp_cursoropen - which DetectCursorLocation would choose for a statement starting with select - needs
+		// something to range over.
+		public static string QueryMSSQL(string connectionString, string expression)
+		{
+			using (MSSQLConnection connection = new MSSQLConnection(connectionString))
+			using (SQLCommand command = connection.CreateCommand(true))
+			{
+				command.CursorLocation = SQLCursorLocation.Client;
+				command.CommandType = SQLCommandType.Statement;
+				command.LockType = SQLLockType.ReadOnly;
+				command.Statement = expression;
+				using (SQLCursor cursor = command.Open(SQLCursorType.Dynamic, SQLIsolationLevel.ReadCommitted))
+					return cursor.Next() ? Convert.ToString(cursor[0]) : null;
+			}
 		}
 
 		#endregion

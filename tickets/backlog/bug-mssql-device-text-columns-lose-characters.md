@@ -1,6 +1,6 @@
 description: When Dataphor creates a table in a SQL Server database, it makes the text columns single-byte, so text stored in them still loses any character the server's character set cannot hold - Chinese or Greek characters come back as question marks - even though Dataphor now sends the text correctly.
 architecture: docs/modernization-plan.md#ws7-devices-and-libraries
-files: libraries/SQLDevice/Source/SQLTypes.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLTypes.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLDevice.cs, src/engine/Server/Connection/MSSQLCommand.cs, tests/goldens/devices/MSSQL/
+files: libraries/SQLDevice/Source/SQLTypes.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLTypes.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLDevice.cs, src/engine/Server/Connection/MSSQLCommand.cs, tests/goldens/devices/MSSQL/, tests/DAE.Server.Tests/MSSQLVersionMatrixTest.cs
 repro: static
 severity: corruption
 likelihood: normal-use
@@ -46,3 +46,13 @@ This is the same site as the two arms above - what the SQL Server device thinks 
 Worth noting for whoever triages: the device already has an `IsCaseSensitive` property, but `MSSQLDevice.RegisterSystemObjectMaps` hard-codes `"false"` into the `SystemCatalog.d4` it runs (the `USEISTRING` branch beside it is compiled out), and the one definition of a `CoverageDevice` kept in the test tree has `//"IsCaseSensitive" = "true"` commented out - so the question was already open in 2008 and nothing in the tree answers it.
 
 Reproducing it needs the one statement that `test-pre-3-1-scripts-policy`'s third arm asks the owner to rule on; until then `LiveDeviceTest` does not reach these cases.
+
+## A fourth arm: the byte-count arm is now verified, and it costs more than "nothing is lost"
+
+Verified 2026-11-26 by `device-sqlserver-version-matrix`, on SQL Server 2016 LocalDB, 2019 (LocalDB and a Linux container) and 2022, all four giving the same answer. The new fixture `tests/DAE.Server.Tests/MSSQLVersionMatrixTest.cs` creates a table on the server directly and reconciles it; an `nvarchar(30)` column arrives as a D4 `String` with `Storage.Length` 60, as the byte-count arm above said it would.
+
+What the measurement adds is a consequence that arm did not have. Reconciliation does not only record the length as a tag: `SQLDevice.GetDeviceTables` compiles a column constraint from it, `LengthValid`, asserting `Length(value) <= 60`. So D4 accepts a 45-character value for a column that holds 30, and the rejection arrives from SQL Server when the row is written rather than from Dataphor when the value is entered - which for a user editing a form means a server error instead of a field-level message, and for a batch insert means a failure partway through. So the arm is not only a wider parameter descriptor; it is a length constraint that does not say what the column can hold.
+
+The fix is the one that arm already named - record the character width rather than the byte count - and the place that decides it is the same `MSSQLDevice.FindScalarType`. The reconciliation query is in `GetDeviceTablesExpression` in the same file, which selects `convert(integer, sc.max_length) as Length` on SQL Server 9 and above and `convert(integer, sc.length)` below it; both are byte counts, so a correction belongs where the number is interpreted or in both queries, not in one.
+
+Whoever takes this: the fixture above pins the current behaviour, so the fix has to change its expectation for `NVarcharColumn` from 60 to 30, and that is the one change to it that is correct to make.

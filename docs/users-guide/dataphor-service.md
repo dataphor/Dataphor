@@ -107,7 +107,7 @@ One store other than SQLite ships, for a deployment that must keep its catalog i
 	catalogstoreconnectionstring="Data Source=SQLHOST;Initial Catalog=DataphorReporting;Integrated Security=SSPI" />
 ```
 
-The database named in the connection string is created by the server if it is not there, so the account the server runs as needs the right to create it, or the database should be created in advance. Three things to know about this store. It always sets `MultipleActiveResultSets=True` on its connections, whatever the connection string says, because the catalog reads one of its tables while a read of another is still open and SQL Server refuses that otherwise; leave the keyword out of the connection string. Its text columns are written as Unicode, so non-ASCII characters in catalog object, library or user names are safe; a catalog written by a build before release 4.0 wrote them through `varchar` parameters, which stored a question mark in place of every character the database's code page had no room for, and nothing converts those question marks back. And it adds `Encrypt=False` when the connection string mentions neither `Encrypt` nor `TrustServerCertificate`, because the SQL Server client this release uses would otherwise encrypt the connection and then refuse a server whose certificate this machine does not trust - which a connection string written for release 3 never had to say anything about. To encrypt the catalog connection instead, say so and the default gives way: add `Encrypt=True` for a server whose certificate is trusted, or `Encrypt=True;TrustServerCertificate=True` to encrypt without checking it. SQLite remains the recommendation for every deployment that does not specifically need the catalog in SQL Server.
+The database named in the connection string is created by the server if it is not there, so the account the server runs as needs the right to create it, or the database should be created in advance. Three things to know about this store. It always sets `MultipleActiveResultSets=True` on its connections, whatever the connection string says, because the catalog reads one of its tables while a read of another is still open and SQL Server refuses that otherwise; leave the keyword out of the connection string. Its text columns are written as Unicode, so non-ASCII characters in catalog object, library or user names are safe; a catalog written by a build before release 4.0 wrote them through `varchar` parameters, which stored a question mark in place of every character the database's code page had no room for, and nothing converts those question marks back. And it adds `Encrypt=False` when the connection string mentions neither `Encrypt` nor `TrustServerCertificate`, because the SQL Server client this release uses would otherwise encrypt the connection and then refuse a server whose certificate this machine does not trust - which a connection string written for release 3 never had to say anything about. To encrypt the catalog connection instead, say so and the default gives way: add `Encrypt=True` for a server whose certificate is trusted, or `Encrypt=True;TrustServerCertificate=True` to encrypt without checking it. SQLite remains the recommendation for every deployment that does not specifically need the catalog in SQL Server. Which SQL Server versions this store and the SQL Server device have been measured against is below, under [Which SQL Server versions work](#which-sql-server-versions-work).
 
 **Catalog store connection string** (`catalogstoreconnectionstring`). How the catalog store connects. Empty, the default, means the catalog is kept in a file named `DAECatalog.sqlite` in the `Catalog` folder of the instance directory. In a value given here, the token `%CatalogPath%` is replaced with that `Catalog` folder, which is the way to vary this setting without writing an absolute path into it: `Data Source=%CatalogPath%\DAECatalog.sqlite` is the default spelled out. Leave it empty unless the catalog file has to live somewhere other than its default place, or a store other than SQLite is in use.
 
@@ -150,6 +150,55 @@ A setting the current server no longer has is ignored, and every other setting o
 Such a setting is then gone from the file the next time anything saves it, because a save writes out the settings the server has, not the ones it read. The same save also drops any setting whose value is the default for it — `shouldlisten`, `overridelistenerportnumber`, `requiresecureconnection` and `requiresecurelistenerconnection` are written only when they differ from the defaults above — and drops any entry that could not be read, such as one whose name duplicated another's. Keep a copy of the old file if its contents matter.
 
 A file naming the SQL Server Compact catalog store of an earlier release will not start; see the catalog store settings above. Catalogs are rebuilt from the application's own scripts rather than migrated.
+
+## Which SQL Server versions work
+
+Both of the places Dataphor talks to a SQL Server — the catalog store described above, and the SQL Server **device** an application's libraries use to hold their tables — go through the same connection code, so one answer covers both.
+
+**SQL Server 2022 is the supported minimum.** SQL Server 2019 also works and needs no settings of its own beyond the connection settings below. Older releases are not supported, although nothing in Dataphor refuses them and SQL Server 2016 passes the same tests today; a deployment on one is on its own if a later change breaks it. Support follows roughly the last five years of SQL Server releases, so a version will leave this list as it ages out.
+
+### What was measured, and on what
+
+Each row below was measured by pointing the test suite's live SQL Server passes at that server: the three transaction-atomicity scripts that commit and roll back across a device boundary, the fifteen catalog-store contract cases, the six text-parameter cases that drive both of the ways a parameter is described to the server, the three cases that read the server's version and reconcile a table the device did not create, and the device-coverage pass, which creates a test library's tables and its 1,180 rows of test data on the server through the device and then stops at a statement in the test script itself that cannot succeed on any version — so it shows that the device works and does not yet check the 1,180 assertions. Measured 26 November 2026; the whole set takes about a minute per server.
+
+| SQL Server | How it was hosted | Version reported | Database collation | Result |
+|---|---|---|---|---|
+| 2022 | Linux container, SQL login | 16.0.4325.4, Developer Edition | `SQL_Latin1_General_CP1_CI_AS` | **Passes.** Every case passed, and the device-coverage pass stopped where it does on every version |
+| 2019 | Linux container, SQL login | 15.0.4510.2, Developer Edition | `SQL_Latin1_General_CP1_CI_AS` | **Passes**, with no extra code or settings |
+| 2019 | Windows, LocalDB, integrated security | 15.0.4382.1, Express Edition | `SQL_Latin1_General_CP1_CI_AS` | **Passes** |
+| 2016 | Windows, LocalDB, integrated security | 13.0.4001.0, Express Edition | `SQL_Latin1_General_CP1_CI_AS` | Passes, but below the supported minimum — information, not a promise |
+| 2025 | not reached | — | — | **Not measured.** The 2025 Linux container image would not start on the machine available for this measurement: the server process stops with a fatal error before it accepts any connection, on both the Ubuntu 22.04 and 24.04 images and whether run as root or not, so nothing about Dataphor was learned either way |
+| 2017 | not reached | — | — | **Not measured.** An instance is installed on the measurement machine but starting its Windows service needs administrator rights the measurement did not have. It sits between two versions that pass |
+
+Every row that was reached reports the same database collation, so **a pass above is a pass on `SQL_Latin1_General_CP1_CI_AS` and not on every collation.** The collation decides what a `varchar` column can hold: a character the collation's code page has no room for is stored as a question mark, silently, which is why Dataphor writes text through Unicode parameters. A deployment on a different collation should run the same passes against its own server before trusting the table above.
+
+Three things the measurement confirmed on every version it reached, each of which is the first thing to fail against a server nobody has tried: the device reads the server's version correctly from `serverproperty('productversion')` and does not mistake any of these for SQL Server 7.0, whose dialect it still knows how to emit; the device creates the database named in its definition when that database is absent; and the server-side cursor path — the undocumented `sp_cursoropen` and `sp_cursorfetch` procedures the device uses for every read whose statement begins with `select` — works. A failure in that last one would be the strongest argument for making the device use client-side cursors instead, and there was none.
+
+### Connection settings
+
+The SQL Server client this release uses encrypts by default and then checks the server's certificate, which earlier releases did not. An internal SQL Server usually has a self-signed certificate that the machines connecting to it do not trust, so this is the setting a deployment most often has to add. The device and the catalog store each add `Encrypt=False` for themselves — which is what release 3.1 did — so a device definition or a catalog store connection string carried over from release 3.1 keeps connecting. Anything that connects with the exact text it is given does not.
+
+Measured against SQL Server 2019 and 2022 with a self-signed certificate the client did not trust:
+
+| In the connection string | 2019 | 2022 | What it means |
+|---|---|---|---|
+| nothing about encryption | fails: *the certificate chain was issued by an authority that is not trusted* | fails, same way | the client encrypts and checks the certificate |
+| `Encrypt=False` | connects | connects | unencrypted; what release 3.1 did, and what the device and the catalog store default to |
+| `TrustServerCertificate=True` | connects | connects | encrypted, certificate not checked |
+| `Encrypt=True;TrustServerCertificate=True` | connects | connects | the same, said explicitly |
+| `Encrypt=Strict` | fails before login | fails before login | strict encryption ignores `TrustServerCertificate`, so it needs a certificate the machine really trusts; and 2019 does not support it at all |
+
+A device whose definition names only a server and a database connects to such a server unchanged, through its own `Encrypt=False` — measured against SQL Server 2022. To encrypt a device's connection instead, give the device `ConnectionParameters`, which is applied after that default and overrides it: `"ConnectionParameters" = "Encrypt=True"` for a server whose certificate is trusted, or `"Encrypt=True;TrustServerCertificate=True"` to encrypt without checking it. The catalog store takes the same settings in its connection string, as described under the catalog store above.
+
+### Adopting a schema the device did not create
+
+A device in a reconciliation mode whose master is the device reads the tables already in its database and creates a D4 table variable for each. Three things about that are worth knowing before pointing a device at an existing schema, and all three are the same on every version above.
+
+The D4 name includes the SQL schema: a `dbo` table called `Invoices` becomes `MyLibrary.dbo.Invoices`, not `MyLibrary.Invoices`, unless the device's `Schema` attribute is set to `dbo`, in which case the schema is left out of the name.
+
+Columns of type `datetime2` and `datetimeoffset` are **left out of the reconciled table variable, with nothing said about it.** The device maps `datetime`, `date` and `time`, but not the two types SQL Server added alongside them in 2008, so a table using them reconciles with fewer columns than it has. Check a reconciled table variable's columns against the SQL table before relying on it.
+
+A Unicode column reconciles twice as wide as it is: an `nvarchar(30)` column arrives with a length of 60, because SQL Server reports that column's width in bytes and Dataphor reads the number as a count of characters. The length constraint Dataphor then puts on the column admits strings the server will not store, so the error arrives from SQL Server on the write rather than from Dataphor on the edit. Both of these are defects rather than decisions and are expected to change; a release that fixes them will say so in the migration notes.
 
 ## Uninstalling
 

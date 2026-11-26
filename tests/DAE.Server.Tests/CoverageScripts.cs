@@ -512,10 +512,11 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			return
 				String.Format
 				(
-					"SetLibrary('{0}');\r\ncreate device {1} reconciliation {{ mode = {{ command }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n",
+					"SetLibrary('{0}');\r\ncreate device {1} reconciliation {{ mode = {{ command }}, master = device }} class \"MSSQLDevice.MSSQLDevice\" attributes {{ {2} }};\r\n{3}",
 					LiveDeviceLibrary,
 					LiveDeviceName,
-					TestEnvironment.MSSQLDeviceAttributes(LiveDeviceDatabase)
+					TestEnvironment.MSSQLDeviceAttributes(LiveDeviceDatabase),
+					TestEnvironment.MSSQLDeviceUser(LiveDeviceName)
 				);
 		}
 
