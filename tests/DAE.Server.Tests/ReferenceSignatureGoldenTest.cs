@@ -270,6 +270,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public const string OperatorsFolder = "operators";
 		public const string TypesFolder = "types";
 
+		/// <summary>The folder of generated system table pages, below the pages directory.</summary>
+		public const string TablesFolder = "tables";
+
+		/// <summary>The generated section index of the tables folder.</summary>
+		public const string TablesIndexFileName = "README.md";
+
+		/// <summary>The Developer's Guide chapter a generated table page sends a reader to, from inside the tables folder.</summary>
+		private const string CatalogChapterPath = "../../../developers-guide/d4-catalog.md";
+
 		/// <summary>
 		/// The pages that carry no declarations block, and why. These are absences, not disagreements: a page that loses
 		/// or gains a block without this list changing fails the pass.
@@ -320,6 +329,87 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			"System.LibraryDescriptor",
 			"System.LibraryReference",
 			"System.Scalar"
+		];
+
+		/// <summary>
+		/// The System library's base tables, as the catalog of a server carrying no library reports them. Held against
+		/// the catalog in both directions, so that a table arriving or leaving is a line in this list for a reviewer to
+		/// read, rather than only a page that appears or disappears under docs/ on an update run.
+		/// </summary>
+		/// <remarks>
+		/// Seven more tables are declared in src/engine/DAE/Schema/SystemCatalog.d4 and are deliberately not here. Six -
+		/// SourceDerivedReferences, TargetDerivedReferences, DerivedReferences, DerivedReferenceColumns,
+		/// DerivedReferenceParents and DerivedReferenceDerivedParents - are inside a block comment there, as
+		/// System.GroupName's create type is in DataTypes.d4, so no catalog has had them since before 3.1. The seventh,
+		/// Generators, is created by the body of EnsureGenerators rather than by the script, and in the calling library's
+		/// own namespace rather than in System, so a bare engine has no such table to document.
+		/// </remarks>
+		private static readonly string[] SystemTables =
+		[
+			"System.ApplicationTransactionOperatorMaps",
+			"System.ApplicationTransactionOperatorNameMaps",
+			"System.ApplicationTransactionTableMaps",
+			"System.ApplicationTransactions",
+			"System.BaseTableVars",
+			"System.CatalogConstraints",
+			"System.CatalogObjects",
+			"System.Connections",
+			"System.DerivedTableVars",
+			"System.DeviceOperators",
+			"System.DeviceScalarTypes",
+			"System.DeviceSessions",
+			"System.DeviceUsers",
+			"System.Devices",
+			"System.Libraries",
+			"System.LibraryFileEnvironments",
+			"System.LibraryFiles",
+			"System.LibraryOwners",
+			"System.LibraryRequisites",
+			"System.LibrarySettings",
+			"System.LibraryVersions",
+			"System.LoadedLibraries",
+			"System.ObjectDependencies",
+			"System.Objects",
+			"System.Operators",
+			"System.Plans",
+			"System.Processes",
+			"System.References",
+			"System.RegisteredAssemblies",
+			"System.RegisteredClasses",
+			"System.RemoteSessions",
+			"System.Rights",
+			"System.RoleRightAssignments",
+			"System.Roles",
+			"System.ScalarTypes",
+			"System.Scripts",
+			"System.ServerLinkUsers",
+			"System.ServerLinks",
+			"System.ServerSettings",
+			"System.SessionCatalogObjects",
+			"System.Sessions",
+			"System.Sorts",
+			"System.TableDee",
+			"System.TableDum",
+			"System.TableVars",
+			"System.UserRightAssignments",
+			"System.UserRoles",
+			"System.Users"
+		];
+
+		/// <summary>
+		/// The System library's views. Which table variables are views is read from the DerivedTableVars system table
+		/// rather than from the emitted text, so the page says what the catalog says; this list is held against that
+		/// table in both directions, so a table becoming a view is a reviewable change too.
+		/// </summary>
+		private static readonly string[] SystemViews =
+		[
+			"System.AttachLibraries",
+			"System.AttachLibrary",
+			"System.DetachLibrary",
+			"System.DevicesNameAndLibrary",
+			"System.LibraryView",
+			"System.ListLogs",
+			"System.ViewLog"
 		];
 
 		/// <summary>
@@ -484,6 +574,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		private Dictionary<string, string> _operatorDeclarations;
 		private Dictionary<string, int> _operatorOverloadCounts;
 		private Dictionary<string, string> _typeDeclarations;
+		private Dictionary<string, string> _tableVarDefinitions;
+		private List<string> _viewNames;
 
 		/// <summary>
 		/// Generates the declarations if this fixture has not done it yet. Called by the cases that need them rather
@@ -499,6 +591,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			{
 				_operatorDeclarations = OperatorDeclarations(Process, out _operatorOverloadCounts);
 				_typeDeclarations = TypeDeclarations(Process);
+				_tableVarDefinitions = TableVarDefinitions(Process, out _viewNames);
 			}
 		}
 
@@ -560,6 +653,35 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		{
 			return
 				Rows(process, "select ScalarTypes where Library_Name = 'System' add { Script(Name) Declaration } over { Name, Declaration } order by { Name }", "Name", "Declaration")
+					.ToDictionary(row => row[0], row => Trim(row[1]), StringComparer.Ordinal);
+		}
+
+		/// <summary>
+		/// Every System table variable's definition, from the TableVars system table the same way, and the names of the
+		/// ones that are views.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Script(Name) on a table variable emits its create table or create view statement: the columns with their
+		/// types and tags, the keys and orders, the constraints, and the table's own tags. It does not emit the
+		/// references declared beside the table in SystemCatalog.d4. A reference is a catalog object of its own, and the
+		/// References system table carries only each one's id, name, library and owner, so nothing a script can select
+		/// reports which two tables a reference connects - Script of the reference's own name is the answer, and the
+		/// generated index says so rather than leaving a reader to wonder where the references went.
+		/// </para>
+		/// <para>
+		/// Library_Name = 'System' for the same reason as the operator query, although a fixture server carrying no
+		/// library has nothing else: a table another library declares must not reach a page in this reference.
+		/// </para>
+		/// </remarks>
+		public static Dictionary<string, string> TableVarDefinitions(IServerProcess process, out List<string> viewNames)
+		{
+			viewNames =
+				Rows(process, "select DerivedTableVars where Library_Name = 'System' over { Name } order by { Name }", "Name")
+					.Select(row => row[0])
+					.ToList();
+			return
+				Rows(process, "select TableVars where Library_Name = 'System' add { Script(Name) Definition } over { Name, Definition } order by { Name }", "Name", "Definition")
 					.ToDictionary(row => row[0], row => Trim(row[1]), StringComparer.Ordinal);
 		}
 
@@ -942,6 +1064,297 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 				yield return String.Format("{0} is recorded as an undocumented scalar type, but it is documented now, or the catalog no longer has it. Remove the entry from CatalogTypesWithNoPage.", name);
 		}
 
+
+		#region Table pages
+
+		/// <summary>
+		/// The framing sentence every generated table page carries, with "table" or "view" in it. The same on every page
+		/// on purpose: a page whose only other content is generated has to carry the warning that it is generated, and a
+		/// reader who arrives on one page should not have to find the index to learn that.
+		/// </summary>
+		private const string TablePageFraming =
+			"A system {0} of the [System library](../README.md): part of the catalog, which a D4 script reads as data."
+				+ " **This page is generated from a running server**, so a hand edit here is reverted the next time the"
+				+ " pages are written; the [system tables index](README.md) says what the definition below does and does"
+				+ " not carry.";
+
+		/// <summary>
+		/// The table these pages are generated from, and the one sentence that is not the same on every page: it is
+		/// where a reader who wants to ask their own server the question these pages answer will look.
+		/// </summary>
+		private const string GeneratorTableName = "System.TableVars";
+
+		private const string GeneratorTableSentence =
+			" This is also the table this reference is generated from: `select TableVars` lists every table variable a"
+				+ " catalog holds, and `select TableVars add { Script(Name) Definition }` is the whole of what produces"
+				+ " the definitions on these pages.";
+
+		/// <summary>The pages under docs/ are LF; the D4 emitter writes CRLF (TextEmitter.NewLine).</summary>
+		private static string Lf(string text)
+		{
+			return text.Replace("\r\n", "\n");
+		}
+
+		/// <summary>A link to another table page, from inside the tables folder.</summary>
+		private static string TablePageLink(string name)
+		{
+			return String.Format("[{0}]({0}.md)", name);
+		}
+
+		/// <summary>
+		/// The other System table variables a definition names, which for a view is what it is built from. A base
+		/// table's definition names none, so the section this feeds appears only on the view pages.
+		/// </summary>
+		/// <remarks>
+		/// A qualified-identifier scan of the emitted text rather than a reading of the view's plan: the names it finds
+		/// are kept only when the catalog has a table variable of that name, so the operators a view calls
+		/// (.System.IfNil, .System.Diagnostics.ShowLog) drop out. Nothing rests on it being complete - it produces links
+		/// and no assertion - and a name it found is in the definition on the page either way.
+		/// </remarks>
+		private static List<string> NamedTableVars(string definition, string ownName, ICollection<string> tableVarNames)
+		{
+			var found = new SortedSet<string>(StringComparer.Ordinal);
+			foreach (Match match in Regex.Matches(definition, @"(?<![A-Za-z0-9_.])\.(?<name>System\.[A-Za-z_][A-Za-z0-9_]*)"))
+			{
+				string name = match.Groups["name"].Value;
+				if (name != ownName && tableVarNames.Contains(name))
+					found.Add(name);
+			}
+			return found.ToList();
+		}
+
+		/// <summary>One generated table page: its name, the framing sentence, the definition, and where to read on.</summary>
+		private static string TablePage(string name, bool isView, string definition, List<string> namedTableVars)
+		{
+			var text = new StringBuilder();
+			text.Append("# ").Append(name).Append("\n\n");
+			text.Append(String.Format(TablePageFraming, isView ? "view" : "table"));
+			if (name == GeneratorTableName)
+				text.Append(GeneratorTableSentence);
+			text.Append("\n\n");
+			text.Append("**Definition**\n\n").Append(Fence).Append("\n").Append(Lf(definition)).Append("```\n");
+			if (namedTableVars.Count > 0)
+			{
+				text.Append("\n**Built From**\n\n");
+				text.Append(String.Join(" \\| ", namedTableVars.Select(TablePageLink))).Append("\n");
+			}
+			text.Append("\n**See Also**\n\n");
+			text.Append(String.Format("[System Tables]({0}) \\| [Table Variables]({1}#table-variables) \\| [System Library](../README.md)\n", TablesIndexFileName, CatalogChapterPath));
+			return text.ToString();
+		}
+
+		/// <summary>
+		/// The generated section index: what a system table is, that these pages are generated, that there are no
+		/// descriptions and why, what a definition leaves out, and a link to every page.
+		/// </summary>
+		private static string TablesIndex(List<string> tables, List<string> views, int referenceCount)
+		{
+			var text = new StringBuilder();
+			text.Append("# System Tables\n\n");
+			text.Append(String.Format("The System library defines {0} table variables - {1} tables and {2} views - and they are the catalog itself, readable as data: an ordinary `select` against any of them answers a question about the server's own objects, and `select TableVars` is the list below. There is a page here for each one, carrying the definition a running server reports.\n\n", tables.Count + views.Count, tables.Count, views.Count));
+			text.Append("**These pages are generated, and every one of them is compared whole.** `ReferenceSignatureGoldenTest` in `tests/DAE.Server.Tests` starts a server carrying nothing but the built-in System library, asks it for each table's definition through the `Script` operator any script can call, and holds the result against the whole of the matching page - this index included. So a hand edit in this folder fails the test run, and is reverted the next time the pages are written. Change what the generator writes, not the page.\n\n");
+			text.Append("**There are no descriptions here, and none were invented.** The 3.x reference meant to carry a sentence about each table and each column; it never did - its `SystemTables` chapter was a four-line placeholder saying the section was generated, and the published help file listed the table names with nothing under them. The catalog has nothing to report either: no table or column of `src/engine/DAE/Schema/SystemCatalog.d4` carries a `Catalog.Comment` tag, where the scalar types in `DataTypes.d4` carry seventeen. A sentence per table written from a reading of the engine's source would be a new claim in the place of a converted record, so each page gives the definition and stops. For what the catalog holds and how a script uses it, read [Table Variables](" + CatalogChapterPath + "#table-variables) and the rest of the [Catalog Elements](" + CatalogChapterPath + ") chapter of the Developer's Guide.\n\n");
+			text.Append(String.Format("**What a definition does not carry: the references.** `Script` emits a table's columns, keys, orders, constraints and tags, and not the references declared beside it - in this release a reference is a catalog object in its own right, and the [System.References](System.References.md) table carries each one's name, library and owner rather than the two tables it connects. There are {0} of them in the System library. `Script('System.TableVars_CatalogObjects')` on a live server gives any one of them in full.\n\n", referenceCount));
+			text.Append("## Tables\n\n");
+			foreach (string name in tables)
+				text.Append("- ").Append(TablePageLink(name)).Append("\n");
+			text.Append("\n## Views\n\n");
+			foreach (string name in views)
+				text.Append("- ").Append(TablePageLink(name)).Append("\n");
+			text.Append("\n**See Also**\n\n");
+			text.Append(String.Format("[System Library](../README.md) \\| [Catalog Elements]({0}) \\| [Dataphor Reference](../../README.md)\n", CatalogChapterPath));
+			return text.ToString();
+		}
+
+		private static string TablesDirectory
+		{
+			get { return Path.Combine(PagesDirectory, TablesFolder); }
+		}
+
+		/// <summary>
+		/// Every file in the tables folder, by name. Every file, not only the Markdown ones, so that a stray file is
+		/// reported rather than left to accumulate in a folder nobody edits by hand.
+		/// </summary>
+		private static List<string> ExistingTablePages()
+		{
+			if (!Directory.Exists(TablesDirectory))
+				return new List<string>();
+			return
+				Directory.EnumerateFiles(TablesDirectory, "*", SearchOption.AllDirectories)
+					.Select(path => Path.GetRelativePath(TablesDirectory, path).Replace('\\', '/'))
+					.OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+					.ToList();
+		}
+
+		/// <summary>
+		/// A generated page as committed, with its line endings made LF before the comparison, so that a checkout or an
+		/// editor that changed them is not reported as a difference in the generated text. Null if the page is missing.
+		/// </summary>
+		private static string ReadTablePage(string fileName)
+		{
+			string path = Path.Combine(TablesDirectory, fileName);
+			return File.Exists(path) ? Lf(File.ReadAllText(path)) : null;
+		}
+
+		/// <summary>Writes a generated page: UTF-8, no byte-order mark, LF, like the rest of docs/reference/system-library.</summary>
+		private static void WriteTablePage(string fileName, string text)
+		{
+			Directory.CreateDirectory(TablesDirectory);
+			File.WriteAllText(Path.Combine(TablesDirectory, fileName), text, new UTF8Encoding(false));
+		}
+
+		#endregion
+
+		/// <summary>
+		/// The system tables: the one part of the 3.x reference that had no text to convert, so these pages are
+		/// generated whole and this case is the whole of what keeps them true.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// The System library defines the tables and views a D4 script reads the catalog through, and the published
+		/// reference documented none of them. Unlike every other part of this reference there is nothing to compare a
+		/// replacement against: the DocBook chapter was a placeholder saying the section was generated and the help file
+		/// carried the table names with nothing under them, so the only source is a running server. These pages are
+		/// therefore generated whole, which is what makes this case different from
+		/// <see cref="EveryPublishedSignatureAgreesWithTheCatalog"/>: there, a page is mostly published prose with one
+		/// generated block inside it and only the block is compared; here the file is the generated text, so the file is
+		/// the comparison and the pages are their own goldens. No copy under tests/goldens for them - a second copy of a
+		/// fully generated file would only be another thing to keep in step.
+		/// </para>
+		/// <para>
+		/// <b>Two things are asserted.</b> Every page in the tables folder equals what the catalog generates for it,
+		/// character for character once the line endings are made LF; and the table variables the catalog reports are
+		/// exactly <see cref="SystemTables"/> and <see cref="SystemViews"/>, in both directions, so that a table
+		/// appearing, disappearing or changing between a table and a view is a reviewable change in this file rather
+		/// than a page that quietly comes or goes under docs/.
+		/// </para>
+		/// <para>
+		/// DATAPHOR_UPDATE_REFERENCE_GOLDENS=1 writes these pages and deletes the ones no table produces, as it does the
+		/// goldens of the other case, and fails the run either way. The pages say on themselves that they are generated,
+		/// because a hand edit to one of them is reverted by that run and a reader of the published documentation has no
+		/// other way to know.
+		/// </para>
+		/// <para>
+		/// NOTE: the pages carry the definition and nothing else - no reference list, because Script does not emit a
+		/// table's references and the References system table does not say which tables one connects (it carries id,
+		/// name, library, owner and the two generated flags), so pairing the System library's references with their
+		/// tables would mean parsing the emitted create reference text. The index points at Script instead. If a later
+		/// pass wants that section, the text to parse is what Script of a reference's own name returns.
+		/// </para>
+		/// </remarks>
+		[Test]
+		public void EverySystemTableHasAGeneratedPage()
+		{
+			EnsureDeclarations();
+			bool updating = Updating;
+			var problems = new List<string>();
+			var views = new HashSet<string>(_viewNames, StringComparer.Ordinal);
+			var tableVarNames = new HashSet<string>(_tableVarDefinitions.Keys, StringComparer.Ordinal);
+			int referenceCount = Rows(Process, "select References where Library_Name = 'System' over { Name }", "Name").Count;
+
+			problems.AddRange(TableSetProblems(views));
+
+			// Case-insensitive, like the golden claim set of the other case and for the same reason: held against the
+			// names a Windows filesystem gives back rather than against the catalog. NOTE: two table variable names
+			// differing only in case would therefore share one page and the second would overwrite the first; the 55
+			// names are case-insensitively distinct today (measured). If one ever arrives, the file name this builds
+			// needs to disambiguate before this set can tell the two apart.
+			var claimed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			var tables = new List<string>();
+			var viewList = new List<string>();
+			int written = 0;
+			int deleted = 0;
+
+			foreach (string name in _tableVarDefinitions.Keys.OrderBy(name => name, StringComparer.Ordinal))
+			{
+				bool isView = views.Contains(name);
+				(isView ? viewList : tables).Add(name);
+				string fileName = name + ".md";
+				claimed.Add(fileName);
+				string definition = _tableVarDefinitions[name];
+				problems.AddRange(TablePageProblems(updating, fileName, TablePage(name, isView, definition, NamedTableVars(definition, name, tableVarNames)), ref written));
+			}
+
+			claimed.Add(TablesIndexFileName);
+			problems.AddRange(TablePageProblems(updating, TablesIndexFileName, TablesIndex(tables, viewList, referenceCount), ref written));
+
+			foreach (string existing in ExistingTablePages())
+			{
+				if (claimed.Contains(existing))
+					continue;
+				if (updating)
+				{
+					File.Delete(Path.Combine(TablesDirectory, existing.Replace('/', Path.DirectorySeparatorChar)));
+					deleted++;
+				}
+				else
+					problems.Add(String.Format("\"{0}/{1}\" is a generated page nothing produces. Delete it, or find out which table stopped being documented.", TablesFolder, existing));
+			}
+
+			if (updating)
+			{
+				RemoveEmptyDirectories(TablesDirectory);
+				Assert.Fail(String.Format("{0}=1: wrote {1} system table page(s) and deleted {2}. An update run always fails, so that it cannot be mistaken for a passing one - the diff is the review, so read it before committing it.{3}", UpdateVariable, written, deleted, Report(problems)));
+			}
+
+			if (problems.Count > 0)
+				Assert.Fail(String.Format("{0} generated system table page(s) or recorded entr(ies) do not agree with the catalog. Run with {1}=1 to rewrite the pages, then read the diff before committing it.{2}", problems.Count, UpdateVariable, Report(problems)));
+		}
+
+		/// <summary>Writes or compares one generated page, and says what is wrong with it.</summary>
+		private static IEnumerable<string> TablePageProblems(bool updating, string fileName, string page, ref int written)
+		{
+			string committed = ReadTablePage(fileName);
+			if (updating)
+			{
+				if (committed != page)
+				{
+					WriteTablePage(fileName, page);
+					written++;
+				}
+				return [];
+			}
+			if (committed == null)
+				return [String.Format("there is no \"{0}/{1}\". Create it by running with {2}=1.", TablesFolder, fileName, UpdateVariable)];
+			if (committed != page)
+				return [String.Format("\"{0}/{1}\" is not what the catalog generates. {2}", TablesFolder, fileName, FirstDifference(committed, page))];
+			return [];
+		}
+
+		/// <summary>
+		/// The two recorded table-variable sets against the catalog, in both directions, and each name against the kind
+		/// it is recorded as. Separate from the page comparison so that a server with an unexpected catalog says so once
+		/// rather than once per page.
+		/// </summary>
+		private IEnumerable<string> TableSetProblems(HashSet<string> views)
+		{
+			var recordedTables = new HashSet<string>(SystemTables, StringComparer.Ordinal);
+			var recordedViews = new HashSet<string>(SystemViews, StringComparer.Ordinal);
+			foreach (string name in _tableVarDefinitions.Keys.OrderBy(name => name, StringComparer.Ordinal))
+			{
+				bool isView = views.Contains(name);
+				if (!(isView ? recordedViews : recordedTables).Contains(name))
+					yield return
+						String.Format
+						(
+							"the System library has the {0} {1} and it is not recorded in {2}. Add it there - and to docs/migration-notes.md, if this release is what added it.",
+							isView ? "view" : "table",
+							name,
+							isView ? "SystemViews" : "SystemTables"
+						);
+			}
+			foreach (string name in recordedTables.OrderBy(name => name, StringComparer.Ordinal))
+				if (!_tableVarDefinitions.ContainsKey(name))
+					yield return String.Format("{0} is recorded in SystemTables and the System library does not have it. Remove the entry - and record the removal in docs/migration-notes.md, if this release is what removed it.", name);
+				else if (views.Contains(name))
+					yield return String.Format("{0} is recorded in SystemTables and the catalog reports it as a view. Move the entry to SystemViews.", name);
+			foreach (string name in recordedViews.OrderBy(name => name, StringComparer.Ordinal))
+				if (!_tableVarDefinitions.ContainsKey(name))
+					yield return String.Format("{0} is recorded in SystemViews and the System library does not have it. Remove the entry - and record the removal in docs/migration-notes.md, if this release is what removed it.", name);
+				else if (!views.Contains(name))
+					yield return String.Format("{0} is recorded in SystemViews and the catalog reports it as a base table. Move the entry to SystemTables.", name);
+		}
+
 		/// <summary>At most this many problems are listed; a failure that names every page of the corpus is unreadable.</summary>
 		private const int ReportLimit = 40;
 
@@ -1006,6 +1419,9 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 			Dictionary<string, int> counts;
 			Assert.That(OperatorDeclarations(Process, out counts), Is.EqualTo(_operatorDeclarations), "Asking the same catalog for its operator declarations twice gave two different answers.");
 			Assert.That(TypeDeclarations(Process), Is.EqualTo(_typeDeclarations), "Asking the same catalog for its scalar type declarations twice gave two different answers.");
+			List<string> viewNames;
+			Assert.That(TableVarDefinitions(Process, out viewNames), Is.EqualTo(_tableVarDefinitions), "Asking the same catalog for its table variable definitions twice gave two different answers.");
+			Assert.That(viewNames, Is.EqualTo(_viewNames), "Asking the same catalog which of its table variables are views twice gave two different answers.");
 
 			using (var second = new TestServerInstance(GetType().Name + "Second"))
 			{
@@ -1016,6 +1432,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 					IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
 					Assert.That(OperatorDeclarations(process, out counts), Is.EqualTo(_operatorDeclarations), "A second server instance reported different operator declarations, so a golden depends on something other than the catalog.");
 					Assert.That(TypeDeclarations(process), Is.EqualTo(_typeDeclarations), "A second server instance reported different scalar type declarations, so a golden depends on something other than the catalog.");
+					Assert.That(TableVarDefinitions(process, out viewNames), Is.EqualTo(_tableVarDefinitions), "A second server instance reported different table variable definitions, so a generated page depends on something other than the catalog.");
+					Assert.That(viewNames, Is.EqualTo(_viewNames), "A second server instance disagreed about which table variables are views.");
 				}
 				finally
 				{

@@ -12,7 +12,7 @@ Most of this was converted from the DocBook sources the published 3.x help colle
 
 | Section | What is in it |
 |---|---|
-| [System library](system-library/README.md) | The core library: 297 [operator](system-library/README.md#operators) pages grouped as the printed reference grouped them, and 20 [scalar type](system-library/README.md#scalar-types) pages. The D4 language's own vocabulary. |
+| [System library](system-library/README.md) | The core library: 297 [operator](system-library/README.md#operators) pages grouped as the printed reference grouped them, 20 [scalar type](system-library/README.md#scalar-types) pages, and 55 [system table](system-library/tables/README.md) pages - 48 tables and 7 views - generated from a running server. The D4 language's own vocabulary, and the catalog a script reads it through. |
 | [Libraries](libraries/README.md) | One page per shipped library - what it is for, what it needs, the files and classes it registers, and its settings, types and operators. |
 | [D4 Language Grammar](d4-grammar.md) | The complete grammar of D4, as productions. |
 | [Tags](tags.md) | The metadata tags, with the `Frontend.*` tags that guide form derivation and the `DAE.*` and `Storage.*` tags that guide the engine and the devices. |
@@ -22,7 +22,7 @@ Most of this was converted from the DocBook sources the published 3.x help colle
 | [Call-level Interface (CLI)](call-level-interface.md) | The interfaces a .NET program connects, prepares, executes and reads results with. An overview; there is no generated API reference. |
 | [Data Access Components (DAC)](data-access-components.md) | The .NET components and data-aware controls a Windows application binds to. An overview, on the same footing as the CLI page. |
 
-Two reference sections of the 3.x documentation are not here, because neither has a source that can be converted: **the system tables** - their columns, keys and descriptions - which [the System library page](system-library/README.md#what-is-missing-the-system-tables) explains, and **the Frontend element reference**, which [the Frontend Components page](frontend-nodes/README.md) explains. Both need a page generated from something running, not a document translated.
+One reference section of the 3.x documentation is not here, because it has no source that can be converted: **the Frontend element reference**, which [the Frontend Components page](frontend-nodes/README.md) explains. The other section in that position, **the system tables**, had none either and is now [generated from a running server](system-library/tables/README.md) rather than converted - with the definitions the catalog reports and, because nothing ever recorded them, no descriptions.
 
 The **editor shortcut keys**, which the printed reference carried as an appendix, are under [Editor Shortcut Keys](../users-guide/tutorials.md#editor-shortcut-keys) in the User's Guide: the help collection attached that appendix to the User's Guide and the converted sources kept it in that position.
 
