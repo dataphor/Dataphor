@@ -1,4 +1,4 @@
-# System.LastIndexOf (List)
+# System.LastIndexOf
 
 **Declarations**
 

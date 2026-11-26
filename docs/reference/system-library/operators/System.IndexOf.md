@@ -1,4 +1,4 @@
-# System.IndexOf (List)
+# System.IndexOf
 
 **Declarations**
 
@@ -36,7 +36,7 @@ select list(String){ "a", "b", "c", "b" }.IndexOf("x");
 
 [System.StartsWith](System.StartsWith.md) \| [System.EndsWith](System.EndsWith.md) \| [System.LastIndexOf (List)](System.LastIndexOf.md) \| [System.IndexOfAny](System.IndexOfAny.md) \| [System.LastIndexOfAny](System.LastIndexOfAny.md) \| [System.Pos](System.Pos.md) \| [System.LastPos](System.LastPos.md) \| [System.Lower](System.Lower.md) \| [System.Upper](System.Upper.md) \| [System.String Scalar Type](../types/System.String.md) \| [Qualifier Expression](../../../developers-guide/d4-language-elements.md#qualified-expression)
 
-## System.IndexOf
+## System.IndexOf (List Operators)
 
 **Remarks**
 

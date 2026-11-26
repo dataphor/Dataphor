@@ -300,6 +300,11 @@ def link_names(pages):
     built-in rule sends to that page - the one the links under docs/ already use. Linking by
     that name keeps the generated navigation out of `--legacy-map`; a page with no such section
     is reported, because it is the one case that does need a row there."""
+    # NOTE: the preference below is between ids whose rule matches the output; a file-keyed id has
+    # no help page at all, so if one were ever merged onto a page that also holds id-keyed sections
+    # it could win and carry a None name into a generated list. It cannot today - the only
+    # file-keyed page is one file root, which no enclosing section can cut out - so prefer a named
+    # id here if a merge of that shape ever appears.
     chosen = {}
     for identifier, row in pages.items():
         output = row["output"]

@@ -125,11 +125,9 @@ A help page with no *Declarations* block (a category page, or one of the short c
 ```
 python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml --seed-pages tools/docs-convert/reference-pages.tsv
 
-python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml legacy/Documentation/Docs2.0/SystemTypes.xml ^
-    --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --out C:\temp\refwork
+python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml legacy/Documentation/Docs2.0/SystemTypes.xml --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --out C:\temp\refwork
 
-python tools/docs-convert/convert.py docbook C:\temp\refwork\*.xml --out C:\temp\refout --pages C:\temp\refwork\pages.tsv ^
-    --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text
+python tools/docs-convert/convert.py docbook C:\temp\refwork\*.xml --out C:\temp\refout --pages C:\temp\refwork\pages.tsv --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text
 ```
 
 `--seed-pages` writes a `reference-pages.tsv` row per section instead of splitting, so the 360 rows get reviewed rather than typed. The second command writes one DocBook document per page into `--out`, plus the `pages.tsv` that `convert.py docbook --pages` then reads; a page's file is named after its output path, flattened. Running either command twice over the same inputs gives byte-identical output.
@@ -147,21 +145,21 @@ The report lists, each only when it has entries: sections with no published decl
 
 ### The run that produced `docs/reference/system-library`
 
-`docs-reference-operators` landed the 342 pages of the core-library reference with these two commands, run from the repository root. Keep the work folder's path **short**: a 342-file command line is about 29 KB, Windows allows 32 KB and `cmd.exe` only 8 KB, so run it from bash or PowerShell and expect failure from a deep scratch path.
+`docs-reference-operators` landed the 342 pages of the core-library reference with these two commands, run from the repository root. Keep the work folder's path **short**: a 342-file command line is about 29 KB, Windows allows 32 KB and `cmd.exe` only 8 KB, so run it from bash or PowerShell and expect failure from a deep scratch path. Each command is one line on purpose - `^` continuations are `cmd.exe` syntax and arrive as literal arguments in the two shells that can carry the line length.
 
 ```
-python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml ^
-    legacy/Documentation/Docs2.0/SystemTypes.xml legacy/Documentation/DocBookManuals/OperatorDocs/System.iXor.xml ^
-    --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --out C:/temp/dref/work
+python tools/docs-convert/reference_split.py split legacy/Documentation/Docs2.0/SystemOperators.xml legacy/Documentation/Docs2.0/SystemTypes.xml legacy/Documentation/DocBookManuals/OperatorDocs/System.iXor.xml --pages tools/docs-convert/reference-pages.tsv --declarations tools/docs-convert/declarations.tsv --out C:/temp/dref/work
 
-python tools/docs-convert/convert.py docbook C:/temp/dref/work/*.xml --out docs --pages C:/temp/dref/work/pages.tsv ^
-    --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text ^
-    --legacy-table C:/temp/dref/reference-legacy.tsv
+python tools/docs-convert/convert.py docbook C:/temp/dref/work/*.xml --out docs --pages C:/temp/dref/work/pages.tsv --legacy-html --legacy-map tools/docs-convert/reference-links.tsv --global-ids --match-heading-text --legacy-table C:/temp/dref/reference-legacy.tsv
 ```
 
 Add `--pandoc PATH` where pandoc is not on `PATH`. **Send `--legacy-table` to a scratch path, never to `legacy-links.tsv`:** that file is the AsciiDoc run's output and the pending list CI reads, and writing the reference's own internal links over it would make CI's link gate meaningless. The conversion takes about 75 seconds and both steps are reproducible: a rerun over the same inputs writes byte-identical pages.
 
 `docs/reference/system-library/README.md` is hand-written and is no source's output, so a rerun leaves it alone - as it leaves alone everything but the paths its page map names.
+
+NOTE: `System.iXor` is the only one of the 275 files in `legacy/Documentation/DocBookManuals/OperatorDocs/` that is converted, and the other 11 that document an operator the 2007 sources dropped are a deliberate omission, not an oversight: `System.ConstraintType`, `System.DayOfMonth`, `System.Diagnostics.LoadCatalog`, `System.Diagnostics.SaveCatalog`, `System.RealSQLToD4`, `System.SetLanguage`, `System.String.ASCII`, `System.String.UTF8`, `System.String.Unicode`, `System.iBetween` and `System.iRedefine`. Nothing under `docs/` links to any of them, the 2007 edition dropped their sections, and the three `System.String.*` ones name types the engine schema no longer has. `System.iXor` qualified because a converted guide page links it. `docs-remove-old-sources` deletes this folder, after which these 11 live only in git history - converting one is a page-map row keyed on the file name and a rerun, so do it before that deletion if a reason appears.
+
+NOTE: a DocBook table with no `<thead>` converts to a pipe table with an empty header row, its hand-written column headings becoming the first body row - one page of the 342 (`operators/System.iXor.md`) is shaped that way. GitHub renders it legibly, so it is left alone; if a later source set brings in enough of them to look like a defect, promote the first body row in `convert.py` rather than hand-editing pages a rerun overwrites.
 
 NOTE: the reference's code blocks are tagged by the heuristic and no code table is committed for them. The run tags 858 blocks, 639 `d4` and 219 `text`, and GitHub highlights neither language, so the handful the heuristic reads wrong - a result grid taken for D4, a line of prose in a listing - makes no visible difference to a page. If a `d4` highlighter is ever added to the documentation build, seed a table with `--code-table` and review it before trusting the tags.
 

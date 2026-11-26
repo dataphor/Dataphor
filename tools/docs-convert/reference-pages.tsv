@@ -151,8 +151,8 @@ O-System.Clear	reference/system-library/operators/System.Clear.md	System.Clear
 O-System.iIn	reference/system-library/operators/System.iIn.md	System.iIn	
 O-System.iInListOperator.html	reference/system-library/operators/System.iIn.md	System.iIn (List)	the printed reference listed this operator under another category too
 O-System.iInRowOperator.html	reference/system-library/operators/System.iIn.md	System.iIn (Row)	the printed reference listed this operator under another category too
-O-System.ListIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (List)	the printed reference listed this operator under another category too
-O-System.IndexOfListOperator	reference/system-library/operators/System.IndexOf.md	System.IndexOf	the printed reference listed this operator under another category too
+O-System.ListIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf	the page holds both of this operator's overload sections, so its title is the bare operator name: a qualified title would also label the generated category-index entry, and the String Operators category holds both sections
+O-System.IndexOfListOperator	reference/system-library/operators/System.IndexOf.md	System.IndexOf (List Operators)	the List Operators category's cross-reference entry (its body is a link to this page); qualified so it does not collide with the page title
 O-System.StringIndexOf	reference/system-library/operators/System.IndexOf.md	System.IndexOf (String)	the printed reference listed this operator under another category too
 O-System.Remove	reference/system-library/operators/System.Remove.md	System.Remove	
 O-System.RemoveStringOperator	reference/system-library/operators/System.Remove.md	System.Remove (String)	the printed reference listed this operator under another category too
@@ -286,7 +286,7 @@ O-System.IsLetter	reference/system-library/operators/System.IsLetter.md	System.I
 O-System.IsLetterOrDigit	reference/system-library/operators/System.IsLetterOrDigit.md	System.IsLetterOrDigit	
 O-System.IsLower	reference/system-library/operators/System.IsLower.md	System.IsLower	
 O-System.IsUpper	reference/system-library/operators/System.IsUpper.md	System.IsUpper	
-O-System.ListLastIndexOf	reference/system-library/operators/System.LastIndexOf.md	System.LastIndexOf (List)	the printed reference listed this operator under another category too
+O-System.ListLastIndexOf	reference/system-library/operators/System.LastIndexOf.md	System.LastIndexOf	the page holds both of this operator's overload sections, so its title is the bare operator name: a qualified title would also label the generated category-index entry, and the String Operators category holds both sections
 O-System.StringLastIndexOf	reference/system-library/operators/System.LastIndexOf.md	System.LastIndexOf (String)	the printed reference listed this operator under another category too
 O-System.LastIndexOfAny	reference/system-library/operators/System.LastIndexOfAny.md	System.LastIndexOfAny	
 O-System.LastPos	reference/system-library/operators/System.LastPos.md	System.LastPos	

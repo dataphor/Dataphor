@@ -97,13 +97,13 @@ DUGP3Security.html	users-guide/security.md	chapter page -> whole file
 FTRTagsDescriptions-StorageTags-ShouldReconcile.html	reference/tags.md#shouldreconcile	tag name is the heading
 O-Frontend.ExecuteScript.html		a Frontend library operator: docs-reference-libraries puts its section on reference/libraries/Frontend.md and fills this row in
 O-System.ConCat.html	reference/system-library/operators/System.Concat.md	the link misspells the case of Concat
-O-System.CreateGroup.html		group-based security operator: deprecated in the catalog and undocumented since 2007
+O-System.CreateGroup.html		group-based security operator: still in the catalog script but tagged DAE.IsDeprecated, and undocumented since 2007
 O-System.DefaultSetMaxCallDepth.html	reference/system-library/operators/System.SetDefaultMaxCallDepth.md	the link scrambles the words of SetDefaultMaxCallDepth
 O-System.DefaultSetMaxStackDepth.html	reference/system-library/operators/System.SetDefaultMaxStackDepth.md	the link scrambles the words of SetDefaultMaxStackDepth
 O-System.Diagnostics.GetDetailedErrorDecsription.html	reference/system-library/operators/System.Diagnostics.GetDetailedErrorDescription.md	the link misspells Description
 O-System.Diagnostics.GetErrorDecsription.html	reference/system-library/operators/System.Diagnostics.GetErrorDescription.md	the link misspells Description
-O-System.DropGroup.html		group-based security operator: deprecated in the catalog and undocumented since 2007
-O-System.GroupExists.html		group-based security operator: deprecated in the catalog and undocumented since 2007
+O-System.DropGroup.html		group-based security operator: no such operator in the engine's catalog script, and undocumented since 2007
+O-System.GroupExists.html		group-based security operator: no such operator in the engine's catalog script, and undocumented since 2007
 O-System.Guid.html	reference/system-library/types/System.Guid.md	documented as a scalar type, not as an operator
 O-System.ListIndexOf.html	reference/system-library/operators/System.IndexOf.md	merged onto the operator's page
 O-System.ListLastIndexOf.html	reference/system-library/operators/System.LastIndexOf.md	merged onto the operator's page
