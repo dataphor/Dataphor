@@ -35,7 +35,6 @@
     <TargetZone>LocalIntranet</TargetZone>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <TargetFrameworkProfile />
-    <PublishUrl>C:\src\Alphora\Dataphor\Dataphor\ClickOnce\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -45,8 +44,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
-    <InstallUrl>\\appsvr01\DCG\Crick\Alphora\ClickOnceClient\</InstallUrl>
-    <ProductName>medig - Production</ProductName>
+    <ProductName>Dataphor Windows Client</ProductName>
     <PublisherName>Alphora</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>62</ApplicationRevision>
