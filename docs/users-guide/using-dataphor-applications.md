@@ -8,6 +8,6 @@
 
 ## Summary
 
-This chapter discusses the Dataphor Frontend Clients that provide the user interface for Dataphor Applications. Dataphor applications typically have at least a Microsoft Windows user interface, and a Web user interface. Regardless of the style of user interface, the overall look-and-feel of the application is the same.
+This chapter discusses the Dataphor Frontend Clients that provide the user interface for Dataphor Applications. Release 4.0 ships the Microsoft Windows client. Because every Frontend Client consumes the same user interface descriptions, the overall look-and-feel of an application is the same whichever client presents it.
 
 This chapter is intended to be read by anyone using a Dataphor application. No prior knowledge of the Dataphor platform is assumed in the material covered.
