@@ -9,7 +9,7 @@
 // The idea is to try to reduce the amount of memory used for tags by using
 // the same string reference for each tag of a given name.
 // However, early indications are that the amount of memory saved is not significant,
-// even when dealing with large catalogs such as IBAS.
+// even when dealing with a large customer catalog.
 
 #define USESTRUCTTAG
 

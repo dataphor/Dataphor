@@ -30,7 +30,7 @@ create table PersonAddressDuring
 	tags 
 	{ 
 		Frontend.Title = "Address History" ,
-		Frontend.Group.Main.State_ID.IBAS.Contact.PersonAddressDuring_StateGroup.FlowBreak = "true"
+		Frontend.Group.Main.State_ID.Sample.Contact.PersonAddressDuring_StateGroup.FlowBreak = "true"
 	};
 
 //*

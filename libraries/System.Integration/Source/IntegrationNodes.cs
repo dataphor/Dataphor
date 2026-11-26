@@ -168,7 +168,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 									{
 										source.Open();
 
-										// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
+										// TODO: allow cross-process row copies for streamed types
 										// There is a MarshalRow call in the LocalProcess, would that solve this problem?
 										using (Row row = new Row(targetProcess.ValueManager, sourceTable.DataType.CreateRowType()))
 										{

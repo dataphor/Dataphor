@@ -3,7 +3,7 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-#define REQUIRECASEMATCHONRESOLVE // Use this to require a case match when resolving identifiers (see IBAS Proposal #26889)
+#define REQUIRECASEMATCHONRESOLVE // Use this to require a case match when resolving identifiers (introduced for an internal proposal, numbered 26889 in the inherited index)
 
 using System;
 using System.IO;
