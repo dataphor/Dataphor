@@ -30,6 +30,7 @@
     <Project Path="libraries/MSSQLDevice/Source/DAEDeviceMSSQL.csproj" />
     <Project Path="libraries/ODBCConnection/Source/DAE.Connection.ODBC.csproj" />
     <Project Path="libraries/PGSQLConnection/Source/DAE.Connection.PGSQL.csproj" />
+    <Project Path="libraries/PGSQLDevice/Source/DAEDevicePGSQL.csproj" />
     <Project Path="libraries/SimpleDevice/Source/DAE.Device.Simple.csproj" />
     <Project Path="libraries/SQLDevice/Source/DAE.Device.SQL.csproj" />
     <Project Path="libraries/System.Platform/Source/System.Platform.csproj" />

@@ -8,6 +8,15 @@ using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Language.PGSQL;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
 
+// NOTE: most of this file is unreachable. A device operator class is reached only by being named in the device's
+// operator map, SystemCatalog.d4, and that script names just two of the classes here - PostgreSQLRetrieve and
+// PostgreSQLUnion (measured 2026-11-25: 13 live "PostgreSQLDevice.*" class references in it, the other 11 being
+// device scalar types). Everything else the map needs it maps through Storage.TranslationString tags written in
+// PostgreSQL syntax instead. That matters when reading this file for defects: several of the unreached classes emit
+// T-SQL that PostgreSQL would reject - PostgreSQLToday emits Round(GetDate(), 0, 1), and the To* classes emit
+// Convert(<type>, x) with T-SQL type names - and the lines of SystemCatalog.d4 that would map them are commented out.
+// So those are dead rather than latent. Before concluding that a class here is a live defect, grep SystemCatalog.d4
+// for its name and check the line is not commented out; a class that becomes mapped brings its translation with it.
 namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
 	/// <summary> Works around the fact that as of PostgreSQL 9.1, UNION is not optimized at all, but UNION ALL is.</summary>

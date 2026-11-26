@@ -34,6 +34,11 @@ namespace Alphora.Dataphor.DAE.Language.PGSQL
 		protected override void EmitAlgebraicFromClause(Alphora.Dataphor.DAE.Language.SQL.AlgebraicFromClause clause)
 		{
 			// The "from" clause is optional for PG, omit the dummy from
+			// NOTE: this covers only the algebraic path. SQLDevice builds the dummy from clause as a CalculusFromClause in
+			// three of its four places (the key-check select in front of an insert among them), and this emitter does not
+			// override EmitCalculusFromClause, so those still emit "from (select 0 as "dummy1") as "dummy1"" - measured
+			// 2026-11-25 in tests/goldens/devices/PGSQL/DML.Insert.sql. That text is valid PostgreSQL, so nothing is wrong
+			// today; if the redundancy ever matters, override the calculus clause too and read the golden diff.
 			if (clause.TableSpecifier.TableAlias != "dummy1")
 				base.EmitAlgebraicFromClause(clause);
 		}

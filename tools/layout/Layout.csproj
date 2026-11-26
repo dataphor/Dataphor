@@ -62,6 +62,7 @@
     <ProjectReference Include="..\..\libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SQLDevice\Source\DAE.Device.SQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj" DataphorLayoutRole="Library" />
+    <ProjectReference Include="..\..\libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\SimpleDevice\Source\DAE.Device.Simple.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\Frontend\Source\Frontend.Server.csproj" DataphorLayoutRole="Library" />
     <ProjectReference Include="..\..\libraries\System.Platform\Source\System.Platform.csproj" DataphorLayoutRole="Library" />
@@ -76,8 +77,6 @@
   <!-- The D4 libraries in the layout, one item per library: its .d4l file. -->
   <ItemGroup>
     <DataphorD4Library Include="$(_DataphorRepositoryRoot)libraries\*\*.d4l;$(_DataphorRepositoryRoot)samples\*\*.d4l;$(_DataphorRepositoryRoot)tests\libraries\*\*.d4l" />
-    <!-- Left out while their C# projects are not converted: registering them would fail on the missing assembly. Remove the line when the project joins the Library list. -->
-    <DataphorD4Library Remove="$(_DataphorRepositoryRoot)libraries\PGSQLDevice\PGSQLDevice.d4l" /><!-- device-pgsql-device-golden -->
   </ItemGroup>
 
   <!-- Every write and delete below goes through _DataphorLayoutDirFull, which this target confines to artifacts\layout\<something>\. -->

@@ -512,6 +512,12 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 				);
         }
 
+        // NOTE: "option (fast 1)" is a T-SQL hint, carried over from MSSQLDevice, and PostgreSQL has no such syntax. It
+        // reaches no statement: only the T-SQL emitter writes a statement's OptimizerHints modifier, and this device's
+        // emitter (Language.PGSQL.TSQLTextEmitter, which does not derive from it) does not - measured 2026-11-25, the
+        // ordered query goldens under tests/goldens/devices/PGSQL carry no hint. So the modifier is set and dropped. If
+        // this emitter ever learns to write modifiers, this line starts generating SQL no PostgreSQL server accepts;
+        // remove the override then rather than adding a PostgreSQL hint, which the device has never had.
         public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node, SelectStatement statement, bool inContextOrderBy)
         {
             if (statement.Modifiers == null)

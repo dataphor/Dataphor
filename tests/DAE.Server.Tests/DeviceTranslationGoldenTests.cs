@@ -29,7 +29,15 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		/// is how the data-definition half is reached: a create, alter or drop reaches the device as commands, not as a
 		/// query whose text an operator can be asked for.
 		/// </summary>
-		Statement
+		Statement,
+
+		/// <summary>
+		/// Not SQL: the connection string the device built and handed its connection class, which the recorder records
+		/// beside the statements. The device assembles it from its own settings through its connection-string builder's
+		/// keyword legend, and both are what a device definition written for an earlier release depends on - so the
+		/// string is pinned character for character, which is the only check on it that needs no database server.
+		/// </summary>
+		Connection
 	}
 
 	/// <summary>One case of the translation corpus: a name, where its SQL comes from, and the D4 that produces it.</summary>
@@ -47,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 
 		public TranslationCaseKind Kind { get; }
 
-		/// <summary>The D4 expression (a query case) or statement (a statement case).</summary>
+		/// <summary>The D4 expression (a query case) or statement (a statement case); empty for a connection case, which runs no D4 of its own.</summary>
 		public string D4 { get; }
 
 		/// <summary>The golden's name below this device's folder.</summary>
@@ -97,17 +105,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	/// nothing would pin a lie - <see cref="ReadingADeviceTableIsRefusedRatherThanAnsweredWithNothing"/> holds that.
 	/// </para>
 	/// <para>
-	/// <b>What these goldens do not say.</b> The three device settings that make a SQL Server device connect when it
-	/// starts - ShouldDetermineVersion, ShouldEnsureDatabase and ShouldEnsureOperators, all on by default - are turned
-	/// off here, so the device never learns which version of the server it is talking to and emits what its default
-	/// version assumption produces (MSSQLDevice.IsMSSQL70 changes some operators' translation). These files therefore pin
-	/// the translation for one version assumption and say nothing about whether a real server accepts the text. That is
-	/// what test-device-live is for; this pass is the fast layer underneath it.
+	/// <b>What these goldens do not say.</b> The three device settings that make a SQL device connect when it starts -
+	/// ShouldDetermineVersion, ShouldEnsureDatabase and ShouldEnsureOperators - are turned off by every subclass, so the
+	/// device never learns which version of the server it is talking to and emits what its default version assumption
+	/// produces (MSSQLDevice.IsMSSQL70 changes some operators' translation; PostgreSQLDevice.MajorVersion changes none of
+	/// its own translation today). These files therefore pin the translation for one version assumption and say nothing
+	/// about whether a real server accepts the text. That is what test-device-live and device-pgsql-port are for; this
+	/// pass is the fast layer underneath them.
 	/// </para>
 	/// <para>
 	/// The corpus and the machinery are here and a subclass supplies the device: its library, the create device
-	/// statement, the folder its goldens live in and the expressions it refuses. MSSQLDeviceTranslationGoldenTests is
-	/// the only subclass today; device-pgsql-device-golden adds the second.
+	/// statement, the folder its goldens live in and the expressions it refuses. The two subclasses are
+	/// MSSQLDeviceTranslationGoldenTests and PGSQLDeviceTranslationGoldenTests, and the corpus is deliberately shared: a
+	/// case one device covers and the other does not is how a device quietly ends up with less of a net than its sibling.
 	/// </para>
 	/// </remarks>
 	// Not [Parallelizable]: this fixture starts a server, and two engines in one process share the engine's static state
@@ -303,10 +313,20 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 			new TranslationCase("Query.AllTypes", TranslationCaseKind.Query, "AllTypes"),
 		];
 
+		/// <summary>
+		/// The connection corpus: one case, the connection string the device handed its connection class while the
+		/// statement cases above ran. No D4 of its own - the device built it when it opened a connection for the first
+		/// create table.
+		/// </summary>
+		private static readonly TranslationCase[] ConnectionCases =
+		[
+			new TranslationCase("Connection", TranslationCaseKind.Connection, String.Empty),
+		];
+
 		/// <summary>Every case this pass covers, in the order the statement cases have to run in.</summary>
 		private static IEnumerable<TranslationCase> Cases()
 		{
-			return StatementCases.Concat(QueryCases);
+			return StatementCases.Concat(QueryCases).Concat(ConnectionCases);
 		}
 
 		private static bool Updating => Environment.GetEnvironmentVariable(UpdateVariable) == "1";
@@ -335,6 +355,15 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 		/// </remarks>
 		private readonly Dictionary<string, string> _recordings = new Dictionary<string, string>(StringComparer.Ordinal);
 
+		/// <summary>Every distinct connection string the device handed the recorder while the statement cases ran, in the order each was first seen.</summary>
+		/// <remarks>
+		/// Distinct rather than every occurrence: each data-definition statement opens its own connection (see the NOTE on
+		/// <see cref="RecordedConnections"/>), so the same string is handed over once per statement and a list of them would
+		/// pin the number of statements rather than the string. Two different strings would both be here, which is what the
+		/// golden should show if a device ever built more than one.
+		/// </remarks>
+		private readonly List<string> _connections = new List<string>();
+
 		[OneTimeSetUp]
 		public void SetUpDevice()
 		{
@@ -350,6 +379,9 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 				Execute("SQLRecorderClear();");
 				Execute(statementCase.D4);
 				_recordings.Add(statementCase.Name, Recorded());
+				foreach (string connection in RecordedConnections())
+					if (!_connections.Contains(connection, StringComparer.Ordinal))
+						_connections.Add(connection);
 			}
 		}
 
@@ -404,9 +436,10 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 		/// The recording is cleared before each statement case of the set-up, so what is here is whatever the device has
 		/// opened since the last one.
 		/// NOTE: there is one only because SQLDeviceSession.ReleaseConnection disposes an execute-pool connection whenever
-		/// no device transaction is open, so each data-definition statement opens a fresh one. If that pooling ever keeps a
-		/// connection alive across statements, every case that reads this fails for a reason that has nothing to do with
-		/// what it checks; clear the recording and open a connection deliberately at that point rather than relaxing it.
+		/// no device transaction is open, so each data-definition statement opens a fresh one - which the fixture's set-up
+		/// now asserts for every statement case, since that is where it collects the connection strings. If that pooling
+		/// ever keeps a connection alive across statements, the set-up fails here rather than in a case that checks
+		/// something else; clear the recording and open a connection deliberately at that point rather than relaxing it.
 		/// </remarks>
 		private string[] RecordedConnections()
 		{
@@ -437,6 +470,9 @@ insert table { row { 1 ID, ""first"" Note, $1.50 Amount } } into Ledger;"
 
 				case TranslationCaseKind.Statement:
 					return _recordings[translationCase.Name];
+
+				case TranslationCaseKind.Connection:
+					return String.Join("\n", _connections);
 
 				default:
 					throw new InvalidOperationException(String.Format("Unknown translation case kind {0}.", translationCase.Kind));

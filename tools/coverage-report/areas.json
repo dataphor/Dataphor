@@ -16,6 +16,7 @@
       "Alphora.Dataphor.Frontend.Server",
       "Alphora.Dataphor.DAE.Device.SQL",
       "AlphoraMSSQLDevice",
+      "AlphoraPGSQLDevice",
       "Alphora.Dataphor.DAE.Device.Simple",
       "Alphora.Dataphor.DAE.Connection",
       "Alphora.Dataphor.DAE.Connection.ODBC",

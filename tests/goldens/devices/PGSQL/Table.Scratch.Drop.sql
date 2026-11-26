@@ -1,0 +1,1 @@
+EXECUTE drop table "Scratch";

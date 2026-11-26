@@ -1,6 +1,6 @@
-description: When Dataphor reads the shape of a SQL Server database it was pointed at, it silently leaves out any column that uses two of SQL Server's date-and-time types, so the Dataphor view of that table is missing columns and nothing says so.
+description: When Dataphor reads the shape of a SQL database it was pointed at, it silently leaves out any column whose type it does not recognise, so the Dataphor view of that table is missing columns and nothing says so. It happens with two of SQL Server's date-and-time types, and with several of PostgreSQL's ordinary ones.
 architecture: docs/modernization-plan.md#ws7-devices-and-libraries
-files: libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLDevice.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLTypes.cs, libraries/SQLDevice/Source/SQLDevice.cs, tests/DAE.Server.Tests/MSSQLVersionMatrixTest.cs
+files: libraries/SQLDevice/Source/SQLDevice.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLDevice.cs, libraries/MSSQLDevice/Source/Device.MSSQL/MSSQLTypes.cs, libraries/PGSQLDevice/Source/Device.PGSQL/PostgreSQLDevice.cs, tests/DAE.Server.Tests/MSSQLVersionMatrixTest.cs
 repro: verified
 severity: wrong-result
 likelihood: normal-use
@@ -63,3 +63,26 @@ That change is itself one a deployment can notice - a device that reconciled a s
 ## What would confirm a fix
 
 Extend `MSSQLVersionMatrixTest`'s table to every SQL Server type the device's case list names, plus two it does not, and assert the D4 type and length of each; that pins the whole mapping surface rather than the seven columns there now, and is the test the fix wants rather than a test per type.
+
+## Second arm: the PostgreSQL device drops its own column types (added 2026-11-26 by `device-pgsql-device-golden`)
+
+The same gap is wider in the PostgreSQL device, and it is wider in a way that is self-contradictory: **the device drops column types that it creates itself.**
+
+`PostgreSQLDevice.ShouldIncludeColumn` and `PostgreSQLDevice.FindScalarType` were written by copying the SQL Server device's case lists and adding a few PostgreSQL spellings to them, so most of what they test for are T-SQL type names (`uniqueidentifier`, `image`, `nvarchar`, `smalldatetime`, `varbinary`). What the device asks PostgreSQL for is `information_schema.columns.data_type` (`PostgreSQLDevice.GetDeviceTablesExpression`), and PostgreSQL's spellings for several ordinary types are not in either list:
+
+| PostgreSQL `data_type` | In the case list? |
+|---|---|
+| `bytea` | no - and this is what the device creates for a D4 `Binary` column |
+| `uuid` | no - and this is what it creates for a D4 `Guid` column |
+| `time without time zone` | no - and this is what it creates for a D4 `Time` column |
+| `character` | no (the list has T-SQL's `char`) |
+| `double precision` | no |
+| `timestamp with time zone`, `time with time zone` | no |
+
+So a device pointed at a table *it created itself* reconciles back fewer columns than it wrote. The three `no` rows at the top of that table are each visible in this repository's own checked-in output: `tests/goldens/devices/PGSQL/Table.AllTypes.sql` has the device issuing `"Payload" bytea`, `"Identifier" uuid` and `"Clock" time`, and none of those three strings appears in `ShouldIncludeColumn`.
+
+`FindScalarType` carries a second, narrower defect behind the same door. Its `binary` and `timestamp` arms resolve the D4 type `SQLDevice.PostgreSQLBinary`, and **there is no such type**: `libraries/SQLDevice/Documents/Register.d4` declares `MSSQLBinary` and nothing named `PostgreSQLBinary`, so those two arms would fail to resolve rather than return a type. They are unreachable today only because `binary` and `timestamp` are T-SQL spellings that PostgreSQL's `information_schema` never reports - the same copy-paste that causes the dropped columns is what keeps this one dormant. A fix that adds `bytea` to the lists must not point it at that name.
+
+`repro: static` for this arm, in contrast with the SQL Server arm above: the case lists and the generated column types are read off the code and the checked-in goldens, but **nothing has reconciled a real PostgreSQL table**, so the `data_type` spellings in the table above come from PostgreSQL's documented behaviour rather than from a measurement. What would confirm it is the obvious thing and `device-pgsql-port` is the ticket that can do it: create the corpus's `AllTypes` table through a PostgreSQL device, then reconcile it back and count the columns.
+
+This arm does not change the root cause or the fix. Both devices drop an unknown column at the one site the section above names, `SQLDevice.GetDeviceTables`'s `if (ShouldIncludeColumn(...))` with no else branch, and the general change proposed there - name the table and the column rather than dropping it in silence - is what turns both devices' incomplete case lists from missing data into a message. The per-type mapping work is then separate, and for PostgreSQL it is mostly adding the spellings of types the device already knows how to write.
